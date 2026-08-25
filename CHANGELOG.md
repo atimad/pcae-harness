@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3J** — Repository Intelligence → Advisory
+  Production Consumption Integration: wired the real production
+  Advisory decision path (`core/advisory.py::build_advisory()`, behind
+  `pcae advisory check`) to automatically consume the existing
+  Repository Intelligence Advisory-context bridge
+  (`build_advisory_context()`), previously CLI-only. One production
+  file changed. Read-only-query acquisition (`.pcae/repository-
+  intelligence/latest.json`, no regeneration); fail-soft for missing/
+  invalid/stale RI state; staleness disclosed via the snapshot's own
+  recorded commit vs. current HEAD, no new freshness policy invented.
+  Structurally non-authoritative: RI context never influences the
+  Permission-Broker-derived verdict (test-verified). No model/network
+  dependency added; manual `pcae advisory context build` CLI unchanged.
+  18 new tests, 0 attributable Fast Green regressions (16 new failures
+  are pre-existing "no src/pcae file changed" structural tripwires).
+  Runtime unchanged. Recommends `149O.20L.7O.3J.1` independent
+  verification, not begun.
 - **Phase 149O.20L.7O.3I** — Post-v0.4.1 Deferred Capability
   Consumption Priority Reassessment: read-only strategic reassessment
   of the three deferred mature capability-consumption candidates

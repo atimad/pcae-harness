@@ -16,6 +16,17 @@ from pcae.core.permission_broker import (
     BPE_HARD_BLOCK_DECISIONS,
     build_permission_broker,
 )
+from pcae.advisory.context import (
+    AdvisoryContextBuilderError,
+    AdvisoryContextRequest,
+    build_advisory_context,
+)
+from pcae.advisory.context.context_package import NON_AUTHORITY_DISCLAIMER
+from pcae.repository_intelligence.historical_memory.git_source import (
+    HistoricalSourceError,
+    git_head_commit_sha,
+)
+from pcae.repository_intelligence.persistence import DEFAULT_OUTPUT_SUBDIR
 
 
 # ── Advisory decision vocabulary (88W §17) ───────────────────────────────────
@@ -279,6 +290,100 @@ def _explain_decision(advisory_decision: str) -> dict[str, str]:
     }
 
 
+# ── Repository Intelligence context (149O.20L.7O.3J) ─────────────────────────
+#
+# Bounded, informational-only Repository Intelligence context, automatically
+# acquired via the existing, already-built-and-tested Advisory-context bridge
+# (`pcae.advisory.context.build_advisory_context`), which previously had
+# exactly one caller: the manual `pcae advisory-context build` CLI command.
+#
+# Structurally non-authoritative: this context is additive to the advisory
+# envelope only. It is never read by `permission_broker`/`mutation_permission`,
+# never influences `broker_decision`/`advisory_decision`, and its absence or
+# failure never changes the broker-derived verdict -- fail-soft, not
+# fail-closed, for this one call path (a deliberate divergence from
+# `build_advisory_context`'s own fail-closed default for its CLI caller).
+
+_RI_CONTEXT_UNAVAILABLE_NO_SNAPSHOT = "no_repository_intelligence_snapshot_found"
+_RI_CONTEXT_UNAVAILABLE_BUILD_FAILED = "repository_intelligence_context_build_failed"
+
+
+def _repository_intelligence_snapshot_path(repo_root: Path) -> Path:
+    """The canonical Repository Intelligence 'latest' snapshot path already
+    written by the existing snapshot-persistence pipeline (120D). Not a
+    directory-scan/'most recent file' heuristic -- `latest.json` is the
+    literal, single artifact name that pipeline always (over)writes."""
+    return repo_root / ".pcae" / DEFAULT_OUTPUT_SUBDIR / "latest.json"
+
+
+def _gather_repository_intelligence_context(
+    repo_root: Path, requested_files: list[str] | None
+) -> dict[str, Any]:
+    """Advisory-only, non-authoritative Repository Intelligence context for
+    ``build_advisory``'s output envelope. Never raises: every absence or
+    failure mode is disclosed instead, so Advisory's broker-derived verdict
+    remains unaffected by Repository Intelligence being unavailable."""
+    snapshot_path = _repository_intelligence_snapshot_path(repo_root)
+
+    if not snapshot_path.is_file():
+        return {
+            "available": False,
+            "unavailable_reason": _RI_CONTEXT_UNAVAILABLE_NO_SNAPSHOT,
+            "non_authority_disclaimer": NON_AUTHORITY_DISCLAIMER,
+        }
+
+    if requested_files:
+        request = AdvisoryContextRequest(
+            category="entity_lookup",
+            advisory_purpose="advisory_check_automatic_context",
+            target=requested_files[0],
+        )
+    else:
+        request = AdvisoryContextRequest(
+            category="boundary_lookup",
+            advisory_purpose="advisory_check_automatic_context",
+        )
+
+    try:
+        package = build_advisory_context(snapshot_path, request)
+    except AdvisoryContextBuilderError as exc:
+        return {
+            "available": False,
+            "unavailable_reason": _RI_CONTEXT_UNAVAILABLE_BUILD_FAILED,
+            "unavailable_detail": str(exc),
+            "non_authority_disclaimer": NON_AUTHORITY_DISCLAIMER,
+        }
+
+    package_dict = package.to_dict()
+    source_commit = package.context_metadata.get("source_artifact", {}).get(
+        "repository_commit"
+    )
+    limitations = list(package_dict["limitation_bundle"])
+    try:
+        current_commit = git_head_commit_sha(repo_root)
+    except HistoricalSourceError:
+        current_commit = None
+    if source_commit and current_commit and source_commit != current_commit:
+        limitations.append(
+            {
+                "limitation_type": "possibly_stale_snapshot",
+                "limitation_description": (
+                    "Repository Intelligence snapshot was generated at commit "
+                    f"{source_commit}, which differs from the current HEAD "
+                    f"{current_commit}. This context may not reflect the "
+                    "current repository state."
+                ),
+            }
+        )
+    package_dict["limitation_bundle"] = limitations
+
+    return {
+        "available": True,
+        "context": package_dict,
+        "non_authority_disclaimer": NON_AUTHORITY_DISCLAIMER,
+    }
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Core advisory evaluation
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -372,6 +477,12 @@ def build_advisory(
         f"Advisory evaluation complete. Decision: {advisory_decision}.",
     )
 
+    # Repository Intelligence context (149O.20L.7O.3J) -- automatically
+    # acquired, additive, informational only; never a broker/decision input.
+    repository_intelligence_context = _gather_repository_intelligence_context(
+        repo_root=repo_root, requested_files=requested_files
+    )
+
     # Evidence sources
     evidence_sources: list[str] = list(broker.get("evidence_sources", []))
     missing_evidence: list[str] = list(broker.get("missing_evidence", []))
@@ -422,6 +533,7 @@ def build_advisory(
         "missing_evidence": missing_evidence,
         "warnings": warnings,
         "errors": errors,
+        "repository_intelligence_context": repository_intelligence_context,
     }
 
 

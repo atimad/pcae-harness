@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3J — Repository Intelligence → Advisory Production
+Consumption Integration. **BOUNDED SOURCE-MODIFYING INTEGRATION —
+COMPLETE.** Per the human's Plan A / Candidate C selection from
+`149O.20L.7O.3I`, wired the real production Advisory decision path
+(`core/advisory.py::build_advisory()`, the engine behind `pcae
+advisory check`) to automatically consume the existing, already-built-
+and-tested Repository Intelligence Advisory-context bridge
+(`advisory/context/advisory_context_builder.py::build_advisory_context()`),
+which previously had exactly one caller — the manual `pcae advisory
+context build` CLI command. Exactly one production file changed
+(`core/advisory.py`, +112/-0 lines): a new, additive
+`repository_intelligence_context` key on the Advisory output envelope,
+read-only-query acquisition mode (reads
+`.pcae/repository-intelligence/latest.json` at its existing canonical
+pipeline-defined path; no snapshot regeneration, no new `.pcae/`
+writes), fail-soft (not fail-closed) for missing/invalid/stale RI
+state, and a staleness disclosure derived from the snapshot's own
+already-recorded `repository_commit` provenance field compared against
+current `git rev-parse HEAD` — no new freshness policy invented.
+Structurally non-authoritative: RI context is inserted into the
+envelope only after all broker/decision fields are already fully
+computed from `build_permission_broker()` alone, so it cannot causally
+influence `broker_decision`/`advisory_decision`/`would_*`/
+`authorization_granted`/`execution_authorized`
+(independently test-verified — identical evidence inputs produce
+identical decisions with or without RI context present). Zero
+references to `permission_broker`/`PermissionBroker` in the RI or
+advisory-context subsystems, re-confirmed unchanged. No model/
+provider/network dependency added; `pcae advisory context build`
+(manual CLI) remains unmodified and independently re-verified working.
+18 new `fast_green` tests added, all passing; full Advisory/RI
+regression corpus (2848 tests) passes except 7 pre-existing failures
+independently re-confirmed identical against the pre-3J tree via `git
+stash`. Fast Green node-ID diff: exactly 16 new failures, all of the
+literal form "no `src/pcae` file changed since a fixed historical
+phase-entry commit" (pre-existing structural tripwires that
+necessarily fire for any legitimate source-modifying phase) — **0
+attributable regressions**. Runtime unchanged
+(`Observed`/`observe`/`unavailable`). Candidates A (rollback
+readiness/evidence) and B (runtime preflight) remain deferred, not
+touched. Article remains **STOPPED**;
+`~/repos/pcae-deepseek-research` untouched. This phase does not
+self-certify; recommends `149O.20L.7O.3J.1` (Independent End-to-End
+Repository Intelligence / Advisory Consumption Verification), not
+begun. See
+`docs/PHASE_149O_20L_7O_3J_REPOSITORY_INTELLIGENCE_ADVISORY_PRODUCTION_CONSUMPTION_INTEGRATION.md`
+for full evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3I — Post-v0.4.1 Deferred Capability Consumption
 Priority Reassessment. **READ-ONLY STRATEGIC REASSESSMENT — COMPLETE.
 NO IMPLEMENTATION.** Re-derived, from current source (not from prior
