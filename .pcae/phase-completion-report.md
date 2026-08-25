@@ -1,60 +1,60 @@
-# Phase 149O.20L.7O.3E Complete — Post-v0.4 Deferred Capability Consumption Priority Reassessment
+# Phase 149O.20L.7O.3F Complete — Permission Broker Rollback Default-Path Consumption Integration
 
-**Verdict: READ-ONLY STRATEGIC REASSESSMENT COMPLETE.** No integration
-implemented; no priority selected unilaterally. Reconstructed the
-connected-consumption graph Plan B+ shipped in v0.4.0 (`pcae phase
-complete` → `auto_publish_confirmed_session` → Permission Broker gate →
-`PublicationCoordinator` → CHGR, human `Confirmed`-state boundary
-preserved). Confirmed Interactive Workflow/CHGR auto-detect+route,
-Publication Execution Ownership auto-invocation, and Permission Broker
-publication-path coverage are now production-consumed. Repository
-Intelligence internal consumption remains deferred, effort revised up
-from S-M to M. Runtime unchanged (`Observed`/`observe`/`unavailable`).
+**Verdict: BOUNDED SOURCE-MODIFYING INTEGRATION COMPLETE.** Human-selected
+Plan B from `149O.20L.7O.3E`. Closed the sole remaining Permission Broker
+production-coverage gap: `pcae rollback`'s default (non-`HATP_MANDATORY`)
+dispatch path (`core/agent.py::build_rollback_execution`), which
+previously had zero Permission Broker evaluation at all. Runtime unchanged
+(`Observed`/`observe`/`unavailable`).
 
 ## Summary
 
-**Baseline:** `v0.4.0` (`ea3f731e`), HEAD 10 commits ahead at phase entry
-(lifecycle bookkeeping only, zero `src/pcae` drift, re-verified via
-`git diff --name-status`).
+**Baseline:** phase-entry commit `97bb9cda`, working tree clean, `origin/
+main..HEAD` = 0, `v0.4.0` unchanged.
 
-**Re-derivation, not repetition of 3C.1:** every one of the six deferred
-candidates was freshly re-checked against current post-v0.4.0 source via
-targeted `grep`/read evidence, not assumed unchanged from 3C.1/3C.2's own
-prose.
+**Integration:** added `mutation_permission.evaluate_rollback_permission()`
+— a new Wave-1-style adapter reusing the existing `ACTION_ROLLBACK`
+literal paired with `EXECUTION_CLASS_MUTATION` (deliberately not
+`EXECUTION_CLASS_ROLLBACK`, which would have triggered `POL-004`
+`HUMAN_REVIEW` unconditionally and invented a new human-approval
+requirement outside this phase's authorization), `COMP-008` component id
+and `build_rollback_execution` capability literal (both already
+registered by `hatp_ag_authority.py` for the separate HATP-gated AG5
+evaluation). No new decision state, policy vocabulary, or shadow broker
+was invented.
 
-**Findings:** Interactive Workflow/CHGR auto-detect+route, Publication
-Execution Ownership auto-invocation, and Permission Broker
-publication-path coverage — all newly **AC** (landed 3C.2/v0.4.0), a
-material change from 3C.1's CLI/UC ratings. The sole remaining Permission
-Broker gap is the `pcae rollback` default dispatch path
-(`agent.py::build_rollback_execution`), re-confirmed unguarded. Repository
-Intelligence internal consumption remains **UC**, its effort
-re-classified up from 3C.1's S-M to **M** — grounded in 3C.2's own
-re-reading of `push.py`'s freshness-comparison logic, re-confirmed
-unchanged, plus a newly-identified snapshot-freshness/auto-regeneration
-design gap. Runtime/plugin orchestration remains diagnostic-only (the
-runtime registry is architecturally always empty — 0 plugins — so only
-truthful unavailability disclosure is buildable today). Advisory-context
-wiring and rollback readiness/evidence auto-generation remain open,
-LOW-risk, S-M-effort candidates. Runtime Enforcement consumption
-reconfirmed **TB** — no execution-attempt boundary exists anywhere to
-gate.
+**Gate placement:** in `build_rollback_execution`, immediately after the
+pre-existing, byte-unchanged `HATP_MANDATORY` gate block and immediately
+before the restore/remove effect boundary, active only outside
+`HATP_MANDATORY` mode — the separate, stricter, HATP-integrated gate
+keeps its own untouched coverage.
 
-**Matrices A-E, six E2E verification designs, and a dependency graph**
-were produced. Three plans proposed: **Plan A** (runtime preflight
-disclosure + rollback readiness/evidence auto-generation, S-M/LOW,
-`v0.4.1`-plausible), **Plan B** (Permission Broker rollback-gap closure,
-S-M/MODERATE, completes 100% broker coverage across all root-mutating
-commands, `v0.4.1`-plausible), **Plan C** (Repository Intelligence +
-Advisory-Context wiring, M/LOW, `v0.5.0`-scale). **Plan B recommended**
-as the next single phase.
+**Results:** `ALLOW` permits the pre-existing dispatch behavior unchanged.
+`DENY`/broker-failure/malformed-result all fail closed with zero file
+mutation and a new terminal `aborted_permission_denied` RollbackExecutionRecord
+status. Dry-run rollback readiness/evidence generation is entirely
+unaffected — it returns before the new gate and was never gated. Human
+authority (`pcae rollback --per-id X`) and runtime posture are unchanged
+— permission is not execution capability.
 
-**BLOCKING: 0. MUST-FIX: 0.**
+**Production diff:** exactly two files (`core/mutation_permission.py`,
+`core/agent.py`). 21 new tests added. Existing rollback (142 tests) and
+Permission Broker Foundation/push/publication/policy (983 tests)
+regression suites re-run with zero attributable behavioral change
+(pre-existing failures in both groups confirmed identical before/after
+via `git stash` comparison). Full Fast Green run twice (baseline via
+`git stash` isolation, current against the diff); every one of the 19
+newly-failing and 2 newly-passing node IDs individually classified as
+either a frozen historical-phase source-diff/git-status tripwire
+(necessarily triggered by this phase's mandated file changes) or
+confirmed `pytest -n auto` parallel-execution flakiness (verified via
+serial re-run: 3 passed, 0 failed).
 
-**Human priority selection required** before any implementation begins.
-Runtime Enforcement consumption is not offered as a selectable option
-(trust-blocked).
+**BLOCKING: 0. MUST-FIX: 0. Attributable functional regressions: 0.**
+
+**Not self-certified.** Recommends **149O.20L.7O.3F.1 — Independent
+End-to-End Rollback Permission-Boundary Verification** next, not begun.
 
 See
-`docs/PHASE_149O_20L_7O_3E_POST_V0_4_DEFERRED_CAPABILITY_CONSUMPTION_PRIORITY_REASSESSMENT.md`
+`docs/PHASE_149O_20L_7O_3F_PERMISSION_BROKER_ROLLBACK_DEFAULT_PATH_CONSUMPTION_INTEGRATION.md`
 for the full evidence trail.
