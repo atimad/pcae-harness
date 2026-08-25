@@ -224,6 +224,26 @@ promoted. Use `pcae intake show`, `pcae intake list`,
 `pcae execution-change-package show`, and `pcae promotion-review show`
 to inspect any stage.
 
+## Explore Next
+
+Once the golden path above is comfortable, three more already-shipped,
+read-only capabilities are worth a look — full syntax in
+[docs/CAPABILITY_REFERENCE_V0_3_2.md](CAPABILITY_REFERENCE_V0_3_2.md) and
+[docs/COMMANDS.md](COMMANDS.md):
+
+- **Inspect PCAE's runtime** — `pcae runtime inspect` reports current
+  runtime/plugin state from any repository, zero setup.
+- **Govern a decision outside the intake path** — `pcae decision-session
+  create` … `pcae governance-record publish` runs the same
+  preview-then-confirm-then-publish human-governance workflow this
+  project uses on itself, for decisions that aren't a file-change
+  proposal.
+- **Inspect this repository's own architecture** — if you're working in
+  a `pcae-harness` checkout, `pcae repository-intelligence snapshot
+  generate` builds a deterministic, attributed snapshot of PCAE's own
+  source layout (not a generic per-project tool; see
+  [docs/CAPABILITY_REFERENCE_V0_3_2.md](CAPABILITY_REFERENCE_V0_3_2.md#pcae-repository-intelligence-self-inspection-of-pcaes-own-repository)).
+
 ## 13. What PCAE Does NOT Yet Do
 
 - **No autonomous execution.** PCAE does not run your coding agent for

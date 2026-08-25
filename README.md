@@ -322,6 +322,43 @@ Phases 86A–86I implemented a read-only project-intelligence stack that answers
 
 For the full summary, see [docs/PHASE_85_READ_ONLY_STACK_SUMMARY.md](docs/PHASE_85_READ_ONLY_STACK_SUMMARY.md).
 
+## More Capabilities Already Included
+
+These are already-shipped, tested, read-only capabilities that were
+undocumented at the top level before this section — see
+[docs/CAPABILITY_REFERENCE_V0_3_2.md](docs/CAPABILITY_REFERENCE_V0_3_2.md)
+for full syntax, prerequisites, and side-effect classification for each.
+
+- **Runtime/plugin introspection** (`pcae runtime inspect`) — read-only,
+  zero prerequisites, works in any repository. Reports PCAE's current
+  non-executing runtime posture and registered-plugin state (always
+  `Observed`/`observe`/`unavailable`/0 plugins today, since no plugin
+  loader exists yet — see
+  [docs/CAPABILITY_REFERENCE_V0_3_2.md](docs/CAPABILITY_REFERENCE_V0_3_2.md#pcae-runtime-inspect)).
+- **Interactive governed decision workflow**
+  (`pcae decision-session create/evidence/select/preview/confirm/readiness`
+  → `pcae governance-record publish/inspect/verify`) — the same
+  human-confirmation-gated workflow this project uses internally to
+  authorize its own governance records (Canonical Human Governance
+  Record / CHGR), usable in any repository. Preview is not confirmation;
+  confirmation is not publication; publication is not execution — see
+  [docs/COMMANDS.md#decision-session](docs/COMMANDS.md#decision-session) for the full
+  command sequence and exact authority boundaries.
+- **Repository Intelligence** (`pcae repository-intelligence snapshot
+  generate/query/change-impact`) — a deterministic, attributed,
+  read-only self-inspection of **PCAE's own repository structure**.
+  This only works against a `pcae-harness` checkout (it looks for
+  `src/pcae/`, `tests/`, `schemas/repository_intelligence/`); it is not a
+  general "analyze any project" tool. Mainly useful to PCAE contributors —
+  see
+  [docs/CAPABILITY_REFERENCE_V0_3_2.md](docs/CAPABILITY_REFERENCE_V0_3_2.md#pcae-repository-intelligence-self-inspection-of-pcaes-own-repository).
+
+`pcae authority inspect` also exists (representation-only Typed Authority
+Model record inspection) but is CLTR-migration-facing tooling with no
+production example artifact yet in this repository; see
+[docs/CAPABILITY_REFERENCE_V0_3_2.md](docs/CAPABILITY_REFERENCE_V0_3_2.md#pcae-authority-inspect)
+rather than treating it as a general capability.
+
 ## CLI Examples
 
 ```

@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased (post-v0.3.1, on `main`)
+
+**Docs**: Phase 149O.20L.7O.3B independently re-verified four
+already-shipped, unchanged-since-v0.3.1 capabilities from a clean
+installed wheel and sdist, then documented them as supported product
+surface for the first time in `README.md`/`docs/QUICKSTART_V0_3.md`/
+`docs/COMMANDS.md`: runtime/plugin introspection (`pcae runtime
+inspect`), the interactive governed decision workflow
+(`pcae decision-session` → `pcae governance-record publish`), and
+Repository Intelligence (`pcae repository-intelligence snapshot
+generate/query/change-impact`) — the last of these documented as
+self-inspection of PCAE's own repository, not a general per-project
+tool, after verification showed it fails closed against any repository
+lacking PCAE's own `src/pcae`/`tests`/`schemas/repository_intelligence`
+layout. `pcae authority inspect` was verified read-only/non-authoritative
+and documented narrowly as CLTR-migration-facing tooling with no
+production example artifact yet, rather than as a general capability.
+Zero production source, CLI, contract, or packaging-configuration change
+was made. See
+`docs/PHASE_149O_20L_7O_3B_SELECTED_EXISTING_CAPABILITY_VERIFICATION_AND_PRODUCT_EXPOSURE.md`
+for full verification evidence and the recommended `v0.3.2` release.
+
 ## v0.3.1 (2026-08-25)
 
 **Published**: https://github.com/atimad/pcae-harness/releases/tag/v0.3.1
