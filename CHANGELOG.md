@@ -1,26 +1,39 @@
 # Changelog
 
-## Unreleased (post-v0.3.1, on `main`)
+## v0.3.2 (release-candidate verification complete, not yet published)
 
-**Docs**: Phase 149O.20L.7O.3B independently re-verified four
-already-shipped, unchanged-since-v0.3.1 capabilities from a clean
-installed wheel and sdist, then documented them as supported product
-surface for the first time in `README.md`/`docs/QUICKSTART_V0_3.md`/
-`docs/COMMANDS.md`: runtime/plugin introspection (`pcae runtime
-inspect`), the interactive governed decision workflow
-(`pcae decision-session` → `pcae governance-record publish`), and
-Repository Intelligence (`pcae repository-intelligence snapshot
-generate/query/change-impact`) — the last of these documented as
-self-inspection of PCAE's own repository, not a general per-project
-tool, after verification showed it fails closed against any repository
-lacking PCAE's own `src/pcae`/`tests`/`schemas/repository_intelligence`
-layout. `pcae authority inspect` was verified read-only/non-authoritative
-and documented narrowly as CLTR-migration-facing tooling with no
-production example artifact yet, rather than as a general capability.
-Zero production source, CLI, contract, or packaging-configuration change
-was made. See
+**Docs / release hardening**: Phase 149O.20L.7O.3B independently
+re-verified four already-shipped, unchanged-since-v0.3.1 capabilities
+from a clean installed wheel and sdist, then documented them as
+supported product surface for the first time in `README.md`/
+`docs/QUICKSTART_V0_3.md`/`docs/CAPABILITY_REFERENCE_V0_3_2.md`:
+runtime/plugin introspection (`pcae runtime inspect`), the interactive
+governed decision workflow (`pcae decision-session` → `pcae
+governance-record publish`), and Repository Intelligence (`pcae
+repository-intelligence snapshot generate/query/change-impact`) — the
+last of these documented as self-inspection of PCAE's own repository,
+not a general per-project tool, after verification showed it fails
+closed against any repository lacking PCAE's own `src/pcae`/`tests`/
+`schemas/repository_intelligence` layout. `pcae authority inspect` was
+verified read-only/non-authoritative and documented narrowly as
+CLTR-migration-facing tooling with no production example artifact yet,
+rather than as a general capability. Phase 149O.20L.7O.3C then froze
+the exact release scope, independently reproduced all four workflows a
+second time (including the `.pcae/repository-intelligence/latest.json`
+write, in a disposable repository, and the full `governance-record
+publish` CHGR chain to a real published record), confirmed the
+existing documentation's side-effect labels were already accurate
+(`snapshot generate` labeled LOCAL WRITE, not read-only), bumped the
+version, wrote release notes
+(`docs/RELEASE_NOTES_V0_3_2.md`), and built/verified wheel and sdist
+release-candidate artifacts. Zero production source, CLI, contract, or
+schema change was made in either phase; the only source change is
+version metadata (`pyproject.toml`, `src/pcae/__init__.py`). See
 `docs/PHASE_149O_20L_7O_3B_SELECTED_EXISTING_CAPABILITY_VERIFICATION_AND_PRODUCT_EXPOSURE.md`
-for full verification evidence and the recommended `v0.3.2` release.
+and
+`docs/PHASE_149O_20L_7O_3C_PCAE_V0_3_2_RELEASE_HARDENING_AND_RELEASE_CANDIDATE_VERIFICATION.md`
+for full verification evidence. Not yet published — see the
+publication checklist in the 3C phase document.
 
 ## v0.3.1 (2026-08-25)
 
@@ -10933,6 +10946,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3B) to Phase 149O.20L.7O.3C: PCAE v0.3.2 Release Hardening and Release Candidate Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3B: Selected Existing Capability Verification and Product Exposure to Idle: awaiting next governed phase (post-149O.20L.7O.3B); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3A: Existing Capability Confirmation, Integration Gap, and Quick-Release Audit to Idle: awaiting next governed phase (post-149O.20L.7O.3A); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3A** — Existing Capability Confirmation, Integration Gap, and Quick-Release Audit (read-only audit + product gap analysis, zero source-code changes). Classified 16 capability areas A–G against current `HEAD` source and live CLI output. Selected a documentation-only, zero-execution-risk quick-release batch: Repository Intelligence exposure (RKS/Query/Advisory-Context/Change-Impact — already built, tested, CLI-exposed, byte-unchanged since v0.3.1, but undocumented and unconsumed by any other subsystem), Runtime/plugin introspection exposure, Interactive Workflow/CHGR discoverability (already released and load-bearing but absent from README/QUICKSTART), and `pcae authority inspect` documentation. Recommended theme: expose PCAE's existing read-only intelligence/governance-transparency layer as a documented product capability. Recommended next version: v0.3.2. Recommended minimum follow-up sequence: 3B (verify + expose) → 3C (release hardening/RC) → 3D (public release). Full detail: `docs/PHASE_149O_20L_7O_3A_EXISTING_CAPABILITY_CONFIRMATION_INTEGRATION_GAP_AND_QUICK_RELEASE_AUDIT.md`.

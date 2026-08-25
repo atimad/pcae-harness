@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3C — PCAE v0.3.2 Release Hardening and Release
+Candidate Verification. **COMPLETE.** Froze and verified the exact
+v0.3.2 release candidate: independently re-reproduced all four
+capabilities Phase 3B selected (runtime/plugin introspection,
+Interactive Workflow/CHGR, Repository Intelligence, `pcae authority
+inspect`) a second time from source, including reproducing the
+`.pcae/repository-intelligence/latest.json` write in a disposable
+repository and completing the full `governance-record publish` CHGR
+chain to a real published record; confirmed Phase 3B's documentation
+side-effect labels were already accurate (`snapshot generate` labeled
+LOCAL WRITE, not read-only — no correction needed). Confirmed
+`docs/COMMANDS.md`'s generated content is still byte-identical to its
+generator's dry-run output (no regeneration needed). Bumped version
+`0.3.1` → `0.3.2` (`pyproject.toml`, `src/pcae/__init__.py` — the only
+production-source change this phase). Wrote
+`docs/RELEASE_NOTES_V0_3_2.md`. Built wheel and sdist from the clean
+committed release-candidate commit, verified checksums and contents
+(no private/research/article material, all four capabilities present
+in both artifacts), installed each into a fresh venv, and re-exercised
+the v0.3.1 golden path plus all four v0.3.2 workflows from each clean
+install. Re-ran Phase 3B's exact 962-test focused suite —
+**962 passed, 0 failed**, identical to baseline. Release blocker table:
+**BLOCKING = 0, MUST-FIX = 0.** No production defect found; no source
+repair performed. `v0.3.1` tag/release/artifacts unchanged; no `v0.3.2`
+tag or GitHub Release created; PyPI untouched; **not published.**
+Runtime unchanged (`Observed`/`observe`/`unavailable`). Recommended
+next phase: **149O.20L.7O.3D — PCAE v0.3.2 Public Release**
+(publication-only).
+
+See
+`docs/PHASE_149O_20L_7O_3C_PCAE_V0_3_2_RELEASE_HARDENING_AND_RELEASE_CANDIDATE_VERIFICATION.md`
+for full verification evidence, the release-batch table, the blocker
+table, and the publication checklist.
+
+## Previous Phase
+
 Phase 149O.20L.7O.3B — Selected Existing Capability Verification and
 Product Exposure. **COMPLETE.** Independently re-verified the four
 capabilities 3A selected for quick release, from a clean-built wheel and
