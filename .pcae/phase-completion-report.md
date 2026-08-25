@@ -1,105 +1,118 @@
-# Phase 149O.20L.7O.3A Complete — Existing Capability Confirmation, Integration Gap, and Quick-Release Audit
+# Phase 149O.20L.7O.3B Complete — Selected Existing Capability Verification and Product Exposure
 
-**Verdict: COMPLETE — READ-ONLY CAPABILITY AUDIT FINISHED. 16 AREAS
-CLASSIFIED A-G. QUICK-RELEASE BATCH SELECTED (4 CAPABILITIES,
-DOCUMENTATION-ONLY). RECOMMENDED NEXT VERSION: v0.3.2. ZERO PRODUCTION
-SOURCE CHANGES. RUNTIME: Observed / observe / unavailable. ARTICLE:
-STOPPED.**
+**Verdict: COMPLETE — INDEPENDENT VERIFICATION FROM CLEAN WHEEL/SDIST
+COMPLETE. 4 CANDIDATES VERIFIED, ALL CONFIRMED FOR EXPOSURE (ONE
+SCOPE-CORRECTED, ONE DOCUMENTED NARROWLY). RECOMMENDED NEXT VERSION:
+v0.3.2. ZERO PRODUCTION SOURCE CHANGES. RUNTIME: Observed / observe /
+unavailable. ARTICLE: STOPPED.**
 
-Conducted a read-only audit and product-gap analysis of PCAE's full
-capability universe against current `HEAD` source and live CLI
-output, using five parallel independent research passes covering
-Permission Broker, Runtime Enforcement, Shell Gate, HATP/HMIC,
-Class-B verifier, Rollback, Repository Intelligence, Advisory,
-Plugin/Runtime introspection, CLTR/canonical lifecycle, Human
-Governance/CHGR, Authority Evaluation, Telegram/notifications,
-Audit/evidence persistence, Backend/provider adapters, and packaging.
+Independently re-verified the four capabilities Phase 3A selected for
+quick release, from a clean-built wheel and sdist (`pcae_harness-0.3.1`,
+unchanged version) installed into disposable environments and exercised
+against disposable git repositories outside `pcae-harness`, per the
+phase brief's "verify first, document second" rule.
 
 ## Summary
 
-Most historically "strategically important" areas — Permission Broker
-(push/commit/promotion gating), Rollback, Interactive Workflow/CHGR,
-Telegram, audit/evidence persistence, and the Authority Evaluation
-service — are already released and load-bearing as of `v0.3.1`.
-HATP/HMIC, CLTR authority cutover, and real backend execution remain
-correctly hard-stopped: current source (not historical claims) proves
-no production-reachable activation path exists for any of them (e.g.
-`hatp_mandatory_cutover.py`'s own docstring; `pcae cltr migration
-status --json` self-reporting `production_authority: "legacy"`,
-`authority_cutover: false`; `pcae backend execution-boundary proof
---json` returning `execution_available: false` across every provider).
+`pcae runtime inspect` — confirmed a full zero-prerequisite,
+no-side-effect product workflow, wheel- and sdist-verified. Interactive
+Workflow/CHGR — confirmed and exercised end-to-end
+(`create`→`evidence`→`select`→`preview`→`confirm`→`readiness`→
+`governance-record publish`→`inspect`/`verify`), producing a real,
+schema-verifiable CHGR record; authority distinctions
+(preview≠confirmation≠publication≠execution) hold and are documented.
+Repository Intelligence — confirmed real, tested, and safe, but
+**scope-corrected**: `snapshot generate` hardcodes `src/pcae/`,
+`tests/`, `schemas/repository_intelligence/` as required top-level
+paths (verified both by a live failing invocation against a bare
+disposable repository and by direct source citation), meaning it only
+functions as *self-inspection of a `pcae-harness`-shaped checkout*, not
+a general "analyze any repository" feature — documented accordingly,
+correcting 3A's unqualified framing. `pcae authority inspect` —
+confirmed read-only/non-authoritative/fail-closed, but no production
+record artifact of any family it supports exists anywhere in this
+repository's tracked governance state today (CLTR migration remains
+`production_authority: "legacy"`) — documented narrowly as advanced
+CLTR-tooling, not a README headline.
 
-The single largest near-complete, under-exposed capability found is
-**Repository Intelligence** (Repository Knowledge Snapshot, Query,
-Advisory-Context, Change-Impact): ~70+ tests, fully CLI-registered,
-byte-unchanged since `v0.3.1`, but undocumented in README/CHANGELOG
-headline and consumed by zero other PCAE subsystem outside its own
-CLI. Combined with the already-complete, honestly-scoped **Runtime/
-plugin introspection** CLI and the already-released-but-undocumented
-**Interactive Workflow/CHGR**, this yields a coherent, low-risk,
-documentation-only quick-release batch.
+## Findings
 
-## Selected Quick-Release Batch
+One apparent defect during `governance-record publish` testing
+(`internal_error`) was fully reproduced by bypassing the CLI's error
+wrapper and correctly attributed to invalid test input — a
+`--template-ref` value (`"manual:v1"`) violating CHGR's closed
+identifier pattern (`^[a-z][a-z0-9_-]{2,63}$`), not a code defect;
+retrying with a conformant value completed the workflow successfully.
+One minor, non-blocking UX rough edge was found and documented, not
+repaired: `decision_session.py`'s shared error-mapping wrapper collapses
+every non-`ApplicationServiceError`/`ValueError` exception — including
+this legitimate, specific `ChgrSchemaConformanceError` — into the same
+generic `internal_error` message.
 
-1. Repository Intelligence exposure (RKS/Query/Advisory-Context/Change-Impact)
-2. Runtime/plugin introspection exposure
-3. Interactive Workflow/CHGR discoverability
-4. `pcae authority inspect` documentation (bundled)
+`docs/COMMANDS.md` was found to be a *generated* artifact (`pcae docs
+commands`) whose generator does not currently enumerate `pcae runtime
+inspect`, `pcae repository-intelligence`, or `pcae authority inspect` as
+command areas (`pcae docs commands --dry-run` output was byte-identical
+to committed `HEAD`). An initial hand-edit was reverted (`git checkout
+--`) once this was identified, to avoid permanent generated-artifact
+drift; a new hand-maintained `docs/CAPABILITY_REFERENCE_V0_3_2.md` was
+created instead. This generator gap is disclosed as operational debt,
+not fixed (a production-source change, out of scope here). One
+accidental write to this repository's own tracked
+`.pcae/repository-intelligence/latest.json` occurred during initial
+Repository Intelligence verification and was immediately caught and
+reverted before any further work.
 
-All four: already built, already tested, already shipped in `v0.3.1`'s
-installed code; zero execution-capability change; zero new trust
-surface. **Recommended theme:** expose PCAE's existing read-only
-intelligence and governance-transparency layer as a documented,
-supported product capability. **Recommended version:** v0.3.2.
+## Final v0.3.2 Batch
 
-## Rejected/Deferred
+1. Runtime/plugin introspection (`pcae runtime inspect`) — CONFIRMED, full product workflow
+2. Interactive Workflow/CHGR — CONFIRMED, full product workflow (one field-format caveat documented)
+3. Repository Intelligence — CONFIRMED, scope-corrected to self-inspection docs
+4. `pcae authority inspect` — CONFIRMED, advanced CLTR-tooling docs only
 
-Permission Broker primitive-level closure (real code change, marginal
-value — already gated one layer up); Repository Intelligence
-Dependency-Graph/Historical-Memory/Cross-Artifact/Unified-Query/
-Service (self-labeled prototypes, need a real consumer, not just
-docs); Class-B verifier standalone exposure (HOLD — TRUST GAP, low
-value); HATP Trust-Enrollment/activation, CLTR authority cutover,
-backend execution activation (hard-stopped by phase-brief SS38).
+**Recommended theme:** expose PCAE's existing governed inspection and
+intelligence capabilities as supported installed workflows, accurately
+scoped to what each one actually does. **Recommended version:** v0.3.2
+(unchanged from 3A).
 
 ## Test Evidence
 
-0 tests run this phase (read-only audit, zero source changes) — per
-the phase brief's explicit instruction not to run the full suite
-merely to discover capabilities. Capability-state evidence was
-gathered via targeted `grep` against existing test files (cited by
-filename throughout the phase document, e.g. `tests/test_phase_120e_
-repository_knowledge_snapshot.py`, `tests/test_permission_broker_
-push_production_consumption.py`, `tests/test_phase_147*.py` ×8) and
-side-effect-free live CLI invocation (`pcae runtime inspect --json`,
-`pcae repository-intelligence {snapshot generate, query, dependency-
-graph generate, historical-memory generate}`, `pcae advisory {status,
-context build, check}`, `pcae cltr migration status --json`, `pcae
-agents adapters --json`, `pcae backend list --json`, `pcae notify
-status`, `pcae backend execution-boundary proof --json`, and `--help`
-on `hatp`, `rollback`, `decision-session`, `governance-record`,
-`authority`).
+962 targeted existing tests run across the four capabilities (0
+failures), not a full `python -m pytest -n auto` regression — per the
+phase brief's explicit focused-verification instruction. Suites:
+`test_runtime_registry_{contract,prototype,verification}.py`,
+`test_runtime_introspection_{prototype,architecture}.py`,
+`test_authority_inspect_137k.py`, `test_typed_authority_inspector_137e.py`
+(693 combined); `test_phase_145g_decision_session_cli.py`,
+`test_phase_145g1_decision_session_cli_repair.py`,
+`test_phase_145g3_decision_session_identity_binding.py`,
+`test_iwc_143o_session_coordination_publication_handoff.py`,
+`test_phase_144c_publication_coordinator.py` (197); `test_phase_120e_
+repository_knowledge_snapshot.py`, `test_phase_121e_repository_
+intelligence_query.py`, `test_phase_122e_repository_intelligence_
+advisory_context.py`, `test_phase_123e_repository_intelligence_
+change_impact.py`, `test_phase_124e_repository_intelligence_
+hardening.py` (72).
 
 ## Governance
 
 `pcae health`: healthy. `pcae check`: passed. `pcae status coherence`:
-coherent. `pcae doctor task-memory`: 129 warnings, unchanged,
+coherent. `pcae doctor task-memory`: warnings, unchanged,
 repository-maintainer-only. `pcae runtime inspect`:
-`execution_capability: unavailable`, unchanged before/after this
-phase. No article read/modified/published. No inspection of the
-private `~/repos/pcae-deepseek-research` repository. No PyPI action.
-No production source, CLI, contract, schema, or packaging-
-configuration file was modified this phase.
+`execution_capability: unavailable`, unchanged before/after this phase.
+No article read/modified/published. No inspection of the private
+`~/repos/pcae-deepseek-research` repository. No PyPI action, no tag, no
+GitHub Release. No production source, CLI, contract, schema, or
+packaging-configuration file was modified this phase.
 
 ## Recommended Next Phase
 
-**3B — Verify + expose the selected batch.** Confirm exact current
-CLI syntax/output for the four selected capabilities against this
-audit's citations, then write the README/QUICKSTART/docs/COMMANDS.md/
-CHANGELOG documentation additions that surface them as supported
-workflows. Followed by **3C — Release hardening/RC** and **3D —
-Public v0.3.2 release**. No new architecture or contract phase is
-recommended.
+**3C — PCAE v0.3.2 Release Hardening and Release Candidate
+Verification.** Freeze the exact v0.3.2 scope finalized in this phase,
+bump version, prepare release notes, build wheel/sdist, verify
+checksums, clean-install smoke, rerun the four selected capability
+workflows exactly as documented here, run release-critical regression,
+produce a publication checklist, do not publish.
 
 Full text:
-`docs/PHASE_149O_20L_7O_3A_EXISTING_CAPABILITY_CONFIRMATION_INTEGRATION_GAP_AND_QUICK_RELEASE_AUDIT.md`.
+`docs/PHASE_149O_20L_7O_3B_SELECTED_EXISTING_CAPABILITY_VERIFICATION_AND_PRODUCT_EXPOSURE.md`.
