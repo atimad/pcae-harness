@@ -1,98 +1,97 @@
-# Phase 149O.20L.7O.3B Complete — Selected Existing Capability Verification and Product Exposure
+# Phase 149O.20L.7O.3C Complete — PCAE v0.3.2 Release Hardening and Release Candidate Verification
 
-**Verdict: COMPLETE — INDEPENDENT VERIFICATION FROM CLEAN WHEEL/SDIST
-COMPLETE. 4 CANDIDATES VERIFIED, ALL CONFIRMED FOR EXPOSURE (ONE
-SCOPE-CORRECTED, ONE DOCUMENTED NARROWLY). RECOMMENDED NEXT VERSION:
-v0.3.2. ZERO PRODUCTION SOURCE CHANGES. RUNTIME: Observed / observe /
-unavailable. ARTICLE: STOPPED.**
+**Verdict: COMPLETE — RELEASE CANDIDATE VERIFIED. RELEASE THEME:
+EXISTING CAPABILITY PRODUCT EXPOSURE. PRODUCTION FEATURE IMPLEMENTATION
+CHANGES: 0. WHEEL: VERIFIED. SDIST: VERIFIED. CLEAN INSTALLS: PASS.
+RELEASE BLOCKERS: 0. MUST-FIX: 0. RUNTIME: Observed / observe /
+unavailable. PUBLICATION: NOT PERFORMED.**
 
-Independently re-verified the four capabilities Phase 3A selected for
-quick release, from a clean-built wheel and sdist (`pcae_harness-0.3.1`,
-unchanged version) installed into disposable environments and exercised
-against disposable git repositories outside `pcae-harness`, per the
-phase brief's "verify first, document second" rule.
+Froze and independently re-verified the exact v0.3.2 release candidate
+selected in Phase 3B, from source in disposable repositories, then
+built and verified real wheel/sdist artifacts from the clean committed
+release-candidate commit.
 
 ## Summary
 
-`pcae runtime inspect` — confirmed a full zero-prerequisite,
-no-side-effect product workflow, wheel- and sdist-verified. Interactive
-Workflow/CHGR — confirmed and exercised end-to-end
-(`create`→`evidence`→`select`→`preview`→`confirm`→`readiness`→
-`governance-record publish`→`inspect`/`verify`), producing a real,
-schema-verifiable CHGR record; authority distinctions
-(preview≠confirmation≠publication≠execution) hold and are documented.
-Repository Intelligence — confirmed real, tested, and safe, but
-**scope-corrected**: `snapshot generate` hardcodes `src/pcae/`,
-`tests/`, `schemas/repository_intelligence/` as required top-level
-paths (verified both by a live failing invocation against a bare
-disposable repository and by direct source citation), meaning it only
-functions as *self-inspection of a `pcae-harness`-shaped checkout*, not
-a general "analyze any repository" feature — documented accordingly,
-correcting 3A's unqualified framing. `pcae authority inspect` —
-confirmed read-only/non-authoritative/fail-closed, but no production
-record artifact of any family it supports exists anywhere in this
-repository's tracked governance state today (CLTR migration remains
-`production_authority: "legacy"`) — documented narrowly as advanced
-CLTR-tooling, not a README headline.
+All four v0.3.2 capabilities (runtime/plugin introspection, Interactive
+Workflow/CHGR, Repository Intelligence, `pcae authority inspect`) were
+independently re-exercised end-to-end from source, including
+reproducing the Repository Intelligence `latest.json` write in a
+disposable repository and completing a full `governance-record
+publish` chain to a real published CHGR record. Existing documentation
+(`docs/CAPABILITY_REFERENCE_V0_3_2.md`) was audited and found already
+accurate — `snapshot generate` is correctly labeled a LOCAL WRITE, not
+read-only; no documentation correction was required for any of the
+four capabilities. `docs/COMMANDS.md`'s generated content was
+reconfirmed byte-identical to its generator's output.
+
+Version bumped `0.3.1` → `0.3.2` (`pyproject.toml`,
+`src/pcae/__init__.py` — the only production-source change).
+`docs/RELEASE_NOTES_V0_3_2.md` written.
 
 ## Findings
 
-One apparent defect during `governance-record publish` testing
-(`internal_error`) was fully reproduced by bypassing the CLI's error
-wrapper and correctly attributed to invalid test input — a
-`--template-ref` value (`"manual:v1"`) violating CHGR's closed
-identifier pattern (`^[a-z][a-z0-9_-]{2,63}$`), not a code defect;
-retrying with a conformant value completed the workflow successfully.
-One minor, non-blocking UX rough edge was found and documented, not
-repaired: `decision_session.py`'s shared error-mapping wrapper collapses
-every non-`ApplicationServiceError`/`ValueError` exception — including
-this legitimate, specific `ChgrSchemaConformanceError` — into the same
-generic `internal_error` message.
+**Packaging finding (caught, not a release blocker):** building the
+sdist directly inside the local development checkout picked up 6
+unintended duplicate files (`README.md`/`LICENSE`/`pyproject.toml`/two
+schema `README.md`s) from a stray, gitignored `.claude/worktrees/`
+directory left over from an unrelated prior agent session — hatchling's
+explicit `include` patterns are not anchored to the repository root and
+matched these filenames wherever found on disk, VCS-ignore status
+notwithstanding. This does **not** reproduce from a fresh clone:
+independently verified twice, building from two separate clean clones
+of the exact release-candidate commit produced byte-identical wheel
+*and* sdist checksums both times, with zero forbidden or unexpected
+content. The officially recorded/verified artifacts below are the
+clean-clone build. The contaminated in-place build directory was
+deleted and never committed. Recommendation for future release
+phases: always build release artifacts from a fresh clone (or a
+checkout independently confirmed free of untracked/gitignored
+matching-named cruft), never directly inside a long-lived local
+development working directory.
 
-`docs/COMMANDS.md` was found to be a *generated* artifact (`pcae docs
-commands`) whose generator does not currently enumerate `pcae runtime
-inspect`, `pcae repository-intelligence`, or `pcae authority inspect` as
-command areas (`pcae docs commands --dry-run` output was byte-identical
-to committed `HEAD`). An initial hand-edit was reverted (`git checkout
---`) once this was identified, to avoid permanent generated-artifact
-drift; a new hand-maintained `docs/CAPABILITY_REFERENCE_V0_3_2.md` was
-created instead. This generator gap is disclosed as operational debt,
-not fixed (a production-source change, out of scope here). One
-accidental write to this repository's own tracked
-`.pcae/repository-intelligence/latest.json` occurred during initial
-Repository Intelligence verification and was immediately caught and
-reverted before any further work.
+**Fast Green noise (explained, zero attributable regressions):** the
+full `fast_green`-marked suite showed 334–338 failures across three
+runs at the release-candidate commit — all state-sensitive/
+host-dependent/git-history-count/flaky tests unrelated to this phase
+(e.g. HATP Class-B real-host hardware checks, historical-CHGR-count
+assertions, shell-gate audit-corpus timing), consistent with Phase
+2Z's own documented historical baseline (336 failed/8691 passed/9
+errors). A disposable git-worktree A/B comparison against the
+phase-entry commit (846ec6c7) found exactly two differing nodeids:
+`test_head_equals_origin_main` (expected — this phase's own commits
+were not yet pushed at test time) and
+`tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`
+(independently reproduced as flaky across three isolated runs: 1 fail,
+2 pass — matching the already-disclosed shell-gate audit-corpus
+performance debt). A fully deselected run excluding exactly the 345
+pre-existing failing/erroring nodeids produced **8691 passed, 5
+skipped, 0 failed, 0 errors**.
 
-## Final v0.3.2 Batch
+## Final v0.3.2 Batch (unchanged from Phase 3B, independently reconfirmed)
 
-1. Runtime/plugin introspection (`pcae runtime inspect`) — CONFIRMED, full product workflow
-2. Interactive Workflow/CHGR — CONFIRMED, full product workflow (one field-format caveat documented)
-3. Repository Intelligence — CONFIRMED, scope-corrected to self-inspection docs
-4. `pcae authority inspect` — CONFIRMED, advanced CLTR-tooling docs only
+1. Runtime/plugin introspection (`pcae runtime inspect`) — VERIFIED, full product workflow
+2. Interactive Workflow/CHGR — VERIFIED, full product workflow, one documented UX rough edge
+3. Repository Intelligence — VERIFIED, self-inspection scope
+4. `pcae authority inspect` — VERIFIED, advanced CLTR-tooling docs only
 
-**Recommended theme:** expose PCAE's existing governed inspection and
-intelligence capabilities as supported installed workflows, accurately
-scoped to what each one actually does. **Recommended version:** v0.3.2
-(unchanged from 3A).
+## Release Candidate
+
+- **Release-candidate commit:** `8bb8c882` (implementation commit — version bump, release notes, phase document, `PROJECT_STATUS.md`/`CHANGELOG.md`).
+- **Wheel:** `pcae_harness-0.3.2-py3-none-any.whl`, 2,339,194 bytes, SHA-256 `9de9a0d636e80a7bcae5c984f892d34d6e3d28561240b5770cf4be7f35c8d785`.
+- **Sdist:** `pcae_harness-0.3.2.tar.gz`, sourced from the clean-clone build, SHA-256 `3baa336afed310980a5c200b1f01623ff618d8735b41f8f0fd36e4e4062161bf`.
+- Both checksums independently reproduced identically across two separate fresh-clone builds.
+- Clean wheel install: version `0.3.2` confirmed via `import pcae; pcae.__version__`; `pcae --help` works; v0.3.1 golden path (`init`→`session bootstrap`→`task new`→`intake from-files`→`show`/`list`) ACCEPTED; all four v0.3.2 workflows exercised successfully.
+- Clean sdist install: identical CLI registration (`pcae --help` byte-identical to wheel); v0.3.1 golden path ACCEPTED; all four v0.3.2 workflows exercised successfully (including a full CHGR publish to a real record). No wheel/sdist divergence found.
 
 ## Test Evidence
 
-962 targeted existing tests run across the four capabilities (0
-failures), not a full `python -m pytest -n auto` regression — per the
-phase brief's explicit focused-verification instruction. Suites:
-`test_runtime_registry_{contract,prototype,verification}.py`,
-`test_runtime_introspection_{prototype,architecture}.py`,
-`test_authority_inspect_137k.py`, `test_typed_authority_inspector_137e.py`
-(693 combined); `test_phase_145g_decision_session_cli.py`,
-`test_phase_145g1_decision_session_cli_repair.py`,
-`test_phase_145g3_decision_session_identity_binding.py`,
-`test_iwc_143o_session_coordination_publication_handoff.py`,
-`test_phase_144c_publication_coordinator.py` (197); `test_phase_120e_
-repository_knowledge_snapshot.py`, `test_phase_121e_repository_
-intelligence_query.py`, `test_phase_122e_repository_intelligence_
-advisory_context.py`, `test_phase_123e_repository_intelligence_
-change_impact.py`, `test_phase_124e_repository_intelligence_
-hardening.py` (72).
+962 targeted focused-capability tests (Phase 3B's exact suite set) — 962
+passed, 0 failed, unchanged from the 3B baseline. Full `fast_green`
+suite from the clean release-candidate tree: 8691 passed, 5 skipped, 0
+failed, 0 errors after deselecting the 345 pre-existing/environmental
+nodeids identically present at the phase-entry commit (see Findings
+above) — zero attributable v0.3.2 regressions.
 
 ## Governance
 
@@ -100,19 +99,32 @@ hardening.py` (72).
 coherent. `pcae doctor task-memory`: warnings, unchanged,
 repository-maintainer-only. `pcae runtime inspect`:
 `execution_capability: unavailable`, unchanged before/after this phase.
-No article read/modified/published. No inspection of the private
-`~/repos/pcae-deepseek-research` repository. No PyPI action, no tag, no
-GitHub Release. No production source, CLI, contract, schema, or
-packaging-configuration file was modified this phase.
+`v0.3.1` tag confirmed unchanged (`5d7edef9`) at both phase entry and
+phase close. No `v0.3.2` tag, no GitHub Release, no PyPI action. No
+article read/modified/published. No inspection of the private
+`~/repos/pcae-deepseek-research` repository.
+
+## Release Blocker Table
+
+BLOCKING = 0. MUST-FIX = 0. All items ACCEPTED or ACCEPTED-DEBT (task-
+memory warnings, shell-gate timeout debt — both pre-existing,
+unrelated). See the full table in the phase document.
+
+## Publication Checklist
+
+Produced in the phase document (§34) — final human authorization
+required before any tag, GitHub Release, or artifact upload.
 
 ## Recommended Next Phase
 
-**3C — PCAE v0.3.2 Release Hardening and Release Candidate
-Verification.** Freeze the exact v0.3.2 scope finalized in this phase,
-bump version, prepare release notes, build wheel/sdist, verify
-checksums, clean-install smoke, rerun the four selected capability
-workflows exactly as documented here, run release-critical regression,
-produce a publication checklist, do not publish.
+**3D — PCAE v0.3.2 Public Release.** Publication-only: reverify the
+exact release-candidate commit (`8bb8c882`) and the frozen wheel/sdist
+checksums above, confirm explicit human publication authorization,
+create and publish an annotated `v0.3.2` tag, create a GitHub Release
+with the exact verified artifacts attached, verify checksums
+post-attachment, run a post-publication clean-install smoke test,
+verify Latest/stable pointers, keep PyPI untouched unless separately
+authorized, keep the article stopped.
 
 Full text:
-`docs/PHASE_149O_20L_7O_3B_SELECTED_EXISTING_CAPABILITY_VERIFICATION_AND_PRODUCT_EXPOSURE.md`.
+`docs/PHASE_149O_20L_7O_3C_PCAE_V0_3_2_RELEASE_HARDENING_AND_RELEASE_CANDIDATE_VERIFICATION.md`.
