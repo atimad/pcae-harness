@@ -1,60 +1,68 @@
-# Phase 149O.20L.7O.3F Complete — Permission Broker Rollback Default-Path Consumption Integration
+# Phase 149O.20L.7O.3F.1 Complete — Independent End-to-End Rollback Permission-Boundary Verification
 
-**Verdict: BOUNDED SOURCE-MODIFYING INTEGRATION COMPLETE.** Human-selected
-Plan B from `149O.20L.7O.3E`. Closed the sole remaining Permission Broker
-production-coverage gap: `pcae rollback`'s default (non-`HATP_MANDATORY`)
-dispatch path (`core/agent.py::build_rollback_execution`), which
-previously had zero Permission Broker evaluation at all. Runtime unchanged
+**Verdict: VERIFICATION-ONLY COMPLETE. ZERO BLOCKING FINDINGS.**
+Independently re-derived, without trusting `149O.20L.7O.3F`'s own
+claims, tests, or classifications, that 3F's rollback default-path
+Permission Broker integration is genuine, non-bypassable, fail-closed,
+and does not affect runtime capability. Runtime unchanged
 (`Observed`/`observe`/`unavailable`).
 
 ## Summary
 
-**Baseline:** phase-entry commit `97bb9cda`, working tree clean, `origin/
-main..HEAD` = 0, `v0.4.0` unchanged.
+**Baseline:** phase-entry commit `53ef81ff` (post-3F), working tree
+clean, `origin/main..HEAD` = 0, `v0.4.0` unchanged. Pre-3F commit
+`97bb9cda`, integration commit `b7f89981`.
 
-**Integration:** added `mutation_permission.evaluate_rollback_permission()`
-— a new Wave-1-style adapter reusing the existing `ACTION_ROLLBACK`
-literal paired with `EXECUTION_CLASS_MUTATION` (deliberately not
-`EXECUTION_CLASS_ROLLBACK`, which would have triggered `POL-004`
-`HUMAN_REVIEW` unconditionally and invented a new human-approval
-requirement outside this phase's authorization), `COMP-008` component id
-and `build_rollback_execution` capability literal (both already
-registered by `hatp_ag_authority.py` for the separate HATP-gated AG5
-evaluation). No new decision state, policy vocabulary, or shadow broker
-was invented.
+**Pre-3F graph:** independently re-read from `git show
+97bb9cda:src/pcae/core/agent.py` — the default (non-`HATP_MANDATORY`)
+dispatch path in `build_rollback_execution` truly had zero Permission
+Broker evaluation, falling straight into the restore/remove mutation
+loop. 3F's premise **CONFIRMED**, not merely repeated.
 
-**Gate placement:** in `build_rollback_execution`, immediately after the
-pre-existing, byte-unchanged `HATP_MANDATORY` gate block and immediately
-before the restore/remove effect boundary, active only outside
-`HATP_MANDATORY` mode — the separate, stricter, HATP-integrated gate
-keeps its own untouched coverage.
+**Current graph:** independently re-read from current
+`build_rollback_execution` — the new gate sits immediately before the
+mutation loop; the `HATP_MANDATORY` branch is byte-identical to
+pre-3F; the sole production caller is `commands/agent.py::run_rollback`,
+reached only via `pcae rollback --per-id <PER_ID>`. No bypass found.
 
-**Results:** `ALLOW` permits the pre-existing dispatch behavior unchanged.
-`DENY`/broker-failure/malformed-result all fail closed with zero file
-mutation and a new terminal `aborted_permission_denied` RollbackExecutionRecord
-status. Dry-run rollback readiness/evidence generation is entirely
-unaffected — it returns before the new gate and was never gated. Human
-authority (`pcae rollback --per-id X`) and runtime posture are unchanged
-— permission is not execution capability.
+**Fresh independent test suite:** 19 new tests
+(`tests/test_phase_149o_20l_7o_3f_1_independent_rollback_permission_verification.py`,
+imports nothing from 3F's own test file) — ALLOW, DENY (zero mutation,
+terminal `aborted_permission_denied` status), broker-exception and
+malformed-result fail-closed (no fallback, no substring/truthy
+parsing), dry-run and `HATP_MANDATORY` non-invocation of the new
+adapter (spy assertions), runtime capability unchanged across a
+disposable ALLOW rollback, DENY-retry determinism, operation-identity
+distinctness from a push adapter call. **19/19 passed.**
 
-**Production diff:** exactly two files (`core/mutation_permission.py`,
-`core/agent.py`). 21 new tests added. Existing rollback (142 tests) and
-Permission Broker Foundation/push/publication/policy (983 tests)
-regression suites re-run with zero attributable behavioral change
-(pre-existing failures in both groups confirmed identical before/after
-via `git stash` comparison). Full Fast Green run twice (baseline via
-`git stash` isolation, current against the diff); every one of the 19
-newly-failing and 2 newly-passing node IDs individually classified as
-either a frozen historical-phase source-diff/git-status tripwire
-(necessarily triggered by this phase's mandated file changes) or
-confirmed `pytest -n auto` parallel-execution flakiness (verified via
-serial re-run: 3 passed, 0 failed).
+**Policy analysis:** independently confirmed `ACTION_ROLLBACK`
++`EXECUTION_CLASS_MUTATION` is a precedented pairing (matches existing
+commit/push adapters), correctly avoiding an unintended `POL-004`
+`HUMAN_REVIEW` requirement; `COMP-008`/`build_rollback_execution` are
+legitimately generic pre-existing identities, not aliasing.
 
-**BLOCKING: 0. MUST-FIX: 0. Attributable functional regressions: 0.**
+**Status-consumer audit:** every production consumer of
+`RollbackExecutionRecord.status` re-grepped repo-wide; none would
+mishandle the new terminal status.
 
-**Not self-certified.** Recommends **149O.20L.7O.3F.1 — Independent
-End-to-End Rollback Permission-Boundary Verification** next, not begun.
+**Regression suites:** 43 (rollback/AG5) + 192 (rollback persistence)
++ 983-of-985 (permission-broker/push/publication/policy, 21 files)
+passed; the 2 failures independently reproduced identical at the
+pre-3F commit in an isolated worktree — pre-existing, unrelated.
+
+**Fast Green A/B (isolated pre-3F worktree vs. current):** exactly 1
+newly-failing node (`test_ag5_build_rollback_execution_body_unchanged_since_entry`
+— an expected, self-acknowledged tripwire necessarily triggered by
+3F's legitimate modification) and 1 newly-passing node
+(`test_head_equals_origin_main` — a timing-sensitive push-state check,
+unrelated to source). **Attributable functional regressions: 0.**
+
+**BLOCKING: 0. Production `src/pcae/` files modified this phase: 0.**
+
+**Does not self-authorize a release.** Recommends
+**149O.20L.7O.3G — Post-Rollback Permission Integration Release and
+Next-Capability Decision** next, not begun.
 
 See
-`docs/PHASE_149O_20L_7O_3F_PERMISSION_BROKER_ROLLBACK_DEFAULT_PATH_CONSUMPTION_INTEGRATION.md`
+`docs/PHASE_149O_20L_7O_3F_1_INDEPENDENT_END_TO_END_ROLLBACK_PERMISSION_BOUNDARY_VERIFICATION.md`
 for the full evidence trail.
