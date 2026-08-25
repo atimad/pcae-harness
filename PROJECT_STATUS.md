@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3C.3.2 — Auto-Publish Corrupt-Store Repair Independent
+Verification. **VERIFIED — CLOSED.** Independently re-derived (not
+trusted) 3C.3.1's repair of `B-149O.20L.7O.3C.3-1`: checked out the real
+pre-repair commit (`2fd7fe3a`) into a disposable `git worktree` and
+reproduced the historical crash for real (literal `pcae phase complete`
+subprocess, unrelated corrupt session file, uncaught
+`SessionStoreCorruptError`, exit code 1); the identical fixture against
+current repaired source completes cleanly (exit 0, disclosed
+`application_error` outcome). 29 fresh tests (no fixture/function
+imported from 3C.3.1's own suite) independently re-derive the
+unrelated-vs-relevant corruption matrix, the malformed-JSON/filesystem
+matrix, ordering-attack resistance, restart/resume, and the
+duplicate-`subject_ref` disposition from the primary-source contract
+(free-text field, no store-level uniqueness enforcement anywhere) —
+confirmed **NON-BLOCKING/ACCEPTED-DEBT**, unrepaired, consistent with
+3C.3's own classification but independently re-derived here. One
+documentation-precision finding recorded (not blocking): the repair's
+"unrelated corruption isolation" is, by direct code reading, actually
+"a real match anywhere always wins; absent that, any corruption anywhere
+fails closed regardless of true relevance" — safe (fail-closed-when-
+uncertain), simply more conservative than the repair phase's own
+framing implied. Fast Green: 8690 passed / 337 failed / 5 skipped / 9
+errors, all failures/errors independently confirmed confined to
+pre-existing HATP/HMIC/Class-B/HBDC-bound-contract-identity host-specific
+suites unrelated to this finding's subsystem — zero attributable
+regressions. Runtime unchanged (`Observed`/`observe`/`unavailable`). No
+production source modified this phase. **Finding
+`B-149O.20L.7O.3C.3-1`: CLOSED.** **PLAN B+ CAPABILITY CONSUMPTION:
+INDEPENDENTLY VERIFIED.** Release remains **STOPPED** — recommended next
+phase is 149O.20L.7O.3C.4 (release scope/version/reproducible-build
+hardening). See
+`docs/PHASE_149O_20L_7O_3C_3_2_AUTO_PUBLISH_CORRUPT_STORE_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3C.3.1 — Auto-Publish Corrupt-Store Fail-Closed Repair.
 **REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Repairs
 BLOCKING finding `B-149O.20L.7O.3C.3-1` (149O.20L.7O.3C.3's own

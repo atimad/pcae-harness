@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3C.3.2** — Auto-Publish Corrupt-Store Repair
+  Independent Verification: independently closes finding
+  `B-149O.20L.7O.3C.3-1`. Reproduced the historical crash for real from
+  the fixed pre-repair commit (`2fd7fe3a`) via a disposable `git
+  worktree` and the literal `pcae phase complete` subprocess (uncaught
+  `SessionStoreCorruptError`, exit 1); confirmed the same fixture against
+  current repaired source completes cleanly (exit 0, disclosed
+  `application_error`). 29 fresh, independently-authored tests (no
+  fixture/function imported from 3C.3.1's own suite) re-derive the
+  unrelated-vs-relevant corruption semantics, the malformed-record/
+  filesystem-error matrix, ordering-attack resistance, restart/resume,
+  and the Plan B+ happy/rejection paths. Independently re-adjudicated
+  duplicate-`subject_ref` from the primary-source contract as
+  NON-BLOCKING/ACCEPTED-DEBT (unrepaired, consistent with 3C.3). Recorded
+  one documentation-precision finding (not blocking): the repair's
+  "unrelated corruption isolation" is, by direct code reading, "a real
+  match anywhere always wins; absent that, any corruption anywhere fails
+  closed regardless of true relevance" — safe, just more conservative
+  than 3C.3.1's own framing implied. Fast Green: 8690 passed / 337 failed
+  / 5 skipped / 9 errors, all failures/errors confirmed confined to
+  pre-existing, unrelated HATP/HMIC/Class-B/HBDC host-specific suites —
+  zero attributable regressions. No production source modified.
+  **`B-149O.20L.7O.3C.3-1`: CLOSED.** **PLAN B+ CAPABILITY CONSUMPTION:
+  INDEPENDENTLY VERIFIED.** Recommended next phase: 149O.20L.7O.3C.4
+  (release scope/version/reproducible-build hardening).
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.1) to Phase 149O.20L.7O.3C.3.2: Auto-Publish Corrupt-Store Repair Independent Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3C.3.1: Auto-Publish Corrupt-Store Fail-Closed Repair to Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3C.3) to Phase 149O.20L.7O.3C.3.1: Auto-Publish Corrupt-Store Fail-Closed Repair; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.3.1** — Auto-Publish Corrupt-Store Fail-Closed
