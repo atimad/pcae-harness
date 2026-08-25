@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260825-2258-phase-149o-20l-7o-3h-pcae-v0-4-1-release-hardening
+20260825-2315-idle-awaiting-next-governed-phase-post-149o-20l-7o-3h
 
 ## Title
 
-Phase 149O.20L.7O.3H: PCAE v0.4.1 Release Hardening
+Idle: awaiting next governed phase (post-149O.20L.7O.3H)
 
 ## Status
 
@@ -18,26 +18,17 @@ implementation
 
 ## Goal
 
-Prepare a frozen, reproducible PCAE v0.4.1 release candidate (version bump, release notes, reproducible build verification, clean-install regression, no publication)
+Idle: awaiting next governed phase (post-149O.20L.7O.3H)
 
 ## Allowed Files
 
-- pyproject.toml
-- src/pcae/__init__.py
-- docs/RELEASE_NOTES_V0_4_1.md
-- docs/PHASE_149O_20L_7O_3H_PCAE_V0_4_1_RELEASE_HARDENING.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 - tasks/DONE.md
 - tasks/done/20260825-2254-idle-awaiting-next-governed-phase-post-149o-20l-7o-3g.md
-- tasks/active/20260825-2254-idle-awaiting-next-governed-phase-post-149o-20l-7o-3g.md
+- tasks/done/20260825-2258-phase-149o-20l-7o-3h-pcae-v0-4-1-release-hardening.md
 - tasks/active/20260825-2258-phase-149o-20l-7o-3h-pcae-v0-4-1-release-hardening.md
-
-## Override Protected Files
-
-- pyproject.toml
+- tasks/active/20260825-2315-idle-awaiting-next-governed-phase-post-149o-20l-7o-3h.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -84,4 +75,4 @@ TBD
 
 ## Created Timestamp
 
-2026-08-25T22:58:51.352904+02:00
+2026-08-25T23:15:57.827870+02:00
