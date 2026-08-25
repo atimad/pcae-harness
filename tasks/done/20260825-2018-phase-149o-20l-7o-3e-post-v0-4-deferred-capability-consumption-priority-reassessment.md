@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3E: Post-v0.4 Deferred Capability Consumption Priority Reasses
 
 ## Status
 
-active
+done
 
 ## Mode
 

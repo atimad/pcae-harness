@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3E — Post-v0.4 Deferred Capability Consumption Priority
+Reassessment. **READ-ONLY STRATEGIC REASSESSMENT — COMPLETE.** Re-derived
+(not copied) the consumption maturity of all six deferred candidates from
+3C.1 against current post-v0.4.0 source: Interactive Workflow/CHGR
+auto-detect+route, Publication Execution Ownership auto-invocation, and
+Permission Broker publication-path coverage are now confirmed
+production-consumed (landed in 3C.2/v0.4.0) — the single most important
+finding is that a real, precedent-setting "production workflow
+auto-detects + routes to an existing service, preserving the human
+boundary" pattern now exists and shipped. The remaining open Permission
+Broker gap is exactly one item: the `pcae rollback` default dispatch path
+(`agent.py::build_rollback_execution`), still unguarded, re-confirmed via
+fresh grep against current HEAD. Repository Intelligence internal
+consumption remains deferred, with its effort re-classified **up** from
+3C.1's original S-M to **M**, because 3C.2 already found (and this phase
+re-confirmed unchanged) that `push.py`'s freshness-comparison logic
+consumes the raw git-subprocess output as real logic, not display text,
+plus a previously-uncounted snapshot-freshness/auto-regeneration design
+gap. Runtime/plugin orchestration remains diagnostic-only (registry is
+architecturally always empty — 0 plugins — so no real capability
+resolution is possible today, only truthful "unavailable" disclosure).
+Advisory-context and rollback-readiness/evidence auto-generation remain
+open, LOW-risk, S-M-effort candidates. Runtime Enforcement consumption
+remains trust-blocked — no execution-attempt boundary exists anywhere to
+gate. Recommended next phase: **Plan B — Permission Broker rollback
+default-path gap closure** (completes 100% broker coverage across every
+root-mutating production command), with Plan A (runtime preflight
+disclosure + rollback readiness/evidence auto-generation) as a
+lower-risk alternative/companion, and Plan C (Repository Intelligence +
+Advisory-Context wiring, `v0.5.0`-scale) as the larger connected-
+intelligence step. No integration was implemented; no priority was
+selected unilaterally — **human priority selection required.** Runtime
+unchanged (`Observed`/`observe`/`unavailable`). Article and
+`~/repos/pcae-deepseek-research` untouched. See
+`docs/PHASE_149O_20L_7O_3E_POST_V0_4_DEFERRED_CAPABILITY_CONSUMPTION_PRIORITY_REASSESSMENT.md`
+for full evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3D — PCAE v0.4.0 Public Release. **PUBLICLY
 RELEASED.** Explicit human publication authorization was obtained before
 any irreversible action. Independently re-verified the frozen release
