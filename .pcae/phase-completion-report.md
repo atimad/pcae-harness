@@ -1,4 +1,4 @@
-# Phase 149O.20L.7O.3G Complete — Post-Rollback Permission Integration Release and Next-Capability Decision
+# Phase 149O.20L.7O.3H Complete — PCAE v0.4.1 Release Hardening
 
 **Verdict: VERIFICATION-ONLY COMPLETE. ZERO BLOCKING FINDINGS.**
 Independently re-derived, without trusting `149O.20L.7O.3F`'s own
