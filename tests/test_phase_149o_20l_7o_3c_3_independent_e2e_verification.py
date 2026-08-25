@@ -19,14 +19,20 @@ suite are load-bearing for the phase verdict:
 
  - ``test_corrupted_unrelated_session_file_crashes_auto_publish`` /
    ``test_run_phase_complete_call_site_has_no_exception_guard_around_auto_publish_block``
-   reproduce a BLOCKING defect: an unrelated, pre-existing corrupted
-   session file anywhere in the Interactive Workflow session store causes
-   an uncaught ``SessionStoreCorruptError`` (an ``InteractiveWorkflowError``
-   subclass, a *different* exception hierarchy than the
-   ``ApplicationServiceError`` hierarchy ``auto_publish_confirmed_session``
-   actually catches) to propagate out of ``auto_publish_confirmed_session``
-   and crash ``pcae phase complete`` for a phase that has nothing to do
-   with Interactive Workflow.
+   originally reproduced a BLOCKING defect: an unrelated, pre-existing
+   corrupted session file anywhere in the Interactive Workflow session
+   store caused an uncaught ``SessionStoreCorruptError`` (an
+   ``InteractiveWorkflowError`` subclass, a *different* exception
+   hierarchy than the ``ApplicationServiceError`` hierarchy
+   ``auto_publish_confirmed_session`` actually catches) to propagate out
+   of ``auto_publish_confirmed_session`` and crash ``pcae phase complete``
+   for a phase that has nothing to do with Interactive Workflow. REPAIRED
+   at Phase 149O.20L.7O.3C.3.1 (independent verification pending, finding
+   ``B-149O.20L.7O.3C.3-1``) -- the first test's assertions were updated
+   in place to confirm the corruption is now surfaced through the
+   existing ``ApplicationServiceError``/``AutoPublicationOutcome``
+   vocabulary instead of escaping as a raw, untranslated exception; see
+   docs/PHASE_149O_20L_7O_3C_3_1_AUTO_PUBLISH_CORRUPT_STORE_FAIL_CLOSED_REPAIR.md.
  - ``test_duplicate_subject_ref_sessions_resolved_by_latest_timestamp_not_fail_closed``
    independently reproduces a disclosed, NON-BLOCKING limitation: when
    two sessions share the same ``subject_ref``,
@@ -56,6 +62,7 @@ from pcae.interactive_workflow.application.errors import (
 from pcae.interactive_workflow.application.publication_service import PublicationApplicationService
 from pcae.interactive_workflow.application.session_service import SessionApplicationService
 from pcae.commands.governance_auto_publication import (
+    STATUS_APPLICATION_ERROR,
     STATUS_AWAITING_HUMAN_DECISION,
     STATUS_HUMAN_DEFERRED,
     STATUS_HUMAN_REJECTED,
@@ -65,7 +72,6 @@ from pcae.commands.governance_auto_publication import (
     STATUS_READINESS_UNAVAILABLE,
     auto_publish_confirmed_session,
 )
-from pcae.interactive_workflow.errors import InteractiveWorkflowError, SessionStoreCorruptError
 from pcae.interactive_workflow.models.session import SessionState
 from pcae.interactive_workflow.persistence.filesystem_pending_readiness_store import (
     FilesystemPendingReadinessStore,
@@ -507,32 +513,47 @@ def test_duplicate_subject_ref_sessions_resolved_by_latest_timestamp_not_fail_cl
 
 
 def test_corrupted_unrelated_session_file_crashes_auto_publish(harness: FreshHarness):
-    """BLOCKING finding, independently reproduced: a session file
-    unrelated to the requested subject_ref, corrupted on disk (invalid
-    JSON -- the same failure mode a partial write, disk fault, or manual
-    edit could produce), causes `find_session_by_subject_ref` to raise
+    """BLOCKING finding, independently reproduced at Phase 149O.20L.7O.3C.3:
+    a session file unrelated to the requested subject_ref, corrupted on
+    disk (invalid JSON -- the same failure mode a partial write, disk
+    fault, or manual edit could produce), used to cause
+    `find_session_by_subject_ref` to raise an uncaught
     `SessionStoreCorruptError` while scanning ALL persisted sessions
-    (`list_session_ids()` + `load_session()` for each). This exception is
-    NOT an `ApplicationServiceError` -- it is an `InteractiveWorkflowError`
-    from a sibling hierarchy (`pcae.interactive_workflow.errors`) that
-    `auto_publish_confirmed_session`'s except clauses do not catch."""
+    (`list_session_ids()` + `load_session()` for each) -- an
+    `InteractiveWorkflowError`, a sibling hierarchy to the
+    `ApplicationServiceError` family `auto_publish_confirmed_session`'s
+    except clauses actually caught, so the crash propagated all the way
+    out of `pcae phase complete`.
+
+    REPAIRED at Phase 149O.20L.7O.3C.3.1 (independent verification
+    pending -- see
+    docs/PHASE_149O_20L_7O_3C_3_1_AUTO_PUBLISH_CORRUPT_STORE_FAIL_CLOSED_REPAIR.md):
+    this test's assertions are updated in place (not weakened -- the
+    prior "raises uncaught `SessionStoreCorruptError`" expectation *was*
+    the documented defect; asserting it still holds would mean the
+    repair failed) to confirm the corruption no longer escapes as a raw,
+    untranslated domain exception at either call boundary, and is instead
+    surfaced through the existing, closed `ApplicationServiceError` /
+    `AutoPublicationOutcome` vocabulary this suite's other tests already
+    exercise."""
     unrelated = harness.session_in_state(SessionState.CREATED, subject_ref="totally-unrelated-subject")
     corrupt_path = harness.tmp_path / "decision-sessions" / f"{unrelated.session_id}.json"
     assert corrupt_path.exists()
     corrupt_path.write_text("{not valid json!!!", encoding="utf-8")
 
-    with pytest.raises(SessionStoreCorruptError):
+    with pytest.raises(ApplicationServiceError):
         harness.session_service.find_session_by_subject_ref("some-other-active-task-with-no-relation")
 
-    # And unguarded at the level `auto_publish_confirmed_session` itself
-    # calls it -- this is NOT converted to `STATUS_APPLICATION_ERROR`,
-    # it propagates all the way out.
-    with pytest.raises(SessionStoreCorruptError):
-        auto_publish_confirmed_session(
-            harness.context,
-            subject_ref="some-other-active-task-with-no-relation",
-            operator_id="op-1",
-        )
+    # No longer unguarded at the `auto_publish_confirmed_session` level:
+    # converted to a disclosed `STATUS_APPLICATION_ERROR` outcome, never
+    # propagates an exception.
+    outcome = auto_publish_confirmed_session(
+        harness.context,
+        subject_ref="some-other-active-task-with-no-relation",
+        operator_id="op-1",
+    )
+    assert outcome.status == STATUS_APPLICATION_ERROR
+    assert outcome.diagnostic
 
 
 def test_run_phase_complete_call_site_has_no_exception_guard_around_auto_publish_block():

@@ -198,7 +198,23 @@ def auto_publish_confirmed_session(
     advance whether a governance decision applies to it.
     """
 
-    session = find_confirmed_session(context.session_service, subject_ref)
+    try:
+        session = find_confirmed_session(context.session_service, subject_ref)
+    except ApplicationServiceError as exc:
+        # Phase 149O.20L.7O.3C.3.1: a corrupt/unreadable session record
+        # anywhere in the store (translated by
+        # ``SessionApplicationService.find_session_by_subject_ref`` into
+        # this already-existing application-error taxonomy) must not
+        # crash this caller -- surfaced as `application_error`, the same
+        # closed status the publish path below already uses for every
+        # other ``ApplicationServiceError``, never silently treated as
+        # `no_session_bound` (that would launder possibly-relevant
+        # corruption into "no governance state exists").
+        return AutoPublicationOutcome(
+            status=STATUS_APPLICATION_ERROR,
+            subject_ref=subject_ref,
+            diagnostic=str(exc),
+        )
     if session is None:
         return AutoPublicationOutcome(status=STATUS_NO_SESSION, subject_ref=subject_ref)
 

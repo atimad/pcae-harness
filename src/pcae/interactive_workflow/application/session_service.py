@@ -56,6 +56,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Optional, Tuple
 
 from pcae.interactive_workflow.application.errors import (
+    ApplicationServiceError,
     InvalidSessionIdentifierApplicationError,
     ReadinessSessionNotConfirmedApplicationError,
     SessionAlreadyExistsApplicationError,
@@ -364,20 +365,55 @@ class SessionApplicationService:
         (``--subject-ref`` remains free text at ``decision-session
         create``; this method does not prevent duplicates), the most
         recently created one is returned -- a disclosed limitation, not a
-        silently-assumed impossibility."""
+        silently-assumed impossibility (carried forward unrepaired by
+        Phase 149O.20L.7O.3C.3.1 as a separate, NON-BLOCKING finding).
+
+        Phase 149O.20L.7O.3C.3.1: a corrupt/unreadable record encountered
+        during the scan (``SessionStoreCorruptError``/
+        ``PersistenceUnavailableError``) no longer aborts the scan with
+        an uncaught domain-layer exception (the BLOCKING isolation defect
+        3C.3 reproduced -- an unrelated corrupt session file must not
+        crash an unrelated caller such as ``pcae phase complete``). The
+        scan still visits every remaining id (order-independent,
+        deterministic result regardless of which id is corrupt or how
+        many are): if a genuinely readable match for ``subject_ref`` is
+        found, it is returned unconditionally -- a real, live match
+        proves the corrupt record(s) elsewhere in the store are not the
+        one governing this subject. Only when the scan completes with
+        *no* readable match *and* at least one record could not be read
+        does this method raise the translated application-error
+        exception (``SessionCorruptApplicationError``/
+        ``SessionPersistenceUnavailableApplicationError``) instead of
+        returning ``None`` -- this is the fail-closed half of the repair:
+        an unreadable record that might have been the one governing this
+        subject must never be silently laundered into "no session
+        bound"."""
 
         candidates: list[Session] = []
+        corruption: Optional[ApplicationServiceError] = None
         for session_id in self._coordinator.list_session_ids():
             try:
                 session = self._coordinator.load_session(session_id)
             except SessionNotFoundError:
                 continue
+            except SessionStoreCorruptError as exc:
+                if corruption is None:
+                    corruption = SessionCorruptApplicationError(str(exc), session_id=session_id)
+                continue
+            except PersistenceUnavailableError as exc:
+                if corruption is None:
+                    corruption = SessionPersistenceUnavailableApplicationError(
+                        str(exc), session_id=session_id
+                    )
+                continue
             if session.subject_ref == subject_ref:
                 candidates.append(session)
-        if not candidates:
-            return None
-        candidates.sort(key=lambda s: s.created_at)
-        return candidates[-1]
+        if candidates:
+            candidates.sort(key=lambda s: s.created_at)
+            return candidates[-1]
+        if corruption is not None:
+            raise corruption
+        return None
 
     def persist_session(self, session: Session) -> None:
         """Persist an existing, already-validated session record."""
