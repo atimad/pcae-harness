@@ -15,7 +15,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (pre-existing historical tasks/DONE.md sync-debt findings, repository-maintainer-only, unrelated to this phase; unchanged from phase entry)",
-    "pcae_push_check": "pushed",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "Observed / observe / unavailable -- unchanged, re-verified at phase entry and phase close",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
