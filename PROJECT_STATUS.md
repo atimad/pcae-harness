@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3F.1 — Independent End-to-End Rollback
+Permission-Boundary Verification. **VERIFICATION-ONLY — COMPLETE. ZERO
+BLOCKING FINDINGS.** Independently re-derived, without trusting 3F's
+own claims, tests, or classifications, whether 3F's reported
+integration genuinely closed the rollback default-path Permission
+Broker gap. Fresh source reconstruction at the pre-3F commit
+(`97bb9cda`) confirmed the historical default (non-`HATP_MANDATORY`)
+dispatch path truly had zero Permission Broker evaluation; fresh
+reconstruction of the current path confirmed the new gate in
+`build_rollback_execution` sits immediately before the restore/remove
+mutation loop, with no production-reachable bypass (single call site,
+`commands/agent.py::run_rollback` reached only via
+`pcae rollback --per-id`). A new, independent 19-test suite (imports
+nothing from 3F's own tests) verified ALLOW, DENY (zero mutation),
+broker-exception and malformed-result fail-closed behavior, dry-run
+and `HATP_MANDATORY`-branch non-invocation of the new adapter (spy
+assertions), runtime capability unchanged
+(Observed/observe/unavailable) across an ALLOW rollback, DENY-retry
+determinism, and operation-identity distinctness from push. Verified
+`ACTION_ROLLBACK`+`EXECUTION_CLASS_MUTATION` is a precedented (not
+novel) pairing that correctly avoids inventing a POL-004
+`HUMAN_REVIEW` requirement, and that `COMP-008`/
+`build_rollback_execution` are legitimately-scoped pre-existing
+identities, not aliasing. Audited every production consumer of
+`RollbackExecutionRecord.status` and confirmed none would mishandle
+the new `aborted_permission_denied` terminal status. Ran all existing
+relevant regression suites (43 + 192 + 983 passed, 2 pre-existing
+unrelated failures independently reconfirmed identical at the pre-3F
+commit) and a full two-sided Fast Green A/B (current vs. an isolated
+pre-3F worktree): exactly 1 newly-failing node (an expected
+"function body unchanged since entry" tripwire necessarily triggered
+by 3F's legitimate modification) and 1 newly-passing node (a
+timing-sensitive `HEAD==origin/main` check) — zero attributable
+functional regressions. No `src/pcae/` file was modified during this
+phase. Recommends **149O.20L.7O.3G — Post-Rollback Permission
+Integration Release and Next-Capability Decision** next, not begun.
+Runtime unchanged. Article and `~/repos/pcae-deepseek-research`
+untouched. See
+`docs/PHASE_149O_20L_7O_3F_1_INDEPENDENT_END_TO_END_ROLLBACK_PERMISSION_BOUNDARY_VERIFICATION.md`
+for full evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3F — Permission Broker Rollback Default-Path
 Consumption Integration. **BOUNDED SOURCE-MODIFYING INTEGRATION —
 COMPLETE.** Human-selected Plan B from 3E. Closed the sole remaining
