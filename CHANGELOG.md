@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3C.3.2: Auto-Publish Corrupt-Store Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.2); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.3.2** — Auto-Publish Corrupt-Store Repair
   Independent Verification: independently closes finding
   `B-149O.20L.7O.3C.3-1`. Reproduced the historical crash for real from

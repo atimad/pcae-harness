@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.3C.3.2: Auto-Publish Corrupt-Store Repair Independent Verification (20260825-1809-phase-149o-20l-7o-3c-3-2-auto-publish-corrupt-store-repair-independent-verification)
+- Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.1) (20260825-1732-idle-awaiting-next-governed-phase-post-149o-20l-7o-3c-3-1)
 - Phase 149O.20L.7O.3C.3.1: Auto-Publish Corrupt-Store Fail-Closed Repair (20260825-1726-phase-149o-20l-7o-3c-3-1-auto-publish-corrupt-store-fail-closed-repair)
 - Idle: awaiting next governed phase (post-149O.20L.7O.3C.3) (20260825-1652-idle-awaiting-next-governed-phase-post-149o-20l-7o-3c-3)
 - Phase 149O.20L.7O.3C.3: Independent End-to-End Capability Consumption Verification (20260825-1608-phase-149o-20l-7o-3c-3-independent-end-to-end-capability-consumption-verification)
