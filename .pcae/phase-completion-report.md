@@ -1,90 +1,92 @@
-# Phase 149O.20L.7O.3C.4 Complete — Connected Capability Release Scope, Version, and Reproducible-Build Hardening
+# Phase 149O.20L.7O.3D Complete — PCAE v0.4.0 Public Release
 
-**Verdict: PCAE v0.4.0 RELEASE CANDIDATE PREPARED (NOT PUBLISHED).**
-Froze the independently-verified connected-capability scope, derived
-v0.4.0 from the real post-`v0.3.1` delta (unconditional automatic
-cross-capability orchestration at `pcae phase complete`, not a
-patch-level fix), found and fixed a genuine sdist-packaging
-contamination defect (unanchored `include` globs sweeping in a local
-`.claude/worktrees/<agent-id>/` directory), pinned the build backend to
-`hatchling==1.32.0`, and verified byte-identical wheel/sdist artifacts
-across two independent clean-clone builds. Both artifacts install
-cleanly and the installed CLI's golden path and governance gates behave
-correctly. Zero attributable Fast Green regressions. Runtime unchanged
-(`Observed`/`observe`/`unavailable`). No tag, GitHub Release, or PyPI
-publication was created.
+**Verdict: PCAE v0.4.0 PUBLICLY RELEASED.** Explicit human publication
+authorization was obtained before any irreversible action. Independently
+re-verified the frozen 3C.4 release candidate rather than trusting its
+summary — re-derived candidate identity, version, `v0.3.1`/`v0.3.0`
+isolation, and build hashes from primary sources; independently resolved
+a real arithmetic/categorization error in 3C.4's own Fast Green count.
+Created and pushed annotated tag `v0.4.0` bound exactly to the candidate
+commit, published the GitHub Release, uploaded hash-verified artifacts,
+and independently confirmed public asset byte-identity. Ran the Plan
+B+/corrupt-store/Permission Broker behavioral suite against the public
+wheel. PyPI confirmed not published. Runtime unchanged
+(`Observed`/`observe`/`unavailable`).
 
 ## Summary
 
-**Version:** `v0.4.0`, selected because `pcae phase complete` now
-performs unconditional automatic cross-capability orchestration
-(auto-detect a `Confirmed` Interactive Workflow session → CHGR
-consumption → Permission Broker gate → Publication Execution Ownership)
-that did not exist at `v0.3.1` — a new, backward-compatible product
-capability, not a patch-level fix.
+**Release candidate:** `ea3f731ef50ea16985fd4a0562f0c091bb8109b2`
+(3C.4's own phase-owning commit). `git diff` from candidate to
+phase-entry `HEAD` touched only lifecycle/reporting files — zero drift
+in `src/pcae`/`pyproject.toml`.
 
-**Reproducible-build fix:** a real `python -m build` run from the
-working tree produced an sdist containing a nested
-`.claude/worktrees/agent-a792203d34f32ceda/` checkout (its own
-`src/pcae`, `README.md`, `LICENSE`, `pyproject.toml`), because
-`[tool.hatch.build.targets.sdist].include` patterns were unanchored and
-matched those same path segments at any depth. Fixed by root-anchoring
-the patterns (leading `/`); re-verified with a second build showing zero
-contamination. `[build-system].requires` now pins `hatchling==1.32.0`.
+**Fast Green correction (Sec 5 of the phase document):** 3C.4's prose
+breakdown ("344+2+1=347") did not match its own stated 345-nodeid total.
+Two independent full re-runs at unchanged `HEAD` gave **335 failed /
+8692 passed / 5 skipped / 9 errors** and **336 failed / 8691 passed / 5
+skipped / 9 errors** (±1 known `test_head_equals_origin_main`-style
+timing flake). Direct nodeid inspection (not prose) found the failing
+set spans a much broader pre-existing self-referential "no drift since
+my own historical candidate SHA" cluster than 3C.4 characterized —
+`deploymentbinding`, `dell_redeployment`, `repositoryidentity`, `hmrc`,
+`shell_gate`, plus HATP/HMIC/HBDC — but **zero nodeids reference
+`governance_auto_publication`, `publication_permission_gate`,
+`mutation_permission`, or `phase.py`'s new auto-publish call site**.
+**Attributable regressions = 0**, confirmed on stronger evidence; 3C.4's
+own report was not edited.
 
-**Reproducibility verification:** two independent clean-clone builds
-(`/tmp/pcae_clean_a`, `/tmp/pcae_clean_b`), each in its own disposable
-venv created and destroyed independently, pinned to the frozen candidate
-commit:
+**Build reproducibility (re-verified):** two additional independent
+clean-clone builds pinned to the candidate commit (one pre-authorization
+verification pass, one immediately before upload) both reproduced:
 
 ```text
-wheel:  pcae_harness-0.4.0-py3-none-any.whl
+wheel:  pcae_harness-0.4.0-py3-none-any.whl (2,349,213 bytes)
         sha256: 8125d21dc5093892d7303ccbd416cfed91429798ad2d3f17e1512d24b2c3ea00
-sdist:  pcae_harness-0.4.0.tar.gz
+sdist:  pcae_harness-0.4.0.tar.gz (2,051,181 bytes)
         sha256: 13492127f261e0460ba943598dca010881c672e2c2602348697050f763960f61
 ```
 
-Both hashes matched byte-for-byte across build A and build B.
+Byte-identical to the canonical 3C.4 record across all 4 independent
+builds now performed.
 
-**Installed verification:** both the wheel and sdist install cleanly
-into disposable venvs (`pcae --version`/`import pcae` → `0.4.0`, `pcae
---help` works, non-editable site-packages install confirmed). The
-installed wheel's CLI golden path (`pcae init` → `session bootstrap` →
-`task new` → `intake from-files`) runs correctly, including a
-correctly-fail-closed rejection of an out-of-scope file path. `pcae
-phase complete` from the installed wheel correctly rejects an
-intentionally-incomplete report with a clean, structured governance-gate
-rejection (no crash). `pcae runtime inspect` from the installed wheel
+**Tag:** annotated `v0.4.0` created bound explicitly to the candidate
+commit (verified via `git rev-parse v0.4.0^{commit}` before push), then
+pushed with no force. Remote peeled ref (`git ls-remote --tags origin
+'refs/tags/v0.4.0^{}'`) confirmed identical. **local tag == remote tag
+== release_candidate_commit == tagged_commit.**
+
+**GitHub Release:** `https://github.com/atimad/pcae-harness/releases/tag/v0.4.0`,
+not draft, not prerelease, marked Latest, `targetCommitish` verified.
+Assets uploaded with hashes matching the frozen record exactly; GitHub's
+own reported digests matched; **independently downloaded both public
+assets and re-hashed them — byte-identical to the release-of-record.**
+
+**Post-publication smoke (public artifacts only, no local source):**
+public wheel and sdist both install cleanly in fresh disposable venvs,
+report `0.4.0`, CLI functional, golden path passes. The 51-test 3C.3/
+3C.3.2 independent-verification suite (Plan B+ auto-publish, corrupt-
+store fail-closed, Permission Broker no-bypass) was run directly against
+the public wheel's installed code: **43 passed, 8 failed** — the 8
+failures are AST/source-scan tests requiring a repo checkout
+(structurally inapplicable to an installed-artifact-only environment),
+not behavioral regressions. `pcae runtime inspect` from the public wheel
 confirms `Observed`/`observe`/`unavailable`, unchanged.
 
-**Regression:** a focused suite (Plan B+/3C.2–3C.3.2/Permission
-Broker/CHGR/phase-report/packaging, 1563 tests) found 2 pre-existing,
-environment-dependent failures (`test_143e_wheel_contains_all_six_chgr_record_schemas`,
-`test_143e_installed_wheel_offline_registry_resolves_in_isolated_venv`)
-— both invoke `python -m build` against the ambient global Python,
-which lacks the `build` package installed; independently reconfirmed
-identical via `git stash` A/B at the committed candidate commit.
+**PyPI:** confirmed **NOT PUBLISHED** via a direct `404` from
+`pypi.org/pypi/pcae-harness/json` (not assumed).
 
-**Fast Green:** phase-entry `HEAD`: 335 failed / 8692 passed / 5 skipped
-/ 9 errors. Committed candidate commit: 336 failed / 8691 passed / 5
-skipped / 9 errors — exactly **one** attributable nodeid
-(`test_head_equals_origin_main`, a pre-push local-ahead-of-origin
-self-check that resolves the instant this phase is pushed). Deselecting
-the full 345-nodeid failing/erroring set at the candidate commit: **0
-failed, 8691 passed, 5 skipped.** Zero attributable regressions.
+**Isolation:** `v0.3.1`/`v0.3.0` GitHub Releases and tags untouched. The
+article track remains stopped; `~/repos/pcae-deepseek-research` was not
+inspected, modified, or imported from.
 
-**Runtime:** `Observed`/`observe`/`unavailable`, unchanged, reconfirmed
-from source and from the installed release-candidate wheel.
+**BLOCKING: 0. MUST-FIX: 0.**
 
-**Release:** `v0.4.0` remains **NOT RELEASED**. No tag, GitHub Release,
-artifact upload, or PyPI publication occurred. `v0.3.1`/`v0.3.0`
-untouched. The article track remains stopped;
-`~/repos/pcae-deepseek-research` was not inspected, modified, or
-imported from.
+**Next strategic direction (not started):** which deferred mature PCAE
+capability becomes production-consumed next — candidates: Repository
+Intelligence internal consumption, Runtime/plugin capability-aware
+orchestration, remaining Permission Broker coverage, Runtime Enforcement
+consumption, rollback readiness/evidence integration, Advisory context
+consumption.
 
-**BLOCKING: 0. MUST-FIX: 0.** Recommended next phase:
-`149O.20L.7O.3D — PCAE v0.4.0 Public Release`, gated on explicit human
-authorization before any irreversible publication step.
-
-See `docs/PHASE_149O_20L_7O_3C_4_CONNECTED_CAPABILITY_RELEASE_SCOPE_VERSION_AND_REPRODUCIBLE_BUILD_HARDENING.md`
-for the full evidence trail, delta table, and publication checklist.
+See `docs/PHASE_149O_20L_7O_3D_PCAE_V0_4_0_PUBLIC_RELEASE.md` for the
+full evidence trail.
