@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.20L.7O.3B) (20260825-0944-idle-awaiting-next-governed-phase-post-149o-20l-7o-3b)
 - Phase 149O.20L.7O.3B: Selected Existing Capability Verification and Product Exposure (20260825-0930-phase-149o-20l-7o-3b-selected-existing-capability-verification-and-product-exposure)
 - Phase 149O.20L.7O.3A: Existing Capability Confirmation, Integration Gap, and Quick-Release Audit (20260825-0624-phase-149o-20l-7o-3a-existing-capability-confirmation-integration-gap-and-quick-release-audit)
 - Idle: awaiting next governed phase (post-149O.20L.7O.2Z.1) (20260825-0601-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z-1)
