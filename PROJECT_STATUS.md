@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3C.3 — Independent End-to-End Capability Consumption
+Verification. **VERIFICATION COMPLETE — ONE BLOCKING FINDING, NOT
+REPAIRED THIS PHASE.** Independently re-derived (not trusted) 3C.2's
+Plan B+ batch from current source: direct diff/source reading, live
+execution of the real production service objects (no mocks), a fresh
+22-test suite with its own fixtures (imports nothing from 3C.2's own
+tests), and repository-wide `git grep`/AST-import re-scans of every
+"single call site" / "no bypass" / "no self-CLI" / "zero architecture
+warnings" claim. **Confirmed:** `pcae phase complete` is the real, sole,
+unconditional entry point; the commands-zone architecture-policy
+placement is genuinely policy-compliant (zero dependency warnings from
+directly re-running the actual AST scanner); Permission Broker
+ALLOW/DENY/failure paths behave correctly against real policy (POL-001)
+and fail closed with no unbrokered fallback; no production caller
+bypasses the gate; no self-CLI subprocess exists; human authority is
+preserved for all nine non-`Confirmed` session states; Repository
+Intelligence's deferral is correct with no hidden integration; the
+carried-forward `rollback_approval_evidence.py` ungated path remains
+dead code. **New, independently-found BLOCKING defect (undisclosed by
+3C.2):** `auto_publish_confirmed_session`'s exception handling only
+catches the `ApplicationServiceError` hierarchy, but the session-lookup
+scan it runs first can raise `SessionStoreCorruptError`/
+`PersistenceUnavailableError` — a *different*, uncaught hierarchy
+(`InteractiveWorkflowError`) — for **any** corrupted/unreadable session
+file anywhere in the store, even one unrelated to the phase being
+completed; `run_phase_complete` wraps the call in no try/except at all,
+so this crashes `pcae phase complete` for unrelated phases. Reproduced
+twice (a standalone REPL run and a dedicated regression test). A second,
+narrower NON-BLOCKING finding: duplicate-`subject_ref` sessions resolve
+by latest-`created_at` rather than failing closed (a disclosed
+limitation, independently reproduced with a concrete consequence). Per
+governance policy, one unresolved Blocking finding means release-scope
+work does not proceed; recommended next phase is a narrowly-scoped
+repair (149O.20L.7O.3C.3.1), not 3C.4. No production source was modified
+this phase (verification-only, as instructed). Runtime unchanged
+(`Observed`/`observe`/`unavailable`). Release remains **STOPPED**.
+Article remains stopped. See
+`docs/PHASE_149O_20L_7O_3C_3_INDEPENDENT_END_TO_END_CAPABILITY_CONSUMPTION_VERIFICATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3C.2 — Governed Capability Consumption Integration
 (Plan B+). **IMPLEMENTED — first source-modifying phase in the 3C
 thread.** Human-selected Plan B+: Interactive Workflow auto-detect +

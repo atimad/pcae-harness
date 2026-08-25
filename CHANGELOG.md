@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3C.3** — Independent End-to-End Capability
+  Consumption Verification: independently re-derived (not trusted)
+  Phase 3C.2's Plan B+ governed-capability-consumption batch from
+  current source, via direct diff/source reading, live execution of the
+  real production service objects (no mocks), a fresh 22-test suite with
+  its own fixtures, and repository-wide static re-scans of every
+  non-bypass/no-self-CLI/architecture-policy claim. Confirmed: the real
+  production entry point, the architecture-policy correction, Permission
+  Broker ALLOW/DENY/fail-closed behavior, no-bypass, no self-CLI, human
+  authority preservation across all nine non-`Confirmed` session states,
+  and Repository Intelligence's deferral. Found one previously
+  undisclosed **BLOCKING** defect: `auto_publish_confirmed_session`
+  catches only the `ApplicationServiceError` hierarchy, but its
+  session-lookup scan can raise `SessionStoreCorruptError`/
+  `PersistenceUnavailableError` (a different, uncaught hierarchy) for
+  any corrupted/unreadable session file anywhere in the store — even one
+  unrelated to the phase being completed — and `run_phase_complete` has
+  no exception guard around the call, so this crashes `pcae phase
+  complete` for unrelated phases. Reproduced independently twice. Also
+  found one NON-BLOCKING finding: duplicate-`subject_ref` sessions
+  resolve by latest-`created_at` rather than failing closed. No
+  production source modified (verification-only). Recommends a narrow
+  repair phase (149O.20L.7O.3C.3.1) before any release-scope work.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3C.2) to Phase 149O.20L.7O.3C.3: Independent End-to-End Capability Consumption Verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3C.2: Governed Capability Consumption Integration to Idle: awaiting next governed phase (post-149O.20L.7O.3C.2); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.2** — Governed Capability Consumption
   Integration (Plan B+): Interactive Workflow auto-detect + route,
