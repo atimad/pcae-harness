@@ -1,115 +1,112 @@
-# Phase 149O.20L.7O.3C.3 Complete — Independent End-to-End Capability Consumption Verification
+# Phase 149O.20L.7O.3C.3.1 Complete — Auto-Publish Corrupt-Store Fail-Closed Repair
 
-**Verdict: VERIFICATION COMPLETE — ONE BLOCKING FINDING, NOT REPAIRED THIS
-PHASE. PLAN B+ CAPABILITY CONSUMPTION: PARTIALLY INDEPENDENTLY VERIFIED.
-MOST OF PHASE 3C.2'S CLAIMS INDEPENDENTLY CONFIRMED TRUE (REAL ENTRY
-POINT, ARCHITECTURE-POLICY CORRECTION, PERMISSION BROKER ALLOW/DENY/
-FAIL-CLOSED, NO-BYPASS, NO SELF-CLI, HUMAN AUTHORITY PRESERVATION, RI
-DEFERRAL). ONE PREVIOUSLY UNDISCLOSED BLOCKING DEFECT FOUND: AN UNCAUGHT
-EXCEPTION IN `auto_publish_confirmed_session` CAN CRASH `pcae phase
-complete` FOR UNRELATED PHASES WHEN ANY UNRELATED SESSION FILE IS
-CORRUPT. NO PRODUCTION SOURCE MODIFIED (VERIFICATION-ONLY). RELEASE-SCOPE
-WORK DOES NOT PROCEED UNTIL THIS IS REPAIRED. RUNTIME: Observed / observe
-/ unavailable. RELEASE: STOPPED.**
+**Verdict: AUTO-PUBLISH CORRUPT-STORE DEFECT REPAIRED — INDEPENDENT
+VERIFICATION PENDING — NOT CLOSED. UNRELATED CORRUPT SESSION NO LONGER
+CRASHES `pcae phase complete`. RELEVANT CORRUPT SESSION FAILS CLOSED
+(`application_error`, no session fabricated). PLAN B+ HAPPY PATH, HUMAN
+AUTHORITY, CHGR UNIQUENESS, AND PERMISSION BROKER COVERAGE ALL PRESERVED.
+DUPLICATE-`subject_ref` AMBIGUITY EXPLICITLY NOT REPAIRED, CARRIED
+FORWARD UNCHANGED. RUNTIME: Observed / observe / unavailable. RELEASE:
+BLOCKED PENDING INDEPENDENT REPAIR VERIFICATION (149O.20L.7O.3C.3.2).**
 
 ## Summary
 
-Independently re-derived (did not trust) Phase 3C.2's Plan B+
-governed-capability-consumption batch from current source, using direct
-diff/source reading, live execution of the real production service
-objects (no mocks), a fresh 22-test independent suite with its own
-fixtures (imports nothing from 3C.2's own tests), and repository-wide
-`git grep`/AST-import re-scans of every non-bypass/no-self-CLI/
-architecture-policy claim.
+Repairs BLOCKING finding `B-149O.20L.7O.3C.3-1`, independently found by
+Phase 149O.20L.7O.3C.3: an unrelated, corrupt/unreadable Interactive
+Workflow session file anywhere under `.pcae/decision-sessions/` crashed
+`pcae phase complete` with an uncaught `SessionStoreCorruptError`/
+`PersistenceUnavailableError`, for phases that have nothing to do with
+Interactive Workflow.
 
-**Confirmed true, independently:** `pcae phase complete` is the real,
-sole, unconditional production entry point for the new auto-publish
-capability; the commands-zone architecture-policy correction is
-genuinely policy-compliant (zero dependency/parse warnings obtained by
-directly re-running the actual AST-based scanner against the 3C.2 diff,
-not by trusting that the pre-commit hook passed); Permission Broker
-ALLOW/DENY/failure paths behave correctly against the real
-`PermissionBroker`/`PolicyRegistry` (POL-001 "Missing Active Task") and
-fail closed with no unbrokered fallback on a broker exception; no
-production caller bypasses the gate (`git grep` across the entire
-`src/pcae` tree finds exactly one external caller of `hand_off()` and
-zero production callers of the ungated `resume_publication()`); no
-self-CLI subprocess exists in any of the new/changed integration
-modules; human authority is preserved for all nine non-`Confirmed`
-`SessionState` values (none can ever reach `published`); Repository
-Intelligence's deferral is correct with no hidden RI integration
-anywhere in the diff; the carried-forward `rollback_approval_evidence.py`
-ungated path to `PublicationCoordinator.execute()` remains dead code
-(zero production callers).
+**Historical crash reproduction:** independently confirmed at phase
+entry, before any production source was touched — via `git show` against
+the fixed phase-entry commit (`2fd7fe3a`), 3C.3's own existing
+regression test, and a fresh literal subprocess-level `pcae phase
+complete` E2E run once against unmodified source (exit code 1, full
+Python traceback ending in `SessionStoreCorruptError`).
 
-**New, previously undisclosed BLOCKING finding:**
-`auto_publish_confirmed_session`'s exception handling catches only the
-`ApplicationServiceError` hierarchy, but the session-lookup scan it runs
-first (`find_session_by_subject_ref`, a full scan of every persisted
-session) can raise `SessionStoreCorruptError`/`PersistenceUnavailableError`
-— members of a separate, sibling exception hierarchy
-(`InteractiveWorkflowError`) — for **any** corrupted or unreadable
-session file anywhere in the store, even one completely unrelated to the
-subject_ref being looked up. `run_phase_complete` wraps the call in no
-try/except at all, so this crashes `pcae phase complete` itself, for any
-phase with an active task, regardless of that phase's relationship to
-Interactive Workflow. Independently reproduced twice: a standalone
-Python REPL repro, and a dedicated, passing regression test
-(`test_corrupted_unrelated_session_file_crashes_auto_publish` /
-`test_run_phase_complete_call_site_has_no_exception_guard_around_auto_publish_block`).
-Not mentioned anywhere in Phase 3C.2's own report.
+**Root cause / exact call graph:** `pcae phase complete` →
+`run_phase_complete()` → `auto_publish_confirmed_session()` →
+`find_confirmed_session()` → `SessionApplicationService.
+find_session_by_subject_ref()`'s full-scan loop (`SessionCoordinator.
+list_session_ids()` + `load_session()` for every id) → `Filesystem
+SessionRepository.load()` raises `SessionStoreCorruptError` on malformed
+JSON. The scan loop caught only `SessionNotFoundError`;
+`auto_publish_confirmed_session`'s own `except` clauses covered only
+`ApplicationServiceError` (a sibling, unrelated hierarchy), and only
+around the later publish calls, not the lookup call itself.
+`run_phase_complete` wraps the whole block in no `try`/`except`.
 
-**Second, NON-BLOCKING finding:** `find_session_by_subject_ref` resolves
-duplicate-`subject_ref` sessions by latest-`created_at` rather than
-failing closed on the ambiguity — a limitation already disclosed in the
-module's own docstring, independently reproduced with a concrete (if
-narrow) consequence: an already-published session's CHGR can become
-unreachable via this lookup if a later, non-terminal-state session is
-created with the same `subject_ref`.
+**Chosen error-ownership layer:** `SessionApplicationService.
+find_session_by_subject_ref` (the method that owns the scan loop), with
+a consistent second layer at `auto_publish_confirmed_session` (which
+already owns exception-to-outcome translation for every other
+`ApplicationServiceError` on the publish path).
 
-**Fast Green — genuine three-way A/B, not a single trusted number:** a
-disposable `git worktree` at phase-entry HEAD (`9139a2bb`) reproduced
-Phase 3C.2's own documented baseline exactly (338 failed, 8689 passed, 9
-errors). The current tree (this phase's diff touches zero `src/pcae`
-files — tests/docs/task-lifecycle bookkeeping only) produced 339 failed,
-8688 passed, 9 errors, reproduced identically across two independent
-runs. A nodeid-level diff isolated the single delta to one expected,
-transient node (`test_head_equals_origin_main`, resolved by this phase's
-own push) plus one pre-existing-category order-dependent swap within
-`test_shell_gate.py::TestAuditPersistence` (net zero, unrelated to this
-phase's diff). Deselecting the union (349 nodeids) produced a fully
-clean run: 0 failed, 8687 passed, 0 errors.
+**Unrelated-vs-relevant corruption semantics:** the scan loop now
+catches and translates `SessionStoreCorruptError`/
+`PersistenceUnavailableError` per record, continues scanning
+deterministically (every id still visited regardless of which is
+corrupt), and (a) returns a genuinely readable match for `subject_ref`
+unconditionally if one exists — corruption elsewhere cannot mask a real
+match; (b) if no readable match exists and corruption was encountered,
+raises the translated application error instead of returning `None` —
+possibly-relevant corruption is never laundered into "no governance
+state exists". `auto_publish_confirmed_session` converts that exception
+into the existing `STATUS_APPLICATION_ERROR` outcome.
 
-No production source under `src/pcae` was modified this phase
-(verification-only, as instructed). Per governance policy, one
-unresolved Blocking finding means release-scope/release-hardening work
-does not proceed. This phase recommends a narrowly-scoped repair phase,
-**149O.20L.7O.3C.3.1 — Auto-Publish Corrupt-Store Fail-Closed Repair**,
-before any 3C.4 release-scope reassessment.
+**Production files changed (2):** `src/pcae/interactive_workflow/
+application/session_service.py`, `src/pcae/commands/
+governance_auto_publication.py`. `run_phase_complete` (`phase.py`) is
+unchanged.
 
-See `docs/PHASE_149O_20L_7O_3C_3_INDEPENDENT_END_TO_END_CAPABILITY_CONSUMPTION_VERIFICATION.md`
-for the full methodology, call graph, and finding-by-finding disposition.
+**Duplicate-`subject_ref` ambiguity** (3C.3's separate NON-BLOCKING
+finding): explicitly **not repaired**, per this phase's own narrow
+scope — carried forward unchanged and pinned by a regression test.
 
-## Governance Results
+**Tests:** 14 new (`tests/test_phase_149o_20l_7o_3c_3_1_auto_publish_
+corrupt_store_fail_closed_repair.py`), including a mandatory literal
+subprocess-level `pcae phase complete` E2E (before-repair crash
+reproduction and after-repair confirmation). 3C.3's own 22-test suite
+re-run with one test's assertions updated in place to match the now-
+repaired behavior (the prior "raises uncaught `SessionStoreCorruptError`"
+expectation *was* the documented defect); 21 of 22 unchanged.
 
-- **pcae_check:** passed
-- **pcae_doctor_task_memory:** warnings (pre-existing historical `tasks/DONE.md` sync-debt findings, repository-maintainer-only, unrelated to this phase; unchanged from phase entry)
-- **pcae_health:** healthy
-- **pcae_push_check:** nothing_to_push (pre-finalization baseline; re-verified clean at close)
-- **pcae_runtime_inspect:** execution_capability: unavailable, governance posture: non-executing — unchanged, reconfirmed at phase entry and phase close
-- **pcae_status_coherence:** coherent
-- **telegram_runtime:** configured
+**Regressions:** 3C.2's 117-test suite, session/publication lifecycle
+suites (284 tests), architecture/policy suites (180 tests), CHGR/
+Permission Broker/publication-coordinator/task-finish suites (585 tests,
+2 pre-existing unrelated `python -m build` wheel-packaging failures,
+independently reproduced identical against `git stash`-clean phase-entry
+source), the full `test_phase.py` (886 tests), `test_session.py` (145
+tests), and notification suites (56 tests) — all pass.
 
-## Test Results
+**Fast Green:** genuine A/B via disposable `git worktree` at phase-entry
+commit `2fd7fe3a`. Baseline: 335 failed/8692 passed/9 errors. With this
+phase's diff: 351 failed/8676 passed/9 errors. Every one of the 17
+newly-failing + 1 newly-passing nodeid-level deltas individually
+investigated: 16 are the pre-existing "working tree dirty" sentinel-test
+category (documented precedent in 3C.2's own report), the remaining 2
+(1 newly-failing + 1 newly-passing) are confirmed test-order/collection
+flakes (pass in isolation, touch no file this phase's diff modifies);
+two further transient-concurrency flakes surfaced during background
+commit activity, also confirmed passing in isolation. Deselecting the
+union (354 nodeids): **0 failed, 8673 passed, 5 skipped, 9 pre-existing
+errors.** Zero attributable regressions.
 
-- **bootstrap_session_reporting_tests:** not_applicable_this_phase (no source change to bootstrap/session reporting surfaces this phase)
-- **fast_green:** 8687 passed, 0 failed (deselecting the 347 pre-existing baseline-failing nodeids reconfirmed via a disposable git worktree at phase-entry HEAD 9139a2bb, plus 2 explained deltas — one expected transient HEAD-equals-origin-main node and one pre-existing-category order-dependent swap within test_shell_gate.py::TestAuditPersistence, net zero — 349 total deselections)
-- **report_notification_tests:** not_applicable_this_phase (no source change to report-notification production surfaces this phase)
+**Runtime:** `Observed`/`observe`/`unavailable`, unchanged before and
+after this phase's work.
 
-## No-Go Confirmations
+**Release:** v0.3.2 remains **NOT RELEASED**. No tag, GitHub Release,
+artifact upload, or PyPI publication occurred. No version changed. The
+unpinned-`hatchling` reproducible-build issue remains open, carried
+forward unmodified. The article track remains stopped;
+`~/repos/pcae-deepseek-research` was not inspected, modified, or
+imported from.
 
-No v0.3.2 tag, GitHub Release, artifact upload, or PyPI publication occurred; the SUPERSEDED/ON HOLD v0.3.2 candidate was not resumed, modified, or re-tagged. No version was changed. No build-system dependency (hatchling) was pinned or otherwise modified; the artifact-reproducibility finding remains carried forward unresolved. No production source under src/pcae was modified this phase. No Repository Intelligence consumption was implemented. No Runtime Enforcement, shell-gate enforcement/audit-surfacing, broad Advisory-context wiring, rollback-integration, HATP/HMIC/Class-B, CLTR authority cutover, runtime execution, Telegram inbound, or backend/model execution capability was touched — runtime remains Observed/observe/unavailable. No inspection occurred of the private ~/repos/pcae-deepseek-research repository. No reading, modification, or publication of the article occurred — it remains STOPPED. No raw git commit or git push was performed outside pcae-governed commands. No force push, --no-verify, or history rewrite occurred. This phase found one unresolved Blocking finding and does not recommend proceeding to release-scope/release-hardening work.
+**This phase does not close its own finding.** Recommended next phase:
+`149O.20L.7O.3C.3.2 — Auto-Publish Corrupt-Store Repair Independent
+Verification`.
 
-## Recommended Next Phase
-
-149O.20L.7O.3C.3.1 -- Auto-Publish Corrupt-Store Fail-Closed Repair. Narrowly scoped: wrap the auto_publish_confirmed_session(...) call site in run_phase_complete (or the exception handling inside auto_publish_confirmed_session/find_confirmed_session itself) so a corrupt/unreadable, unrelated session file degrades to a non-fatal, disclosed application_error-class outcome instead of crashing pcae phase complete for unrelated phases -- plus a literal subprocess-level pcae phase complete E2E test exercising this exact scenario. Secondary, optional scope: make find_session_by_subject_ref fail closed on a duplicate-subject_ref ambiguity rather than silently picking the latest-created session. Only after that repair phase passes should 149O.20L.7O.3C.4 (release scope/version reassessment) be considered.
+See `docs/PHASE_149O_20L_7O_3C_3_1_AUTO_PUBLISH_CORRUPT_STORE_FAIL_CLOSED_REPAIR.md`
+for the full call-graph/root-cause narrative and complete test/evidence
+inventory.
