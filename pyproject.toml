@@ -1,10 +1,16 @@
 [build-system]
-requires = ["hatchling"]
+# Phase 149O.20L.7O.3C.4: pinned to the exact backend version verified
+# (via two independent clean-clone builds) to produce byte-identical
+# wheel/sdist artifacts. An unpinned `hatchling` requirement let the
+# resolved backend version drift silently between build sessions/
+# environments, which the stopped 149O.20L.7O.3D attempt found produced
+# different artifact bytes across separate clean-clone builds.
+requires = ["hatchling==1.32.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "pcae-harness"
-version = "0.3.2"
+version = "0.4.0"
 description = "Persistent Constrained Agentic Engineering Harness CLI."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -51,12 +57,21 @@ packages = ["src/pcae"]
 # smoke test. The wheel (the artifact most installs actually use) was
 # already correctly scoped via `packages` above; this restricts the sdist
 # to the same essentials needed to build and run the package from source.
+#
+# Phase 149O.20L.7O.3C.4: the patterns above were unanchored, so
+# hatchling matched them at *any* depth, not just the repo root — a
+# nested `.claude/worktrees/<agent-id>/` directory (an ephemeral local
+# agent worktree, itself containing its own `src/pcae`, `README.md`,
+# `LICENSE`, `pyproject.toml`) was swept into the sdist because its
+# nested paths happened to match those same unanchored glob segments.
+# Leading `/` anchors each pattern to the sdist root so only the
+# top-level entries match.
 [tool.hatch.build.targets.sdist]
 include = [
-  "src/pcae",
-  "README.md",
-  "LICENSE",
-  "pyproject.toml",
+  "/src/pcae",
+  "/README.md",
+  "/LICENSE",
+  "/pyproject.toml",
 ]
 
 [tool.pytest.ini_options]

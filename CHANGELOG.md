@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3C.4** — Connected Capability Release Scope,
+  Version, and Reproducible-Build Hardening: prepared a **release
+  candidate — not published** — for **v0.4.0**. Froze the
+  independently-verified connected-capability scope (Interactive
+  Workflow auto-detect/route, CHGR automatic consumption, Publication
+  Execution Ownership auto-invocation, Permission Broker coverage/
+  no-bypass, corrupt-store fail-closed isolation) and derived v0.4.0
+  from the actual post-v0.3.1 delta (unconditional automatic
+  cross-capability orchestration at `pcae phase complete`, not a
+  patch-level fix). Found and fixed a real sdist packaging defect:
+  unanchored `[tool.hatch.build.targets.sdist].include` globs matched a
+  local `.claude/worktrees/<agent-id>/` directory at any depth,
+  contaminating the sdist; patterns are now root-anchored.
+  `[build-system].requires` pins `hatchling==1.32.0`, verified
+  byte-reproducible across two independent clean-clone builds.
+  `pyproject.toml`/`src/pcae/__init__.py` bumped `0.3.2` → `0.4.0`. New
+  `docs/RELEASE_NOTES_V0_4_0.md`. No tag, GitHub Release, or PyPI
+  publication created. Runtime unchanged
+  (`Observed`/`observe`/`unavailable`). Recommends
+  `149O.20L.7O.3D — PCAE v0.4.0 Public Release` next, gated on explicit
+  human authorization before any irreversible publication step.
 - Transitioned active task from Phase 149O.20L.7O.3C.3.2: Auto-Publish Corrupt-Store Repair Independent Verification to Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.2); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.3.2** — Auto-Publish Corrupt-Store Repair
   Independent Verification: independently closes finding

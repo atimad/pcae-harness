@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3C.4 — Connected Capability Release Scope, Version,
+and Reproducible-Build Hardening. **RELEASE CANDIDATE PREPARED — NOT
+PUBLISHED.** Froze the independently-verified connected-capability
+release scope (Interactive Workflow auto-detect/route, CHGR automatic
+consumption, Publication Execution Ownership auto-invocation, Permission
+Broker coverage/no-bypass, corrupt-store fail-closed isolation) and
+derived the semantic version from the actual post-`v0.3.1` production
+delta rather than assuming it: **v0.4.0**, because `pcae phase complete`
+now performs unconditional automatic cross-capability orchestration that
+did not exist at `v0.3.1` — a new backward-compatible capability, not a
+patch-level fix. Found and fixed a real sdist packaging defect:
+unanchored `[tool.hatch.build.targets.sdist].include` globs matched a
+local, gitignored `.claude/worktrees/<agent-id>/` directory at any path
+depth, contaminating the sdist with a nested unrelated checkout; patterns
+are now root-anchored. `[build-system].requires` now pins
+`hatchling==1.32.0`, verified byte-reproducible across two independent
+clean-clone builds. `pyproject.toml`/`src/pcae/__init__.py` bumped
+`0.3.2` → `0.4.0`. New `docs/RELEASE_NOTES_V0_4_0.md` distinguishes
+`EXPOSED` vs. `PRODUCTION-CONSUMED`/`AUTO-ORCHESTRATED` capability claims
+and restates the human-authority semantic walls verbatim. No tag,
+GitHub Release, or PyPI publication was created. Runtime unchanged
+(`Observed`/`observe`/`unavailable`). See
+`docs/PHASE_149O_20L_7O_3C_4_CONNECTED_CAPABILITY_RELEASE_SCOPE_VERSION_AND_REPRODUCIBLE_BUILD_HARDENING.md`
+for full evidence and the publication checklist. Recommended next phase:
+`149O.20L.7O.3D — PCAE v0.4.0 Public Release`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3C.3.2 — Auto-Publish Corrupt-Store Repair Independent
 Verification. **VERIFIED — CLOSED.** Independently re-derived (not
 trusted) 3C.3.1's repair of `B-149O.20L.7O.3C.3-1`: checked out the real
