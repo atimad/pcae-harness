@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3B — Selected Existing Capability Verification and
+Product Exposure. **COMPLETE.** Independently re-verified the four
+capabilities 3A selected for quick release, from a clean-built wheel and
+sdist installed against disposable repositories outside `pcae-harness`
+(no version change; both built as `0.3.1`, matching `HEAD`). Zero
+production source, CLI, contract, or packaging-configuration change made.
+`pcae runtime inspect` — CONFIRMED AND EXPOSED as a full product workflow
+(zero prerequisites, no side effects, works in any repository). Interactive
+Workflow/CHGR — CONFIRMED AND EXPOSED at full scope: the entire
+create→evidence→select→preview→confirm→readiness→`governance-record
+publish`→inspect/verify sequence was exercised end-to-end from the wheel
+install and produced a real, verifiable CHGR record, with authority
+distinctions (preview≠confirmation≠publication≠execution) preserved in
+documentation. Repository Intelligence — CONFIRMED AND EXPOSED but
+**scope-corrected**: independent verification found `snapshot generate`
+hardcodes `src/pcae/`, `tests/`, `schemas/repository_intelligence/` as
+required top-level paths (`snapshot_builder.py`), meaning it only
+functions against a `pcae-harness`-shaped checkout, not an arbitrary
+user's repository — documented as PCAE self-inspection tooling for
+contributors, not marketed as a general "inspect your repository"
+feature (differs from 3A's unqualified "INTEGRATE NOW" framing).
+`pcae authority inspect` — CONFIRMED AND EXPOSED as advanced CLTR-tooling
+documentation only, not a README headline: verified read-only/non-
+authoritative/fail-closed, but no record artifact of any family it
+supports exists anywhere in this repository's production `.pcae/` state
+today (CLTR migration remains `production_authority: "legacy"`). One
+test-input error (invalid `--template-ref` format) was initially mistaken
+for a possible defect, fully reproduced, and correctly attributed to test
+input, not a code defect; one minor non-blocking UX rough edge was found
+and documented (generic `internal_error` mapping obscures specific CHGR
+schema-validation failures) but not repaired, per phase scope. 962
+targeted existing tests run across the four capabilities, all passing.
+Runtime unchanged (`Observed`/`observe`/`unavailable`). Documentation
+changes: `README.md`, `docs/QUICKSTART_V0_3.md`, new
+`docs/CAPABILITY_REFERENCE_V0_3_2.md` (created after discovering
+`docs/COMMANDS.md` is a *generated* artifact whose generator does not yet
+cover these three commands — hand-editing it was reverted to avoid
+permanent drift, a disclosed generator gap carried forward as debt, not
+fixed here), `CHANGELOG.md`. **Recommended version:** v0.3.2 (unchanged
+from 3A — still patch-level documentation/discoverability scope). Full
+text:
+`docs/PHASE_149O_20L_7O_3B_SELECTED_EXISTING_CAPABILITY_VERIFICATION_AND_PRODUCT_EXPOSURE.md`.
+**Recommended next phase:** 3C — PCAE v0.3.2 Release Hardening and
+Release Candidate Verification.
+
+## Previous Phase
+
 Phase 149O.20L.7O.3A — Existing Capability Confirmation, Integration
 Gap, and Quick-Release Audit. **COMPLETE.** Read-only audit + product
 gap analysis of the full PCAE capability universe against current
