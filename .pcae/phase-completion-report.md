@@ -1,94 +1,86 @@
-# Phase 149O.20L.7O.3C.1 Complete — PCAE Capability Consumption Integration Assessment and Priority Proposal
+# Phase 149O.20L.7O.3C.2 Complete — Governed Capability Consumption Integration (Plan B+)
 
-**Verdict: COMPLETE — READ-ONLY EVIDENCE-DRIVEN ASSESSMENT. 30 CAPABILITY
-ITEMS AUDITED (6 AC / 1 PC / 3 CLI / 10 UC / 7 TB / 3 NC). NO
-INTEGRATION IMPLEMENTED. NO PRIORITY SELECTED. HUMAN DECISION REQUIRED.
-v0.3.2: NOT RELEASED. 3D: STOPPED. RUNTIME: Observed / observe /
-unavailable.**
-
-Phase 3D (public v0.3.2 release) was stopped before publication to ask
-whether PCAE's own mature capabilities are actually *consumed* by its
-production workflows, not merely implemented/verified/packaged/CLI-
-exposed. This phase built a complete Capability Consumption Graph and
-a prioritized integration proposal for human selection.
+**Verdict: IMPLEMENTED — FIRST SOURCE-MODIFYING PHASE IN THE 3C THREAD.
+INTERACTIVE WORKFLOW AUTO-DETECT+ROUTE / PUBLICATION EXECUTION OWNERSHIP
+AUTO-INVOCATION / CHGR DOWNSTREAM AUTOMATIC CONSUMPTION / PERMISSION
+BROKER CHGR-PUBLICATION-PATH GAP CLOSURE ARE PRODUCTION-CONSUMED.
+REPOSITORY INTELLIGENCE RECONFIRMED AND DEFERRED. HUMAN AUTHORITY
+PRESERVED. RUNTIME: Observed / observe / unavailable. RELEASE:
+STOPPED. INDEPENDENT END-TO-END VERIFICATION (149O.20L.7O.3C.3):
+MANDATORY NEXT — THIS PHASE DOES NOT SELF-CERTIFY THE BATCH.**
 
 ## Summary
 
-Reverified the stopped-3D baseline: clean repository, `origin/main..HEAD`
-= 0, no v0.3.2 tag anywhere, v0.3.1 unchanged, runtime posture
-unchanged (Observed/observe/unavailable). Carried forward the 3D
-artifact-reproducibility finding (unpinned `hatchling`; clean-clone
-rebuild hashes did not match Phase 3C's frozen hashes) unresolved and
-unrepaired, as instructed.
+Implemented the human-selected Plan B+ integration batch identified by
+Phase 149O.20L.7O.3C.1. New `commands/governance_auto_publication.py`
+auto-routes a `Confirmed` Confirmable Decision Session to publication
+from `pcae phase complete`, reusing the existing `decision-session`/
+`governance-record` CLI's own composition root — no self-CLI subprocess
+anywhere. A new `mutation_permission.evaluate_publication_permission`
+adapter closes the Permission Broker gap at the CHGR/publication path,
+the one root/external-effect-adjacent action previously outside broker
+scope. Repository Intelligence internal consumption was reconfirmed
+against current `push.py` source and correctly **deferred** — its
+raw-subprocess change-context data feeds real freshness/report logic,
+not display text, so it was not the mechanical drop-in 3C.1 originally
+assessed.
 
-Re-evaluated the complete Phase 3A capability universe (16 areas) via
-five parallel read-only source-evidence research passes, each grounded
-in grep-verified import/call-site evidence and direct source reads —
-not CLI-help/docstring trust alone. Classified 30 audited capability
-items: **6 Already Consumed, 1 Partially Consumed, 3 CLI-only/human-
-orchestrated, 10 Unconsumed Internal, 7 Trust-Blocked, 3 Not-
-Consumable.**
+**Architecture-policy violation caught and corrected mid-phase.** A
+first implementation draft placed the new Permission Broker call inside
+`PublicationApplicationService.hand_off()` (`interactive_workflow`
+zone). The repository's own pre-commit `pcae check` architecture-
+dependency hook correctly blocked this — `interactive_workflow -> core
+is not allowed by policy`, a frozen Phase 143K boundary — before any
+commit succeeded. Corrected by moving the broker call to a new
+`commands`-zone module (`commands/publication_permission_gate.py`) and
+relocating the new orchestration entry point
+(`commands/governance_auto_publication.py`) from `interactive_workflow/`
+to `commands/`, with **zero `.pcae/policy.toml` changes** — `commands`
+was already permitted to depend on both `core` and `interactive_workflow`.
+Both real production callers of `hand_off()` (the manual
+`governance-record publish` CLI handler and the automatic
+`pcae phase complete` entry point) now call the identical gate function,
+verified non-bypassable by a dedicated test.
 
-Headline finding: **Interactive Workflow/CHGR** — PCAE's most mature
-governance capability — has a clean, reusable production service layer
-(`SessionCoordinator`, `PublicationCoordinator`) that **zero production
-lifecycle module calls automatically**; routing into it is 100%
-human-typed CLI. One real programmatic-producer path exists
-(`core/rollback_approval_evidence.py::create_rollback_approval_decision`)
-but has zero callers anywhere — dead code, not wired to anything.
-**Repository Intelligence** has zero production consumers outside its
-own CLI across every sub-capability (Query, Change-Impact, Dependency
-Graph, Historical Memory, Cross-Artifact, Unified Query, Service).
-**Permission Broker** is correctly production-consumed for
-push/commit/promotion but has two small, concrete gaps (rollback
-default path, CHGR publication path). A Phase 3A conflation was
-corrected: the AC-rated Authority Evaluation service and the TB-rated
-Typed Authority Model (`cltr/authority/`, frozen-contract-blocked from
-all production imports) are separate packages with opposite
-consumption states, not one shared rating.
+Disclosed intentional behavior change: publication now requires an
+active PCAE task (`POL-001`), the same invariant `commit`/`push`/
+`promotion` already enforce. Five existing test files' fixtures were
+updated accordingly; no assertion was weakened, removed, or had its
+expected outcome changed.
 
-Produced Matrix A (consumption state), Matrix B (consumer gap), Matrix
-C (integration priority), an integration dependency graph, E2E
-verification designs for every recommended candidate, and three
-priority plans:
-
-- **Plan A — Lowest Risk/Fastest**: Repository Intelligence internal
-  consumption wiring, Permission Broker CHGR-publication-path gap
-  closure, Runtime introspection preflight-gating disclosure, rollback
-  readiness/evidence auto-generation. S/S-M effort, LOW risk.
-- **Plan B — Highest Governance Value**: Interactive Workflow/CHGR
-  auto-detect+route, Publication Execution Ownership auto-invocation,
-  Permission Broker rollback-path gap closure, CHGR downstream
-  automatic consumption. M effort, MODERATE risk, highest strategic
-  value.
-- **Plan C — Broader Connected PCAE**: Plan A + Plan B plus
-  Advisory-Context wiring and shell-gate audit surfacing.
-
-**Recommended starting point: Plan A**, with Plan B as the necessary
-strategic follow-on regardless of starting point. **This is a
-recommendation, not a decision — human priority selection is required
-before any implementation phase begins.**
-
-Trust-blocked items excluded from every plan: Typed Authority Model /
-CLTR authority cutover, HATP Trust-Enrollment / `HATP_MANDATORY`
-activation, HMIC/Class-B positive-authority consumption, Runtime
-Enforcement Decision Engine consumption, Backend/provider execution
-invocation, Shell Gate enforcement.
+22 new focused tests. A genuine `git stash -u` A/B of the **complete**
+`pytest -m fast_green` suite (not a hand-picked sample) found 338
+pre-existing `FAILED` + 9 pre-existing `ERROR` at phase-entry `HEAD`
+(`999227fd`), entirely unrelated to this phase's touched files
+(concentrated in HATP/HMIC/Class-B/hardware-credential/shell-gate-audit
+territory). Deselecting exactly those 347 nodeids against the committed
+tree left one expected, transient failure (a "HEAD equals origin/main"
+check, resolved by this phase's own push) and otherwise a clean run —
+**zero functional regressions attributable to this phase.**
 
 ## No-Go confirmation
 
-No integration was implemented. No priority was selected. No v0.3.2
-tag, GitHub Release, artifact upload, or PyPI publish occurred. No
-build-system dependency was modified. No human approval boundary was
-automated. No execution capability, backend, adapter, or parser was
-added. No shell execution was enabled. No Telegram inbound was added.
-No HATP/FIDO2 provisioning occurred. No Dell mutation occurred. No
-CLTR authority cutover occurred. `~/repos/pcae-deepseek-research` was
-not inspected. The article was not read, modified, or published — it
-remains STOPPED. No raw git commit/push occurred outside pcae-governed
-commands. No force push, `--no-verify`, or history rewrite occurred.
-v0.3.1 remains unchanged; the frozen `8bb8c882` v0.3.2 release
-candidate is carried forward as SUPERSEDED / ON HOLD.
+No v0.3.2 tag, GitHub Release, artifact upload, or PyPI publication
+occurred; the SUPERSEDED/ON HOLD v0.3.2 candidate (`8bb8c882`) was not
+resumed, modified, or re-tagged. No version was changed. No build-system
+dependency (`hatchling`) was pinned or modified; the artifact-
+reproducibility finding remains carried forward unresolved. No human
+approval, confirmation, selection, or authorization was automated — the
+new auto-publication path only ever acts on a session that already
+independently reached `Confirmed` via the existing, unmodified human-
+confirmation path. No new Permission Broker policy, decision category,
+or authority vocabulary member was introduced. No CLI-subprocess
+self-shelling was introduced anywhere (verified by a dedicated static
+test). No Runtime Enforcement, shell-gate enforcement/audit-surfacing,
+broad Advisory-context wiring, rollback-integration, HATP/HMIC/Class-B,
+CLTR authority cutover, runtime execution, Telegram inbound, or
+backend/model execution capability was added or activated. Repository
+Intelligence was correctly deferred, not forced into scope.
+`~/repos/pcae-deepseek-research` was not inspected. The article was not
+read, modified, or published — it remains STOPPED. No raw git
+commit/push occurred outside pcae-governed commands. No force push,
+`--no-verify`, or history rewrite occurred. This phase explicitly does
+**not** self-certify the Plan B+ batch as complete.
 
 ## Governance results
 
@@ -96,13 +88,16 @@ candidate is carried forward as SUPERSEDED / ON HOLD.
 - `pcae check`: passed
 - `pcae status coherence`: coherent
 - `pcae doctor task-memory`: warnings (pre-existing, unrelated, unchanged)
-- `pcae push check`: nothing_to_push (pre-finalization baseline)
+- `pcae push check`: re-verified `nothing_to_push` after the real push (see below)
 - `pcae runtime inspect`: unchanged (Observed / observe / unavailable)
 - Telegram: configured, ready
 
 ## Full evidence
 
 See
-`docs/PHASE_149O_20L_7O_3C_1_PCAE_CAPABILITY_CONSUMPTION_INTEGRATION_ASSESSMENT_AND_PRIORITY_PROPOSAL.md`
-for the complete consumption graph, all five required matrices,
-E2E verification designs, and the three priority plans.
+`docs/PHASE_149O_20L_7O_3C_2_GOVERNED_CAPABILITY_CONSUMPTION_INTEGRATION.md`
+for the complete pre/post-integration consumer graphs, the architecture-
+policy-violation finding and correction (§5a), all 22 test descriptions,
+the full Fast Green baseline/A-B methodology, and the mandatory
+recommended next phase (149O.20L.7O.3C.3 — Independent End-to-End
+Capability Consumption Verification).
