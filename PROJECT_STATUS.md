@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.2Z.1 — PCAE v0.3.1 Public Release. **COMPLETE.**
+Published PCAE v0.3.1 from the exact independently pre-publication-
+verified release candidate established by Phase 2Z (commit
+`5d7edef9`), with explicit human publication authorization confirmed
+in-session before any irreversible action. Annotated tag `v0.3.1`
+created pointing exactly at `5d7edef9` (not `HEAD`, which carries only
+later phase-report/finalization commits with zero `src/pcae/**`/
+`pyproject.toml` diff since the candidate) and pushed without force;
+local tag commit verified equal to remote tag commit verified equal to
+the release-candidate commit. GitHub Release published
+(https://github.com/atimad/pcae-harness/releases/tag/v0.3.1, not
+draft, not prerelease, now `Latest`) with the frozen wheel
+(`pcae_harness-0.3.1-py3-none-any.whl`, 2,338,452 bytes, SHA-256
+`a459617fdaf2d6424123852c84c8c7abf6e238224827196a37d1e346cf74dad6`)
+and sdist (`pcae_harness-0.3.1.tar.gz`, 2,053,935 bytes, SHA-256
+`9d61147efa1f1fc2f96dc52366d884bbfa50f9d87d1af6e5d88f0ec4f8514084`)
+attached; GitHub's server-reported asset digests and a fresh local
+download both independently re-confirmed these exact checksums. The
+original 2Z-built artifacts no longer existed (built into a disposable
+directory); both were rebuilt from `5d7edef9` under human-authorized
+Path B, proven deterministic across three independent builds from the
+same commit/environment/command (wheel byte-identical to 2Z's original
+report; sdist internally reproducible though its bytes differ from
+2Z's now-unrecoverable original, an accepted, explicitly authorized
+divergence). Post-publication install/workflow smoke passed from the
+**public downloaded GitHub Release assets** (not local builds) for
+both wheel and sdist: version 0.3.1, `pcae init` → `session bootstrap`
+→ `intake from-files` → `intake show/list`, plus `codex-ox`
+bootstrap/provenance and no-lock compatibility, all behaving
+identically to the pre-publication evidence, zero external AI/network
+calls. `v0.3.0` reconfirmed unchanged
+(`738a81553128665a9c206f3ce33c931dc9089a6c`) and still published,
+merely no longer `Latest` (normal GitHub semantics). PyPI: **not
+published** (out of scope, untouched). Article: **unpublished**
+(untouched). Runtime posture unchanged:
+`Observed`/`observe`/`unavailable`. Accepted non-blocking debt carried
+forward unrepaired, exactly as authorized: empty-`agent_id`
+descriptive-provenance weakness, 129 `tasks/DONE.md` historical
+sync-warning findings (repository-maintainer-only), and the
+`test_audit_verify_cli` resource-sensitive subprocess timeout against
+a very large accumulated local audit corpus (unrelated to any v0.3.1
+product change). Zero source-code changes this phase — publication
+only. Full text:
+`docs/PHASE_149O_20L_7O_2Z_1_PUBLIC_RELEASE.md`. **Recommended next
+phase:** Post-v0.3.1 Article Reassessment and Rewrite — a discussion
+phase to reassess the unpublished article draft against the exact
+v0.3.1 released capability set, not automatically a new PCAE code
+phase.
+
+## Previous Phase
+
 Phase 149O.20L.7O.2Z — Post-v0.3.1 Release Candidate Final
 Verification. **COMPLETE.** Prepared and independently verified the
 complete `v0.3.1` release candidate from a fixed committed tree

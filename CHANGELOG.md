@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.3.1 (2026-08-25)
+
+**Published**: https://github.com/atimad/pcae-harness/releases/tag/v0.3.1
+— tag `v0.3.1` bound to release-candidate commit `5d7edef9`. Wheel
+(`pcae_harness-0.3.1-py3-none-any.whl`, SHA-256
+`a459617fdaf2d6424123852c84c8c7abf6e238224827196a37d1e346cf74dad6`) and
+sdist (`pcae_harness-0.3.1.tar.gz`, SHA-256
+`9d61147efa1f1fc2f96dc52366d884bbfa50f9d87d1af6e5d88f0ec4f8514084`)
+attached and checksum-verified against the published GitHub Release
+assets. Not published to PyPI.
+
+**Fix**: `pcae session bootstrap` and `pcae intake from-files` no
+longer crash with an uncaught `AttributeError` when the agent-lock file
+is well-formed JSON but the wrong root type (array, string, number,
+`null`) — both now fail closed with a clean, deterministic,
+non-authorizing rejection.
+
+**Change**: `pcae intake from-files` promoted to
+`docs/QUICKSTART_V0_3.md`'s primary golden path; the legacy Claude Code
+adapter script demoted to a reference footnote.
+
+See `docs/RELEASE_NOTES_V0_3_1.md` and
+`docs/PHASE_149O_20L_7O_2Z_1_PUBLIC_RELEASE.md` for full details.
+
 ## v0.3.0 (2026-08-24)
 
 **New**: a generic external-agent intake path (`pcae intake
@@ -10887,6 +10911,7 @@ for the full release notes and
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.2Z) to Phase 149O.20L.7O.2Z.1: PCAE v0.3.1 Public Release; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.2Z: Post-v0.3.1 Release Candidate Final Verification to Idle: awaiting next governed phase (post-149O.20L.7O.2Z); session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.2Z: post-v0.3.1 release candidate final
   verification. Bumped version to `0.3.1` (`pyproject.toml`,
