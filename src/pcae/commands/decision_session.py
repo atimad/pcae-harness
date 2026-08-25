@@ -100,6 +100,7 @@ from pcae.interactive_workflow.application.errors import (
     PublicationAttemptConflictApplicationError,
     PublicationAuthorizationFailedApplicationError,
     PublicationExecutionFailedApplicationError,
+    PublicationPermissionDeniedApplicationError,
     PublicationReconciliationIncompleteApplicationError,
     ReadinessDigestMismatchApplicationError,
     ReadinessPackageNotFoundApplicationError,
@@ -374,6 +375,14 @@ _PUBLICATION_ERROR_MAP = {
     PublicationAuthorizationFailedApplicationError: "authorization_invalid",
     PublicationExecutionFailedApplicationError: "publication_conflict",
     PublicationReconciliationIncompleteApplicationError: "internal_error",
+    # Phase 149O.20L.7O.3C.2: Permission Broker publication-path gap
+    # closure (pcae.commands.publication_permission_gate). Reuses the
+    # existing "authorization_invalid" error_type rather than inventing a
+    # new CLI exit-code taxonomy member -- a Permission Broker DENY is,
+    # from the CLI caller's perspective, the same class of "this
+    # authorization attempt is not valid" outcome as an authorization
+    # replay/staleness/invalidity failure.
+    PublicationPermissionDeniedApplicationError: "authorization_invalid",
 }
 
 _ALL_ERROR_MAPS = {**_SESSION_ERROR_MAP, **_READINESS_ERROR_MAP, **_PUBLICATION_ERROR_MAP}

@@ -158,6 +158,21 @@ class PublicationReconciliationIncompleteApplicationError(PublicationCoordinatio
     publication failure to retry."""
 
 
+class PublicationPermissionDeniedApplicationError(PublicationCoordinationError):
+    """Phase 149O.20L.7O.3C.2: the Permission Broker's publication-path
+    adapter (``pcae.core.mutation_permission.evaluate_publication_permission``)
+    did not return ``authorized=True`` for this hand-off attempt -- either
+    a policy ``DENY``/non-``ALLOW`` decision, or a broker construction/
+    evaluation failure (fails closed identically either way, RWMPC-001's
+    existing "construction failure is diagnostically identical to an
+    evaluation failure" precedent). No CHGR is created and no readiness-
+    store attempt-linkage update occurs; the caller may retry once the
+    underlying condition is resolved -- this is a machine-checked gate
+    added in front of ``PublicationCoordinator.execute()``, never a
+    replacement for the human confirmation boundary that already produced
+    the ``Confirmed`` session this package was built from."""
+
+
 __all__ = [
     "ApplicationServiceError",
     "SessionCoordinationError",
@@ -186,4 +201,5 @@ __all__ = [
     "PublicationAuthorizationFailedApplicationError",
     "PublicationExecutionFailedApplicationError",
     "PublicationReconciliationIncompleteApplicationError",
+    "PublicationPermissionDeniedApplicationError",
 ]

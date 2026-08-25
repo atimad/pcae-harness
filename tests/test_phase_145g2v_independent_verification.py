@@ -247,6 +247,16 @@ def test_genuine_subprocess_e2e_create_through_publish(tmp_path):
     graph, no direct Session/repository construction, no fixture-only
     state injection anywhere in this chain."""
 
+    # Phase 149O.20L.7O.3C.2: CHGR publication now requires an active-task
+    # contract (POL-001), mirroring commit/push/promotion's existing
+    # Permission Broker invariant -- see the identical fixture change in
+    # test_phase_145g_decision_session_cli.py.
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260101-0000-phase-145g2v-cli-fixture-task.md").write_text(
+        "# Phase 145G.2v CLI fixture task\n", encoding="utf-8"
+    )
+
     create = _run_cli(tmp_path, "decision-session", "create",
                        "--template-ref", "tmpl", "--subject-ref", "subj", "--owner-id", "owner",
                        "--json")

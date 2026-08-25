@@ -353,6 +353,32 @@ class SessionApplicationService:
         except PersistenceUnavailableError as exc:
             raise SessionPersistenceUnavailableApplicationError(str(exc), session_id=session_id) from exc
 
+    def find_session_by_subject_ref(self, subject_ref: str) -> Optional[Session]:
+        """Return the most-recently-created persisted session whose
+        ``subject_ref`` exactly equals ``subject_ref``, or ``None`` if
+        none exists (Phase 149O.20L.7O.3C.2). Performs one full,
+        deterministic scan of every session id via
+        ``SessionCoordinator.list_session_ids``/``load_session`` -- no
+        "most recent file" ordering, no narrowing by state before the
+        scan. If more than one session shares the same ``subject_ref``
+        (``--subject-ref`` remains free text at ``decision-session
+        create``; this method does not prevent duplicates), the most
+        recently created one is returned -- a disclosed limitation, not a
+        silently-assumed impossibility."""
+
+        candidates: list[Session] = []
+        for session_id in self._coordinator.list_session_ids():
+            try:
+                session = self._coordinator.load_session(session_id)
+            except SessionNotFoundError:
+                continue
+            if session.subject_ref == subject_ref:
+                candidates.append(session)
+        if not candidates:
+            return None
+        candidates.sort(key=lambda s: s.created_at)
+        return candidates[-1]
+
     def persist_session(self, session: Session) -> None:
         """Persist an existing, already-validated session record."""
 

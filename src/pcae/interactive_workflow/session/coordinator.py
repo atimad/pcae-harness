@@ -114,6 +114,17 @@ class SessionCoordinator:
         self._repository.create(session)
         return session
 
+    def list_session_ids(self) -> List[str]:
+        """Return every persisted session id (Phase 149O.20L.7O.3C.2:
+        Interactive Workflow auto-detect + route needs a deterministic,
+        full-scan-by-identity lookup -- never a "most recent file"
+        heuristic -- to find the session bound to a given subject; this
+        is a thin delegation to the injected ``SessionRepository``'s own
+        existing ``list_session_ids``, exactly like every other method on
+        this class delegates to a collaborator it does not reimplement)."""
+
+        return list(self._repository.list_session_ids())
+
     def load_session(self, session_id: str) -> Session:
         """Return the persisted session for ``session_id``.
 

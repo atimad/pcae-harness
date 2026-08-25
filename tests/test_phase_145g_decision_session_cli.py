@@ -75,6 +75,21 @@ def _run(handler, **kwargs) -> tuple[int, dict]:
 @pytest.fixture(autouse=True)
 def _isolated_repo(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
+    # Phase 149O.20L.7O.3C.2: CHGR publication is now covered by the
+    # Permission Broker (POL-001 "Missing Active Task", the same
+    # existing invariant `pcae commit`/`push`/promotion already require)
+    # via `PublicationApplicationService.hand_off`'s new gate. Every
+    # test in this file exercises publication in an isolated repo with
+    # no PCAE task lifecycle of its own, so a minimal active-task
+    # contract is provided here so POL-001 evaluates truthfully rather
+    # than this file's own scenarios becoming an unintended proxy for
+    # "no active task" coverage (that scenario is covered directly by
+    # the 3C.2 phase's own test suite instead).
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260101-0000-phase-145g-cli-fixture-task.md").write_text(
+        "# Phase 145G CLI fixture task\n", encoding="utf-8"
+    )
     yield tmp_path
 
 

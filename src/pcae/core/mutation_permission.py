@@ -529,3 +529,63 @@ def validate_promotion_permission_freshness(
     if current_task_id != snapshot.task_id:
         mismatches.append(f"active task changed ({snapshot.task_id} -> {current_task_id})")
     return (not mismatches, mismatches)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Publication adapter (CHGR/publication-path gap closure) -- Phase
+# 149O.20L.7O.3C.2, closing the gap 3C.1 §7.3/§10 identified: CHGR
+# publication (`PublicationCoordinator.execute()`, via
+# `PublicationApplicationService.hand_off`) was the one root/external-
+# effect-adjacent action with no Permission Broker coverage at all.
+# ═══════════════════════════════════════════════════════════════════════════
+
+_PUBLICATION_COMPONENT = "COMP-001"
+_PUBLICATION_CAPABILITY = "pcae_governance_record_publish"
+
+
+def evaluate_publication_permission(
+    root: HarnessPath,
+    *,
+    session_id: str,
+    package_id: str,
+    task_id: str | None,
+) -> MutationPermissionResult:
+    """Publication adapter for `PublicationApplicationService.hand_off`
+    (Phase 149O.20L.7O.3C.2). Evaluated once per hand-off attempt,
+    strictly before `PublicationCoordinator.execute()` is invoked --
+    mirroring every other Wave-1 adapter's "gate before the real effect,
+    never after" placement.
+
+    `action_type` uses the existing `ACTION_DOCS_MUTATION` literal, not a
+    new invented action type (RWMPC-REQ-016's "fixed literals" discipline,
+    and Phase 149O.20L.7O.3C.2's own "no new invented taxonomy" scope
+    rule): a CHGR record is a structured governance document written to
+    `.pcae/governance-records/**`, the same shape of repository-adjacent
+    write `classify_promotion_action_type` already classifies as a
+    `docs`-class mutation when a promotion's approved paths land under
+    `docs/`. `execution_class` is `EXECUTION_CLASS_MUTATION`, identical to
+    every other Wave-1 site -- publication is not a new execution class,
+    it is the same `simulation_only=True`, non-authoritative broker
+    evaluation every existing adapter performs.
+
+    Session identity (`session_id`) and package identity (`package_id`)
+    are surfaced as the requested resource -- not `task_id` alone --
+    because a publication attempt's decision-relevant identity is the
+    Confirmable Decision Session/readiness package being published, which
+    may or may not have an active PCAE task bound (`task_id` may be
+    `None`, e.g. a human running `governance-record publish` directly by
+    hand outside any governed task)."""
+    from pcae.core import permission_broker_foundation
+
+    return evaluate_repository_mutation_permission(
+        root=root,
+        action_type=permission_broker_foundation.ACTION_DOCS_MUTATION,
+        execution_class=permission_broker_foundation.EXECUTION_CLASS_MUTATION,
+        requested_component=_PUBLICATION_COMPONENT,
+        requested_capability=_PUBLICATION_CAPABILITY,
+        task_id=task_id,
+        requested_resource=f"session:{session_id};package:{package_id}",
+        evidence_available=True,
+        approval_present=False,
+        simulation_only=True,
+    )

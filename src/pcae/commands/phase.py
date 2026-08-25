@@ -40,6 +40,11 @@ from pcae.core.repository_transition_integration import (
 from pcae.core.repository_transition_validator import (
     TransitionKind,
 )
+from pcae.commands.decision_session import build_application_context
+from pcae.commands.governance_auto_publication import (
+    STATUS_NO_SESSION,
+    auto_publish_confirmed_session,
+)
 
 
 def _refresh_session_snapshot_for_governed_flow(root: HarnessPath) -> None:
@@ -73,6 +78,15 @@ def run_phase_complete(args: argparse.Namespace) -> int:
     # ordinary corrected retry needs no manual lock or metadata recovery.
     allow_partial_report = getattr(args, "allow_partial_report", False)
     stage_pending_report = getattr(args, "stage_pending_report", False)
+    # Phase 149O.20L.7O.3C.2 -- Interactive Workflow auto-detect + route /
+    # Publication Execution Ownership auto-invocation. Captured *before*
+    # `_finalize_report_and_notify`/`complete_phase` run: the active task
+    # (this governed operation's `subject_ref` binding convention -- see
+    # `pcae.interactive_workflow.governance_auto_publication`) is only
+    # reliably resolvable while the task is still active, not after
+    # `complete_phase()` has released the agent lock and transitioned it.
+    active_task_before_completion = find_latest_active_task(root)
+
     finalizable = _finalize_report_and_notify(
         args.summary,
         allow_partial_report=allow_partial_report,
@@ -80,6 +94,37 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         cli_phase_id=getattr(args, "phase_id", None),
         cli_phase_name=getattr(args, "phase_name", None),
     )
+
+    if finalizable and active_task_before_completion is not None:
+        # Non-blocking, informational-only (§41 compatibility: a phase
+        # with no bound Confirmable Decision Session completes exactly as
+        # before this phase -- `STATUS_NO_SESSION` is the overwhelmingly
+        # common case and is not printed to avoid noise on every ordinary
+        # phase completion). This never gates `finalizable`/the exit
+        # code: publication timing relative to phase completion is an
+        # orchestration convenience this phase adds, not a new
+        # authorization coupling between the two (no governing contract
+        # makes CHGR publication a phase-completion precondition).
+        agent_lock = read_agent_lock(root)
+        outcome = auto_publish_confirmed_session(
+            build_application_context(),
+            subject_ref=active_task_before_completion.task_id,
+            operator_id=agent_lock.agent_id if agent_lock is not None and agent_lock.agent_id else "unknown-agent",
+        )
+        if outcome.status != STATUS_NO_SESSION:
+            print()
+            print("Interactive Workflow auto-route (Phase 149O.20L.7O.3C.2):")
+            print(f"  status: {outcome.status}")
+            if outcome.session_id:
+                print(f"  session_id: {outcome.session_id}")
+            if outcome.session_state:
+                print(f"  session_state: {outcome.session_state}")
+            if outcome.package_id:
+                print(f"  package_id: {outcome.package_id}")
+            if outcome.record_id:
+                print(f"  record_id (CHGR): {outcome.record_id}")
+            if outcome.diagnostic:
+                print(f"  diagnostic: {outcome.diagnostic}")
 
     if finalizable:
         result = complete_phase(root, args.summary)

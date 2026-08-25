@@ -33,6 +33,8 @@ from pcae.commands.decision_session import (
     emit_error,
     run_with_error_mapping,
 )
+from pcae.commands.publication_permission_gate import publish_with_permission_gate
+from pcae.core.paths import HarnessPath
 from pcae.governance.inspection import (
     InspectionFailure,
     InspectionObservation,
@@ -226,7 +228,12 @@ def run_governance_record_publish(args: argparse.Namespace) -> int:
 
     def body() -> int:
         context = build_application_context()
-        result = context.publication_service.resume_publication(package_id, operator_id=operator_id)
+        result = publish_with_permission_gate(
+            context.publication_service,
+            HarnessPath.cwd(),
+            package_id,
+            operator_id=operator_id,
+        )
 
         payload = {
             "status": "success",

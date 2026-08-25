@@ -81,6 +81,15 @@ def _run(handler, **kwargs):
 @pytest.fixture(autouse=True)
 def _isolated_repo(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
+    # Phase 149O.20L.7O.3C.2: see the identical comment in
+    # test_phase_145g_decision_session_cli.py -- CHGR publication now
+    # requires an active-task contract (POL-001), mirroring commit/push/
+    # promotion's existing invariant.
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260101-0000-phase-145g1-cli-fixture-task.md").write_text(
+        "# Phase 145G.1 CLI fixture task\n", encoding="utf-8"
+    )
     yield tmp_path
 
 
