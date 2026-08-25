@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.4.0 — 2026-08-25
+
+- **Phase 149O.20L.7O.3D** — PCAE v0.4.0 Public Release: published under
+  explicit human publication authorization. Annotated tag `v0.4.0`
+  created and pushed, bound exactly to the frozen release candidate
+  `ea3f731ef50ea16985fd4a0562f0c091bb8109b2` (verified local == remote
+  == candidate). GitHub Release published at
+  https://github.com/atimad/pcae-harness/releases/tag/v0.4.0 with
+  hash-verified `pcae_harness-0.4.0-py3-none-any.whl`
+  (`sha256:8125d21d...`) and `pcae_harness-0.4.0.tar.gz`
+  (`sha256:13492127...`) — both re-verified byte-identical via
+  independent clean-clone rebuild and independent download+re-hash of
+  the public assets. Independently resolved a real
+  arithmetic/categorization error in the 3C.4 report's Fast Green count
+  (its "344+2+1=347" breakdown did not match its own "345" total); the
+  corrected finding, from direct nodeid inspection, is that the failing
+  set is a broader pre-existing self-referential "no drift since my own
+  historical candidate SHA" cluster than 3C.4 described, with zero
+  nodeids touching the new auto-publish production code — attributable
+  regressions remain 0. Ran the Plan B+/corrupt-store/Permission Broker
+  behavioral suite (51 tests) against the public wheel's installed code
+  (43/51 pass; 8 failures are repo-checkout-dependent AST tests, not
+  regressions). Confirmed PyPI **not published**. Runtime unchanged
+  (`Observed`/`observe`/`unavailable`).
+
 ## Unreleased
 
 - Transitioned active task from Phase 149O.20L.7O.3C.4: Connected Capability Release Scope, Version, and Reproducible-Build Hardening to Idle: awaiting next governed phase (post-149O.20L.7O.3C.4); session refreshed and governance continuity revalidated.

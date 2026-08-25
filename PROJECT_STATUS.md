@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3D — PCAE v0.4.0 Public Release. **PUBLICLY
+RELEASED.** Explicit human publication authorization was obtained before
+any irreversible action. Independently re-verified the frozen release
+candidate (`ea3f731ef50ea16985fd4a0562f0c091bb8109b2`) rather than
+trusting the 3C.4 summary: re-derived the release-candidate identity,
+re-confirmed version `0.4.0`, re-confirmed `v0.3.1`/`v0.3.0` isolation,
+and independently resolved a real arithmetic/categorization error in
+3C.4's Fast Green count (its stated "344+2+1=347" breakdown did not
+match its own "345" total) — the corrected finding, from direct nodeid
+inspection across two full re-runs, is that the failing/erroring set
+(335–336, ±1 known timing flake) is a much broader pre-existing
+self-referential "no drift since my own historical candidate SHA"
+cluster than 3C.4 described, spanning many unrelated legacy phases, with
+**zero nodeids referencing the new `governance_auto_publication`/
+`publication_permission_gate`/`mutation_permission`/`phase.py` auto-
+publish code** — attributable regressions remain 0, now on stronger
+evidence. Rebuilt the wheel/sdist from a fresh clean clone pinned to the
+candidate commit (hashes matched the canonical 3C.4 record exactly, a
+4th independent reproduction). Created annotated tag `v0.4.0` bound
+explicitly to the candidate commit (verified local == remote ==
+candidate before and after push). Published GitHub Release `v0.4.0`
+(https://github.com/atimad/pcae-harness/releases/tag/v0.4.0) from
+`docs/RELEASE_NOTES_V0_4_0.md`, uploaded the hash-verified wheel/sdist,
+and independently downloaded+re-hashed both public assets to confirm
+byte-identity with the release-of-record. Ran the same 51-test Plan
+B+/corrupt-store/Permission Broker behavioral suite against the public
+wheel's installed code (43/51 pass; the 8 failures are repo-checkout-
+dependent AST tests, not behavioral regressions) plus a public-sdist
+install and golden-path smoke. Confirmed PyPI not published (`404` on
+`pypi.org/pypi/pcae-harness/json`). Runtime unchanged
+(`Observed`/`observe`/`unavailable`). Article and
+`~/repos/pcae-deepseek-research` untouched. See
+`docs/PHASE_149O_20L_7O_3D_PCAE_V0_4_0_PUBLIC_RELEASE.md` for full
+evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3C.4 — Connected Capability Release Scope, Version,
 and Reproducible-Build Hardening. **RELEASE CANDIDATE PREPARED — NOT
 PUBLISHED.** Froze the independently-verified connected-capability
