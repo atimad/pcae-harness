@@ -22,10 +22,8 @@ Idle: awaiting human priority decision (post-149O.20L.7O.3C.1)
 
 ## Allowed Files
 
-- tasks/DONE.md
-- tasks/done/20260825-1137-phase-149o-20l-7o-3c-1-pcae-capability-consumption-integration-assessment-and-priority-proposal.md
 - tasks/active/20260825-1145-idle-awaiting-human-priority-decision-post-149o-20l-7o-3c-1.md
-- CHANGELOG.md
+- tasks/active/20260825-1137-phase-149o-20l-7o-3c-1-pcae-capability-consumption-integration-assessment-and-priority-proposal.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
