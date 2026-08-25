@@ -75,6 +75,6 @@
   "validation_results": {
     "report_notification_tests": "not_applicable_this_phase (no source change to report-notification production surfaces this phase)",
     "bootstrap_session_reporting_tests": "not_applicable_this_phase (no source change to bootstrap/session reporting surfaces this phase)",
-    "fast_green": "pending_final_post_push_run"
+    "fast_green": "8688 passed, 0 failed (deselecting the 347 pre-existing baseline-failing nodeids reconfirmed via git stash -u A/B plus 1 pre-push HEAD-equals-origin/main check expected to resolve after this phase's own push; see phase document Sec 14-15)"
   }
 }
