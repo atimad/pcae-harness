@@ -93916,7 +93916,7 @@ _RER_VERSION: str = "1.0"
 
 _RER_VALID_STATUSES: frozenset[str] = frozenset({
     "in_progress", "completed", "partial", "failed", "aborted_divergence",
-    "aborted_hatp_mandatory_denied",
+    "aborted_hatp_mandatory_denied", "aborted_permission_denied",
 })
 _RER_VALID_FILE_OUTCOMES: frozenset[str] = frozenset({
     "success", "failed", "already_reverted",
@@ -94327,6 +94327,46 @@ def build_rollback_execution(
             stored = store_rollback_execution_record(root, record)
             return {
                 **gate_denial,
+                "rer_id": rer_id, "per_id": per_id, "ecp_id": ecp_id,
+                "reverted": False, "created": stored["stored"],
+                "errors": stored.get("errors", []),
+                "execution_allowed": False,
+                "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
+                "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+            }
+
+    # Phase 149O.20L.7O.3F -- Permission Broker Rollback Default-Path
+    # Consumption Integration (closes the 149O.20L.7O.3E Section 7 gap):
+    # the default (non-`HATP_MANDATORY`) dispatch path previously had
+    # zero Permission Broker coverage, unlike every other root-mutating
+    # command. Mode is resolved fresh here (matches the HATP_MANDATORY
+    # gate's own "no cache, no reuse of any earlier read" discipline
+    # above) so this gate applies only outside `HATP_MANDATORY`, which
+    # already has its own separate, stricter, HATP-integrated broker
+    # gate untouched by this phase. Placed after every existing
+    # structural precondition and immediately before the first real
+    # filesystem mutation, mirroring every other Wave-1 adapter's
+    # "gate before the real effect, never after" placement.
+    if resolve_production_hatp_cutover_mode(root).mode != CutoverMode.HATP_MANDATORY:
+        active_task_for_rollback_permission = find_latest_active_task(root)
+        rollback_permission_task_id = (
+            active_task_for_rollback_permission.task_id
+            if active_task_for_rollback_permission else None
+        )
+        rollback_permission_result = mutation_permission.evaluate_rollback_permission(
+            root, task_id=rollback_permission_task_id, per_id=per_id, ecp_id=ecp_id,
+        )
+        if not rollback_permission_result.authorized:
+            rollback_denial_details = mutation_permission.permission_denial_details(
+                rollback_permission_result
+            )
+            record["status"] = "aborted_permission_denied"
+            record["completed_at"] = datetime.now(timezone.utc).isoformat()
+            record["rollback_executed"] = False
+            stored = store_rollback_execution_record(root, record)
+            return {
+                "error": "rollback_permission_denied",
+                **rollback_denial_details,
                 "rer_id": rer_id, "per_id": per_id, "ecp_id": ecp_id,
                 "reverted": False, "created": stored["stored"],
                 "errors": stored.get("errors", []),

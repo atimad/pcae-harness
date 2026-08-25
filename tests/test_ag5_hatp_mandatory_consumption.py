@@ -82,7 +82,14 @@ def _patch_consumption(monkeypatch, pb_decision: str, *, calls: list | None = No
 
 def _setup_removable_file_per(tmp_path, per_id="per-rertest"):
     """A PER whose sole file_result is a "success" addition of `added.txt`
-    (real effect: unlink) -- the standard fixture reused across this suite."""
+    (real effect: unlink) -- the standard fixture reused across this suite.
+
+    `_init_git_root` (tests/test_agent.py) already creates an active task
+    contract as its own Phase 149F precondition-fixture side effect; the
+    new default-path Permission Broker gate added in Phase 149O.20L.7O.3F
+    (POL-001, identical to the pre-existing commit/promotion/publication
+    adapters) relies on that same task being present, so no additional
+    fixture change is needed here."""
     root_dir = tmp_path / "root"
     root_dir.mkdir()
     _init_git_root(root_dir)

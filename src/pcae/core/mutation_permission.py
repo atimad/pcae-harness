@@ -28,8 +28,18 @@ from a caller argument, CLI flag, or config value (RWMPC-REQ-016).
 Every adapter here sets `simulation_only=True` (RWMPC-REQ-014/015) and
 `approval_present=False` (RWMPC-REQ-017: POL-004 is not applicable to
 `EXECUTION_CLASS_MUTATION`, so `False` is the *truthful* value, not a
-weakening) for every Wave-1 `MUTATION`-class site. Rollback-class sites
-(AG3, AG5) are explicitly out of Wave-1 scope and are not wired here.
+weakening) for every Wave-1 `MUTATION`-class site.
+
+Rollback (AG3 `execute_rollback` / AG5 `build_rollback_execution`) has
+its own, separate `EXECUTION_CLASS_ROLLBACK`/`ACTION_ROLLBACK`
+HATP-gated advisory evaluation in `hatp_ag_authority.py`
+(`resolve_ag3_gated_rollback_authority`/`resolve_ag5_gated_rollback_authority`),
+out of Wave-1 scope and not wired here. Phase 149O.20L.7O.3F adds one
+narrow exception below (`evaluate_rollback_permission`): a Wave-1-style
+`EXECUTION_CLASS_MUTATION` adapter that closes the *default* (non-
+`HATP_MANDATORY`) rollback dispatch path's previously-uncovered
+Permission Broker gap, reusing the existing `ACTION_ROLLBACK` action
+literal but not the separate HATP-gated evaluation above.
 """
 
 from __future__ import annotations
@@ -585,6 +595,71 @@ def evaluate_publication_permission(
         requested_capability=_PUBLICATION_CAPABILITY,
         task_id=task_id,
         requested_resource=f"session:{session_id};package:{package_id}",
+        evidence_available=True,
+        approval_present=False,
+        simulation_only=True,
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Rollback default-dispatch-path adapter (AG5, non-HATP_MANDATORY gap
+# closure) -- Phase 149O.20L.7O.3F, closing the gap 149O.20L.7O.3E
+# Section 7 identified: `build_rollback_execution`'s default (non-
+# `HATP_MANDATORY`) dispatch path had zero Permission Broker coverage at
+# all, unlike every other root-mutating command (push/commit/promotion/
+# publication).
+# ═══════════════════════════════════════════════════════════════════════════
+
+_ROLLBACK_COMPONENT = "COMP-008"  # "Rollback Boundary" -- same component id
+# `hatp_ag_authority.py` already registered for AG5, not a new invention.
+_ROLLBACK_CAPABILITY = "build_rollback_execution"  # same literal
+# `hatp_ag_authority.resolve_ag5_gated_rollback_authority` already uses.
+
+
+def evaluate_rollback_permission(
+    root: HarnessPath,
+    *,
+    task_id: str | None,
+    per_id: str,
+    ecp_id: str | None,
+) -> MutationPermissionResult:
+    """Rollback default-dispatch-path adapter. Evaluated once per real
+    (non-`dry_run`) rollback dispatch attempt, immediately before the
+    file restore/remove loop -- mirroring every other Wave-1 adapter's
+    "gate before the real effect, never after" placement.
+
+    Deliberately reuses `EXECUTION_CLASS_MUTATION` (identical to every
+    other Wave-1 adapter), not `EXECUTION_CLASS_ROLLBACK`:
+    `MissingHumanApprovalRule` (POL-004) is scoped to
+    `EXECUTION_CLASS_ROLLBACK`/`SHELL`/`BACKEND`/`ADAPTER` and explicitly
+    excludes `EXECUTION_CLASS_MUTATION` (RWMPC-001 precedent, Phase
+    148C.6). This adapter is a machine-checked authorization gate on an
+    already-human-initiated action (`pcae rollback --per-id X`), not a
+    new human-approval step -- reusing `EXECUTION_CLASS_ROLLBACK` here
+    would incorrectly invent a POL-004 HUMAN_REVIEW requirement this
+    phase's governing instruction does not authorize. `action_type`
+    reuses the existing `ACTION_ROLLBACK` literal (already a member of
+    `KNOWN_ACTION_TYPES`, previously consumed only by the separate
+    HATP-gated AG3/AG5 advisory evaluation in `hatp_ag_authority.py`) --
+    no new action-type vocabulary is invented.
+
+    This adapter is NOT wired into `build_rollback_execution`'s
+    `HATP_MANDATORY` branch, which already has its own, separate,
+    stricter HATP-integrated broker gate (`hatp_rollback_consumption.
+    evaluate_for_real_effect`) -- it governs only the previously-
+    unguarded default (legacy/prepared) dispatch path, per this phase's
+    narrow scope.
+    """
+    from pcae.core import permission_broker_foundation
+
+    return evaluate_repository_mutation_permission(
+        root=root,
+        action_type=permission_broker_foundation.ACTION_ROLLBACK,
+        execution_class=permission_broker_foundation.EXECUTION_CLASS_MUTATION,
+        requested_component=_ROLLBACK_COMPONENT,
+        requested_capability=_ROLLBACK_CAPABILITY,
+        task_id=task_id,
+        requested_resource=f"per:{per_id};ecp:{ecp_id or ''}",
         evidence_available=True,
         approval_present=False,
         simulation_only=True,

@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3F — Permission Broker Rollback Default-Path
+Consumption Integration. **BOUNDED SOURCE-MODIFYING INTEGRATION —
+COMPLETE.** Human-selected Plan B from 3E. Closed the sole remaining
+Permission Broker production-coverage gap: `pcae rollback`'s default
+(non-`HATP_MANDATORY`) dispatch path (`core/agent.py::
+build_rollback_execution`) previously had zero Permission Broker
+evaluation. Added `mutation_permission.evaluate_rollback_permission()`
+(reusing the existing `ACTION_ROLLBACK` literal with
+`EXECUTION_CLASS_MUTATION`, matching every other Wave-1 adapter, not the
+separate `EXECUTION_CLASS_ROLLBACK` HATP-gated evaluation), gated
+immediately before the restore/remove effect boundary, active only
+outside `HATP_MANDATORY` mode (which keeps its own separate, untouched,
+stricter HATP-integrated gate). ALLOW/DENY/broker-failure verified
+fail-closed with zero mutation on denial; dry-run readiness/evidence
+generation unaffected (bypasses the gate entirely, unchanged); human
+authority (`--per-id` CLI invocation) unchanged; runtime unchanged
+(`Observed`/`observe`/`unavailable`) — permission is not execution
+capability. Production diff: exactly two files
+(`core/mutation_permission.py`, `core/agent.py`), one new closed-status
+vocabulary entry (`aborted_permission_denied`). 21 new tests; existing
+Permission Broker Foundation/push/publication/policy/rollback regression
+suites pass unmodified in behavior; Fast Green baseline-vs-current
+node-ID delta shows 19 newly-failing/2 newly-passing entries, all
+independently confirmed non-functional (frozen historical-phase
+source-diff/git-status tripwires necessarily triggered by this phase's
+mandated `core/agent.py`/`core/mutation_permission.py` changes, or
+`-n auto` parallel-execution flakiness on shared real-host fixtures,
+confirmed via serial re-run) — **zero attributable functional
+regressions.** Not self-certified: recommends
+**149O.20L.7O.3F.1 — Independent End-to-End Rollback
+Permission-Boundary Verification** next, not begun. Runtime unchanged.
+Article and `~/repos/pcae-deepseek-research` untouched. See
+`docs/PHASE_149O_20L_7O_3F_PERMISSION_BROKER_ROLLBACK_DEFAULT_PATH_CONSUMPTION_INTEGRATION.md`
+for full evidence.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3E — Post-v0.4 Deferred Capability Consumption Priority
 Reassessment. **READ-ONLY STRATEGIC REASSESSMENT — COMPLETE.** Re-derived
 (not copied) the consumption maturity of all six deferred candidates from
@@ -33,8 +70,9 @@ disclosure + rollback readiness/evidence auto-generation) as a
 lower-risk alternative/companion, and Plan C (Repository Intelligence +
 Advisory-Context wiring, `v0.5.0`-scale) as the larger connected-
 intelligence step. No integration was implemented; no priority was
-selected unilaterally — **human priority selection required.** Runtime
-unchanged (`Observed`/`observe`/`unavailable`). Article and
+selected unilaterally — human priority selection was subsequently made:
+**Plan B, implemented in 149O.20L.7O.3F.** Runtime unchanged
+(`Observed`/`observe`/`unavailable`). Article and
 `~/repos/pcae-deepseek-research` untouched. See
 `docs/PHASE_149O_20L_7O_3E_POST_V0_4_DEFERRED_CAPABILITY_CONSUMPTION_PRIORITY_REASSESSMENT.md`
 for full evidence.

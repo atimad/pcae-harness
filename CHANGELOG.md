@@ -27,6 +27,26 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3F** — Permission Broker Rollback Default-Path
+  Consumption Integration: human-selected Plan B from 3E. Closed the
+  sole remaining Permission Broker production-coverage gap — `pcae
+  rollback`'s default (non-`HATP_MANDATORY`) dispatch path
+  (`core/agent.py::build_rollback_execution`) previously had zero
+  Permission Broker evaluation. Added `mutation_permission.
+  evaluate_rollback_permission()` (reuses the existing `ACTION_ROLLBACK`
+  literal with `EXECUTION_CLASS_MUTATION`, not the separate
+  `EXECUTION_CLASS_ROLLBACK` HATP-gated evaluation, to avoid inventing a
+  new POL-004 human-review requirement), gated immediately before the
+  restore/remove effect boundary, active only outside `HATP_MANDATORY`
+  mode. ALLOW/DENY/broker-failure fail-closed with zero mutation on
+  denial; dry-run readiness/evidence generation unaffected; human
+  authority and runtime (`Observed`/`observe`/`unavailable`) unchanged.
+  Production diff: exactly two files. 21 new tests; zero attributable
+  functional regressions (Fast Green baseline-vs-current delta fully
+  attributed to unrelated historical-phase source-diff tripwires and
+  confirmed `-n auto` flakiness). Not self-certified — recommends
+  `149O.20L.7O.3F.1 — Independent End-to-End Rollback
+  Permission-Boundary Verification` next, not begun.
 - Transitioned active task from Phase 149O.20L.7O.3D: PCAE v0.4.0 Public Release to Idle: awaiting next governed phase (post-149O.20L.7O.3D); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3C.4: Connected Capability Release Scope, Version, and Reproducible-Build Hardening to Idle: awaiting next governed phase (post-149O.20L.7O.3C.4); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3C.4** — Connected Capability Release Scope,
