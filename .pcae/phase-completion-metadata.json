@@ -54,6 +54,6 @@
   "validation_results": {
     "report_notification_tests": "not_applicable_this_phase (no report-notification production surface touched; this is a read-only audit phase with zero source changes)",
     "bootstrap_session_reporting_tests": "not_applicable_this_phase (no source change to bootstrap/session reporting surfaces this phase)",
-    "fast_green": "0 tests run this phase (read-only audit phase, zero source changes); no regression suite was run because no production source was modified -- capability-state evidence was instead gathered via targeted grep against existing test files (cited by filename throughout the phase document) and side-effect-free live CLI invocation, per the phase brief's explicit instruction not to run the entire suite merely to discover capabilities"
+    "fast_green": "0 passed, 0 failed -- 0 tests run this phase (read-only audit phase, zero source changes); no regression suite was run because no production source was modified -- capability-state evidence was instead gathered via targeted grep against existing test files (cited by filename throughout the phase document) and side-effect-free live CLI invocation, per the phase brief's explicit instruction not to run the entire suite merely to discover capabilities"
   }
 }

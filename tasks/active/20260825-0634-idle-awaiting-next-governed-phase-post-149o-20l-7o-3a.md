@@ -24,7 +24,6 @@ Idle: awaiting next governed phase (post-149O.20L.7O.3A)
 
 - tasks/DONE.md
 - CHANGELOG.md
-- tasks/done/20260825-0624-phase-149o-20l-7o-3a-existing-capability-confirmation-integration-gap-and-quick-release-audit.md
 - tasks/active/20260825-0634-idle-awaiting-next-governed-phase-post-149o-20l-7o-3a.md
 - tasks/done/20260825-0601-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z-1.md
 - .pcae/phase-completion-metadata.json
