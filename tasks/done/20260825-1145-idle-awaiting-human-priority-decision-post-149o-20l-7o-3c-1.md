@@ -10,7 +10,7 @@ Idle: awaiting human priority decision (post-149O.20L.7O.3C.1)
 
 ## Status
 
-active
+done
 
 ## Mode
 
