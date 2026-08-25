@@ -1,103 +1,105 @@
-# Phase 149O.20L.7O.2Z.1 Complete — PCAE v0.3.1 Public Release
+# Phase 149O.20L.7O.3A Complete — Existing Capability Confirmation, Integration Gap, and Quick-Release Audit
 
-**Verdict: COMPLETE — PCAE v0.3.1 PUBLICLY RELEASED. TAG VERIFIED.
-RELEASE-CANDIDATE COMMIT BINDING VERIFIED. WHEEL AND SDIST PUBLISHED
-AND CHECKSUM-VERIFIED. POST-PUBLICATION INSTALL PASS. GITHUB RELEASE
-PUBLISHED AND MARKED LATEST. PYPI NOT PUBLISHED. ARTICLE UNPUBLISHED.
-RUNTIME: Observed / observe / unavailable.**
+**Verdict: COMPLETE — READ-ONLY CAPABILITY AUDIT FINISHED. 16 AREAS
+CLASSIFIED A-G. QUICK-RELEASE BATCH SELECTED (4 CAPABILITIES,
+DOCUMENTATION-ONLY). RECOMMENDED NEXT VERSION: v0.3.2. ZERO PRODUCTION
+SOURCE CHANGES. RUNTIME: Observed / observe / unavailable. ARTICLE:
+STOPPED.**
 
-Published PCAE v0.3.1 from the exact independently pre-publication-
-verified release candidate established by Phase 2Z (commit
-`5d7edef9`), under explicit human publication authorization confirmed
-in-session before any irreversible action.
-
-Reconfirmed every pre-publication invariant immediately before
-tagging: `HEAD == origin/main`, zero `src/pcae/**`/`pyproject.toml`
-diff since the candidate commit, version `0.3.1`, no pre-existing
-`v0.3.1` tag/release, `v0.3.0` untouched.
-
-Created annotated tag `v0.3.1` pointing exactly at `5d7edef9` (not
-`HEAD`, which carries only later non-product phase-report commits) and
-pushed it without force. Independently verified local tag commit ==
-remote tag commit == release-candidate commit via `git rev-parse` and
-`git ls-remote`'s peeled ref.
-
-Rebuilt the wheel and sdist a third independent time from the exact
-candidate commit — the original pre-authorization build artifacts had
-been deleted during worktree cleanup — reproducing byte-identical
-output to both prior independent builds, proving the build process
-deterministic before using the output for publication.
-
-Created the GitHub Release
-(https://github.com/atimad/pcae-harness/releases/tag/v0.3.1, not
-draft, not prerelease, now `Latest`, targeting `main`) with the frozen
-wheel (`pcae_harness-0.3.1-py3-none-any.whl`, 2,338,452 bytes, SHA-256
-`a459617fdaf2d6424123852c84c8c7abf6e238224827196a37d1e346cf74dad6`,
-byte-identical to Phase 2Z's own originally reported wheel) and sdist
-(`pcae_harness-0.3.1.tar.gz`, 2,053,935 bytes, SHA-256
-`9d61147efa1f1fc2f96dc52366d884bbfa50f9d87d1af6e5d88f0ec4f8514084`,
-internally reproducible across three independent builds though
-differing from 2Z's now-unrecoverable original bytes — an explicitly
-human-authorized Path B divergence) attached.
-
-Independently re-verified GitHub's own server-reported asset SHA-256
-digests match these exact values, then separately downloaded both
-assets fresh and recomputed their checksums locally as a third
-independent confirmation.
+Conducted a read-only audit and product-gap analysis of PCAE's full
+capability universe against current `HEAD` source and live CLI
+output, using five parallel independent research passes covering
+Permission Broker, Runtime Enforcement, Shell Gate, HATP/HMIC,
+Class-B verifier, Rollback, Repository Intelligence, Advisory,
+Plugin/Runtime introspection, CLTR/canonical lifecycle, Human
+Governance/CHGR, Authority Evaluation, Telegram/notifications,
+Audit/evidence persistence, Backend/provider adapters, and packaging.
 
 ## Summary
 
-Zero remaining BLOCKING/MUST-FIX items. Ran full post-publication
-install and golden-workflow smoke (`pcae init`, `session bootstrap`,
-`intake from-files`, `intake show/list`, `codex-ox` bootstrap/
-provenance, no-lock compatibility) against the public downloaded
-GitHub Release assets specifically — not the local build — for both
-wheel and sdist, with zero external AI/network calls, matching the
-pre-publication evidence exactly.
+Most historically "strategically important" areas — Permission Broker
+(push/commit/promotion gating), Rollback, Interactive Workflow/CHGR,
+Telegram, audit/evidence persistence, and the Authority Evaluation
+service — are already released and load-bearing as of `v0.3.1`.
+HATP/HMIC, CLTR authority cutover, and real backend execution remain
+correctly hard-stopped: current source (not historical claims) proves
+no production-reachable activation path exists for any of them (e.g.
+`hatp_mandatory_cutover.py`'s own docstring; `pcae cltr migration
+status --json` self-reporting `production_authority: "legacy"`,
+`authority_cutover: false`; `pcae backend execution-boundary proof
+--json` returning `execution_available: false` across every provider).
 
-Reconfirmed `v0.3.0` completely unchanged (same tag SHA, same release,
-only no longer marked `Latest` — normal single-`Latest` GitHub
-semantics). PyPI publication and article publication both remain
-explicitly out of scope and untouched, per the authorization boundary.
-Zero source-code changes this phase — publication and governance/
-task-lifecycle bookkeeping only.
+The single largest near-complete, under-exposed capability found is
+**Repository Intelligence** (Repository Knowledge Snapshot, Query,
+Advisory-Context, Change-Impact): ~70+ tests, fully CLI-registered,
+byte-unchanged since `v0.3.1`, but undocumented in README/CHANGELOG
+headline and consumed by zero other PCAE subsystem outside its own
+CLI. Combined with the already-complete, honestly-scoped **Runtime/
+plugin introspection** CLI and the already-released-but-undocumented
+**Interactive Workflow/CHGR**, this yields a coherent, low-risk,
+documentation-only quick-release batch.
+
+## Selected Quick-Release Batch
+
+1. Repository Intelligence exposure (RKS/Query/Advisory-Context/Change-Impact)
+2. Runtime/plugin introspection exposure
+3. Interactive Workflow/CHGR discoverability
+4. `pcae authority inspect` documentation (bundled)
+
+All four: already built, already tested, already shipped in `v0.3.1`'s
+installed code; zero execution-capability change; zero new trust
+surface. **Recommended theme:** expose PCAE's existing read-only
+intelligence and governance-transparency layer as a documented,
+supported product capability. **Recommended version:** v0.3.2.
+
+## Rejected/Deferred
+
+Permission Broker primitive-level closure (real code change, marginal
+value — already gated one layer up); Repository Intelligence
+Dependency-Graph/Historical-Memory/Cross-Artifact/Unified-Query/
+Service (self-labeled prototypes, need a real consumer, not just
+docs); Class-B verifier standalone exposure (HOLD — TRUST GAP, low
+value); HATP Trust-Enrollment/activation, CLTR authority cutover,
+backend execution activation (hard-stopped by phase-brief SS38).
 
 ## Test Evidence
 
-0 tests run in this phase (publication-only, zero source changes). The
-release-critical/targeted regression evidence this publication relies
-on — 4671 passed, 0 failed across release-critical
-(`test_phase_149o_20l_7o_2z_release_candidate.py` +
-`test_phase_149o_20l_7o_2y_release_hardening.py`, 31), 2X/2X.1/2W/2W.1
-(109), 2U.2-4 (150), and `test_agent.py`+`test_session.py` (4381) — was
-established in the immediately preceding pre-publication-verification
-continuation against the unmodified `5d7edef9`-equivalent source tree,
-not re-run redundantly here since no source changed between that
-verification and this publication. Resource-sensitive tests
-re-isolated under low load in that same continuation: both
-`test_show_after_create` node IDs pass; the concurrent-load artifact
-passes cleanly alone; the expected until-push guard test now passes
-(resolved once `HEAD == origin/main`); the shell-gate audit-verify
-timeout reproduces deterministically (200,987+ accumulated records,
-unrelated to any v0.3.1 diff) — accepted debt, unchanged.
+0 tests run this phase (read-only audit, zero source changes) — per
+the phase brief's explicit instruction not to run the full suite
+merely to discover capabilities. Capability-state evidence was
+gathered via targeted `grep` against existing test files (cited by
+filename throughout the phase document, e.g. `tests/test_phase_120e_
+repository_knowledge_snapshot.py`, `tests/test_permission_broker_
+push_production_consumption.py`, `tests/test_phase_147*.py` ×8) and
+side-effect-free live CLI invocation (`pcae runtime inspect --json`,
+`pcae repository-intelligence {snapshot generate, query, dependency-
+graph generate, historical-memory generate}`, `pcae advisory {status,
+context build, check}`, `pcae cltr migration status --json`, `pcae
+agents adapters --json`, `pcae backend list --json`, `pcae notify
+status`, `pcae backend execution-boundary proof --json`, and `--help`
+on `hatp`, `rollback`, `decision-session`, `governance-record`,
+`authority`).
 
 ## Governance
 
 `pcae health`: healthy. `pcae check`: passed. `pcae status coherence`:
 coherent. `pcae doctor task-memory`: 129 warnings, unchanged,
 repository-maintainer-only. `pcae runtime inspect`:
-`execution_capability: unavailable`, unchanged before/after
-publication. `v0.3.0` tag (`738a8155...9a6c`) re-confirmed unchanged.
-`v0.3.1` tag (`5d7edef9...`) verified local == remote == release-
-candidate commit. No article read/modified/published. No inspection of
-the private `~/repos/pcae-deepseek-research` repository. No PyPI
-action of any kind.
+`execution_capability: unavailable`, unchanged before/after this
+phase. No article read/modified/published. No inspection of the
+private `~/repos/pcae-deepseek-research` repository. No PyPI action.
+No production source, CLI, contract, schema, or packaging-
+configuration file was modified this phase.
 
 ## Recommended Next Phase
 
-**Post-v0.3.1 Article Reassessment and Rewrite** — a discussion phase,
-not automatically a new PCAE code phase, to reassess the unpublished
-article draft against the exact v0.3.1 released capability set before
-any decision to rewrite or publish it.
+**3B — Verify + expose the selected batch.** Confirm exact current
+CLI syntax/output for the four selected capabilities against this
+audit's citations, then write the README/QUICKSTART/docs/COMMANDS.md/
+CHANGELOG documentation additions that surface them as supported
+workflows. Followed by **3C — Release hardening/RC** and **3D —
+Public v0.3.2 release**. No new architecture or contract phase is
+recommended.
 
-Full text: `docs/PHASE_149O_20L_7O_2Z_1_PUBLIC_RELEASE.md`.
+Full text:
+`docs/PHASE_149O_20L_7O_3A_EXISTING_CAPABILITY_CONFIRMATION_INTEGRATION_GAP_AND_QUICK_RELEASE_AUDIT.md`.

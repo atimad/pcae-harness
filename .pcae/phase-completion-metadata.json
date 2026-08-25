@@ -1,72 +1,59 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "Followed the exact human-authorized publication scope: reconfirmed every pre-publication invariant (HEAD==origin/main, zero src/pcae/**/pyproject.toml diff since 5d7edef9, version 0.3.1, no existing v0.3.1 tag/release, v0.3.0 unchanged) immediately before the first irreversible action. Rebuilt the wheel/sdist a third independent time from commit 5d7edef9 in a fresh git worktree/venv since the original pre-authorization build artifacts had already been deleted; both matched the two prior independent builds' SHA-256 checksums exactly, proving the rebuild process deterministic across three runs before using the output for publication. Created the annotated v0.3.1 tag pointing exactly at 5d7edef9 (not HEAD), verified locally, pushed without force, then independently re-verified via git ls-remote's peeled ref that the remote tag commit equals the release-candidate commit. Created the GitHub Release via gh release create, then independently verified via gh release view --json that the server-reported asset SHA-256 digests match the frozen values, and separately downloaded both assets fresh via gh release download and recomputed their checksums locally as a third independent check. Ran full post-publication install/workflow smoke (bootstrap, intake from-files, intake show/list, codex-ox, no-lock) against the public downloaded GitHub Release assets specifically, not the local build, for both wheel and sdist.",
+  "derived_correctness": "Ran the mandated baseline sequence at phase entry (git status/log, pcae health/check/status coherence/doctor task-memory/push check/runtime inspect, telegram env + notify status, phase-report show --latest), confirming a clean repository, zero commits ahead of origin/main, v0.3.1 as the latest release, and unchanged non-executing runtime posture before any analysis began. Launched five independent read-only research passes against current HEAD source and live CLI output (not historical phase-doc claims alone) covering all 16 capability areas named in the phase brief, each required to cite concrete file paths, function/class names, and either live CLI output or existing test file names. Synthesized the five reports into a single phase document with the four mandated matrices (Capability State, Gap, Candidate Ranking, Recommended Batch), classified every area A-G, and derived a 2-4 item quick-release batch using the phase brief's stated preference (already built + verified + one missing integration/documentation edge + no runtime-capability elevation) rather than selecting by historical importance. Every hard-stop item in phase-brief SS38 (HATP/FIDO2 activation, CLTR authority cutover, backend execution activation, Class-B positive-authority integration) was explicitly identified via direct source evidence (e.g. hatp_mandatory_cutover.py's own docstring stating no production-reachable activation path exists; pcae cltr migration status self-reporting production_authority: legacy) and excluded from the selected batch, not merely asserted excluded.",
   "execution_availability": "unavailable",
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_2Z_1_PUBLIC_RELEASE.md",
+    "docs/PHASE_149O_20L_7O_3A_EXISTING_CAPABILITY_CONFIRMATION_INTEGRATION_GAP_AND_QUICK_RELEASE_AUDIT.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260824-2344-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z.md",
-    "tasks/done/20260824-2344-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z.md",
-    "tasks/active/20260825-0559-phase-149o-20l-7o-2z-1-pcae-v0-3-1-public-release.md",
-    "tasks/done/20260825-0559-phase-149o-20l-7o-2z-1-pcae-v0-3-1-public-release.md",
-    "tasks/active/20260825-0601-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z-1.md",
+    "tasks/active/20260825-0624-phase-149o-20l-7o-3a-existing-capability-confirmation-integration-gap-and-quick-release-audit.md",
+    "tasks/done/20260825-0624-phase-149o-20l-7o-3a-existing-capability-confirmation-integration-gap-and-quick-release-audit.md",
+    "tasks/active/20260825-0634-idle-awaiting-next-governed-phase-post-149o-20l-7o-3a.md",
+    "tasks/done/20260825-0601-idle-awaiting-next-governed-phase-post-149o-20l-7o-2z-1.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 11,
+  "files_changed_count": 10,
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings (129 pre-existing historical tasks/DONE.md sync-debt findings, repository-maintainer-only, unrelated to this phase; unchanged from phase entry)",
-    "pcae_push_check": "nothing_to_push",
-    "pcae_runtime_inspect": "execution_capability: unavailable, governance posture: non-executing -- unchanged, independently re-queried after publication",
+    "pcae_push_check": "clean",
+    "pcae_runtime_inspect": "execution_capability: unavailable, governance posture: non-executing -- unchanged, reconfirmed at phase entry and phase close",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
-  "internal_evidence_coherence": "Every publication claim traces to a command actually run this phase: the tag-target binding is a literal git rev-parse/ls-remote comparison against the frozen release_candidate_commit; the wheel/sdist checksums are shasum output computed independently three times (pre-authorization Build A/B, then the final pre-tag rebuild) plus a fourth independent computation on the assets downloaded back from the published GitHub Release; the GitHub Release state (not draft, not prerelease, Latest, correct target branch) is gh release view --json output, not assumed; the post-publication smoke transcripts are literal CLI output from two independent disposable venvs installing only the public downloaded assets, not the local source tree or local build.",
-  "no_go_confirmation": "No PyPI publication occurred -- no credentials created, no upload attempted. No modification was made to the v0.3.0 tag (git rev-parse v0.3.0^{commit} re-confirmed 738a81553128665a9c206f3ce33c931dc9089a6c, unchanged) or its GitHub Release. No published v0.3.1 asset was substituted after the release was created -- the release was created once, with the frozen artifacts, and not re-uploaded. No article read, modification, or publication occurred. No inspection of the private ~/repos/pcae-deepseek-research repository occurred. No source-code change was made this phase -- files_changed above is entirely docs/task-lifecycle/governance-metadata bookkeeping plus the publication action itself (tag+release, not a repository file). No Codex execution was implemented; no OpenRouter call was added. No runtime execution was activated -- pcae runtime inspect reconfirmed execution_capability: unavailable after publication. No force push was performed (git push origin v0.3.1 was a plain, non-force push of a tag that did not previously exist). No --no-verify or history rewrite was performed. No raw git push of the main branch occurred outside pcae-governed commit/task/phase commands; the tag push itself has no pcae-governed equivalent (confirmed absent in docs/PHASE_149O_20L_7O_2U_..._FREEZE.md §30) and matches the established v0.1.0-rc1/v0.2.0/v0.3.0 precedent exactly.",
-  "origin_main_head": "36d12608dc2e59aa715a161bdb86a5434998ab3a",
-  "origin_main_head_count": 6,
+  "internal_evidence_coherence": "Every classification in the phase document traces to a citation gathered during this phase: file paths and function/class names from direct source inspection, or literal live CLI output (pcae runtime inspect --json, pcae backend execution-boundary proof --json, pcae repository-intelligence {snapshot,query,dependency-graph,historical-memory} live invocations, pcae advisory {status,check,context build}, pcae cltr migration status --json, pcae agents adapters --json, pcae backend list --json, pcae notify status, pcae hatp/rollback/decision-session/governance-record/authority --help). No classification rests on a phase-title or PROJECT_STATUS.md claim alone; where a historical doc's claim (e.g. Chapter 147 'operationally certified', HMIC activation phase headlines) was checked against current source, the current-source finding is what appears in the classification, with the historical claim cited only as corroborating context.",
+  "no_go_confirmation": "No production source, CLI, contract, schema, or packaging-configuration file was modified this phase -- files_changed above is entirely the new audit document plus task-lifecycle/governance-metadata bookkeeping. No implementation of any selected capability occurred; the batch is a recommendation only. No new architecture or contract was created. No PyPI publication, tag, or GitHub Release action occurred; no version was changed in pyproject.toml. No hardware provisioning, credential creation, trust-root creation, FIDO2 enrollment, Dell mutation, or HATP/HMIC activation occurred or was proposed for action -- HATP/HMIC/Class-B were explicitly excluded from the selected batch specifically because current source proves no production-reachable activation path exists. No CLTR authority cutover was proposed or performed; pcae cltr migration status was queried read-only and confirmed production_authority: legacy, unchanged. No shell execution was activated; no Telegram inbound capability was added (notify status was queried read-only). No article was read, modified, or published. No inspection of the private ~/repos/pcae-deepseek-research repository occurred. No broad test suite was run; existing-test evidence was gathered via targeted grep and side-effect-free CLI invocation only, per the phase brief's focused-verification instruction. No raw git commit or git push was performed outside pcae-governed commands; no force push, --no-verify, or history rewrite occurred.",
+  "origin_main_head": "d2d406c39881636aa87320d9acac848852ac278d",
+  "origin_main_head_count": 3,
   "phase_commits": [
     {
-      "hash": "f8f3c25a",
-      "subject": "Phase 149O.20L.7O.2Z.1: PCAE v0.3.1 public release (tag + GitHub Release), full pre/post-publication verification"
+      "hash": "c3a69e6c",
+      "subject": "Phase 149O.20L.7O.3A: Existing Capability Confirmation, Integration Gap, and Quick-Release Audit"
     },
     {
-      "hash": "7c206d68",
-      "subject": "Phase 149O.20L.7O.2Z.1: update PROJECT_STATUS.md and CHANGELOG.md"
+      "hash": "fdd54b13",
+      "subject": "Phase 149O.20L.7O.3A: update PROJECT_STATUS.md and CHANGELOG.md"
     },
     {
-      "hash": "b4c75e58",
-      "subject": "Phase 149O.20L.7O.2Z.1: close out task lifecycle, open idle placeholder"
-    },
-    {
-      "hash": "67c58126",
-      "subject": "Phase 149O.20L.7O.2Z.1: sync task-lifecycle move (idle-to-2Z.1 transition)"
-    },
-    {
-      "hash": "41f76fe8",
-      "subject": "Phase 149O.20L.7O.2Z.1: write canonical phase-completion metadata and report (pre-push)"
-    },
-    {
-      "hash": "ccfdeee3",
-      "subject": "Phase 149O.20L.7O.2Z.1: restore idle-task allowed-files after phase-complete lock release"
+      "hash": "46054943",
+      "subject": "Phase 149O.20L.7O.3A: close out task lifecycle, open idle placeholder"
     }
   ],
-  "phase_id": "149O.20L.7O.2Z.1",
-  "phase_name": "PCAE v0.3.1 Public Release",
-  "phase_title": "PCAE v0.3.1 Public Release",
-  "pushed_status": "nothing_to_push",
-  "recommended_next_phase": "Post-v0.3.1 Article Reassessment and Rewrite -- a discussion phase to reassess the unpublished article draft against the exact v0.3.1 released capability set. Not automatically a new PCAE code phase; only after that reassessment should the human decide whether to rewrite or publish the article.",
+  "phase_id": "149O.20L.7O.3A",
+  "phase_name": "Existing Capability Confirmation, Integration Gap, and Quick-Release Audit",
+  "phase_title": "Existing Capability Confirmation, Integration Gap, and Quick-Release Audit",
+  "pushed_status": "clean",
+  "recommended_next_phase": "3B -- Verify + expose the selected quick-release batch (Repository Intelligence exposure, Runtime/plugin introspection exposure, Interactive Workflow/CHGR discoverability, pcae authority inspect documentation): confirm exact current CLI syntax/output against this audit's citations, then write the README/QUICKSTART/docs/COMMANDS.md/CHANGELOG documentation additions that surface them as supported workflows, followed by 3C (release hardening/RC) and 3D (public v0.3.2 release). No new architecture or contract phase recommended.",
   "status": "completed",
-  "summary": "Published PCAE v0.3.1 from the exact independently pre-publication-verified release candidate established by Phase 2Z (commit 5d7edef9), under explicit human publication authorization confirmed in-session before any irreversible action. Reconfirmed every pre-publication invariant immediately before tagging (HEAD==origin/main, zero product-source diff since the candidate commit, version 0.3.1, no pre-existing v0.3.1 tag/release, v0.3.0 untouched). Created annotated tag v0.3.1 pointing exactly at 5d7edef9 (not HEAD, which carries only later non-product phase-report commits) and pushed it without force; independently verified local tag commit == remote tag commit == release-candidate commit via git rev-parse and git ls-remote's peeled ref. Rebuilt the wheel and sdist a third independent time (the original pre-authorization build artifacts had been deleted during worktree cleanup) from the exact candidate commit in a fresh isolated worktree/venv, reproducing byte-identical output to both prior independent builds -- proof of a deterministic build process before using the output for publication. Created the GitHub Release (https://github.com/atimad/pcae-harness/releases/tag/v0.3.1, not draft, not prerelease, now Latest, targeting main) with the frozen wheel (2,338,452 bytes, SHA-256 a459617fdaf2d6424123852c84c8c7abf6e238224827196a37d1e346cf74dad6, byte-identical to Phase 2Z's own originally reported wheel) and sdist (2,053,935 bytes, SHA-256 9d61147efa1f1fc2f96dc52366d884bbfa50f9d87d1af6e5d88f0ec4f8514084, internally reproducible across three independent builds though differing from 2Z's now-unrecoverable original bytes -- an explicitly human-authorized Path B divergence, not investigated further per instructions) attached. Independently re-verified GitHub's own server-reported asset SHA-256 digests match these exact values, then separately downloaded both assets fresh and recomputed their checksums locally as a third independent confirmation. Ran full post-publication install and golden-workflow smoke (pcae init, session bootstrap, intake from-files, intake show/list, codex-ox bootstrap/provenance, no-lock compatibility) against the public downloaded GitHub Release assets specifically for both wheel and sdist, with zero external AI/network calls, matching the pre-publication evidence exactly. Reconfirmed v0.3.0 completely unchanged (same tag SHA, same release, only no longer marked Latest -- normal single-Latest GitHub semantics). PyPI publication and article publication both remain explicitly out of scope and untouched, per the authorization boundary. Zero source-code changes this phase -- publication and governance/task-lifecycle bookkeeping only. Carried forward, unrepaired and explicitly reaffirmed by the human as accepted: empty-agent_id descriptive-provenance debt, 129 tasks/DONE.md historical sync warnings (repository-maintainer-only), and the shell-gate audit-verify resource-sensitive subprocess timeout (unrelated to any v0.3.1 product change). Recommends a discussion-only post-release article reassessment as the next step, not a new engineering phase.",
-  "test_evidence_classification": "publication_verification",
+  "summary": "Conducted a read-only audit and product-gap analysis of the full PCAE capability universe (16 areas: Permission Broker, Runtime Enforcement, Shell Gate, HATP/HMIC, Class-B verifier, Rollback, Repository Intelligence, Advisory, Plugin/Runtime introspection, CLTR/canonical lifecycle, Human Governance/CHGR, Authority Evaluation, Telegram/notifications, Audit/evidence persistence, Backend/provider adapters, packaging) against current HEAD source and live CLI output, using five parallel independent research passes. Classified each area A-G per the phase brief's scheme, grounding every conclusion in concrete file/function citations or live command output rather than historical phase-doc claims. Found that most historically 'strategically important' areas (Permission Broker, Rollback, Interactive Workflow/CHGR, Telegram, Audit persistence, the Authority Evaluation service) are already released and working as of v0.3.1, while HATP/HMIC, CLTR authority cutover, and real backend execution remain correctly hard-stopped (no production-reachable activation path exists for any of them, confirmed directly from source rather than assumed). The single largest near-complete, under-exposed capability found was Repository Intelligence (Repository Knowledge Snapshot, Query, Advisory-Context, Change-Impact): ~70+ tests, fully CLI-registered, byte-unchanged since v0.3.1, but undocumented in README/CHANGELOG headline and consumed by zero other PCAE subsystem. Combined with the already-complete Runtime/plugin introspection CLI and the already-released-but-undocumented Interactive Workflow/CHGR, this yielded a coherent, low-risk, documentation-only quick-release batch requiring no execution-capability or authority change, recommended for a v0.3.2 release via a 3B (verify+expose) -> 3C (release hardening/RC) -> 3D (public release) sequence. Zero production source, CLI, contract, or packaging changes were made this phase; only the audit document and governance/task-lifecycle bookkeeping.",
+  "test_evidence_classification": "audit_evidence_gathering",
   "tests_run": 0,
   "validation_results": {
-    "report_notification_tests": "not_applicable_this_phase (no report-notification production surface touched; this is a publication phase with zero source changes)",
-    "bootstrap_session_reporting_tests": "not_applicable_this_phase (no source change to bootstrap/session reporting surfaces; pre-publication verification's malformed-lock/bootstrap regression matrix was run and passed under Phase 2Z.1's pre-publication-verification continuation, prior to this metadata commit, against the same unmodified source)",
-    "fast_green": "0 tests run this phase (publication-only phase, zero source changes); the release-critical/targeted regression evidence this publication relies on (4671 passed, 0 failed across release-critical + 2X/2X.1/2W/2W.1 + 2U.2-4 + test_agent.py+test_session.py) was established in the immediately preceding pre-publication-verification continuation against the unmodified 5d7edef9-equivalent source tree, not re-run redundantly here since no source changed between that verification and this publication"
+    "report_notification_tests": "not_applicable_this_phase (no report-notification production surface touched; this is a read-only audit phase with zero source changes)",
+    "bootstrap_session_reporting_tests": "not_applicable_this_phase (no source change to bootstrap/session reporting surfaces this phase)",
+    "fast_green": "0 tests run this phase (read-only audit phase, zero source changes); no regression suite was run because no production source was modified -- capability-state evidence was instead gathered via targeted grep against existing test files (cited by filename throughout the phase document) and side-effect-free live CLI invocation, per the phase brief's explicit instruction not to run the entire suite merely to discover capabilities"
   }
 }
