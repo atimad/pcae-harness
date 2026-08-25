@@ -1,73 +1,68 @@
-# Phase 149O.20L.7O.3H.1 Complete — PCAE v0.4.1 Public Release
+# Phase 149O.20L.7O.3I Complete — Post-v0.4.1 Deferred Capability Consumption Priority Reassessment
 
-**Verdict: PUBLICLY RELEASED. ZERO BLOCKING FINDINGS.**
-Publication-only phase. Publicly released PCAE v0.4.1 under explicit
-human authorization given in the active session ("Approved") after
-independent re-verification of the frozen `149O.20L.7O.3H` release
-candidate reached a zero-blocking/zero-must-fix PUBLICATION READY
-checkpoint. Runtime unchanged (`Observed`/`observe`/`unavailable`).
+**Verdict: COMPLETE. READ-ONLY STRATEGIC REASSESSMENT. ZERO BLOCKING FINDINGS.**
+Re-derived, from current source (not from prior phase summaries), the
+priority order of the three deferred mature capability-consumption
+candidates first identified in `149O.20L.7O.3E` and re-touched in
+`149O.20L.7O.3G`. Runtime unchanged (`Observed`/`observe`/`unavailable`).
 
 ## Summary
 
-**Release candidate:** `9869cb65d890b70d8649ddd4216ffda4e7d98df5` (full
-SHA independently derived). Phase-entry `HEAD` (`7eaaee1a`) contained
-only 3H's own lifecycle/reporting commits since the candidate — zero
-release-facing drift (`git diff 9869cb65..HEAD -- src/pcae
-pyproject.toml docs/RELEASE_NOTES_V0_4_1.md` empty).
+**Baseline confirmed:** `git diff --name-status v0.4.1..HEAD -- src/pcae/`
+returned empty — zero production behavior change since the public
+`v0.4.1` release tag (`9869cb65`).
 
-**Build reproducibility:** 3H's own frozen wheel/sdist bytes were not
-preserved between phases (built in disposable `/tmp` venvs, destroyed
-after use). Independently rebuilt via two fresh clean clones pinned to
-the candidate commit, using the unmodified `v0.4.0` process
-(`hatchling==1.32.0`, `build 1.5.0`, Python 3.14.5). Build A == Build B
-byte-for-byte, and both matched 3H's frozen record exactly (wheel
-SHA-256 `1994dc04...8309`, 2,350,582 bytes; sdist SHA-256
-`f8712b9b...5e16cf`, 2,052,499 bytes).
+**Candidate A — rollback readiness/evidence:** readiness has NOT
+IMPLEMENTED status (no automatic-generation concept exists anywhere);
+rollback evidence (dry-run) is PRODUCTION-CONSUMED but human-CLI-
+triggered only (`build_rollback_execution(dry_run=True)` has exactly
+one caller in `src/pcae`); the Permission Broker gate on the default
+rollback path remains RELEASED (`v0.4.1`, unchanged, `agent.py:94356`).
+Missing edge: automatic generation at `pcae promote` completion, plus a
+new small persistence/freshness contract. Effort S-M, authority risk
+LOW.
 
-**Installed-artifact rollback Permission Broker smoke:** reconstructed
-a 19-check suite from production `pcae.core.*` APIs only (no
-test-suite imports) — dry-run, real ALLOW, forced DENY,
-missing-active-task DENY, broker failure, malformed result,
-`HATP_MANDATORY` isolation (adapter never invoked), human `--per-id`
-trigger requirement, dry-run readiness unaffected by missing task.
-19/19 passed identically on the rebuilt wheel, the rebuilt sdist, and
-— after upload — the **downloaded public wheel**.
+**Candidate B — runtime preflight:** the runtime registry is
+architecturally always empty (0 plugins, an invariant — `pcae runtime
+inspect`: `Registry status: empty`). Three real production workflows
+already auto-consume static runtime facts (session bootstrap,
+phase-report generation, finalization) — no unmet real workflow need
+was found for capability-aware routing, since nothing yet exists to
+route among. Effort S, authority risk LOW, lowest priority.
 
-**Source-level regression sweeps** (byte-identical source to the
-verified candidate, run at phase-entry `HEAD`): Permission Broker
-broad sweep 1109 passed/5 failed, Plan B+/corrupt-store 43 passed/0
-failed, intake/Codex-Ox 430 passed/8 failed/1 error, 3F+3F.1+AG5+18D
-focused bucket 202 passed/5 failed, packaging 20 passed/0 failed —
-every failure matched 3H's own documented pre-existing set by name.
-`fast_green`: 336 failed/8731 passed/5 skipped/9 errors, within the
-same flake tolerance 3H itself documented (zero source drift since the
-candidate). **Zero attributable regressions.**
+**Candidate C — RI/Advisory:** the RI-backed Advisory-context bridge
+(`advisory/context/advisory_context_builder.py`) is fully built and
+tested but has exactly one caller — a CLI command
+(`commands/advisory_context.py`); `core/advisory.py`'s real decision
+engine never consumes it. Missing edge: a single bounded caller-side
+wire, with fail-soft handling for missing/stale RI snapshots. Authority
+isolation confirmed clean (zero `permission_broker` references in
+`repository_intelligence`/`advisory` source). **This phase revises
+Candidate C's prior M/"v0.5.0-scale" effort label DOWN to S** — the
+hard architectural work is already built and tested; only the caller
+wire is missing.
 
-**Publication actions:** created annotated tag `v0.4.1` pinned
-explicitly to the release-candidate commit (not `HEAD`); pushed it
-(local tag target == remote tag target == candidate, verified both
-ways); created the public GitHub Release (`--latest`, correct target,
-not draft/prerelease); recomputed frozen artifact hashes immediately
-before upload (exact match, no rebuild) and uploaded them; downloaded
-the public assets post-upload and verified filename/size/SHA-256 exact
-match to the local frozen artifacts; confirmed public release state
-(tag, target, Latest pointer, notes) correct; installed the public
-wheel and public sdist into fresh disposable venvs with no local
-source on path — version/import/CLI all PASS.
+**Priority ranking: C > A > B.** Recommended: Plan A (Candidate C
+narrow first cut) as the fastest, highest-value next step. Plan B
+(Candidate C + Candidate A together) offered as the highest-strategic-
+value batch without execution activation. Plan C provides a sequenced
+roadmap (C → A → B).
 
-**v0.4.0 isolation:** tag, GitHub Release, and both assets confirmed
-unchanged both before and after `v0.4.1` publication.
+**Already-connected governance confirmed:** no new Permission Broker
+gap or production mutation bypass was found by any of the three
+independent candidate investigations.
 
-**PyPI: NOT PUBLISHED** (unauthorized, out of scope). **Article:
-STOPPED**, not resumed. `~/repos/pcae-deepseek-research` untouched.
+**No integration was implemented. No priority was selected
+unilaterally.**
 
-**BLOCKING: 0. MUST-FIX: 0.** No production source, version, or build
-configuration change made this phase.
+```text
+HUMAN PRIORITY SELECTION REQUIRED
+```
 
-**Does not self-authorize the deferred capability roadmap.**
-Recommends a reassessment of runtime preflight disclosure, rollback
-readiness/evidence auto-generation, and Repository Intelligence +
-Advisory integration next — none selected this phase.
+**BLOCKING: 0. MUST-FIX: 0.** No production source, CLI, contract,
+schema, version, or build configuration change was made this phase.
+Article remains **STOPPED**, not resumed. `~/repos/pcae-deepseek-research`
+untouched.
 
-See `docs/PHASE_149O_20L_7O_3H_1_PCAE_V0_4_1_PUBLIC_RELEASE.md` for the
-full evidence trail.
+See `docs/PHASE_149O_20L_7O_3I_POST_V0_4_1_DEFERRED_CAPABILITY_CONSUMPTION_PRIORITY_REASSESSMENT.md`
+for the full evidence trail.
