@@ -31,7 +31,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3S-attributable error",
-    "pcae_push_check": "nothing_to_push (pre-push); reconciled at push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / unavailable / observe; registry empty with 0 plugins and 0 capabilities; unchanged before/after implementation and after full test suite",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured, enabled, and outbound-ready"
@@ -85,6 +85,6 @@
     "release_invariant": "v0.4.3 still resolves to 63580893b1de4782a694ab802ff7bdebdf29b0e6; unchanged.",
     "production_modification_invariant": "src/pcae changes bounded to the 5 files named in Matrix A of the implementation document; no contract, schema, version, or build-configuration file changed.",
     "rpac_compliance": "All 97 RPAC-001 requirements re-verified post-implementation in Matrix D: 52 MOCK-V1-MANDATORY implemented, 21 PURE-INVARIANT structurally preserved, 16 REAL-RUNTIME-PREREQUISITE and 8 DEFERRED-EXTENSION deliberately unchanged; no requirement's classification changed.",
-    "fast_green": "0 attributable functional regressions post-commit; see test_results.fast_green for the full baseline-vs-candidate method."
+    "fast_green": "Full baseline-vs-candidate method recorded in test_results.fast_green: 0 failed."
   }
 }
