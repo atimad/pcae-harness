@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3O** — PCAE v0.4.3 Release Hardening: prepared a
+  frozen, reproducible `v0.4.3` release candidate (commit `63580893`)
+  shipping the human-selected RELEASE NOW decision (`3M`'s rollback
+  evidence-visibility change as a narrow patch, unbundled). Version
+  bumped to `0.4.3` in `pyproject.toml`/`src/pcae/__init__.py`.
+  `docs/RELEASE_NOTES_V0_4_3.md` created (theme: Rollback Evidence
+  Visibility; states rollback preparation was already automatic before
+  `v0.4.3`). Two independent clean-clone builds produced byte-identical
+  wheel/sdist (`sha256:e42ca72c...`/`sha256:8a088983...`). Installed
+  both artifacts into fresh venvs (version `0.4.3` confirmed, golden
+  path passed). Installed-wheel rollback evidence-visibility smoke
+  (dry-run, real ALLOW with no prior dry-run, divergence-block) all
+  passed. Fast Green: 0 attributable regressions (PASS verdict); two
+  `3M.1` tests blocked only by an environment-only missing `rg` binary,
+  manually re-verified and independently confirmed non-attributable.
+  BLOCKING = 0, MUST-FIX = 0. Mature S/M consumption program reconfirmed
+  exhausted, not reopened. Publication NOT PERFORMED (no tag, no
+  release, no upload) — requires separate human authorization.
 - **Phase 149O.20L.7O.3M.1** — independently verified the rollback
   preparation/evidence path against fixed pre-`3M` and current trees.
   Confirmed real rollback already computed and consumed `file_plan` and

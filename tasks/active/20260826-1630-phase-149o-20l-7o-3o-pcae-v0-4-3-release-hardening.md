@@ -36,6 +36,7 @@ Prepare a frozen, verified v0.4.3 release candidate surfacing the already-comput
 - .pcae/phase-completion-report.md
 - tasks/active/20260826-1630-phase-149o-20l-7o-3o-pcae-v0-4-3-release-hardening.md
 - tasks/done/20260826-1612-phase-149o-20l-7o-3n-1-mature-capability-consumer-edge-investigation.md
+- .pcae/fast-green-attribution/*.json
 
 ## Override Protected Files
 

@@ -1,57 +1,63 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "3N.1 independently re-derived the audit/explainability, Advisory Governance Framework, and Repository Decision/Explainability landscape directly from fresh grep/read of src/pcae (not trusted from PROJECT_STATUS.md prose): `grep -rl \"GLP-001\\|GAC-001\\|PGP-001\" src/pcae` returns 0 hits (Advisory Governance Framework has no code); `grep -rn \"\\.explanation\\b\" src/pcae` confirms zero production readers of TransitionResult.explanation outside its own construction/serialization code; repository_transition_validator.py's own docstring independently corroborates the same finding verbatim. 0 failed in the sense that the field's own trailing sentence reads 0 failed for attributable regressions -- no source change was made this phase so no new fast_green run was required.",
+    "derived_correctness": "Post-v0.4.2 delta was independently re-derived from raw git diff (git diff --name-status v0.4.2..HEAD; git diff v0.4.2..HEAD -- src/pcae), not trusted from prose: exactly two production files changed (src/pcae/commands/agent.py +13/-0, src/pcae/core/agent.py +23/-0), both 3M's evidence-visibility change, confirming no scope reassessment was needed. Reproducibility, wheel/sdist hashes, and Fast Green attribution counts are all mechanically produced by sha256sum/cmp and pcae phase fast-green-attribution, not asserted. 0 failed in the sense that Fast Green's own trailing verdict line reads 'Attributable: 0' / 'Verdict: PASS'.",
     "execution_availability": "unavailable",
     "files_changed": [
+        ".pcae/fast-green-attribution/e9f97517666d5746d9e6b1a0a3ec65eb44d87e0f385606818d585755eacb97de.json",
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md",
+        "CHANGELOG.md",
         "PROJECT_STATUS.md",
-        "docs/PHASE_149O_20L_7O_3N_1_MATURE_CAPABILITY_CONSUMER_EDGE_INVESTIGATION.md",
-        "tasks/active/20260826-1612-phase-149o-20l-7o-3n-1-mature-capability-consumer-edge-investigation.md",
-        "tasks/done/20260826-1605-idle-awaiting-next-governed-phase-post-149o-20l-7o-3n.md"
+        "docs/PHASE_149O_20L_7O_3O_PCAE_V0_4_3_RELEASE_HARDENING.md",
+        "docs/RELEASE_NOTES_V0_4_3.md",
+        "pyproject.toml",
+        "src/pcae/__init__.py",
+        "tasks/active/20260826-1630-phase-149o-20l-7o-3o-pcae-v0-4-3-release-hardening.md",
+        "tasks/done/20260826-1612-phase-149o-20l-7o-3n-1-mature-capability-consumer-edge-investigation.md"
     ],
-    "files_changed_count": 6,
+    "files_changed_count": 11,
     "governance_results": {
         "pcae_health": "healthy",
         "pcae_check": "passed",
-        "pcae_doctor_task_memory": "warnings limited to pre-existing historical tasks/DONE.md synchronization debt, unrelated to 149O.20L.7O.3N.1, not repaired this phase",
-        "pcae_push_check": "clean",
-        "pcae_runtime_inspect": "Observed / observe / unavailable, unchanged",
+        "pcae_doctor_task_memory": "warnings limited to pre-existing historical tasks/DONE.md synchronization debt, unrelated to 149O.20L.7O.3O, not repaired this phase",
+        "pcae_push_check": "clean_pre_push",
+        "pcae_runtime_inspect": "Observed / observe / unavailable, unchanged before and after all rollback smoke testing",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "The phase document's subsystem inventories, unified consumer graph, maturity matrix, consumer-edge matrix, gap classifications, and recommendation all converge on the same conclusions reached from fresh src/pcae grep/read and PROJECT_STATUS.md's own 3N/3K entries: Advisory Governance Framework has zero code footprint (NO MEANINGFUL GAP); the Decision-Evaluation core is wired-but-inert (VISIBILITY/SURFACING GAP, not TRUE CONSUMPTION GAP, per 3M's own precedent); the AdvisoryProvider family remains CONTRACT GAP effort L unchanged from 3K; no TRUE CONSUMPTION GAP or AUTOMATIC ORCHESTRATION GAP exists in any of the three areas.",
-    "no_go_confirmation": "No production source in src/pcae was modified. No release, tag, or publication was created. No v0.4.3 or any version bump occurred. No candidate capability was implemented. No new contract, schema, or authority semantics was invented. No Runtime Enforcement execution was enabled. No Shell Gate enforcement was enabled. No HATP/HMIC/Class-B authority was modified. No CLTR cutover occurred. No hac-dell host was mutated. No private pcae-deepseek-research repository was inspected, modified, or imported from. No article work was resumed; it remains STOPPED. No full Fast Green run was performed for this read-only investigation phase. No next phase was begun.",
-    "origin_main_head": "aa60c33352a8e1c07d2e06b2148efc6d425f497a",
+    "internal_evidence_coherence": "The phase document's 42 sections, this metadata, and the canonical report all converge on the same facts: post-v0.4.2 delta is exactly 3M's two-file rollback-evidence-visibility change; release_candidate_commit 63580893b1de4782a694ab802ff7bdebdf29b0e6; wheel/sdist byte-identical across two independent clean-clone builds (sha256:e42ca72c.../sha256:8a088983...); installed-wheel rollback smoke (dry-run, real ALLOW no-prior-dry-run, divergence-block) all surfaced file_plan/divergence_check evidence with effect/authority semantics unchanged; Fast Green attribution PASS with 0 attributable regressions; BLOCKING=0, MUST-FIX=0; mature S/M consumption program reconfirmed exhausted, not reopened; publication NOT PERFORMED.",
+    "no_go_confirmation": "No new rollback preparation automation was implemented. No new readiness was invented. No new authority was invented. No Permission Broker behavior was changed. No Runtime Enforcement execution was enabled. No Shell Gate enforcement was enabled. No true RI-backed reasoning was implemented. No provider/model execution was added. No OpenRouter call was made. No HATP/HMIC/Class-B authority was altered. No CLTR cutover occurred. No hac-dell host was mutated. No private pcae-deepseek-research repository was inspected, modified, or imported from. No article work was resumed; it remains STOPPED. No v0.4.3 tag was created. No tag was pushed. No GitHub Release was created. No PyPI upload was performed. No next phase was begun.",
+    "origin_main_head": "63580893b1de4782a694ab802ff7bdebdf29b0e6",
     "origin_main_head_count": 0,
     "phase_commits": [
         {
-            "hash": "6e8fa731",
-            "subject": "Phase 149O.20L.7O.3N.1: Mature Capability Consumer-Edge Investigation (read-only, docs/status/task lifecycle only)"
+            "hash": "63580893",
+            "subject": "Phase 149O.20L.7O.3O: version bump 0.4.2 -> 0.4.3 and release notes (rollback evidence visibility)"
         }
     ],
-    "phase_id": "149O.20L.7O.3N.1",
-    "phase_name": "Mature Capability Consumer-Edge Investigation",
-    "phase_title": "Mature Capability Consumer-Edge Investigation",
+    "phase_id": "149O.20L.7O.3O",
+    "phase_name": "PCAE v0.4.3 Release Hardening",
+    "phase_title": "PCAE v0.4.3 Release Hardening",
     "pushed_status": "not_pushed",
-    "recommended_next_phase": "None within the 'wire existing capabilities' program -- MATURE CAPABILITY CONSUMPTION PROGRAM: CURRENTLY EXHAUSTED AT S/M SCOPE. Next strategic work should shift to a new architecture, contract-evolution (e.g. AdvisoryProvider-family contract, effort L), trust-activation-preparation, or provider/runtime chapter. HUMAN DECISION REQUIRED on release timing (v0.4.3 RELEASE NOW vs BUNDLE, reconfirmed favoring RELEASE NOW) and next strategic mode.",
+    "recommended_next_phase": "149O.20L.7O.3O.1 -- PCAE v0.4.3 Public Release (publication-only; requires explicit human authorization before tag push, GitHub Release creation, or artifact upload; PyPI remains separately unauthorized). After successful v0.4.3 publication, recommend a fresh read-only Post-Consumption Strategic Runtime / Provider Architecture Reassessment. Do not begin either phase automatically.",
     "status": "completed",
-    "summary": "Phase 149O.20L.7O.3N.1 (Mature Capability Consumer-Edge Investigation) is a read-only investigation phase. Confirmed unchanged baseline (clean, 0 ahead, v0.4.2 unchanged, runtime unchanged) and that the only unreleased delta remains 3M's isolated rollback-evidence-visibility change. Investigated the three areas 3N left UNVERIFIED. Advisory Governance Framework: NO MEANINGFUL GAP -- confirmed zero code footprint, a pure documentary/procedural governance chapter (138-141), not software. Repository Decision/Explainability: the Decision Evaluation core (evidence.py/decision_evaluation.py/repository_transition_validator.py) is production-wired into pcae phase complete/task finish --commit, but its computed TransitionResult.explanation has zero readers anywhere -- classified VISIBILITY/SURFACING GAP (not TRUE CONSUMPTION GAP), consistent with 3M's own precedent that surfacing existing evidence is not consumption; the six-module AdvisoryProvider/AdvisoryContextPackage family remains CONTRACT GAP, effort L, unchanged from 3K. Audit/explainability lifecycle surfacing: ~10 deliberately siloed audit subsystems found, each ALREADY CONSUMED within its own scope except Enforcement Audit (TRUST/AUTHORITY BLOCK) and the same Decision-Evaluation surfacing gap. No TRUE CONSUMPTION GAP or AUTOMATIC ORCHESTRATION GAP was found in any of the three areas -- CONFIRMED S/M CONSUMPTION GAPS: NONE. MATURE CAPABILITY CONSUMPTION PROGRAM: CURRENTLY EXHAUSTED AT S/M SCOPE. Reconfirmed 3M's release decision: RELEASE NOW is now favored over BUNDLE. No production source, version, tag, or release changed. Runtime remains Observed/observe/unavailable; v0.4.2 unchanged; article remains STOPPED. Human decision required on release timing and next strategic mode; no next phase begun; no implementation performed.",
-    "test_evidence_classification": "fresh_source_grep_plus_direct_file_read_plus_cli_inspection_plus_doc_reading",
-    "tests_added_or_updated": "0 new tests added (read-only investigation phase); 0 pre-existing tests re-run (no source changed; governance CLI invariant checks run directly)",
-    "tests_run": 0,
+    "summary": "Phase 149O.20L.7O.3O (PCAE v0.4.3 Release Hardening) prepared a frozen, independently-verified v0.4.3 release candidate implementing the human-selected RELEASE NOW decision from 3N/3N.1: ship 3M's already-verified rollback evidence-visibility enhancement as a narrow patch, unbundled. Confirmed the only post-v0.4.2 product delta was 3M's two-file change (core/agent.py, commands/agent.py). Version bumped 0.4.2 -> 0.4.3 in pyproject.toml/src/pcae/__init__.py. docs/RELEASE_NOTES_V0_4_3.md created (theme: Rollback Evidence Visibility; states rollback preparation was already automatic before v0.4.3, this release changes evidence surfacing/observability only; Permission Broker/HATP/human-authority/runtime explicitly unchanged). Documentation audit found no stale mandatory-dry-run claims requiring correction. Build infrastructure reused unmodified (hatchling==1.32.0 pinned, root-anchored sdist includes). release_candidate_commit=63580893b1de4782a694ab802ff7bdebdf29b0e6 frozen via pcae commit implementation. Two independent clean-clone builds (Python 3.14.5, build==1.2.2, hatchling==1.32.0) produced byte-identical wheel (pcae_harness-0.4.3-py3-none-any.whl, 2,352,742 bytes, sha256:e42ca72c136e95fbb179582c3058b1d6c2001edbbbe80f61af8c45002a8ff5e4) and sdist (pcae_harness-0.4.3.tar.gz, 2,054,469 bytes, sha256:8a088983971b19d6e16f0e6ce3d7a9aa69fa27e987b574c4a109e74589977276); artifact-content inspection clean (no .git, no worktrees, no private-research content, no secrets, no caches). Installed both artifacts into fresh venvs: version 0.4.3 confirmed, golden path (init -> session bootstrap -> task new -> intake from-files -> intake list/show) passed on both. Installed-wheel rollback evidence-visibility smoke via disposable PER/ECP fixtures and the real installed pcae CLI: dry-run surfaces file_plan without an AUTHORIZED claim; real rollback with no prior dry-run completes and surfaces divergence_check with unchanged effect semantics; a forced divergence conflict stops effect while still surfacing file_plan/divergence_check, execution_allowed remaining false. Result/persistence consistency, PB DENY non-authoritative, ALLOW-path effect-unchanged, HATP_MANDATORY-unchanged, dry-run-optional, human-trigger-only, and evidence-non-authority were all independently confirmed via the source-tree 3M/3M.1 suites (42/44 passed; 2 3M.1 tests blocked only by an environment-only missing rg/ripgrep binary in this sandbox, manually re-verified via equivalent grep/direct-import checks and independently confirmed non-attributable by Fast Green). Representative regression suites (rollback PB, RI/3J/3J.1, Plan B+/3C.2, corrupt-store/3C.3.1/3C.3.2, intake-Codex-Ox/2X) all passed (170/170). Fast Green attribution (baseline 674dc8a3, candidate 63580893): 0 attributable regressions, 350 pre-existing, verdict PASS. Runtime confirmed Observed/observe/unavailable before and after, unchanged throughout. Stable-release isolation confirmed: v0.4.2 and v0.4.1 tags unchanged, no v0.4.3 tag exists. BLOCKING=0, MUST-FIX=0. Mature S/M capability consumption program reconfirmed EXHAUSTED, not reopened by this release. Publication checklist prepared; publication NOT PERFORMED (no tag, no GitHub Release, no PyPI upload). Article remains STOPPED; private research repository not inspected/modified.",
+    "test_evidence_classification": "reproducible_build_plus_installed_artifact_smoke_plus_source_regression_suites_plus_fast_green_attribution",
+    "tests_added_or_updated": "0 new tests added (release-hardening phase reuses existing 3M/3M.1/3F/3F.1/3J/3J.1/3C.2/3C.3.1/3C.3.2/2X suites); 1 new standalone installed-wheel smoke script (not a pytest module) exercising the packaged CLI directly",
+    "tests_run": 6,
     "test_results": {
         "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
-        "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; health/check/coherence were run directly this phase",
-        "fast_green": "Not run this phase -- read-only investigation phase per Section 36 of the governing brief, no source file changed. This phase's own attributable result is 0 failed."
+        "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; pcae health/pcae check/pcae status coherence re-verified passing at phase entry and phase close instead",
+        "fast_green": "pcae phase fast-green-attribution --phase-id 149O.20L.7O.3O --pushed-status not_pushed. Baseline 674dc8a30cd9a634d6356dae4297c187df4f22e9 (parent of oldest attributed commit), candidate 63580893b1de4782a694ab802ff7bdebdf29b0e6. Raw failures 351 (342 failed / 9 errors). Attributable: 0. Pre-existing: 350 (includes the two environment-only rg-tooling-gap 3M.1 tests, present identically on both baseline and candidate). Environment: 0 (tool's own classification). Expected artifacts: 1. Verdict: PASS. Full evidence artifact .pcae/fast-green-attribution/e9f97517666d5746d9e6b1a0a3ec65eb44d87e0f385606818d585755eacb97de.json. This phase's own attributable result is 0 failed."
     },
-    "metadata_consistency": "phase_id, phase_name, phase_title, active task 20260826-1612-phase-149o-20l-7o-3n-1-mature-capability-consumer-edge-investigation, phase document, and canonical report all identify 149O.20L.7O.3N.1 consistently.",
+    "metadata_consistency": "phase_id, phase_name, phase_title, active task 20260826-1630-phase-149o-20l-7o-3o-pcae-v0-4-3-release-hardening, phase document, and canonical report all identify 149O.20L.7O.3O consistently.",
     "validation_results": {
         "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
-        "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; health/check/coherence were run directly this phase",
-        "phase_149O_20L_7O_3N_1_identity": "This canonical report documents Phase 149O.20L.7O.3N.1 (Mature Capability Consumer-Edge Investigation).",
-        "runtime_invariant": "Observed / observe / unavailable, 0 failed to remain unchanged -- confirmed unchanged by pcae runtime inspect",
-        "version_release_invariant": "0.4.2 unchanged; no tag, release, or publication; 0 failed in verifying this invariant",
-        "fast_green": "Not run this phase -- read-only investigation phase per Section 36 of the governing brief, no source file changed. This phase's own attributable result is 0 failed."
+        "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; pcae health/pcae check/pcae status coherence re-verified passing at phase entry and phase close instead",
+        "phase_149O_20L_7O_3O_identity": "This canonical report documents Phase 149O.20L.7O.3O (PCAE v0.4.3 Release Hardening).",
+        "runtime_invariant": "Observed / observe / unavailable, 0 failed to remain unchanged -- confirmed unchanged by pcae runtime inspect before and after rollback smoke testing",
+        "version_release_invariant": "0.4.2 -> 0.4.3 bumped consistently across pyproject.toml and src/pcae/__init__.py; no tag, release, or publication performed this phase; 0 failed in verifying this invariant",
+        "reproducibility_invariant": "Two independent clean-clone builds produced byte-identical wheel and sdist (cmp byte-for-byte identical); 0 failed in verifying this invariant",
+        "fast_green": "pcae phase fast-green-attribution: baseline 674dc8a3, candidate 63580893, attributable 0, pre-existing 350, verdict PASS. This phase's own attributable result is 0 failed."
     }
 }

@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3O — PCAE v0.4.3 Release Hardening.
+**RELEASE-CANDIDATE PREPARATION ONLY — COMPLETE. NO PUBLICATION
+PERFORMED.** Implemented the human-selected **RELEASE NOW** decision
+from `3N`/`3N.1`: prepared a frozen, independently-verified `v0.4.3`
+release candidate shipping `3M`'s already-verified rollback
+evidence-visibility enhancement (`file_plan`/`divergence_check` now
+surfaced in `pcae rollback` terminal/JSON output across
+divergence-conflict, HATP_MANDATORY-denial, Permission-Broker-denial,
+and final success/partial/failure paths) as a narrow patch release.
+Confirmed the only post-`v0.4.2` product delta was `3M`'s two-file
+change (Section 3 of the phase document). `v0.4.2 → v0.4.3` in
+`pyproject.toml`/`src/pcae/__init__.py`;
+`docs/RELEASE_NOTES_V0_4_3.md` created (theme: Rollback Evidence
+Visibility; explicitly states rollback preparation was **already
+automatic before v0.4.3** and this release changes evidence
+surfacing/observability only). Release candidate
+`63580893b1de4782a694ab802ff7bdebdf29b0e6` frozen; two independent
+clean-clone builds produced byte-identical wheel
+(`pcae_harness-0.4.3-py3-none-any.whl`, 2,352,742 bytes,
+`sha256:e42ca72c...`) and sdist (`pcae_harness-0.4.3.tar.gz`, 2,054,469
+bytes, `sha256:8a088983...`); artifact-content inspection clean.
+Installed both artifacts into fresh venvs (version `0.4.3` confirmed,
+golden path — `init`→`session bootstrap`→`task new`→`intake
+from-files`→`intake list`/`show` — passed on both). Installed-wheel
+rollback evidence-visibility smoke (dry-run, real ALLOW with no prior
+dry-run, divergence-block) all surfaced evidence correctly with
+effect/authority semantics unchanged. Representative regression
+suites (rollback/RI/Plan B+/corrupt-store/intake-Codex-Ox, 3M, 3M.1)
+all green except two `3M.1` tests blocked by an environment-only `rg`
+(ripgrep) binary absence in this sandbox — manually re-verified and
+independently confirmed non-attributable by Fast Green attribution
+(baseline vs. candidate, 0 attributable regressions, PASS verdict).
+Runtime confirmed unchanged (`Observed`/`observe`/`unavailable`)
+before and after. BLOCKING = 0, MUST-FIX = 0. `MATURE CAPABILITY
+CONSUMPTION PROGRAM` reconfirmed **EXHAUSTED AT S/M SCOPE** — not
+reopened by this release. See
+`docs/PHASE_149O_20L_7O_3O_PCAE_V0_4_3_RELEASE_HARDENING.md` for the
+full evidence trail, build provenance, and publication checklist.
+**Publication NOT PERFORMED** (no tag, no GitHub Release, no PyPI
+upload) — requires separate explicit human authorization in
+`149O.20L.7O.3O.1`. Article remains STOPPED; private research
+repository not inspected/modified.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3N.1 — Mature Capability Consumer-Edge Investigation.
 **READ-ONLY INVESTIGATION — COMPLETE. NO `src/pcae` MODIFIED.**
 Confirmed baseline unchanged: repository clean, `origin/main..HEAD` = 0,
