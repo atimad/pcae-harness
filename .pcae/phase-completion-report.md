@@ -1,39 +1,42 @@
-# Phase 149O.20L.7O.3M.1 Complete — Independent End-to-End Rollback Readiness / Evidence Consumption Verification
+# Phase 149O.20L.7O.3N Complete — Product/Release Decision and Remaining Mature Capability Gap Reset
 
-**Verdict: VERIFIED COMPLETE — ZERO BLOCKING FINDINGS.**
+**Verdict: READ-ONLY DECISION PHASE — COMPLETE. NO `src/pcae` MODIFIED.**
 
-Independent reconstruction against fixed pre-`3M` commit `7b193145` proved
-that a real rollback already computed and consumed `file_plan` and
-`divergence_check` without a prior `--dry-run`. Dry-run is optional diagnostics,
-not a prerequisite. The evidence is an operational safety input and audit
-receipt, never authority: live divergence is the mechanical safety gate, while
-HATP or Permission Broker remains the authorization gate.
+Independently re-derived, from the raw `git diff v0.4.2..HEAD -- src/pcae`, that Phase `3M`'s
+rollback-evidence-visibility change is exactly two additive dict-key/print-line changes:
+`file_plan`/`divergence_check` were already computed unconditionally and already gated the
+divergence short-circuit before `3M`; `3M` only spliced the already-computed evidence into
+terminal result dicts and printed it inline. Confirmed this matches `3M`/`3M.1`'s own prior
+findings verbatim in substance.
 
-No distinct AG5 rollback-readiness concept exists or is needed for this bounded
-behavior. Rejecting promotion-time readiness persistence was correct because
-such an artifact would require a new identity, freshness, invalidation,
-supersession, replay, and live-revalidation contract. Phase `3M` therefore
-changed evidence visibility only; it did not add the underlying automatic
-preparation/consumption behavior.
+Scored the unreleased `3M` delta LOW on standalone release value (low urgency, low governance
+value, low autonomy gain, low regression risk, non-trivial release overhead for a 36-line diff).
+**Recommends Release Option B: bundle `3M` with the next genuine capability**, rather than
+shipping a standalone `v0.4.3` (Option A) or reverting (Option C, rejected on the merits).
 
-Fresh evidence: 26/26 independent tests passed; 188 focused rollback tests
-passed; shared regressions produced 601 passes with two packaging-only cases
-unavailable because the optional `build` module is absent; the legacy `18D`
-suite reproduced the same five frozen-history failures before and after `3M`.
-Machine Fast Green attribution from entry `8907df05` to checkpoint `42207c24`
-passed with 0 attributable failures. The authoritative artifact is
-`.pcae/fast-green-attribution/77695d008f999ff48649a98c165dec885372ff20fab1aea111cc4571a2117651.json`.
+Re-audited the current mature-capability universe against the corrected post-`v0.4.2` baseline:
+RI-to-Advisory attachment, Permission Broker (rollback path), rollback evidence, Interactive
+Workflow/CHGR, and Publication Execution Ownership are all NO GAP (already production-consumed).
+Runtime Enforcement, Shell Gate, CLTR cutover, and HATP/HMIC/Class-B remain TRUST BLOCK /
+intentionally deferred. RI-to-Advisory true reasoning consumption (122A-scoped) remains CONTRACT
+GAP, effort L, unchanged from `3K` — not selected merely because RI is mature. **No confirmed
+S/M-effort quick-consumption candidate was established this phase**: audit/explainability
+lifecycle surfacing, the Advisory Governance Framework, and Repository Decision/Explainability
+were each found UNVERIFIED (plausible leads, no exact missing edge traced) and are recommended as
+the target of a narrow follow-up investigation phase, rather than jumping directly to
+contract-scale work.
 
-No production source, schema, runtime authority, version, tag, release, or
-publication changed. Runtime remains `Observed` / `observe` / `unavailable`;
-version remains `0.4.2`; article work remains STOPPED; the private research
-repository was not inspected.
+No production source, schema, contract, version, tag, release, or runtime authority changed.
+Runtime remains `Observed` / `observe` / `unavailable`; version remains `0.4.2`; article work
+remains STOPPED; the private research repository was not inspected.
 
-Recommended next phase: `149O.20L.7O.3N`, a product/release decision for the
-next mature capability bundle. It is not begun.
+Recommended next phase: `149O.20L.7O.3N.1` — a narrow, read-only investigation of
+audit/explainability lifecycle surfacing, Advisory Governance Framework, and Repository
+Decision/Explainability consumer edges, to confirm or reject a genuine S/M consumption-gap
+candidate before any implementation. Not begun. `HUMAN PRIORITY/RELEASE SELECTION REQUIRED`.
 
 This pending narrative is superseded by the canonical
 `.pcae/phase-reports/latest.md`/`latest.json` after governed completion.
 
-See `docs/PHASE_149O_20L_7O_3M_1_INDEPENDENT_END_TO_END_ROLLBACK_READINESS_EVIDENCE_CONSUMPTION_VERIFICATION.md`
-for the full evidence trail.
+See `docs/PHASE_149O_20L_7O_3N_PRODUCT_RELEASE_DECISION_AND_REMAINING_MATURE_CAPABILITY_GAP_RESET.md`
+for the full evidence trail, maturity matrix, and missing-edge matrix.
