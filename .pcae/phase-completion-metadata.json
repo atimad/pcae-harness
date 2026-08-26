@@ -2529,6 +2529,8 @@
                 "artifact_path": ".pcae/fast-green-attribution/f972c8e27d6b06bcda5c909b5a0e32d98b1dbd6da14732602b22cfd6a29a02cb.json",
                 "artifact_digest": "f972c8e27d6b06bcda5c909b5a0e32d98b1dbd6da14732602b22cfd6a29a02cb"
             }
-        }
+        },
+        "report_notification_tests": "not_directly_applicable_this_phase (149O.20L.7O.3M modified only core/agent.py and commands/agent.py's rollback path; no bootstrap/session/phase-report/notification source was changed this phase; the fresh 18-test suite plus rollback/Permission-Broker regressions plus machine-produced Fast Green attribution serve as this phase's governing regression gate instead)",
+        "bootstrap_session_reporting_tests": "not_directly_applicable_this_phase (149O.20L.7O.3M modified only core/agent.py and commands/agent.py's rollback path; no bootstrap/session/phase-report/notification source was changed this phase; pcae health/pcae check/pcae status coherence were re-verified passing at phase entry and phase close instead)"
     }
 }
