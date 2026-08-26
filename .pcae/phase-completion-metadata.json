@@ -24,7 +24,12 @@
     "no_go_confirmation": "No production source in src/pcae was modified. No release, tag, or publication was created. No v0.4.3 or any version bump occurred. No candidate capability was implemented. No new contract, schema, or authority semantics was invented. No Runtime Enforcement execution was enabled. No Shell Gate enforcement was enabled. No HATP/HMIC/Class-B authority was modified. No CLTR cutover occurred. No hac-dell host was mutated. No private pcae-deepseek-research repository was inspected, modified, or imported from. No article work was resumed; it remains STOPPED. No full Fast Green run was performed for this read-only investigation phase. No next phase was begun.",
     "origin_main_head": "aa60c33352a8e1c07d2e06b2148efc6d425f497a",
     "origin_main_head_count": 0,
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "6e8fa731",
+            "subject": "Phase 149O.20L.7O.3N.1: Mature Capability Consumer-Edge Investigation (read-only, docs/status/task lifecycle only)"
+        }
+    ],
     "phase_id": "149O.20L.7O.3N.1",
     "phase_name": "Mature Capability Consumer-Edge Investigation",
     "phase_title": "Mature Capability Consumer-Edge Investigation",
