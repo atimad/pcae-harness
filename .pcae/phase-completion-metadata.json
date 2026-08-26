@@ -22,13 +22,13 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings limited to pre-existing historical tasks/DONE.md synchronization debt; the 3P idle transition is now listed and no 3Q-attributable memory warning remains",
-    "pcae_push_check": "ready/nothing-to-push as applicable; trust and identity gates passed",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "not_implemented / Observed / unavailable / observe; registry empty with 0 plugins and 0 capabilities",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured, enabled, and outbound-ready"
   },
   "internal_evidence_coherence": "The phase document, frozen RPAC-001 v1.0 contract, PROJECT_STATUS, CHANGELOG, decision log, task memory, metadata, and canonical report converge on one architecture: distinct agent/producer/adapter/target/provider/model/principal/invocation identities; one declarative Runtime Registry foundation; explicit target selection/no fallback; human approval, capability, PB permission, Runtime Enforcement authorization, and execution as separate states; a durable attempt record before adapter dispatch; normalized untrusted results returning through generic intake; deterministic mock/dry first. All converge on current execution remaining unavailable and 149O.20L.7O.3R as human-gated next phase.",
-  "no_go_confirmation": "No src/pcae or test file was modified. No production schema, version, or build configuration changed. No adapter was implemented or registered. No Claude, Codex, Codex-Ox, OpenRouter, provider API, model, or external runtime was invoked. No subprocess or runtime path was created or activated. No credential or secret was accessed or added. No provider/network execution was enabled. Permission Broker policy was not changed. Runtime Enforcement and Shell Gate were not activated. Agent identities were not altered. HATP, HMIC, Class-B, and CLTR were not altered. Dell was not contacted or mutated. ~/repos/pcae-deepseek-research was not inspected, modified, imported from, or relied on. The article was not read, modified, resumed, or published. v0.4.3 was not changed. No next phase was begun.",
+  "no_go_confirmation": "No production source file was modified. No test file was modified. No production schema, version, or build configuration changed. No adapter was implemented or registered. No Claude, Codex, Codex-Ox, OpenRouter, provider API, model, or external runtime was invoked. No subprocess or runtime path was created or activated. No credential or secret was accessed or added. No provider or network execution was enabled. No Permission Broker policy was changed. No Runtime Enforcement behavior was activated. No Shell Gate behavior was activated. No agent identity was altered. No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell contact or mutation occurred. No private research repository was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No v0.4.3 release state changed. No next phase was begun.",
   "origin_main_head": "8bc27726861e6221781402b7680dec9ed75f4148",
   "origin_main_head_count": 0,
   "phase_commits": [
@@ -54,6 +54,8 @@
   "test_results": {
     "rpac_static_contract_verification": "PASS: 65 required phase sections, six required matrices, and RPAC-REQ-001 through RPAC-REQ-097 sequential definitions; 0 failed",
     "architecture_source_inspection": "Direct source cross-check covered all named runtime/identity/backend/provider/governance/intake surfaces and legacy invocation paths; 0 unresolved contradictions",
+    "report_notification_tests": "Reporting and notification production source was unchanged; canonical report trust is exercised by the governed phase finalization gate; 0 failed",
+    "bootstrap_session_reporting_tests": "Production bootstrap/session source was inspected and baseline session/runtime reporting was verified without prompt dispatch; 0 failed",
     "fast_green": "Not run because the governing brief specifies architecture/contract static verification and no production/test/schema/version/build file changed; 0 attributable failures",
     "no_external_execution": "No runtime/provider invocation, subprocess adapter, network/provider call, secret access, Dell/private-research interaction, or article work occurred; 0 failed"
   },
