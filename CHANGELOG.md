@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3K** — Post-RI Attachment Architecture and
+  Release Decision (decision-only, no `src/pcae` modified). Re-derived
+  from current source/contracts, not inherited conclusions, whether
+  true RI-backed Advisory reasoning consumption is now safe to build.
+  Found: the `AdvisoryProvider`/`AdvisoryContextPackage` framework
+  (115P-115Z) remains fully mock-only, disconnected from production —
+  zero non-test callers anywhere in `src/pcae`; Phase 122A §3.4 itself
+  requires an explicit 115W-contract amendment before Repository
+  Intelligence content may occupy an `AdvisoryContextPackage` section,
+  so true consumption is architecture/contract-scale work. Effort
+  reclassified from 3I's "S" (which scoped only 3J's attachment work)
+  to **L**, given the missing contract amendment, the absent real
+  (non-mock, non-human-relay) provider, the absent production entry
+  point, and the F1 symlink-provenance gap needing repair first.
+  Recommends **Option B**: release 3J's already-verified
+  attachment-only integration as a narrow patch (`v0.4.2`-plausible)
+  with corrected release language, and reprioritize Candidate A
+  (rollback readiness/evidence) as the next capability ahead of any
+  future true-reasoning-consumption attempt. The 122A-scoped
+  reasoning-consumption gap remains open. Human decision required;
+  no next phase begun.
 - **Phase 149O.20L.7O.3J.1** — Independent End-to-End Repository
   Intelligence / Advisory Consumption Verification (verification-only,
   no `src/pcae` modified). Independently re-derived 3J's claims via

@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3K — Post-RI Attachment Architecture and Release
+Decision. **DECISION-ONLY — COMPLETE. NO SRC/PCAE MODIFIED.**
+Re-derived, from current source and contracts only (not inherited from
+prior phases' conclusions), whether PCAE can now safely move from
+attachment to genuine RI-backed Advisory reasoning consumption.
+Confirmed: the `AdvisoryProvider`/`AdvisoryContextPackage` framework
+(115P-115Z) remains fully mock-only and disconnected from production
+(zero non-test callers of `advisory_repository_skills.py` or
+`advisory_context_package.py` anywhere in `src/pcae`); Phase 122A §3.4
+itself states that placing Repository Intelligence content into an
+`AdvisoryContextPackage` section requires an explicit 115W-contract
+amendment, so true reasoning consumption is architecture/contract-scale
+work, not a wiring task. Effort reclassified from 3I's "S" (which
+scoped only the attachment work 3J implemented) to **L** for true
+consumption, given the missing contract amendment, the absent real
+(non-mock, non-human-relay) provider, the absent production entry
+point, and F1 (symlink provenance) needing repair before RI could
+safely influence any actual reasoning output. Recommends **Option B**:
+release the already-verified attachment-only integration as a narrow
+patch (`v0.4.2`-plausible), with corrected release language ("`pcae
+advisory check` now automatically attaches available Repository
+Intelligence context, provenance, and limitations" — never "RI now
+drives Advisory reasoning"), and reprioritize Candidate A (rollback
+readiness/evidence, S-M effort, LOW risk) as the next capability ahead
+of any future Option-A attempt. **The 122A-scoped Advisory-reasoning-
+consumption gap remains open** — this phase does not close it, and
+implements nothing. Human decision on release/priority selection
+required; no next phase begun. See
+`docs/PHASE_149O_20L_7O_3K_POST_RI_ATTACHMENT_ARCHITECTURE_AND_RELEASE_DECISION.md`
+for full evidence, taxonomy, decision matrix, and threat-model notes.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3J.1 — Independent End-to-End Repository Intelligence
 / Advisory Consumption Verification. **VERIFICATION-ONLY — COMPLETE.
 NO SRC/PCAE MODIFIED.** Independently re-derived, without trusting
