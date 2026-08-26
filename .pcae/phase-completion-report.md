@@ -1,7 +1,9 @@
-# Phase 149O.20L.7O.3O.1 Complete — PCAE v0.4.3 Public Release
+# Phase 149O.20L.7O.3O.2 Complete — PCAE v0.4.3 Publication Execution
 
-**Verdict: PUBLICATION READY — VERIFICATION COMPLETE. NO PUBLICATION PERFORMED. HUMAN
-PUBLICATION AUTHORIZATION REQUIRED AND ABSENT.**
+**Verdict: PUBLICLY RELEASED. COMPLETE. Explicit human publication authorization was
+given in the active session, superseding 3O.1's STOP. See
+`docs/PHASE_149O_20L_7O_3O_2_PCAE_V0_4_3_PUBLICATION_EXECUTION.md` for the full
+publication trail.**
 
 Independently re-verified `149O.20L.7O.3O`'s frozen `v0.4.3` release candidate
 (`63580893b1de4782a694ab802ff7bdebdf29b0e6`) rather than trusting the governing-brief
@@ -16,8 +18,8 @@ ahead, no local/remote `v0.4.3` tag, `v0.4.2` tag unchanged
 (`bc7935f4bb86ea7f6ade823a4e63ed9c9cc0a0c4`), `pcae health`/`check`/`status coherence`
 all healthy/passed/coherent, `pcae doctor task-memory` warnings limited to pre-existing
 `tasks/DONE.md` sync debt, `pcae push check` clean, `pcae runtime inspect` Observed /
-observe / unavailable, Telegram configured. `release_candidate_commit
-63580893b1de4782a694ab802ff7bdebdf29b0e6` independently confirmed against the `3O`
+observe / unavailable, Telegram configured. The frozen release candidate SHA
+(`63580893b1de4782a694ab802ff7bdebdf29b0e6`) was independently confirmed against the `3O`
 canonical phase document. Candidate-to-HEAD drift on `src/pcae`, `pyproject.toml`, and
 `docs/RELEASE_NOTES_V0_4_3.md` was empty — only `3N.2`'s later docs/status/task-lifecycle
 commits exist past the candidate. Version independently confirmed `0.4.3` in both
