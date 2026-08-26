@@ -20,15 +20,15 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings limited to pre-existing historical tasks/DONE.md synchronization debt",
-    "pcae_push_check": "pre-push verification pending canonical pending-report staging",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "Observed / observe / unavailable, unchanged",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured"
   },
   "internal_evidence_coherence": "The report, fresh tests, disposable out-of-process rollback executions, fixed pre-3M worktree, exact production diff, focused regressions, and machine Fast Green artifact converge on the same result: evidence was already prepared and consumed on real rollback before 3M; 3M added visibility only; evidence remains non-authoritative.",
-  "no_go_confirmation": "No production source was modified. No authoritative rollback-readiness object was created. No promotion-time readiness artifact was persisted. No Permission Broker or HATP authority was bypassed or weakened. No human rollback trigger was automated. No runtime execution capability was enabled. No version, tag, release, or publication was created. No private pcae-deepseek-research repository was inspected. No article work was resumed; it remains STOPPED. No next phase was begun.",
+  "no_go_confirmation": "No production source was modified. No authoritative rollback-readiness object was created. No promotion-time readiness artifact was persisted. No Permission Broker or HATP authority was bypassed or weakened. No human rollback trigger was automated. No runtime execution capability was enabled. No version, tag, release, or publication was created. No private pcae-deepseek-research repository was inspected. No article work was resumed; it remains STOPPED. No CLTR cutover occurred. No next phase was begun.",
   "origin_main_head": "8907df05536e1c817634f06b443eb8edbceb5ade",
-  "origin_main_head_count": 5,
+  "origin_main_head_count": 6,
   "phase_commits": [
     {"hash": "ced15d1f", "subject": "Complete Phase 149O.20L.7O.3M.1 independent rollback evidence verification"},
     {"hash": "52291199", "subject": "Phase 149O.20L.7O.3M.1: begin independent rollback evidence verification"},
@@ -54,7 +54,7 @@
     "focused_rollback_regressions": "188 passed, 4378 deselected",
     "legacy_18d_baseline_comparison": "20 passed and 5 frozen-history failures identically at current and fixed pre-3M baseline; zero attributable",
     "shared_regressions": "601 passed; 2 packaging-only tests unavailable because optional build module is absent; publication subset excluding them 85 passed; RI subset 46 passed",
-    "fast_green": "339 raw failed nodes plus 9 raw errors; 347 excluded as baseline-reproduced; 1 expected not-pushed artifact; 0 environment exclusions; 0 attributable failures; PASS. Baseline 8907df05536e1c817634f06b443eb8edbceb5ade; verification checkpoint 42207c243c5386ba51ad24628e41e1c5356cd8c1; artifact .pcae/fast-green-attribution/77695d008f999ff48649a98c165dec885372ff20fab1aea111cc4571a2117651.json",
+    "fast_green": "0 failed attributable; PASS. Candidate observation contained 339 raw failed nodes plus 9 raw errors; 347 were excluded as baseline-reproduced, 1 was the expected not-pushed artifact, and 0 were environment exclusions. Baseline 8907df05536e1c817634f06b443eb8edbceb5ade; verification checkpoint 42207c243c5386ba51ad24628e41e1c5356cd8c1; artifact .pcae/fast-green-attribution/77695d008f999ff48649a98c165dec885372ff20fab1aea111cc4571a2117651.json",
     "runtime_invariant": "Observed / observe / unavailable",
     "version_release_invariant": "0.4.2 unchanged; no tag, release, or publication"
   }
