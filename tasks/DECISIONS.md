@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3M.1 rollback-evidence adjudication
+  (2026-08-26).** Fixed pre-`3M` execution proves `pcae rollback
+  --per-id` already computed and consumed its PER-derived `file_plan` and
+  live divergence check without a prior dry-run. `--dry-run` is optional
+  diagnostics, not human-review evidence or an eligibility prerequisite.
+  No distinct readiness object exists in the AG5 production graph; unrelated
+  runtime/backend/AG3/CLTR objects with readiness names do not bind or gate
+  AG5. A promotion-time readiness artifact is rejected unless a future
+  contract defines repository/PER/ECP/HEAD/branch/task/file-state identity,
+  freshness, invalidation, replay, and lifecycle semantics. Candidate A is
+  therefore classified as **already functionally complete before `3M`; `3M`
+  adds evidence visibility only**. Evidence remains mechanically dispositive
+  for scope/divergence but never substitutes for HATP/PB authority. Recommend
+  `149O.20L.7O.3N` as a decision-only release/priority phase; no release in
+  `3M.1`.
+
 - **Authorization-incident record (2026-08-22), Phase 149O.20L.7O.2S.**
   Reported: the commits comprising Phase 149O.20L.7O.2S
   (`60a0a11b..50a74e57`, freezing contract FGSC-001 v1.0) and their

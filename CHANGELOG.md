@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3M.1** — independently verified the rollback
+  preparation/evidence path against fixed pre-`3M` and current trees.
+  Confirmed real rollback already computed and consumed `file_plan` and
+  live divergence evidence before `3M`, with no manual dry-run
+  prerequisite; `3M` changes immediate result/CLI visibility only.
+  Verified evidence is mechanically consumed but non-authoritative for
+  permission, remains repository-local/current-state-derived, matches the
+  persisted RER on every post-evidence terminal outcome, and preserves
+  HATP/PB ordering, the explicit human trigger, idempotency, and runtime.
+  No distinct AG5 readiness artifact exists; promotion-time persistence
+  was correctly rejected as requiring a new freshness/identity/lifecycle
+  contract. Added a fresh 26-test verification suite; no production source,
+  schema, version, tag, release, or article change. Candidate A is
+  reclassified as already functionally complete before `3M`; `3M` adds an
+  observability/usability improvement suitable for bundling or a human-
+  decided patch release.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3M) to Phase 149O.20L.7O.3M.1: Independent End-to-End Rollback Readiness / Evidence Consumption Verification; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3M** — Rollback Readiness / Evidence Automatic
   Consumption Architecture and Integration: re-derived the current
   rollback architecture from source (not inherited summaries) and

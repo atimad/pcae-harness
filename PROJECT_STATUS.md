@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3M.1 — Independent End-to-End Rollback Readiness /
+Evidence Consumption Verification. **VERIFICATION-ONLY — COMPLETE.
+NO `src/pcae` MODIFIED.** Independently executed the fixed pre-`3M`
+tree and current tree with fresh PER/ECP fixtures and literal CLI calls.
+Confirmed a real pre-`3M` `pcae rollback --per-id X` computed
+`file_plan` and live `divergence_check` without any earlier dry-run,
+persisted/consumed them before effect, stopped on divergence, then
+reached the HATP or default Permission Broker boundary before the
+restore/remove loop. Manual dry-run verdict: **NOT REQUIRED** by source,
+CLI grammar, or contract; it is optional read-only diagnostics. `3M`'s
+product delta is visibility only (+23/-0 `core/agent.py`, +13/-0
+`commands/agent.py`): the already-computed evidence is returned on all
+post-evidence terminal paths and rendered immediately. Returned evidence
+equals the persisted RER on divergence, HATP denial, PB denial, and
+completed/partial/failed outcomes; clean evidence plus forced DENY has
+zero effect and grants no authority. No distinct AG5 readiness type,
+artifact, state, cache, or consumer exists; similarly named readiness
+objects elsewhere belong to unrelated subsystems, making `3M`'s blanket
+repository-wide wording overbroad but its scoped conclusion correct.
+Rejecting promotion-time readiness persistence was **CORRECT**: it would
+require new repository/PER/ECP/HEAD/branch/task/file-state identity,
+freshness, invalidation, replay, and lifecycle semantics. Candidate A
+verdict: **already functionally complete before `3M`; `3M` adds evidence
+visibility only.** Fresh independent suite: 26 passed. Rollback subset:
+188 passed. Shared PB/push/publication/RI regression corpus: 601 passed;
+two packaging-only cases were environmentally unavailable because the
+active Python lacks `build`, with the remaining publication suite 85/85.
+Legacy 18D state-sensitive failures reproduce identically pre-`3M`
+(5 failed/20 passed), non-attributable. Runtime remains
+`Observed`/`observe`/`unavailable`; `v0.4.2` unchanged; no release or
+publication. Blocking findings: 0. See
+`docs/PHASE_149O_20L_7O_3M_1_INDEPENDENT_END_TO_END_ROLLBACK_READINESS_EVIDENCE_CONSUMPTION_VERIFICATION.md`.
+Recommends `149O.20L.7O.3N` — Post-Rollback Evidence Visibility Release
+and Capability Priority Decision; not begun.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3M — Rollback Readiness / Evidence Automatic
 Consumption Architecture and Integration. **BOUNDED ARCHITECTURE-PLUS-
 INTEGRATION, NARROWED ON RE-DERIVATION.** Re-derived the current
