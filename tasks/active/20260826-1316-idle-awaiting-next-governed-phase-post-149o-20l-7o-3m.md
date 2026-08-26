@@ -29,6 +29,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.3M)
 - .pcae/phase-completion-report.md
 - tasks/active/*
 - tasks/done/*
+- docs/PHASE_149O_20L_7O_3M_ROLLBACK_READINESS_EVIDENCE_AUTOMATIC_CONSUMPTION_ARCHITECTURE_AND_INTEGRATION.md
 
 ## Forbidden Files
 
