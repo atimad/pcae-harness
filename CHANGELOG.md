@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3N.2** — Deep Repository-Wide Capability
+  Discovery and Consumption-Gap Audit (read-only, no `src/pcae`
+  modified): bottom-up (not architecture-chapter-organized) sweep of
+  all 114 `core/*.py` and 60 `commands/*.py` modules (416 `.py` files
+  total), triggered by a concern that "prompt writing" might be a
+  missed mature capability. Found prompt writing is two distinct
+  subsystems: `build_bootstrap_prompt` (`core/context.py`) is real and
+  already production-consumed by `pcae session bootstrap`; a separate
+  "Phase 45F-45O" prompt-generation/adaptation/validation chain in
+  `core/agent.py` is self-declared non-production (hardcoded stale
+  data, zero non-CLI callers) and fails the maturity bar for a
+  candidate. No other genuine S/M consumption-gap candidate found.
+  Mature S/M consumption program **reconfirmed exhausted**, this time
+  via bottom-up audit rather than chapter recall, with an explicit
+  scope-honesty disclosure of what was and wasn't exhaustively swept.
+  Recommends proceeding with `149O.20L.7O.3O.1` (v0.4.3 publication),
+  not begun (requires separate human authorization).
 - **Phase 149O.20L.7O.3O** — PCAE v0.4.3 Release Hardening: prepared a
   frozen, reproducible `v0.4.3` release candidate (commit `63580893`)
   shipping the human-selected RELEASE NOW decision (`3M`'s rollback

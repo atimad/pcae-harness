@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3N.2 — Deep Repository-Wide Capability Discovery and
+Consumption-Gap Audit. **READ-ONLY AUDIT — COMPLETE. NO `src/pcae`
+MODIFIED.** Triggered by a concern that prior S/M-consumption audits,
+organized around known architecture chapters, might have missed a
+mature capability implemented outside that chapter framing — named
+example: prompt writing / prompt generation. Performed a bottom-up
+(not chapter-recycled) discovery: a full caller-graph census of all
+114 `core/*.py` modules plus 60 CLI command modules (416 `.py` files
+total under `src/pcae`), an exhaustive source-level mandatory
+prompt-writing deep dive, a fresh Repository Intelligence consumer
+import sweep, an orphan/zero-caller module audit, and a documented
+ten-question falsification attempt. **Key finding: "prompt writing" is
+two functionally distinct, unrelated subsystems, not one capability.**
+(1) `build_bootstrap_prompt` (`core/context.py`, also
+`commands/phase.py`/`commands/session.py`) is real, deterministic,
+local, already **production-consumed** — it is exactly what `pcae
+session bootstrap --compact` prints (governance state, active task,
+latest handoff, roadmap summary, phase-identity-ambiguity detection),
+called from inside the production session-bootstrap path itself. The
+only remaining manual step is a human copying that text into a new
+agent session, which is a deliberate trust/authority boundary (PCAE
+has no runtime execution capability — `pcae runtime inspect`:
+`execution_unavailable`), not a missing-generation gap. (2) A
+previously-undocumented (in current architecture-status prose,
+predating the 149-series numbering) "Phase 45F–45O" prompt-generation/
+adaptation/validation/governance/rendering/approval/proposal chain in
+`core/agent.py`, CLI-exposed via `pcae agent prompt-*`, is
+**self-declared non-production** by its own artifacts (`readiness_
+status: "partially_ready"`, explicit blockers, hardcoded stale
+synthetic data unrelated to the repository's real current phase
+numbering) with zero non-CLI, non-self callers — it fails the
+maturity precondition for a genuine consumption-gap candidate; it was
+never claimed production-ready. No other genuine S/M consumption-gap
+candidate was found in the broader sweep (one true zero-caller module,
+`core/runtime_enforcement_safety_authorization.py`, is a deliberate
+constants-only contract, correctly disconnected; the pre-existing
+RI-feeds-Advisory-only boundary was reconfirmed unchanged, not
+reopened, consistent with `3K`'s prior decision). **`MATURE CAPABILITY
+CONSUMPTION PROGRAM` RECONFIRMED EXHAUSTED — this time via bottom-up
+audit, not architecture-chapter recall**, with an explicit scope-
+honesty disclosure that a literal field-by-field read of every typed
+result class across all 416 files was not performed. See
+`docs/PHASE_149O_20L_7O_3N_2_DEEP_REPOSITORY_WIDE_CAPABILITY_
+DISCOVERY_AND_CONSUMPTION_GAP_AUDIT.md` for the full 55-section
+audit trail, matrices, and falsification record. **Recommendation:
+proceed with `149O.20L.7O.3O.1` (v0.4.3 publication)** — requires
+separate explicit human authorization; not begun by this phase.
+Article remains STOPPED; private research repository not
+inspected/modified.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3O — PCAE v0.4.3 Release Hardening.
 **RELEASE-CANDIDATE PREPARATION ONLY — COMPLETE. NO PUBLICATION
 PERFORMED.** Implemented the human-selected **RELEASE NOW** decision
