@@ -46,6 +46,11 @@
   "test_evidence_classification": "fresh_independent_suite_plus_fixed_baseline_execution_plus_targeted_regressions_plus_machine_fast_green_attribution",
   "tests_added_or_updated": "26 tests added and passed",
   "tests_run": 26,
+  "test_results": {
+    "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
+    "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; health/check/coherence were run directly",
+    "fast_green": "0 failed attributable; PASS. Authoritative artifact: .pcae/fast-green-attribution/77695d008f999ff48649a98c165dec885372ff20fab1aea111cc4571a2117651.json"
+  },
   "metadata_consistency": "phase_id, phase_name, phase_title, active task, phase document, and pending canonical report all identify 149O.20L.7O.3M.1 consistently.",
   "validation_results": {
     "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
