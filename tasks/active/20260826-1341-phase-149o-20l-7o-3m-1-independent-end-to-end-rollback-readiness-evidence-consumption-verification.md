@@ -78,14 +78,17 @@ strict
 
 ## Acceptance Checks
 
-- pcae health passes
-- pcae check passes
-- pcae status coherence passes
-- fresh 3M.1 tests pass
-- targeted and shared regressions have zero attributable failures
-- Fast Green attribution reports zero attributable regressions
-- runtime remains Observed/observe/unavailable
-- origin/main..HEAD is zero after governed push
+- pcae health
+- pcae check
+- pcae status coherence
+- python -m pytest tests/test_phase_149o_20l_7o_3m_1_independent_rollback_readiness_evidence_consumption_verification.py -q
+- python -c "import json; d=json.load(open('.pcae/fast-green-attribution/77695d008f999ff48649a98c165dec885372ff20fab1aea111cc4571a2117651.json')); assert d['candidate_commit']=='42207c243c5386ba51ad24628e41e1c5356cd8c1'; assert not d['attributable_failures']"
+- python -c "import subprocess; s=subprocess.check_output(['pcae','runtime','inspect'], text=True); assert 'Runtime state:             Observed' in s; assert 'Execution capability:      unavailable' in s; assert 'Maximum plugin capability: observe' in s"
+- python -c "import json; d=json.load(open('.pcae/phase-completion-metadata.json')); assert d['validation_results']['focused_rollback_regressions'].startswith('188 passed'); assert d['validation_results']['shared_regressions'].startswith('601 passed')"
+
+The governed push and the final `origin/main..HEAD == 0` assertion occur after
+task closure because push-readiness report identity requires this task to be
+the latest completed phase task.
 
 ## Documentation Requirements
 

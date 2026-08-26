@@ -16,7 +16,11 @@
   adds evidence visibility only**. Evidence remains mechanically dispositive
   for scope/divergence but never substitutes for HATP/PB authority. Recommend
   `149O.20L.7O.3N` as a decision-only release/priority phase; no release in
-  `3M.1`.
+  `3M.1`. During closeout, encode task acceptance checks as literal executable
+  commands and perform the governed push after task closure: canonical report
+  identity requires `3M.1` to be the latest completed phase task before push,
+  while final `origin/main..HEAD == 0` remains a mandatory post-closure phase
+  condition.
 
 - **Authorization-incident record (2026-08-22), Phase 149O.20L.7O.2S.**
   Reported: the commits comprising Phase 149O.20L.7O.2S
