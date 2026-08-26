@@ -41,6 +41,7 @@ Wire the verified RPAC-001 mock/dry adapter into one explicit production dry-lif
 - tasks/active/20260826-2234-idle-awaiting-human-decision-post-149o-20l-7o-3s-1.md
 - tasks/active/20260826-2340-phase-149o-20l-7o-3s-2-production-dry-lifecycle-runtime-adapter-consumption.md
 - tasks/done/20260826-2340-phase-149o-20l-7o-3s-2-production-dry-lifecycle-runtime-adapter-consumption.md
+- .pcae/fast-green-attribution/cb3fc783d979bbb712b16f6a5998688ca61cb2ccbecb34766a0494b99bd53762.json
 
 ## Forbidden Files
 
