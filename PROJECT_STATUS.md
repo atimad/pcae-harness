@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3N — Product/Release Decision and Remaining Mature
+Capability Gap Reset. **READ-ONLY DECISION PHASE — COMPLETE. NO
+`src/pcae` MODIFIED.** Confirmed baseline: repository clean,
+`origin/main..HEAD` = 0, `v0.4.2` unchanged, runtime unchanged
+(`Observed`/`observe`/`unavailable`). Reconstructed the exact
+post-`v0.4.2` delta: exactly two production files changed
+(`core/agent.py` +23/-0, `commands/agent.py` +13/-0), both `3M`'s
+evidence-visibility change — independently re-derived from the raw diff,
+confirming file_plan/divergence computation and internal consumption
+were already automatic pre-`3M`; `3M` only spliced the already-computed
+evidence into terminal result dicts and added two additive `print()`
+lines. Classified `3M`'s standalone product value as OBSERVABILITY/
+DEBUGGABILITY, LOW release-worthiness (low urgency, low governance
+value, low autonomy gain, low regression risk, non-trivial release
+overhead for the delta size). **Recommends Release Option B (bundle
+`3M` with the next genuine capability)** over shipping `v0.4.3`
+standalone. Re-audited the current mature-capability universe: RI→
+Advisory attachment, Permission Broker (rollback path), rollback
+evidence, Interactive Workflow/CHGR, and Publication Execution
+Ownership are all NO GAP (already production-consumed); Runtime
+Enforcement, Shell Gate, CLTR cutover, and HATP/HMIC/Class-B remain
+TRUST BLOCK/intentionally deferred; RI→Advisory true reasoning (122A)
+remains CONTRACT GAP, effort L, unchanged from `3K`. **No confirmed
+S/M-effort quick-consumption candidate was established** — Advisory
+Governance Framework, Repository Decision/Explainability, and audit/
+explainability lifecycle surfacing were each found UNVERIFIED (plausible
+but not traced to an exact missing edge) and are recommended as the
+target of a narrow follow-up investigation phase before any candidate
+is implemented. See
+`docs/PHASE_149O_20L_7O_3N_PRODUCT_RELEASE_DECISION_AND_REMAINING_MATURE_CAPABILITY_GAP_RESET.md`
+for the full maturity matrix, missing-edge matrix, and release/roadmap
+paths. `HUMAN PRIORITY/RELEASE SELECTION REQUIRED`; no next phase
+begun.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3M.1 — Independent End-to-End Rollback Readiness /
 Evidence Consumption Verification. **VERIFICATION-ONLY — COMPLETE.
 NO `src/pcae` MODIFIED.** Independently executed the fixed pre-`3M`
