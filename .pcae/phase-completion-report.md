@@ -1,34 +1,39 @@
-# Phase 149O.20L.7O.3M Complete — Rollback Readiness / Evidence Automatic Consumption Architecture and Integration
+# Phase 149O.20L.7O.3M.1 Complete — Independent End-to-End Rollback Readiness / Evidence Consumption Verification
 
-**Verdict: BOUNDED ARCHITECTURE-PLUS-INTEGRATION, NARROWED ON RE-DERIVATION.**
+**Verdict: VERIFIED COMPLETE — ZERO BLOCKING FINDINGS.**
 
-Re-derived the current rollback architecture from source (not inherited
-`3I` summaries) and found the "prepare evidence → consume internally →
-stop if invalid → Permission Broker → effect" automation the governing
-brief targets was already the exact production behavior of a real
-(non-`--dry-run`) `pcae rollback --per-id X` invocation, released in
-v0.4.1 (`149O.20L.7O.3F`). No existing typed "readiness" concept exists
-anywhere in `src/pcae` (re-confirmed exhaustively); none was invented.
-A materially larger candidate — proactively persisting a readiness
-artifact at `pcae promote`-completion time — was considered and
-rejected as requiring a new freshness/identity contract this phase has
-no authority to invent. This phase's one narrow, additive production
-change: surface the already-computed, already-consumed, already-
-persisted evidence (`file_plan`/`divergence_check`) directly in every
-terminal result `build_rollback_execution` returns and in
-`pcae rollback`'s printed output. Two production files changed, both
-additive (`src/pcae/core/agent.py`, `src/pcae/commands/agent.py`). No
-new type, schema, or persistence added; Permission Broker sequencing,
-HATP isolation, human authority, and runtime
-(`Observed`/`observe`/`unavailable`) all unchanged and independently
-re-verified. New 18-test suite, all passing; rollback/Permission-
-Broker/mutation-permission regressions (562 tests) and v0.4.2
-RI-attachment smoke (46 tests) all pass unweakened; Fast Green
-attribution PASS with 0 attributable regressions.
+Independent reconstruction against fixed pre-`3M` commit `7b193145` proved
+that a real rollback already computed and consumed `file_plan` and
+`divergence_check` without a prior `--dry-run`. Dry-run is optional diagnostics,
+not a prerequisite. The evidence is an operational safety input and audit
+receipt, never authority: live divergence is the mechanical safety gate, while
+HATP or Permission Broker remains the authorization gate.
 
-This placeholder is superseded automatically by the canonical
-`.pcae/phase-reports/latest.md`/`latest.json` once `pcae phase complete`
-finalizes successfully for this phase.
+No distinct AG5 rollback-readiness concept exists or is needed for this bounded
+behavior. Rejecting promotion-time readiness persistence was correct because
+such an artifact would require a new identity, freshness, invalidation,
+supersession, replay, and live-revalidation contract. Phase `3M` therefore
+changed evidence visibility only; it did not add the underlying automatic
+preparation/consumption behavior.
 
-See `docs/PHASE_149O_20L_7O_3M_ROLLBACK_READINESS_EVIDENCE_AUTOMATIC_CONSUMPTION_ARCHITECTURE_AND_INTEGRATION.md`
+Fresh evidence: 26/26 independent tests passed; 188 focused rollback tests
+passed; shared regressions produced 601 passes with two packaging-only cases
+unavailable because the optional `build` module is absent; the legacy `18D`
+suite reproduced the same five frozen-history failures before and after `3M`.
+Machine Fast Green attribution from entry `8907df05` to checkpoint `42207c24`
+passed with 0 attributable failures. The authoritative artifact is
+`.pcae/fast-green-attribution/77695d008f999ff48649a98c165dec885372ff20fab1aea111cc4571a2117651.json`.
+
+No production source, schema, runtime authority, version, tag, release, or
+publication changed. Runtime remains `Observed` / `observe` / `unavailable`;
+version remains `0.4.2`; article work remains STOPPED; the private research
+repository was not inspected.
+
+Recommended next phase: `149O.20L.7O.3N`, a product/release decision for the
+next mature capability bundle. It is not begun.
+
+This pending narrative is superseded by the canonical
+`.pcae/phase-reports/latest.md`/`latest.json` after governed completion.
+
+See `docs/PHASE_149O_20L_7O_3M_1_INDEPENDENT_END_TO_END_ROLLBACK_READINESS_EVIDENCE_CONSUMPTION_VERIFICATION.md`
 for the full evidence trail.
