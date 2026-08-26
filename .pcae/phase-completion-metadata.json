@@ -26,26 +26,30 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3S.2-attributable error (this phase's own two task transitions were added to tasks/DONE.md)",
-    "pcae_push_check": "clean after push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / unavailable / observe; registry empty with 0 plugins and 0 capabilities; unchanged at every checkpoint this phase (entry, post-implementation, post-dry-invocation smoke tests, close)",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured, enabled, and outbound-ready"
   },
   "internal_evidence_coherence": "The implementation document, PROJECT_STATUS, CHANGELOG, task contract, metadata, and canonical report converge on one production-consumption claim: the RPAC-001 mock/dry adapter is now reached from exactly one explicit, narrow production entry point (pcae session bootstrap --compact --dry-runtime --runtime-target <id>), with 0 pre-3S.2 production consumers and 1 post-3S.2 production consumer, explicit target selection with no fallback, PB simulation-only, Runtime Enforcement not activated as real authority, and execution availability remaining unavailable throughout.",
   "no_go_confirmation": "No real runtime execution occurred. No subprocess creation for an agent runtime occurred (the RPAC-consuming phase was independently proven to make zero subprocess/socket calls). No network or provider call was made. No credential, token, auth file, secret store, or provider environment was accessed. No Codex execution occurred. No Claude execution occurred. No Codex-Ox transport was created; codex-ox gained no provider/model inference. No OpenRouter call was made. No API-provider invocation occurred. No Shell Gate behavior was activated. No Runtime Enforcement behavior was activated as real execution authority. No Permission Broker policy was changed. No real execution capability or availability was enabled; execution availability remained unavailable at every checkpoint. No agent identity was changed or mapped to a runtime target/provider/model. No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell system was contacted or mutated. No private research repository was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No release was created and v0.4.3 was not changed. No production source mutation by the runtime path occurred; all invocation evidence was confined to the newly gitignored .pcae/runtime-invocations/ tree. No new runtime registry or adapter catalog was created; the existing RuntimeRegistry/RuntimeAdapterResolver was reused unmodified. No automatic/implicit dispatch occurred; every dry invocation required an explicit --dry-runtime plus an exact --runtime-target flag pair. No silent fallback occurred on an unknown target or missing task authority; both fail closed with an explicit error and exit code 1.",
-  "origin_main_head": "74a36dd060c60fd2b3c986fe0e682271d865bb8a",
-  "origin_main_head_count": 1,
+  "origin_main_head": "fd470c7b71beda8cfbb03f6cae1ed404247d179e",
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "b3801f09",
       "subject": "Phase 149O.20L.7O.3S.2: production dry-lifecycle runtime adapter consumption"
+    },
+    {
+      "hash": "fd470c7b",
+      "subject": "Phase 149O.20L.7O.3S.2: fast_green attribution evidence and metadata (pre-push)"
     }
   ],
   "phase_id": "149O.20L.7O.3S.2",
   "phase_name": "Production Dry-Lifecycle Runtime Adapter Consumption",
   "phase_title": "Production Dry-Lifecycle Runtime Adapter Consumption",
-  "pushed_status": "local_only",
-  "recommended_next_phase": "149O.20L.7O.3S.2.1 — Independent End-to-End Production Dry-Lifecycle Runtime Adapter Consumption Verification; human decision required, not begun.",
+  "pushed_status": "pushed",
+  "recommended_next_phase": "149O.20L.7O.3S.2.1 \u2014 Independent End-to-End Production Dry-Lifecycle Runtime Adapter Consumption Verification; human decision required, not begun.",
   "status": "completed",
   "summary": "Phase 149O.20L.7O.3S.2 wired the verified RPAC-001 v1.0 mock/dry adapter (implemented in 3S, independently verified in 3S.1) into one explicit, narrow production consumer: pcae session bootstrap --compact --dry-runtime --runtime-target <id>, per human-approved Option A. PRE-3S.2 production consumers: 0, independently confirmed by grep before any source change. New src/pcae/core/runtime_dry_consumption.py derives the RPAC AuthoritySnapshot from real PCAE-owned repository/task state and delegates all governance/gate logic to the existing, unmodified simulate_invocation coordinator, RuntimeAdapterResolver, and MockDryRuntimeAdapter -- no adapter business logic in the CLI or command layer (command-zone architecture preserved, verified by a dedicated regression test). Explicit-intent only: both --dry-runtime and an exact --runtime-target (one of the three known mock-v1 fixture IDs) are required together; unknown target or missing active-task authority fails closed with no fallback; the ordinary --compact prompt-only path is byte-for-byte unchanged when the flags are absent. codex-ox and a custom agent identity produce byte-identical semantic output; neither gains provider/model inference. Zero subprocess/network calls in the RPAC-consuming phase (independently proven via monkeypatched subprocess/socket around the pure construction+simulate_invocation call). PB DENY, unknown-target, and authority-spoofing adversarial scenarios all fail closed. 21 new tests (14 core + 7 CLI) plus one phase-attributable, bounded repair to a 3S.1 test whose premise this phase's objective intentionally supersedes. Fast Green attribution (isolated worktree, baseline 74a36dd0): 0 attributable failures, verdict PASS. POST-3S.2 production consumers: 1 (pcae session bootstrap --compact --dry-runtime). Runtime remains Observed/observe/unavailable throughout; v0.4.3 unchanged; no production source mutation by the runtime path. Production source modified: YES (core/CLI/command layer, additive only). Execution activated: NO. Real-runtime readiness: NO. Recommended next: 149O.20L.7O.3S.2.1 (independent verification), human decision required, not begun. Article STOPPED; private research untouched.",
   "test_evidence_classification": "implementation_with_dedicated_e2e_and_security_suite",

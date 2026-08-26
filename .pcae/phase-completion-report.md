@@ -1,20 +1,19 @@
-# Phase 149O.20L.7O.3S.1 Complete — Independent End-to-End Deterministic Mock/Dry Runtime Adapter Verification
+# Phase 149O.20L.7O.3S.2 Complete — Production Dry-Lifecycle Runtime Adapter Consumption
 
-**Status: completed. Completeness: partial (pre-push). Human decision required for next phase.**
-# Phase Report: Independent End-to-End Deterministic Mock/Dry Runtime Adapter Verification
+**Status: completed. Completeness: complete. Human decision required for next phase.**
+# Phase Report: Production Dry-Lifecycle Runtime Adapter Consumption
 
-- **Phase ID:** `149O.20L.7O.3S.1`
+- **Phase ID:** `149O.20L.7O.3S.2`
 - **Status:** completed
-- **Missing trust fields:** pushed_status, origin_main_head, metadata_consistency
-- **Files changed:** 12
-- **Tests run:** 1
-- **Commits:** 8c9d28e4, 653fb4e5
-- **Pushed:** not_pushed
-- **origin/main..HEAD:** 3
+- **Files changed:** 16
+- **Tests run:** 347
+- **Commits:** b3801f09, fd470c7b
+- **Pushed:** pushed
+- **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 149O.20L.7O.3S.1 independently verified RPAC-001 v1.0 mock-v1 compliance for Phase 3S from the contract, the 3R plan, current source, tests, and live runtime behavior. All 52 MOCK-V1-MANDATORY VERIFIED, 21 PURE-INVARIANT VERIFIED-AS-INVARIANT, 16 REAL-RUNTIME-PREREQUISITE and 8 DEFERRED-EXTENSION CORRECTLY-DEFERRED. Fresh 18-test adversarial suite confirmed no silent fallback, schema-level authority-injection rejection, enforcement-double cannot bypass PB DENY, zero subprocess/network, cross-stack determinism. Mock adapter confirmed implemented but NOT production-consumed. 0 BLOCKING, 0 MUST-FIX, 1 NON-BLOCKING, 2 OBSERVATION. 0 attributable regressions after in-phase test-tooling repair. No production source modified. Real-runtime readiness NO. Recommended next: Option A, human decision required.
+Phase 149O.20L.7O.3S.2 wired the verified RPAC-001 v1.0 mock/dry adapter (implemented in 3S, independently verified in 3S.1) into one explicit, narrow production consumer: `pcae session bootstrap --compact --dry-runtime --runtime-target <id>`, per human-approved Option A. PRE-3S.2 production consumers: 0. New `src/pcae/core/runtime_dry_consumption.py` derives the RPAC `AuthoritySnapshot` from real PCAE-owned repository/task state and delegates all governance/gate logic to the existing, unmodified `simulate_invocation` coordinator, `RuntimeAdapterResolver`, and `MockDryRuntimeAdapter` — no adapter business logic in the CLI or command layer. Explicit-intent only: both `--dry-runtime` and an exact `--runtime-target` are required together; unknown target or missing active-task authority fails closed with no fallback; the ordinary `--compact` prompt-only path is unchanged when the flags are absent. `codex-ox` and a custom agent identity produce byte-identical semantic output; neither gains provider/model inference. 21 new tests, 0 attributable Fast Green regressions (isolated worktree comparison, verdict PASS). POST-3S.2 production consumers: 1. No production source mutation by the runtime path. Runtime remains `Observed` / `observe` / `unavailable`; `v0.4.3` unchanged. Real-runtime readiness: NO. Recommended next: 149O.20L.7O.3S.2.1 (independent verification), human decision required.
 
 ## PCAE Architecture Status
 
@@ -71,6 +70,7 @@ Phase 149O.20L.7O.3S.1 independently verified RPAC-001 v1.0 mock-v1 compliance f
 - ✓ Next Strategic Capability Architecture Reassessment (147A-147R, 18 phases)
 - ✓ Next Strategic Capability Architecture (148A-148H, 8 phases)
 - ✓ Next Strategic Capability Reassessment (149A-149O, 9 phases)
+- ✓ Deterministic Mock/Dry Runtime Adapter: Implementation Plan + Implementation + Independent Verification (3R, 3S, 3S.1)
 
 ### In Progress
 
@@ -78,7 +78,7 @@ Phase 149O.20L.7O.3S.1 independently verified RPAC-001 v1.0 mock-v1 compliance f
 
 ### Planned
 
-- ○ Option A (ranked, evidence-derived) — wire the verified RPAC-001 mock/dry adapter into an explicit production dry-lifecycle consumer (session/task handoff), still without real execution; human decision required, not begun.
+- ○ 149O.20L.7O.3S.2.1 — Independent End-to-End Production Dry-Lifecycle Runtime Adapter Consumption Verification; human decision required, not begun.
 
 ### Current Runtime State
 
@@ -93,49 +93,36 @@ Phase 149O.20L.7O.3S.1 independently verified RPAC-001 v1.0 mock-v1 compliance f
 ## Governance Results
 
 - **pcae_check:** passed
-- **pcae_doctor_task_memory:** warnings limited to established historical tasks/DONE.md synchronization debt; no 3S.1-attributable error
+- **pcae_doctor_task_memory:** warnings limited to established historical tasks/DONE.md synchronization debt; no 3S.2-attributable error
 - **pcae_health:** healthy
 - **pcae_push_check:** clean
-- **pcae_runtime_inspect:** not_implemented / Observed / unavailable / observe; registry empty with 0 plugins and 0 capabilities; unchanged at every checkpoint this phase (entry, post-adversarial-suite, post-regression-sweep, close)
+- **pcae_runtime_inspect:** not_implemented / Observed / unavailable / observe; registry empty with 0 plugins and 0 capabilities; unchanged at every checkpoint this phase
 - **pcae_status_coherence:** coherent
 - **telegram_runtime:** configured, enabled, and outbound-ready
 
 ## Test Results
 
-- **bootstrap_session_reporting_tests:** Bootstrap/session production source unchanged; independently confirmed no automatic bootstrap-to-mock-dispatch wiring exists; 0 failed.
-- **fast_green:** Full baseline-vs-candidate triage method recorded in test_results.fast_green; attributable functional regressions after in-phase repair: 0 failed.
-- **phase_149O_20L_7O_3S_1_identity:** Canonical evidence identifies Phase 149O.20L.7O.3S.1 consistently.
-- **production_modification_invariant:** No src/pcae file was changed this phase; changes bounded to the 12 files named in files_changed (1 test file, 1 verification doc, task/report/status lifecycle files).
+- **bootstrap_session_reporting_tests:** Ordinary `--compact` bootstrap output is byte-for-byte unchanged without `--dry-runtime`; 0 failed.
+- **fast_green:** Isolated-worktree Fast Green attribution (baseline `74a36dd060c60fd2b3c986fe0e682271d865bb8a`, candidate `b3801f095d49c74d3491d4327181cf506057d2c4`). Raw failures: 350 (341 failed / 9 errors). Attributable: 0. Pre-existing: 349. Verdict: PASS. Attributable functional regressions: 0 failed.
+- **phase_149O_20L_7O_3S_2_identity:** Canonical evidence identifies Phase 149O.20L.7O.3S.2 consistently.
+- **production_modification_invariant:** `src/pcae/core/runtime_dry_consumption.py` (new), `src/pcae/cli.py`, and `src/pcae/commands/session.py` changed, all additive; no adapter business logic added to the CLI or command layer.
 - **release_invariant:** v0.4.3 still resolves to 63580893b1de4782a694ab802ff7bdebdf29b0e6; unchanged.
 - **report_notification_tests:** Reporting and notification production source unchanged; canonical report trust exercised by governed finalization; 0 failed.
-- **rpac_compliance:** All 97 RPAC-001 requirements independently re-verified in the canonical verification document's Matrix D: 52 MOCK-V1-MANDATORY VERIFIED, 21 PURE-INVARIANT VERIFIED-AS-INVARIANT, 16 REAL-RUNTIME-PREREQUISITE and 8 DEFERRED-EXTENSION CORRECTLY-DEFERRED; no requirement's classification changed from 3R/3S.
-- **runtime_invariant:** Observed / observe / unavailable, registry empty with 0 plugins and 0 legacy-plugin capabilities; unchanged at phase entry, after the fresh adversarial suite, after the full regression sweep, and at close.
+- **rpac_compliance:** All 97 RPAC-001 requirements remain as classified by 3R/3S/3S.1; RPAC-REQ-053 (no fallback) and RPAC-REQ-006/007/008 (identity separation) freshly re-exercised against the new production entry point; 0 failed.
+- **runtime_invariant:** Observed / observe / unavailable, registry empty with 0 plugins and 0 legacy-plugin capabilities; unchanged at phase entry, after implementation, after the dedicated dry-invocation test suite, and at close.
 
 ## No-Go Confirmations
 
-- No real runtime execution occurred. No subprocess creation for an agent runtime occurred. No network or provider call was made. No credential, token, auth file, secret store, or provider environment was accessed. No Codex execution occurred. No Claude execution occurred. No Codex-Ox transport was created. No OpenRouter call was made. No API-provider invocation occurred. No Shell Gate behavior was activated. No Runtime Enforcement behavior was activated as real execution authority. No Permission Broker policy was changed. No real execution capability or availability was enabled. No agent identity was changed or mapped to a runtime target/provider/model. No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell system was contacted or mutated. No private research repository was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No release was created and v0.4.3 was not changed. No production source file (src/pcae/core/runtime_registry.py, runtime_adapter.py, runtime_invocation.py, mock_runtime_adapter.py, intake.py) was modified this phase.
+- No real runtime execution occurred. No subprocess creation for an agent runtime occurred (the RPAC-consuming phase was independently proven to make zero subprocess/socket calls). No network or provider call was made. No credential, token, auth file, secret store, or provider environment was accessed. No Codex execution occurred. No Claude execution occurred. No Codex-Ox transport was created; codex-ox gained no provider/model inference. No OpenRouter call was made. No API-provider invocation occurred. No Shell Gate behavior was activated. No Runtime Enforcement behavior was activated as real execution authority. No Permission Broker policy was changed. No real execution capability or availability was enabled; execution availability remained unavailable at every checkpoint. No agent identity was changed or mapped to a runtime target/provider/model. No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell system was contacted or mutated. No private research repository was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No release was created and v0.4.3 was not changed. No production source mutation by the runtime path occurred; all invocation evidence was confined to the newly gitignored `.pcae/runtime-invocations/` tree. No new runtime registry or adapter catalog was created. No automatic/implicit dispatch occurred; every dry invocation required an explicit `--dry-runtime` plus an exact `--runtime-target` flag pair. No silent fallback occurred on an unknown target or missing task authority; both fail closed with an explicit error and exit code 1.
 
 ## Recommended Next Phase
 
-Option A (ranked, evidence-derived) — wire the verified RPAC-001 mock/dry adapter into an explicit production dry-lifecycle consumer (session/task handoff), still without real execution; human decision required, not begun.
-
-## Missing Trust Fields
-
-- **Fields:** pushed_status, origin_main_head, metadata_consistency
-- ⚠️ Missing trust fields: pushed_status, origin_main_head
-- ⚠️ canonical report and metadata disagree
-- ⚠️   Mismatch: canonical report title phase_id=149O.20L.7O.3S, current phase_id=149O.20L.7O.3S.1
-- ⚠️   Mismatch: pushed_status: canonical=pushed metadata=not_pushed
-- ⚠️ Manual review recommended.
+149O.20L.7O.3S.2.1 — Independent End-to-End Production Dry-Lifecycle Runtime Adapter Consumption Verification; human decision required, not begun.
 
 ## Report Consistency
 
 - **Canonical report:** present
 - **Metadata:** present
-- **Status:** mismatch detected
-- **Warnings:**
-  - canonical report and metadata disagree
-  -   Mismatch: canonical report title phase_id=149O.20L.7O.3S, current phase_id=149O.20L.7O.3S.1
-  -   Mismatch: pushed_status: canonical=pushed metadata=not_pushed
+- **Status:** consistent
 
 ---
