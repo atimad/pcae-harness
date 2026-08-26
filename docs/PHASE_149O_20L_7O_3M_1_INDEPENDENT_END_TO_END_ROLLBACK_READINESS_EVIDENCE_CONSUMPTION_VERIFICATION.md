@@ -394,10 +394,15 @@ them immediately.
 
 ## 31. Fast Green
 
-Fixed baseline/candidate attribution is recorded in
-`.pcae/fast-green-attribution/` and the canonical metadata. The final
-machine-produced result is populated after the verification commit is frozen;
-functional attributable regressions must remain zero for completion.
+Fixed baseline/candidate attribution is recorded in the content-addressed
+artifact under `.pcae/fast-green-attribution/` and in the canonical metadata.
+The corrected pre-finalization comparison used phase entry `8907df05` and
+reported **339 raw failed nodes**, **9 raw collection errors**, **347
+baseline-reproduced exclusions**, **1 expected not-yet-pushed artifact**, **0
+environment exclusions**, and **0 phase-attributable failures**. The final
+checkpoint must reproduce those classifications with zero attributable
+failures; its candidate commit and artifact digest are canonical-metadata
+facts rather than hand-maintained narrative constants.
 
 ## 32. Findings
 
