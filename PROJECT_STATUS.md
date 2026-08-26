@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3L — PCAE v0.4.2 Release Hardening.
+**RELEASE-CANDIDATE PREPARATION ONLY — NO PUBLICATION PERFORMED.**
+Prepared a frozen, independently-verified `v0.4.2` release candidate
+implementing `3K`'s selected Option B: `3J`'s already-verified,
+attachment-only Repository Intelligence integration shipped as a
+narrow patch, with release language that draws the AUTOMATIC RI
+CONTEXT ATTACHMENT vs. TRUE RI-BACKED ADVISORY REASONING distinction
+exactly. Version bumped `0.4.1` → `0.4.2` (`pyproject.toml`,
+`src/pcae/__init__.py`). Wrote `docs/RELEASE_NOTES_V0_4_2.md`. Froze
+candidate commit `bc7935f4bb86ea7f6ade823a4e63ed9c9cc0a0c4`. Two
+independent clean-clone builds (`hatchling==1.32.0`, Python 3.14.5)
+produced byte-identical wheel (`pcae_harness-0.4.2-py3-none-any.whl`,
+2,352,007 bytes,
+`sha256:20fce764abe4bebc36c831f11c286db16c516b289e966838c4169c10294b60b4`)
+and sdist (`pcae_harness-0.4.2.tar.gz`, 2,053,704 bytes,
+`sha256:19f6372447d8a65bf804c41c7ef7fdca501b58d33ec66b5b9365abc2982f0455`);
+no contamination found. Installed both artifacts into separate fresh
+venvs: version `0.4.2` confirmed, CLI works. Installed-artifact
+Advisory Mode RI-attachment smoke (fresh snapshot, missing snapshot,
+malformed snapshot, stale snapshot) all passed: automatic attachment
+with no manual `pcae advisory-context build` prerequisite, truthful
+fail-soft, read-only (identical `latest.json` SHA-256 before/after),
+and all authority fields (`broker_decision`/`advisory_decision`/every
+`would_*`/`authorization_granted`/`execution_authorized`) empirically
+identical regardless of RI presence/absence/validity. `pcae runtime
+inspect` unchanged (`Observed`/`observe`/`unavailable`) before and
+after. F1/F2 carried forward unrepaired, correctly classified
+non-blocking for attachment-only release. See
+`docs/PHASE_149O_20L_7O_3L_PCAE_V0_4_2_RELEASE_HARDENING.md` and the
+canonical phase-completion report for the full evidence trail, Fast
+Green attribution, and blocker table. Recommends
+`149O.20L.7O.3L.1` (publication, human authorization required); not
+begun.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3K — Post-RI Attachment Architecture and Release
 Decision. **DECISION-ONLY — COMPLETE. NO SRC/PCAE MODIFIED.**
 Re-derived, from current source and contracts only (not inherited from

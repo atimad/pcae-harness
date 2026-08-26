@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.3L: PCAE v0.4.2 Release Hardening (20260826-0913-phase-149o-20l-7o-3l-pcae-v0-4-2-release-hardening)
 - Phase 149O.20L.7O.3F.1: Independent End-to-End Rollback Permission-Boundary Verification (20260825-2145-phase-149o-20l-7o-3f-1-independent-end-to-end-rollback-permission-boundary-verification)
 - Idle: awaiting next governed phase (post-149O.20L.7O.3F) (20260825-2127-idle-awaiting-next-governed-phase-post-149o-20l-7o-3f)
 - Phase 149O.20L.7O.3D: PCAE v0.4.0 Public Release (20260825-2007-phase-149o-20l-7o-3d-pcae-v0-4-0-public-release)
