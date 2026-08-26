@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3O.2** — PCAE v0.4.3 Publication Execution
+  (human-authorized): published `v0.4.3` from the frozen release
+  candidate (`63580893b1de4782a694ab802ff7bdebdf29b0e6`), independently
+  re-verified in `3O.1`. Annotated tag `v0.4.3` created and pushed
+  pinned exactly to the candidate commit (local tag object ==
+  remote tag object == wraps candidate); GitHub Release published
+  (`https://github.com/atimad/pcae-harness/releases/tag/v0.4.3`,
+  Latest, not prerelease) using the verified release notes; only the
+  frozen wheel/sdist (`sha256:e42ca72c...ff5e4` /
+  `sha256:8a088983...977276`) were uploaded, no rebuild; public bytes
+  downloaded back and re-hashed to an exact match; fresh public wheel
+  and sdist installs both pass version/golden-path checks; public
+  rollback-evidence smoke (dry-run, real-rollback-no-prior-dry-run,
+  divergence-block), RI-attachment regression, and bootstrap-prompt
+  regression all reproduced identically against the public artifacts.
+  `v0.4.2` tag/Release/assets unchanged. PyPI: NOT PUBLISHED. Article:
+  STOPPED, untouched. BLOCKING = 0, MUST-FIX = 0. RELEASE STATUS:
+  COMPLETE.
 - **Phase 149O.20L.7O.3O.1** — PCAE v0.4.3 Public Release
   (publication-only, verification): independently re-verified `3O`'s
   frozen `v0.4.3` candidate (`63580893`) — zero release-facing drift

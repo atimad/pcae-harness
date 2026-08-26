@@ -10,7 +10,7 @@ Idle: awaiting explicit human publication authorization post-149O.20L.7O.3O.1
 
 ## Status
 
-active
+done
 
 ## Mode
 
