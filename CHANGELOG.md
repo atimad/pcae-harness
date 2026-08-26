@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3L** — PCAE v0.4.2 Release Hardening: prepared a
+  frozen, reproducible `v0.4.2` release candidate (commit `bc7935f4`)
+  implementing `3K`'s selected Option B (ship `3J`'s attachment-only RI
+  integration as a narrow patch). Version bumped to `0.4.2` in
+  `pyproject.toml`/`src/pcae/__init__.py`; wrote
+  `docs/RELEASE_NOTES_V0_4_2.md` using "AUTOMATIC RI CONTEXT
+  ATTACHMENT" terminology and explicitly stating true RI-backed
+  Advisory reasoning is not implemented. Two independent clean-clone
+  builds (`hatchling==1.32.0`) produced byte-identical wheel and sdist
+  (SHA-256 verified, `cmp` byte-for-byte identical); no contamination.
+  Installed both artifacts into fresh venvs (version `0.4.2` confirmed,
+  CLI functional). Installed-artifact Advisory Mode RI-attachment
+  smoke (fresh/missing/malformed/stale snapshot) all passed: automatic
+  attachment with no manual `pcae advisory-context build` prerequisite,
+  truthful fail-soft, read-only (RI snapshot SHA-256 unchanged before/
+  after `pcae advisory check`), and every authority field
+  (`broker_decision`/`advisory_decision`/all `would_*`/
+  `authorization_granted`/`execution_authorized`) empirically identical
+  regardless of RI presence, absence, or validity. `pcae runtime
+  inspect` unchanged (`Observed`/`observe`/`unavailable`). 3J's 18-test
+  suite and 3J.1's 28-test independent suite both pass unweakened (46/46).
+  Fast Green A/B against pre-phase baseline (both runs executed with
+  matching cwd/rootdir to avoid a cwd-sensitive-test artifact discovered
+  mid-phase): 336 failed/8567 passed/11 skipped/13 errors (baseline) vs.
+  335 failed/8568 passed/11 skipped/13 errors (candidate); exactly one
+  candidate-only failure, the expected self-referential
+  `test_head_equals_origin_main` tripwire (resolves on push, not
+  source-caused); zero attributable regressions. F1/F2 carried forward,
+  correctly classified non-blocking for attachment-only release.
+  BLOCKING = 0, MUST-FIX = 0. No publication performed (no tag, no
+  release, no PyPI upload) — human authorization required first.
+  Recommends `149O.20L.7O.3L.1` (publication), not begun.
 - **Phase 149O.20L.7O.3K** — Post-RI Attachment Architecture and
   Release Decision (decision-only, no `src/pcae` modified). Re-derived
   from current source/contracts, not inherited conclusions, whether
