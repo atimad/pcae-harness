@@ -1,400 +1,357 @@
-# Phase 149O.20L.7O.3Q Complete — Runtime Surface Reconciliation and Runtime / Provider Adapter Contract Freeze
+# Phase 149O.20L.7O.3R Complete — Deterministic Mock/Dry Runtime Adapter Implementation Plan
 
 **Status: completed. Completeness: complete. Human decision required.**
 
 Phase-entry commit:
-`a52561954b78f1e195715baf4feb7db0e88fdebb`. Substantive contract commits:
-`4c9332ec44b8417ca4d5f53d72e7528753bf166f` and
-`8bc27726861e6221781402b7680dec9ed75f4148`. Canonical evidence/trust commits:
-`13b7984911960920e7bcf11f4591cebcf3559e92`,
-`c7fcbe4852edb779ad0d95c9c60393e3b692b135`, and
-`f985821c9833c1380afde3604148a115d41e98f8`. All are pushed to `origin/main`.
+`7318230feb619b161c08caa2d5256a5d2a41edf6`. Substantive planning commit:
+`197c0c7bc391d5fbac82bfceb62b77fc18cdfca3`. The governed push/finalization
+ceremony is in progress while this canonical evidence is first bound.
 
-## Public and runtime state
+## Baseline and scope result
 
+- Phase ID: `149O.20L.7O.3R`.
+- Phase status/completeness: `completed / complete`.
 - Latest public release: `v0.4.3`, still resolving to
   `63580893b1de4782a694ab802ff7bdebdf29b0e6`; unchanged.
-- Runtime status/state/capability:
-  `not_implemented / Observed / unavailable / observe`.
-- Runtime Registry current truth: valid empty, process-local metadata registry;
-  0 plugins, 0 capabilities, no loader/resolver/callable target.
-- Current execution: **UNAVAILABLE**.
+- Contract baseline: **RPAC-001 v1.0**.
+- Runtime: `not_implemented / Observed / unavailable / observe`.
+- Runtime Registry current truth: 0 plugins / 0 capabilities.
 - Production source modified: **NO**.
-- Execution activation: **NO**.
-- External runtime invocation: **NONE**.
+- Adapter implementation: **NOT STARTED**.
+- Execution activated: **NO**.
+- External runtime/provider invocation: **NONE**.
+- Pushed: not_pushed.
+- origin/main..HEAD: 1 before the governed push ceremony.
 
-## Reconciled surfaces
+## RPAC-001 classification
 
-Current source was re-derived across Runtime Registry, Runtime Context,
-Runtime Snapshot, runtime inspect, Plugin Model, agent and agent-config
-registries, session AgentLock, session/phase backend locks and registries,
-backend preflight, legacy backend and adapter contracts, provider/model hints,
-producer provenance, execution principal gap, capability vocabulary,
-invocation approval, Permission Broker, Runtime Enforcement, Shell Gate,
-generic intake, process/environment/network/filesystem controls, and every
-material legacy real-runtime path identified by 3P.
+All 97 normative requirements were re-read and classified exactly once:
 
-Key reconciliation:
+| Classification | Count |
+|---|---:|
+| MOCK-V1-MANDATORY | 52 |
+| REAL-RUNTIME-PREREQUISITE | 16 |
+| DEFERRED-EXTENSION | 8 |
+| PURE-INVARIANT | 21 |
+| **Total** | **97** |
 
-- Runtime Registry is the single future declarative catalog foundation, not a
-  callable container today.
-- Plugin Model is metadata/introspection-only: no loader, implementation
-  resolver, lifecycle callback, or execution hook.
-- Backend preflight validates task/prompt/hash/file scope but is bootstrap
-  evidence, not target resolution, capability, dispatch, or authorization.
-- Legacy backend and adapter registries are overlapping historical metadata,
-  not competing future authorities.
-- Legacy subprocess surfaces do not conform to RPAC and must be retired,
-  disabled, or routed through the one governed kernel before real activation.
-- Generic intake is already producer-neutral and is the return path for
-  proposed changes.
+Every MOCK-V1-MANDATORY row identifies an expected module and symbol, named
+test seam, and fail-closed behavior. The full mapping is Matrix A in the phase
+document. The plan explicitly avoids converting all 97 requirements into the
+first implementation.
 
-## Identity conclusion
+## Proposed implementation footprint
 
-Frozen identity layers:
+Production files proposed for the separately authorized 3S phase:
 
-```text
-AgentIdentity
-ProducerIdentity / provenance
-AdapterIdentity
-RuntimeTargetIdentity
-ProviderIdentity (optional)
-ModelIdentity (optional)
-ExecutionPrincipal
-InvocationIdentity (logical invocation + attempts)
-```
+| File | Action | Responsibility |
+|---|---|---|
+| `src/pcae/core/runtime_registry.py` | Modify | Add inert adapter-descriptor cataloging without changing plugin counts/capabilities |
+| `src/pcae/core/runtime_adapter.py` | New | Target config, status, Protocol, exact resolver, and simulation coordinator |
+| `src/pcae/core/runtime_invocation.py` | New | Immutable prompt/authority/request/envelope/result types, IDs, digests, states, append-only store |
+| `src/pcae/core/mock_runtime_adapter.py` | New | Built-in fixed-fixture, deterministic, in-process mock/dry adapter |
+| `src/pcae/core/intake.py` | Modify | Pure normalized-change to producer-neutral intake-candidate mapping |
 
-They are non-equivalent. In particular:
+Proposed tests:
 
-```text
-agent_id != runtime target
-agent_id != provider
-agent_id != model
-producer provenance != runtime identity
-```
+- `tests/test_runtime_adapter_core_3s.py`
+- `tests/test_runtime_invocation_3s.py`
+- `tests/test_mock_runtime_adapter_3s.py`
+- `tests/test_runtime_adapter_registry_3s.py`
+- `tests/test_runtime_adapter_intake_3s.py`
+- `tests/test_runtime_adapter_e2e_3s.py`
 
-Agent identity is descriptive coordination/session provenance; it carries no
-runtime authority. Producer provenance is untrusted descriptive lineage.
-RuntimeTarget is one explicit versioned adapter configuration. Provider/model
-are optional and never inferred. ExecutionPrincipal is the observed OS/service
-credential principal at effect time. InvocationIdentity provides audit and
-idempotency, not authority.
+No proposed production or test file was created or modified in 3R.
 
-**Codex-Ox conclusion:** `codex-ox` remains a first-class PCAE session/producer
-identity only. It does not imply OpenRouter, Codex CLI selection, a model, a
-configured target, authentication, capability, permission, authorization, or
-execution.
+## Registry, descriptor, and status plan
 
-## Selected adapter architecture and frozen contract
+The one existing `RuntimeRegistry` remains the declarative catalog. It gains
+inert adapter descriptor metadata only; the callable resolver is a separate,
+trusted component composed with that catalog. Mock-v1 uses trusted built-in,
+internal/test registration only—no ambient plugin discovery and no CLI
+auto-registration.
 
-Architecture: **trusted PCAE governance kernel plus replaceable RuntimeAdapter
-transports**.
+- Adapter ID: `pcae.mock-dry`.
+- Explicit targets: `mock-dry.no-change.v1`,
+  `mock-dry.synthetic-change.v1`, and `mock-dry.failure.v1`.
+- Unknown or ambiguous target: fail `no_adapter_configured`; never fallback.
+- Static descriptor: RPAC version, immutable adapter identity/version/digest,
+  class `mock_dry`, transport `in_process_fixture`,
+  `simulation.dry_dispatch`, result format, `effect=none`, local/portable,
+  no network, no subprocess, cancellation unsupported, simulation-only.
+- Dynamic status: registered/installed/configured/auth-not-required,
+  `simulation_ready=true`, `real_execution_available=false`, health and
+  observed simulation capability. It contains no permission or authorization.
 
-Contract: **Runtime / Provider Adapter Contract, RPAC-001 v1.0 — FROZEN**.
+Mock registration does not change legacy plugin count/capability aggregation,
+maximum real capability, or global execution availability. Runtime inspect is
+unchanged in 3S; a later additive view may show adapter count and simulation
+readiness separately while retaining 0 plugin capabilities and real execution
+unavailable.
 
-The kernel owns authoritative repo/task/prompt/target binding, human authority,
-Permission Broker consumption, final Runtime Enforcement, durable invocation
-state, retry authority, audit, result quarantine, generic-intake submission,
-review and promotion linkage. An adapter owns only target-specific transport,
-process/API lifecycle, bounded capture, timeout/cancellation mapping, status
-observation, and normalized result production. It cannot authorize itself or
-accept/promote output.
+## Invocation request and identity plan
 
-Conceptual interface:
+The minimum immutable request binds RPAC version; PCAE-created logical
+invocation/attempt identities; idempotency key; trusted repository fingerprint,
+root, base commit, active task and phase/session; descriptive agent identity;
+explicit target/adapter/descriptor/config digests; typed prompt artifact and
+separate simulation-approval evidence; requested simulation capability/result
+format; repo-relative cwd `.`; all-none effect profiles; finite timeout; and
+zero paid budget. Provider, model, credential, network, write, and outside-repo
+fields are absent or explicitly none/denied.
 
-```text
-describe() -> RuntimeDescriptor
-preflight(InvocationRequest) -> AdapterPreflightResult
-dispatch(DispatchEnvelope) -> DispatchReceipt
-collect(attempt_id) -> RuntimeInvocationResult | PendingObservation
-cancel(attempt_id) -> RuntimeCancellationResult
-```
+The request cannot contain PB ALLOW, Runtime Enforcement ALLOW, permission, or
+authorization claims. PCAE creates UUID4 invocation and attempt IDs. A SHA-256
+digest of canonical semantic request content supplies stable idempotency;
+timestamps and attempt observations are excluded.
 
-Streaming is deferred; v1 exposes status observations plus one terminal
-result. Cancellation capability is explicit and may be supported,
-cooperative, or unsupported.
-
-## Request contract
-
-The governed InvocationRequest binds contract version; logical invocation,
-attempt, and idempotency identities; repository fingerprint/root, base commit,
-active task and relevant phase/session; descriptive requester agent; explicit
-target/adapter/descriptor/config digests; optional provider/model snapshot;
-PromptArtifact reference/hash; InvocationApproval reference/hash; exact
-capabilities/result format; repository-bound cwd policy; environment,
-filesystem, network, sandbox, and process profiles; finite timeout;
-cancellation requirement; and optional structured resource budget.
-
-Network, write, outside-repo access, and paid usage default denied. Runtime
-output cannot rewrite request authority.
-
-## Result contract
-
-RuntimeInvocationResult binds invocation/attempt/idempotency; exact target,
-adapter, descriptor/config, and optional declared/observed provider/model;
-dispatch/accept/start/complete/capture observations and timestamps; terminal,
-process/transport/provider status; bounded stdout/stderr/content references and
-digests; structured response; changed-file manifest and patch/diff references;
-usage/cost; runtime/adapter/principal provenance; observed confinement facts;
-sanitized common failure, retry hint, and ambiguity; plus PCAE-owned intake
-references.
-
-Raw/provider-specific data may be an opaque bounded attachment. Result is
-untrusted. Completion does not mean accepted change, promotion, or successful
-PCAE task.
-
-## Runtime descriptor, status, and registry contract
-
-RuntimeDescriptor is immutable: adapter contract/identity/version/digest,
-class/transport, declared capabilities/result formats, effect type, locality,
-network requirement, platforms, cancellation mode, and simulation flag. It
-contains no live health, credentials, permission, or task state.
-
-RuntimeStatus is dynamic and timestamped: registered, installed, configured,
-authenticated or not-required, available, health/unknown, observed
-capabilities, source, and observation time. It contains no authority.
-
-Registry contract: unique registration, descriptor enumeration/lookup,
-capability candidate lookup, status association, explicit target resolution,
-no fallback, fail-closed drift/ambiguity/version handling, and a valid empty
-state. Future callable resolution belongs to trusted kernel code composed with
-the registry, never ambient plugin auto-execution.
-
-A future mock/dry entry declares no execution effect and simulation capability;
-it cannot make runtime inspect claim real execution availability. Current 0/0/
-unavailable consumers remain compatible.
-
-## Invocation identity, states, idempotency, and retry
-
-PCAE creates a stable cryptographically random logical invocation ID before
-approval and a unique attempt ID per try. Canonical versioned request content
-produces the SHA-256 idempotency key; timestamps alone never identify an
-invocation.
-
-State model:
+Identity separation is directly tested. This is valid:
 
 ```text
-PCAE governance: PREPARED -> APPROVED -> PERMITTED -> AUTHORIZED
-runtime fact:    CAPABLE (preflight and freshness recheck)
-runtime observe: DISPATCHED -> ACCEPTED -> RUNNING -> COMPLETED -> RESULT_CAPTURED
-intake:          INGESTED
+agent_id       = codex-ox
+runtime_target = mock-dry.no-change.v1
+adapter_id     = pcae.mock-dry
+producer       = pcae.mock-dry-fixture
+provider/model = absent
 ```
 
-Same ID/same content resumes without redispatch; same ID/different content is a
-hard collision. Pre-dispatch restart resumes validation. Possible post-dispatch
-restart becomes ambiguous and never auto-retries. Same-digest completion is
-idempotent; conflicting completion is quarantined. Intake replay uses a
-deterministic invocation/attempt/result-digest candidate identity.
+`codex-ox` is an agent/session identity only. It implies no Codex target,
+OpenRouter, Ox model, credential, configuration, capability, or execution. A
+custom agent ID must work with the same explicit mock target.
 
-Every retry gets a new attempt, fresh facts/PB/enforcement decisions, and fresh
-human authority when approval attempt/expiry bounds require it. A changed
-prompt, target, repo/task, effects, provider/model, or budget creates a new
-logical invocation. Adapter retryability is advisory only.
+## Prompt and bootstrap decisions
 
-## Permission, enforcement, and trust relationships
+Mock-v1 consumes a lightweight immutable `PromptArtifact`, not a raw string or
+a heavyweight workflow artifact. It binds exact content/hash, repository/task/
+phase, generator version, provenance/human-edit markers, and an injected clock.
+The existing deterministic bootstrap prompt may populate it.
 
-**Permission Broker:** existing `adapter_invocation`/`backend_invocation` and
-adapter/backend execution-class vocabulary can express dispatch conceptually.
-The current request lacks exact target, prompt, repo/effects/network/
-filesystem/credential/budget/idempotency binding, and real execution remains
-categorically denied. This is a contract gap; PB policy was not changed.
+Choose **Option B: adapter/request primitives first**. There is no live
+`session bootstrap -> dispatch` connection and no user-facing dispatch CLI in
+3S. The independent E2E may construct the existing bootstrap prompt from a
+fixed trusted context fixture; lifecycle wiring waits until the primitives are
+independently verified.
 
-**Runtime Enforcement:** future final whether-to-invoke gate after human
-approval, target capability/status, and PB permission, immediately before the
-durable effect boundary. Current Runtime Enforcement is evidence-only,
-negative-only, non-authorizing, and has zero production dispatch consumers; a
-separate amendment/implementation is required.
+## Result, determinism, and provenance plan
 
-**Shell Gate:** future constraint on how local command/process launch occurs.
-Fixed argv requires adapter/process-policy validation; shell text/expansion
-requires an enforcing Shell Gate/equivalent. Current Shell Gate only
-classifies/audits simulations and remains non-enforcing. Runtime Enforcement
-answers whether; Shell Gate/process policy answers how.
+The normalized result binds invocation/attempt/idempotency; target, adapter,
+descriptor/config digests; simulation namespace and terminal observation;
+bounded deterministic payload; normalized change list; error category;
+untrusted marker; and separate producer provenance. Provider/model/principal
+remain absent.
 
-**HATP:** no generic adapter dependency. Current HATP is bound to specific
-hardware-backed trust/rollback/deployment domains and is not provider auth or
-general dispatch permission. Any later hardware-backed invocation requirement
-must be separately contracted.
+Given identical normalized semantic input and fixture version, descriptor,
+payload/change bytes, result digest, status/error, and provenance are identical.
+UUIDs and injected envelope timestamps may vary but never enter the deterministic
+payload digest. Host paths, ambient environment, unordered mappings, and wall
+clock do not influence it.
 
-**Prompt approval:** a lightweight immutable PromptArtifact is required for
-machine dispatch. One exact InvocationApproval can encompass prompt approval
-and binds prompt hash, repo/task/base, selected target/config, effect profiles,
-budget, expiry, and attempts. Existing copy/paste is an implicit human boundary
-but not machine-verifiable. Older `approved_agents` is not runtime approval.
+Fixed harmless fixtures are:
 
-**Dispatch permission:** human approval, runtime capability, PB permission,
-Runtime Enforcement authorization, and actual dispatch remain separate.
+- explicit no-change result;
+- one in-memory synthetic creation of `mock-output.txt`, never written by the
+  adapter;
+- deterministic simulated runtime failure;
+- malformed output supplied only by a test fake.
 
-## Gate ordering
+Agent identity, runtime target, adapter identity, and producer
+`pcae.mock-dry-fixture` remain separate. Runtime output cannot select or alter
+repository/task authority.
+
+## Governance-gate decisions
+
+Mock-v1 is a dry control-plane simulation, not a governed execution attempt.
+It emits `SIM_*` observations only—never production `APPROVED`, `PERMITTED`,
+`AUTHORIZED`, `DISPATCHED`, or `COMPLETED` states.
+
+- Permission Broker: call the existing broker with `simulation_only=true`.
+  Persist an ALLOW result only as `PB_POLICY_WOULD_ALLOW`; it does not establish
+  `PERMITTED`. Policy is unchanged.
+- Runtime Enforcement: the current evidence-only/negative-only facility is not
+  a positive authority. Use an injected, digest-bound, explicitly
+  non-authorizing simulation test double that can produce
+  `would_allow_simulation` or deny. It never establishes `AUTHORIZED`.
+- Request/approval/capability/PB/simulated-enforcement evidence remains
+  structurally separate, and a failed gate leaves the adapter call count zero.
+
+Execution Attempt Boundary:
+
+- Last mock-v1 operation allowed: after durable `SIM_DISPATCH_INTENT`, call
+  `MockDryRuntimeAdapter.dispatch` in-process with an immutable
+  `simulation_only=true`, `effect=none` envelope.
+- First operation reserved for a real-runtime phase: executable/process launch,
+  provider/client/network request, child-environment or credential resolution,
+  source-worktree mutation, or emission of real `DISPATCHED` state.
+
+Crossing that line is a hard test failure and implementation STOP condition.
+
+## Persistence, intake, idempotency, and failure plan
+
+Persistence is required in mock-v1 because replay and restart semantics should
+be proven before effects exist. PCAE—not the adapter—writes immutable,
+create-only request/event/result/handoff artifacts under:
 
 ```text
-authoritative task/session + PromptArtifact
-  -> immutable request + explicit target
-  -> human InvocationApproval
-  -> descriptor/config/status/capability preflight
-  -> Permission Broker dispatch/effect permission
-  -> HEAD/config/status/approval freshness recheck
-  -> Runtime Enforcement final single-attempt authorization
-  -> durable attempt record + dispatch intent
-  -> selected adapter only
-  -> normalized result capture
-  -> generic intake
-  -> existing review/promotion lifecycle
+.pcae/runtime-invocations/mock-v1/<invocation_id>/
 ```
 
-Permission != capability; capability != authorization; authorization !=
-execution. Every failed/stale pre-dispatch gate means no adapter call.
+Events are digest-chained. Identical ID/content resumes without redispatch;
+same ID/conflicting content fails `integrity_failure`; duplicate identical
+completion is idempotent; conflicting completion is quarantined; persisted
+intent without terminal result becomes `simulation_ambiguous` and never
+redispatches automatically. Retry lineage is reserved, but retry APIs and
+automatic retry are deferred.
 
-## Runtime configuration and dependencies
+Generic intake decision: **Stage B**. A pure provider-neutral helper converts
+normalized in-memory changes to the existing candidate shape and stable
+invocation/attempt/result-digest identity. It does not call live intake,
+Evidence Collection Pipeline, acceptance, review, promotion, or filesystem/git
+binding helpers. No-change returns `not_applicable_no_changes` rather than a
+fabricated candidate. Result and candidate remain untrusted evidence.
 
-- Selection: explicit `runtime_target_id`; no silent agent/config/provider/
-  model/environment fallback.
-- Discovery: trusted built-ins and explicit pinned config initially; future
-  entry points/executable descriptors require governed admission; no ambient
-  auto-enable.
-- Credentials: opaque refs only; PCAE currently lacks a general secret resolver
-  and least-privilege injector. This blocks authenticated real adapters.
-- Network: explicit default-deny capability/effect, even for local CLI;
-  endpoint/TLS/DNS/proxy/egress enforcement required before real use.
-- Local process: fixed argv, pinned executable, repo cwd, minimal env, bounded
-  capture, timeout, process tree, signals, cancellation, containment, and
-  restart reconciliation required.
-- Filesystem: separate repo read/write/temp/outside scopes; write/outside
-  default none; cwd kernel-selected and realpath-contained.
-- API: endpoint/provider, secret ref, schema, timeouts, rate limits,
-  cancellation, ambiguous delivery, usage/cost, and normalized result required.
-- Budget: optional v1 extension for mock propagation; required before metered
-  real use. Missing means no paid use.
-- Portability: common fields are OS-neutral; macOS/Linux mechanics remain
-  declared adapter platform profiles.
+Mock-v1 failure subset:
 
-## Invocation record, audit, provenance, and intake
+- no adapter configured / invalid explicit target;
+- invalid request or integrity collision;
+- unsupported simulation capability/effect;
+- deterministic simulated runtime failure;
+- malformed normalized result;
+- result-to-intake mapping failure;
+- simulation ambiguity on restart.
 
-A persistent append-only RuntimeInvocationRecord is required before real
-execution and should be exercised by mock/dry. It binds request/artifact/
-config digests, repo/task/phase, all identities, approval, status, PB/
-enforcement, transition log, dispatch receipt, result, failures/ambiguity,
-retry lineage, intake references, timestamps, and integrity digest. No schema
-was implemented in 3Q.
+Authentication, provider/network, delivery timeout, and real process failures
+remain representable contract vocabulary but unexercised prerequisites.
+Cancellation returns deterministic unsupported/already-complete semantics;
+streaming is deferred and terminal results only are planned.
 
-Audit must answer who requested/approved, what prompt/context/repo/task/base,
-which target/adapter/provider/model/principal, which facts and decisions, what
-dispatch/runtime/cancel/ambiguity occurred, what was captured, and how intake/
-review/promotion ended.
+## Security and zero-effect proof design
 
-Producer provenance records requesting agent, producer claim, target, adapter,
-provider/model if known, principal, attempt, and result digest but remains
-descriptive. Repository/task authority always comes from current governed PCAE
-state, never runtime claims.
+Static AST/import guards and dynamic sentinels jointly prove:
 
-Generic intake is reused unchanged as the return path: the kernel maps a
-normalized change result into a producer-neutral task/repo/base-bound
-candidate; intake validates paths/scope/hashes/idempotency and emits evidence,
-not execution or promotion. No Codex-/Claude-specific intake is permitted.
+| Invariant | Evidence design |
+|---|---|
+| No subprocess | Reject `subprocess`, `os.system`, `exec*`, `spawn*`, shell helpers; patched sentinels must remain at zero calls |
+| No network | Reject HTTP/socket/provider clients; patched socket/client constructors must remain at zero calls |
+| No credentials | Reject environment/auth/keyring/token/secret reads and credential-like fields; patched env/open/keyring sentinels remain untouched |
+| Controlled filesystem only | Hash repo outside the invocation-record root before/after; adapter write attempt fails; only PCAE record artifacts may differ |
+| Adapter cannot self-authorize | Protocol/result schemas contain no authority methods or fields; forged fields fail closed |
+| PB/RE cannot be overridden | Coordinator owns separate immutable evidence; adapter sees only final simulation envelope |
+| Repo authority cannot be chosen by adapter | Trusted `AuthoritySnapshot` is kernel-supplied and output claims cannot rebind it |
+| Result is not accepted change | `untrusted=true`; Stage-B mapping only; no acceptance/promotion/task-success path |
 
-## Failure taxonomy
+The independent E2E uses a fixed trusted repository/task/session context,
+builds the existing deterministic bootstrap prompt, constructs the typed
+artifact/request, explicitly selects `mock-dry.synthetic-change.v1`, evaluates
+the simulation-only PB and non-authorizing enforcement double, records
+`SIM_DISPATCH_INTENT`, calls the in-process fixture, persists the normalized
+result, and produces a generic intake-compatible candidate. It asserts zero
+process, network, credential, and runtime source-write calls; no source diff;
+and unchanged `Observed / observe / unavailable` with plugin registry 0/0.
 
-Frozen minimum:
+Core common types use `pathlib`, repo-relative logical paths, canonical JSON,
+injected clocks, and no shell/signal/OS branch. macOS and Linux CI exercise the
+same mock logic. Dell is not involved.
+
+## Implementation and commit sequence
+
+Separately authorized 3S order:
+
+1. immutable IDs/types/digests and validation;
+2. descriptor/status plus inert catalog extension and exact resolver;
+3. deterministic fixed-fixture adapter;
+4. append-only simulation store and replay reducer;
+5. simulation coordinator with PB and non-authorizing enforcement seams;
+6. normalized result and pure intake-candidate mapping;
+7. unit, integration, zero-effect, identity, restart, and E2E tests;
+8. independent verification before any public CLI/bootstrap/inspect exposure.
+
+Recommended logical commits: core invocation types; registry/resolver;
+deterministic adapter; persistence/coordinator; intake mapping/integration;
+security/E2E verification. Do not over-fragment and do not add CLI exposure.
+
+Implementation must stop if it requires PB policy or Runtime Enforcement
+contract change, credentials, network, subprocess, real execution activation,
+Shell Gate/HATP/Class-B changes, or new authority semantics.
+
+## First-real-runtime prerequisites and sequencing
+
+Before any real adapter: positive attempt-bound human authority; RPAC-rich PB
+dispatch/effect permission; production Runtime Enforcement authorization;
+durable invocation/attempt persistence; process supervision/confinement and
+Shell Gate/equivalent for local execution; sanitized environment and secret
+reference resolver; explicit network policy; filesystem scope enforcement;
+timeouts/cancellation; ambiguity-safe retry/recovery; bounded/redacted output
+normalization; generic-intake linkage; supply-chain admission; and macOS/Linux
+verification.
+
+After mock implementation and independent verification, first build a generic
+fixed-argv external-executable adapter against a non-AI fixture to validate the
+process boundary. The first named AI target should then be an explicitly
+configured **Codex CLI RuntimeTarget**, followed by Claude-local. API providers
+come later because secrets, network, cost, and delivery ambiguity add more
+unproven dependencies. This sequencing creates no mapping from `codex-ox`.
+
+## Verification and no-go record
+
+- Planning static verifier: 58/58 sections, matrices A-E, 97/97 sequential
+  RPAC rows, exact 52/16/8/21 totals, and every mandatory mapping; 0 failed.
+- Source-reuse inspection: current registry, runtime, identity, prompt, PB,
+  enforcement, legacy backend, persistence, and intake surfaces; 0 unresolved
+  contradictions.
+- `git diff --check`: passed.
+- Full Fast Green: not run under the planning-only testing rule; no production,
+  test, contract, schema, version, or build file changed; 0 attributable
+  failures.
+- Required PCAE governance/runtime checks: passed, with only established
+  historical task-memory warnings.
+
+No production source file was modified. No test file was modified. No contract
+or schema was modified. No adapter was implemented or registered. No runtime
+inspect behavior or identity was changed. No prompt was dispatched. No runtime,
+subprocess, network, provider/model, or credential operation occurred. No PB,
+Runtime Enforcement, Shell Gate, HATP, HMIC, Class-B, or CLTR behavior changed.
+No Dell system was contacted. The private research repository was untouched and
+uninspected. The article remains stopped, unread, unmodified, and unpublished.
+No release was cut.
+
+## Final verdict
 
 ```text
-no_adapter_configured
-unsupported_capability
-unauthenticated
-unavailable
-permission_denied
-enforcement_denied
-dispatch_error
-timeout
-runtime_failure
-malformed_result
-result_ingestion_failure
+DETERMINISTIC MOCK/DRY ADAPTER IMPLEMENTATION PLAN:
+COMPLETE
+RPAC-001:
+v1.0
+MOCK-V1 SCOPE:
+MINIMAL / CONTRACT-CORRECT
+REAL SUBPROCESS:
+NONE
+NETWORK:
+NONE
+CREDENTIALS:
+NONE
+PROVIDER/MODEL:
+NONE
+REAL EXECUTION:
+UNAVAILABLE
+GENERIC INTAKE:
+STAGE B PURE CANDIDATE MAPPING; NO SUBMISSION
+RUNTIME REGISTRY:
+ONE INERT CATALOG; INTERNAL EXPLICIT MOCK REGISTRATION; NO FALLBACK
+EXECUTION AVAILABILITY:
+UNCHANGED BY MOCK ADAPTER
+IMPLEMENTATION:
+NOT STARTED
+NEXT PHASE:
+149O.20L.7O.3S — DETERMINISTIC MOCK/DRY RUNTIME ADAPTER IMPLEMENTATION
+HUMAN DECISION:
+REQUIRED
 ```
 
-Additive: canceled, rate_limited, ambiguous_outcome, integrity_failure.
+No release occurs in 3R. A future runtime chapter may justify `v0.5.0`, but no
+version is frozen.
 
-## Security invariants
+## Exact next phase
 
-- adapter cannot self-authorize or alter human/PB/Runtime Enforcement decisions;
-- adapter cannot choose repo/task authority or broaden cwd/env/network/
-  filesystem/process/budget scope;
-- identities remain non-equivalent; no agent-to-runtime inference;
-- credentials are refs only and never persisted in contract/audit/output;
-- network, subprocess, shell, mutation, outside-repo and paid effects default
-  denied and are separately authorized;
-- adapter implementation/digest is pinned and drift fails closed;
-- durable record precedes dispatch and ambiguous outcomes never auto-retry;
-- runtime output remains untrusted until normalization/intake;
-- runtime completion != accepted change != promotion != successful PCAE task.
+**149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter Implementation.**
 
-## First implementation and first real adapter sequencing
-
-First implementation: **deterministic mock/dry adapter**, built-in and explicit,
-using fixed fixtures, no subprocess, network, model, provider, credential, or
-repo mutation. It exercises registration, selection, request/approval,
-simulated gates, state/record/result, cancellation/failures, idempotency, and
-generic intake. Its positive path remains a simulation and never changes real
-runtime availability.
-
-After independent mock verification: generic fixed-argv local executable
-adapter against a deterministic non-AI fixture; then the first named AI target
-should be an explicitly configured **Codex CLI RuntimeTarget**, never inferred
-from `codex-local` or `codex-ox`. Claude-local follows without legacy-path
-exemption. API providers wait for secret/network/budget controls.
-
-## Contract verification and checks
-
-- RPAC static verification: PASS — 65 required phase sections, matrices A-F,
-  RPAC-REQ-001 through RPAC-REQ-097 sequential; 0 failed.
-- Cross-check: Runtime Architecture/Plugin Model, Permission Broker, Runtime
-  Enforcement, Shell Gate, generic intake, agent identities, Codex-Ox, backend
-  preflight, HATP, legacy invocations, runtime inspect — PASS; all gaps have an
-  explicit fail-closed disposition.
-- `git diff --check`: passed after formatting normalization.
-- `pcae health`: healthy.
-- `pcae check`: passed.
-- `pcae status coherence`: coherent.
-- `pcae doctor task-memory`: warnings only for longstanding historical
-  `tasks/DONE.md` synchronization debt, unrelated to 3Q.
-- `pcae push check`: passed for governed pushes.
-- `pcae runtime inspect`: unchanged Observed/observe/unavailable, 0/0.
-- `pcae notify status`: configured, enabled, ready.
-- Full Fast Green: not run; the governing brief calls for source inspection,
-  contract cross-checks, and static consistency for this architecture/contract
-  phase, and no production/test/schema/version/build file changed.
-
-## No-Go confirmation
-
-Production source modified = **NO**. Execution activation = **NO**. External
-runtime invocation = **NONE**. No adapter implementation or registration; no
-Claude/Codex/Codex-Ox/OpenRouter/provider/model call; no subprocess runtime
-path; no network; no credentials/secrets; no PB policy change; no Runtime
-Enforcement or Shell Gate activation; no agent identity change; no HATP/HMIC/
-Class-B/CLTR change; no Dell mutation; no release/version/build change.
-
-Article remains **STOPPED and untouched**. Private
-`~/repos/pcae-deepseek-research` remains **untouched, uninspected, not imported,
-and not relied upon**.
-
-## Verdict and next phase
-
-```text
-RUNTIME SURFACE RECONCILIATION: COMPLETE
-RUNTIME / PROVIDER ADAPTER CONTRACT: FROZEN — RPAC-001 v1.0
-CURRENT EXECUTION: UNAVAILABLE
-AGENT IDENTITY: SEPARATE FROM RUNTIME TARGET
-PRODUCER PROVENANCE: SEPARATE FROM RUNTIME IDENTITY
-RUNTIME REGISTRY: VALID EMPTY STATE
-ADAPTER SELECTION: EXPLICIT / NO SILENT FALLBACK
-PERMISSION: SEPARATE FROM CAPABILITY
-RUNTIME ENFORCEMENT: FUTURE PRE-DISPATCH GATE
-GENERIC INTAKE: REUSED AS RETURN PATH
-FIRST IMPLEMENTATION: DETERMINISTIC MOCK/DRY ADAPTER
-REAL PROVIDER EXECUTION: NOT IMPLEMENTED
-EXECUTION ACTIVATION: NOT PERFORMED
-```
-
-Exact next phase: **149O.20L.7O.3R — Deterministic Mock/Dry Runtime Adapter
-Implementation Plan**.
-
-Human decision is required to accept RPAC-001 v1.0 and begin 3R. 3R has not
-begun. Phase 3Q stops here.
+It is not started. A new explicit human decision is required. Stop after 3R.
