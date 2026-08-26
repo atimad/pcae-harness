@@ -700,3 +700,68 @@ def build_intake_candidate_from_files(
         },
     }
     return {"candidate": candidate, "errors": []}
+
+
+def build_intake_candidate_from_changes(
+    *,
+    repository_fingerprint: str,
+    base_commit: str,
+    task_id: str,
+    candidate_id: str,
+    changed_files: list[dict],
+    producer_kind: str,
+    producer_source: str = "runtime_adapter",
+    summary: str = "",
+    adapter_version: str = "pcae.mock-dry/1.0",
+) -> dict:
+    """Phase 149O.20L.7O.3S -- RPAC-001 Stage B generic in-memory-change
+    candidate builder (RPAC-REQ-080, RPAC-001 §15). Producer-neutral: no
+    runtime-adapter-specific branch exists here, so this same function
+    serves the mock adapter today and any future RPAC-conformant real
+    adapter unchanged.
+
+    Unlike `build_intake_candidate_from_files` above, this function reads
+    no git state and calls no subprocess -- repository/base binding is
+    supplied by the caller's already-authoritative binding (an
+    `AuthoritySnapshot`, never adapter/runtime output; see
+    `runtime_invocation.AuthoritySnapshot`), preserving the RPAC mock
+    slice's zero-subprocess proof.
+
+    It never calls `validate_and_ingest_intake_candidate` -- Stage B stops
+    at producing a schema-correct candidate document only (RPAC-REQ-080/
+    081). If `changed_files` is empty, it returns the explicit
+    `not_applicable_no_changes` disposition rather than a fabricated
+    candidate (RPAC-REQ-081)."""
+    if not changed_files:
+        return {"candidate": None, "disposition": "not_applicable_no_changes", "errors": []}
+
+    proposed_changes: list[dict] = []
+    for change in changed_files:
+        entry = {"path": change["path"], "operation": change["operation"]}
+        if change["operation"] != "delete":
+            entry["content_after"] = change["content_after"]
+            entry["content_hash_after"] = change["content_hash_after"]
+        proposed_changes.append(entry)
+
+    candidate = {
+        "intake_contract_version": INTAKE_CONTRACT_VERSION,
+        "candidate_id": candidate_id,
+        "producer": {
+            "kind": producer_kind,
+            "source": producer_source,
+            "adapter_version": adapter_version,
+        },
+        "task_context": {"task_id": task_id, "declared_goal": summary},
+        "repo_binding": {
+            "repo_fingerprint": repository_fingerprint,
+            "base_commit": base_commit,
+        },
+        "proposed_changes": proposed_changes,
+        "producer_claims": {"summary": summary, "self_reported_complete": False},
+    }
+    return {
+        "candidate": candidate,
+        "disposition": "candidate_built",
+        "errors": [],
+        "candidate_content_hash": _hash_candidate_content(candidate),
+    }
