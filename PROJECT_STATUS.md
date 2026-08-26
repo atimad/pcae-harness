@@ -2,30 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter
+Implementation. **IMPLEMENTATION — COMPLETE. HUMAN DECISION REQUIRED FOR
+NEXT PHASE.** Implemented the RPAC-001 v1.0 mock-v1 vertical slice frozen
+by the 3R plan: all 52 MOCK-V1-MANDATORY requirements and the structural
+seams for all 21 PURE-INVARIANT requirements; the 16 REAL-RUNTIME-PREREQUISITE
+and 8 DEFERRED-EXTENSION requirements remain deliberately absent (Matrix E).
+Five production files: `runtime_registry.py` gained an adapter-descriptor
+catalog beside unchanged plugin metadata; new `runtime_adapter.py` (target/
+status/Protocol/resolver/simulation coordinator), `runtime_invocation.py`
+(prompt/approval/request/envelope/result/state/append-only store), and
+`mock_runtime_adapter.py` (built-in deterministic fixed-fixture adapter);
+`intake.py` gained a git-free, producer-neutral Stage-B changed-file-to-
+candidate builder. 82 new tests across 4 files; 0 attributable Fast Green
+regressions (3 pre-existing test assertions repaired to reflect the
+RPAC-REQ-050-mandated registry shape). Runtime remains `Observed` /
+`observe` / `unavailable`, registry 0 plugins / 0 capabilities; `v0.4.3`
+unchanged; no real adapter, subprocess, network, credential, provider/model,
+Permission Broker policy change, Runtime Enforcement/Shell Gate activation,
+public CLI, or bootstrap wiring. Exact recommended next phase:
+**149O.20L.7O.3S.1 — Independent End-to-End Deterministic Mock/Dry Runtime
+Adapter Verification** (not begun; human decision required). See
+`docs/PHASE_149O_20L_7O_3S_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3R — Deterministic Mock/Dry Runtime Adapter
-Implementation Plan. **IMPLEMENTATION PLANNING — COMPLETE. HUMAN DECISION
-REQUIRED.** Re-read complete RPAC-001 v1.0 and 3Q evidence, re-audited current
-Runtime Registry/introspection/snapshot/inspect, agent/task/session/repository
-identity, bootstrap prompt, Permission Broker, Runtime Enforcement, legacy
-backend models/persistence, and producer-neutral intake source. Classified all
-97 RPAC requirements exactly once: **52 MOCK-V1-MANDATORY, 16
-REAL-RUNTIME-PREREQUISITE, 8 DEFERRED-EXTENSION, 21 PURE-INVARIANT**. Planned a
-five-production-file, six-test-file internal/test-only slice: extend the one
-Runtime Registry with inert adapter metadata; add immutable RPAC target/status/
-request/result and exact callable-resolution seams; implement a built-in fixed-
-fixture adapter; persist append-only simulation records under `.pcae`; and map
-normalized in-memory changes to generic intake candidate shape without
-submitting intake. Existing PB is consumed only with `simulation_only=true`;
-current Runtime Enforcement is not treated as authority and is represented by
-a separately injected non-authorizing test double. Production runtime states
-are never emitted. Public CLI/bootstrap wiring and runtime-inspect exposure are
-deferred until independent verification. Exact recommended next phase:
-**149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter Implementation** (not
-begun; human decision required). Runtime remains `Observed` / `observe` /
-`unavailable`, registry 0 plugins / 0 capabilities; `v0.4.3` unchanged; no
-production/test/contract/schema/version/build change, adapter implementation or
-registration, prompt dispatch, subprocess, network, credential, provider/model,
-policy activation, Dell/private-research/article action. See
+Implementation Plan. **IMPLEMENTATION PLANNING — COMPLETE.** Re-read complete
+RPAC-001 v1.0 and 3Q evidence, re-audited current Runtime Registry/
+introspection/snapshot/inspect, agent/task/session/repository identity,
+bootstrap prompt, Permission Broker, Runtime Enforcement, legacy backend
+models/persistence, and producer-neutral intake source. Classified all 97
+RPAC requirements exactly once: 52 MOCK-V1-MANDATORY, 16
+REAL-RUNTIME-PREREQUISITE, 8 DEFERRED-EXTENSION, 21 PURE-INVARIANT. See
 `docs/PHASE_149O_20L_7O_3R_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_IMPLEMENTATION_PLAN.md`.
 
 ## Prior Phase

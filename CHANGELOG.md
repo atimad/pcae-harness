@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3R to Phase 149O.20L.7O.3S: Deterministic Mock/Dry Runtime Adapter Implementation; session refreshed and governance continuity revalidated.
+- **Phase 149O.20L.7O.3S** — Deterministic Mock/Dry Runtime Adapter
+  Implementation: implemented the RPAC-001 v1.0 mock-v1 vertical slice frozen
+  by the 3R plan. All 52 MOCK-V1-MANDATORY requirements and the structural
+  seams for all 21 PURE-INVARIANT requirements are implemented; 16
+  REAL-RUNTIME-PREREQUISITE and 8 DEFERRED-EXTENSION requirements remain
+  deliberately absent. Five production files: `runtime_registry.py` gained an
+  adapter-descriptor catalog beside unchanged plugin metadata; new
+  `runtime_adapter.py` (target/status/Protocol/resolver/simulation
+  coordinator), `runtime_invocation.py` (prompt/approval/request/envelope/
+  result/state/append-only store), and `mock_runtime_adapter.py` (built-in
+  deterministic fixed-fixture adapter); `intake.py` gained a git-free,
+  producer-neutral Stage-B changed-file-to-candidate builder. Existing PB is
+  consumed only with `simulation_only=true`; production Runtime Enforcement is
+  not invoked and is represented by a separately injected non-authorizing test
+  double; no production runtime state is ever emitted. Public CLI, bootstrap
+  wiring, and `pcae runtime inspect` exposure remain unchanged/deferred. 82 new
+  tests across 4 files; 0 attributable Fast Green regressions (3 pre-existing
+  test assertions repaired to reflect the RPAC-REQ-050-mandated registry
+  shape). Recommended next:
+  `149O.20L.7O.3S.1 — Independent End-to-End Deterministic Mock/Dry Runtime
+  Adapter Verification`, not begun and human-gated. No release, version bump,
+  real adapter, subprocess, network, credential, provider/model, PB/Runtime
+  Enforcement/Shell Gate activation, HATP/HMIC/Class-B/CLTR change, Dell,
+  private-research, or article action. Runtime remains
+  Observed/observe/unavailable with 0 plugins and 0 legacy-plugin
+  capabilities; `v0.4.3` unchanged.
 - Transitioned active task from Phase 149O.20L.7O.3R: Deterministic Mock/Dry Runtime Adapter Implementation Plan to Idle: awaiting human decision post-149O.20L.7O.3R; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3R** — Deterministic Mock/Dry Runtime Adapter
   Implementation Plan (planning only): re-read RPAC-001 v1.0 and complete 3Q
