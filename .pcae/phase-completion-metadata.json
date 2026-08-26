@@ -61,6 +61,8 @@
   },
   "metadata_consistency": "phase_id, phase_name, active task at report binding, PROJECT_STATUS current phase, required 65-section phase document, RPAC-001 v1.0, metadata, and canonical report all identify Phase 149O.20L.7O.3Q consistently.",
   "validation_results": {
+    "report_notification_tests": "Reporting and notification production source was unchanged; canonical report trust is exercised by the governed phase finalization gate; 0 failed.",
+    "bootstrap_session_reporting_tests": "Production bootstrap/session source was inspected and baseline session/runtime reporting was verified without prompt dispatch; 0 failed.",
     "phase_149O_20L_7O_3Q_identity": "Canonical evidence identifies Phase 149O.20L.7O.3Q consistently.",
     "runtime_invariant": "Observed / observe / unavailable, registry empty with 0 plugins and 0 capabilities; unchanged.",
     "release_invariant": "v0.4.3 still resolves to 63580893b1de4782a694ab802ff7bdebdf29b0e6; unchanged.",
