@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3R — Deterministic Mock/Dry Runtime Adapter
+Implementation Plan. **IMPLEMENTATION PLANNING — COMPLETE. HUMAN DECISION
+REQUIRED.** Re-read complete RPAC-001 v1.0 and 3Q evidence, re-audited current
+Runtime Registry/introspection/snapshot/inspect, agent/task/session/repository
+identity, bootstrap prompt, Permission Broker, Runtime Enforcement, legacy
+backend models/persistence, and producer-neutral intake source. Classified all
+97 RPAC requirements exactly once: **52 MOCK-V1-MANDATORY, 16
+REAL-RUNTIME-PREREQUISITE, 8 DEFERRED-EXTENSION, 21 PURE-INVARIANT**. Planned a
+five-production-file, six-test-file internal/test-only slice: extend the one
+Runtime Registry with inert adapter metadata; add immutable RPAC target/status/
+request/result and exact callable-resolution seams; implement a built-in fixed-
+fixture adapter; persist append-only simulation records under `.pcae`; and map
+normalized in-memory changes to generic intake candidate shape without
+submitting intake. Existing PB is consumed only with `simulation_only=true`;
+current Runtime Enforcement is not treated as authority and is represented by
+a separately injected non-authorizing test double. Production runtime states
+are never emitted. Public CLI/bootstrap wiring and runtime-inspect exposure are
+deferred until independent verification. Exact recommended next phase:
+**149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter Implementation** (not
+begun; human decision required). Runtime remains `Observed` / `observe` /
+`unavailable`, registry 0 plugins / 0 capabilities; `v0.4.3` unchanged; no
+production/test/contract/schema/version/build change, adapter implementation or
+registration, prompt dispatch, subprocess, network, credential, provider/model,
+policy activation, Dell/private-research/article action. See
+`docs/PHASE_149O_20L_7O_3R_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_IMPLEMENTATION_PLAN.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3Q — Runtime Surface Reconciliation and Runtime /
 Provider Adapter Contract Freeze. **ARCHITECTURE / CONTRACT FREEZE —
 COMPLETE. HUMAN DECISION REQUIRED.** Re-derived and reconciled current
@@ -20,13 +48,10 @@ overloaded as a callable loader. Future ordering is bound request + human
 approval -> target capability/status -> Permission Broker -> freshness ->
 Runtime Enforcement final pre-dispatch gate -> durable record -> adapter ->
 normalized result -> producer-neutral intake. First implementation target:
-deterministic mock/dry adapter in a simulation namespace. Exact recommended
-next phase: **149O.20L.7O.3R — Deterministic Mock/Dry Runtime Adapter
-Implementation Plan** (not begun). Runtime remains `Observed` / `observe` /
-`unavailable`, registry 0 plugins / 0 capabilities; `v0.4.3` unchanged; no
-source/test/schema/version/build change, adapter, execution, subprocess,
-network, credential, policy activation, Dell/private-research/article action.
-See `docs/PHASE_149O_20L_7O_3Q_RUNTIME_SURFACE_RECONCILIATION_AND_RUNTIME_PROVIDER_ADAPTER_CONTRACT_FREEZE.md`
+deterministic mock/dry adapter in a simulation namespace. Runtime remains
+`Observed` / `observe` / `unavailable`, registry 0 plugins / 0 capabilities;
+`v0.4.3` unchanged. See
+`docs/PHASE_149O_20L_7O_3Q_RUNTIME_SURFACE_RECONCILIATION_AND_RUNTIME_PROVIDER_ADAPTER_CONTRACT_FREEZE.md`
 and `docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md`.
 
 ## Prior Phase

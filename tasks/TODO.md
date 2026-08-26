@@ -11,18 +11,20 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-**Phase 149O.20L.7O.3Q** (Runtime Surface Reconciliation and Runtime /
-Provider Adapter Contract Freeze, completed, architecture/contract only):
-reconciled current runtime/plugin, agent, backend, provider/model, producer,
-permission, enforcement, process, and intake surfaces and froze **RPAC-001
-v1.0**. Agent identity is not target/provider/model identity; producer
-provenance is not runtime identity. Runtime Registry remains one canonical
-declarative catalog and a valid empty state; selection is explicit with no
-fallback; Permission Broker permission and Runtime Enforcement authorization
-remain separate from capability and execution; generic intake is the return
-path. Recommended next, not begun: **149O.20L.7O.3R — Deterministic Mock/Dry
-Runtime Adapter Implementation Plan**, subject to human decision. Runtime
-remains `Observed` / `observe` / `unavailable`, 0 plugins / 0 capabilities.
+**Phase 149O.20L.7O.3R** (Deterministic Mock/Dry Runtime Adapter
+Implementation Plan, completed, planning only): classified all 97 RPAC-001
+v1.0 requirements exactly once (52 mock-v1 mandatory / 16 real-runtime
+prerequisites / 8 deferred extensions / 21 pure invariants) and produced the
+implementation-ready five-production-file/six-test-file vertical-slice plan.
+Mock-v1 is internal/test-only: explicit target, one canonical catalog,
+immutable request and simulation envelope, PB simulation, non-authorizing
+Runtime Enforcement test double, append-only `.pcae` invocation records,
+deterministic result, and Stage-B generic-intake candidate mapping without
+submission. It has no CLI/bootstrap wiring, subprocess, network, credentials,
+provider/model, or real runtime state. Recommended next, not begun:
+**149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter Implementation**,
+subject to human decision. Runtime remains `Observed` / `observe` /
+`unavailable`, 0 plugins / 0 capabilities.
 
 **Phase 149F** (Repository-Wide Mutation Permission Coverage Wave 1
 Implementation, completed, bounded production implementation) broker-wired

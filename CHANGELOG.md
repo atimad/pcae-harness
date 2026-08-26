@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3R** — Deterministic Mock/Dry Runtime Adapter
+  Implementation Plan (planning only): re-read RPAC-001 v1.0 and complete 3Q
+  evidence, then classified all 97 requirements exactly once (52 mock-v1
+  mandatory, 16 real-runtime prerequisites, 8 deferred extensions, 21 pure
+  invariants). Planned an internal/test-only five-production-file,
+  six-test-file vertical slice: one canonical catalog with inert adapter
+  metadata and explicit exact resolver; immutable prompt/request/simulation
+  envelope/result types; fixed-fixture mock adapter; append-only controlled
+  invocation persistence; actual PB evaluation only in simulation mode;
+  non-authorizing enforcement test double; deterministic no-change/synthetic-
+  change/failure results; and Stage-B generic-intake candidate mapping without
+  submission. Public CLI/bootstrap wiring and inspect exposure are deferred
+  until independent verification. Recommended next:
+  `149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter Implementation`,
+  not begun and human-gated. No production/test/contract/schema/version/build
+  change; no adapter implementation/registration, prompt dispatch, subprocess,
+  network, credential, provider/model, PB/Runtime Enforcement/Shell Gate
+  activation, release, Dell, private-research, or article action. Runtime
+  remains Observed/observe/unavailable with 0 plugins and 0 capabilities;
+  `v0.4.3` unchanged.
+- Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3Q to Phase 149O.20L.7O.3R: Deterministic Mock/Dry Runtime Adapter Implementation Plan; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3Q** — Runtime Surface Reconciliation and Runtime /
   Provider Adapter Contract Freeze (architecture/contract only): re-derived
   current runtime/plugin, agent/config/session/backend, provider/model,

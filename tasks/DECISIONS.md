@@ -3021,3 +3021,34 @@
   state and sequencing reconciliation; it must perform no certification,
   provisioning, enrollment, DeploymentBinding creation, readiness wiring, or
   activation.
+- Phase 149O.20L.7O.3R classifies RPAC-001 v1.0's 97 requirements as 52
+  MOCK-V1-MANDATORY, 16 REAL-RUNTIME-PREREQUISITE, 8 DEFERRED-EXTENSION, and
+  21 PURE-INVARIANT. Coverage is exact and deliberately does not equate
+  contract coverage with implementing every future transport concern.
+- Phase 149O.20L.7O.3R selects an internal/test-only mock-v1 surface with no
+  public CLI or automatic bootstrap wiring. The existing Runtime Registry is
+  extended as the one inert metadata catalog; callable resolution remains a
+  separately explicit trusted-kernel object. A registered mock descriptor uses
+  `simulation.dry_dispatch`, `execution_effect=none`, and never changes legacy
+  plugin counts, maximum real capability, or execution availability.
+- Phase 149O.20L.7O.3R requires append-only mock invocation persistence under
+  `.pcae/runtime-invocations/mock-v1` rather than an in-memory-only prototype.
+  This proves idempotency and restart/ambiguity behavior before any real effect
+  exists. The adapter itself performs no filesystem I/O; only the trusted store
+  writes controlled evidence.
+- Phase 149O.20L.7O.3R reuses the existing Permission Broker only as an exact
+  `simulation_only=true` policy evaluation. Its `ALLOW` is recorded as
+  `PB_POLICY_WOULD_ALLOW`, never `PERMITTED`. Current Runtime Enforcement is
+  not invoked as authority; a separately injected, digest-bound,
+  non-authorizing test double proves ordering and denial behavior without
+  emitting `AUTHORIZED`.
+- Phase 149O.20L.7O.3R selects generic-intake Stage B for mock-v1: convert a
+  normalized in-memory change result into the producer-neutral Intake Candidate
+  shape, but do not call intake validation/submission or create an ECP. A
+  no-change result produces an explicit no-candidate disposition.
+- Phase 149O.20L.7O.3R requires the first process-bound successor to be a
+  generic fixed-argv executable adapter against a deterministic non-AI fixture.
+  The first named AI target remains an explicit Codex CLI RuntimeTarget after
+  all real-runtime prerequisites are independently satisfied. `codex-ox`
+  remains an agent/session identity only and implies no OpenRouter, model,
+  target, credential, or execution.

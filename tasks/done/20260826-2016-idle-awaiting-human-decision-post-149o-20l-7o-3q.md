@@ -10,7 +10,7 @@ Idle: awaiting human decision post-149O.20L.7O.3Q
 
 ## Status
 
-active
+done
 
 ## Mode
 
