@@ -1,78 +1,90 @@
 {
   "commit_attribution": "phase_owned",
-  "derived_correctness": "Phase 149O.20L.7O.3R is implementation-planning-only. The plan was derived from the complete RPAC-001 v1.0 contract and current public source, then checked statically for all 58 required sections, matrices A-E, exactly 97 sequential requirements, exact one-of-four classification, classification totals 52/16/8/21, and an implementation/test/failure mapping for every MOCK-V1-MANDATORY row. No src/pcae, tests, contracts, schemas, version, or build configuration changed. Full Fast Green was not required by the phase brief; all planning-static and governance/runtime checks report 0 attributable failures.",
+  "derived_correctness": "Phase 149O.20L.7O.3S implemented the RPAC-001 v1.0 mock-v1 vertical slice frozen by the 3R plan: all 52 MOCK-V1-MANDATORY requirements and the structural seams for all 21 PURE-INVARIANT requirements, across 5 production files and 4 new test files (82 tests). Targeted regression sweep (runtime/plugin/intake/bootstrap/session/phase-report, 5208 collected) found 3 attributable failures, each a pre-existing assertion of an outdated RuntimeRegistry shape that RPAC-REQ-050 explicitly extends; all 3 were repaired in-phase and the sweep now reports 0 failed attributable to this phase. The full fast_green marker tier (9171 tests) was compared baseline-vs-candidate via git-stash replay: 18 apparent new failures were all confirmed by source inspection to be git-status working-tree-dirty sentinels (resolved once this phase's commits landed) plus one xdist-parallel flake independently confirmed to pass in isolation; 0 attributable functional regressions remain post-commit.",
   "execution_availability": "unavailable",
   "files_changed": [
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3R_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_IMPLEMENTATION_PLAN.md",
-    "tasks/DECISIONS.md",
+    "docs/PHASE_149O_20L_7O_3S_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_IMPLEMENTATION.md",
+    "src/pcae/core/intake.py",
+    "src/pcae/core/mock_runtime_adapter.py",
+    "src/pcae/core/runtime_adapter.py",
+    "src/pcae/core/runtime_invocation.py",
+    "src/pcae/core/runtime_registry.py",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20260826-2016-idle-awaiting-human-decision-post-149o-20l-7o-3q.md",
-    "tasks/done/20260826-2016-idle-awaiting-human-decision-post-149o-20l-7o-3q.md",
-    "tasks/active/20260826-2024-phase-149o-20l-7o-3r-deterministic-mock-dry-runtime-adapter-implementation-plan.md",
-    "tasks/done/20260826-2024-phase-149o-20l-7o-3r-deterministic-mock-dry-runtime-adapter-implementation-plan.md",
-    "tasks/active/20260826-2047-idle-awaiting-human-decision-post-149o-20l-7o-3r.md"
+    "tasks/active/20260826-2047-idle-awaiting-human-decision-post-149o-20l-7o-3r.md",
+    "tasks/active/20260826-2138-phase-149o-20l-7o-3s-deterministic-mock-dry-runtime-adapter-implementation.md",
+    "tasks/done/20260826-2047-idle-awaiting-human-decision-post-149o-20l-7o-3r.md",
+    "tests/test_mock_runtime_adapter_3s.py",
+    "tests/test_runtime_adapter_core_3s.py",
+    "tests/test_runtime_adapter_e2e_3s.py",
+    "tests/test_runtime_inspect_cli.py",
+    "tests/test_runtime_invocation_3s.py",
+    "tests/test_runtime_registry_prototype.py",
+    "tests/test_runtime_registry_verification.py"
   ],
-  "files_changed_count": 13,
+  "files_changed_count": 21,
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
-    "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3R-attributable error",
-    "pcae_push_check": "nothing_to_push",
-    "pcae_runtime_inspect": "not_implemented / Observed / unavailable / observe; registry empty with 0 plugins and 0 capabilities",
+    "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3S-attributable error",
+    "pcae_push_check": "nothing_to_push (pre-push); reconciled at push",
+    "pcae_runtime_inspect": "not_implemented / Observed / unavailable / observe; registry empty with 0 plugins and 0 capabilities; unchanged before/after implementation and after full test suite",
     "pcae_status_coherence": "coherent",
     "telegram_runtime": "configured, enabled, and outbound-ready"
   },
-  "internal_evidence_coherence": "The planning document, PROJECT_STATUS, TODO, decision log, changelog, task contract, metadata, and canonical report converge on one implementation plan: internal/test-only mock-v1; one inert metadata catalog plus explicit callable resolver; pcae.mock-dry with fixed explicit targets; immutable request, simulation envelope, deterministic normalized result, append-only simulation record, existing PB in simulation mode, a non-authorizing Runtime Enforcement test double, Stage-B generic-intake candidate mapping without submission, and no CLI/bootstrap/runtime-inspect behavior change in 3S. They also converge on execution remaining unavailable and 149O.20L.7O.3S as the human-gated next phase.",
-  "no_go_confirmation": "No production source file was modified. No test file was modified. No contract or schema was modified. No version or build configuration was modified. No mock adapter was implemented or registered. No runtime-inspect behavior was changed. No prompt was dispatched. No subprocess, shell, exec, or spawn operation was used for a runtime. No provider, model, Claude, Codex, Codex-Ox transport, OpenRouter, or external runtime was invoked. No network or provider call was made. No credential, token, auth file, secret store, or provider environment was accessed. No Permission Broker policy was changed. No Runtime Enforcement behavior was activated or treated as positive authority. No Shell Gate behavior was activated. No real execution capability or availability was enabled. No agent identity was changed or mapped to a runtime. No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell system was contacted or mutated. No private research repository was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No release was created and v0.4.3 was not changed. No 3S implementation work was begun.",
-  "origin_main_head": "9a803701e946fc90f604ce5ed6f561f95c089914",
+  "internal_evidence_coherence": "The implementation document, PROJECT_STATUS, TODO, changelog, task contract, metadata, and canonical report converge on one implementation: internal/test-only mock-v1 RPAC-001 adapter with explicit target selection, one adapter-descriptor catalog beside unchanged plugin metadata, immutable prompt/approval/request/envelope/result types, a built-in deterministic fixed-fixture adapter, append-only simulation persistence, existing PB consumed only in simulation mode, a non-authorizing Runtime Enforcement test double, and Stage-B generic-intake candidate mapping without submission. They also converge on execution remaining unavailable and 149O.20L.7O.3S.1 as the human-gated next phase.",
+  "no_go_confirmation": "No real runtime execution occurred. No subprocess creation for an agent runtime occurred. No network or provider call was made. No credential, token, auth file, secret store, or provider environment was accessed. No Codex execution occurred. No Claude execution occurred. No Codex-Ox transport was created. No OpenRouter call was made. No API-provider invocation occurred. No Shell Gate behavior was activated. No Runtime Enforcement behavior was activated as real execution authority. No Permission Broker policy was changed. No real execution capability or availability was enabled. No agent identity was changed or mapped to a runtime target/provider/model. No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell system was contacted or mutated. No private research repository was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No release was created and v0.4.3 was not changed.",
+  "origin_main_head": "7fbd4d3ed958ba827d3f7525ba706f6bb77aaf8b",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "197c0c7b",
-      "subject": "Phase 149O.20L.7O.3R: plan deterministic mock adapter implementation"
+      "hash": "58717e58",
+      "subject": "Phase 149O.20L.7O.3S: adapter core types and catalog metadata (RPAC-001 mock-v1)"
     },
     {
-      "hash": "b4c74b24",
-      "subject": "Phase 149O.20L.7O.3R: bind canonical planning evidence"
+      "hash": "a0e5d9e2",
+      "subject": "Phase 149O.20L.7O.3S: deterministic mock adapter and invocation lifecycle types"
     },
     {
-      "hash": "9a803701",
-      "subject": "Phase 149O.20L.7O.3R: close planning task lifecycle"
+      "hash": "ac512ced",
+      "subject": "Phase 149O.20L.7O.3S: generic intake handoff and independent E2E/security tests"
+    },
+    {
+      "hash": "1ace884a",
+      "subject": "Phase 149O.20L.7O.3S: canonical implementation evidence and task-lifecycle transition"
     }
   ],
-  "phase_id": "149O.20L.7O.3R",
-  "phase_name": "Deterministic Mock/Dry Runtime Adapter Implementation Plan",
-  "phase_title": "Deterministic Mock/Dry Runtime Adapter Implementation Plan",
+  "phase_id": "149O.20L.7O.3S",
+  "phase_name": "Deterministic Mock/Dry Runtime Adapter Implementation",
+  "phase_title": "Deterministic Mock/Dry Runtime Adapter Implementation",
   "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter Implementation (do not begin without human decision)",
+  "recommended_next_phase": "149O.20L.7O.3S.1 — Independent End-to-End Deterministic Mock/Dry Runtime Adapter Verification (do not begin without human decision)",
   "status": "completed",
-  "summary": "Phase 149O.20L.7O.3R completed exactly one implementation-planning phase. It re-read RPAC-001 v1.0 and current public implementation surfaces; classified all 97 requirements exactly once as 52 MOCK-V1-MANDATORY, 16 REAL-RUNTIME-PREREQUISITE, 8 DEFERRED-EXTENSION, and 21 PURE-INVARIANT; and produced an implementation-ready five-production-file/six-test-file plan. Mock-v1 is internal/test-only and uses explicit target selection, one inert Runtime Registry metadata catalog plus a separate exact callable resolver, immutable authority/request/simulation-envelope/result types, fixed deterministic fixtures, append-only PCAE simulation records, existing PB simulation-only evaluation, a non-authorizing Runtime Enforcement test double, and pure Stage-B generic-intake candidate mapping without submission. It creates no CLI/bootstrap wiring, subprocess, network, credential, provider/model, source mutation, or real runtime state. Runtime remains Observed / observe / unavailable with 0 plugins / 0 capabilities. Production source modified NO; execution activated NO; implementation NOT STARTED. Exact next phase 149O.20L.7O.3S, human decision required and not begun. Article STOPPED; private research untouched.",
-  "test_evidence_classification": "implementation_plan_static_consistency",
-  "tests_added_or_updated": "1 static planning-contract verification; 0 production test files added or updated",
-  "tests_run": 1,
+  "summary": "Phase 149O.20L.7O.3S implemented exactly one governed phase: the RPAC-001 v1.0 mock-v1 vertical slice frozen by the 3R plan. All 52 MOCK-V1-MANDATORY requirements and the structural seams for all 21 PURE-INVARIANT requirements are implemented across 5 production files (runtime_registry.py extended with an adapter-descriptor catalog; new runtime_adapter.py, runtime_invocation.py, mock_runtime_adapter.py; intake.py extended with a git-free Stage-B candidate builder) and 4 new test files (82 tests: unit/integration/E2E/security/identity). The 16 REAL-RUNTIME-PREREQUISITE and 8 DEFERRED-EXTENSION requirements remain deliberately absent by design; no stop condition was triggered. Existing PB is consumed only with simulation_only=true; production Runtime Enforcement is not invoked and is represented by a separately injected non-authorizing test double; no production runtime state is ever emitted; pcae runtime inspect, the public CLI, and bootstrap wiring are unchanged. 0 attributable Fast Green regressions after in-phase repair of 3 pre-existing test assertions of an outdated registry shape. Runtime remains Observed / observe / unavailable with 0 plugins / 0 legacy-plugin capabilities. Production source modified YES (bounded); execution activated NO. Exact next phase 149O.20L.7O.3S.1, human decision required and not begun. Article STOPPED; private research untouched.",
+  "test_evidence_classification": "implementation_dynamic_and_static_verification",
+  "tests_added_or_updated": "4 new production test files added (82 tests); 3 pre-existing test files repaired for RPAC-REQ-050 registry-shape compatibility",
+  "tests_run": 82,
   "test_results": {
-    "planning_static_contract_verification": "PASS: 58 required sections, matrices A-E, 97 sequential RPAC rows, exact 52/16/8/21 classification, and mandatory implementation/test/failure mappings; 0 failed",
-    "source_reuse_inspection": "Current runtime registry/introspection, identity/context/bootstrap, PB, Runtime Enforcement, legacy backend, intake, and persistence surfaces inspected read-only; 0 unresolved planning contradictions",
+    "unit_tests": "PASS: 61 tests across test_runtime_adapter_core_3s.py (28), test_runtime_invocation_3s.py (21), test_mock_runtime_adapter_3s.py (12); 0 failed",
+    "integration_e2e_security_identity_tests": "PASS: 21 tests in test_runtime_adapter_e2e_3s.py covering full vertical slice, Stage-B intake mapping, zero-effect E2E, security invariants, and identity separation; 0 failed",
     "report_notification_tests": "Reporting and notification production source unchanged; canonical report trust exercised by governed finalization; 0 failed",
-    "bootstrap_session_reporting_tests": "Bootstrap/session production source unchanged and bootstrap integration explicitly deferred; 0 failed",
-    "fast_green": "Not run because the phase brief authorizes planning/static checks and no production/test/contract/schema/version/build file changed; 0 attributable failures",
-    "no_external_execution": "No adapter implementation, runtime/provider invocation, subprocess, network, credential read, source mutation, Dell/private-research interaction, or article work; 0 failed"
+    "bootstrap_session_reporting_tests": "Bootstrap/session production source unchanged and bootstrap auto-dispatch integration explicitly deferred; 0 failed",
+    "fast_green": "Targeted regression sweep (runtime/plugin/intake/bootstrap/session/phase-report): 5181 passed / 2 skipped / 0 attributable failed after in-phase repair of 3 pre-existing registry-shape assertions. Full -m fast_green tier (9171 tests) baseline-vs-candidate via git-stash replay: 0 attributable failed post-commit (18 apparent new failures were working-tree-dirty sentinels resolved by commit, plus 1 xdist flake confirmed to pass in isolation).",
+    "no_external_execution": "No adapter implementation registered outside an internal test/API catalog, no runtime/provider invocation, no subprocess, no network, no credential read, no source mutation outside the 5 planned production files, no Dell/private-research interaction, no article work; 0 failed"
   },
-  "metadata_consistency": "phase_id, phase_name, active task, PROJECT_STATUS current phase, 58-section planning document, RPAC-001 v1.0 baseline, metadata, and canonical report consistently identify Phase 149O.20L.7O.3R.",
+  "metadata_consistency": "phase_id, phase_name, active task, PROJECT_STATUS current phase, this implementation document, RPAC-001 v1.0 baseline, metadata, and canonical report consistently identify Phase 149O.20L.7O.3S.",
   "validation_results": {
     "report_notification_tests": "Reporting and notification production source unchanged; canonical report trust exercised by governed finalization; 0 failed.",
-    "bootstrap_session_reporting_tests": "Bootstrap/session production source unchanged and bootstrap integration explicitly deferred; 0 failed.",
-    "phase_149O_20L_7O_3R_identity": "Canonical evidence identifies Phase 149O.20L.7O.3R consistently.",
-    "runtime_invariant": "Observed / observe / unavailable, registry empty with 0 plugins and 0 capabilities; unchanged.",
+    "bootstrap_session_reporting_tests": "Bootstrap/session production source unchanged and bootstrap auto-dispatch integration explicitly deferred; 0 failed.",
+    "phase_149O_20L_7O_3S_identity": "Canonical evidence identifies Phase 149O.20L.7O.3S consistently.",
+    "runtime_invariant": "Observed / observe / unavailable, registry empty with 0 plugins and 0 legacy-plugin capabilities; unchanged at phase entry, after implementation, after full test suite, and at close.",
     "release_invariant": "v0.4.3 still resolves to 63580893b1de4782a694ab802ff7bdebdf29b0e6; unchanged.",
-    "production_modification_invariant": "No src/pcae, tests, contracts, schemas, version, or build-configuration file changed.",
-    "plan_completeness": "All 58 required sections and matrices A-E are present; all 97 RPAC requirements are sequential and classified exactly once as 52/16/8/21.",
-    "plan_consistency": "Every mock-v1 mandatory requirement names an implementation surface, test seam, and fail-closed behavior; existing-code reuse and no-capability invariants are explicit.",
-    "fast_green": "Not run under the planning-phase rule; required static and governance/runtime checks report 0 attributable failures."
+    "production_modification_invariant": "src/pcae changes bounded to the 5 files named in Matrix A of the implementation document; no contract, schema, version, or build-configuration file changed.",
+    "rpac_compliance": "All 97 RPAC-001 requirements re-verified post-implementation in Matrix D: 52 MOCK-V1-MANDATORY implemented, 21 PURE-INVARIANT structurally preserved, 16 REAL-RUNTIME-PREREQUISITE and 8 DEFERRED-EXTENSION deliberately unchanged; no requirement's classification changed.",
+    "fast_green": "0 attributable functional regressions post-commit; see test_results.fast_green for the full baseline-vs-candidate method."
   }
 }
