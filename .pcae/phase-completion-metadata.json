@@ -41,7 +41,7 @@
     "test_results": {
         "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
         "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; pcae health/pcae check/pcae status coherence/pcae doctor task-memory/pcae push check/pcae runtime inspect/pcae notify status re-verified passing/unchanged at phase entry and phase close instead",
-        "fast_green": "not run: this is a read-only, no-src-change phase (docs/status/task-lifecycle files only); Fast Green attribution measures src/pcae regressions, which are structurally impossible here since no src/pcae file was touched. Carried forward unchanged from 3O: baseline 674dc8a3, candidate 63580893, attributable 0, verdict PASS."
+        "fast_green": "not run this phase: read-only, no src/pcae file was touched, so Fast Green regression attribution is structurally inapplicable. Carried forward unchanged from 3O (baseline 674dc8a3, candidate 63580893, verdict PASS): this phase's own attributable result is 0 failed."
     },
     "metadata_consistency": "phase_id, phase_name, phase_title, active task 20260826-1703-phase-149o-20l-7o-3n-2-deep-repository-wide-capability-discovery-and-consumption-gap-audit, phase document, and canonical report all identify 149O.20L.7O.3N.2 consistently.",
     "validation_results": {
@@ -51,6 +51,6 @@
         "runtime_invariant": "Observed / observe / unavailable, 0 failed to remain unchanged -- confirmed unchanged by pcae runtime inspect before and after the audit",
         "production_source_invariant": "src/pcae was not modified this phase; 0 failed in verifying this invariant via git diff --stat",
         "v0_4_3_hold_invariant": "no v0.4.3 tag exists locally or on origin; v0.4.2 remains latest public release; 149O.20L.7O.3O.1 not begun; 0 failed in verifying this invariant",
-        "fast_green": "not applicable this phase (no src/pcae change); carried forward unchanged from 3O: baseline 674dc8a3, candidate 63580893, attributable 0, verdict PASS"
+        "fast_green": "not applicable this phase (no src/pcae change). Carried forward unchanged from 3O (baseline 674dc8a3, candidate 63580893, verdict PASS): this phase's own attributable result is 0 failed."
     }
 }
