@@ -27,6 +27,7 @@ Reconstruct current rollback architecture from actual source; determine whether 
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/*
 - tasks/DONE.md
 - tasks/active/*
 - tasks/done/*

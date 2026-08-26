@@ -213,7 +213,30 @@ New file `tests/test_phase_149o_20l_7o_3m_rollback_readiness_evidence_automatic_
 
 ## 26. Fast Green
 
-See canonical phase-completion report for the exact baseline-vs-current node-ID delta produced by `pcae phase fast-green-attribution --phase-id 149O.20L.7O.3M`.
+`pcae phase fast-green-attribution --phase-id 149O.20L.7O.3M --json` (baseline `7b193145` — this phase's phase-entry commit, resolved automatically as the parent of this phase's first attributed commit `09eb8ec5`; candidate `e632a2df` — this phase's implementation commit):
+
+```
+status:                          PASS
+raw_failed_count (candidate):    339
+raw_errors_count (candidate):    9
+attributable_failures:           []  (0)
+excluded_preexisting_failures:   347 (identical node IDs failed in the independently
+                                       re-run baseline at 7b193145; frozen self-referential
+                                       contract/byte-identity/git-status tripwires and
+                                       pre-existing environment quirks from dozens of
+                                       unrelated historical phases -- not caused by this
+                                       phase's diff)
+excluded_environment_failures:   []
+expected_phase_artifacts:        1 -- tests/test_phase_149o_20l_7n_1_dell_redeployment_
+                                       proposition_independent_verification.py::
+                                       TestCandidateCurrentness::test_head_equals_origin_main,
+                                       predicted local_only by pushed_status (expected and
+                                       harmless pre-push; resolves once this phase's
+                                       commits are pushed to origin/main)
+issues:                           []
+```
+
+**Attributable functional/behavioral regressions: 0.** This machine-produced result independently corroborates this phase's own manual spot-check regression runs (§25): the identical 5 `test_phase_149o_18d_...` frozen-diff failures, re-confirmed via `git stash` before/after this phase's diff, are part of the 347 pre-existing exclusions above, not new.
 
 ## 27. Findings
 
