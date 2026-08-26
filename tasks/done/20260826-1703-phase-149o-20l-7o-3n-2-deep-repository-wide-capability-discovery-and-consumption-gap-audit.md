@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3N.2: Deep Repository-Wide Capability Discovery and Consumptio
 
 ## Status
 
-active
+done
 
 ## Mode
 
