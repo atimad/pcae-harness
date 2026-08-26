@@ -4,8 +4,9 @@
 
 Phase-entry commit:
 `7318230feb619b161c08caa2d5256a5d2a41edf6`. Substantive planning commit:
-`197c0c7bc391d5fbac82bfceb62b77fc18cdfca3`. The governed push/finalization
-ceremony is in progress while this canonical evidence is first bound.
+`197c0c7bc391d5fbac82bfceb62b77fc18cdfca3`. Canonical evidence and task
+lifecycle commits: `b4c74b2432aba7f2c5c6ab8d993a4d051595c716` and
+`9a803701e946fc90f604ce5ed6f561f95c089914`. All are pushed to `origin/main`.
 
 ## Baseline and scope result
 
@@ -20,8 +21,8 @@ ceremony is in progress while this canonical evidence is first bound.
 - Adapter implementation: **NOT STARTED**.
 - Execution activated: **NO**.
 - External runtime/provider invocation: **NONE**.
-- Pushed: not_pushed.
-- origin/main..HEAD: 1 before the governed push ceremony.
+- Pushed: pushed.
+- origin/main..HEAD: 0.
 
 ## RPAC-001 classification
 
