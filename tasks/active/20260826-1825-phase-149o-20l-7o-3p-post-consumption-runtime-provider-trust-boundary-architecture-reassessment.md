@@ -45,6 +45,7 @@ Reconstruct current public PCAE runtime/provider/trust-boundary architecture fro
 
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
