@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3J.1 — Independent End-to-End Repository Intelligence
+/ Advisory Consumption Verification. **VERIFICATION-ONLY — COMPLETE.
+NO SRC/PCAE MODIFIED.** Independently re-derived, without trusting
+149O.20L.7O.3J's own call graph, tests, or rationale, whether the real
+Advisory production path genuinely and safely consumes Repository
+Intelligence context. Confirmed via fresh disposable-repository
+experiments and a newly-authored, non-imported 28-test suite: exactly
+one production file changed by 3J (`core/advisory.py`, +112/-0,
+re-confirmed via `git diff`); automatic consumption with no manual CLI
+prerequisite (live-repo re-derived); acquisition genuinely read-only
+(filesystem hash/mtime before/after, unchanged); missing/malformed/
+incompatible-schema/corrupt RI all fail soft with a truthful, distinct
+`unavailable_reason`, no traceback; fail-soft divergence from the CLI
+builder's own fail-closed default judged **CORRECT** (RI was never an
+Advisory-decision input before 3J, so its absence removes no input the
+decision ever depended on); staleness disclosure derived from a
+pre-existing `repository_commit` provenance field, not an invented
+freshness policy; authority fields (`broker_decision`,
+`advisory_decision`, all `would_*`, `authorization_granted`,
+`execution_authorized`) empirically and structurally invariant to RI
+presence/absence; Permission Broker isolation confirmed bidirectionally
+by static grep; no model/network/runtime expansion; Fast Green A/B
+(with vs. without this phase's own new test file) shows **0
+attributable regressions** (336 failed/9 errors/5 skipped identical
+both ways; only delta is +28 new passing tests).
+
+Two material, **non-blocking** findings recorded (not raised by 3J
+itself): (1) a foreign RI snapshot placed at the canonical path via a
+filesystem symlink is consumed and disclosed as merely "stale" once the
+target repo has ≥1 commit, and is consumed with **zero disclosure** if
+the target repo has no commits yet — requires pre-existing write access
+to the target repo's `.pcae/` tree as precondition; (2) 3J's own
+framing ("Advisory production consumption") targets `core/advisory.py`
+(Phase 88W "Advisory Mode," a deterministic decision-preview engine with
+no reasoning step), not the differently-scoped `AdvisoryProvider`/
+`AdvisoryContextPackage` reasoning framework that
+`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md`
+§3.4 actually named as the intended Repository Intelligence consumer —
+that framework remains untouched, mock-only, and disconnected, exactly
+as before. RI context is genuinely and safely **attached** to
+`core/advisory.py`'s output, not **consumed** by any reasoning step,
+because that subsystem has no reasoning step at all. Zero Blocking
+findings. See
+`docs/PHASE_149O_20L_7O_3J_1_INDEPENDENT_END_TO_END_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_VERIFICATION.md`
+for full evidence. Recommends `149O.20L.7O.3K` — Post-RI/Advisory
+Integration Release and Next-Capability Decision — including a status-
+language correction distinguishing "Advisory Mode attachment" from
+"122A-scoped Advisory reasoning consumption."
+
+## Prior Phase
+
 Phase 149O.20L.7O.3J — Repository Intelligence → Advisory Production
 Consumption Integration. **BOUNDED SOURCE-MODIFYING INTEGRATION —
 COMPLETE.** Per the human's Plan A / Candidate C selection from

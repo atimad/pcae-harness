@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3J.1** — Independent End-to-End Repository
+  Intelligence / Advisory Consumption Verification (verification-only,
+  no `src/pcae` modified). Independently re-derived 3J's claims via
+  fresh disposable-repository tests and a new 28-test suite (0 shared
+  code with 3J's own tests). Confirmed: automatic consumption with no
+  manual CLI prerequisite; read-only acquisition (filesystem hash/mtime
+  unchanged); missing/malformed/incompatible-schema/corrupt RI all fail
+  soft with distinct, truthful `unavailable_reason`; fail-soft judged
+  CORRECT (RI was never a pre-3J Advisory-decision input); authority
+  fields (`broker_decision`/`advisory_decision`/`would_*`/
+  `authorization_granted`/`execution_authorized`) empirically and
+  structurally invariant to RI presence; Permission Broker isolation
+  bidirectional; no model/network/runtime expansion; Fast Green A/B: 0
+  attributable regressions (336 failed/9 errors/5 skipped identical
+  with vs. without this phase's suite; only delta +28 new passing).
+  Two non-blocking findings: (1) a foreign RI snapshot at the canonical
+  path via symlink is disclosed only as generic staleness once the
+  target repo has a commit, undisclosed if it has none; (2) 3J's
+  "Advisory production consumption" framing targets `core/advisory.py`
+  ("Advisory Mode", no reasoning step) rather than the differently-
+  scoped `AdvisoryProvider`/`AdvisoryContextPackage` reasoning
+  framework that Phase 122A's architecture named as the intended RI
+  consumer (still untouched/mock-only) — RI is genuinely **attached**,
+  not **consumed** by reasoning, in the subsystem 3J modified. Zero
+  Blocking findings. Recommends `149O.20L.7O.3K`.
 - **Phase 149O.20L.7O.3J** — Repository Intelligence → Advisory
   Production Consumption Integration: wired the real production
   Advisory decision path (`core/advisory.py::build_advisory()`, behind
