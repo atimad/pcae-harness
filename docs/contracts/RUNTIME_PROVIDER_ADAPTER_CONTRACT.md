@@ -2,9 +2,9 @@
 
 ## Contract identity and status
 
-**Contract:** RPAC-001  
-**Version:** 1.0  
-**Status:** FROZEN  
+**Contract:** RPAC-001
+**Version:** 1.0
+**Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3Q — Runtime Surface Reconciliation and
 Runtime / Provider Adapter Contract Freeze
 
@@ -638,6 +638,6 @@ and SHALL not be grandfathered as alternate dispatch authorities.
 
 ## Frozen verdict
 
-**RUNTIME / PROVIDER ADAPTER CONTRACT: FROZEN — RPAC-001 v1.0.**  
-**CURRENT EXECUTION: UNAVAILABLE.**  
+**RUNTIME / PROVIDER ADAPTER CONTRACT: FROZEN — RPAC-001 v1.0.**
+**CURRENT EXECUTION: UNAVAILABLE.**
 **IMPLEMENTATION AUTHORITY: NOT GRANTED.**
