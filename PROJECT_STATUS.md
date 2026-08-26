@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3Q — Runtime Surface Reconciliation and Runtime /
+Provider Adapter Contract Freeze. **ARCHITECTURE / CONTRACT FREEZE —
+COMPLETE. HUMAN DECISION REQUIRED.** Re-derived and reconciled current
+Runtime Registry/Context/Snapshot/inspect, Plugin Model, agent/config/session
+identities, backend registries/locks/preflight, producer provenance,
+Permission Broker, Runtime Enforcement, Shell Gate, generic intake, and legacy
+execution surfaces. Froze **RPAC-001 v1.0**: PCAE remains the trusted
+governance kernel; adapters own transport and normalization only;
+`AgentIdentity`, producer provenance, adapter, explicit RuntimeTarget,
+provider/model, execution principal, and invocation identity remain distinct.
+Selection is explicit with no silent fallback. Permission, capability,
+authorization, and execution are non-equivalent. The existing Runtime Registry
+remains the canonical declarative catalog foundation and a valid empty state;
+its Plugin Model is metadata/introspection-only and must not be silently
+overloaded as a callable loader. Future ordering is bound request + human
+approval -> target capability/status -> Permission Broker -> freshness ->
+Runtime Enforcement final pre-dispatch gate -> durable record -> adapter ->
+normalized result -> producer-neutral intake. First implementation target:
+deterministic mock/dry adapter in a simulation namespace. Exact recommended
+next phase: **149O.20L.7O.3R — Deterministic Mock/Dry Runtime Adapter
+Implementation Plan** (not begun). Runtime remains `Observed` / `observe` /
+`unavailable`, registry 0 plugins / 0 capabilities; `v0.4.3` unchanged; no
+source/test/schema/version/build change, adapter, execution, subprocess,
+network, credential, policy activation, Dell/private-research/article action.
+See `docs/PHASE_149O_20L_7O_3Q_RUNTIME_SURFACE_RECONCILIATION_AND_RUNTIME_PROVIDER_ADAPTER_CONTRACT_FREEZE.md`
+and `docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3P — Post-Consumption Runtime / Provider /
 Trust-Boundary Architecture Reassessment. **READ-ONLY ARCHITECTURE
 REASSESSMENT — COMPLETE. HUMAN DECISION REQUIRED.** Reconstructed the

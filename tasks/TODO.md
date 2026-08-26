@@ -11,15 +11,18 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-**Phase 149O.20L.7O.3P** (Post-Consumption Runtime / Provider /
-Trust-Boundary Architecture Reassessment, completed, read-only architecture):
-reconstructed the current public runtime/provider/trust graph and found the
-canonical empty Runtime Registry does not govern several legacy executable CLI
-paths. Selected a trusted PCAE kernel plus replaceable external bridges, with a
-deterministic mock/dry bridge first and generic intake as the return path.
-Recommended next, not begun: **149O.20L.7O.3Q — Runtime Surface Reconciliation
-and Runtime / Provider Adapter Contract Freeze** (architecture/contract only),
-subject to human decision. Execution remains unavailable.
+**Phase 149O.20L.7O.3Q** (Runtime Surface Reconciliation and Runtime /
+Provider Adapter Contract Freeze, completed, architecture/contract only):
+reconciled current runtime/plugin, agent, backend, provider/model, producer,
+permission, enforcement, process, and intake surfaces and froze **RPAC-001
+v1.0**. Agent identity is not target/provider/model identity; producer
+provenance is not runtime identity. Runtime Registry remains one canonical
+declarative catalog and a valid empty state; selection is explicit with no
+fallback; Permission Broker permission and Runtime Enforcement authorization
+remain separate from capability and execution; generic intake is the return
+path. Recommended next, not begun: **149O.20L.7O.3R — Deterministic Mock/Dry
+Runtime Adapter Implementation Plan**, subject to human decision. Runtime
+remains `Observed` / `observe` / `unavailable`, 0 plugins / 0 capabilities.
 
 **Phase 149F** (Repository-Wide Mutation Permission Coverage Wave 1
 Implementation, completed, bounded production implementation) broker-wired

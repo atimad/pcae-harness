@@ -2,6 +2,27 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3Q RPAC-001 v1.0 contract freeze (2026-08-26).**
+  Re-derived and froze a trusted-kernel plus replaceable RuntimeAdapter
+  architecture. Preserve `AgentIdentity`, `ProducerIdentity`,
+  `AdapterIdentity`, explicit `RuntimeTargetIdentity`, optional provider/model,
+  execution principal, and logical invocation/attempt identities as separate
+  layers; specifically, `codex-ox` implies no OpenRouter, model, runtime target,
+  configuration, authentication, or execution. Keep one canonical runtime
+  catalog by extending/composing with the existing metadata-only Runtime
+  Registry in a future phase; do not create a competing adapter registry or
+  silently turn the Plugin Model into an executable loader. Freeze explicit
+  target selection/no fallback; lightweight hashed PromptArtifact plus exact
+  InvocationApproval; PB permission followed by final Runtime Enforcement;
+  durable pre-dispatch invocation record; receipt/collect/cancel adapter
+  interface; default-deny network/filesystem/environment/process/budget
+  effects; normalized untrusted result into generic intake; stable
+  idempotency/retry/failure semantics. First implementation target is a
+  deterministic mock/dry adapter in a simulation namespace; first later
+  process target is a generic fixed-argv fixture, then an explicitly configured
+  Codex CLI target. Recommend exactly `149O.20L.7O.3R — Deterministic Mock/Dry
+  Runtime Adapter Implementation Plan`; human decision required and not begun.
+
 - **Phase 149O.20L.7O.3P runtime/provider architecture selection
   (2026-08-26).** Selected **Option C — hybrid trusted PCAE kernel plus
   replaceable external runtime bridges**. The trusted kernel owns prompt,

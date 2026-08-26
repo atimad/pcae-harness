@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3Q** — Runtime Surface Reconciliation and Runtime /
+  Provider Adapter Contract Freeze (architecture/contract only): re-derived
+  current runtime/plugin, agent/config/session/backend, provider/model,
+  producer, Permission Broker, Runtime Enforcement, Shell Gate, legacy process,
+  and generic-intake surfaces from public source. Froze **RPAC-001 v1.0** with
+  separate agent/producer/adapter/target/provider/model/principal/invocation
+  identities; one declarative Runtime Registry foundation; explicit target
+  selection and no silent fallback; typed hashed prompt plus exact invocation
+  approval; capability/PB permission/Runtime Enforcement/execution separation;
+  durable idempotent attempt record; provider-neutral descriptor/status/
+  request/result/interface; default-deny effects; stable failure/retry/
+  cancellation semantics; and generic intake as the only change return path.
+  Deterministic mock/dry is first implementation recommendation, in a
+  simulation namespace that does not change real runtime availability.
+  Recommended next: `149O.20L.7O.3R — Deterministic Mock/Dry Runtime Adapter
+  Implementation Plan`, not begun. No production/test/schema/version/build
+  change; no adapter registration, subprocess/runtime/provider/network/
+  credential use, PB/Runtime Enforcement/Shell Gate activation, release,
+  Dell, private-research, or article action. Runtime remains Observed/observe/
+  unavailable with 0 plugins and 0 capabilities; `v0.4.3` unchanged.
 - **Phase 149O.20L.7O.3P** — Post-Consumption Runtime / Provider /
   Trust-Boundary Architecture Reassessment (read-only): reconstructed
   the public runtime, provider, identity, permission, enforcement,
