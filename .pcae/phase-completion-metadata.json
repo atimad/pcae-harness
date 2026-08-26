@@ -1,58 +1,52 @@
 {
     "commit_attribution": "phase_owned",
-    "derived_correctness": "3N independently re-derived 3M's corrected interpretation directly from `git diff v0.4.2..HEAD -- src/pcae/core/agent.py` and `src/pcae/commands/agent.py` (not trusted from PROJECT_STATUS.md prose): file_plan/divergence are computed unconditionally before the dry_run branch and divergence already gates the pre-existing short-circuit; 3M's only change is splicing the already-computed evidence into terminal result dicts plus two additive print() lines. 0 failed in the sense that the field's own trailing sentence reads 0 failed for attributable regressions -- no source change was made this phase so no new fast_green run was required.",
+    "derived_correctness": "3N.1 independently re-derived the audit/explainability, Advisory Governance Framework, and Repository Decision/Explainability landscape directly from fresh grep/read of src/pcae (not trusted from PROJECT_STATUS.md prose): `grep -rl \"GLP-001\\|GAC-001\\|PGP-001\" src/pcae` returns 0 hits (Advisory Governance Framework has no code); `grep -rn \"\\.explanation\\b\" src/pcae` confirms zero production readers of TransitionResult.explanation outside its own construction/serialization code; repository_transition_validator.py's own docstring independently corroborates the same finding verbatim. 0 failed in the sense that the field's own trailing sentence reads 0 failed for attributable regressions -- no source change was made this phase so no new fast_green run was required.",
     "execution_availability": "unavailable",
     "files_changed": [
         ".pcae/phase-completion-metadata.json",
         ".pcae/phase-completion-report.md",
         "PROJECT_STATUS.md",
-        "docs/PHASE_149O_20L_7O_3N_PRODUCT_RELEASE_DECISION_AND_REMAINING_MATURE_CAPABILITY_GAP_RESET.md",
-        "tasks/active/20260826-1559-phase-149o-20l-7o-3n-product-release-decision-and-remaining-mature-capability-gap-reset.md",
-        "tasks/done/20260826-1551-idle-awaiting-next-governed-phase-post-149o-20l-7o-3m-1.md"
+        "docs/PHASE_149O_20L_7O_3N_1_MATURE_CAPABILITY_CONSUMER_EDGE_INVESTIGATION.md",
+        "tasks/active/20260826-1612-phase-149o-20l-7o-3n-1-mature-capability-consumer-edge-investigation.md",
+        "tasks/done/20260826-1605-idle-awaiting-next-governed-phase-post-149o-20l-7o-3n.md"
     ],
     "files_changed_count": 6,
     "governance_results": {
         "pcae_health": "healthy",
         "pcae_check": "passed",
-        "pcae_doctor_task_memory": "warnings limited to pre-existing historical tasks/DONE.md synchronization debt, unrelated to 149O.20L.7O.3N, not repaired this phase",
+        "pcae_doctor_task_memory": "warnings limited to pre-existing historical tasks/DONE.md synchronization debt, unrelated to 149O.20L.7O.3N.1, not repaired this phase",
         "pcae_push_check": "clean",
         "pcae_runtime_inspect": "Observed / observe / unavailable, unchanged",
         "pcae_status_coherence": "coherent",
         "telegram_runtime": "configured"
     },
-    "internal_evidence_coherence": "The phase document's maturity matrix, missing-edge matrix, release-worthiness scoring, and recommendation all converge on the same conclusions reached from the raw v0.4.2..HEAD diff and PROJECT_STATUS.md's own 3M/3M.1/3K/3J.1/3I entries: 3M is observability-only with LOW standalone release value; no S/M consumption-gap candidate was confirmed; Release Option B (bundle) is recommended over Option A (ship now) or Option C (revert).",
-    "no_go_confirmation": "No production source in src/pcae was modified. No release, tag, or publication was created. No v0.4.3 or any version bump occurred. No candidate capability was implemented. Phase 149O.20L.7O.3M was not reverted. No new readiness type, artifact, or authority was invented. No runtime preflight was implemented. No true Repository-Intelligence reasoning consumption was implemented. No Permission Broker change was made. No Runtime Enforcement execution was enabled. No Shell Gate enforcement was enabled. No HATP/HMIC/Class-B authority was modified. No CLTR cutover occurred. No hac-dell host was mutated. No private pcae-deepseek-research repository was inspected, modified, or imported from. No article work was resumed; it remains STOPPED. No full Fast Green run was performed for this read-only ranking phase. No next phase (149O.20L.7O.3N.1 or otherwise) was begun.",
-    "origin_main_head": "743951c23e09936692a7d4bb4af3ace1f944bf51",
+    "internal_evidence_coherence": "The phase document's subsystem inventories, unified consumer graph, maturity matrix, consumer-edge matrix, gap classifications, and recommendation all converge on the same conclusions reached from fresh src/pcae grep/read and PROJECT_STATUS.md's own 3N/3K entries: Advisory Governance Framework has zero code footprint (NO MEANINGFUL GAP); the Decision-Evaluation core is wired-but-inert (VISIBILITY/SURFACING GAP, not TRUE CONSUMPTION GAP, per 3M's own precedent); the AdvisoryProvider family remains CONTRACT GAP effort L unchanged from 3K; no TRUE CONSUMPTION GAP or AUTOMATIC ORCHESTRATION GAP exists in any of the three areas.",
+    "no_go_confirmation": "No production source in src/pcae was modified. No release, tag, or publication was created. No v0.4.3 or any version bump occurred. No candidate capability was implemented. No new contract, schema, or authority semantics was invented. No Runtime Enforcement execution was enabled. No Shell Gate enforcement was enabled. No HATP/HMIC/Class-B authority was modified. No CLTR cutover occurred. No hac-dell host was mutated. No private pcae-deepseek-research repository was inspected, modified, or imported from. No article work was resumed; it remains STOPPED. No full Fast Green run was performed for this read-only investigation phase. No next phase was begun.",
+    "origin_main_head": "aa60c33352a8e1c07d2e06b2148efc6d425f497a",
     "origin_main_head_count": 0,
-    "phase_commits": [
-        {
-            "hash": "743951c2",
-            "subject": "Phase 149O.20L.7O.3N: Product/Release Decision and Remaining Mature Capability Gap Reset (read-only, docs/status/task lifecycle only)"
-        }
-    ],
-    "phase_id": "149O.20L.7O.3N",
-    "phase_name": "Product/Release Decision and Remaining Mature Capability Gap Reset",
-    "phase_title": "Product/Release Decision and Remaining Mature Capability Gap Reset",
-    "pushed_status": "clean",
-    "recommended_next_phase": "149O.20L.7O.3N.1 -- narrow read-only investigation of audit/explainability lifecycle surfacing, Advisory Governance Framework, and Repository Decision/Explainability consumer edges, to confirm or reject a genuine S/M consumption-gap candidate before any implementation. Not begun. HUMAN PRIORITY/RELEASE SELECTION REQUIRED.",
+    "phase_commits": [],
+    "phase_id": "149O.20L.7O.3N.1",
+    "phase_name": "Mature Capability Consumer-Edge Investigation",
+    "phase_title": "Mature Capability Consumer-Edge Investigation",
+    "pushed_status": "not_pushed",
+    "recommended_next_phase": "None within the 'wire existing capabilities' program -- MATURE CAPABILITY CONSUMPTION PROGRAM: CURRENTLY EXHAUSTED AT S/M SCOPE. Next strategic work should shift to a new architecture, contract-evolution (e.g. AdvisoryProvider-family contract, effort L), trust-activation-preparation, or provider/runtime chapter. HUMAN DECISION REQUIRED on release timing (v0.4.3 RELEASE NOW vs BUNDLE, reconfirmed favoring RELEASE NOW) and next strategic mode.",
     "status": "completed",
-    "summary": "Phase 149O.20L.7O.3N (Product/Release Decision and Remaining Mature Capability Gap Reset) is a read-only decision phase. Independently re-confirmed from the raw diff that 3M's rollback-evidence-visibility change is OBSERVABILITY/DEBUGGABILITY only, with rollback preparation/evidence computation and internal consumption already automatic pre-3M. Scored the unreleased 3M delta LOW on standalone release value and recommends Release Option B (bundle 3M with the next genuine capability) over shipping v0.4.3 standalone or reverting. Re-audited the mature-capability universe: RI-to-Advisory attachment, Permission Broker rollback path, rollback evidence, Interactive Workflow/CHGR, and Publication Execution Ownership are NO GAP; Runtime Enforcement, Shell Gate, CLTR cutover, and HATP/HMIC/Class-B remain TRUST BLOCK; RI-to-Advisory true reasoning remains CONTRACT GAP, effort L, unchanged from 3K. No confirmed S/M consumption-gap candidate was established this phase -- Advisory Governance Framework, Repository Decision/Explainability, and audit/explainability lifecycle surfacing were each found UNVERIFIED and are recommended as the target of a narrow follow-up investigation phase. No production source, version, tag, or release changed. Runtime remains Observed/observe/unavailable; v0.4.2 unchanged; article remains STOPPED. Human decision required on release action and next-phase selection.",
-    "test_evidence_classification": "source_diff_re_derivation_plus_targeted_existing_tests_plus_cli_inspection_plus_doc_reading",
-    "tests_added_or_updated": "0 new tests added (read-only phase); 44 pre-existing targeted rollback/evidence tests run",
-    "tests_run": 44,
+    "summary": "Phase 149O.20L.7O.3N.1 (Mature Capability Consumer-Edge Investigation) is a read-only investigation phase. Confirmed unchanged baseline (clean, 0 ahead, v0.4.2 unchanged, runtime unchanged) and that the only unreleased delta remains 3M's isolated rollback-evidence-visibility change. Investigated the three areas 3N left UNVERIFIED. Advisory Governance Framework: NO MEANINGFUL GAP -- confirmed zero code footprint, a pure documentary/procedural governance chapter (138-141), not software. Repository Decision/Explainability: the Decision Evaluation core (evidence.py/decision_evaluation.py/repository_transition_validator.py) is production-wired into pcae phase complete/task finish --commit, but its computed TransitionResult.explanation has zero readers anywhere -- classified VISIBILITY/SURFACING GAP (not TRUE CONSUMPTION GAP), consistent with 3M's own precedent that surfacing existing evidence is not consumption; the six-module AdvisoryProvider/AdvisoryContextPackage family remains CONTRACT GAP, effort L, unchanged from 3K. Audit/explainability lifecycle surfacing: ~10 deliberately siloed audit subsystems found, each ALREADY CONSUMED within its own scope except Enforcement Audit (TRUST/AUTHORITY BLOCK) and the same Decision-Evaluation surfacing gap. No TRUE CONSUMPTION GAP or AUTOMATIC ORCHESTRATION GAP was found in any of the three areas -- CONFIRMED S/M CONSUMPTION GAPS: NONE. MATURE CAPABILITY CONSUMPTION PROGRAM: CURRENTLY EXHAUSTED AT S/M SCOPE. Reconfirmed 3M's release decision: RELEASE NOW is now favored over BUNDLE. No production source, version, tag, or release changed. Runtime remains Observed/observe/unavailable; v0.4.2 unchanged; article remains STOPPED. Human decision required on release timing and next strategic mode; no next phase begun; no implementation performed.",
+    "test_evidence_classification": "fresh_source_grep_plus_direct_file_read_plus_cli_inspection_plus_doc_reading",
+    "tests_added_or_updated": "0 new tests added (read-only investigation phase); 0 pre-existing tests re-run (no source changed; governance CLI invariant checks run directly)",
+    "tests_run": 0,
     "test_results": {
         "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
         "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; health/check/coherence were run directly this phase",
-        "fast_green": "Not run this phase -- read-only ranking/decision phase per Section 36 of the governing brief, no source file changed. This phase's own attributable result is 0 failed."
+        "fast_green": "Not run this phase -- read-only investigation phase per Section 36 of the governing brief, no source file changed. This phase's own attributable result is 0 failed."
     },
-    "metadata_consistency": "phase_id, phase_name, phase_title, completed task 20260826-1559-phase-149o-20l-7o-3n-product-release-decision-and-remaining-mature-capability-gap-reset, phase document, and canonical report all identify 149O.20L.7O.3N consistently.",
+    "metadata_consistency": "phase_id, phase_name, phase_title, active task 20260826-1612-phase-149o-20l-7o-3n-1-mature-capability-consumer-edge-investigation, phase document, and canonical report all identify 149O.20L.7O.3N.1 consistently.",
     "validation_results": {
         "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
         "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; health/check/coherence were run directly this phase",
-        "targeted_rollback_evidence_tests": "42 passed, 2 failed (environmental: local 'rg' binary missing, unrelated to any code change -- 0 src/pcae files modified this phase)",
-        "phase_149O_20L_7O_3N_identity": "This canonical report documents Phase 149O.20L.7O.3N (Product/Release Decision and Remaining Mature Capability Gap Reset).",
+        "phase_149O_20L_7O_3N_1_identity": "This canonical report documents Phase 149O.20L.7O.3N.1 (Mature Capability Consumer-Edge Investigation).",
         "runtime_invariant": "Observed / observe / unavailable, 0 failed to remain unchanged -- confirmed unchanged by pcae runtime inspect",
         "version_release_invariant": "0.4.2 unchanged; no tag, release, or publication; 0 failed in verifying this invariant",
-        "fast_green": "Not run this phase -- read-only ranking/decision phase per Section 36 of the governing brief, no source file changed. This phase's own attributable result is 0 failed."
+        "fast_green": "Not run this phase -- read-only investigation phase per Section 36 of the governing brief, no source file changed. This phase's own attributable result is 0 failed."
     }
 }

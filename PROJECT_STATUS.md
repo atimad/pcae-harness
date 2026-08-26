@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3N.1 — Mature Capability Consumer-Edge Investigation.
+**READ-ONLY INVESTIGATION — COMPLETE. NO `src/pcae` MODIFIED.**
+Confirmed baseline unchanged: repository clean, `origin/main..HEAD` = 0,
+`v0.4.2` unchanged, runtime unchanged (`Observed`/`observe`/`unavailable`);
+only unreleased delta remains `3M`'s two-file rollback-evidence-visibility
+change. Investigated the three areas `3N` left UNVERIFIED. **Advisory
+Governance Framework: NO MEANINGFUL GAP** — confirmed zero code
+footprint (`grep -rl "GLP-001\|GAC-001\|PGP-001" src/pcae` → 0 hits); it
+is a pure documentary/procedural governance chapter (Phases 138–141),
+not software. **Repository Decision/Explainability: one real finding**
+— `core/decision_evaluation.py`/`core/repository_transition_validator.py`
+are production-wired (called automatically by `pcae phase complete` /
+`task finish --commit`), but the computed `TransitionResult.explanation`
+has zero readers anywhere (confirmed by grep and by the module's own
+docstring); classified **VISIBILITY/SURFACING GAP**, not a true
+consumption gap, per 3M's own established precedent that surfacing
+already-computed evidence is not consumption. The six-module
+`AdvisoryProvider`/`AdvisoryContextPackage` family remains **CONTRACT
+GAP**, effort L, unchanged from `3K`. **Audit/explainability lifecycle
+surfacing:** ~10 deliberately siloed audit subsystems found, each
+internally coherent (ALREADY CONSUMED within its own scope) except
+Enforcement Audit (TRUST/AUTHORITY BLOCK, tied to not-yet-activated
+Runtime Enforcement) and the same Decision-Evaluation surfacing gap
+above (shared boundary between this area and Repository
+Decision/Explainability). **No TRUE CONSUMPTION GAP or AUTOMATIC
+ORCHESTRATION GAP was found in any of the three areas.**
+`MATURE CAPABILITY CONSUMPTION PROGRAM: CURRENTLY EXHAUSTED AT S/M
+SCOPE`. Reconfirmed `3M`'s release decision: **RELEASE NOW is now
+favored over BUNDLE** (holding `3M` for an unspecified future bundle
+risks indefinite delay given next work shifts to a categorically
+larger/slower strategic mode). See
+`docs/PHASE_149O_20L_7O_3N_1_MATURE_CAPABILITY_CONSUMER_EDGE_INVESTIGATION.md`
+for the full maturity matrix, consumer-edge matrix, and unified
+consumer graph. `HUMAN DECISION REQUIRED` (release timing; next
+strategic mode); no next phase begun; no implementation performed.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3N — Product/Release Decision and Remaining Mature
 Capability Gap Reset. **READ-ONLY DECISION PHASE — COMPLETE. NO
 `src/pcae` MODIFIED.** Confirmed baseline: repository clean,
