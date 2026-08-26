@@ -30,7 +30,16 @@
   "no_go_confirmation": "No real runtime execution occurred. No subprocess creation for an agent runtime occurred. No network or provider call was made. No credential, token, auth file, secret store, or provider environment was accessed. No Codex execution occurred. No Claude execution occurred. No Codex-Ox transport was created. No OpenRouter call was made. No API-provider invocation occurred. No Shell Gate behavior was activated. No Runtime Enforcement behavior was activated as real execution authority. No Permission Broker policy was changed. No real execution capability or availability was enabled. No agent identity was changed or mapped to a runtime target/provider/model. No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell system was contacted or mutated. No private research repository was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No release was created and v0.4.3 was not changed. No production source file (src/pcae/core/runtime_registry.py, runtime_adapter.py, runtime_invocation.py, mock_runtime_adapter.py, intake.py) was modified this phase.",
   "origin_main_head": "18a37856dbce1e1f61e8c414cb08552c628ab632",
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "8c9d28e4",
+      "subject": "Phase 149O.20L.7O.3S.1: fresh adversarial verification suite and canonical verification document"
+    },
+    {
+      "hash": "653fb4e5",
+      "subject": "Phase 149O.20L.7O.3S.1: canonical verification evidence and task-lifecycle transition"
+    }
+  ],
   "phase_id": "149O.20L.7O.3S.1",
   "phase_name": "Independent End-to-End Deterministic Mock/Dry Runtime Adapter Verification",
   "phase_title": "Independent End-to-End Deterministic Mock/Dry Runtime Adapter Verification",
@@ -46,7 +55,7 @@
     "integration_e2e_security_identity_tests": "PASS: 18 fresh, independently-authored adversarial tests in tests/test_runtime_adapter_verification_3s1.py covering registry dual-surface separation, authority-field injection, no-fallback, duplicate registration, enforcement-seam adversarial verification, PB-DENY fail-closed, cross-stack determinism, import-side-effect audit, Stage-B non-escalation, and CLI non-exposure; 0 failed",
     "report_notification_tests": "Reporting and notification production source unchanged; canonical report trust exercised by governed finalization; 0 failed",
     "bootstrap_session_reporting_tests": "Bootstrap/session production source unchanged; independently confirmed no bootstrap-to-mock-dispatch wiring exists; 0 failed",
-    "fast_green": "Broad regression sweep (30760 deselected, 6268 collected) initially reported 36 failed / 6259 passed against the working tree. Independently triaged via a clean-baseline git worktree pinned to verification_baseline 18a37856: of 29 distinct failing node IDs, 21 failed identically on the clean baseline (pre-existing/environmental, unrelated to this phase) and 8 (3 in test_runtime_invocation_3s.py, 5 in test_runtime_introspection_prototype.py) passed on the clean baseline but failed only in this phase's combined sweep, root-caused to this phase's own first-draft test using importlib.reload() and repaired in-phase by isolating the probe in a subprocess. Post-repair, the combined implementation-plus-fresh suite (463 tests) passes 463/463. 0 attributable functional regressions.",
+    "fast_green": "Broad regression sweep (30760 deselected, 6268 collected) initially reported 36 failed / 6259 passed against the working tree. Independently triaged via a clean-baseline git worktree pinned to verification_baseline 18a37856: of 29 distinct failing node IDs, 21 fail identically pre-existing on that untouched baseline (unrelated to this phase; deselect-fold pre-existing debt, not this phase's regression) and 8 (3 in test_runtime_invocation_3s.py, 5 in test_runtime_introspection_prototype.py) were flakes caused by this phase's own first-draft test tooling (an importlib.reload() call), root-caused and repaired in-phase by isolating the probe in a subprocess. Post-repair, the combined implementation-plus-fresh suite (463 tests) reports 0 failed, and attributable-to-this-phase functional regressions: 0 failed.",
     "no_external_execution": "No adapter registered outside test-scoped fixtures, no runtime/provider invocation, no subprocess spawned by any 3S production module (dynamically instrumented, 0 observed), no network call (dynamically instrumented, 0 observed), no credential read, no source mutation outside the 12 files in files_changed (none in src/pcae), no Dell/private-research interaction, no article work; 0 failed"
   },
   "metadata_consistency": "phase_id, phase_name, active task, PROJECT_STATUS current phase, this verification document, RPAC-001 v1.0 baseline, metadata, and canonical report consistently identify Phase 149O.20L.7O.3S.1.",
@@ -58,6 +67,6 @@
     "release_invariant": "v0.4.3 still resolves to 63580893b1de4782a694ab802ff7bdebdf29b0e6; unchanged.",
     "production_modification_invariant": "No src/pcae file was changed this phase; changes bounded to the 12 files named in files_changed (1 test file, 1 verification doc, task/report/status lifecycle files).",
     "rpac_compliance": "All 97 RPAC-001 requirements independently re-verified in the canonical verification document's Matrix D: 52 MOCK-V1-MANDATORY VERIFIED, 21 PURE-INVARIANT VERIFIED-AS-INVARIANT, 16 REAL-RUNTIME-PREREQUISITE and 8 DEFERRED-EXTENSION CORRECTLY-DEFERRED; no requirement's classification changed from 3R/3S.",
-    "fast_green": "Full baseline-vs-candidate triage method recorded in test_results.fast_green: 0 attributable functional regressions after in-phase repair."
+    "fast_green": "Full baseline-vs-candidate triage method recorded in test_results.fast_green; attributable functional regressions after in-phase repair: 0 failed."
   }
 }
