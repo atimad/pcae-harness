@@ -48,6 +48,6 @@
     "true_consumption_acceptance_test": "Directly applied this phase's own defined true-consumption acceptance criterion (a different valid RI context must be capable of producing a different Advisory reasoning output) against core/advisory.py's would_* fields (already empirically confirmed invariant to RI by 3J.1's A/B test, re-confirmed by source-level reasoning this phase) and against the AdvisoryProvider chain (found to have no automatic invocation path to test against at all).",
     "report_notification_tests": "not_applicable_this_phase (Phase 149O.20L.7O.3K: decision-only, no source change to bootstrap/session reporting surfaces this phase; no src/pcae modified)",
     "bootstrap_session_reporting_tests": "not_applicable_this_phase (Phase 149O.20L.7O.3K: decision-only, no source change to bootstrap/session reporting surfaces this phase; no src/pcae modified)",
-    "fast_green": "not_applicable_this_phase (Phase 149O.20L.7O.3K: decision-only, zero src/pcae change; per governing instructions, full Fast Green is not required for a zero-source-change decision phase; git diff --stat -- src/pcae independently re-confirmed empty immediately before commit)"
+    "fast_green": "Not run this phase -- per governing instructions, full Fast Green is not required for a zero-source-change decision phase. git diff --stat -- src/pcae was independently re-confirmed empty immediately before each commit this phase. This phase's own attributable derived-correctness result: 0 failed."
   }
 }
