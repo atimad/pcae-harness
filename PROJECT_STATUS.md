@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3O.1 — PCAE v0.4.3 Public Release. **PUBLICATION
+READY — VERIFICATION COMPLETE. NO PUBLICATION PERFORMED.** Independently
+re-verified `3O`'s frozen `v0.4.3` release candidate
+(`63580893b1de4782a694ab802ff7bdebdf29b0e6`): baseline invariants held
+(clean, `HEAD == origin/main`, 0 commits ahead, no local/remote
+`v0.4.3` tag, `v0.4.2` unchanged); candidate-to-HEAD drift on
+`src/pcae`/`pyproject.toml`/`docs/RELEASE_NOTES_V0_4_3.md` was empty
+(only `3N.2`'s later docs/status/task-lifecycle commits exist past the
+candidate); version confirmed `0.4.3` in both canonical sources; `3O`'s
+exact frozen wheel/sdist bytes were recovered from disk and
+re-hashed, matching the frozen record exactly
+(`sha256:e42ca72c...8ff5e4` wheel, `sha256:8a08898...977276` sdist,
+byte-identical across both original clones); fresh wheel and sdist
+installs in separate venvs both confirmed `__version__ == "0.4.3"`
+and passed the golden path (`init` → `session bootstrap` → `task new`
+→ `intake from-files` ACCEPTED, `execution_allowed: False` →
+`intake list`); the installed wheel's real CLI was independently
+re-run through `3O`'s own rollback-evidence-visibility smoke script
+(dry-run, real rollback with **no** prior dry-run, divergence-block —
+all three reproduced identically); regression suites for Permission
+Broker, RI attachment, Plan B+, corrupt-store, intake/Codex-Ox, and
+`3M`/`3M.1` rollback-evidence tests all re-run on current `HEAD`:
+212/214 passed, the same 2 pre-existing `rg`-tooling-gap failures `3O`
+already disclosed (environment, not product; ACCEPTED-DEBT); release
+notes truth-audited (states preparation was already automatic,
+evidence-surfacing only, no new authority claims). **BLOCKING = 0,
+MUST-FIX = 0.** No explicit human authorization to publish `v0.4.3`
+was present in the session (the governing phase directive is not
+itself authorization), so steps 31-45 (tag creation, tag push, GitHub
+Release, artifact upload) were **not performed**; the phase stops at
+the authorization checkpoint per its own governing brief. PyPI:
+`NOT PUBLISHED`. Article remains STOPPED; private research repository
+not inspected/modified. See
+`docs/PHASE_149O_20L_7O_3O_1_PCAE_V0_4_3_PUBLIC_RELEASE.md` for the
+full verification trail. **Recommendation: awaiting explicit human
+publication authorization** — no next phase begun automatically.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3N.2 — Deep Repository-Wide Capability Discovery and
 Consumption-Gap Audit. **READ-ONLY AUDIT — COMPLETE. NO `src/pcae`
 MODIFIED.** Triggered by a concern that prior S/M-consumption audits,

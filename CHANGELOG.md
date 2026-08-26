@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3O.1** — PCAE v0.4.3 Public Release
+  (publication-only, verification): independently re-verified `3O`'s
+  frozen `v0.4.3` candidate (`63580893`) — zero release-facing drift
+  since candidate freeze, version confirmed `0.4.3`, `v0.4.2`
+  unchanged, frozen wheel/sdist bytes recovered from disk and
+  re-hashed exact-match (`sha256:e42ca72c...`/`sha256:8a088983...`),
+  fresh wheel/sdist installs both pass version check and golden path,
+  rollback-evidence-visibility smoke (dry-run, real-rollback-no-prior-
+  dry-run, divergence-block) reproduced identically on the installed
+  wheel, regression suites 212/214 passed (2 pre-existing `rg`-tooling
+  environment gaps, non-attributable, same as `3O`). BLOCKING = 0,
+  MUST-FIX = 0. No explicit human publication authorization was
+  present in session, so no tag was created/pushed, no GitHub Release
+  was created, no artifact was uploaded. PyPI: NOT PUBLISHED. Phase
+  stops at the authorization checkpoint per its own governing brief;
+  awaiting human authorization to proceed.
 - **Phase 149O.20L.7O.3N.2** — Deep Repository-Wide Capability
   Discovery and Consumption-Gap Audit (read-only, no `src/pcae`
   modified): bottom-up (not architecture-chapter-organized) sweep of
