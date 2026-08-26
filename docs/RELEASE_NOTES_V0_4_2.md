@@ -1,7 +1,9 @@
-# PCAE v0.4.2 Release Notes (Release Candidate — Not Yet Published)
+# PCAE v0.4.2 Release Notes
 
-**Status:** release-candidate preparation only. No tag, GitHub Release,
-or PyPI upload has been created as of this document. See
+**Status:** published. Tag `v0.4.2` and the GitHub Release are live,
+pinned to release-candidate commit
+`bc7935f4bb86ea7f6ade823a4e63ed9c9cc0a0c4`. No PyPI upload has been
+created. See
 `docs/PHASE_149O_20L_7O_3L_PCAE_V0_4_2_RELEASE_HARDENING.md` for the
 full evidence trail and publication checklist.
 
