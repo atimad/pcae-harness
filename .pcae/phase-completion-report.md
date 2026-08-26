@@ -5,7 +5,10 @@
 Phase-entry commit:
 `a52561954b78f1e195715baf4feb7db0e88fdebb`. Substantive contract commits:
 `4c9332ec44b8417ca4d5f53d72e7528753bf166f` and
-`8bc27726861e6221781402b7680dec9ed75f4148`, pushed to `origin/main`.
+`8bc27726861e6221781402b7680dec9ed75f4148`. Canonical evidence/trust commits:
+`13b7984911960920e7bcf11f4591cebcf3559e92`,
+`c7fcbe4852edb779ad0d95c9c60393e3b692b135`, and
+`f985821c9833c1380afde3604148a115d41e98f8`. All are pushed to `origin/main`.
 
 ## Public and runtime state
 
