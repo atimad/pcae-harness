@@ -27,8 +27,8 @@
   },
   "internal_evidence_coherence": "The report, fresh tests, disposable out-of-process rollback executions, fixed pre-3M worktree, exact production diff, focused regressions, and machine Fast Green artifact converge on the same result: evidence was already prepared and consumed on real rollback before 3M; 3M added visibility only; evidence remains non-authoritative.",
   "no_go_confirmation": "No production source was modified. No authoritative rollback-readiness object was created. No promotion-time readiness artifact was persisted. No Permission Broker or HATP authority was bypassed or weakened. No human rollback trigger was automated. No runtime execution capability was enabled. No version, tag, release, or publication was created. No private pcae-deepseek-research repository was inspected. No article work was resumed; it remains STOPPED. No CLTR cutover occurred. No next phase was begun.",
-  "origin_main_head": "8907df05536e1c817634f06b443eb8edbceb5ade",
-  "origin_main_head_count": 6,
+  "origin_main_head": "0f241dcaad088a987353282d149da07cdde5e326",
+  "origin_main_head_count": 0,
   "phase_commits": [
     {"hash": "ced15d1f", "subject": "Complete Phase 149O.20L.7O.3M.1 independent rollback evidence verification"},
     {"hash": "52291199", "subject": "Phase 149O.20L.7O.3M.1: begin independent rollback evidence verification"},
@@ -39,7 +39,7 @@
   "phase_id": "149O.20L.7O.3M.1",
   "phase_name": "Independent End-to-End Rollback Readiness / Evidence Consumption Verification",
   "phase_title": "Independent End-to-End Rollback Readiness / Evidence Consumption Verification",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3N -- Product/release decision for the next mature capability bundle; preserve v0.4.2 until that decision. Not begun.",
   "status": "completed",
   "summary": "Independent verification found zero Blocking findings. Real pre-3M rollback already computed and consumed file_plan and divergence_check without any prior dry-run; --dry-run is optional diagnostics. The evidence is an operational safety input and audit receipt, not authority: live divergence remains the mechanical gate, while HATP or Permission Broker remains the authorization gate. No distinct AG5 readiness concept exists or is needed for the bounded behavior, and rejecting promotion-time persistence was correct because it would require a new identity, freshness, invalidation, and replay contract. Phase 3M is therefore Candidate B in the requested A/B verdict: functionally complete before 3M, with 3M adding immediate result/CLI visibility only. Runtime remains Observed/observe/unavailable; version remains 0.4.2; article work remains STOPPED.",
@@ -51,7 +51,7 @@
     "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; health/check/coherence were run directly",
     "fast_green": "0 failed attributable; PASS. Authoritative artifact: .pcae/fast-green-attribution/77695d008f999ff48649a98c165dec885372ff20fab1aea111cc4571a2117651.json"
   },
-  "metadata_consistency": "phase_id, phase_name, phase_title, active task, phase document, and pending canonical report all identify 149O.20L.7O.3M.1 consistently.",
+  "metadata_consistency": "phase_id, phase_name, phase_title, completed task, phase document, and canonical report all identify 149O.20L.7O.3M.1 consistently; the active task is the post-phase idle boundary and does not begin 3N.",
   "validation_results": {
     "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
     "bootstrap_session_reporting_tests": "not directly applicable: no bootstrap or session production source changed; health/check/coherence were run directly",
