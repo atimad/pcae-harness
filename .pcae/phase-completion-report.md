@@ -2,9 +2,11 @@
 
 **Status: completed. Completeness: complete. Human decision required.**
 
-Phase-entry commit:
-`83af9b3b1b1485fa3acdf4d6eebcef95f692113e`. Substantive phase commit:
-`8b351ebe18277de4963f9b5611b5bc0ea1a0069d`, pushed to `origin/main`.
+Phase commit: `8b351ebe18277de4963f9b5611b5bc0ea1a0069d`.
+Canonical-evidence commit:
+`83ea42b6f4efb43377ccd3dfcbd8fe74d1586255`. Phase-entry commit:
+`83af9b3b1b1485fa3acdf4d6eebcef95f692113e`. Both phase-owned commits are
+pushed to `origin/main`.
 
 ## Baseline and invariant state
 
@@ -269,8 +271,9 @@ read, modified, resumed, or published.
 PHASE ID: 149O.20L.7O.3P
 STATUS: COMPLETED
 COMPLETENESS: COMPLETE
-PHASE-ENTRY COMMIT: 83af9b3b1b1485fa3acdf4d6eebcef95f692113e
 PHASE COMMIT: 8b351ebe18277de4963f9b5611b5bc0ea1a0069d
+CANONICAL-EVIDENCE COMMIT: 83ea42b6f4efb43377ccd3dfcbd8fe74d1586255
+PHASE-ENTRY COMMIT: 83af9b3b1b1485fa3acdf4d6eebcef95f692113e
 PUSHED: pushed
 ORIGIN/MAIN..HEAD: 0
 V0.4.3 PUBLIC STATE: CURRENT, UNCHANGED
