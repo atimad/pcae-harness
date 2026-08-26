@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3K: Post-RI Attachment Architecture and Release Decision
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -30,6 +30,7 @@ Decision-only phase: determine whether true RI-backed Advisory reasoning consump
 - tasks/active/20260826-0900-phase-149o-20l-7o-3k-post-ri-attachment-architecture-and-release-decision.md
 - tasks/done/20260826-0535-idle-awaiting-next-governed-phase-post-149o-20l-7o-3j-1.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
