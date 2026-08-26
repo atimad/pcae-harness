@@ -27,6 +27,7 @@ Independently re-derive and verify or refute 3J's claim that the real Advisory p
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/TODO.md
 - tasks/DONE.md
 - tasks/active/20260826-0128-idle-awaiting-next-governed-phase-post-149o-20l-7o-3j.md

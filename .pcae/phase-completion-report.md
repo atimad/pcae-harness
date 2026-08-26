@@ -1,99 +1,105 @@
-# Phase 149O.20L.7O.3J Complete — Repository Intelligence to Advisory Production Consumption Integration
+# Phase 149O.20L.7O.3J.1 Complete — Independent End-to-End Repository Intelligence / Advisory Consumption Verification
 
-**Verdict: COMPLETE. BOUNDED SOURCE-MODIFYING INTEGRATION. ZERO BLOCKING FINDINGS.**
+**Verdict: COMPLETE. VERIFICATION-ONLY. NO SRC/PCAE MODIFIED. ZERO BLOCKING FINDINGS.**
 
-Per the human's Plan A / Candidate C selection from `149O.20L.7O.3I`,
-wired the real production Advisory decision path
-(`core/advisory.py::build_advisory()`, the engine behind `pcae
-advisory check`) to automatically consume the existing,
-already-built-and-tested Repository Intelligence Advisory-context
-bridge (`advisory/context/advisory_context_builder.py::build_advisory_context()`),
-which previously had exactly one caller — the manual `pcae advisory
-context build` CLI command.
+Independently re-derived, without trusting 149O.20L.7O.3J's own call
+graph, tests, fail-soft rationale, authority-non-flow claim, staleness
+handling, isolation claim, read-only claim, or model/network claim,
+whether the real Advisory production path (`core/advisory.py::build_advisory()`,
+behind `pcae advisory check`) automatically consumes the Repository
+Intelligence Advisory-context bridge (`build_advisory_context()`).
 
-**Production diff scope:** exactly one file changed
-(`src/pcae/core/advisory.py`, +112/-0 lines) — a new, additive
-`repository_intelligence_context` key on the Advisory output envelope.
+**Production diff scope:** independently re-confirmed via `git diff --name-status`
+between the exact pre-3J commit (`3537ad15`) and the integration commit
+(`744cec4b`) — exactly one production file changed, `src/pcae/core/advisory.py`
+(+112/-0 lines). No `src/pcae` file was modified by this phase itself.
 
-**Acquisition mode: READ-ONLY QUERY.** Reads
-`.pcae/repository-intelligence/latest.json` at its existing canonical
-pipeline-defined path (`repository_intelligence/persistence.py::
-DEFAULT_OUTPUT_SUBDIR`); no snapshot regeneration, no new `.pcae/`
-writes.
+**Automatic consumption:** confirmed live on the real repository (`pcae
+advisory check --command "ls" --json`, no manual `pcae advisory context
+build` prerequisite run first) and independently re-confirmed via a
+fresh, non-imported 28-test suite against disposable `tmp_path` repos.
 
-**Missing/invalid/stale RI state:** fail-soft (not fail-closed) for
-missing or invalid/incompatible-schema snapshots — a deliberate,
-documented divergence from `build_advisory_context()`'s own
-fail-closed default for its CLI caller, scoped to this one call path.
-Staleness is disclosed via the snapshot's own already-recorded
-`repository_commit` provenance field compared against current `git
-rev-parse HEAD`, appended as a limitation entry using the pre-existing
-free-form limitation shape — no new freshness policy was invented.
+**Read-only acquisition:** confirmed via filesystem hash/mtime
+before/after comparison around real invocations — zero mutation.
 
-**Authority non-flow:** `repository_intelligence_context` is computed
-and inserted only after all broker/decision fields are already fully
-resolved from `build_permission_broker()` alone, so it cannot
-causally influence `broker_decision`/`advisory_decision`/`would_*`/
-`authorization_granted`/`execution_authorized` — independently
-verified by a dedicated test comparing identical evidence inputs with
-and without RI context present.
+**Missing/malformed/incompatible-schema/corrupt RI:** each
+independently reproduced live against the real repository's own
+snapshot file (with backup/restore) and in the fresh suite. All four
+classes fail soft with a distinct, truthful `unavailable_reason`, no
+traceback, exit 0.
 
-**Permission Broker isolation:** zero references to
-`permission_broker`/`PermissionBroker` in the RI or advisory-context
-subsystems, re-confirmed unchanged by static test.
-`mutation_permission.py`/`permission_broker.py` were not modified.
+**Fail-soft semantic adjudication: CORRECT.** RI was never a pre-3J
+Advisory-decision input, so its absence removes no input the decision
+ever depended on; the additive output key discloses `available: false`
+truthfully on every unavailable path.
 
-**No model/provider/network dependency added.** `pcae advisory
-context build` (manual CLI) remains byte-unmodified and independently
-re-verified working end-to-end via subprocess.
+**Staleness:** independently traced `repository_commit` to a
+pre-existing snapshot provenance field (`query_engine.py::_source_artifact`),
+not a new field invented by 3J. Only the comparison-and-disclose step
+is new.
 
-**Tests:** 18 new `fast_green` tests added
-(`tests/test_phase_149o_20l_7o_3j_ri_advisory_production_consumption.py`),
-all passing — automatic consumption, entity-lookup identity binding,
-missing/invalid/incompatible-schema/stale RI disclosure,
-cross-repository isolation, determinism, authority non-flow, static
-Permission Broker isolation, static no-self-CLI-subprocess check, CLI
-regression (both commands), and runtime-boundary preservation.
+**Authority non-flow:** empirically confirmed via A/B toggling RI
+presence/absence on the identical live repository (rename/restore of
+the real `latest.json`) and in fresh disposable repos — all 15
+inspected authority/decision fields (`broker_decision`,
+`advisory_decision`, all `would_*`, `authorization_granted`,
+`execution_authorized`, etc.) identical in both cases. Structurally
+re-confirmed via source-level variable-binding order plus
+`inspect.signature` on the RI-gathering helper (no decision-derived
+parameter accepted).
 
-**Regressions:** full pre-existing Advisory/RI regression corpus
-(2848 tests, 22 files) passes except 7 failures independently
-re-confirmed identical against the unmodified pre-3J tree via `git
-stash` — pre-existing, unrelated.
+**Permission Broker isolation:** confirmed bidirectionally by static
+grep — zero cross-references either direction.
 
-**Fast Green:** pre-3J baseline (via `git stash`) 336 pre-existing
-red / 8731 passed / 9 errors; post-3J 352 red / 8733 passed / 9
-errors. Exact node-ID diff: 16 new red node IDs, all of the literal
-form "no `src/pcae` file changed since a fixed historical phase-entry
-commit" (pre-existing structural tripwires that necessarily fire for
-any legitimate source-modifying phase), 0 resolved. Reconciliation:
-8731 minus 16 plus 18 new tests equals 8733. **This phase's own
-attributable derived-correctness result: 0 failed.**
+**Model/network/runtime boundary:** zero model/network references
+found in any touched module; `pcae runtime inspect` unchanged
+(`Observed`/`observe`/`unavailable`) before and after.
 
-**Runtime unchanged:** `Observed`/`observe`/`unavailable` before and
-after this phase.
+**CLI compatibility:** manual `pcae advisory context build` re-verified
+byte-unmodified, still requires explicit `--snapshot`, still fail-closed.
 
-**Deferred, not touched:** Candidate A (rollback readiness/evidence
-auto-generation) and Candidate B (runtime preflight capability-aware
-routing), per the human's Plan A selection.
+**Fast Green:** total-count A/B performed by temporarily moving this
+phase's own new test file out of and back into the tree. Pre-existing
+baseline failed/error/skipped counts identical both times; only delta
+is +28 new passing tests, exactly this phase's own new test count.
+This phase's own attributable derived-correctness result: 0 failed.
 
-**This phase does not self-certify.**
+**Two non-blocking findings, not present in 3J's own report:**
 
-```text
-REPOSITORY INTELLIGENCE -> ADVISORY PRODUCTION CONSUMPTION: IMPLEMENTED
-REAL ADVISORY PATH: AUTO-CONSUMES EXISTING RI CONTEXT BUILDER
-MANUAL ADVISORY-CONTEXT CLI PREREQUISITE: REMOVED
-RI AUTHORITY: NONE / UNCHANGED
-PERMISSION BROKER: NOT INFLUENCED BY RI CONTEXT
-ATTRIBUTABLE REGRESSIONS: 0
-INDEPENDENT END-TO-END VERIFICATION: MANDATORY NEXT
-```
+1. **Cross-repository symlink consumption edge case.** A foreign RI
+   snapshot placed at the canonical `.pcae/repository-intelligence`
+   path via a filesystem symlink is consumed and disclosed only as
+   generic staleness once the target repository has ≥1 commit, and is
+   consumed with **zero disclosure** if the target repository has no
+   commits yet. Requires pre-existing filesystem write access to the
+   target repository's `.pcae/` tree as precondition — a materially
+   larger compromise than merely influencing Advisory output.
+2. **Attachment vs. consumption subsystem-scope mismatch.** 3J's own
+   framing ("Advisory production consumption") targets
+   `core/advisory.py` (Phase 88W "Advisory Mode," a deterministic
+   decision-preview engine with no reasoning step), not the
+   differently-scoped `AdvisoryProvider`/`AdvisoryContextPackage`
+   reasoning framework that
+   `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md`
+   §3.4 explicitly named as the intended Repository Intelligence
+   reasoning consumer. That framework
+   (`core/advisory_repository_skills.py`) remains untouched, mock-only,
+   and "disconnected by design," exactly as before. Repository
+   Intelligence context is genuinely and safely **attached** to
+   `core/advisory.py`'s output, not **consumed** by any reasoning step,
+   because that subsystem performs no reasoning.
 
-**Recommended next phase: `149O.20L.7O.3J.1` — Independent End-to-End
-Repository Intelligence / Advisory Consumption Verification.** Not
-begun.
+**Blocking count: 0.**
 
-Article remains **STOPPED**, not resumed. `~/repos/pcae-deepseek-research`
-untouched.
+Article remains **STOPPED**; `~/repos/pcae-deepseek-research`
+untouched, out of scope, not inspected. `v0.4.1` remains the current,
+unmodified public release; no release action taken.
 
-See `docs/PHASE_149O_20L_7O_3J_REPOSITORY_INTELLIGENCE_ADVISORY_PRODUCTION_CONSUMPTION_INTEGRATION.md`
-for the full evidence trail.
+Recommends `149O.20L.7O.3K` — Post-RI/Advisory Integration Release and
+Next-Capability Decision — including a status-language correction
+distinguishing "Advisory Mode attachment" from "122A-scoped Advisory
+reasoning consumption." Not begun.
+
+See
+`docs/PHASE_149O_20L_7O_3J_1_INDEPENDENT_END_TO_END_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_VERIFICATION.md`
+for full evidence.
