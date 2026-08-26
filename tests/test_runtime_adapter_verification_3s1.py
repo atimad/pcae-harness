@@ -406,10 +406,32 @@ def test_intake_stage_b_builder_rejects_malformed_operation_gracefully():
         )
 
 
-# ── No CLI exposure ──────────────────────────────────────────────────────
+# ── No CLI exposure (superseded by Phase 149O.20L.7O.3S.2) ──────────────
+#
+# 3S.1 asserted the mock adapter was NOT YET CLI-exposed -- true at that
+# phase, because production consumption had not been authorized. Phase
+# 149O.20L.7O.3S.2 (production dry-lifecycle consumption, human-approved
+# Option A) makes exposing an explicit `--dry-runtime --runtime-target
+# mock-dry.*` surface on `pcae session bootstrap --compact` its entire
+# deliverable, so the target-ID vocabulary now legitimately appears in
+# `cli.py`'s argparse help text. What must still hold, and what this test
+# now asserts instead, is the command-zone architecture invariant
+# (3S.2 spec Sections 36/37): `cli.py` may reference the mock-dry target
+# ID *vocabulary* in help strings, but must never import or call adapter
+# business logic directly -- that stays in
+# `pcae.core.runtime_dry_consumption` / `pcae.core.runtime_adapter`.
 
 
-def test_mock_adapter_not_referenced_in_cli_module_source():
+def test_cli_module_has_no_direct_adapter_business_logic():
     cli_source = (Path(__file__).resolve().parents[1] / "src" / "pcae" / "cli.py").read_text()
-    for forbidden in ("mock_runtime_adapter", "mock-dry", "simulate_invocation", "MockDryRuntimeAdapter"):
-        assert forbidden not in cli_source, f"{forbidden!r} must not be exposed via the public CLI yet"
+    for forbidden in ("mock_runtime_adapter", "simulate_invocation(", "MockDryRuntimeAdapter("):
+        assert forbidden not in cli_source, (
+            f"{forbidden!r} must not appear in cli.py -- adapter construction/"
+            "dispatch belongs only in the core/service layer, never the CLI "
+            "parsing/rendering layer (command-zone architecture)."
+        )
+    # The target-ID vocabulary in help text is explicit, allowed CLI-surface
+    # documentation, not business logic (RPAC-REQ-053 explicitness).
+    assert "mock-dry" in cli_source
+    assert "--dry-runtime" in cli_source
+    assert "--runtime-target" in cli_source

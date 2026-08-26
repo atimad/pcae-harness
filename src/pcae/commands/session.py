@@ -672,6 +672,17 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
         pack, profile, handoff=handoff, audit=audit, prompt=prompt_meta,
     )
 
+    # ── Phase 149O.20L.7O.3S.2: explicit RPAC-001 mock/dry production
+    # consumption. Reached ONLY when both --dry-runtime and an explicit
+    # --runtime-target are supplied; the ordinary --compact prompt-only
+    # path above is otherwise completely unchanged (no auto-dispatch).
+    dry_runtime: bool = getattr(args, "dry_runtime", False)
+    if dry_runtime:
+        return _run_compact_bootstrap_dry(
+            args, root, prompt, agent_id, backend_lock_result, sync_lock,
+            profile, is_unknown, profile_name, pack, challenge,
+        )
+
     if args.json:
         print(
             json.dumps(
@@ -725,6 +736,133 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
         for line in lines:
             print(line)
     return 0
+
+
+def _run_compact_bootstrap_dry(
+    args: argparse.Namespace,
+    root: HarnessPath,
+    prompt: str,
+    agent_id: str | None,
+    backend_lock_result: dict,
+    sync_lock: bool,
+    profile: Any,
+    is_unknown: bool,
+    profile_name: str | None,
+    pack: Any,
+    challenge: dict,
+) -> int:
+    """Phase 149O.20L.7O.3S.2 production dry-lifecycle consumer.
+
+    Explicit intent only (RPAC-REQ-053): reached only when the caller
+    passed both --dry-runtime and an exact --runtime-target. Fails closed
+    on a missing/unknown target or missing task authority -- it never
+    falls back to the ordinary non-dry prompt-only flow above, and never
+    guesses a target.
+    """
+    from pcae.core.mock_runtime_adapter import KNOWN_MOCK_TARGET_FIXTURES
+    from pcae.core.runtime_dry_consumption import (
+        DRY_CONSUMER_ENTRY_POINT,
+        UnknownRuntimeTargetError,
+        run_production_dry_invocation,
+    )
+
+    runtime_target_id: str | None = getattr(args, "runtime_target", None)
+    dry_agent_id = agent_id or "unspecified"
+
+    if not runtime_target_id:
+        message = (
+            "Error: --dry-runtime requires an explicit --runtime-target "
+            f"(one of: {', '.join(sorted(KNOWN_MOCK_TARGET_FIXTURES))}). "
+            "No default or fallback target exists; the requested dry "
+            "operation stops here."
+        )
+        if args.json:
+            print(json.dumps({"dry_runtime_error": "missing_runtime_target"}, indent=2, sort_keys=True))
+        else:
+            print(message)
+        return 1
+
+    outcome = run_production_dry_invocation(
+        root=root, agent_id=dry_agent_id, runtime_target_id=runtime_target_id,
+        prompt_content=prompt,
+    )
+
+    if isinstance(outcome, UnknownRuntimeTargetError):
+        message = f"Error: dry-runtime request stopped -- {outcome}. No fallback was taken."
+        if args.json:
+            print(json.dumps(
+                {
+                    "dry_runtime_error": str(outcome),
+                    "entry_point": DRY_CONSUMER_ENTRY_POINT,
+                    "requested_runtime_target": runtime_target_id,
+                },
+                indent=2, sort_keys=True,
+            ))
+        else:
+            print(message)
+        return 1
+
+    result_payload = None
+    if outcome.result is not None:
+        result_payload = {
+            "invocation_id": outcome.result.invocation_id,
+            "attempt_id": outcome.result.attempt_id,
+            "terminal_outcome": outcome.result.terminal_outcome,
+            "structured_payload": dict(outcome.result.structured_payload),
+            "error_category": outcome.result.error_category,
+        }
+
+    if args.json:
+        print(json.dumps(
+            {
+                "adapter_call_count": outcome.adapter_call_count,
+                "advisory": BOOTSTRAP_COMPACT_ADVISORY,
+                "agent_id": dry_agent_id,
+                "bootstrap_prompt": prompt,
+                "dry_runtime": True,
+                "entry_point": DRY_CONSUMER_ENTRY_POINT,
+                "execution_availability": "unavailable",
+                "external_runtime_invoked": False,
+                "failure_category": outcome.failure_category,
+                "final_state": outcome.final_state,
+                "requested_runtime_target": runtime_target_id,
+                "result": result_payload,
+                "simulation_accepted": outcome.accepted,
+                "simulation_only": True,
+                "trace": list(outcome.trace),
+            },
+            indent=2, sort_keys=True,
+        ))
+        return 0 if outcome.accepted else 1
+
+    print(f"Profile: {profile.profile_type}")
+    print()
+    print("PCAE RPAC-001 mock/dry production dry-lifecycle consumption.")
+    print(f"  Requested runtime target: {runtime_target_id}")
+    print(f"  Agent identity (descriptive only): {dry_agent_id}")
+    print(f"  Simulation accepted: {outcome.accepted}")
+    print(f"  Final state: {outcome.final_state}")
+    if outcome.result is not None:
+        print(f"  Terminal outcome: {outcome.result.terminal_outcome} (SIMULATION ONLY)")
+        print(f"  Structured payload: {dict(outcome.result.structured_payload)}")
+    if not outcome.accepted:
+        print(f"  Failure category: {outcome.failure_category}")
+        print(f"  Failure reasons: {list(outcome.failure_reasons)}")
+    print("  External runtime invoked: no")
+    print("  Real execution: none (simulation only)")
+    print("  Execution availability: unavailable")
+    print()
+    print(f"Vendor-neutral note: {CONTEXT_PACK_UNIVERSAL_AGENT_NOTE}")
+    print(f"Quality preservation note: {BOOTSTRAP_COMPACT_ADVISORY}")
+    assessment = build_challenge_attention_assessment(root, surface="bootstrap", challenge_data=challenge)
+    lines = render_irg_challenge_compact_lines_with_allocation(
+        challenge, assessment["allocation"], surface="bootstrap"
+    )
+    if lines:
+        print()
+        for line in lines:
+            print(line)
+    return 0 if outcome.accepted else 1
 
 
 def _session_summary(session: ProvenanceSession | None) -> dict | None:

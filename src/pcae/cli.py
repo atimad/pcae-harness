@@ -6866,6 +6866,30 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Rehydrate backend lock artifact (.pcae/agent-locks/latest.json) for --agent-id.",
     )
+    session_bootstrap_parser.add_argument(
+        "--dry-runtime",
+        action="store_true",
+        help=(
+            "Explicitly request an RPAC-001 mock/dry simulation-only invocation "
+            "of the compact bootstrap prompt (requires --compact and "
+            "--runtime-target). Simulation only: no external runtime, no "
+            "model/provider, no source mutation, no subprocess/network/"
+            "credential access. Real execution remains unavailable. Without "
+            "this flag, --compact behaves exactly as before -- prompt output "
+            "only, no dispatch."
+        ),
+    )
+    session_bootstrap_parser.add_argument(
+        "--runtime-target",
+        default=None,
+        metavar="RUNTIME_TARGET_ID",
+        help=(
+            "Exact RPAC-001 mock-v1 runtime target ID for --dry-runtime "
+            "(e.g. mock-dry.no-change.v1, mock-dry.synthetic-change.v1, "
+            "mock-dry.failure.v1). Required with --dry-runtime; no default, "
+            "no fallback."
+        ),
+    )
     session_bootstrap_parser.set_defaults(handler=run_session_bootstrap)
 
     session_continuity_check_parser = session_subparsers.add_parser(

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3S.2** — Production Dry-Lifecycle Runtime Adapter
+  Consumption (human-approved Option A): wired the verified RPAC-001
+  mock/dry adapter into one explicit production consumer, `pcae session
+  bootstrap --compact --dry-runtime --runtime-target <id>`, without
+  enabling real execution. New `src/pcae/core/runtime_dry_consumption.py`
+  derives the RPAC `AuthoritySnapshot` from real repository/task state and
+  delegates every gate decision to the existing, unmodified
+  `simulate_invocation` coordinator. Explicit intent only: both flags are
+  required together; unknown target or missing task authority fails
+  closed with no fallback; ordinary `--compact` output is unchanged when
+  the flags are absent. `codex-ox`/custom agent identities produce
+  byte-identical semantic output with no provider/model inference. 32 new
+  tests; 0 attributable Fast Green regressions; runtime stays `Observed` /
+  `observe` / `unavailable`; `v0.4.3` unchanged. See
+  `docs/PHASE_149O_20L_7O_3S_2_PRODUCTION_DRY_LIFECYCLE_RUNTIME_ADAPTER_CONSUMPTION.md`.
 - Transitioned active task from Phase 149O.20L.7O.3S.1 to Idle: awaiting human decision post-149O.20L.7O.3S.1; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3S.1** — Independent End-to-End Deterministic Mock/Dry
   Runtime Adapter Verification (verification-only, 0 production source

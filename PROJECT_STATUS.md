@@ -2,39 +2,55 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3S.1 — Independent End-to-End Deterministic Mock/Dry
-Runtime Adapter Verification. **VERIFICATION-ONLY — COMPLETE. HUMAN
-DECISION REQUIRED FOR NEXT PHASE.** Independently re-derived RPAC-001 v1.0
-compliance for 3S's mock-v1 implementation from the contract, the 3R plan,
-current source, tests, and live runtime behavior — not by re-running 3S's
-own tests alone. Confirmed all 52 MOCK-V1-MANDATORY requirements VERIFIED,
-21 PURE-INVARIANT requirements VERIFIED-AS-INVARIANT, and 16
-REAL-RUNTIME-PREREQUISITE + 8 DEFERRED-EXTENSION requirements
-CORRECTLY-DEFERRED (full 97-row matrix). Fresh adversarial suite (18 tests,
-`tests/test_runtime_adapter_verification_3s1.py`) independently proved: no
-silent fallback, authority-field injection rejected at the schema level, a
-malicious always-allow enforcement double cannot bypass a Permission Broker
-DENY, zero subprocess/network calls (dynamically instrumented), and
-semantic determinism across independently constructed stacks. Independently
-confirmed the registry dual-surface split (`_plugins` vs.
-`_adapter_descriptors`) is contract-mandated (RPAC-REQ-050), and that `pcae
-runtime inspect`'s 0 plugins / 0 capabilities output is genuinely truthful —
-no production code path anywhere registers the mock adapter, so the mock
-adapter is implemented and tested but **not production-consumed**. 0
-BLOCKING, 0 MUST-FIX, 1 NON-BLOCKING (runtime-inspect exposure gap, not
-blocking per RPAC-REQ-056), 2 OBSERVATION findings. 0 attributable
-regressions (29 pre-existing/tooling-pollution failures independently
-triaged: 21 confirmed pre-existing via clean-baseline `git worktree`
-comparison, 8 caused by and repaired within this phase's own test tooling).
-No production source modified. Runtime remains `Observed` / `observe` /
+Phase 149O.20L.7O.3S.2 — Production Dry-Lifecycle Runtime Adapter
+Consumption. **IMPLEMENTATION — COMPLETE.** Human-approved Option A:
+wired the verified RPAC-001 mock/dry adapter into one explicit, narrow
+production consumer — `pcae session bootstrap --compact --dry-runtime
+--runtime-target <id>` — without enabling real execution. PRE-3S.2
+production consumers: 0 (confirmed by grep before any source change).
+New `src/pcae/core/runtime_dry_consumption.py` derives the RPAC
+`AuthoritySnapshot` from real PCAE-owned repository/task state and
+delegates all governance/gate logic to the existing, unmodified
+`simulate_invocation` coordinator, `RuntimeAdapterResolver`, and
+`MockDryRuntimeAdapter` — no adapter business logic in the CLI or
+command layer. Explicit-intent only: both `--dry-runtime` and an exact
+`--runtime-target` (one of the three known mock-v1 fixture IDs) are
+required together; unknown target or missing active-task authority fails
+closed with no fallback; the ordinary `--compact` prompt-only path is
+byte-for-byte unchanged when the flags are absent. `codex-ox` and custom
+agent identities produce byte-identical semantic output; neither gains
+provider/model inference. 32 new tests (core service layer + CLI
+surface) plus one phase-attributable, bounded repair to a 3S.1 test whose
+premise ("mock adapter not yet CLI-exposed") this phase's objective
+intentionally supersedes — the replacement test preserves the underlying
+command-zone-architecture invariant. 0 BLOCKING, 0 MUST-FIX. 0
+attributable Fast Green regressions (2 pre-existing PB-suite failures and
+5 pre-existing `tasks/TODO.md`-staleness failures both confirmed
+unrelated via clean-baseline `git stash` re-run). No production source
+mutation by the runtime path; evidence confined to gitignored
+`.pcae/runtime-invocations/`. Runtime remains `Observed` / `observe` /
 `unavailable`; `v0.4.3` unchanged; no real adapter, subprocess, network,
 credential, release, or execution activation. Real-runtime readiness: NO.
-Recommended next (ranked, evidence-derived): **Option A** — wire the
-verified mock/dry adapter into an explicit production dry-lifecycle
-consumer (not begun; human decision required). See
-`docs/PHASE_149O_20L_7O_3S_1_INDEPENDENT_END_TO_END_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_VERIFICATION.md`.
+Recommended next: **149O.20L.7O.3S.2.1** — Independent End-to-End
+Production Dry-Lifecycle Runtime Adapter Consumption Verification (not
+begun; human decision required). See
+`docs/PHASE_149O_20L_7O_3S_2_PRODUCTION_DRY_LIFECYCLE_RUNTIME_ADAPTER_CONSUMPTION.md`.
 
 ## Prior Phase
+
+Phase 149O.20L.7O.3S.1 — Independent End-to-End Deterministic Mock/Dry
+Runtime Adapter Verification. **VERIFICATION-ONLY — COMPLETE.**
+Independently re-derived RPAC-001 v1.0 compliance for 3S's mock-v1
+implementation from the contract, the 3R plan, current source, tests, and
+live runtime behavior — not by re-running 3S's own tests alone. Confirmed
+all 52 MOCK-V1-MANDATORY requirements VERIFIED, 21 PURE-INVARIANT
+requirements VERIFIED-AS-INVARIANT, and 16 REAL-RUNTIME-PREREQUISITE + 8
+DEFERRED-EXTENSION requirements CORRECTLY-DEFERRED (full 97-row matrix).
+Confirmed the mock adapter was implemented and tested but **not
+production-consumed** — closed by 3S.2 above. See
+`docs/PHASE_149O_20L_7O_3S_1_INDEPENDENT_END_TO_END_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_VERIFICATION.md`.
+
+## Prior Prior Phase
 
 Phase 149O.20L.7O.3S — Deterministic Mock/Dry Runtime Adapter
 Implementation. Implemented the RPAC-001 v1.0 mock-v1 vertical slice frozen
