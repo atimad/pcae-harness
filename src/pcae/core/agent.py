@@ -94191,6 +94191,25 @@ def build_rollback_execution(
 
     file_plan = [r["path"] for r in per.get("file_results", []) if r.get("outcome") == "success"]
     divergence = _rer_check_divergence(root, ecp, file_plan)
+    # Phase 149O.20L.7O.3M -- Rollback Readiness / Evidence Automatic
+    # Consumption Architecture and Integration: this preparation evidence
+    # (file_plan + divergence_check) is already computed unconditionally,
+    # for every non-early-error invocation of this function, dry_run or
+    # not, and is already consumed internally below (it gates the
+    # divergence-conflict short-circuit) and already persisted verbatim
+    # inside the RollbackExecutionRecord (`record["file_plan"]`,
+    # `record["divergence_check"]`). Prior to this phase it was omitted
+    # from several of this function's *returned*/printed result dicts
+    # even though it had already been computed and already gated the
+    # outcome -- an operator had to separately run `pcae rollback-
+    # execution show <rer_id>` to see evidence that already determined
+    # their own command's result. `_EVIDENCE_SUMMARY` below is merged,
+    # additively and non-authoritatively, into every terminal return of
+    # this function from this point on (informational only; it never
+    # changes any existing gating decision -- see EXECUTION_ROLLBACK_
+    # RECORD_ADVISORY and `execution_allowed: False`, both already
+    # present in every branch and untouched by this phase).
+    _evidence_summary = {"file_plan": file_plan, "divergence_check": divergence}
 
     if dry_run:
         dry_run_result = {
@@ -94237,6 +94256,7 @@ def build_rollback_execution(
             "execution_allowed": False,
             "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
             "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+            "file_plan": file_plan,
         }
 
     # Phase 149O.18D -- Mandatory Consumption Boundary (HMRC-REQ-066):
@@ -94333,6 +94353,7 @@ def build_rollback_execution(
                 "execution_allowed": False,
                 "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
                 "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+                **_evidence_summary,
             }
 
     # Phase 149O.20L.7O.3F -- Permission Broker Rollback Default-Path
@@ -94373,6 +94394,7 @@ def build_rollback_execution(
                 "execution_allowed": False,
                 "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
                 "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+                **_evidence_summary,
             }
 
     status_by_path = {fc["path"]: fc["status"] for fc in divergence["file_checks"]}
@@ -94452,6 +94474,7 @@ def build_rollback_execution(
         "execution_allowed": False,
         "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+        **_evidence_summary,
     }
     if hatp_authority is not None:
         result["hatp_authority"] = hatp_authority

@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3M** — Rollback Readiness / Evidence Automatic
+  Consumption Architecture and Integration: re-derived the current
+  rollback architecture from source (not inherited summaries) and
+  found that the "prepare evidence → consume internally → stop if
+  invalid → Permission Broker → effect" automation this phase's brief
+  targets was already the exact production behavior of a real (non-
+  `--dry-run`) `pcae rollback --per-id X` invocation, released in
+  v0.4.1 (`149O.20L.7O.3F`) — `file_plan`/`divergence_check` are
+  computed unconditionally regardless of `--dry-run` and already gate
+  the divergence short-circuit before either authority gate. No
+  existing typed "readiness" concept was found anywhere in `src/pcae`
+  (re-confirmed exhaustively); a new one was correctly not invented. A
+  materially larger candidate — proactively persisting a readiness
+  artifact at `pcae promote`-completion time — was considered and
+  rejected as requiring a new freshness/identity contract this phase
+  does not have authority to invent (staleness hazard: repository
+  state can drift between promotion and an eventual rollback). This
+  phase's one narrow, additive production change: surface the
+  already-computed, already-consumed, already-persisted evidence
+  (`file_plan`/`divergence_check`) directly in every terminal result
+  `build_rollback_execution` returns (`src/pcae/core/agent.py`) and
+  print it in `pcae rollback`'s human-readable output
+  (`src/pcae/commands/agent.py`) — closing the gap where an operator
+  previously needed a second command (`pcae rollback-execution show`)
+  to see evidence that had already gated their own command's outcome.
+  No new type, schema, or persistence added; Permission Broker
+  sequencing, HATP isolation, human authority, and runtime
+  (`Observed`/`observe`/`unavailable`) all unchanged and independently
+  re-verified. New 18-test suite
+  (`tests/test_phase_149o_20l_7o_3m_rollback_readiness_evidence_automatic_consumption.py`),
+  all passing; rollback/Permission Broker/mutation-permission
+  regressions (562 tests combined) and v0.4.2 RI-attachment smoke (46
+  tests) all pass unweakened; 0 attributable Fast Green regressions.
+  Recommends `149O.20L.7O.3M.1` (independent end-to-end verification),
+  not begun.
+
 - **Phase 149O.20L.7O.3L** — PCAE v0.4.2 Release Hardening: prepared a
   frozen, reproducible `v0.4.2` release candidate (commit `bc7935f4`)
   implementing `3K`'s selected Option B (ship `3J`'s attachment-only RI

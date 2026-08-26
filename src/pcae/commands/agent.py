@@ -16291,6 +16291,13 @@ def run_rollback(args: argparse.Namespace) -> int:
             print(f"  blocking_paths: {result['blocking_paths']}")
         if result.get("rer_id"):
             print(f"  rer_id: {result['rer_id']}")
+        # Phase 149O.20L.7O.3M: surface the same preparation evidence
+        # (file_plan / divergence_check) that already gated this outcome,
+        # informational only -- mirrors the --dry-run branch's presentation.
+        if result.get("file_plan") is not None:
+            print(f"  file_plan:      {result['file_plan']}")
+        if result.get("divergence_check") is not None:
+            print(f"  divergence_check: {result['divergence_check']}")
         print()
         print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
         return 1
@@ -16302,6 +16309,12 @@ def run_rollback(args: argparse.Namespace) -> int:
     print(f"  rollback_executed: {result['rollback_executed']}")
     for fr in result["file_results"]:
         print(f"    {fr['path']}: {fr['outcome']}")
+    # Phase 149O.20L.7O.3M: surface the same preparation evidence used
+    # to gate this outcome, informational only (never re-derives or
+    # replaces the RollbackExecutionRecord, which remains the canonical
+    # persisted artifact).
+    if result.get("divergence_check") is not None:
+        print(f"  divergence_check:  {result['divergence_check']}")
     print()
     print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
     return 0 if result["status"] in ("completed", "partial") else 1

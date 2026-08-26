@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3M — Rollback Readiness / Evidence Automatic
+Consumption Architecture and Integration. **BOUNDED ARCHITECTURE-PLUS-
+INTEGRATION, NARROWED ON RE-DERIVATION.** Re-derived the current
+rollback architecture from source (not inherited `3I` summaries) and
+found the "prepare evidence → consume internally → stop if invalid →
+Permission Broker → effect" automation the governing brief targets was
+already the exact production behavior of a real (non-`--dry-run`)
+`pcae rollback --per-id X` invocation, released in v0.4.1
+(`149O.20L.7O.3F`): `file_plan`/`divergence_check` are computed
+unconditionally regardless of `--dry-run` and already gate the
+divergence short-circuit before either authority gate. No existing
+typed "readiness" concept exists anywhere in `src/pcae` (re-confirmed
+exhaustively); none was invented. A materially larger candidate —
+proactively persisting a readiness artifact at `pcae promote`-
+completion time — was considered and rejected as requiring a new
+freshness/identity contract this phase has no authority to invent
+(staleness hazard across the promotion-to-rollback time gap). This
+phase's one narrow, additive production change: surface the already-
+computed, already-consumed, already-persisted evidence
+(`file_plan`/`divergence_check`) directly in every terminal result
+`build_rollback_execution` returns and in `pcae rollback`'s printed
+output — closing the gap where an operator previously needed a second
+command (`pcae rollback-execution show`) to see evidence that had
+already gated their own command's outcome. No new type, schema, or
+persistence added; Permission Broker sequencing, HATP isolation,
+human authority, and runtime (`Observed`/`observe`/`unavailable`) all
+unchanged and independently re-verified. See
+`docs/PHASE_149O_20L_7O_3M_ROLLBACK_READINESS_EVIDENCE_AUTOMATIC_CONSUMPTION_ARCHITECTURE_AND_INTEGRATION.md`
+and the canonical phase-completion report for the full evidence trail,
+production diff, test suite, and Fast Green attribution. Recommends
+`149O.20L.7O.3M.1` (independent end-to-end verification); not begun.
+
+## Prior Phase
+
+Phase 149O.20L.7O.3L.1 — publish v0.4.2 release-notes header
+correction. **PUBLICATION-SUPPORT DOCUMENTATION FIX ONLY.** Corrected
+`docs/RELEASE_NOTES_V0_4_2.md`'s status line from release-candidate/
+not-yet-published to published, pinned to the `v0.4.2` release
+candidate commit `bc7935f4bb86ea7f6ade823a4e63ed9c9cc0a0c4`. No
+substantive release-notes content, `src/pcae`, version, build-config,
+tag, or artifact change. `v0.4.2` remains the current public release.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3L — PCAE v0.4.2 Release Hardening.
 **RELEASE-CANDIDATE PREPARATION ONLY — NO PUBLICATION PERFORMED.**
 Prepared a frozen, independently-verified `v0.4.2` release candidate
