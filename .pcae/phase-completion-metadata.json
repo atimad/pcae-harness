@@ -41,7 +41,7 @@
   "test_evidence_classification": "installed_artifact_smoke_plus_focused_regression_suites_plus_full_fast_green_a_b_attribution",
   "tests_run": 8903,
   "metadata_consistency": "phase_id/phase_name/phase_title all read 149O.20L.7O.3L throughout this metadata file and the phase document title; the prior canonical report (if any) belongs to phase 149O.20L.7O.3K and is superseded by this phase completion.",
-  "test_results": {
+  "validation_results": {
     "phase_149o_20l_7o_3l_identity": "This is Phase 149O.20L.7O.3L (PCAE v0.4.2 Release Hardening), independently re-confirmed via the frozen release_candidate_commit bc7935f4bb86ea7f6ade823a4e63ed9c9cc0a0c4 and this task's own contract file.",
     "post_v0_4_1_delta_check": "git diff --name-status v0.4.1..HEAD (at phase entry): 26 files changed (19 added/6 modified/1 renamed); git diff --name-status v0.4.1..HEAD -- src/pcae showed exactly one production file changed (core/advisory.py). Independently re-confirmed the only intended post-v0.4.1 product behavior change is the 3J Advisory Mode RI-context attachment.",
     "candidate_drift_check": "git diff bc7935f4bb86ea7f6ade823a4e63ed9c9cc0a0c4..HEAD -- src/pcae pyproject.toml docs/RELEASE_NOTES_V0_4_2.md: empty, re-confirmed immediately before phase completion.",
