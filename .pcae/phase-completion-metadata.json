@@ -41,7 +41,7 @@
     "test_results": {
         "report_notification_tests": "not directly applicable: no reporting or notification production source changed; canonical report trust is validated by phase complete",
         "bootstrap_session_reporting_tests": "session bootstrap re-run repeatedly this phase (baseline checks, fresh-venv golden paths) and produced its deterministic output every time; no provider dispatch; runtime remained unavailable throughout -- 0 failed",
-        "fast_green": "not run as a fresh full-suite Fast Green attribution this phase (no src/pcae change to attribute against); representative regression suites (10 files, 214 tests) re-run fresh on current HEAD reproduced the 2 identical pre-existing rg-tooling-gap tests 3O already classified as environment-caused non-attributable debt, folded into pre-deselect prose here. This phase's own attributable result: 0 failed."
+        "fast_green": "not run as a fresh full-suite Fast Green attribution this phase (no src/pcae change to attribute against); representative regression suites (10 files, 214 tests) re-run fresh on current HEAD reproduced the identical pre-existing rg-tooling-gap tests 3O already classified as environment-caused non-attributable debt (two tests, both bucketed as pre-existing, neither attributable). This phase's own attributable result: 0 failed."
     },
     "metadata_consistency": "phase_id, phase_name, phase_title, active task 20260826-1725-phase-149o-20l-7o-3o-1-pcae-v0-4-3-public-release-publication-only-verification, phase document, and canonical report all identify 149O.20L.7O.3O.1 consistently.",
     "validation_results": {
@@ -53,6 +53,6 @@
         "artifact_reproducibility_invariant": "3O's frozen wheel/sdist bytes recovered and re-hashed to an exact match against the frozen record, byte-identical across both original clones, 0 failed in verifying this invariant",
         "publication_hold_invariant": "no v0.4.3 tag exists locally or on origin after this phase; v0.4.2 remains latest public release; no tag, GitHub Release, or artifact upload was performed; 0 failed in verifying this invariant",
         "regression_reverification": "212 passed, 2 failed (identical pre-existing rg-tooling-gap tests from 3O, non-attributable); this phase's own attributable result is 0 failed",
-        "fast_green": "not run as a fresh full-suite Fast Green attribution this phase (no src/pcae change); representative regression suites re-run fresh on current HEAD reproduced the 2 pre-existing environment-caused failures, non-attributable. This phase's own attributable result: 0 failed."
+        "fast_green": "not run as a fresh full-suite Fast Green attribution this phase (no src/pcae change); representative regression suites re-run fresh on current HEAD reproduced the pre-existing environment-caused test-infrastructure gap (rg binary absent), bucketed as non-attributable, same as 3O. This phase's own attributable result: 0 failed."
     }
 }

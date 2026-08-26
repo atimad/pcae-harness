@@ -1,59 +1,122 @@
-# Phase 149O.20L.7O.3N.2 Complete — Deep Repository-Wide Capability Discovery and Consumption-Gap Audit
+# Phase 149O.20L.7O.3O.1 Complete — PCAE v0.4.3 Public Release
 
-**Verdict: READ-ONLY AUDIT — COMPLETE. NO `src/pcae` MODIFIED.**
+**Verdict: PUBLICATION READY — VERIFICATION COMPLETE. NO PUBLICATION PERFORMED. HUMAN
+PUBLICATION AUTHORIZATION REQUIRED AND ABSENT.**
 
-Performed a bottom-up (not architecture-chapter-organized) repository-wide sweep of all 114
-`core/*.py` modules and 60 `commands/*.py` CLI modules (416 `.py` files under `src/pcae`),
-triggered by a concern that prior S/M-consumption audits, organized around known architecture
-chapters, might have missed a mature capability — named example: prompt writing / prompt
-generation.
+Independently re-verified `149O.20L.7O.3O`'s frozen `v0.4.3` release candidate
+(`63580893b1de4782a694ab802ff7bdebdf29b0e6`) rather than trusting the governing-brief
+summary alone, then stopped at the explicit human-authorization checkpoint before any
+irreversible publication action, per this phase's own governing brief (publication-only,
+no repair-and-publish).
 
-## Key finding — prompt writing is two distinct subsystems
+## Baseline and candidate verification
 
-1. `build_bootstrap_prompt` (`src/pcae/core/context.py`, also `commands/phase.py`/
-   `commands/session.py`) is real, deterministic, local, and already **production-consumed** —
-   it is exactly what `pcae session bootstrap --compact` prints, called from inside the
-   production session-bootstrap code path itself. The only remaining manual step (a human
-   copying the output into a new agent session) is a deliberate trust/authority boundary,
-   since PCAE has no runtime execution capability — not a missing-generation gap.
-2. A previously-undocumented (in current architecture-status prose) "Phase 45F–45O"
-   prompt-generation/adaptation/validation/governance/rendering/approval/proposal chain in
-   `core/agent.py`, CLI-exposed via `pcae agent prompt-*`, is **self-declared non-production**
-   by its own artifacts (`readiness_status: "partially_ready"` with explicit listed blockers;
-   hardcoded stale synthetic data) with zero non-CLI, non-self production callers. It fails
-   the maturity precondition for a genuine consumption-gap candidate.
+Baseline invariants held at phase entry: clean tree, `HEAD == origin/main`, `0` commits
+ahead, no local/remote `v0.4.3` tag, `v0.4.2` tag unchanged
+(`bc7935f4bb86ea7f6ade823a4e63ed9c9cc0a0c4`), `pcae health`/`check`/`status coherence`
+all healthy/passed/coherent, `pcae doctor task-memory` warnings limited to pre-existing
+`tasks/DONE.md` sync debt, `pcae push check` clean, `pcae runtime inspect` Observed /
+observe / unavailable, Telegram configured. `release_candidate_commit
+63580893b1de4782a694ab802ff7bdebdf29b0e6` independently confirmed against the `3O`
+canonical phase document. Candidate-to-HEAD drift on `src/pcae`, `pyproject.toml`, and
+`docs/RELEASE_NOTES_V0_4_3.md` was empty — only `3N.2`'s later docs/status/task-lifecycle
+commits exist past the candidate. Version independently confirmed `0.4.3` in both
+`pyproject.toml` and `src/pcae/__init__.py`; no version edits made this phase.
 
-## Broader sweep
+## Build reproducibility
 
-No other genuine S/M consumption-gap candidate was found. One true zero-caller module
-(`core/runtime_enforcement_safety_authorization.py`) is a deliberate constants-only
-shared-vocabulary contract, correctly disconnected. The pre-existing RI-feeds-Advisory-only
-boundary was reconfirmed unchanged via a fresh import sweep, not reopened (consistent with
-`3K`'s prior decision). No orphaned mature context builder, planner, or reviewer was found
-beyond what prior phases already catalogued.
+`3O`'s exact frozen wheel (`pcae_harness-0.4.3-py3-none-any.whl`, 2,352,742 bytes,
+`sha256:e42ca72c136e95fbb179582c3058b1d6c2001edbbbe80f61af8c45002a8ff5e4`) and sdist
+(`pcae_harness-0.4.3.tar.gz`, 2,054,469 bytes,
+`sha256:8a088983971b19d6e16f0e6ce3d7a9aa69fa27e987b574c4a109e74589977276`) bytes were
+recovered from a still-present local build directory (two independent clean-clone builds
+from `3O`) and independently re-hashed to an exact match against the frozen record,
+byte-identical (`cmp`) across both original clones. **Reproducibility: PASS**, reconfirmed
+not merely re-cited. Re-scanned both artifacts for contamination (`.git`,
+`.claude/worktrees`, `deepseek`, `.env`, `credential`, `.key`, `__pycache__`, `.venv`):
+only the same two legitimate source-filename false positives `3O` found; no contamination.
 
-## Exhaustion verdict
+## Installed-artifact verification
+
+Installed the frozen wheel alone into a fresh venv: version `0.4.3` confirmed, golden
+path (`init` → `session bootstrap` → `task new` → `intake from-files` → `ACCEPTED`,
+`execution_allowed: False`, `promotion_executed: False` → `intake list`) passed. Repeated
+for the frozen sdist alone in a separate fresh venv: same result.
+
+Re-ran `3O`'s own rollback-evidence-visibility smoke-construction script fresh against
+the installed wheel's real CLI (subprocess, not in-process): dry-run (`file_plan` visible,
+no `AUTHORIZED` claim), a real rollback with **zero prior `--dry-run` call**
+(`COMPLETED`, `divergence_check` visible, target file removed), and a divergence-block
+(`file_plan`/`divergence_check` visible, `execution_allowed: false`, target file
+unchanged) all reproduced identically to `3O`'s frozen record. `pcae runtime inspect`
+before/after: Observed / observe / unavailable, unchanged.
+
+## Regression suites
+
+Ran the representative Permission Broker, RI attachment, Plan B+, corrupt-store,
+intake/Codex-Ox, and `3M`/`3M.1` rollback-evidence suites (10 files, 214 tests) fresh on
+current `HEAD`: 212 passed. The remaining two are the identical pre-existing
+`rg`-tooling-gap tests `3O` already disclosed (this sandbox lacks a real `ripgrep`
+binary on `PATH`), same root cause, same non-attributable classification.
+**ACCEPTED-DEBT, not a regression.**
+
+## Release notes truth audit
+
+`docs/RELEASE_NOTES_V0_4_3.md` reviewed in full: correctly states rollback preparation
+was already automatic before `v0.4.3`, this release is evidence-surfacing/observability
+only, no new authority or Permission Broker semantics claims, no prompt-generation-
+integration claims.
+
+## Mature-capability audit state
 
 ```
-MATURE S/M CONSUMPTION GAPS:
-NONE
-PRIOR EXHAUSTION CONCLUSION:
-RECONFIRMED AFTER BOTTOM-UP AUDIT
+MATURE S/M CAPABILITY CONSUMPTION PROGRAM:
+EXHAUSTED AFTER BOTTOM-UP AUDIT
 ```
 
-Scope-honesty disclosure: a literal field-by-field read of every typed result class across all
-416 files was not performed within this phase's budget; this is disclosed rather than
-overclaimed exhaustiveness.
+Scope-honesty caveat preserved: `3N.2`'s audit did not literally field-by-field inspect
+every typed result across all 416 files; this is a bottom-up discovery result, not a
+claim of mathematical completeness.
 
-## v0.4.3 release decision
+## Final blocker gate
 
-Recommend proceeding with **v0.4.3 publication** via `149O.20L.7O.3O.1` (requires separate
-explicit human authorization). v0.4.3 RC (`63580893b1de4782a694ab802ff7bdebdf29b0e6`) remains
-unchanged, still unpublished, no tag. Article remains STOPPED; private research repository not
-inspected/modified.
+**BLOCKING = 0. MUST-FIX = 0.**
 
-See `docs/PHASE_149O_20L_7O_3N_2_DEEP_REPOSITORY_WIDE_CAPABILITY_DISCOVERY_AND_CONSUMPTION_GAP_AUDIT.md`
-for the full 55-section audit trail, matrices, and falsification record.
+## Human authorization checkpoint
+
+No explicit human authorization to publish PCAE `v0.4.3` was present in the active
+session. The governing phase directive itself states it is not authorization. Per the
+governing brief: **STOP. Nothing irreversible was done.** No annotated tag was created,
+no tag was pushed, no GitHub Release was created, no artifact was uploaded, no PyPI
+action was performed.
+
+## Verdict block
+
+```
+PCAE v0.4.3:
+PUBLICATION READY
+RELEASE THEME:
+ROLLBACK EVIDENCE VISIBILITY
+RELEASE CANDIDATE:
+63580893b1de4782a694ab802ff7bdebdf29b0e6
+BUILD REPRODUCIBILITY:
+VERIFIED
+ROLLBACK EVIDENCE VISIBILITY:
+VERIFIED
+MATURE S/M CONSUMPTION PROGRAM:
+EXHAUSTED AFTER BOTTOM-UP AUDIT
+BLOCKING:
+0
+MUST-FIX:
+0
+RUNTIME:
+Observed / observe / unavailable
+HUMAN PUBLICATION AUTHORIZATION:
+REQUIRED
+```
+
+See `docs/PHASE_149O_20L_7O_3O_1_PCAE_V0_4_3_PUBLIC_RELEASE.md` for the full 22-section
+verification trail.
 
 ## Governance
 
@@ -68,15 +131,21 @@ for the full 55-section audit trail, matrices, and falsification record.
 
 ## No-Go confirmations
 
-No `src/pcae` file was modified. No test, contract, schema, version, or build-config file was
-modified. No candidate was implemented (zero confirmed). No v0.4.3 tag was created or pushed.
-No GitHub Release or PyPI upload was performed. No runtime execution was enabled. No Permission
-Broker/HATP/HMIC/Class-B authority was altered. No CLTR cutover occurred. No hac-dell host was
-mutated. No private research repository was inspected, modified, or imported from. No article
-work was resumed. No `149O.20L.7O.3O.1` work was begun.
+No `src/pcae` file was modified. No test file was modified. No contract or schema was
+modified. No version was changed. No build configuration was changed. No `v0.4.3` tag was
+created. No tag was pushed. No GitHub Release was created. No artifact was uploaded. No
+PyPI upload was performed. No repair-and-publish was performed on any discovered defect,
+because none was found. No prompt-generation integration was implemented. No provider/
+model execution was added. No runtime execution was enabled. No Permission Broker
+behavior was changed. No HATP/HMIC/Class-B authority was altered. No CLTR cutover
+occurred. No hac-dell host was mutated. No private `pcae-deepseek-research` repository
+was inspected, modified, or imported from. No article work was resumed; it remains
+STOPPED. No steps 31 through 45 of the governing brief were begun. No next phase was
+begun.
 
 ## Recommended next phase
 
-`149O.20L.7O.3O.1` — PCAE v0.4.3 Public Release (publication-only; requires explicit human
-authorization before tag push, GitHub Release creation, or artifact upload; PyPI remains
-separately unauthorized). Do not begin automatically.
+None initiated automatically. Awaiting explicit human publication authorization for
+`149O.20L.7O.3O.1`'s remaining steps (annotated tag creation, tag push, GitHub Release
+creation, exact frozen wheel/sdist upload, public verification), or a human decision to
+hold `v0.4.3` publication further.
