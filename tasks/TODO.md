@@ -11,6 +11,18 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149O.20L.7O.3P** (Post-Consumption Runtime / Provider /
+Trust-Boundary Architecture Reassessment, active, read-only architecture):
+reconstruct the current public runtime, provider, identity, permission,
+enforcement, process-supervision, and producer-neutral intake architecture
+directly from source; use the production bootstrap-prompt copy/paste boundary
+as the concrete probe; compare local CLI, API-provider, and deterministic dry
+adapter paths; recommend a replaceable-adapter architecture and the smallest
+contract-first next phase. No runtime/provider invocation, execution
+activation, production/test/contract/schema/version/build change, private
+research inspection, Dell mutation, or article work is authorized. Stop after
+3P for human decision.
+
 **Phase 149F** (Repository-Wide Mutation Permission Coverage Wave 1
 Implementation, completed, bounded production implementation) broker-wired
 AG1 (`commit_file_changes`), AG2 (`push_file_changes`), AG4

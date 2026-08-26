@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3P runtime/provider architecture selection
+  (2026-08-26).** Selected **Option C — hybrid trusted PCAE kernel plus
+  replaceable external runtime bridges**. The trusted kernel owns prompt,
+  task/repository, approval, target-selection, Permission Broker, final
+  Runtime Enforcement, invocation-record, audit, quarantine, and intake
+  bindings; bridges own transport-specific CLI/API mechanics only and
+  cannot authorize themselves or promote output. Keep Runtime Registry as
+  discovery metadata rather than an executable plugin container. Before any
+  real adapter, reconcile/fence all legacy public subprocess invocation paths:
+  current `Observed` / `observe` / `unavailable` runtime introspection is not
+  a repository-wide interlock. First later adapter should be deterministic
+  mock/dry. Recommend exactly `149O.20L.7O.3Q — Runtime Surface
+  Reconciliation and Runtime / Provider Adapter Contract Freeze`, remaining
+  architecture/contract-only. Human decision required; 3Q not begun.
+
 - **Phase 149O.20L.7O.3M.1 rollback-evidence adjudication
   (2026-08-26).** Fixed pre-`3M` execution proves `pcae rollback
   --per-id` already computed and consumed its PER-derived `file_plan` and

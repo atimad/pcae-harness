@@ -2,36 +2,48 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3O.2 — PCAE v0.4.3 Publication Execution
-(human-authorized). **PUBLICLY RELEASED. COMPLETE.** Explicit human
-authorization to publish was given in the active session, superseding
-`3O.1`'s STOP. Published `v0.4.3` from the frozen release candidate
-(`63580893b1de4782a694ab802ff7bdebdf29b0e6`) independently re-verified
-in `3O.1`: annotated tag `v0.4.3` created and pushed pinned exactly to
-the candidate commit (local tag object == remote tag object == wraps
-the candidate, not any later `3N.2`/`3O.1` reporting commit); GitHub
-Release published at
-`https://github.com/atimad/pcae-harness/releases/tag/v0.4.3` (Latest,
-not prerelease) using the verified release notes; only the frozen,
-unre-built wheel/sdist (`sha256:e42ca72c...8ff5e4` /
-`sha256:8a088983...977276`) were uploaded, hashes recomputed
-immediately pre-upload; public bytes downloaded back and re-hashed to
-an exact filename/size/hash match; fresh clean installs of both the
-public wheel and public sdist confirmed `__version__ == "0.4.3"` and
-passed the golden path; the public wheel's real CLI reproduced `3O`'s
-rollback-evidence-visibility smoke (dry-run, real rollback with no
-prior dry-run, divergence-block) identically; RI-attachment and
-bootstrap-prompt regressions both reproduced against the public
-install with no change in behavior. `v0.4.2` tag/Release/assets
-confirmed completely unchanged. Runtime confirmed `Observed` /
-`observe` / `unavailable` throughout. **BLOCKING = 0, MUST-FIX = 0.**
-PyPI: `NOT PUBLISHED`. Article remains STOPPED; private research
-repository not inspected/modified. See
-`docs/PHASE_149O_20L_7O_3O_2_PCAE_V0_4_3_PUBLICATION_EXECUTION.md` for
-the full publication trail. **Recommendation: none — stop after this
-phase; no next strategic chapter begun automatically.**
+Phase 149O.20L.7O.3P — Post-Consumption Runtime / Provider /
+Trust-Boundary Architecture Reassessment. **READ-ONLY ARCHITECTURE
+REASSESSMENT — COMPLETE. HUMAN DECISION REQUIRED.** Reconstructed the
+public runtime/provider/trust architecture directly from source using
+the production bootstrap-prompt copy/paste boundary as the concrete
+probe. Canonical Runtime truth remains `Observed` / `observe` /
+`unavailable`; `RuntimeRegistry` is a fresh, in-memory, metadata-only
+registry with 0 plugins, 0 capabilities, no loader/resolver, and no
+executable target. Prompt generation is production-consumed, while
+prompt dispatch lacks an immutable prompt/approval binding, explicit
+target resolution, live capability/auth facts, dispatch-permission
+consumer, final enforcement boundary, supervision/confinement,
+invocation record, and normalized result linkage to generic intake.
+**Critical architecture finding:** several public legacy command paths
+can invoke real subprocesses despite the canonical runtime being
+unavailable, and they do not share the canonical Runtime Registry,
+Permission Broker foundation, or Runtime Enforcement Coordinator as a
+common final authority boundary. Canonical unavailability is therefore
+not yet a repository-wide interlock. Recommended architecture: **hybrid
+trusted PCAE kernel plus replaceable external runtime bridges**; registry
+remains discovery metadata, bridges own transport only, and all returned
+change artifacts enter the existing producer-neutral intake path. First
+later adapter: deterministic mock/dry bridge. Exact recommended next
+phase: **149O.20L.7O.3Q — Runtime Surface Reconciliation and Runtime /
+Provider Adapter Contract Freeze** (architecture/contract only; not
+begun). `v0.4.3` remains current; no release, execution activation,
+provider/network/credential use, production/test/contract/schema/version/
+build change, Dell mutation, private-research access, or article work.
+See `docs/PHASE_149O_20L_7O_3P_POST_CONSUMPTION_RUNTIME_PROVIDER_TRUST_BOUNDARY_ARCHITECTURE_REASSESSMENT.md`.
 
 ## Prior Phase
+
+Phase 149O.20L.7O.3O.2 — PCAE v0.4.3 Publication Execution
+(human-authorized). **PUBLICLY RELEASED. COMPLETE.** Published `v0.4.3`
+from frozen release candidate
+`63580893b1de4782a694ab802ff7bdebdf29b0e6`; annotated tag, GitHub
+Release, frozen wheel/sdist upload, public-byte hash verification,
+fresh installs, and public smokes all completed. PyPI was not published.
+Runtime remained `Observed` / `observe` / `unavailable`. See
+`docs/PHASE_149O_20L_7O_3O_2_PCAE_V0_4_3_PUBLICATION_EXECUTION.md`.
+
+## Prior Phase (N-1)
 
 Phase 149O.20L.7O.3O.1 — PCAE v0.4.3 Public Release
 (publication-only, verification). **PUBLICATION READY — VERIFICATION
@@ -43,7 +55,7 @@ action performed, since no explicit authorization was present in that
 session. See
 `docs/PHASE_149O_20L_7O_3O_1_PCAE_V0_4_3_PUBLIC_RELEASE.md`.
 
-## Prior Phase (N-1)
+## Prior Phase (N-2)
 
 Phase 149O.20L.7O.3N.2 — Deep Repository-Wide Capability Discovery and
 Consumption-Gap Audit. **READ-ONLY AUDIT — COMPLETE. NO `src/pcae`
