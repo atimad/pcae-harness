@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260825-1830-idle-awaiting-next-governed-phase-post-149o-20l-7o-3c-3-2
+20260825-1947-idle-awaiting-next-governed-phase-post-149o-20l-7o-3c-4
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.2)
+Idle: awaiting next governed phase (post-149O.20L.7O.3C.4)
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.2)
+Idle: awaiting next governed phase (post-149O.20L.7O.3C.4)
 
 ## Allowed Files
 
@@ -43,9 +43,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.2)
 
 ## Allowed Zones
 
-- config
-- tasks
-- docs
+- TBD
 
 ## Forbidden Zones
 
@@ -90,4 +88,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-25T18:30:17.475748+02:00
+2026-08-25T19:47:43.619663+02:00

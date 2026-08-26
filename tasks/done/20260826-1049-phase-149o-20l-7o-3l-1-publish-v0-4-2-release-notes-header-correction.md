@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3L.1: publish v0.4.2 release-notes header correction
 
 ## Status
 
-active
+done
 
 ## Mode
 
