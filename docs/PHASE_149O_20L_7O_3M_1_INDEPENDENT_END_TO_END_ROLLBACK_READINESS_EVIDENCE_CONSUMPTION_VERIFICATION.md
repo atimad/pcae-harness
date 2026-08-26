@@ -400,9 +400,11 @@ The corrected pre-finalization comparison used phase entry `8907df05` and
 reported **339 raw failed nodes**, **9 raw collection errors**, **347
 baseline-reproduced exclusions**, **1 expected not-yet-pushed artifact**, **0
 environment exclusions**, and **0 phase-attributable failures**. The final
-checkpoint must reproduce those classifications with zero attributable
-failures; its candidate commit and artifact digest are canonical-metadata
-facts rather than hand-maintained narrative constants.
+checkpoint is authoritative for raw and environment-classification counts
+(including any candidate-only node that passes its recorded isolated rerun)
+and must report zero attributable failures. Its exact counts, candidate
+commit, and artifact digest are canonical-metadata facts rather than
+hand-maintained narrative constants.
 
 ## 32. Findings
 
