@@ -24,8 +24,11 @@ Execute the human-authorized publication of PCAE v0.4.3: annotated tag, GitHub R
 
 - CHANGELOG.md
 - PROJECT_STATUS.md
-- docs/RELEASE_NOTES_V0_4_3.md
 - docs/PHASE_149O_20L_7O_3O_2_PCAE_V0_4_3_PUBLICATION_EXECUTION.md
+- tasks/active/20260826-1740-phase-149o-20l-7o-3o-2-pcae-v0-4-3-publication-execution-human-authorized.md
+- tasks/done/20260826-1731-idle-awaiting-explicit-human-publication-authorization-post-149o-20l-7o-3o-1.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -34,6 +37,7 @@ Execute the human-authorized publication of PCAE v0.4.3: annotated tag, GitHub R
 
 ## Allowed Zones
 
+- docs
 - tasks
 - config
 
