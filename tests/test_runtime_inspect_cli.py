@@ -337,7 +337,10 @@ def test_runtime_introspection_module_unchanged_by_this_phase():
 def test_runtime_registry_remains_metadata_only():
     registry = RuntimeRegistry()
     ri_cli._build_snapshot(registry)
-    assert set(registry.__dict__.keys()) == {"_plugins"}
+    # Phase 149O.20L.7O.3S (RPAC-001 v1.0) adds `_adapter_descriptors` as a
+    # second inert metadata collection; `runtime inspect` construction still
+    # touches only plain dict state, never a callable/adapter reference.
+    assert set(registry.__dict__.keys()) == {"_plugins", "_adapter_descriptors"}
 
 
 def test_command_path_observation_still_has_exactly_four_entries():

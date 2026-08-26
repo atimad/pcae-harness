@@ -571,7 +571,10 @@ def module_imports() -> list[str]:
 
 
 def test_module_imports_only_stdlib(module_imports):
-    stdlib_allowed = {"__future__", "re", "dataclasses", "typing", "types"}
+    # Phase 149O.20L.7O.3S (RPAC-001 v1.0, RPAC-REQ-050) adds `hashlib`/`json`
+    # for RuntimeDescriptor.catalog_digest() -- both standard library, no
+    # dependency added.
+    stdlib_allowed = {"__future__", "re", "dataclasses", "typing", "types", "hashlib", "json"}
     for name in module_imports:
         top = name.split(".")[0]
         assert top in stdlib_allowed, f"non-stdlib import: {name}"

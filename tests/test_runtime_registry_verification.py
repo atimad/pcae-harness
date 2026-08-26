@@ -114,12 +114,15 @@ def test_plugin_descriptor_has_no_module_or_import_path_fields():
 
 
 def test_runtime_registry_has_no_callable_storage_attribute():
-    """RuntimeRegistry's only instance state is the plugin dict --
+    """RuntimeRegistry's instance state is plain data dicts only --
     verified by inspecting a fresh instance's own __dict__ rather than
-    trusting the source alone."""
+    trusting the source alone. Phase 149O.20L.7O.3S (RPAC-001 v1.0,
+    RPAC-REQ-050) adds `_adapter_descriptors` as a second inert metadata
+    collection beside `_plugins`; neither holds a callable."""
     registry = RuntimeRegistry()
-    assert set(registry.__dict__.keys()) == {"_plugins"}
+    assert set(registry.__dict__.keys()) == {"_plugins", "_adapter_descriptors"}
     assert isinstance(registry._plugins, dict)
+    assert isinstance(registry._adapter_descriptors, dict)
 
 
 def test_runtime_registry_internal_store_holds_only_plugin_descriptors():
