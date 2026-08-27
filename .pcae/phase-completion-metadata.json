@@ -31,6 +31,10 @@
     {
       "hash": "71e5f24b",
       "subject": "Phase 149O.20L.7O.3V.2: local-CLI real-runtime dispatch implementation planning"
+    },
+    {
+      "hash": "f3b5a9de",
+      "subject": "Phase 149O.20L.7O.3V.2: close task and enter decision hold"
     }
   ],
   "phase_id": "149O.20L.7O.3V.2",
