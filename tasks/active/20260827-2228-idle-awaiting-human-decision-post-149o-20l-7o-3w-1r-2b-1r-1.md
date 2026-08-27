@@ -25,6 +25,8 @@ Await explicit human authorization for exactly phase 149O.20L.7O.3W.1R.2B.1R.1.1
 - tasks/**
 - CHANGELOG.md
 - .pcae/session.json
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
