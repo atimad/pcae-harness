@@ -18,19 +18,19 @@
   ],
   "files_changed_count": 12,
   "governance_results": {
-    "pcae_health": "healthy before close; final close check pending",
+    "pcae_health": "healthy at final close",
     "pcae_check": "passed after verification",
     "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3V.1-attributable error",
-    "pcae_push_check": "pending governed publication",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; 0 plugins and 0 capabilities; unchanged at entry and pre-close",
     "pcae_status_coherence": "coherent after verification",
-    "telegram_runtime": "configured, enabled, outbound-ready; final completion dispatch pending"
+    "telegram_runtime": "configured, enabled, outbound-ready; final completion dispatch authorized"
   },
   "internal_evidence_coherence": "The independent verification document and 44 fresh tests consistently classify RIHAC complete, RIASC complete as normative schema only, PBRD incomplete/blocking, and RDGO contradictory/blocking. Five-member subject, seven freshness rules, twelve declared PB facts, eleven declared gates, eight declared durable items, and seven TOCTOU facts were reconstructed. Production schema/action/validator/RE/containment/adapter remain absent. Dry adapter_invocation remains unchanged.",
   "metadata_consistency": "Phase ID 149O.20L.7O.3V.1, verification baseline 60de4bda64af32e94a29039d10fdd96a811350dd, 3V phase-entry SHA 934e1f07fac798417c1b5a25d5b06214a5f62ab3, 3V freeze SHA 2060ebd411df664aac97e3987a922c77cb05ef6f, v0.4.3 identity, runtime posture, task, PROJECT_STATUS, verification document, metadata, and report agree.",
   "no_go_confirmation": "No production src/pcae source was modified.\nNo frozen contract was repaired.\nNo executable approval schema was added.\nNo approval store or validator was implemented.\nNo PB runtime_dispatch action was implemented.\nNo POL-005 rule was relaxed or removed.\nNo Runtime Enforcement or Shell Gate was activated.\nNo process, adapter, Codex, Claude, or external runtime was launched.\nNo credential was accessed and no network egress was enabled.\nNo dry runtime, runtime inspect, HATP, HMIC, Class-B, or CLTR behavior changed.\nNo release, article, private-research, or Dell operation occurred.\nNo execution availability was enabled.",
   "origin_main_head": "60de4bda64af32e94a29039d10fdd96a811350dd",
-  "origin_main_head_count": 1,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "7806927f",
@@ -40,7 +40,7 @@
   "phase_id": "149O.20L.7O.3V.1",
   "phase_name": "Independent Verification of Local-CLI Runtime Dispatch Authority and Permission Contract Freeze",
   "phase_title": "Independent Verification of Local-CLI Runtime Dispatch Authority and Permission Contract Freeze",
-  "pushed_status": "not_pushed",
+  "pushed_status": "clean",
   "recommended_next_phase": "149O.20L.7O.3V.1R — Local-CLI Runtime Dispatch Authority and Permission Contract Reconciliation and Repair. Contract-only; human decision required; do not begin implementation.",
   "status": "completed",
   "summary": "Phase 149O.20L.7O.3V.1 independent verification is complete. Verification baseline: 60de4bda64af32e94a29039d10fdd96a811350dd. 3V phase-entry/freeze: 934e1f07fac798417c1b5a25d5b06214a5f62ab3 / 2060ebd411df664aac97e3987a922c77cb05ef6f. v0.4.3 unchanged. Runtime Observed/observe/unavailable. 3V close discrepancy: STALE REPORT WORDING ONLY. RIHAC-001 v1.0 COMPLETE; RIASC-001 v1.0 COMPLETE AS NORMATIVE SCHEMA with 16 fields and no production validator; PBRD-001 v1.0 INCOMPLETE/BLOCKING; RDGO-001 v1.0 CONTRADICTORY/BLOCKING. One-shot authority, exact five-member subject, seven freshness rules, consumption/uncertainty/no-auto-retry, POL-004/HUMAN_REVIEW nuance, DENY > HUMAN_REVIEW > ALLOW, POL-005 unchanged, effect walls, dry compatibility, eleven declared gates, eight declared durable items, seven TOCTOU facts, CHGR/IWC/TAM boundaries, artifact separation, at-most-once honesty, API/network exclusion, two prerequisite MUST-FIX items, and runtime-inspect limitation were verified. Blocking B-1: RDGO reverses RPAC gate order. Blocking B-2: attempt_id/idempotency_key binding omitted. Fresh tests: 44 passed. Production source modified: NO. Execution activated: NO. External runtime: NONE. Dry path unchanged. Article stopped. Private research untouched. Next: contract-only 3V.1R repair; human decision required.",
