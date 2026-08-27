@@ -21,13 +21,13 @@
   ],
   "files_changed_count": 15,
   "governance_results": {
-    "pcae_health": "healthy at entry; final close check required",
+    "pcae_health": "healthy at final close",
     "pcae_check": "passed after contract freeze",
     "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3V-attributable error",
     "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; 0 plugins and 0 capabilities; unchanged at entry",
     "pcae_status_coherence": "coherent after contract freeze",
-    "telegram_runtime": "configured, enabled, and outbound-ready at entry; final status required"
+    "telegram_runtime": "configured, enabled, outbound-ready; final completion summary and report delivered successfully"
   },
   "internal_evidence_coherence": "The four contracts, 66-section phase document, six matrices, PROJECT_STATUS.md, CHANGELOG.md, task memory, metadata, and canonical report use one vocabulary and identity model: RIHAC-001 v1.0, PBRD-001 v1.0, RDGO-001 v1.0, RIASC-001 v1.0; invocation_id; repository_identity; task_id; lifecycle_context; runtime_target_id; prompt_hash; human_authority_binding; PB and RE digests; dispatch_attempted. Artifact families remain separate and link only by IDs/digests. Scope, one-shot authority, freshness, consumption/crash/retry, PB/HUMAN_REVIEW/POL-005 semantics, eleven gates, eight durable items, seven TOCTOU facts, both MUST-FIX dispositions, runtime-inspect limitation, API/network boundary, and unchanged dry/runtime/release state agree. No contradiction with the primary contracts or dry path was found.",
   "metadata_consistency": "Phase ID 149O.20L.7O.3V, title, phase-entry SHA 934e1f07fac798417c1b5a25d5b06214a5f62ab3, RPAC-001 v1.0, contract IDs/versions, local-CLI-only scope, runtime Observed/observe/unavailable, v0.4.3 identity, task, PROJECT_STATUS, phase document, metadata, and report are consistent.",

@@ -29,7 +29,7 @@ provider contract freeze is **NOT AUTHORIZED / NOT READY** because network-
 egress permission architecture is unresolved. Both 3S.2.1 MUST-FIX findings
 remain unrepaired with exact safe repair points; runtime inspect remains
 `TRUTHFUL_WITH_LIMITATION` and must be repaired before a first real adapter
-registration/availability claim. Recommended next: exactly
+registration/availability claim. Recommended next phase: exactly
 **149O.20L.7O.3V.1 — Independent Verification of Local-CLI Runtime Dispatch
 Authority and Permission Contract Freeze**; human decision required, not
 begun. See

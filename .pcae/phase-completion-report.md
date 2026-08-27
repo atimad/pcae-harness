@@ -371,9 +371,10 @@ Phase-owned commits begin with:
 - `2060ebd4` — freeze local CLI runtime authority and permission contracts.
 - `53bb5fe0` — add completion evidence metadata.
 
-Final governed publication requires and records a clean push, zero
-`origin/main..HEAD`, unchanged runtime/release state, and complete canonical
-report evidence. No force, no `--no-verify`, and no history rewrite are used.
+Final governed publication recorded a clean push, zero `origin/main..HEAD`,
+unchanged runtime/release state, and complete canonical report evidence.
+Telegram summary/document delivery succeeded. No force, no `--no-verify`, and
+no history rewrite were used.
 
 ## Final verdict
 
