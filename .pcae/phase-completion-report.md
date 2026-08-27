@@ -1,40 +1,37 @@
-# Phase 149O.20L.7O.3W Complete — Runtime Invocation Authority + PB Dispatch Request Foundation Implementation
+# Phase 149O.20L.7O.3W.1 Complete — Independent End-to-End Runtime Invocation Authority + PB Dispatch Request Foundation Verification
 
-**Verdict: AUTHORITY + PB DISPATCH FOUNDATION IMPLEMENTED. POL-005 REMAINS
-UNCHANGED HARD DENY. RUNTIME ENFORCEMENT AND SHELL GATE NOT ACTIVATED.
-HUMAN DECISION REQUIRED FOR NEXT PHASE.**
+**Verdict: NOT VERIFIED. Seven BLOCKING authority/PB trust-boundary
+findings. Runtime remains unavailable; POL-005 remains hard DENY.**
 
-Phase ID: `149O.20L.7O.3W`. Status: completed. Completeness: complete.
+Phase ID: `149O.20L.7O.3W.1`. Status: completed. Completeness: complete.
 
-Baseline SHA: `daebfdbb2d8664518c51e904b64aad555195d626`. Phase commits:
-`6e765341`, `1d53ed19`, `289bd75d`, `ea50a0dd`, `2218995a`.
+Verification entry: `0106c3c2d6f0ee740b7ffca97d4ffd79f6494022`.
+Fixed baseline: `daebfdbb2d8664518c51e904b64aad555195d626`.
+Fixed candidate: `289bd75d2d9843e95f336bcba2eed35bc414adb7`.
+Release `v0.4.3` remains at
+`63580893b1de4782a694ab802ff7bdebdf29b0e6`.
 
-v0.4.3 unchanged at `63580893b1de4782a694ab802ff7bdebdf29b0e6`. Runtime:
-`Observed` / `observe` / `unavailable`, unchanged throughout.
+Fresh independent tests: 83 passed. Phase 3W implementation tests: 190
+passed. Fixed-SHA ordinary pytest A-Z partitions establish
+`UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0`; no monolithic FULL
+FAST GREEN PASS is claimed. Historical, obsolete-assertion, and
+environment/test-infrastructure exclusions are enumerated in the full report.
 
-Implements Stages 1-7 of Phase 149O.20L.7O.3V.2's blueprint: the
-`RuntimeInvocationApproval` model (RIASC-001 v1.0, 16 fields, 5-member
-subject) with the RIHAC-001 v1.0 twelve-step ordered validator and all
-seven freshness conditions; a canonical create-only, path-confined
-approval store; the PBRD-001 v1.1 `runtime_dispatch` PB request
-architecture using the selected Option B nested `runtime_dispatch_context`
-field on the existing `PermissionBrokerRequest`. POL-005
-(`ExecutionDisabledRule`) is byte-unmodified and proven, by dedicated
-regression test, to still deny every real (`simulation_only=False`)
-`runtime_dispatch` request even with a fully valid human approval and PB
-structural ALLOW. Runtime Enforcement and Shell Gate not activated; zero
-subprocess/network/credential access in any new module. Approval creation
-is internal-API-only (Option A); no public CLI added.
+Blocking findings: forgeable validated-authority/raw approval paths and
+optional dispatch context; approval-store symlink/hardlink escape; incomplete
+RIASC and duplicate-key enforcement; unbound preview provenance; incomplete
+descriptor/filesystem-scope binding; lexical timestamp comparison; and
+incomplete/non-durable idempotency identity.
 
-190 new tests across 8 new files, all passing. Pre-existing dry-path and
-Permission Broker foundation/policy-framework suites re-run unchanged and
-green (336 total in the combined targeted run). Both pre-existing 3S.2.1
-MUST-FIX findings re-checked post-implementation and confirmed still not
-reachable.
+Runtime remained `Observed` / `observe` / `unavailable` at five checkpoints.
+Runtime Enforcement calls: 0. Shell Gate calls from the foundation: 0.
+Runtime process, network/provider, credential, external-runtime, and
+background-work calls: 0. Production source changed by 3W.1: NO.
 
-Recommended next phase: `149O.20L.7O.3W.1` — Independent End-to-End
-Runtime Invocation Authority + PB Dispatch Request Foundation
-Verification. Human decision required; not begun.
+Ready for Runtime Enforcement planning: **NO**. Real-runtime ready: **NO**.
+Recommended next: **Runtime Invocation Authority + PB Dispatch Foundation
+Blocking Repair**, followed by independent re-verification. Human decision
+required; do not begin automatically.
 
-See `docs/PHASE_149O_20L_7O_3W_RUNTIME_INVOCATION_AUTHORITY_AND_PB_DISPATCH_REQUEST_FOUNDATION_IMPLEMENTATION.md`
-for the full implementation record and matrices.
+Full evidence:
+`docs/PHASE_149O_20L_7O_3W_1_INDEPENDENT_END_TO_END_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_REQUEST_FOUNDATION_VERIFICATION.md`.

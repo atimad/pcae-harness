@@ -1,97 +1,78 @@
 {
+  "phase_id": "149O.20L.7O.3W.1",
+  "phase_name": "Independent End-to-End Runtime Invocation Authority + PB Dispatch Request Foundation Verification",
+  "phase_title": "Independent End-to-End Runtime Invocation Authority + PB Dispatch Request Foundation Verification",
+  "status": "completed",
   "commit_attribution": "phase_owned",
-  "derived_correctness": "Phase 149O.20L.7O.3W implements Stages 1-7 of Phase 149O.20L.7O.3V.2's blueprint: the RuntimeInvocationApproval model (RIASC-001 v1.0, 16 fields, 5-member subject) with the RIHAC-001 v1.0 twelve-step ordered validator and all seven freshness conditions (src/pcae/core/runtime_authority.py); a canonical create-only, path-confined approval store (src/pcae/core/runtime_invocation_approval_store.py); the PBRD-001 v1.1 runtime_dispatch PB request architecture using the selected Option B nested runtime_dispatch_context field on the existing PermissionBrokerRequest (src/pcae/core/runtime_dispatch_permission.py, additive changes to permission_broker_foundation.py and runtime_invocation.py). Reused existing primitives (new_invocation_id/new_attempt_id/_write_create_only) unmodified per the 3V.2 reuse audit. POL-005 (ExecutionDisabledRule) is byte-unmodified and remains an unconditional hard deny for every real (simulation_only=False) runtime_dispatch request, proved by dedicated regression tests (test_real_dispatch_always_denied_by_pol005_regardless_of_valid_approval). Runtime Enforcement and Shell Gate are not activated; no process spawn, network, or credential access exists in any new module (static AST audit plus runtime tripwire tests). Approval creation is internal-API-only (Option A); no public CLI added. Both pre-existing 3S.2.1 MUST-FIX findings were re-checked for reachability and confirmed still not reachable after this phase's changes.",
   "execution_availability": "unavailable",
-  "files_changed": [
-    ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md",
-    "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3W_RUNTIME_INVOCATION_AUTHORITY_AND_PB_DISPATCH_REQUEST_FOUNDATION_IMPLEMENTATION.md",
-    "src/pcae/core/permission_broker_foundation.py",
-    "src/pcae/core/runtime_authority.py",
-    "src/pcae/core/runtime_dispatch_permission.py",
-    "src/pcae/core/runtime_invocation.py",
-    "src/pcae/core/runtime_invocation_approval_store.py",
-    "tasks/DONE.md",
-    "tasks/active/20260827-1357-phase-149o-20l-7o-3w-runtime-invocation-authority-pb-dispatch-request-foundation-implementation.md",
-    "tasks/done/20260827-1319-idle-awaiting-human-decision-post-149o-20l-7o-3v-2.md",
-    "tests/_rdw3w_helpers.py",
-    "tests/test_runtime_authority_model.py",
-    "tests/test_runtime_authority_validation.py",
-    "tests/test_runtime_dispatch_attempt_idempotency.py",
-    "tests/test_runtime_dispatch_no_external_effect.py",
-    "tests/test_runtime_dispatch_permission.py",
-    "tests/test_runtime_dispatch_regression_dry_path.py",
-    "tests/test_runtime_dispatch_regression_pb_actions.py",
-    "tests/test_runtime_invocation_approval_store.py"
-  ],
-  "files_changed_count": 20,
+  "summary": "Phase 149O.20L.7O.3W.1 independently verified the Phase 3W authority and PB foundation and returned NOT VERIFIED. Seven blocking trust-boundary findings remain: forgeable validated-authority/raw approval paths and optional runtime-dispatch context; approval-store symlink/hardlink escape; incomplete RIASC and duplicate-key enforcement; unbound preview provenance; incomplete descriptor/filesystem-scope binding; lexical timestamp comparison; and incomplete/non-durable idempotency identity. Fixed-SHA partitioned regression result: UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0. No monolithic FULL FAST GREEN PASS is claimed. Runtime remains Observed/observe/unavailable, POL-005 remains byte-identical hard DENY, and no production source or external system changed.",
+  "derived_correctness": "Fresh independent verification reconstructed RIHAC-001 v1.0, RIASC-001 v1.0, PBRD-001 v1.1, RDGO-001 v2.0, and RPAC-001 from primary contract text and exercised production behavior without importing the Phase 3W helper. Passing properties include exact five-member subject replay binding, freshness dispositions, attempt IDs, deterministic equal-input idempotency, Option-B 14-field representation, existing-action isolation, POL-004 specificity, PB precedence, unchanged POL-005 hard DENY, dry-runtime compatibility, and zero external effects. Blocking findings are recorded in the canonical 70-section report and fresh 83-test module. Phase 3W's 190 tests also pass but are not independent proof.",
+  "metadata_consistency": "Phase 149O.20L.7O.3W.1; verification-entry SHA 0106c3c2d6f0ee740b7ffca97d4ffd79f6494022; fixed baseline daebfdbb2d8664518c51e904b64aad555195d626; fixed candidate 289bd75d2d9843e95f336bcba2eed35bc414adb7; v0.4.3 at 63580893b1de4782a694ab802ff7bdebdf29b0e6; active task, PROJECT_STATUS, report, metadata, and runtime posture agree.",
+  "internal_evidence_coherence": "The Phase 149O.20L.7O.3W.1 report links its 83 fresh tests, 190 Phase 3W implementation tests, fixed-SHA A-Z pytest partitions, caller graph, source hashes, contract cardinalities, attack matrices, RDGO matrix, and runtime checkpoints to the same verdict: NOT VERIFIED with seven blocking findings, zero unexplained attributable functional regressions, and no production/runtime activation.",
+  "test_evidence_classification": "independent_verification_test_and_documentation_only",
+  "tests_run": 9144,
+  "tests_added_or_updated": "83 fresh independent tests in tests/test_runtime_authority_pb_verification_3w1.py; no production or existing test modified",
+  "test_results": {
+    "fresh_adversarial": "83 passed in 0.19s; unsafe-behavior tests explicitly demonstrate blocking gaps",
+    "implementation_tests": "190 passed in 0.28s across Phase 3W's eight files",
+    "focused_regressions": "197 dry/bootstrap/PB/3V.1R.1 tests passed; 162 representative push/rollback/publication/mutation tests passed",
+    "fixed_fast_green": "Ordinary detached-worktree partitions: A-F 2581 passed each; G-M 1065 passed and 4 baseline-reproduced failures each; N-S baseline 5014 passed/332 failed/5 skipped/9 errors and candidate 5008 passed/338 failed/5 skipped/9 errors with all six candidate-only nodes classified by isolation; T-Z 144 passed each. Unexplained attributable functional regressions = 0. Full monolithic pass not claimed.",
+    "shell_gate": "Reported audit-verify hang not reproduced; isolated node passed at both fixed SHAs. Order-dependent audit tamper node is environment/test infrastructure; Shell Gate source/test unchanged.",
+    "historical": "Four known failures baseline-reproduced; three no-PB-file-change assertions are historical self-check debt; runtime_dispatch-absent assertion is expected obsolete because current PBRD and functional tests require the implemented action.",
+    "fast_green": "0 failed attributable functional regressions after fixed-SHA partitioned attribution; monolithic FULL FAST GREEN PASS not claimed.",
+    "report_notification_tests": "not applicable: no report or notification production source changed; canonical finalization exercises the existing report path",
+    "bootstrap_session_reporting_tests": "existing dry/bootstrap regression partition passed (197-test combined suite); no bootstrap/session production source changed"
+  },
+  "validation_results": {
+    "authority_pb_foundation": "NOT VERIFIED",
+    "rihac": "NOT VERIFIED IN PRODUCTION",
+    "riasc": "PRODUCTION ENFORCEMENT NOT VERIFIED",
+    "pbrd": "OPTION B NOT VERIFIED",
+    "pol005": "byte-identical; strongest valid real request hard DENY",
+    "runtime_enforcement_calls": 0,
+    "shell_gate_calls": 0,
+    "runtime_subprocess_calls": 0,
+    "network_provider_calls": 0,
+    "credential_reads": 0,
+    "external_runtime_calls": 0,
+    "background_work": 0,
+    "production_source_modified": false,
+    "runtime_invariant": "Observed / observe / unavailable; zero plugins/capabilities",
+    "release_invariant": "v0.4.3 unchanged at 63580893b1de4782a694ab802ff7bdebdf29b0e6",
+    "ready_for_runtime_enforcement_planning": false,
+    "real_runtime_ready": false
+    ,"fast_green": "0 failed attributable functional regressions after fixed-SHA partitioned attribution; monolithic FULL FAST GREEN PASS not claimed."
+    ,"report_notification_tests": "not applicable: no report or notification production source changed; canonical finalization exercises the existing report path"
+    ,"bootstrap_session_reporting_tests": "existing dry/bootstrap regression partition passed (197-test combined suite); no bootstrap/session production source changed"
+  },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
-    "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3W-attributable error",
-    "pcae_push_check": "clean",
-    "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; 0 plugins and 0 capabilities; unchanged at entry and pre-close",
     "pcae_status_coherence": "coherent",
-    "telegram_runtime": "configured, enabled, outbound-ready; final completion dispatch authorized"
+    "pcae_doctor_task_memory": "warnings limited to established historical tasks/DONE.md synchronization debt; no 3W.1 error",
+    "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities at five checkpoints",
+    "telegram_runtime": "configured, enabled, outbound-ready",
+    "pcae_push_check": "pending governed phase push sequence"
   },
-  "internal_evidence_coherence": "The implementation document (docs/PHASE_149O_20L_7O_3W_...md) consistently reports RuntimeInvocationApproval/RIASC-001 model+validator implemented, the runtime_dispatch PB request architecture implemented as Option B, POL-005 unchanged hard deny, Runtime Enforcement and Shell Gate not activated, and both 3S.2.1 MUST-FIX findings re-confirmed not reachable -- consistent across sections 5-50 and Matrices A-F. Matrix B's 14-fact table matches PBRD-001 v1.1 section 4 exactly; Matrix A's 16-field table matches RIASC-001 section 2 exactly.",
-  "metadata_consistency": "Phase ID 149O.20L.7O.3W, baseline SHA daebfdbb2d8664518c51e904b64aad555195d626, v0.4.3 identity 63580893b1de4782a694ab802ff7bdebdf29b0e6, runtime posture Observed/observe/unavailable, task, PROJECT_STATUS, implementation document, metadata, and report agree.",
-  "no_go_confirmation": "No contract (RIHAC-001, RIASC-001, PBRD-001, RDGO-001) was modified.\nNo POL-005 rule was relaxed or removed; ExecutionDisabledRule source is byte-unmodified.\nNo Runtime Enforcement engine was activated or invoked.\nNo Shell Gate was activated.\nNo process was spawned by any new module.\nNo network connection was opened by any new module.\nNo credential or provider token was accessed.\nNo Codex or Claude backend was invoked.\nNo execution availability was activated; runtime remains Observed/observe/unavailable.\nNo public approval-creation CLI was added; Option A (internal API/test-only) was followed exactly.\nNo dry runtime, HATP, HMIC, or Class-B behavior changed.\nNo version was bumped, tagged, or published; v0.4.3 remains current.\nNo private research repository was inspected, imported from, or modified.\nNo stopped article was read, modified, resumed, or published.",
-  "origin_main_head": "ea50a0ddd591185eff01eb155bc148414f57ef2d",
-  "origin_main_head_count": 0,
-  "phase_commits": [
-    {
-      "hash": "6e765341",
-      "subject": "Phase 149O.20L.7O.3W: open governed task, close prior idle task"
-    },
-    {
-      "hash": "1d53ed19",
-      "subject": "Phase 149O.20L.7O.3W: canonical create-only RuntimeInvocationApproval store"
-    },
-    {
-      "hash": "289bd75d",
-      "subject": "Phase 149O.20L.7O.3W: runtime_dispatch PB request architecture (Option B) + attempt/idempotency + full test suite"
-    }
+  "no_go_confirmation": "No src/pcae file was modified.\nNo normative contract was modified.\nNo POL-005 rule was relaxed or removed.\nNo Runtime Enforcement component was activated or invoked.\nNo Shell Gate component was activated, invoked by the new foundation, or modified.\nNo runtime process or real runtime was launched.\nNo network, provider API, model endpoint, Codex, Claude, or OpenRouter call occurred.\nNo credential, token, or private key was accessed.\nNo background task or production effect was started.\nNo dry-runtime semantics, HATP, HMIC, or Class-B behavior was changed.\nNo version, tag, release candidate, publication, or v0.4.3 state was changed.\nNo stopped article or private research repository was read, resumed, imported, or modified.",
+  "files_changed": [
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md",
+    "CHANGELOG.md",
+    "PROJECT_STATUS.md",
+    "docs/PHASE_149O_20L_7O_3W_1_INDEPENDENT_END_TO_END_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_REQUEST_FOUNDATION_VERIFICATION.md",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/active/20260827-1423-phase-149o-20l-7o-3w-1-independent-end-to-end-runtime-invocation-authority-pb-dispatch-request-foundation-verification.md",
+    "tests/test_runtime_authority_pb_verification_3w1.py"
   ],
-  "phase_id": "149O.20L.7O.3W",
-  "phase_name": "Runtime Invocation Authority + PB Dispatch Request Foundation Implementation",
-  "phase_title": "Runtime Invocation Authority + PB Dispatch Request Foundation Implementation",
-  "pushed_status": "clean",
-  "recommended_next_phase": "149O.20L.7O.3W.1 -- Independent End-to-End Runtime Invocation Authority + PB Dispatch Request Foundation Verification. Human decision required; do not begin automatically.",
-  "summary": "Phase 149O.20L.7O.3W implements the RIHAC-001 v1.0/RIASC-001 v1.0 human-authority foundation and the PBRD-001 v1.1 runtime_dispatch Permission Broker request architecture (Option B), per Phase 149O.20L.7O.3V.2's exact blueprint, without enabling real execution. Baseline SHA: daebfdbb2d8664518c51e904b64aad555195d626. Candidate SHA: 289bd75d2d9843e95f336bcba2eed35bc414adb7. v0.4.3 unchanged at 63580893b1de4782a694ab802ff7bdebdf29b0e6. Runtime Observed/observe/unavailable, unchanged. Three new modules added (runtime_authority.py, runtime_invocation_approval_store.py, runtime_dispatch_permission.py); permission_broker_foundation.py and runtime_invocation.py extended additively (new action constant, new optional request field, new sibling idempotency function) -- zero existing function bodies altered. 190 new tests across 8 new test files, all passing; pre-existing dry-path and PB foundation/policy-framework suites re-run unchanged and green. POL-005 (ExecutionDisabledRule) is byte-unmodified and proven, by dedicated regression test, to still deny every real (simulation_only=False) runtime_dispatch request even with a fully valid human approval and PB structural ALLOW. Runtime Enforcement and Shell Gate not activated; zero subprocess/network/credential access in new modules (static AST audit plus runtime tripwire tests). Approval creation is internal-API-only (Option A); no public CLI added. Both pre-existing 3S.2.1 MUST-FIX findings re-checked and confirmed not reachable by this phase's changes. One pre-existing 3V.1-scoped historical self-check test (test_future_action_is_not_implemented_but_selected_class_exists) now fails as an intentional, expected consequence of this phase correctly implementing the exact roadmap item that test asserted did not yet exist -- documented, not a functional regression. A whole-repository fast_green run could not be completed to a clean count in this sandbox due to two independently-confirmed, phase-unrelated causes: a pre-existing subprocess hang in test_shell_gate.py's `pcae shell-gate audit verify` CLI invocation, and a large, pre-existing class of historical per-phase self-check tests bound to fixed past commits that fail for any sufficiently later HEAD regardless of what changed. Targeted suites relevant to this phase's actual behavior (190 new tests, dry-path regression, PB foundation/policy regression, contract-verification regression) are all confirmed green. Production source modified: YES (additive only). Execution activated: NO. External runtime: NONE. Release unchanged. Article stopped. Private research untouched. Recommended next phase: 149O.20L.7O.3W.1 (Independent Verification). Human decision required; not begun.",
-  "status": "completed",
-  "test_evidence_classification": "implementation_phase_new_production_and_test_source",
-  "test_results": {
-    "new_tests": "190 tests across 8 new files (test_runtime_authority_model.py, test_runtime_authority_validation.py, test_runtime_invocation_approval_store.py, test_runtime_dispatch_permission.py, test_runtime_dispatch_attempt_idempotency.py, test_runtime_dispatch_no_external_effect.py, test_runtime_dispatch_regression_dry_path.py, test_runtime_dispatch_regression_pb_actions.py); all pass",
-    "regression_suites": "test_runtime_dry_consumption_3s2.py, test_session_bootstrap_dry_runtime_3s2.py, test_permission_broker_foundation.py, test_permission_broker_policy_rule_framework.py re-run unchanged, all pass (336 total across the combined targeted run)",
-    "versioning": "RIHAC-001 v1.0, RIASC-001 v1.0, PBRD-001 v1.1, RDGO-001 v2.0 read directly and unchanged by this phase",
-    "contract_cardinality": "16 RIASC required fields (5-member subject) and 14 PBRD request facts fully implemented and verified via Matrix A/B in the implementation document",
-    "must_fix_reachability": "Both 3S.2.1 MUST-FIX findings re-checked post-implementation; both confirmed still not reachable",
-    "production_diff": "3 commits (6e765341, 1d53ed19, 289bd75d), additive only: 3 new core modules, additive edits to permission_broker_foundation.py and runtime_invocation.py, 8 new test files",
-    "fast_green": "Targeted suites (190 new tests + dry-path + PB foundation/policy regressions, 336 total): 336 passed, 0 failed. Whole-repo -n auto run inconclusive in this sandbox due to a pre-existing subprocess hang in test_shell_gate.py and pre-existing fixed-commit-bound historical self-checks unrelated to this phase (direct reproduction evidence in implementation document section 49). Attributable functional regressions: 0 failed.",
-    "report_notification_tests": "not_applicable_this_phase: no phase_reports.py or notifications.py production source changed",
-    "bootstrap_session_reporting_tests": "not_applicable_this_phase: no session/bootstrap production source changed"
-  },
-  "tests_added_or_updated": "190 new tests added across 8 new files; 0 existing tests modified",
-  "tests_run": 336,
-  "validation_results": {
-    "report_notification_tests": "not_applicable_this_phase: no report/notification production source changed",
-    "bootstrap_session_reporting_tests": "not_applicable_this_phase: no bootstrap/session/reporting production source changed",
-    "fast_green": "Targeted suites (190 new tests + dry-path + PB foundation/policy regressions, 336 total): 336 passed, 0 failed. Whole-repo run inconclusive due to pre-existing environment/self-check issues unrelated to this phase, see implementation document section 49. Attributable functional regressions: 0 failed.",
-    "phase_identity": "All current artifacts identify 149O.20L.7O.3W.",
-    "primary_source_review": "RIHAC-001, RIASC-001, PBRD-001, RDGO-001 read directly this phase; production source (permission_broker_foundation.py, runtime_invocation.py, runtime_adapter.py, intake.py, tasks.py, runtime_registry.py) read directly, not implemented from report prose alone.",
-    "contract_verdict": "IMPLEMENTATION COMPLETE -- contracts unchanged, cardinalities implemented exactly as frozen, no contradictions introduced",
-    "rihac": "IMPLEMENTED v1.0, twelve-step ordered validator plus all seven freshness conditions",
-    "riasc": "IMPLEMENTED v1.0 structural schema validator, 16 fields, 5-member subject, closed-object policy",
-    "pbrd": "IMPLEMENTED v1.1, Option B request architecture, 14 facts, trusted approval projection",
-    "rdgo": "gates 1-6 implemented (gate 4 partially), gates 7-11 not implemented (future phases), per Matrix D",
-    "must_fix": "Two 3S.2.1 findings re-checked post-implementation; both confirmed not reachable by this phase's changes; not repaired (correctly out of scope).",
-    "runtime_inspect": "TRUTHFUL_WITH_LIMITATION; unchanged; still required before first real adapter availability claim.",
-    "api_network_boundary": "NOT FROZEN / NOT AUTHORIZED / NOT READY; unchanged.",
-    "production_invariant": "src/pcae changed (additive only); execution not activated.",
-    "runtime_invariant": "Observed / observe / unavailable; 0 plugins/capabilities.",
-    "release_invariant": "v0.4.3 unchanged at 63580893b1de4782a694ab802ff7bdebdf29b0e6.",
-    "scope_invariants": "POL-005 and dry path unchanged; article stopped; private research untouched; no external runtime invocation."
-  }
+  "files_changed_count": 9,
+  "phase_commits": [
+    {"hash": "291510f0", "subject": "Phase 149O.20L.7O.3W.1: open governed verification task"},
+    {"hash": "5a39b582", "subject": "Phase 149O.20L.7O.3W.1: independent authority/PB verification"}
+  ],
+  "origin_main_head": "291510f00d2f10f340e5f59081caac546101b4f7",
+  "origin_main_head_count": 1,
+  "pushed_status": "pending_push",
+  "recommended_next_phase": "Runtime Invocation Authority + PB Dispatch Foundation Blocking Repair, followed by independent re-verification. Human authorization required; do not begin automatically."
 }
