@@ -11,6 +11,19 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149O.20L.7O.3W.1R.2B.1R.1.1R** (bounded contract-only repair,
+complete): recovered/reproduced B-3/B-4 before editing; canonically specified
+protected presentation mechanism/evidence, deterministic human-visible
+rendering and attestation, hash-chained proof lifecycle, exact Gate-5
+binding, and one crash-safe Gate-9 consumption record. B-3/B-4 closed; other
+original BLOCKING 5/5 and MUST-FIX 2/2 remain closed; new BLOCKING 0; N2
+contract gap closed. Active versions remain RIHAC 2.0, RIASC 3.0, HPAC 2.0,
+PBRD 2.0, RDGO 3.0, RPAC 1.0; RIASC/PBRD/RPAC are byte-identical. Fresh
+static tests: 23 passed. Recommended next, not authorized: exactly
+**149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification of Trusted
+Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization
+Repair**.
+
 **Phase 149O.20L.7O.3W.1R.2B.1R.1** (cross-contract contract-only repair,
 complete): recovered/reproduced exactly 7 BLOCKING + 2 MUST-FIX before edits;
 closed 7/7 and 2/2 with 0 new BLOCKING and N2 contract gap closed. Active

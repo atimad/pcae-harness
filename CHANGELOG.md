@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R** closes original contract blockers
+  B-3/B-4 by freezing canonical protected presentation evidence/mechanism
+  attestation, deterministic human-visible subject rendering, hash-chained
+  proof lifecycle, exact Gate-5 binding, and one create-only crash-safe
+  Gate-9 presentation/challenge/proof/approval consumption record. The other
+  five original blockers and both MUST-FIX findings remain closed; new
+  BLOCKING 0; N2 contract gap closed. RIHAC 2.0, HPAC 2.0, and RDGO 3.0 are
+  correctively completed; RIASC 3.0, PBRD 2.0, and RPAC 1.0 remain
+  byte-identical. Twenty-three fresh static tests pass. No production,
+  hardware, execution, POL-005, runtime, release, article, or private-
+  research change; independent verification is required next.
+
+- Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B.1R.1.1 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R: Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization Blocking Repair; session refreshed and governance continuity revalidated.
 - Transitioned the completed 3W.1R.2B.1R.1.1 NOT VERIFIED task to idle
   awaiting explicit human authorization for bounded contract repair
   3W.1R.2B.1R.1.1R; no repair or implementation began automatically.

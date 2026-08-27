@@ -7,6 +7,12 @@
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
 Invocation Human-Principal Authentication Freeze Repair
+**Correctively completed by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R —
+Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle
+Canonicalization Blocking Repair. This completion retains v2.0 for the
+reason frozen in §38: it defines previously absent companion records without
+changing the challenge or proof wire schemas and without making any v2.0
+artifact newly authority-valid by migration.
 **Supersedes:** HPAC-001 v1.0. V1 proof, registry, enrollment, assurance, and
 presentation semantics are not authority-compatible with v2 and SHALL NOT be
 silently upgraded.
@@ -74,7 +80,8 @@ human principal                != session agent identity
   identity (§4); the `HumanPrincipalRegistry` (§5); the `HumanAuthenticator`
   mechanism abstraction (§10-§15); principal and credential enrollment
   (§8-§9); authentication-proof production and structure (§16-§17); trusted
-  approval-presentation evidence (§16); proof verification behavior (§18);
+  approval-presentation evidence (§38-§39); proof verification behavior
+  (§18); canonical proof lifecycle and authority consumption (§40-§42);
   revocation (§21); mechanism status (§13); trust/assurance level (§20); and
   failure behavior (§25).
 - **HPAC-REQ-003.** HPAC-001 SHALL NOT own, define, or gate: Permission
@@ -112,12 +119,14 @@ human principal                != session agent identity
   must incorporate into its proof (§16).
 - **Authentication proof.** The normalized, verifiable artifact a
   `HumanAuthenticator` produces in response to one challenge (§17).
-- **TrustedApprovalPresentation.** Protected-channel evidence that a
+- **TrustedApprovalPresentationEvidence.** The canonical, protected-store
+  artifact defined by §39. It records and attests that a
   human-usable representation of PCAE-canonical repository, task, target,
   operation/effect, prompt/instruction, invocation, expiry, and one-shot facts
   was displayed and explicitly elected. Its component runs in the protected
   presentation context configured by HPAC-REQ-080; ordinary agent-controlled
-  stdout/stdin and repository-authored labels cannot produce it.
+  stdout/stdin and repository-authored labels cannot produce it. An
+  evidence-shaped caller object is not this trusted artifact.
 - **Assurance level.** A closed vocabulary describing how strong a
   mechanism's presence/identity guarantee is (§20).
 - **Verifier.** The trusted component that checks a proof against a
@@ -414,7 +423,7 @@ model, minimum required assurance).
   NOT yield `AuthenticatedHumanPrincipal`.
 - **HPAC-REQ-043.** Challenge generation uses `HumanAuthenticator.
   prepare_challenge` (§10) over the exact versioned canonical approval-subject
-  digest, exact trusted-presentation digest, fresh cryptographically random
+  digest (§38), exact trusted-presentation-evidence digest (§39), fresh cryptographically random
   nonce, principal/credential binding, proof-schema version, and v2 domain
   separator (§16). The protected presentation channel SHALL display the same
   canonical facts before the non-defaultable approval act.
@@ -468,9 +477,10 @@ Resolves governing-prompt items 16/17.
   `HPAC-CHALLENGE/2.0`, `proof_schema_version` const `HPAC-PROOF/2.0`,
   `principal_id`, `credential_id`, `approval_subject_digest`,
   `trusted_presentation_digest`, `nonce`, `issued_at`, and `expires_at`.
-  The subject digest covers repository identity, task ID, runtime target,
-  operation/effect and scope, prompt/instruction identity, invocation ID,
-  expiry, and one-shot status. UTF-8 compact JSON with recursively sorted
+  `approval_subject_digest` is the digest of the exact
+  `CanonicalRuntimeApprovalSubject` in §38; `trusted_presentation_digest` is
+  the digest of the exact `TrustedApprovalPresentationEvidence` in §39.
+  UTF-8 compact JSON with recursively sorted
   keys and NFC strings is hashed with SHA-256. Any display, subject, domain,
   principal, credential, or version mismatch invalidates the proof.
 - **HPAC-REQ-050.** Nonce origin: cryptographically strong random bytes,
@@ -482,9 +492,9 @@ Resolves governing-prompt items 16/17.
   implementation phase sets it, consistent with RIHAC-001's own precedent
   of not freezing an arbitrary duration for `expires_at`, RIHAC-001 §14).
   Storage: the trusted coordinator records lifecycle state in the protected
-  proof store. Successful verification binds the nonce/proof to exactly one
-  approval without consuming it. Consumption occurs only atomically with the
-  gate-9 approval consumption marker (§24).
+  proof store exactly as §40 specifies. Successful verification binds the
+  nonce/proof to exactly one approval without consuming it. Consumption
+  occurs only through §41's single gate-9 authority-consumption record.
 - **HPAC-REQ-051.** No predictable, sequential, timestamp-only, or reusable
   challenge value is permitted.
 
@@ -497,7 +507,7 @@ Resolves governing-prompt item 18.
   `proof_id` (`hap-<32-hex>`), `proof_digest`, `mechanism_id`, `principal_id`,
   `credential_id`, `challenge_digest`, `approval_subject_digest`,
   `trusted_presentation_ref` (exact `presentation_id`/`presentation_digest`
-  pair), `assertion` (base64url mechanism bytes), `up` (const true), `uv`
+  pair resolving only under §39), `assertion` (base64url mechanism bytes), `up` (const true), `uv`
   (const true), `authenticated_at`, and `verifier_version`. `proof_digest`
   is SHA-256 over canonical UTF-8 compact JSON excluding only itself, with
   recursively sorted keys and NFC strings. Unknown/missing fields fail
@@ -508,11 +518,11 @@ Resolves governing-prompt item 18.
   the exact closed reference `(proof_id, proof_digest)`, never a path.
   Resolution rejects traversal, symlinks, duplicate IDs, non-canonical bytes,
   digest mismatch, wrong owner/ACL, repository/config override, and missing
-  lifecycle state. The adjacent protected lifecycle record has exactly
-  `CHALLENGE_CREATED`, `ASSERTION_RECEIVED`, `PROOF_VERIFIED_AND_BOUND`,
-  `PROOF_CONSUMED_WITH_APPROVAL`, or terminal `EXPIRED`, `REVOKED`,
-  `REJECTED`. Proof and lifecycle writes are atomic, create/append-only, and
-  read-back verified.
+  lifecycle state. The adjacent protected lifecycle consists only of the
+  canonical event records and derived consumption state frozen in §40-§41;
+  a state name, mutable flag, or caller-supplied lifecycle object is
+  insufficient. Proof and lifecycle-event writes are atomic, create-only,
+  and read-back verified.
 
 ## 18. Proof verification — exact sequence
 
@@ -529,9 +539,10 @@ Resolves governing-prompt item 19, consumed by RIHAC-001 v2.0 §16 step 4.
      compare; reject on mismatch;
   5. verify subject and informed-intent binding: the challenge's canonical
      subject digest equals the approval subject/scope/expiry, and the
-     `trusted_presentation_ref` resolves in the protected presentation store
-     to evidence that the identical canonical facts were displayed through a
-     channel the requesting agent could not substitute; reject ordinary
+     `trusted_presentation_ref` resolves by §39's canonical path and exact
+     schema to evidence whose mechanism descriptor and attestation verify
+     that the identical canonical facts were displayed through a channel the
+     requesting agent could not substitute; reject caller-created lookalikes, ordinary
      agent-controlled stdout/stdin, missing explicit election, blind touch,
      or any display/challenge mismatch;
   6. verify `assertion` against the resolved credential's public
@@ -540,11 +551,14 @@ Resolves governing-prompt item 19, consumed by RIHAC-001 v2.0 §16 step 4.
      UP-only, UV-only, or policy/config downgrade;
   8. verify freshness: `authenticated_at` is recent relative to a trusted
      clock and the challenge has not expired (§16); reject if stale;
-  9. verify protected lifecycle state is either fresh or already
-     `PROOF_VERIFIED_AND_BOUND` to this exact same approval and bytes; reject
+  9. resolve §40's complete hash-chained lifecycle and §41's canonical
+     consumption path; verify state is either fresh or already
+     `PROOF_VERIFIED_AND_BOUND` to this exact same approval, presentation,
+     challenge, subject, attempt, proof, and approval bytes; reject
      cross-binding, expired/revoked state, or consumed replay; and
-  10. atomically transition fresh proof state to `PROOF_VERIFIED_AND_BOUND`
-      for this approval and emit an ephemeral immutable
+  10. atomically create §40's `PROOF_VERIFIED_AND_BOUND` event for this
+      approval, or accept an already-present byte-identical same-binding event
+      idempotently, and emit an ephemeral immutable
       `AuthenticatedHumanPrincipal` binding IDs, assurance, subject, and
       presentation digest (§19). Same-binding revalidation is idempotent and
       does not consume the nonce/proof.
@@ -573,7 +587,8 @@ Resolves governing-prompt items 20/21/22.
   ephemeral and non-serializable; only the canonical proof/lifecycle evidence
   may persist. Deserializing stored proof material SHALL NOT by itself yield
   trusted `AuthenticatedHumanPrincipal` state — every
-  consumption SHALL re-run §18's verification sequence against current
+  consumption SHALL re-run §18's verification sequence, including canonical
+  §39-§41 resolution, against current
   registry state (principal/credential status may have changed since the
   proof was stored) rather than trusting a cached verification result.
 
@@ -606,9 +621,10 @@ Resolves governing-prompt items 37/38.
 - **HPAC-REQ-063.** Principal or credential revocation immediately marks all
   its unused challenges, verified/bound proofs, unmaterialized approvals,
   unconsumed approvals, and derived PB authority projections invalid. Gate 5
-  and every pre-gate-9 revalidation SHALL re-resolve current protected
-  registry state; stale cached principal state never qualifies. Only an
-  approval/proof already atomically consumed at gate 9 remains historical
+  and gate 9 SHALL re-resolve current protected registry, presentation,
+  proof, and lifecycle state inside §41's protected compare-and-create
+  boundary; stale cached principal state never qualifies. Only an
+  approval/proof already atomically consumed by §41's record remains historical
   evidence, never reusable authority.
 - **HPAC-REQ-064.** Effect on outstanding challenges: revoking a principal
   or credential SHALL invalidate every outstanding, unconsumed challenge
@@ -667,9 +683,11 @@ Resolves governing-prompt items 58/59.
 
 - **HPAC-REQ-071.** Protected lifecycle state SHALL reject any proof consumed
   with another approval or dispatch. Gate-5 verification binds but does not
-  consume. Gate 9 atomically writes the durable `dispatch_attempted` marker,
-  consumes the canonical approval, and transitions the bound HPAC proof to
-  `PROOF_CONSUMED_WITH_APPROVAL`. Revalidation before gate 9 repeats canonical
+  consume. Gate 9 atomically creates the single canonical
+  `RuntimeInvocationAuthorityConsumption` record defined by §41; its
+  existence simultaneously constitutes the durable `dispatch_attempted`
+  marker and consumption of the canonical approval, presentation evidence,
+  and bound HPAC proof. Revalidation at gate 9 repeats canonical
   byte/digest/signature/domain/presentation/current-registry checks against
   the same binding without a second consumption attempt.
 - **HPAC-REQ-072.** A proof produced for invocation A's subject/preview
@@ -726,7 +744,8 @@ Resolves governing-prompt item 63.
 Resolves governing-prompt items 69/70 explicitly.
 
 - **HPAC-REQ-079.** Repository/task/agent-controlled state SHALL NOT select,
-  redirect, replace, delete, or write the registry/proof/presentation stores;
+  redirect, replace, delete, or write the registry/proof/presentation/
+  consumption stores or their mechanism descriptors;
   enroll or map principals/credentials; set mechanism allowlists; lower UP,
   UV, assurance, freshness, or presentation requirements; or supply trusted
   human-visible labels. Any influence or protected-root validation failure
@@ -846,9 +865,335 @@ independent verification. Unknown versions fail closed. No future version
 may retrospectively widen an already-issued proof or an already-enrolled
 principal's granted assurance.
 
-## 38. Freeze verdict
+## 38. Corrective version treatment and canonical approval subject
 
-**HPAC-001 v2.0: FROZEN; supersedes v1.0 with no authority migration.**
+- **HPAC-REQ-088.** This phase is a corrective completion of the
+  independently rejected HPAC-001 v2.0 candidate, not a successor authority
+  model. It adds the first canonical definitions of companion presentation,
+  lifecycle, and consumption records already required by HPAC-REQ-043,
+  HPAC-REQ-053, HPAC-REQ-054, and HPAC-REQ-071. It does not change
+  `HPAC-CHALLENGE/2.0`, `HPAC-PROOF/2.0`, the challenge domain, the proof
+  field set, the UP+UV floor, or any previously valid authority meaning.
+  Because no v2.0 presentation/lifecycle record could conform to a schema
+  that did not exist, there is no valid old artifact to migrate or silently
+  upgrade. Retaining contract version 2.0 is therefore a correction of the
+  same unverified freeze, not backward-compatible acceptance of incomplete
+  evidence. Any implementation of the pre-correction prose is non-conformant.
+
+- **HPAC-REQ-089.** `CanonicalRuntimeApprovalSubject` has schema identity
+  `HPAC-APPROVAL-SUBJECT/2.0` and exactly these closed fields:
+  `subject_schema_version` (const `HPAC-APPROVAL-SUBJECT/2.0`), `subject`
+  (the exact closed five-field RIASC-001 v3.0 `subject` object),
+  `approval_scope` (the exact closed RIASC-001 v3.0 `approval_scope`
+  object), `approval_preview_digest` (64 lowercase hex), `expires_at`
+  (RIASC-001 timestamp grammar), and `attempt_limit` (const `1`). Its
+  canonical bytes are UTF-8 compact JSON with NFC strings and recursively
+  ASCII-sorted object keys; arrays retain order. `approval_subject_digest`
+  is SHA-256 of those exact bytes. No caller-selected label, filesystem path,
+  display-only text, or mechanism evidence is part of this subject.
+
+This exact object resolves the former prose-only phrase “repository, task,
+target, operation/effect/scope, prompt, invocation, expiry, and one-shot”:
+repository/task/target/prompt/invocation are the five `subject` members;
+operation/effect/scope is `approval_scope`; expiry and one-shot are the final
+two fields. Any field or byte mismatch creates a different subject.
+
+## 39. Canonical trusted approval-presentation evidence
+
+### 39.1 Trusted presentation mechanism descriptor
+
+- **HPAC-REQ-090.** A presentation mechanism qualifies only through one
+  protected, administrator-installed `TrustedApprovalPresentationMechanism`
+  descriptor at
+  `<HPAC_PROTECTED_ROOT>/presentation-mechanisms/v2/<mechanism_id>/descriptor.json`.
+  The descriptor has schema identity `HPAC-PRESENTATION-MECHANISM/2.0` and
+  exactly these closed fields: `descriptor_schema_version` (const),
+  `mechanism_id` (non-empty ID), `descriptor_version` (non-empty ID),
+  `descriptor_digest` (self-excluding SHA-256), `verifier_kind` (non-empty
+  closed implementation identifier), `verifier_configuration_digest`
+  (SHA-256 of protected verifier configuration), `renderer_profile`
+  (non-empty versioned deterministic-renderer identifier), `protected_output` (const
+  `true`), `agent_substitution_resistant` (const `true`),
+  `canonical_subject_rendering` (const `true`), `explicit_election_support`
+  (const `true`), and `status` (enum `active`, `revoked`). Descriptor bytes
+  use HPAC-REQ-089 canonicalization. Only HPAC-REQ-080's protected
+  administrator may create or revoke descriptors. Repository, task, agent,
+  cwd, environment, stdin, or caller state cannot install, select, redirect,
+  or weaken one. Ordinary terminal stdout/stdin cannot truthfully satisfy
+  `agent_substitution_resistant` and is ineligible.
+
+### 39.2 Evidence schema
+
+- **HPAC-REQ-091.** `TrustedApprovalPresentationEvidence` has schema
+  identity `HPAC-PRESENTATION-EVIDENCE/2.0`, ID grammar
+  `hpe-<32-lowercase-hex>`, and exactly these closed top-level fields:
+
+| Field | Exact type / meaning |
+|---|---|
+| `presentation_schema_version` | const `HPAC-PRESENTATION-EVIDENCE/2.0` |
+| `presentation_id` | `^hpe-[0-9a-f]{32}$`, allocated by the protected presentation component |
+| `presentation_digest` | SHA-256 over canonical evidence bytes excluding only this field |
+| `approval_id` | reserved trusted-coordinator `^ria-[0-9a-f]{32}$` identity |
+| `canonical_subject` | exact HPAC-REQ-089 object |
+| `approval_subject_digest` | SHA-256 of `canonical_subject` bytes |
+| `mechanism_ref` | closed `mechanism_id` / `descriptor_version` / `descriptor_digest` triple |
+| `human_visible_facts` | exact closed object in the table below |
+| `human_visible_representation_digest` | SHA-256 of the exact normalized bytes the protected mechanism displayed |
+| `presented_at` | trusted-clock UTC RFC 3339 timestamp |
+| `election` | closed `event_id`, `action`, `occurred_at` object; `event_id` matches `^hpevt-[0-9a-f]{32}$`, `action` is const `approve`, and `occurred_at >= presented_at` |
+| `mechanism_attestation` | non-empty base64url mechanism evidence bytes |
+| `mechanism_attestation_digest` | SHA-256 of decoded mechanism evidence bytes |
+
+`human_visible_facts` contains exactly:
+
+| Field | Canonical source / display rule |
+|---|---|
+| `repository_identity` | exact subject digest value; human-visible |
+| `repository_display` | protected resolver's human-usable repository label plus recognizable fingerprint; raw digest alone forbidden |
+| `task_id` | exact subject value; human-visible |
+| `task_display` | protected resolver's human-usable active-task label plus `task_id` |
+| `runtime_target_id` | exact subject value; human-visible |
+| `runtime_target_display` | protected descriptor's human-usable target label plus exact ID |
+| `operation_effect_scope_display` | protected rendering of the complete canonical `approval_scope`, including requested capability, local transport, effect class, filesystem/process references, no-network fact, and one-dispatch limit |
+| `prompt_hash` | exact subject value |
+| `prompt_instruction_display` | protected rendering of prompt/instruction identity plus a recognizable fingerprint; opaque digest alone forbidden |
+| `invocation_id` | exact subject value; human-visible |
+| `invocation_display` | human-usable invocation label plus recognizable fingerprint |
+| `expires_at` | exact canonical subject expiry; human-visible |
+| `one_shot_notice` | const `true`, rendered as a human-usable one-attempt notice |
+
+- **HPAC-REQ-092.** Evidence canonicalization is HPAC-REQ-089's rule.
+  Before `presentation_digest` is computed, only `presentation_digest` is
+  omitted; no attestation or other field is omitted. The registered
+  mechanism verifies `mechanism_attestation` over exactly one closed object
+  containing `attestation_version` (const
+  `HPAC-PRESENTATION-ATTESTATION/2.0`), `presentation_id`, `approval_id`,
+  `approval_subject_digest`, `human_visible_representation_digest`,
+  `descriptor_digest`, the complete closed `election` object, and
+  `presented_at`; no other or omitted field is permitted. That object's
+  bytes use HPAC-REQ-089 canonicalization and protected verification
+  configuration selected by the resolved descriptor. Digest agreement
+  without successful attestation verification is non-authority. The
+  descriptor's `renderer_profile` deterministically renders only the closed
+  `human_visible_facts` into the actual protected display. Display bytes are
+  UTF-8 with NFC strings and LF line endings; no hidden, caller-supplied, or
+  non-attested authority text is permitted. The protected component hashes
+  those exact displayed bytes as `human_visible_representation_digest`; a
+  resolver rerenders the same facts under the exact descriptor version and
+  requires byte/digest equality. The `canonical_subject`'s
+  `approval_preview_digest` SHALL equal this exact
+  `human_visible_representation_digest`; inequality fails closed. Thus the
+  attested digest identifies what was
+  actually shown, not merely an abstract data object. The
+  requesting caller may request a ceremony but only the protected mechanism
+  may allocate the ID, render canonical facts, observe explicit election,
+  produce the attestation, and persist the evidence.
+
+### 39.3 Store, resolution, correlation, and state
+
+- **HPAC-REQ-093.** Canonical evidence storage is exactly
+  `<HPAC_PROTECTED_ROOT>/presentations/v2/<presentation_id>/presentation.json`.
+  The file is immutable, create-only, atomically written, read-back verified,
+  and resolved only by the closed `(presentation_id, presentation_digest)`
+  pair. Resolution revalidates protected root/ancestor ownership and ACL,
+  canonical bytes/digest, the active descriptor and protected verifier
+  configuration, mechanism attestation, canonical-subject equality, human-
+  visible-fact equality, election ordering, and current expiry. Symlink,
+  traversal, duplicate ID, caller path, repository override, corruption,
+  descriptor revocation, missing attestation, or mismatch fails closed.
+  A valid evidence record is intrinsically `PRESENTED`; its later
+  `BOUND_TO_CHALLENGE` and `USED` states are derived only from the canonical
+  proof lifecycle and consumption records in §40-§41. `EXPIRED` or
+  `INVALIDATED` is derived from trusted time, descriptor status, protected
+  configuration, or linked trust-state invalidation. No mutable status flag
+  is trusted. A presentation for invocation A cannot bind invocation B
+  because approval ID, exact canonical subject, and digest are present in
+  both the attestation and the later challenge/lifecycle chain.
+
+Valid FIDO2 signature, UP, and UV without a successfully resolved
+HPAC-REQ-091 evidence artifact is a blind touch and SHALL NOT satisfy
+`PRINCIPAL_VERIFIED_INTENT`.
+
+## 40. Canonical proof lifecycle
+
+### 40.1 Record form and path
+
+- **HPAC-REQ-094.** The proof lifecycle is a hash-chained sequence of
+  immutable `HumanAuthenticationProofLifecycleEvent` files, not a mutable
+  state flag. Event schema identity is `HPAC-PROOF-LIFECYCLE-EVENT/2.0`.
+  Canonical path is
+  `<HPAC_PROTECTED_ROOT>/proofs/v2/<proof_id>/lifecycle/<sequence-four-digits>.json`,
+  beginning at `0000.json`. Each event is atomically create-only and
+  read-back verified. The resolver rejects gaps, duplicate sequences,
+  forks, unknown files/states, non-canonical bytes, broken hash links,
+  ownership/ACL/path failure, or any binding-field drift.
+
+- **HPAC-REQ-095.** Every lifecycle event has exactly these closed fields:
+  `lifecycle_schema_version` (const
+  `HPAC-PROOF-LIFECYCLE-EVENT/2.0`), `event_id`
+  (`^hpl-[0-9a-f]{32}$`), `event_digest` (self-excluding SHA-256),
+  `sequence` (non-negative integer), `previous_event_digest` (null only at
+  sequence 0, otherwise the prior event digest), `proof_id`, `state`,
+  `occurred_at`, `binding`, `assertion_digest`, `proof_digest`,
+  `approval_digest`, `registry_state_digest`, `verifier_version`, and
+  `terminal_reason_code`. `binding` is a closed object containing exactly
+  `approval_id`, `invocation_id`, `attempt_id`, `principal_id`,
+  `credential_id`, `mechanism_id`, `approval_subject_digest`,
+  `trusted_presentation_ref` (ID/digest pair), and `challenge_digest`.
+  `state` is exactly one of `CHALLENGE_CREATED`, `ASSERTION_RECEIVED`,
+  `PROOF_VERIFIED`, `PROOF_VERIFIED_AND_BOUND`, `EXPIRED`, `REVOKED`, or
+  `REJECTED`. `assertion_digest`, `proof_digest`, `approval_digest`, and
+  `registry_state_digest` are either null or 64 lowercase hex exactly as the
+  state table requires; `verifier_version` and `terminal_reason_code` are
+  either null or non-empty IDs under the same state rules. All other
+  IDs/digests use their owning contract grammars. Event bytes use
+  HPAC-REQ-089 canonicalization. Every event repeats the sequence-0 `binding`
+  byte-for-byte; a drifted repeat is a fork and fails closed.
+
+The non-terminal sequence is exact:
+
+| Sequence/state | Entry condition | Required non-null evidence | Exit condition | Reusable? |
+|---:|---|---|---|---|
+| `0 CHALLENGE_CREATED` | presentation resolved/attested; trusted coordinator allocates `proof_id` and creates exact challenge | none of assertion/proof/approval/registry/verifier fields | one assertion received or terminal state | challenge once only |
+| `1 ASSERTION_RECEIVED` | assertion challenge digest matches sequence 0 | `assertion_digest` | preliminary full proof verification or terminal state | no |
+| `2 PROOF_VERIFIED` | signature, subject, presentation, UP, UV, freshness, domain, registry, and assertion verify for approval creation | `assertion_digest`, `proof_digest`, `registry_state_digest`, `verifier_version`; `approval_digest` null | immutable RIASC approval created, then gate 5 | no |
+| `3 PROOF_VERIFIED_AND_BOUND` | gate 5 revalidates canonical proof and approval and binds exact same bytes | all evidence fields non-null | gate 9 consumption or terminal state | same-binding revalidation only; no authority transfer |
+
+`terminal_reason_code` is null for non-terminal states. A terminal
+`EXPIRED`, `REVOKED`, or `REJECTED` event is the next sequence and requires
+all evidence available at that point plus a non-empty closed reason code;
+no later lifecycle event is permitted. Independently current trusted time or
+registry/descriptor state yields terminal invalidity even before an event can
+be persisted; failure to record the observation never preserves authority.
+
+- **HPAC-REQ-096.** `proof_id` is allocated by the trusted challenge
+  coordinator before sequence 0. An unverified response is transient
+  mechanism input and may produce only `ASSERTION_RECEIVED`; it is not a
+  `HumanAuthenticationProof`. The canonical `proof.json` is created only
+  after the sequence-2 verification succeeds, and its `assertion` bytes must
+  hash to `assertion_digest`. A raw assertion, proof-shaped caller object,
+  copied lifecycle file, state string, or plausible reference is
+  non-authority until the complete protected chain resolves and verifies.
+
+### 40.2 Gate-5 binding
+
+- **HPAC-REQ-097.** Gate 5 reruns HPAC-REQ-054 against current registry,
+  descriptor/configuration, presentation, challenge, proof, approval,
+  freshness, revocation, and consumption state. Success atomically creates
+  sequence 3 with the exact final `approval_digest`. If a byte-identical
+  sequence-3 event already exists, same-binding revalidation is idempotent
+  after all current checks rerun; no event is rewritten and no authority is
+  consumed. A different approval digest, proof digest, presentation,
+  challenge, subject, invocation, attempt, principal, credential, or
+  mechanism is cross-binding and fails closed. Gate 5 emits only an
+  ephemeral `AuthenticatedHumanPrincipal` and RIHAC projection; persisted
+  event shape alone does not recreate either trusted result.
+
+## 41. Gate-9 atomic authority consumption
+
+- **HPAC-REQ-098.** The one canonical consumption artifact is
+  `RuntimeInvocationAuthorityConsumption`, schema identity
+  `HPAC-AUTHORITY-CONSUMPTION/2.0`, stored exactly at
+  `<HPAC_PROTECTED_ROOT>/proofs/v2/<proof_id>/consumption.json`. It has
+  exactly these closed top-level fields: `consumption_schema_version`
+  (const), `record_digest` (self-excluding SHA-256), `request_identity`,
+  `repository_task_binding`, `target_binding`, `prompt_binding`,
+  `authority_binding`, `pb_binding`, `runtime_enforcement_binding`, and
+  `dispatch_binding`.
+
+The eight closed binding objects contain exactly:
+
+| Object | Exact fields |
+|---|---|
+| `request_identity` | `invocation_id`, `attempt_id`, `idempotency_key` |
+| `repository_task_binding` | `repository_identity`, `head_commit`, `task_id`, `task_contract_digest`, `phase_id`, `session_id` (string or null only when not session-scoped) |
+| `target_binding` | `runtime_target_id`, `adapter_id`, `descriptor_version`, `descriptor_digest`, `target_config_digest`, `executable_identity_digest` |
+| `prompt_binding` | `prompt_hash`, `prompt_hash_profile` const `pcae.prompt-semantic.v1` |
+| `authority_binding` | `approval_id`, `approval_digest`, `authority_projection_id`, `authority_projection_digest`, `authority_contract_version` const `RIHAC-001/2.0`, `proof_id`, `proof_digest`, `proof_validation_digest`, `registry_state_digest`, `approval_subject_digest`, `trusted_presentation_ref`, `challenge_digest` |
+| `pb_binding` | `request_digest`, `decision_digest`, `decision`, `policy_version`, `causing_policy_ids`, `matched_no_go_ids` |
+| `runtime_enforcement_binding` | `decision_id`, `decision_digest`, `verdict`, `expires_at`, `evaluated_input_digest` |
+| `dispatch_binding` | `containment_evidence_ref` (closed ID/digest pair), `state` const `dispatch_attempted`, `consumed_at` |
+
+Arrays retain order and all other strings/digests use their owning contract
+grammar. Canonicalization is HPAC-REQ-089's rule. The artifact is the single
+authoritative fact that the named approval, presentation, challenge, proof,
+and attempt were consumed together; no separate mutable `consumed` fields
+or cross-file sequence of consumption writes exists.
+
+- **HPAC-REQ-099.** Immediately before create, gate 9, while holding the
+  protected evidence-store transaction/serialization boundary, reruns
+  current principal/credential/descriptor status, presentation attestation
+  and expiry, challenge/proof/lifecycle chain, approval freshness/expiry,
+  exact gate-5 binding, PB/Runtime Enforcement freshness, and absence of a
+  consumption record. It compare-and-creates `consumption.json` against the
+  exact current registry/configuration state digest and sequence-3 event.
+  Revocation, expiry, invalidation, or drift after gate 5 but before the
+  atomic create fails closed. Gate-5 validation is never a substitute for
+  this gate-9 revalidation.
+
+- **HPAC-REQ-100.** The create is an atomic, create-only, same-filesystem
+  durable commit: write canonical bytes to a protected temporary sibling,
+  fsync-equivalent the file, atomically install only if the final path is
+  absent, fsync-equivalent the parent, and read-back verify before gate 10.
+  Contract semantics admit only two recoverable outcomes: final artifact
+  absent (not consumed; no gate-10 effect permitted) or one complete valid
+  final artifact present (consumed; replay rejected). Temporary/partial,
+  corrupt, duplicate, conflicting, or durability-uncertain state is not
+  interpreted as reusable authority and yields no dispatch. An existing
+  byte-identical record means the attempt is already consumed, not an
+  idempotent license to enter gate 10 again.
+
+## 42. Crash, retry, replay, and store relationships
+
+- **HPAC-REQ-101.** If the process stops after gate 5 and before gate 9,
+  sequence 3 remains bound but unconsumed; resume may rerun gate 5 only for
+  the exact same binding and only while every live check still passes. A
+  gate-9 interruption resolves under HPAC-REQ-100: absent means no effect and
+  permits only full revalidation before another create attempt; valid present
+  means consumed and prohibits dispatch/retry with that authority; ambiguous
+  or corrupt means fail closed and manual recovery, never replay. After a
+  successful gate 9, every retry requires a fresh invocation, attempt,
+  presentation, challenge, proof, and approval under RIHAC/RDGO one-shot
+  rules.
+
+- **HPAC-REQ-102.** Presentation mechanisms, presentation evidence, proof
+  JSON, lifecycle events, and consumption records are distinct record
+  families within one deployment-scoped `HPAC_PROTECTED_ROOT`. Their exact
+  paths and cross-digests form one immutable chain; no repository-local copy,
+  caller-provided path, HATP registry/evidence, structural lookalike, or raw
+  digest can substitute. The approval remains in RIHAC's repository
+  governance store, but its immutable ID/digest is consumed solely by the
+  protected §41 record. Any repository-side dispatch record is a mirror or
+  reference to that commit and cannot independently establish consumption or
+  authority.
+
+## 43. Closure and cross-contract ownership
+
+- **HPAC-REQ-103.** B-3 is closed only by the full conjunction of active
+  protected descriptor, canonical subject, protected evidence path/schema,
+  verified mechanism attestation, human-usable facts, explicit election,
+  challenge digest binding, and later lifecycle revalidation. Missing any
+  conjunct makes blind touch insufficient and produces no authority.
+
+- **HPAC-REQ-104.** B-4 is closed only by the complete proof JSON plus
+  hash-chained lifecycle events, exact approval/presentation/challenge/
+  subject/attempt binding, gate-5 sequence-3 semantics, and the single
+  crash-safe gate-9 consumption record. No object field or reference alone
+  carries trust.
+
+- **HPAC-REQ-105.** HPAC owns presentation/mechanism/proof/lifecycle/
+  consumption artifact schemas and protected resolution; RIHAC owns
+  approval validity and projection; RIASC owns only immutable approval wire
+  shape; PBRD consumes only RIHAC projection; RDGO owns when gates 5 and 9
+  execute these operations. RPAC remains provider-neutral and unchanged.
+  Caller-created principal, presentation, lifecycle, proof, approval, or
+  projection objects without this complete canonical ceremony have zero
+  authority, closing N2 at the contract layer.
+
+## 44. Freeze verdict
+
+**HPAC-001 v2.0: CORRECTIVELY COMPLETED AND FROZEN; supersedes v1.0 with no
+authority migration. B-3 and B-4 canonical evidence gaps are closed.**
 **`HumanAuthenticator` implementation: NOT BUILT / NOT AUTHORIZED.**
 **`HumanPrincipalRegistry`: NOT CREATED.**
 **Hardware: NOT TOUCHED.**

@@ -7,6 +7,11 @@
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
 Invocation Human-Principal Authentication Freeze Repair
+**Correctively completed by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R —
+Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle
+Canonicalization Blocking Repair. V3.0 is retained because the eleven gates,
+their order, and bind-at-5/consume-at-9 state machine are unchanged; this
+correction supplies the canonical records those gates already required (§21).
 **Supersedes:** RDGO-001 v1.0 and v2.0. V2 proof verification/consumption
 lifecycle is incompatible with v3 and has no migration. V1's gate 3/gate 4
 relative order was independently found to contradict RPAC-REQ-042 by Phase
@@ -96,12 +101,17 @@ mint a unique request-identity triple, stops the flow.
 
 Gate 3 resolves canonical repository/task/invocation/prompt/target/effect/
 scope/expiry/one-shot facts, presents their human-usable representation
-through HPAC-001 v2.0's protected channel, and cryptographically binds the
-identical presentation and subject digests into a fresh v2 challenge. A
-distinct, non-defaultable act with mandatory UP and UV produces a protected,
-verified-and-bound HPAC proof; only then may the trusted coordinator create
-the immutable RIASC-001 v3.0 approval artifact. Agent-controlled stdout/stdin
-and blind touch are insufficient.
+through HPAC-001 v2.0's protected channel, persists and verifies exact
+`HPAC-PRESENTATION-EVIDENCE/2.0`, and cryptographically binds its digest and
+the identical `HPAC-APPROVAL-SUBJECT/2.0` digest into a fresh v2 challenge.
+The trusted coordinator reserves approval/proof identities before the
+ceremony. A distinct, non-defaultable act with mandatory UP and UV produces
+an assertion; successful preliminary verification creates canonical
+`HPAC-PROOF/2.0` plus lifecycle sequence 2 `PROOF_VERIFIED`. Only then may
+the coordinator create the immutable RIASC-001 v3.0 approval. Gate 5, not
+gate 3, creates the final `PROOF_VERIFIED_AND_BOUND` event over the completed
+approval digest. Agent-controlled stdout/stdin, caller-created evidence, and
+blind touch are insufficient.
 
 The artifact creates human authority only. It does not create PB permission,
 capability, Runtime Enforcement approval, containment, dispatch, acceptance,
@@ -137,8 +147,10 @@ containment, and dispatch in every case.
 
 ## 6. Gate 5 — approval validation
 
-Gate 5 freshly resolves the canonical approval, HPAC proof/lifecycle,
-protected registry/configuration, and protected presentation evidence; then
+Gate 5 freshly resolves the canonical approval, HPAC proof, complete
+hash-chained lifecycle, protected registry/configuration, canonical
+presentation evidence, active presentation mechanism descriptor, and
+mechanism attestation; then
 executes RIHAC-001 v2.0's ordered validation and produces an ephemeral
 validated-authority projection containing:
 
@@ -152,12 +164,15 @@ validated-authority projection containing:
 - consumption-state verdict; and
 - validation timestamp/version.
 
-It binds fresh proof state to this approval but does not consume the approval,
-nonce, or proof. Repeating gate 5 before gate 9 is permitted only for the same
-canonical bytes and binding and repeats cryptographic/current-registry/
-revocation checks idempotently. Missing, stale, mismatched, expired, revoked,
-consumed, replayed, tampered, caller-constructed, or ambiguous evidence stops
-the flow. It does not produce PB ALLOW.
+It atomically creates HPAC lifecycle sequence 3
+`PROOF_VERIFIED_AND_BOUND`, binding exact approval/proof/presentation/
+challenge/subject/invocation/attempt bytes, but does not consume the
+approval, nonce, presentation, or proof. Repeating gate 5 before gate 9 is
+permitted only when sequence 3 is byte-identical to the same binding and
+repeats cryptographic/current-registry/descriptor/presentation/revocation/
+consumption checks idempotently. Missing, stale, mismatched, expired,
+revoked, consumed, replayed, tampered, caller-constructed, or ambiguous
+evidence stops the flow. It does not produce PB ALLOW.
 
 ## 7. Gate 6 — Permission Broker
 
@@ -226,9 +241,10 @@ creation. The exact eight items are:
    live executable-identity observations.
 4. **Prompt binding:** semantic prompt hash and hash-profile ID.
 5. **Approval binding:** approval ID/digest, RIHAC v2 authority-projection
-   ID/digest, HPAC proof ID/digest, and proof-validation/current-registry
-   digests, with approval and bound proof atomically marked consumed by this
-   write.
+   ID/digest, HPAC proof ID/digest, presentation ID/digest, challenge and
+   approval-subject digests, and proof-validation/current-registry digests,
+   with approval, presentation, challenge, and bound proof atomically
+   consumed by this write.
 6. **PB binding:** PB request/decision digest, decision, policy version,
    causing policy IDs, and matched no-go IDs.
 7. **Runtime Enforcement binding:** decision ID/digest, verdict, expiry, and
@@ -237,13 +253,25 @@ creation. The exact eight items are:
    durable state marker `dispatch_attempted` and its timestamp.
 
 References and digests SHALL be used instead of duplicating the full
-approval/PB/RE artifacts. The write is create-only or append-only,
-crash-consistent, and completed before gate 10. If this write cannot be proven
-durable and internally consistent, no dispatch occurs.
+approval/PB/RE artifacts. These exact eight items are the closed objects of
+HPAC-001 §41's `HPAC-AUTHORITY-CONSUMPTION/2.0`, canonically stored at the
+bound proof's protected `consumption.json` path. It is one create-only,
+crash-consistent, read-back-verified commit completed before gate 10; a
+repository-side invocation record is a non-authoritative mirror/reference.
+If the protected write cannot be proven durable and internally consistent,
+no dispatch occurs.
 
-`dispatch_attempted` is the single atomic approval-and-proof consumption point
-and at-most-once guard. PB evaluation does not consume either. It is not proof
-the external process was created or completed.
+Immediately before compare-and-create, gate 9 revalidates current registry,
+credential, descriptor/configuration, presentation, proof/lifecycle,
+approval/expiry, PB, Runtime Enforcement, and containment state while holding
+the protected evidence-store serialization boundary. Thus revocation,
+presentation invalidation, or expiry after gate 5 fails closed without a
+TOCTOU allowance.
+
+`dispatch_attempted` is the single atomic presentation/challenge/proof/
+approval consumption point and at-most-once guard. PB evaluation does not
+consume any of them. It is not proof the external process was created or
+completed.
 
 ## 11. Gate 10 — adapter dispatch
 
@@ -428,7 +456,7 @@ The minimum conceptual states are:
 
 | State | Meaning | External effect | Reuse/retry |
 |---|---|---|---|
-| `PRE_APPROVAL_CONSUMPTION` | Gates 1–8 may have progressed; no gate-9 marker | None | Same approval only after full revalidation and proof marker absent |
+| `PRE_APPROVAL_CONSUMPTION` | Gates 1–8 may have progressed; no canonical HPAC consumption record | None | Same approval only after full revalidation and consumption path absent |
 | `APPROVAL_VALIDATED` | Gate 5 passed | None | Validation is not cached authority |
 | `PB_EVALUATED` | Gate 6 produced decision | None | Re-evaluate after any drift/restart |
 | `RE_EVALUATED` | Gate 7 produced decision | None | Re-evaluate after any drift/restart |
@@ -446,7 +474,8 @@ durable state proves it; otherwise uncertainty is explicit.
 There is no automatic retry. Before gate 9, a strictly identical,
 unexpired, unconsumed approval may be reused only after all gates/freshness
 checks are repeated and durable state proves no consumption. At or after gate
-9, any failed, uncertain, or proven-not-started new attempt requires a new
+9, the presence of one valid HPAC-001 §41 consumption record rejects replay;
+any failed, uncertain, or proven-not-started new attempt requires a new
 `attempt_id` minted through a fresh gate 2 pass and, per RPAC-REQ-072, a new
 invocation ID and fresh human approval whenever the prior approval's
 attempt limit/expiry does not cover the retry (see §10a).
@@ -501,7 +530,17 @@ migration and independent verification.
 
 Unknown versions fail closed.
 
-**RDGO-001 v3.0: FROZEN; v2 proof-lifecycle semantics have no migration.**
+**Corrective v3.0 completion:** this phase does not add, remove, reorder, or
+reassign a gate and does not move the first-effect boundary. It defines the
+previously missing HPAC lifecycle and the single gate-9 record needed to
+implement v3's already-mandatory bind-at-5/consume-at-9 semantics. No
+conforming pre-correction v3 lifecycle artifact existed, so there is no
+artifact migration or compatible predecessor to preserve. Retaining v3.0 is
+the repository-correct repair of the rejected candidate rather than a new
+state machine.
+
+**RDGO-001 v3.0: CORRECTIVELY COMPLETED AND FROZEN; v2 proof-lifecycle
+semantics have no migration.**
 **Gate count: 11 (unchanged). Durable-before-effect items: 8 (unchanged;
 item 1 enriched, see §10a). TOCTOU facts: 7 (unchanged).**
 **Real execution: UNAVAILABLE.**

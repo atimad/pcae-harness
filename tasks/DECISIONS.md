@@ -3322,3 +3322,23 @@
   context — recorded as future governance/autonomy hardening debt, not
   implemented in this phase. See
   `docs/PHASE_149O_20L_7O_3W_1R_2C_GOVERNANCE_RECORD_CORRECTION_UNAUTHORIZED_DELEGATED_PHASE_FINALIZATION.md`.
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R retains HPAC-001 v2.0,
+  RIHAC-001 v2.0, and RDGO-001 v3.0 as corrective completions of an
+  independently rejected candidate. The new presentation/lifecycle/
+  consumption records are the first definitions of evidence those versions
+  already made mandatory; challenge/proof wire schemas, RIASC approval,
+  RIHAC projection, and gate ordering do not change. No pre-correction
+  B-3/B-4 artifact could conform to an absent schema, so there is no valid
+  predecessor to migrate or silently upgrade. RIASC v3.0, PBRD v2.0, and
+  RPAC v1.0 remain byte-identical.
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R selects one deployment-protected HPAC
+  evidence root with distinct immutable record families. Presentation trust
+  requires a protected registered mechanism, deterministic rendering of
+  exact canonical human-visible facts, and a verifiable mechanism
+  attestation; evidence-shaped caller objects and ordinary stdout/stdin have
+  no authority. Proof state is a hash-chained create-only event sequence.
+  Gate 5 writes the final exact binding but consumes nothing. Gate 9 performs
+  current-state revalidation and atomically creates one
+  `HPAC-AUTHORITY-CONSUMPTION/2.0` record whose existence simultaneously
+  consumes presentation, challenge, proof, and approval and establishes the
+  durable `dispatch_attempted` guard. Gate 10 remains the first effect.

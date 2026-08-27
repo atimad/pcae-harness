@@ -2,6 +2,27 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R — Trusted Approval Presentation
+Evidence and HPAC Proof-Lifecycle Canonicalization Blocking Repair.
+**CONTRACT-ONLY — COMPLETE; READY FOR INDEPENDENT VERIFICATION.** Recovered
+and reproduced original B-3/B-4 verbatim before edits. HPAC-001 v2.0 now
+canonically freezes an attested protected presentation-evidence schema/store,
+deterministic human-visible rendering, exact subject/challenge correlation,
+hash-chained proof-lifecycle events, and one protected create-only Gate-9
+authority-consumption record. RIHAC-001 v2.0 and RDGO-001 v3.0 are
+correctively completed without changing approval/projection wire meaning or
+the eleven-gate state machine; RIASC-001 v3.0, PBRD-001 v2.0, and RPAC-001
+v1.0 remain byte-identical. B-3/B-4 CLOSED; other original BLOCKING 5/5 and
+MUST-FIX 2/2 remain closed; new BLOCKING 0; N2 contract gap CLOSED. Fresh
+static suite: 23 passed. No production, hardware, execution, POL-005,
+runtime, release, article, or private-research change. Recommended next, not
+begun: exactly **149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification
+of Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle
+Canonicalization Repair**. Human decision required. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_TRUSTED_APPROVAL_PRESENTATION_EVIDENCE_HPAC_PROOF_LIFECYCLE_CANONICALIZATION_BLOCKING_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1 — Independent Verification of
 Cross-Contract Runtime Invocation Human-Principal Authentication Freeze
 Repair. **VERIFICATION-ONLY — COMPLETE; NOT VERIFIED.** Independently

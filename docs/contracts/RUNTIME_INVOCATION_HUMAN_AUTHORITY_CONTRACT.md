@@ -7,6 +7,11 @@
 **Status:** FROZEN  
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
 Invocation Human-Principal Authentication Freeze Repair
+**Correctively completed by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R —
+Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle
+Canonicalization Blocking Repair. V2.0 is retained because this correction
+adds canonical definitions for already-mandatory HPAC evidence and does not
+change the approval schema, subject, projection, or authority meaning (§21).
 **Supersedes:** RIHAC-001 v1.0 and defective v1.1. V1.x approvals remain
 historical evidence only and SHALL NOT satisfy v2 authority; no migration or
 silent upgrade exists.
@@ -145,6 +150,14 @@ the HPAC-001 `mechanism_id` (the primary v2 hardware-backed FIDO2
 mechanism, HPAC-001 §14) describes how the human's presence and identity
 were cryptographically proven for that same act. Both are required; neither
 substitutes for the other.
+
+The trusted-presentation half of that conjunction is exactly one canonical
+`TrustedApprovalPresentationEvidence` resolved and verified under HPAC-001
+§39. A display, screenshot, terminal transcript, digest pair, or
+evidence-shaped caller object is not a substitute. The approval coordinator
+reserves `approval_id` before the protected ceremony so HPAC presentation,
+challenge, lifecycle, proof, and the later immutable approval all bind the
+same ID without a circular digest dependency.
 
 **Same-user autonomous-agent threat (mandatory, normative).** PCAE is an
 autonomous coding harness; a real or delegated coding agent executes under
@@ -328,7 +341,8 @@ V2 trust is the conjunction of:
 6. current freshness and consumption-state validation; and
 7. successful HPAC-001 v2.0 proof verification against current protected
    registry/proof state, including exact domain, subject, trusted-presentation,
-   UP, UV, nonce/lifecycle, signature, and revocation checks; and
+   mechanism attestation, UP, UV, nonce/hash-chained lifecycle, signature,
+   revocation, and absence of HPAC-001 §41 consumption checks; and
 8. trusted-construction-only validated-authority projection creation.
 
 **v2 revision:** the v1.0 sentence "No cryptographic signature is required"
@@ -422,13 +436,17 @@ Validation SHALL execute in this fail-closed order:
    load the referenced
    `HumanAuthenticationProof` artifact (`provenance.authentication_proof_ref`)
    from HPAC-001's protected canonical proof store and verify its
-   `approval_subject_digest` and protected `trusted_presentation_ref` bind to
-   this exact approval's subject/scope/expiry and preview digest; (e) verify
+   `approval_subject_digest` binds the exact HPAC-001 §38 canonical subject
+   and its protected `trusted_presentation_ref` resolves by HPAC-001 §39 to
+   a canonical, attested, human-usable presentation of this exact approval's
+   subject/scope/expiry and preview digest; (e) verify
    the proof's signature/assertion
    against the resolved credential's public verification material
    (HPAC-001 §18), required UP and UV, and exact v2 domain; (f) verify the
-   proof is unconsumed and either fresh or already bound only to this same
-   approval; (g) reject on any
+   proof is unconsumed under HPAC-001 §41 and its complete HPAC-001 §40 event
+   chain is either fresh or already bound only to this same approval,
+   presentation, challenge, invocation, attempt, subject, and bytes; (g)
+   reject on any
    registry-miss, revoked status, mechanism-assurance shortfall, subject
    mismatch, signature failure, or replay — no step is skipped and no
    later step substitutes for an earlier failure;
@@ -440,8 +458,10 @@ Validation SHALL execute in this fail-closed order:
 9. validate all seven freshness conditions with the policy-drift disposition
    in §13;
 10. validate `created_at`/`expires_at` against a trusted clock;
-11. inspect canonical durable invocation state for prior consumption,
-    cancellation, uncertainty, or completion; and
+11. inspect HPAC-001 §41's canonical consumption path plus durable invocation
+    state for prior consumption, cancellation, uncertainty, or completion;
+    any existing, conflicting, corrupt, or indeterminate consumption evidence
+    fails closed; and
 12. emit an ephemeral immutable validated-authority projection with canonical
     `authority_projection_id`, `authority_projection_digest`, approval
     ID/digest, `RIHAC-001/2.0`, proof-validation digest, request-binding
@@ -454,9 +474,19 @@ Validation evidence is not PB permission or Runtime Enforcement approval.
 
 ## 17. Consumption point
 
-Approval and its bound HPAC proof consumption occur exactly with gate 9's atomic, durable
-`dispatch_attempted` state transition. The same durable write SHALL bind the
-approval ID/digest and the minimum eight RDGO-001 pre-effect items.
+Approval, trusted presentation, challenge, and bound HPAC proof consumption
+occur exactly with gate 9's atomic, durable `dispatch_attempted` state
+transition. The single authoritative write is HPAC-001 §41's protected,
+create-only `RuntimeInvocationAuthorityConsumption`; it SHALL bind the
+approval/proof/presentation/challenge/subject/attempt identities and the
+minimum eight RDGO-001 pre-effect items. Repository-side invocation state may
+reference or mirror this record but cannot create a second consumption truth.
+
+Immediately before the compare-and-create commit, gate 9 SHALL repeat current
+principal/credential/descriptor, presentation, proof/lifecycle, approval,
+expiry, PB, and Runtime Enforcement validation within the protected
+serialization boundary. Revocation, expiry, invalidation, or drift after
+gate 5 therefore fails closed rather than crossing the consumption boundary.
 
 The approval SHALL NOT be consumed at prompt generation, target selection,
 static preflight, approval creation, approval validation, PB ALLOW, Runtime
@@ -489,7 +519,7 @@ default, or authority inference.
 
 - **Before gate 9:** no external effect has occurred and approval remains
   unconsumed. Resume MAY use the same unexpired approval only when canonical
-  state proves no `dispatch_attempted` marker exists and the complete
+  state proves no HPAC-001 §41 consumption record exists and the complete
   validation, live preflight, PB, and Runtime Enforcement sequence is run
   again successfully.
 - **After approval validation, PB, or Runtime Enforcement but before gate
@@ -543,6 +573,16 @@ Existing approvals SHALL always be interpreted under the exact contract and
 schema version they declare. Unknown versions fail closed. No future version
 may retrospectively widen an already-created approval.
 
+**Corrective v2.0 completion:** HPAC-001 §§38-42 supplies the canonical
+presentation/lifecycle/consumption formats that this contract already made
+mandatory. RIASC-001 v3.0's sixteen fields, the five-member subject,
+`authentication_proof_ref`, `record_digest`, and this contract's projection
+shape do not change. No pre-correction evidence could conform to the absent
+schemas, so there is no authority-valid artifact whose meaning is preserved
+or migrated. A v2.1 label would incorrectly imply a usable v2.0 authority
+baseline; this rejected candidate is instead corrected in place and must be
+independently verified before implementation.
+
 ## 22. Non-goals and implementation boundary
 
 This freeze does not add an executable schema package, approval CLI,
@@ -555,5 +595,6 @@ not implement `HumanAuthenticator`, touch hardware, or write to
 
 ## 23. Freeze verdict
 
-**RIHAC-001 v2.0: FROZEN; v1.x is not authority-compatible.**
+**RIHAC-001 v2.0: CORRECTIVELY COMPLETED AND FROZEN; v1.x is not
+authority-compatible.**
 **Real execution: UNAVAILABLE.**
