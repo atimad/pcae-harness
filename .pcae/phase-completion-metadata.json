@@ -3,6 +3,8 @@
   "derived_correctness": "Phase 149O.20L.7O.3V.1R.1 independently verified that Phase 149O.20L.7O.3V.1R's repair closes both BLOCKING findings from 3V.1. RDGO-001 v2.0's gate table was independently re-read: gate 3 (human authority creation) strictly precedes gate 4 (static preflight), an exact literal match to RPAC-REQ-042's own steps 3/4, re-read directly from RPAC-001 primary text -- CLOSED. PBRD-001 v1.1's fact table was independently recounted at exactly fourteen rows, with attempt_id and idempotency_key both required and PCAE-coordinator-owned -- CLOSED. RPAC-REQ-042 verdict: CONSISTENT. Cross-contract identifier matrix, cardinality sweep (PB 12 to 14, gates 11, durable items 8, TOCTOU facts 7, RIASC 16 required/5 subject fields), and terminology audit found zero new contradictions. The two pre-existing 3S.2.1 MUST-FIX findings remain unchanged, explicit, deferred-real-runtime prerequisites. 51 fresh verification tests pass (0 failed), in a module distinct from and not reusing 3V.1R's own test module.",
   "execution_availability": "unavailable",
   "files_changed": [
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
     "docs/PHASE_149O_20L_7O_3V_1R_1_INDEPENDENT_VERIFICATION_REPAIRED_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_PERMISSION_CONTRACTS.md",
@@ -10,7 +12,7 @@
     "tasks/active/20260827-1254-phase-149o-20l-7o-3v-1r-1-independent-verification-of-repaired-local-cli-runtime-dispatch-authority-and-permission-contracts.md",
     "tests/test_phase_149o_20l_7o_3v_1r_1_contract_verification.py"
   ],
-  "files_changed_count": 6,
+  "files_changed_count": 8,
   "governance_results": {
     "pcae_health": "healthy at final close",
     "pcae_check": "passed",
@@ -21,14 +23,18 @@
     "telegram_runtime": "configured, enabled, outbound-ready; final completion dispatch authorized"
   },
   "internal_evidence_coherence": "The verification document and 51 fresh tests consistently classify both 3V.1 BLOCKING findings CLOSED, PBRD-001 v1.1 VERIFIED (14 facts, attempt_id/idempotency_key bound), RDGO-001 v2.0 VERIFIED (11 gates, gate 3/4 transposed, RPAC-REQ-042-consistent), RIHAC-001 v1.0 VERIFIED unchanged, and RIASC-001 v1.0 NORMATIVE SCHEMA VERIFIED unchanged. Eight durable items and seven TOCTOU facts remain unchanged in count. Production schema/action/validator/RE/containment/adapter remain absent. Dry adapter_invocation remains unchanged; a read-only cross-check confirmed the existing shipped mock/dry code already implements RPAC-REQ-042-consistent gate order and matching attempt_id/idempotency_key conventions.",
-  "metadata_consistency": "Phase ID 149O.20L.7O.3V.1R.1, verification baseline SHA 9a645154fc35d41e6a1d7a95bc73245e89082ffe, phase commit 940a0210, v0.4.3 identity, runtime posture, task, PROJECT_STATUS, verification document, metadata, and report agree.",
+  "metadata_consistency": "Phase ID 149O.20L.7O.3V.1R.1, verification baseline SHA 9a645154fc35d41e6a1d7a95bc73245e89082ffe, phase commits 940a0210/665ea5d4, v0.4.3 identity, runtime posture, task, PROJECT_STATUS, verification document, metadata, and report agree.",
   "no_go_confirmation": "No production src/pcae source was modified.\nNo runtime_dispatch source constant was added.\nNo approval store was implemented.\nNo approval validator was implemented.\nNo Runtime Enforcement or Shell Gate was activated.\nNo POL-005 rule was relaxed or removed.\nNo process, adapter, Codex, Claude, or external runtime was launched.\nNo credential was accessed and no network egress was enabled.\nNo dry runtime, runtime inspect, HATP, HMIC, Class-B, or CLTR behavior changed.\nNo release, article, private-research, or Dell operation occurred.\nNo execution availability was enabled.",
-  "origin_main_head": "940a0210c130b82c17b5abbf25074819168dee25",
+  "origin_main_head": "665ea5d4acb084c958bf6fd1f9015f5ee5507c43",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "940a0210",
       "subject": "Phase 149O.20L.7O.3V.1R.1: independently verify repaired RDGO/PBRD contracts"
+    },
+    {
+      "hash": "665ea5d4",
+      "subject": "Phase 149O.20L.7O.3V.1R.1: sync phase-completion-metadata (pre-push)"
     }
   ],
   "phase_id": "149O.20L.7O.3V.1R.1",
