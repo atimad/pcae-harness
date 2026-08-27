@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B: Runtime Invocation Human-Principal Authentication Contract Freeze to Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3W.1R.2A to Phase 149O.20L.7O.3W.1R.2B: Runtime Invocation Human-Principal Authentication Contract Freeze; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B** — Runtime Invocation Human-Principal
   Authentication Contract Freeze (contract-only; no `src/pcae`, test, or
