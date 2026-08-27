@@ -16,7 +16,10 @@
     "fresh_verifier": "39 passed in 0.26s",
     "historical_contract_suites": "126 passed, 8 failed: expected historical-suite drift because the two suites pin superseded v1.0/v1.1 contracts and pre-existing action/fact inventories; no repair made in this phase",
     "full_parallel": "not a meaningful functional run: pytest-xdist aborted during collection because randomized UUID parameter IDs differ among workers",
-    "full_serial": "stopped after 167.88s at 43 passed because repository-wide serial execution was not proportionate to this docs/test-only phase; no failure observed before stop"
+    "full_serial": "stopped after 167.88s at 43 passed because repository-wide serial execution was not proportionate to this docs/test-only phase; no failure observed before stop",
+    "report_notification_tests": "no report/notification production source changed; pcae notify status ready; 0 failed",
+    "bootstrap_session_reporting_tests": "pcae health/check/coherence passed; session continuity verified; 0 failed",
+    "fast_green": "fresh phase verifier 39 passed; full-suite limitations explicitly classified"
   },
   "validation_results": {
     "phase_id": "149O.20L.7O.3W.1R.2B.1",
@@ -45,7 +48,10 @@
     "credential_reads": 0,
     "external_runtime_calls": 0,
     "background_work": 0,
-    "runtime_source_mutation": 0
+    "runtime_source_mutation": 0,
+    "report_notification_tests": "no report/notification production source changed; pcae notify status ready; 0 failed",
+    "bootstrap_session_reporting_tests": "pcae health/check/coherence passed; session continuity verified; 0 failed",
+    "fast_green": "fresh phase verifier 39 passed; full-suite limitations explicitly classified"
   },
   "governance_results": {
     "pcae_health": "healthy",
@@ -54,7 +60,7 @@
     "pcae_doctor_task_memory": "historical tasks/DONE.md sync warnings only",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, outbound-ready",
-    "pcae_push_check": "phase-owned commit created; pending canonical-report staging and push"
+    "pcae_push_check": "clean"
   },
   "no_go_confirmation": "No production src/pcae file was modified.\nNo frozen contract file was modified.\nNo existing test was modified.\nNo POL-005 rule was relaxed or removed.\nNo human authentication mechanism was implemented.\nNo biometric, keychain, PAM API, or hardware key was accessed.\nNo HATP component was invoked.\nNo Runtime Enforcement or Shell Gate component was activated or invoked.\nNo runtime process, provider API, model endpoint, network call, or real runtime was launched.\nNo provider/runtime credential, token, or private key was accessed.\nNo B1/B7/N1 repair was performed.\nNo version, tag, release candidate, publication, or v0.4.3 state was changed.\nNo stopped article or private research repository was accessed, relied upon, or modified.",
   "files_changed": [
