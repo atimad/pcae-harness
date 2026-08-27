@@ -2,44 +2,37 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W — Runtime Invocation Authority + PB Dispatch
-Request Foundation Implementation. **IMPLEMENTATION — IN PROGRESS.**
-Implements Stages 1-7 of Phase 149O.20L.7O.3V.2's blueprint: the
-`RuntimeInvocationApproval` model (RIASC-001 v1.0, 16 fields, 5-member
-subject) with the RIHAC-001 v1.0 twelve-step ordered validator and all
-seven freshness conditions (`src/pcae/core/runtime_authority.py`); a
-canonical create-only, path-confined approval store
-(`src/pcae/core/runtime_invocation_approval_store.py`); the PBRD-001
-v1.1 `runtime_dispatch` PB request architecture using the selected
-Option B nested `runtime_dispatch_context` field on the existing
-`PermissionBrokerRequest` (`src/pcae/core/runtime_dispatch_permission.py`,
-additive changes to `permission_broker_foundation.py` and
-`runtime_invocation.py`). POL-005 (`ExecutionDisabledRule`) is
-byte-unmodified and remains an unconditional hard deny for every real
-(`simulation_only=False`) `runtime_dispatch` request, proved by dedicated
-regression tests. Runtime Enforcement and Shell Gate are not activated;
-no process spawn, network, or credential access exists in any new
-module (statically and dynamically verified). Approval creation is
-internal-API-only (Option A) — no public CLI added. Runtime remains
-`Observed`/`observe`/`unavailable`; release v0.4.3 unchanged. See
-`docs/PHASE_149O_20L_7O_3W_RUNTIME_INVOCATION_AUTHORITY_AND_PB_DISPATCH_REQUEST_FOUNDATION_IMPLEMENTATION.md`.
+Phase 149O.20L.7O.3W.1 — Independent End-to-End Runtime Invocation
+Authority + PB Dispatch Request Foundation Verification.
+**VERIFICATION-ONLY — COMPLETE; NOT VERIFIED.** Fresh independent tests
+confirmed five-member subject binding, the seven freshness dispositions,
+attempt IDs, deterministic PB precedence, unchanged POL-005 hard DENY,
+existing PB/dry compatibility, and zero Runtime Enforcement, Shell Gate,
+runtime-process, network/provider, or credential effects. They also found
+seven BLOCKING trust-boundary defects: forgeable validated-authority/raw
+`approval_present` paths and optional dispatch context; approval-store
+symlink/hardlink escape; incomplete RIASC and duplicate-key enforcement;
+unbound preview provenance; incomplete descriptor/filesystem-scope binding;
+lexical timestamp comparison; and incomplete/non-durable idempotency
+identity. The 190 implementation tests pass and 83 fresh verifier tests
+pass as evidence of observed behavior. Safety-compatible fixed-SHA A–Z
+partitions found **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0**,
+but no monolithic FULL FAST GREEN PASS is claimed. Runtime remains
+`Observed`/`observe`/`unavailable`; release v0.4.3 unchanged. Recommended
+next, not begun: **Runtime Invocation Authority + PB Dispatch Foundation
+Blocking Repair**, followed by independent re-verification. Human decision
+required. See
+`docs/PHASE_149O_20L_7O_3W_1_INDEPENDENT_END_TO_END_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_REQUEST_FOUNDATION_VERIFICATION.md`.
 
 ## Prior Phase
 
-Phase 149O.20L.7O.3V.2 — Local-CLI Real-Runtime Dispatch Implementation
-Planning. **PLANNING-ONLY — COMPLETE.** Produced an implementation-ready
-sequence for the authority (RIHAC-001 v1.0/RIASC-001 v1.0) and permission
-(PBRD-001 v1.1) portion of the future local-CLI real-runtime dispatch
-path, bounded to the smallest safe first-implementation slice, while
-POL-005 continues to hard-deny real dispatch. All four verified contracts
-(RIHAC-001 v1.0, RIASC-001 v1.0, PBRD-001 v1.1, RDGO-001 v2.0) were read
-directly (not planned from prior reports alone); the exact 14 PBRD facts,
-16 RIASC fields (5-member subject), 11 RDGO gates, 8 durable items, and 7
-TOCTOU facts were recovered and classified against a first-vs-later
-implementation split. Recommended first implementation phase: **Runtime
-Invocation Authority + PB Dispatch Request Foundation Implementation**
-— now Phase 149O.20L.7O.3W above. See
-`docs/PHASE_149O_20L_7O_3V_2_LOCAL_CLI_REAL_RUNTIME_DISPATCH_IMPLEMENTATION_PLANNING.md`.
+Phase 149O.20L.7O.3W — Runtime Invocation Authority + PB Dispatch Request
+Foundation Implementation. **IMPLEMENTATION — COMPLETE, INDEPENDENT
+VERIFICATION NOT PASSED.** Added the authority/store/PB Option-B foundation
+without activating execution and with POL-005 unchanged. Its claimed
+properties are superseded for readiness purposes by the 3W.1 findings above.
+See
+`docs/PHASE_149O_20L_7O_3W_RUNTIME_INVOCATION_AUTHORITY_AND_PB_DISPATCH_REQUEST_FOUNDATION_IMPLEMENTATION.md`.
 
 ## Second-Prior Phase
 

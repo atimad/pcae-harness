@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1** — Independent verification completed with
+  verdict **NOT VERIFIED**. Fresh 83-test adversarial coverage found seven
+  BLOCKING authority/PB trust-boundary defects: forgeable approval projection
+  and raw `approval_present`/missing-context paths; approval-store link escape;
+  incomplete RIASC/duplicate-key enforcement; unbound preview provenance;
+  incomplete descriptor/scope binding; lexical timestamp comparison; and
+  incomplete/non-durable idempotency identity. POL-005 remains byte-identical
+  and hard-denies the strongest real request; Runtime Enforcement, Shell Gate,
+  runtime process, network/provider, and credentials remain unused. Phase
+  3W's 190 tests pass. Ordinary fixed-SHA A–Z pytest partitions establish
+  **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0** with documented
+  historical, obsolete-assertion, and infrastructure exclusions; no
+  monolithic FULL FAST GREEN PASS is claimed. Zero production changes.
+  Recommended next: Runtime Invocation Authority + PB Dispatch Foundation
+  Blocking Repair, then independent re-verification; human decision required.
 - **Phase 149O.20L.7O.3V.2** — Planning-only: produced an
   implementation-ready sequence for the authority (RIHAC-001 v1.0/
   RIASC-001 v1.0) and permission (PBRD-001 v1.1) portion of the future

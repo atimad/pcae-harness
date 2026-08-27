@@ -29,6 +29,7 @@ Independently reconstruct and adversarially verify the Phase 3W RIHAC-001/RIASC-
 - CHANGELOG.md
 - tasks/TODO.md
 - tasks/DONE.md
+- tasks/DECISIONS.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - tasks/active/20260827-1423-phase-149o-20l-7o-3w-1-independent-end-to-end-runtime-invocation-authority-pb-dispatch-request-foundation-verification.md

@@ -1,5 +1,13 @@
 # Done
 
+- 2026-08-27 — Phase 149O.20L.7O.3W.1 independently verified the 3W
+  authority/PB foundation and returned **NOT VERIFIED** with seven BLOCKING
+  trust-boundary findings. 83 fresh tests and 190 implementation tests pass;
+  fixed-SHA partitioned attribution found zero unexplained attributable
+  functional regressions without claiming a monolithic full pass. Zero
+  production changes; POL-005/runtime unavailability preserved. Recommended
+  next: bounded blocking repair then independent re-verification, subject to
+  human authorization.
 - 2026-08-27 — Phase 149O.20L.7O.3V.2 (planning-only) produced an
   implementation-ready sequence for the RIHAC-001/RIASC-001 authority and
   PBRD-001 v1.1 permission portion of the future local-CLI real-runtime

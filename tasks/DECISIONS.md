@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1 independent verification disposition
+  (2026-08-27).** Do not certify the Runtime Invocation Authority + PB
+  Dispatch Request foundation and do not begin Runtime Enforcement planning.
+  Seven BLOCKING trust-boundary defects remain: forgeable validated-authority
+  projection/raw approval boolean and optional dispatch context; approval
+  store link escape; incomplete RIASC/duplicate-key rejection; preview
+  provenance not bound; descriptor/filesystem scope not fully cross-bound;
+  lexical timestamps; and incomplete/non-durable idempotency identity. Keep
+  POL-005 hard DENY and runtime unavailable. Fixed-SHA ordinary pytest
+  partitions establish zero unexplained attributable functional regressions,
+  separately from the independent blockers; no full monolithic green claim.
+  Recommend exactly **Runtime Invocation Authority + PB Dispatch Foundation
+  Blocking Repair**, followed by independent re-verification. Human
+  authorization is required; do not start it automatically.
+
 - **Phase 149O.20L.7O.3V.2 implementation-planning disposition
   (2026-08-27).** Produced an implementation-ready sequence for the
   authority (RIHAC-001 v1.0/RIASC-001 v1.0) and permission (PBRD-001
