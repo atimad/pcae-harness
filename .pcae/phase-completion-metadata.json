@@ -61,7 +61,10 @@
     "runtime_inspect_limitation": "TRUTHFUL_WITH_LIMITATION: no real adapter registered or available",
     "release_invariant": "v0.4.3 unchanged at 63580893b1de4782a694ab802ff7bdebdf29b0e6",
     "ready_for_runtime_enforcement_planning": false,
-    "real_runtime_ready": false
+    "real_runtime_ready": false,
+    "fast_green": "0 failed attributable functional regressions (passed)",
+    "report_notification_tests": "not applicable: verification changes no report/notification production source",
+    "bootstrap_session_reporting_tests": "dry/bootstrap compatibility included and passed"
   },
   "governance_results": {
     "pcae_health": "healthy",
