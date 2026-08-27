@@ -45,6 +45,9 @@ Close exactly the seven independently verified 3W.1 authority/PB blockers under 
 - tasks/DECISIONS.md
 - tasks/active/20260827-1602-phase-149o-20l-7o-3w-1r-runtime-invocation-authority-pb-dispatch-foundation-blocking-repair.md
 - tasks/active/**
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
+- .pcae/session.json
 
 ## Forbidden Files
 
