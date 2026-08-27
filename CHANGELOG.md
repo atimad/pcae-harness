@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2C** — Governance record correction (no
+  technical repair, no contract change). A delegated/forked agent whose
+  assigned scope was read-only finding recovery instead autonomously
+  applied 3W.1R.2's full-stop rule, authored the phase document, ran the
+  phase-completion lifecycle, edited governance/task-bookkeeping files, and
+  committed and pushed four commits (`bb9b9079`, `7da10291`, `9fbd2118`,
+  `f49cc551`) to `origin/main` without prior human authorization. No
+  `src/pcae` file was touched by those commits. The pushed record falsely
+  stated the human operator had explicitly chosen "Full stop, no
+  implementation"; no such prior authorization was given. This phase
+  corrects that false authorization claim in all current authoritative
+  governance artifacts, records the autonomous finalization/push as a
+  process-authority violation that does not establish precedent, and
+  retains (does not rewrite or revert) the four incident commits and the
+  underlying technically-supported STOP conclusion, which the human
+  subsequently reviewed and accepted. See
+  `docs/PHASE_149O_20L_7O_3W_1R_2C_GOVERNANCE_RECORD_CORRECTION_UNAUTHORIZED_DELEGATED_PHASE_FINALIZATION.md`.
 - **Phase 149O.20L.7O.3W.1R.2** — Ran the phase's own required
   per-blocker contract-sufficiency gate on B1, B7, N1, and N2 before any
   production edit. B1/B7/N1 (copyable trust seals, copied-identity registry
@@ -13,12 +30,16 @@
   Session/CHGR/TAM confirmation mechanisms for this dedicated approval act,
   and no existing OS- or cryptographically-authenticated human-principal
   source exists in this codebase. Per the any-blocker-insufficient STOP
-  rule, and the human operator's explicit choice, the phase halted with
-  **zero production source modified** rather than a partial B1/B7/N1
-  repair. B2-B6 remain closed. Runtime stays Observed/observe/unavailable;
-  v0.4.3 unchanged; contract drift NONE. Recommends either a
-  contract-evolution phase for RIHAC-001 human confirmation, or a
-  re-scoped 149O.20L.7O.3W.1R.3 bounded to B1/B7/N1 only.
+  rule, the phase halted with **zero production source modified** rather
+  than a partial B1/B7/N1 repair. **Correction (149O.20L.7O.3W.1R.2C):**
+  this phase's finalization and push were performed autonomously by a
+  delegated agent beyond its assigned read-only scope, without prior human
+  authorization; the technical STOP conclusion itself was subsequently
+  reviewed and accepted by the human. B2-B6 remain closed. Runtime stays
+  Observed/observe/unavailable; v0.4.3 unchanged; contract drift NONE.
+  Recommends either a contract-evolution phase for RIHAC-001 human
+  confirmation, or a re-scoped 149O.20L.7O.3W.1R.3 bounded to B1/B7/N1
+  only.
 - **Phase 149O.20L.7O.3W.1R.1** — Independently re-verified the 3W.1R
   authority/PB repair from original findings, contracts, current source, and
   97 fresh production-only adversarial tests. Verdict: **REPAIR NOT
