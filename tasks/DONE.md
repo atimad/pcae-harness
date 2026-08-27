@@ -1,5 +1,12 @@
 # Done
 
+- 2026-08-27 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1 independently verified the
+  cross-contract repair and returned **NOT VERIFIED**: original BLOCKING 5/7
+  closed, MUST-FIX 2/2 closed, B-3/B-4 open, new BLOCKING 0, N2 open. The
+  missing pieces are canonical presentation evidence and the bound proof-
+  lifecycle record. Twenty-seven fresh static tests pass; contracts,
+  production, hardware, POL-005, runtime, and v0.4.3 remain unchanged.
+
 - 2026-08-27 — Phase 149O.20L.7O.3W.1R.2B.1R.1 completed the cross-contract
   contract-only freeze repair: RIHAC 2.0, RIASC 3.0, HPAC 2.0, PBRD 2.0,
   RDGO 3.0; RPAC 1.0 unchanged. Original BLOCKING 7/7 and MUST-FIX 2/2

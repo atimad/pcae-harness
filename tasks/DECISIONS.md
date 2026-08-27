@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1 independent verification disposition
+  (2026-08-27).** Do not certify or plan implementation against the repaired
+  contract graph. Original B-3 remains open: `TrustedApprovalPresentation`
+  is required but its canonical evidence schema, path, closed fields,
+  canonicalization, and protected channel/election attestation are not
+  frozen. Original B-4 remains open: the proof JSON is exact, but its
+  adjacent lifecycle record has no schema/path or approval/proof binding
+  fields needed for same-binding gate-5 revalidation and atomic gate-9
+  consumption. Classify original BLOCKING 5/7 closed, MUST-FIX 2/2 closed,
+  new BLOCKING 0, N2 open. Preserve all contract bytes, RPAC, POL-005,
+  production source, runtime unavailability, hardware, and v0.4.3. Recommend
+  exactly bounded contract repair 149O.20L.7O.3W.1R.2B.1R.1.1R; require
+  human authorization.
+
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1 cross-contract repair disposition
   (2026-08-27).** Freeze RIHAC v2.0, RIASC v3.0, HPAC v2.0, PBRD v2.0,
   and RDGO v3.0 as independently derived incompatible versions; retain
