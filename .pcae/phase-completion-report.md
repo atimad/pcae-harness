@@ -6,7 +6,7 @@ FOUNDATION ONLY. POL-005 REMAINS HARD DENY. HUMAN DECISION REQUIRED.**
 Phase ID: `149O.20L.7O.3V.2`. Status: completed. Completeness: complete.
 
 Baseline SHA: `3482d8cf92eeb352f94f68ca0f478924d69b442b`. Phase commits:
-`71e5f24b`, `f3b5a9de`, `5ea523f4`.
+`71e5f24b`, `f3b5a9de`, `5ea523f4`, `94d15d8a`.
 
 v0.4.3 unchanged at `63580893b1de4782a694ab802ff7bdebdf29b0e6`. Runtime:
 `Observed` / `observe` / `unavailable`, unchanged throughout.
@@ -71,8 +71,8 @@ pre-existing `tasks/DONE.md` sync debt; `pcae push check` clean at entry;
 unchanged. Tests: 0 added; planning-only phase, no production or test
 source changed.
 
-Commits: `71e5f24b`, `f3b5a9de`, `5ea523f4`. Pushed: not_pushed.
-`origin/main..HEAD`: 3 (pending push).
+Commits: `71e5f24b`, `f3b5a9de`, `5ea523f4`, `94d15d8a`. Pushed: pushed.
+`origin/main..HEAD`: 0.
 
 See
 `docs/PHASE_149O_20L_7O_3V_2_LOCAL_CLI_REAL_RUNTIME_DISPATCH_IMPLEMENTATION_PLANNING.md`
