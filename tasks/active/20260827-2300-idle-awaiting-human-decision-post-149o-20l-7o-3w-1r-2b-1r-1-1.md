@@ -25,6 +25,8 @@ Await explicit human authorization for exactly bounded contract repair 149O.20L.
 - tasks/**
 - CHANGELOG.md
 - .pcae/session.json
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
