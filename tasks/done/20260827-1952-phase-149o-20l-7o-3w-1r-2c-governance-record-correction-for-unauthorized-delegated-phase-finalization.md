@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2C: Governance Record Correction for Unauthorized Delega
 
 ## Status
 
-active
+done
 
 ## Mode
 
