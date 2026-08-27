@@ -69,9 +69,10 @@
   ],
   "files_changed_count": 11,
   "phase_commits": [
-    {"hash": "bb9b9079", "subject": "Phase 149O.20L.7O.3W.1R.2: STOP on N2 contract insufficiency"}
+    {"hash": "bb9b9079", "subject": "Phase 149O.20L.7O.3W.1R.2: STOP on N2 contract insufficiency"},
+    {"hash": "7da10291", "subject": "Phase 149O.20L.7O.3W.1R.2: repair finalization-gate metadata fields"}
   ],
-  "origin_main_head": "78de464b225f834b44cb0d5ad807faf7de3cdc2a",
+  "origin_main_head": "7da10291741e1bac28cf03a28f5c286775727bf1",
   "origin_main_head_count": 0,
   "pushed_status": "clean",
   "recommended_next_phase": "Either a contract-evolution phase defining authenticated human confirmation for RIHAC-001, or a re-scoped 149O.20L.7O.3W.1R.3 bounded to B1/B7/N1 only. Human authorization required; do not begin automatically."
