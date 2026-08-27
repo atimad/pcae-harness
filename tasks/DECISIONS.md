@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R bounded repair design (2026-08-27).** Recovered
+  exactly seven BLOCKING findings verbatim from the canonical 3W.1 artifact and
+  reproduced every one independently at clean baseline
+  `abd3f5b4fb1ab6fc763fa2e6172518fa37c513c2` before editing production. Each is
+  an implementation defect under already-frozen RIHAC-001 v1.0, RIASC-001
+  v1.0, PBRD-001 v1.1, RDGO-001 v2.0, and RPAC-001 v1.0; no contract change is
+  required. Repair shared invariants rather than literal exploits: sealed
+  validator/PB construction paths, no-follow create-exclusive approval-store
+  operations, complete schema/cross-binding/instant validation, and a durable
+  gate-2 identity collision registry. The registry is not gate-9 dispatch
+  recording and does not consume approval. Preserve POL-005, dry behavior,
+  Runtime Enforcement/Shell Gate isolation, and runtime unavailability. Require
+  independent 3W.1R.1 verification; this repair phase does not self-certify.
+
 - **Phase 149O.20L.7O.3W.1 independent verification disposition
   (2026-08-27).** Do not certify the Runtime Invocation Authority + PB
   Dispatch Request foundation and do not begin Runtime Enforcement planning.

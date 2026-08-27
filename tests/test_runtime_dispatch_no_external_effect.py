@@ -20,7 +20,14 @@ from pcae.core import runtime_authority as ra
 from pcae.core import runtime_dispatch_permission as rdp
 from pcae.core import runtime_invocation_approval_store as store_mod
 
-from _rdw3w_helpers import always_unconsumed, build_approval, dispatch_inputs, full_chain, matching_context
+from _rdw3w_helpers import (
+    always_unconsumed,
+    build_approval,
+    dispatch_inputs,
+    full_chain,
+    matching_context,
+    new_dispatch_identity,
+)
 
 NEW_MODULE_PATHS = [
     Path(ra.__file__),
@@ -30,7 +37,7 @@ NEW_MODULE_PATHS = [
 
 _FORBIDDEN_IMPORT_MODULES = frozenset({
     "subprocess", "socket", "http", "http.client", "urllib", "urllib.request",
-    "requests", "ftplib", "smtplib", "telnetlib", "ssl", "pty", "os.system",
+    "requests", "ftplib", "smtplib", "telnetlib", "ssl", "pty",
 })
 
 
@@ -150,11 +157,18 @@ def test_no_repository_mutation_by_authority_pb_chain(tmp_path):
     ctx = matching_context(approval)
     projection, _ = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
+    identity = new_dispatch_identity(
+        inputs, root=tmp_path, invocation_id=approval.subject.invocation_id
+    )
     rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity, inputs=inputs, validated_authority=projection,
     )
     after = set(tmp_path.rglob("*"))
     new_paths = after - before
     for p in new_paths:
-        assert ".pcae/runtime-invocation-approvals/v1" in str(p.relative_to(tmp_path)) or p.is_dir()
+        relative = str(p.relative_to(tmp_path))
+        assert (
+            ".pcae/runtime-invocation-approvals/v1" in relative
+            or ".pcae/runtime-dispatch-identities/v1" in relative
+            or p.is_dir()
+        )

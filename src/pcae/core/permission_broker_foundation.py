@@ -36,7 +36,7 @@ module maps decisions against.
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -239,6 +239,10 @@ class PermissionBrokerRequest:
     approval_present: bool
     simulation_only: bool = True
     runtime_dispatch_context: RuntimeDispatchRequestFacts | None = None
+    _runtime_dispatch_seal: object | None = field(default=None, repr=False, compare=False)
+
+
+_RUNTIME_DISPATCH_REQUEST_SEAL = object()
 
 
 def build_permission_broker_request(
@@ -256,6 +260,8 @@ def build_permission_broker_request(
     runtime_dispatch_context: RuntimeDispatchRequestFacts | None = None,
 ) -> PermissionBrokerRequest:
     """Build a `PermissionBrokerRequest` with a generated ID and timestamp."""
+    if action_type == ACTION_TYPE_RUNTIME_DISPATCH or runtime_dispatch_context is not None:
+        raise ValueError("runtime_dispatch_requires_trusted_builder")
     return PermissionBrokerRequest(
         request_id=f"pbr-{uuid.uuid4().hex[:12]}",
         timestamp=datetime.now(timezone.utc).isoformat(),
@@ -270,6 +276,125 @@ def build_permission_broker_request(
         approval_present=approval_present,
         simulation_only=simulation_only,
         runtime_dispatch_context=runtime_dispatch_context,
+    )
+
+
+def _build_runtime_dispatch_permission_broker_request(
+    *,
+    requested_component: str,
+    requested_capability: str,
+    task_id: str,
+    phase_id: str,
+    requested_resource: str | None,
+    evidence_available: bool,
+    approval_present: bool,
+    simulation_only: bool,
+    runtime_dispatch_context: RuntimeDispatchRequestFacts,
+) -> PermissionBrokerRequest:
+    """Module-internal trust bridge used only by the bound 3W builder."""
+    return PermissionBrokerRequest(
+        request_id=f"pbr-{uuid.uuid4().hex[:12]}",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        action_type=ACTION_TYPE_RUNTIME_DISPATCH,
+        execution_class=EXECUTION_CLASS_ADAPTER,
+        task_id=task_id,
+        phase_id=phase_id,
+        requested_component=requested_component,
+        requested_capability=requested_capability,
+        requested_resource=requested_resource,
+        evidence_available=evidence_available,
+        approval_present=approval_present,
+        simulation_only=simulation_only,
+        runtime_dispatch_context=runtime_dispatch_context,
+        _runtime_dispatch_seal=_RUNTIME_DISPATCH_REQUEST_SEAL,
+    )
+
+
+def _bounded_string(value: object, maximum: int = 256) -> bool:
+    return isinstance(value, str) and 1 <= len(value) <= maximum and value == value.strip()
+
+
+def _sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _generated_id(value: object, prefix: str) -> bool:
+    return (
+        isinstance(value, str)
+        and value.startswith(prefix + "-")
+        and len(value) == len(prefix) + 33
+        and all(character in "0123456789abcdef" for character in value[len(prefix) + 1 :])
+    )
+
+
+def _valid_runtime_dispatch_request(request: PermissionBrokerRequest) -> bool:
+    """Validate PBRD Option-B facts and their outer-request bindings."""
+    facts = request.runtime_dispatch_context
+    if (
+        request._runtime_dispatch_seal is not _RUNTIME_DISPATCH_REQUEST_SEAL
+        or request.execution_class != EXECUTION_CLASS_ADAPTER
+        or type(facts) is not RuntimeDispatchRequestFacts
+    ):
+        return False
+    assert facts is not None
+    if not (
+        _generated_id(facts.invocation_id, "inv")
+        and _generated_id(facts.attempt_id, "att")
+        and _sha256(facts.idempotency_key)
+        and _sha256(facts.repository_identity)
+        and _bounded_string(facts.task_id)
+        and _bounded_string(facts.runtime_target_id, 128)
+        and _sha256(facts.prompt_hash)
+        and _bounded_string(facts.requested_capability, 128)
+        and facts.transport_type == "local_cli"
+        and facts.network_requirement is False
+        and facts.task_id == request.task_id
+        and facts.requested_capability == request.requested_capability
+    ):
+        return False
+    lifecycle = facts.lifecycle_context
+    if not (
+        type(lifecycle) is RuntimeDispatchLifecycleContext
+        and _bounded_string(lifecycle.phase_id)
+        and (lifecycle.session_id is None or _bounded_string(lifecycle.session_id))
+        and lifecycle.phase_id == request.phase_id
+    ):
+        return False
+    adapter = facts.adapter_descriptor_binding
+    if not (
+        type(adapter) is RuntimeDispatchAdapterDescriptorBinding
+        and _bounded_string(adapter.adapter_id, 128)
+        and _bounded_string(adapter.descriptor_version, 128)
+        and _sha256(adapter.descriptor_digest)
+        and _sha256(adapter.target_config_digest)
+    ):
+        return False
+    scope = facts.filesystem_scope_ref
+    if not (
+        type(scope) is RuntimeDispatchFilesystemScopeRef
+        and _bounded_string(scope.scope_id)
+        and _sha256(scope.scope_digest)
+    ):
+        return False
+    authority = facts.human_authority_binding
+    if type(authority) is not RuntimeDispatchHumanAuthorityBinding:
+        return False
+    authority_is_valid = (
+        _generated_id(authority.approval_id, "ria")
+        and _sha256(authority.approval_record_digest)
+        and _sha256(authority.validation_evidence_digest)
+    )
+    authority_is_absent = (
+        authority.approval_id == ""
+        and authority.approval_record_digest == ""
+        and authority.validation_evidence_digest == ""
+    )
+    return (request.approval_present and authority_is_valid) or (
+        not request.approval_present and authority_is_absent
     )
 
 
@@ -964,6 +1089,36 @@ class PermissionBroker:
                     "Submit a valid PermissionBrokerRequest instance.",
                 ),
                 precedence_reason="fail_closed_invalid_request",
+            )
+
+        if request.action_type == ACTION_TYPE_RUNTIME_DISPATCH:
+            if not _valid_runtime_dispatch_request(request):
+                return _decision(
+                    DECISION_DENY,
+                    "invalid_runtime_dispatch_request",
+                    matched_no_go_ids=("NG-023",),
+                    matched_invariants=("INV-009",),
+                    required_remediation=(
+                        "Rebuild the request from complete validated Option-B facts through "
+                        "the trusted runtime-dispatch construction path.",
+                    ),
+                    simulation_only=request.simulation_only,
+                    precedence_reason="fail_closed_invalid_runtime_dispatch_request",
+                )
+        elif (
+            request.runtime_dispatch_context is not None
+            or request._runtime_dispatch_seal is not None
+        ):
+            return _decision(
+                DECISION_DENY,
+                "runtime_dispatch_context_on_non_runtime_action",
+                matched_no_go_ids=("NG-023",),
+                matched_invariants=("INV-009",),
+                required_remediation=(
+                    "Remove runtime-dispatch-only facts from the non-runtime action.",
+                ),
+                simulation_only=request.simulation_only,
+                precedence_reason="fail_closed_action_context_mismatch",
             )
 
         results = self._registry.evaluate_all(request)

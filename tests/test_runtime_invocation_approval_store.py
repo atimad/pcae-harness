@@ -203,16 +203,17 @@ def test_atomic_write_never_leaves_half_written_valid_artifact(
     assert not any(f.suffix == ".tmp" for f in files)
 
 
-def test_write_uses_tmp_then_replace_pattern(tmp_path: Path, store: RuntimeInvocationApprovalStore):
-    """Simulate a crash mid-write: a stray `.tmp` file alone (never
-    replaced) must never be visible via `load`/`exists`."""
+def test_preexisting_partial_directory_fails_closed(tmp_path: Path, store: RuntimeInvocationApprovalStore):
+    """A pre-existing partial container is corruption, never absence."""
     approval = build_approval()
     approval_dir = tmp_path / STORE_ROOT / approval.approval_id
     approval_dir.mkdir(parents=True)
     tmp_file = approval_dir / "approval.json.tmp"
     tmp_file.write_text("partial content that never got replace()d", encoding="utf-8")
-    assert store.load(approval.approval_id) is None
-    assert not store.exists(approval.approval_id)
+    with pytest.raises(ApprovalStoreIntegrityError):
+        store.load(approval.approval_id)
+    with pytest.raises(ApprovalStoreIntegrityError):
+        store.exists(approval.approval_id)
 
 
 # ── Restart / persistence ────────────────────────────────────────────────

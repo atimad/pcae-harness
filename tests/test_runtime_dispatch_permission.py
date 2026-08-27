@@ -24,6 +24,7 @@ from _rdw3w_helpers import (
     dispatch_inputs,
     full_chain,
     matching_context,
+    new_dispatch_identity,
 )
 
 
@@ -86,7 +87,7 @@ def test_valid_approval_projects_approval_present_true():
 
 def test_missing_approval_projects_approval_present_false():
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs)
+    identity = new_dispatch_identity(inputs)
     request = rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity, inputs=inputs, validated_authority=None, simulation_only=True,
     )
@@ -112,7 +113,7 @@ def test_stale_approval_never_reaches_pb_as_approval_present_true():
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
     assert projection is None
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
+    identity = new_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
     request = rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity, inputs=inputs, validated_authority=projection, simulation_only=True,
     )
@@ -125,7 +126,7 @@ def test_mismatched_subject_approval_never_reaches_pb_as_present():
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
     assert projection is None
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
+    identity = new_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
     request = rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity, inputs=inputs, validated_authority=projection, simulation_only=True,
     )
@@ -142,7 +143,7 @@ def test_valid_request_simulation_only_allows():
 
 def test_missing_approval_triggers_pol004_human_review():
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs)
+    identity = new_dispatch_identity(inputs)
     request = rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity, inputs=inputs, validated_authority=None, simulation_only=True,
     )
@@ -172,7 +173,7 @@ def test_pol005_deny_precedes_pol004_human_review_when_both_would_fire():
     with NO approval triggers both POL-004 (would-be HUMAN_REVIEW) and
     POL-005 (DENY); DENY wins."""
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs)
+    identity = new_dispatch_identity(inputs)
     request = rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity, inputs=inputs, validated_authority=None, simulation_only=False,
     )
@@ -191,7 +192,7 @@ def test_positive_control_plane_structural_validity_distinguished_from_pol005_de
     assert sim_decision.decision == pbf.DECISION_ALLOW  # structural: would allow if execution existed
 
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
+    identity = new_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
     real_request = rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity, inputs=inputs, validated_authority=projection, simulation_only=False,
     )
@@ -238,7 +239,7 @@ def test_invalid_invocation_id_rejected_at_construction():
         invocation_id="not-valid",
         attempt_id="att-" + "0" * 32,
         idempotency_key=rdp.compute_runtime_dispatch_idempotency_key(
-            rdp.canonical_runtime_dispatch_projection(inputs)
+            rdp.canonical_runtime_dispatch_projection(inputs, invocation_id="inv-" + "0" * 32)
         ),
     )
     with pytest.raises(rdp.RuntimeDispatchConstructionError):
@@ -253,7 +254,7 @@ def test_invalid_attempt_id_rejected_at_construction():
         invocation_id="inv-" + "0" * 32,
         attempt_id="not-valid",
         idempotency_key=rdp.compute_runtime_dispatch_idempotency_key(
-            rdp.canonical_runtime_dispatch_projection(inputs)
+            rdp.canonical_runtime_dispatch_projection(inputs, invocation_id="inv-" + "0" * 32)
         ),
     )
     with pytest.raises(rdp.RuntimeDispatchConstructionError):
@@ -267,7 +268,7 @@ def test_tampered_idempotency_key_rejected_at_construction():
     canonical content projection -- structurally impossible to smuggle a
     stale/forged key through the trusted builder."""
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs)
+    identity = new_dispatch_identity(inputs)
     forged = dataclasses.replace(identity, idempotency_key="0" * 64)
     with pytest.raises(rdp.RuntimeDispatchConstructionError):
         rdp.build_runtime_dispatch_permission_broker_request(

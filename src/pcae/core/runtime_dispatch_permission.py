@@ -23,20 +23,28 @@ exactly like every other action type (PBRD-001 §12/§24).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import json
+import os
+import re
+import stat
+import uuid
+from dataclasses import dataclass, field, replace
+from pathlib import Path
 
 from .permission_broker_foundation import (
-    EXECUTION_CLASS_ADAPTER,
-    ACTION_TYPE_RUNTIME_DISPATCH,
     PermissionBrokerRequest,
     RuntimeDispatchAdapterDescriptorBinding,
     RuntimeDispatchFilesystemScopeRef,
     RuntimeDispatchHumanAuthorityBinding,
     RuntimeDispatchLifecycleContext,
     RuntimeDispatchRequestFacts,
-    build_permission_broker_request,
+    _build_runtime_dispatch_permission_broker_request,
 )
-from .runtime_authority import ValidatedAuthorityProjection, compute_canonical_digest
+from .runtime_authority import (
+    ValidatedAuthorityProjection,
+    compute_canonical_digest,
+    is_trusted_validated_authority_projection,
+)
 from .runtime_invocation import (
     compute_runtime_dispatch_idempotency_key,
     is_valid_generated_id,
@@ -56,6 +64,59 @@ class RuntimeDispatchConstructionError(Exception):
     collision (PBRD-001 §15). Never silently corrected."""
 
 
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_COMMIT_RE = re.compile(r"^[0-9a-f]{40,64}$")
+
+
+def _bounded_string(value: object, maximum: int = 256) -> bool:
+    return isinstance(value, str) and 1 <= len(value) <= maximum and value == value.strip()
+
+
+def _digest_string(value: object) -> bool:
+    return isinstance(value, str) and bool(_SHA256_RE.fullmatch(value))
+
+
+def _valid_ref(value: object) -> bool:
+    return (
+        type(value) is RuntimeDispatchFilesystemScopeRef
+        and _bounded_string(value.scope_id)
+        and _digest_string(value.scope_digest)
+    )
+
+
+def _validate_construction_inputs(inputs: object) -> None:
+    if type(inputs) is not RuntimeDispatchRequestConstructionInput:
+        raise RuntimeDispatchConstructionError("invalid_construction_input")
+    assert isinstance(inputs, RuntimeDispatchRequestConstructionInput)
+    adapter = inputs.adapter_descriptor_binding
+    lifecycle = inputs.lifecycle_context
+    valid = (
+        _digest_string(inputs.repository_identity)
+        and isinstance(inputs.base_commit, str)
+        and bool(_COMMIT_RE.fullmatch(inputs.base_commit))
+        and _bounded_string(inputs.task_id)
+        and _digest_string(inputs.task_contract_digest)
+        and type(lifecycle) is RuntimeDispatchLifecycleContext
+        and _bounded_string(lifecycle.phase_id)
+        and (lifecycle.session_id is None or _bounded_string(lifecycle.session_id))
+        and _bounded_string(inputs.runtime_target_id, 128)
+        and type(adapter) is RuntimeDispatchAdapterDescriptorBinding
+        and _bounded_string(adapter.adapter_id, 128)
+        and _bounded_string(adapter.descriptor_version, 128)
+        and _digest_string(adapter.descriptor_digest)
+        and _digest_string(adapter.target_config_digest)
+        and _digest_string(inputs.prompt_hash)
+        and _bounded_string(inputs.requested_capability, 128)
+        and _valid_ref(inputs.filesystem_scope_ref)
+        and _valid_ref(inputs.process_profile_ref)
+        and inputs.effect_class == "bounded_local_process_dispatch"
+        and inputs.network_requirement is False
+        and _valid_ref(inputs.resource_budget)
+    )
+    if not valid:
+        raise RuntimeDispatchConstructionError("invalid_construction_input_facts")
+
+
 @dataclass(frozen=True)
 class RuntimeDispatchRequestConstructionInput:
     """The subset of the fourteen PBRD-001 facts that are NOT identity
@@ -67,16 +128,24 @@ class RuntimeDispatchRequestConstructionInput:
     performs no repository/task/registry resolution of its own."""
 
     repository_identity: str
+    base_commit: str
     task_id: str
+    task_contract_digest: str
     lifecycle_context: RuntimeDispatchLifecycleContext
     runtime_target_id: str
     adapter_descriptor_binding: RuntimeDispatchAdapterDescriptorBinding
     prompt_hash: str
     requested_capability: str
     filesystem_scope_ref: RuntimeDispatchFilesystemScopeRef
+    process_profile_ref: RuntimeDispatchFilesystemScopeRef
+    effect_class: str
+    network_requirement: bool
+    resource_budget: RuntimeDispatchFilesystemScopeRef
 
 
-def canonical_runtime_dispatch_projection(inputs: RuntimeDispatchRequestConstructionInput) -> dict:
+def canonical_runtime_dispatch_projection(
+    inputs: RuntimeDispatchRequestConstructionInput, *, invocation_id: str
+) -> dict:
     """RDGO-001 §10a / RPAC-REQ-065's canonical-content projection for the
     real-dispatch idempotency key: excludes `attempt_id` and any
     timestamp; includes repository/task/target/prompt/adapter/scope
@@ -87,8 +156,11 @@ def canonical_runtime_dispatch_projection(inputs: RuntimeDispatchRequestConstruc
     forging a mismatched key directly against the store, tested in
     `test_runtime_dispatch_attempt_idempotency.py`)."""
     return {
+        "invocation_id": invocation_id,
         "repository_identity": inputs.repository_identity,
+        "base_commit": inputs.base_commit,
         "task_id": inputs.task_id,
+        "task_contract_digest": inputs.task_contract_digest,
         "lifecycle_context": {
             "phase_id": inputs.lifecycle_context.phase_id,
             "session_id": inputs.lifecycle_context.session_id,
@@ -106,7 +178,57 @@ def canonical_runtime_dispatch_projection(inputs: RuntimeDispatchRequestConstruc
             "scope_id": inputs.filesystem_scope_ref.scope_id,
             "scope_digest": inputs.filesystem_scope_ref.scope_digest,
         },
+        "process_profile_ref": {
+            "scope_id": inputs.process_profile_ref.scope_id,
+            "scope_digest": inputs.process_profile_ref.scope_digest,
+        },
+        "effect_class": inputs.effect_class,
+        "network_requirement": inputs.network_requirement,
+        "resource_budget": {
+            "scope_id": inputs.resource_budget.scope_id,
+            "scope_digest": inputs.resource_budget.scope_digest,
+        },
     }
+
+
+def _expected_subject_scope_binding_digest(
+    *, identity: RuntimeDispatchIdentity, inputs: RuntimeDispatchRequestConstructionInput
+) -> str:
+    return compute_canonical_digest(
+        {
+            "subject": {
+                "invocation_id": identity.invocation_id,
+                "runtime_target_id": inputs.runtime_target_id,
+                "prompt_hash": inputs.prompt_hash,
+                "repository_identity": inputs.repository_identity,
+                "task_id": inputs.task_id,
+            },
+            "approval_scope": {
+                "requested_capability": inputs.requested_capability,
+                "transport_type": "local_cli",
+                "effect_class": inputs.effect_class,
+                "dispatch_limit": 1,
+                "network_required": inputs.network_requirement,
+                "filesystem_scope_ref": {
+                    "artifact_id": inputs.filesystem_scope_ref.scope_id,
+                    "artifact_digest": inputs.filesystem_scope_ref.scope_digest,
+                },
+                "process_profile_ref": {
+                    "artifact_id": inputs.process_profile_ref.scope_id,
+                    "artifact_digest": inputs.process_profile_ref.scope_digest,
+                },
+            },
+            "adapter_binding": {
+                "adapter_id": inputs.adapter_descriptor_binding.adapter_id,
+                "descriptor_version": inputs.adapter_descriptor_binding.descriptor_version,
+                "descriptor_digest": inputs.adapter_descriptor_binding.descriptor_digest,
+                "target_config_digest": inputs.adapter_descriptor_binding.target_config_digest,
+            },
+        }
+    )
+
+
+_RUNTIME_DISPATCH_IDENTITY_SEAL = object()
 
 
 @dataclass(frozen=True)
@@ -120,11 +242,24 @@ class RuntimeDispatchIdentity:
     invocation_id: str
     attempt_id: str
     idempotency_key: str
+    _identity_seal: object | None = field(default=None, repr=False, compare=False)
+    _registration_digest: str = field(default="", repr=False, compare=False)
+
+
+def _identity_registration_digest(identity: RuntimeDispatchIdentity) -> str:
+    return compute_canonical_digest(
+        {
+            "invocation_id": identity.invocation_id,
+            "attempt_id": identity.attempt_id,
+            "idempotency_key": identity.idempotency_key,
+        }
+    )
 
 
 def new_runtime_dispatch_identity(
     inputs: RuntimeDispatchRequestConstructionInput,
     *,
+    identity_tracker: RuntimeDispatchIdentityTracker,
     invocation_id: str | None = None,
 ) -> RuntimeDispatchIdentity:
     """Mint (or, for a genuine same-logical-request retry, reuse) the
@@ -134,13 +269,22 @@ def new_runtime_dispatch_identity(
     is a pure function of `inputs` and is therefore identical for an
     unchanged logical request and different for any changed one, with no
     possibility of the two diverging."""
-    return RuntimeDispatchIdentity(
-        invocation_id=invocation_id or new_invocation_id(),
+    _validate_construction_inputs(inputs)
+    resolved_invocation_id = invocation_id or new_invocation_id()
+    if not is_valid_generated_id(resolved_invocation_id, prefix="inv"):
+        raise RuntimeDispatchConstructionError(
+            f"invalid_invocation_id:{resolved_invocation_id!r}"
+        )
+    identity = RuntimeDispatchIdentity(
+        invocation_id=resolved_invocation_id,
         attempt_id=new_attempt_id(),
         idempotency_key=compute_runtime_dispatch_idempotency_key(
-            canonical_runtime_dispatch_projection(inputs)
+            canonical_runtime_dispatch_projection(inputs, invocation_id=resolved_invocation_id)
         ),
+        _identity_seal=_RUNTIME_DISPATCH_IDENTITY_SEAL,
     )
+    identity_tracker.register(identity)
+    return replace(identity, _registration_digest=_identity_registration_digest(identity))
 
 
 class RuntimeDispatchIdentityTracker:
@@ -148,35 +292,130 @@ class RuntimeDispatchIdentityTracker:
     uniqueness (PBRD-001 §15, RPAC-REQ-066). This is explicitly NOT the
     durable RDGO-001 gate-9 pre-dispatch record -- that record does not
     exist yet (3V.2 §16/§28 staging) and requires gate 8 as an input. This
-    tracker is a lighter-weight, process-local integrity check available
-    before gate 9 exists, proving the collision-detection *logic* end to
-    end without claiming durable, crash-safe, cross-process enforcement."""
+    tracker is a gate-2 append-only collision registry, not the gate-9
+    dispatch-attempt record and not approval consumption. Create-exclusive
+    records make the same collision result deterministic across processes."""
 
-    def __init__(self) -> None:
-        self._attempt_fingerprint: dict[str, str] = {}
-        self._idempotency_invocation: dict[str, str] = {}
+    STORE_ROOT = Path(".pcae") / "runtime-dispatch-identities" / "v1"
+
+    def __init__(self, root: Path) -> None:
+        self._repository_root = Path(root)
+        self._root = self._repository_root / self.STORE_ROOT
+
+    def _ensure_directory(self, path: Path) -> None:
+        try:
+            root_stat = self._repository_root.lstat()
+        except FileNotFoundError as exc:
+            raise RuntimeDispatchConstructionError("identity_store_root_missing") from exc
+        if not stat.S_ISDIR(root_stat.st_mode) or stat.S_ISLNK(root_stat.st_mode):
+            raise RuntimeDispatchConstructionError("identity_store_root_untrusted")
+        current = self._repository_root
+        relative = path.relative_to(self._repository_root)
+        for component in relative.parts:
+            current = current / component
+            try:
+                entry_stat = current.lstat()
+            except FileNotFoundError:
+                try:
+                    current.mkdir(mode=0o700)
+                except FileExistsError:
+                    pass
+                entry_stat = current.lstat()
+            if not stat.S_ISDIR(entry_stat.st_mode) or stat.S_ISLNK(entry_stat.st_mode):
+                raise RuntimeDispatchConstructionError("identity_store_path_untrusted")
+
+    def _read_record(self, path: Path) -> dict:
+        try:
+            entry_stat = path.lstat()
+            if (
+                not stat.S_ISREG(entry_stat.st_mode)
+                or stat.S_ISLNK(entry_stat.st_mode)
+                or entry_stat.st_nlink != 1
+            ):
+                raise RuntimeDispatchConstructionError("identity_record_untrusted")
+            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            try:
+                payload = b""
+                while True:
+                    chunk = os.read(fd, 65536)
+                    if not chunk:
+                        break
+                    payload += chunk
+            finally:
+                os.close(fd)
+            parsed = json.loads(payload.decode("utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise RuntimeDispatchConstructionError("identity_record_corrupt") from exc
+        if not isinstance(parsed, dict):
+            raise RuntimeDispatchConstructionError("identity_record_corrupt")
+        return parsed
+
+    def _create_or_compare(
+        self, path: Path, record: dict, *, collision: str, allow_identical: bool
+    ) -> None:
+        self._ensure_directory(path.parent)
+        payload = json.dumps(record, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        temporary = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
+        fd = os.open(
+            temporary,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+            0o600,
+        )
+        try:
+            view = memoryview(payload)
+            while view:
+                written = os.write(fd, view)
+                view = view[written:]
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        try:
+            os.link(temporary, path, follow_symlinks=False)
+        except FileExistsError:
+            prior = self._read_record(path)
+            if not allow_identical or prior != record:
+                raise RuntimeDispatchConstructionError(collision)
+        except OSError as exc:
+            raise RuntimeDispatchConstructionError("identity_record_create_failed") from exc
+        finally:
+            try:
+                temporary.unlink()
+            except FileNotFoundError:
+                pass
 
     def register(self, identity: RuntimeDispatchIdentity) -> None:
-        fingerprint = compute_canonical_digest(
-            {"invocation_id": identity.invocation_id, "idempotency_key": identity.idempotency_key}
+        invocation_record = {
+            "invocation_id": identity.invocation_id,
+            "idempotency_key": identity.idempotency_key,
+        }
+        self._create_or_compare(
+            self._root / "invocations" / f"{identity.invocation_id}.json",
+            invocation_record,
+            collision=f"invocation_id_collision_conflicting_content:{identity.invocation_id}",
+            allow_identical=True,
         )
-        prior_fingerprint = self._attempt_fingerprint.get(identity.attempt_id)
-        if prior_fingerprint is not None and prior_fingerprint != fingerprint:
-            raise RuntimeDispatchConstructionError(
-                f"attempt_id_collision_conflicting_content:{identity.attempt_id}"
-            )
-        self._attempt_fingerprint[identity.attempt_id] = fingerprint
-
-        prior_invocation = self._idempotency_invocation.get(identity.idempotency_key)
-        if prior_invocation is not None and prior_invocation != identity.invocation_id:
-            raise RuntimeDispatchConstructionError(
-                f"idempotency_key_collision_different_invocation:{identity.idempotency_key}"
-            )
-        self._idempotency_invocation[identity.idempotency_key] = identity.invocation_id
+        self._create_or_compare(
+            self._root / "idempotency" / f"{identity.idempotency_key}.json",
+            invocation_record,
+            collision=(
+                "idempotency_key_collision_different_invocation:"
+                f"{identity.idempotency_key}"
+            ),
+            allow_identical=True,
+        )
+        self._create_or_compare(
+            self._root / "attempts" / f"{identity.attempt_id}.json",
+            {**invocation_record, "attempt_id": identity.attempt_id},
+            collision=f"attempt_id_collision:{identity.attempt_id}",
+            allow_identical=False,
+        )
 
 
 def project_human_authority_binding(
     validated_authority: ValidatedAuthorityProjection | None,
+    *,
+    identity: RuntimeDispatchIdentity,
+    inputs: RuntimeDispatchRequestConstructionInput,
 ) -> tuple[RuntimeDispatchHumanAuthorityBinding, bool]:
     """PBRD-001 §7/§22: the ONLY function in this module (indeed, in this
     phase's entire surface) that may cause `approval_present=True`. It
@@ -194,6 +433,11 @@ def project_human_authority_binding(
             ),
             False,
         )
+    if not is_trusted_validated_authority_projection(validated_authority):
+        raise RuntimeDispatchConstructionError("untrusted_validated_authority_projection")
+    expected_binding = _expected_subject_scope_binding_digest(identity=identity, inputs=inputs)
+    if validated_authority.subject_scope_binding_digest != expected_binding:
+        raise RuntimeDispatchConstructionError("validated_authority_subject_scope_mismatch")
     return (
         RuntimeDispatchHumanAuthorityBinding(
             approval_id=validated_authority.approval_id,
@@ -210,7 +454,6 @@ def build_runtime_dispatch_permission_broker_request(
     inputs: RuntimeDispatchRequestConstructionInput,
     validated_authority: ValidatedAuthorityProjection | None,
     simulation_only: bool = True,
-    identity_tracker: RuntimeDispatchIdentityTracker | None = None,
 ) -> PermissionBrokerRequest:
     """The trusted, contract-fixed PCAE integration point for
     `runtime_dispatch` requests (PBRD-001 §5). Only this function may
@@ -224,13 +467,20 @@ def build_runtime_dispatch_permission_broker_request(
     request -- POL-005 (unmodified) always denies it (proved by
     `test_runtime_dispatch_permission.py`'s POL-005 regression case).
     """
+    _validate_construction_inputs(inputs)
+    if (
+        type(identity) is not RuntimeDispatchIdentity
+        or identity._identity_seal is not _RUNTIME_DISPATCH_IDENTITY_SEAL
+        or identity._registration_digest != _identity_registration_digest(identity)
+    ):
+        raise RuntimeDispatchConstructionError("untrusted_runtime_dispatch_identity")
     if not is_valid_generated_id(identity.invocation_id, prefix="inv"):
         raise RuntimeDispatchConstructionError(f"invalid_invocation_id:{identity.invocation_id!r}")
     if not is_valid_generated_id(identity.attempt_id, prefix="att"):
         raise RuntimeDispatchConstructionError(f"invalid_attempt_id:{identity.attempt_id!r}")
 
     expected_key = compute_runtime_dispatch_idempotency_key(
-        canonical_runtime_dispatch_projection(inputs)
+        canonical_runtime_dispatch_projection(inputs, invocation_id=identity.invocation_id)
     )
     if identity.idempotency_key != expected_key:
         raise RuntimeDispatchConstructionError(
@@ -238,10 +488,9 @@ def build_runtime_dispatch_permission_broker_request(
             f"presented={identity.idempotency_key!r} expected={expected_key!r}"
         )
 
-    if identity_tracker is not None:
-        identity_tracker.register(identity)
-
-    human_authority_binding, approval_present = project_human_authority_binding(validated_authority)
+    human_authority_binding, approval_present = project_human_authority_binding(
+        validated_authority, identity=identity, inputs=inputs
+    )
 
     facts = RuntimeDispatchRequestFacts(
         invocation_id=identity.invocation_id,
@@ -256,15 +505,15 @@ def build_runtime_dispatch_permission_broker_request(
         requested_capability=inputs.requested_capability,
         filesystem_scope_ref=inputs.filesystem_scope_ref,
         human_authority_binding=human_authority_binding,
+        network_requirement=inputs.network_requirement,
     )
 
-    return build_permission_broker_request(
-        action_type=ACTION_TYPE_RUNTIME_DISPATCH,
-        execution_class=EXECUTION_CLASS_ADAPTER,
+    return _build_runtime_dispatch_permission_broker_request(
         requested_component=REQUESTED_COMPONENT_ADAPTER_BOUNDARY,
         requested_capability=inputs.requested_capability,
         task_id=inputs.task_id,
         phase_id=inputs.lifecycle_context.phase_id,
+        requested_resource=None,
         evidence_available=True,
         approval_present=approval_present,
         simulation_only=simulation_only,

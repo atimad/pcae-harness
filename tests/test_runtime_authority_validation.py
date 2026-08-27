@@ -125,18 +125,26 @@ def test_step_7_prompt_swap():
 
 def test_step_8_adapter_descriptor_digest_mismatch():
     approval = build_approval()
-    ctx = dataclasses.replace(matching_context(approval), descriptor_digest="9" * 64)
+    original = matching_context(approval)
+    ctx = dataclasses.replace(
+        original,
+        adapter_binding=dataclasses.replace(original.adapter_binding, descriptor_digest="9" * 64),
+    )
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
     assert projection is None
-    assert reasons == ("adapter_binding_mismatch:descriptor_digest",)
+    assert reasons == ("adapter_binding_mismatch:adapter_binding",)
 
 
 def test_step_8_target_config_digest_mismatch():
     approval = build_approval()
-    ctx = dataclasses.replace(matching_context(approval), target_config_digest="9" * 64)
+    original = matching_context(approval)
+    ctx = dataclasses.replace(
+        original,
+        adapter_binding=dataclasses.replace(original.adapter_binding, target_config_digest="9" * 64),
+    )
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
     assert projection is None
-    assert reasons == ("adapter_binding_mismatch:target_config_digest",)
+    assert reasons == ("adapter_binding_mismatch:adapter_binding",)
 
 
 def test_step_8_requested_capability_mismatch():
@@ -144,7 +152,7 @@ def test_step_8_requested_capability_mismatch():
     ctx = matching_context(approval, requested_capability="different_capability")
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
     assert projection is None
-    assert reasons == ("scope_mismatch:requested_capability",)
+    assert reasons == ("scope_mismatch:approval_scope",)
 
 
 # ── Step 9: all seven freshness conditions ───────────────────────────────
@@ -193,7 +201,11 @@ def test_freshness_runtime_target_change_is_subject_mismatch_not_staleness():
 
 def test_freshness_adapter_configuration_change_is_stale_via_step_8():
     approval = build_approval()
-    ctx = dataclasses.replace(matching_context(approval), descriptor_digest="7" * 64)
+    original = matching_context(approval)
+    ctx = dataclasses.replace(
+        original,
+        adapter_binding=dataclasses.replace(original.adapter_binding, descriptor_digest="7" * 64),
+    )
     _, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
     assert reasons[0].startswith("adapter_binding_mismatch")
 

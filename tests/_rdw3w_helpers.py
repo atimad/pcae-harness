@@ -15,6 +15,10 @@ starts from the same known-good baseline and diverges explicitly.
 
 from __future__ import annotations
 
+import tempfile
+from dataclasses import replace
+from pathlib import Path
+
 from pcae.core import permission_broker_foundation as pbf
 from pcae.core import runtime_authority as ra
 from pcae.core import runtime_dispatch_permission as rdp
@@ -39,6 +43,7 @@ TASK_CONTRACT_DIGEST_A = "2" * 64
 TASK_CONTRACT_DIGEST_B = "3" * 64
 POLICY_VERSION_A = "pv-1"
 POLICY_VERSION_B = "pv-2"
+RESOURCE_BUDGET_DIGEST = "4" * 64
 CREATED_AT = "2026-08-27T00:00:00Z"
 EXPIRES_AT = "2026-08-27T01:00:00Z"
 NOW_FRESH = "2026-08-27T00:30:00Z"
@@ -126,11 +131,10 @@ def matching_context(
         task_id=approval.subject.task_id,
         phase_id=approval.governance_context.phase_id,
         session_id=approval.governance_context.session_id,
-        requested_capability=requested_capability,
-        adapter_id=approval.adapter_binding.adapter_id,
-        descriptor_version=approval.adapter_binding.descriptor_version,
-        descriptor_digest=approval.adapter_binding.descriptor_digest,
-        target_config_digest=approval.adapter_binding.target_config_digest,
+        approval_scope=replace(
+            approval.approval_scope, requested_capability=requested_capability
+        ),
+        adapter_binding=approval.adapter_binding,
         head_commit=approval.freshness_snapshot.head_commit,
         task_contract_digest=approval.freshness_snapshot.task_contract_digest,
         task_state=approval.freshness_snapshot.task_state,
@@ -155,7 +159,9 @@ def dispatch_inputs(
 ) -> rdp.RuntimeDispatchRequestConstructionInput:
     return rdp.RuntimeDispatchRequestConstructionInput(
         repository_identity=repository_identity,
+        base_commit=HEAD_COMMIT_A,
         task_id=task_id,
+        task_contract_digest=TASK_CONTRACT_DIGEST_A,
         lifecycle_context=pbf.RuntimeDispatchLifecycleContext(
             phase_id=phase_id, session_id=session_id
         ),
@@ -171,7 +177,36 @@ def dispatch_inputs(
         filesystem_scope_ref=pbf.RuntimeDispatchFilesystemScopeRef(
             scope_id="fs-scope-1", scope_digest=FS_SCOPE_DIGEST
         ),
+        process_profile_ref=pbf.RuntimeDispatchFilesystemScopeRef(
+            scope_id="proc-profile-1", scope_digest=PROC_PROFILE_DIGEST
+        ),
+        effect_class="bounded_local_process_dispatch",
+        network_requirement=False,
+        resource_budget=pbf.RuntimeDispatchFilesystemScopeRef(
+            scope_id="budget-1", scope_digest=RESOURCE_BUDGET_DIGEST
+        ),
     )
+
+
+def new_dispatch_identity(
+    inputs: rdp.RuntimeDispatchRequestConstructionInput,
+    *,
+    invocation_id: str | None = None,
+    root: Path | None = None,
+) -> rdp.RuntimeDispatchIdentity:
+    """Mint through the required durable gate-2 collision registry."""
+    if root is not None:
+        return rdp.new_runtime_dispatch_identity(
+            inputs,
+            identity_tracker=rdp.RuntimeDispatchIdentityTracker(root),
+            invocation_id=invocation_id,
+        )
+    with tempfile.TemporaryDirectory() as temporary_root:
+        return rdp.new_runtime_dispatch_identity(
+            inputs,
+            identity_tracker=rdp.RuntimeDispatchIdentityTracker(Path(temporary_root)),
+            invocation_id=invocation_id,
+        )
 
 
 def full_chain(
@@ -186,13 +221,24 @@ def full_chain(
     )
     assert projection is not None and reasons == ()
     inputs = dispatch_inputs()
-    identity = rdp.new_runtime_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
+    if tracker is None:
+        with tempfile.TemporaryDirectory() as temporary_root:
+            identity = rdp.new_runtime_dispatch_identity(
+                inputs,
+                identity_tracker=rdp.RuntimeDispatchIdentityTracker(Path(temporary_root)),
+                invocation_id=approval.subject.invocation_id,
+            )
+    else:
+        identity = rdp.new_runtime_dispatch_identity(
+            inputs,
+            identity_tracker=tracker,
+            invocation_id=approval.subject.invocation_id,
+        )
     request = rdp.build_runtime_dispatch_permission_broker_request(
         identity=identity,
         inputs=inputs,
         validated_authority=projection,
         simulation_only=simulation_only,
-        identity_tracker=tracker,
     )
     broker = pbf.PermissionBroker()
     decision = broker.evaluate(request)

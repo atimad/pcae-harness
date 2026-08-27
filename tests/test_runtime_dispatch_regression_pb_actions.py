@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from pcae.core import permission_broker_foundation as pbf
 
+from _rdw3w_helpers import full_chain
+
 
 def _decision_shape(decision: pbf.PermissionBrokerDecision) -> dict:
     return {
@@ -135,15 +137,5 @@ def test_runtime_dispatch_no_longer_triggers_pol006_unknown_action():
     action (POL-006 DENY). After this phase, it is recognized -- POL-006
     no longer fires for it (though other policies, notably POL-005 for
     real dispatch, still may)."""
-    request = pbf.build_permission_broker_request(
-        action_type=pbf.ACTION_TYPE_RUNTIME_DISPATCH,
-        execution_class=pbf.EXECUTION_CLASS_ADAPTER,
-        requested_component="COMP-006",
-        requested_capability="local_cli_dispatch",
-        task_id="task-a",
-        evidence_available=True,
-        approval_present=True,
-        simulation_only=True,
-    )
-    decision = pbf.PermissionBroker().evaluate(request)
+    _, _, request, decision = full_chain(simulation_only=True)
     assert "POL-006" not in decision.causing_policy_ids

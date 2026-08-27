@@ -38,6 +38,7 @@ import re
 import unicodedata
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Callable, Mapping, Sequence
 
 Clock = Callable[[], str]
@@ -85,6 +86,14 @@ def _normalize_recursive(value: object) -> object:
 def _digest(value: object) -> str:
     normalized = _normalize_recursive(value)
     return hashlib.sha256(_canonical_json(normalized).encode("utf-8")).hexdigest()
+
+
+def _parse_utc_timestamp(value: str) -> datetime:
+    """Parse the RIASC RFC3339 UTC profile into an aware instant."""
+    if not _TIMESTAMP_RE.fullmatch(value):
+        raise ValueError("invalid_riasc_timestamp")
+    parsed = datetime.fromisoformat(value.removesuffix("Z") + "+00:00")
+    return parsed.astimezone(timezone.utc)
 
 
 def compute_canonical_digest(value: object) -> str:
@@ -402,7 +411,7 @@ def create_runtime_invocation_approval(
     """
     if identity_evidence_kind not in _IDENTITY_EVIDENCE_KINDS:
         raise ValueError(f"unknown_identity_evidence_kind:{identity_evidence_kind}")
-    if expires_at <= created_at:
+    if _parse_utc_timestamp(expires_at) <= _parse_utc_timestamp(created_at):
         raise ValueError("expires_at_must_be_after_created_at")
 
     preview_digest = approval_preview_digest or build_approval_preview_digest(
@@ -544,7 +553,8 @@ def validate_riasc_schema_shape(data: Mapping) -> tuple[str, ...]:
     const("contract_version", RIHAC_CONTRACT_VERSION)
     const("record_type", RIASC_RECORD_TYPE)
     const("prompt_hash_profile", PROMPT_HASH_PROFILE)
-    const("attempt_limit", 1)
+    if "attempt_limit" in data and (type(data["attempt_limit"]) is not int or data["attempt_limit"] != 1):
+        issues.append("root_const_mismatch:attempt_limit")
 
     if "approval_id" in data and not is_valid_approval_id(data["approval_id"]):
         issues.append("root_invalid_pattern:approval_id")
@@ -582,15 +592,31 @@ def validate_riasc_schema_shape(data: Mapping) -> tuple[str, ...]:
     issues.extend(
         _closed_object_issues(gov, frozenset({"phase_id"}), _GOVERNANCE_ALLOWED, "governance_context")
     )
+    if isinstance(gov, Mapping):
+        for f in ("phase_id", "session_id"):
+            if f in gov and not (
+                isinstance(gov[f], str)
+                and 1 <= len(gov[f]) <= 256
+                and _NONEMPTY_ID_RE.fullmatch(gov[f])
+            ):
+                issues.append(f"governance_context_invalid_pattern:{f}")
 
     scope = data.get("approval_scope")
     issues.extend(_closed_object_issues(scope, _SCOPE_REQUIRED, _SCOPE_REQUIRED, "approval_scope"))
     if isinstance(scope, Mapping):
+        if "requested_capability" in scope and not (
+            isinstance(scope["requested_capability"], str)
+            and 1 <= len(scope["requested_capability"]) <= 128
+            and _NONEMPTY_ID_RE.fullmatch(scope["requested_capability"])
+        ):
+            issues.append("approval_scope_invalid_pattern:requested_capability")
         if "transport_type" in scope and scope["transport_type"] != "local_cli":
             issues.append("approval_scope_const_mismatch:transport_type")
         if "effect_class" in scope and scope["effect_class"] != "bounded_local_process_dispatch":
             issues.append("approval_scope_const_mismatch:effect_class")
-        if "dispatch_limit" in scope and scope["dispatch_limit"] != 1:
+        if "dispatch_limit" in scope and (
+            type(scope["dispatch_limit"]) is not int or scope["dispatch_limit"] != 1
+        ):
             issues.append("approval_scope_const_mismatch:dispatch_limit")
         if "network_required" in scope and scope["network_required"] is not False:
             issues.append("approval_scope_const_mismatch:network_required")
@@ -601,12 +627,31 @@ def validate_riasc_schema_shape(data: Mapping) -> tuple[str, ...]:
                     ref, _ARTIFACT_REF_REQUIRED, _ARTIFACT_REF_REQUIRED, f"approval_scope.{ref_field}"
                 )
             )
+            if isinstance(ref, Mapping):
+                if "artifact_id" in ref and not (
+                    isinstance(ref["artifact_id"], str)
+                    and 1 <= len(ref["artifact_id"]) <= 256
+                    and _NONEMPTY_ID_RE.fullmatch(ref["artifact_id"])
+                ):
+                    issues.append(f"approval_scope.{ref_field}_invalid_pattern:artifact_id")
+                if "artifact_digest" in ref and not (
+                    isinstance(ref["artifact_digest"], str)
+                    and _SHA256_RE.fullmatch(ref["artifact_digest"])
+                ):
+                    issues.append(f"approval_scope.{ref_field}_invalid_pattern:artifact_digest")
 
     adapter = data.get("adapter_binding")
     issues.extend(
         _closed_object_issues(adapter, _ADAPTER_REQUIRED, _ADAPTER_REQUIRED, "adapter_binding")
     )
     if isinstance(adapter, Mapping):
+        for f in ("adapter_id", "descriptor_version"):
+            if f in adapter and not (
+                isinstance(adapter[f], str)
+                and 1 <= len(adapter[f]) <= 128
+                and _NONEMPTY_ID_RE.fullmatch(adapter[f])
+            ):
+                issues.append(f"adapter_binding_invalid_pattern:{f}")
         for f in ("descriptor_digest", "target_config_digest"):
             if f in adapter and not (isinstance(adapter[f], str) and _SHA256_RE.match(adapter[f])):
                 issues.append(f"adapter_binding_invalid_pattern:{f}")
@@ -630,12 +675,24 @@ def validate_riasc_schema_shape(data: Mapping) -> tuple[str, ...]:
             and re.match(r"^[0-9a-f]{40,64}$", freshness["head_commit"])
         ):
             issues.append("freshness_snapshot_invalid_pattern:head_commit")
+        if "policy_version" in freshness and not (
+            isinstance(freshness["policy_version"], str)
+            and 1 <= len(freshness["policy_version"]) <= 128
+            and _NONEMPTY_ID_RE.fullmatch(freshness["policy_version"])
+        ):
+            issues.append("freshness_snapshot_invalid_pattern:policy_version")
 
     provenance = data.get("provenance")
     issues.extend(
         _closed_object_issues(provenance, _PROVENANCE_REQUIRED, _PROVENANCE_REQUIRED, "provenance")
     )
     if isinstance(provenance, Mapping):
+        if "approver_id" in provenance and not (
+            isinstance(provenance["approver_id"], str)
+            and 1 <= len(provenance["approver_id"]) <= 256
+            and _NONEMPTY_ID_RE.fullmatch(provenance["approver_id"])
+        ):
+            issues.append("provenance_invalid_pattern:approver_id")
         if (
             "identity_evidence_kind" in provenance
             and provenance["identity_evidence_kind"] not in _IDENTITY_EVIDENCE_KINDS
@@ -705,16 +762,16 @@ class InvocationRequestContext:
     task_id: str
     phase_id: str
     session_id: str | None
-    requested_capability: str
-    adapter_id: str
-    descriptor_version: str
-    descriptor_digest: str
-    target_config_digest: str
+    approval_scope: ApprovalScope
+    adapter_binding: AdapterBinding
     head_commit: str
     task_contract_digest: str
     task_state: str
     policy_version: str
     current_time: str
+
+
+_VALIDATED_AUTHORITY_SEAL = object()
 
 
 @dataclass(frozen=True)
@@ -734,6 +791,7 @@ class ValidatedAuthorityProjection:
     consumption_state_verdict: str
     validated_at: str
     schema_version: str = RIASC_SCHEMA_VERSION
+    _validator_seal: object | None = field(default=None, repr=False, compare=False)
 
     def evidence_digest(self) -> str:
         return _digest(
@@ -749,6 +807,14 @@ class ValidatedAuthorityProjection:
                 "schema_version": self.schema_version,
             }
         )
+
+
+def is_trusted_validated_authority_projection(value: object) -> bool:
+    """Return true only for evidence emitted by `validate_approval`."""
+    return (
+        type(value) is ValidatedAuthorityProjection
+        and value._validator_seal is _VALIDATED_AUTHORITY_SEAL
+    )
 
 
 def validate_approval(
@@ -793,6 +859,13 @@ def validate_approval(
         return None, ("missing_approver_identity",)
     if approval.provenance.approver_id == approval.provenance.producer_component:
         return None, ("producer_identity_not_distinct_from_approver",)
+    expected_preview_digest = build_approval_preview_digest(
+        subject=approval.subject,
+        approval_scope=approval.approval_scope,
+        expires_at=approval.expires_at,
+    )
+    if approval.provenance.approval_preview_digest != expected_preview_digest:
+        return None, ("approval_preview_digest_mismatch",)
 
     # Step 5: repository, task, phase, conditional session binding.
     if approval.subject.repository_identity != context.repository_identity:
@@ -817,14 +890,10 @@ def validate_approval(
         return None, ("unsupported_prompt_hash_profile",)
 
     # Step 8: capability, effect scope, adapter descriptor, target config.
-    if approval.approval_scope.requested_capability != context.requested_capability:
-        return None, ("scope_mismatch:requested_capability",)
-    if approval.adapter_binding.adapter_id != context.adapter_id:
-        return None, ("adapter_binding_mismatch:adapter_id",)
-    if approval.adapter_binding.descriptor_digest != context.descriptor_digest:
-        return None, ("adapter_binding_mismatch:descriptor_digest",)
-    if approval.adapter_binding.target_config_digest != context.target_config_digest:
-        return None, ("adapter_binding_mismatch:target_config_digest",)
+    if approval.approval_scope != context.approval_scope:
+        return None, ("scope_mismatch:approval_scope",)
+    if approval.adapter_binding != context.adapter_binding:
+        return None, ("adapter_binding_mismatch:adapter_binding",)
 
     subject_scope_binding_digest = _digest(
         {
@@ -861,9 +930,9 @@ def validate_approval(
         return None, ("stale_approval:" + ",".join(freshness_failures),)
 
     # Step 10: created_at/expires_at against a trusted clock.
-    if approval.expires_at <= approval.created_at:
+    if _parse_utc_timestamp(approval.expires_at) <= _parse_utc_timestamp(approval.created_at):
         return None, ("invalid_expiry_ordering",)
-    if context.current_time >= approval.expires_at:
+    if _parse_utc_timestamp(context.current_time) >= _parse_utc_timestamp(approval.expires_at):
         return None, ("expired",)
     expiry_verdict = "not_expired"
 
@@ -884,6 +953,7 @@ def validate_approval(
         expiry_verdict=expiry_verdict,
         consumption_state_verdict=consumption_state,
         validated_at=context.current_time,
+        _validator_seal=_VALIDATED_AUTHORITY_SEAL,
     )
     if policy_drifted:
         return projection, ("policy_drift_requires_fresh_pb_re_evaluation",)

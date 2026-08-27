@@ -15,15 +15,16 @@ is validated against the exact `^ria-[0-9a-f]{32}$` pattern *before* any
 path is constructed from it, and no other caller-supplied string is ever
 used to build a path.
 
-Reuses the existing atomic create-only write pattern
-(`RuntimeInvocationStore._write_create_only`,
-`runtime_invocation.py:850`): write to a `.tmp` sibling, then
-`Path.replace()`. No `subprocess`, no network, no credential access.
+Uses directory-relative, no-follow, create-exclusive filesystem operations
+so an adversarial pre-created symlink or hardlink cannot redirect a write.
+No `subprocess`, no network, no credential access.
 """
 
 from __future__ import annotations
 
 import json
+import os
+import stat
 from pathlib import Path
 
 from .runtime_authority import (
@@ -55,7 +56,37 @@ class RuntimeInvocationApprovalStore:
     (RIHAC-001 §15)."""
 
     def __init__(self, root: Path):
-        self._root = Path(root) / STORE_ROOT
+        self._repository_root = Path(root)
+        self._root = self._repository_root / STORE_ROOT
+
+    def _ensure_store_root(self, *, create: bool) -> bool:
+        """Walk the canonical store path without following directory links."""
+        try:
+            root_stat = self._repository_root.lstat()
+        except FileNotFoundError:
+            if not create:
+                return False
+            raise ApprovalStoreIntegrityError("repository_root_missing")
+        if not stat.S_ISDIR(root_stat.st_mode) or stat.S_ISLNK(root_stat.st_mode):
+            raise ApprovalStoreIntegrityError("repository_root_not_trusted_directory")
+
+        current = self._repository_root
+        for component in STORE_ROOT.parts:
+            current = current / component
+            try:
+                entry_stat = current.lstat()
+            except FileNotFoundError:
+                if not create:
+                    return False
+                try:
+                    current.mkdir(mode=0o700)
+                except FileExistsError:
+                    entry_stat = current.lstat()
+                else:
+                    entry_stat = current.lstat()
+            if not stat.S_ISDIR(entry_stat.st_mode) or stat.S_ISLNK(entry_stat.st_mode):
+                raise ApprovalStoreIntegrityError(f"untrusted_store_component:{component}")
+        return True
 
     def _approval_dir(self, approval_id: str) -> Path:
         if not is_valid_approval_id(approval_id):
@@ -76,17 +107,68 @@ class RuntimeInvocationApprovalStore:
         (RIHAC-001 §1: approvals are immutable one-shot human acts, not
         replayable requests; RIASC-001 §9 has no mutable `consumed` field
         to make "same content" a meaningful resume signal)."""
-        path = self._approval_path(approval.approval_id)
-        if path.exists():
-            raise ApprovalStoreIntegrityError(f"approval_already_exists:{approval.approval_id}")
+        approval_dir = self._approval_dir(approval.approval_id)
         document = approval.to_dict()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(path.suffix + ".tmp")
-        tmp.write_text(
-            json.dumps(document, sort_keys=True, separators=(",", ":"), ensure_ascii=False),
-            encoding="utf-8",
-        )
-        tmp.replace(path)
+        issues = validate_riasc_schema_shape(document)
+        if issues:
+            raise ApprovalStoreIntegrityError(
+                f"approval_schema_invalid:{approval.approval_id}:{','.join(issues)}"
+            )
+        self._ensure_store_root(create=True)
+        try:
+            approval_dir.mkdir(mode=0o700)
+        except FileExistsError as exc:
+            raise ApprovalStoreIntegrityError(
+                f"approval_already_exists:{approval.approval_id}"
+            ) from exc
+
+        directory_fd: int | None = None
+        temporary_created = False
+        try:
+            directory_fd = os.open(
+                approval_dir,
+                os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0),
+            )
+            payload = json.dumps(
+                document, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+            ).encode("utf-8")
+            file_fd = os.open(
+                "approval.json.tmp",
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+                dir_fd=directory_fd,
+            )
+            temporary_created = True
+            try:
+                view = memoryview(payload)
+                while view:
+                    written = os.write(file_fd, view)
+                    view = view[written:]
+                os.fsync(file_fd)
+            finally:
+                os.close(file_fd)
+            os.link(
+                "approval.json.tmp",
+                "approval.json",
+                src_dir_fd=directory_fd,
+                dst_dir_fd=directory_fd,
+                follow_symlinks=False,
+            )
+            os.unlink("approval.json.tmp", dir_fd=directory_fd)
+            temporary_created = False
+            os.fsync(directory_fd)
+        except OSError as exc:
+            raise ApprovalStoreIntegrityError(
+                f"approval_create_failed:{approval.approval_id}"
+            ) from exc
+        finally:
+            if directory_fd is not None:
+                if temporary_created:
+                    try:
+                        os.unlink("approval.json.tmp", dir_fd=directory_fd)
+                    except OSError:
+                        pass
+                os.close(directory_fd)
 
     def load(self, approval_id: str) -> RuntimeInvocationApproval | None:
         """Load and structurally validate exactly one canonical artifact.
@@ -94,16 +176,49 @@ class RuntimeInvocationApprovalStore:
         `ApprovalStoreIntegrityError` for any malformed, truncated,
         schema-invalid, or mismatched-identity artifact -- never a silent
         fallback and never partial trust (RIHAC-001 §15/§18)."""
-        path = self._approval_path(approval_id)
-        if not path.exists():
+        approval_dir = self._approval_dir(approval_id)
+        if not self._ensure_store_root(create=False):
             return None
         try:
-            raw_text = path.read_text(encoding="utf-8")
+            approval_dir_stat = approval_dir.lstat()
+        except FileNotFoundError:
+            return None
+        if not stat.S_ISDIR(approval_dir_stat.st_mode) or stat.S_ISLNK(approval_dir_stat.st_mode):
+            raise ApprovalStoreIntegrityError(f"untrusted_approval_directory:{approval_id}")
+        directory_fd: int | None = None
+        file_fd: int | None = None
+        try:
+            directory_fd = os.open(
+                approval_dir,
+                os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0),
+            )
+            file_fd = os.open(
+                "approval.json",
+                os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                dir_fd=directory_fd,
+            )
+            file_stat = os.fstat(file_fd)
+            if not stat.S_ISREG(file_stat.st_mode) or file_stat.st_nlink != 1:
+                raise ApprovalStoreIntegrityError(f"untrusted_approval_file:{approval_id}")
+            chunks: list[bytes] = []
+            while True:
+                chunk = os.read(file_fd, 65536)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+            raw_text = b"".join(chunks).decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ApprovalStoreIntegrityError(f"approval_not_utf8:{approval_id}") from exc
         except OSError as exc:
             raise ApprovalStoreIntegrityError(f"approval_unreadable:{approval_id}") from exc
+        finally:
+            if file_fd is not None:
+                os.close(file_fd)
+            if directory_fd is not None:
+                os.close(directory_fd)
         try:
-            data = json.loads(raw_text)
-        except json.JSONDecodeError as exc:
+            data = json.loads(raw_text, object_pairs_hook=_reject_duplicate_keys)
+        except (json.JSONDecodeError, _DuplicateKeyError) as exc:
             raise ApprovalStoreIntegrityError(f"approval_malformed_json:{approval_id}") from exc
 
         issues = validate_riasc_schema_shape(data)
@@ -119,7 +234,20 @@ class RuntimeInvocationApprovalStore:
         return _approval_from_dict(data)
 
     def exists(self, approval_id: str) -> bool:
-        return self._approval_path(approval_id).exists()
+        return self.load(approval_id) is not None
+
+
+class _DuplicateKeyError(ValueError):
+    pass
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise _DuplicateKeyError(key)
+        result[key] = value
+    return result
 
 
 def _approval_from_dict(data: dict) -> RuntimeInvocationApproval:

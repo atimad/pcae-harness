@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R** — Repaired the seven independently verified
+  Runtime Invocation Authority/PB foundation blockers under unchanged frozen
+  contracts: validator-issued authority and trusted Option-B construction,
+  link-safe canonical approval persistence, complete RIASC shape/duplicate-key
+  rejection, recomputed preview provenance, exact descriptor/full-scope
+  cross-binding, chronological timestamp comparison, and complete durable
+  cross-process request identity collision enforcement. POL-005 remains
+  source-identical hard DENY; approval consumption, Runtime Enforcement, Shell
+  Gate, real execution, provider/network, and credential access remain absent.
+  Independent re-verification is still required before Runtime Enforcement
+  planning; v0.4.3 remains the public release.
 - **Phase 149O.20L.7O.3W.1** — Independent verification completed with
   verdict **NOT VERIFIED**. Fresh 83-test adversarial coverage found seven
   BLOCKING authority/PB trust-boundary defects: forgeable approval projection
