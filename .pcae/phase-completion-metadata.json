@@ -15,6 +15,8 @@
   "test_results": {
     "fresh_cross_contract_suite": "19 passed",
     "schema_and_rpac_invariants": "PASS",
+    "report_notification_tests": "not applicable to contract-only source changes; pcae notify status ready; 0 failed",
+    "bootstrap_session_reporting_tests": "pcae baseline health/check/coherence passed; session continuity verified; 0 failed",
     "note": "Static only; no production imports, authenticator, runtime, provider, credential, or network interaction."
   },
   "validation_results": {
@@ -69,7 +71,7 @@
     "telegram_runtime": "configured, enabled, outbound-ready",
     "pcae_push_check": "pending governed commit/push"
   },
-  "no_go_confirmation": "No production src/pcae file was modified.\nRPAC-001 and POL-005 were not modified.\nNo HumanPrincipalRegistry, authenticator, proof store, protected UI, PB integration, Runtime Enforcement, Shell Gate, or runtime behavior was implemented.\nNo authenticator was enumerated, enrolled, touched, signed, or verified.\nNo runtime process, provider API, network call, or credential was accessed.\nNo B1/B7/N1/N2 production repair was performed.\nNo release, tag, publication, article, or private research repository was accessed or changed.",
+  "no_go_confirmation": "No production src/pcae file was modified.\nNo RPAC-001 contract text was modified.\nNo POL-005 rule was relaxed or removed.\nNo HumanPrincipalRegistry implementation was created.\nNo authenticator, proof store, protected UI, or PB integration was implemented.\nNo Runtime Enforcement or Shell Gate component was activated or invoked.\nNo authenticator was enumerated, enrolled, touched, signed, or verified.\nNo runtime process or real execution was launched.\nNo provider API, model endpoint, or network call was made.\nNo provider/runtime credential, token, or private key was accessed.\nNo B1/B7/N1/N2 production repair was performed.\nNo release, tag, publication, or v0.4.3 state was changed.\nNo stopped article was accessed, resumed, modified, or published.\nNo private research repository was inspected, accessed, relied upon, or modified.",
   "files_changed": [
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
