@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3V.1 — Independent Verification of Local-CLI Runtime
+Dispatch Authority and Permission Contract Freeze. **VERIFICATION-ONLY —
+COMPLETE; CONTRACT FREEZE NOT VERIFIED.** Independently reconstructed all
+four 3V artifacts against RPAC-001, 3T/3U, Permission Broker
+Foundation/current source, Runtime Enforcement, Phase 99, Typed Authority,
+CHGR, Interactive Workflow Confirmation, the production dry consumer, and
+schema/versioning precedent. Fresh Draft 2020-12/adversarial/static tests pass
+(40 passed) and verify RIASC's exact 16 required fields, five-member subject,
+unknown/authority-shortcut rejection, current POL-004/POL-005/precedence,
+twelve declared PB facts, eleven gates, eight durable items, seven TOCTOU
+facts, and unchanged dry behavior. RIHAC-001 and normative RIASC-001 are
+complete within scope, but two BLOCKING contradictions prevent joint
+certification: (B-1) RDGO gate 3 static preflight / gate 4 human approval
+reverses RPAC-REQ-042's frozen approval-before-preflight order while
+RPAC-REQ-093 requires a major version for gate-order changes; (B-2) PBRD's
+twelve facts and RDGO durable identity omit RPAC's mandatory unique
+`attempt_id` and `idempotency_key`, despite RPAC-REQ-044 explicitly naming
+idempotency as part of the PB gap to close. 3V was not rewritten. Its close-
+report discrepancy is `STALE REPORT WORDING ONLY`: final health/push/runtime/
+Telegram evidence exists in canonical metadata, provenance, and final sync
+commit. Production validator/store/action/RE/containment/adapter remain
+unimplemented; POL-005 and dry `adapter_invocation` remain unchanged; runtime
+remains `Observed` / `observe` / `unavailable`; API/network remains not frozen.
+Recommended next phase: exactly **149O.20L.7O.3V.1R — Local-CLI Runtime
+Dispatch Authority and Permission Contract Reconciliation and Repair**;
+contract-only, human decision required, not begun. See
+`docs/PHASE_149O_20L_7O_3V_1_INDEPENDENT_VERIFICATION_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_PERMISSION_CONTRACT_FREEZE.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3V — Local-CLI Runtime Dispatch Authority and Permission
 Contract Freeze. **CONTRACT-FREEZE-ONLY — COMPLETE.** Independently re-read
 RPAC-001 v1.0, 3T/3U, Permission Broker Foundation/current implementation,

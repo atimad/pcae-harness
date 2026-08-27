@@ -2,6 +2,19 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3V.1 independent verification disposition
+  (2026-08-27).** Do not certify or implement the 3V four-contract system.
+  RIHAC-001 and normative RIASC-001 are complete, but PBRD-001 is incomplete
+  and RDGO-001 contradicts RPAC-001: RDGO moves static preflight before human
+  approval despite RPAC-REQ-042/093, and PBRD/RDGO omit unconditional
+  `attempt_id` plus `idempotency_key` binding required by RPAC-REQ-025/044/
+  064–068. Preserve 3V history unchanged; classify its final-check placeholder
+  prose as a non-blocking stale-report issue because final evidence exists.
+  Require a dedicated contract-only 149O.20L.7O.3V.1R reconciliation/repair
+  phase before implementation planning, preserving one-shot authority,
+  semantic walls, POL-005, dry behavior, runtime unavailability, and the
+  API/network exclusion.
+
 - **Phase 149O.20L.7O.3V local-CLI authority/permission contract freeze
   (2026-08-27).** Freeze four separate, non-substitutable artifacts:
   RIHAC-001 v1.0 (dedicated one-shot `RuntimeInvocationApproval` human

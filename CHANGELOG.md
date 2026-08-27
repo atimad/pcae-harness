@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3V.1** — Independently verified the four 3V local-CLI
+  authority/permission artifacts without production implementation. Fresh
+  schema/PB/dry/cardinality tests pass (40 passed), but the joint freeze is
+  **NOT VERIFIED**: RDGO reverses RPAC-REQ-042's frozen static-preflight /
+  approval order, and PBRD/RDGO omit RPAC's mandatory `attempt_id` and
+  `idempotency_key` binding. RIHAC and normative RIASC are complete;
+  production approval validation remains unimplemented. Classified 3V's
+  final-check report placeholders as stale wording only because final close
+  evidence exists. Runtime, POL-005, dry behavior, release, API/network scope,
+  article, and private research remain unchanged. Recommended next:
+  149O.20L.7O.3V.1R contract reconciliation/repair, human decision required.
+- Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3V to Phase 149O.20L.7O.3V.1: Independent Verification of Local-CLI Runtime Dispatch Authority and Permission Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3V: Local-CLI Runtime Dispatch Authority and Permission Contract Freeze to Idle: awaiting human decision post-149O.20L.7O.3V; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3V** — Local-CLI Runtime Dispatch Authority and
   Permission Contract Freeze (contract-only; no production source/tests,
