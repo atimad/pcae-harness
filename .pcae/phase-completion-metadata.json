@@ -26,12 +26,24 @@
   },
   "internal_evidence_coherence": "The phase document (65 numbered sections), PROJECT_STATUS.md, CHANGELOG.md, task contract, metadata, and canonical report converge on one evidence-derived plan for Phase 149O.20L.7O.3T: all 16 RPAC-001 REAL-RUNTIME-PREREQUISITE requirements enumerated and classified, first hard blocker POL-005 independently confirmed, human authority classified CONTRACT/AUTHORITY GAP, both 3S.2.1 MUST-FIX findings recovered verbatim, dependency DAG produced, next phase recommended as Real Runtime Dispatch Authority and Permission Contract Architecture, real-runtime readiness NO, execution not activated, runtime remains Observed/observe/unavailable throughout.",
   "no_go_confirmation": "No real runtime execution occurred. No subprocess was created for any adapter or agent runtime. No network or provider call was made. No credential, token, auth file, secret store, or provider environment was accessed. No Codex execution occurred. No Claude execution occurred. No Codex-Ox transport was created or invoked. No OpenRouter call was made. No API-provider invocation occurred. No Shell Gate behavior was activated; it was read and reported on only. No Runtime Enforcement behavior was activated; it was read and reported on only. No Permission Broker policy was changed; POL-005 was independently re-confirmed unconditionally denying any non-simulation request, read-only. No production src/pcae source file was modified this phase (confirmed via git diff --stat -- src/pcae, empty). No new runtime registry or adapter catalog was created. No real execution capability or availability was enabled; execution availability remained unavailable at every checkpoint. No repair of either 3S.2.1 MUST-FIX finding was performed this phase (both recovered and classified only, not separately authorized). No HATP, HMIC, Class-B, or CLTR behavior was altered. No Dell system was contacted or mutated. No private research repository (pcae-deepseek-research) was inspected, modified, imported from, or relied on. No article was read, modified, resumed, or published. No release was created and v0.4.3 was not changed (independently confirmed via git rev-parse v0.4.3^{commit}).",
-  "origin_main_head": "PENDING_PUSH",
+  "origin_main_head": "dd96c98ec45254f803b849f192a9d4e6598c23fa",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "353cfc63",
       "subject": "Phase 149O.20L.7O.3T: real-runtime prerequisite dependency and trust-boundary hardening plan"
+    },
+    {
+      "hash": "9e4ad31e",
+      "subject": "Phase 149O.20L.7O.3T: sync phase_commits metadata (pre-push)"
+    },
+    {
+      "hash": "88b4aea4",
+      "subject": "Phase 149O.20L.7O.3T: close out task lifecycle, open idle placeholder"
+    },
+    {
+      "hash": "dd96c98e",
+      "subject": "Phase 149O.20L.7O.3T: sync idle task contract allowed-files (pre-push)"
     }
   ],
   "phase_id": "149O.20L.7O.3T",

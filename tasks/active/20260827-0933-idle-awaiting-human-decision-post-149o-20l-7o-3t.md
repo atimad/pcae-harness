@@ -22,14 +22,14 @@ Idle placeholder awaiting explicit human decision on Phase 149O.20L.7O.3T's reco
 
 ## Allowed Files
 
-- tasks/active
-- tasks/done
 - tasks/active/20260827-0920-phase-149o-20l-7o-3t-real-runtime-prerequisite-dependency-and-trust-boundary-hardening-plan.md
 - tasks/done/20260827-0920-phase-149o-20l-7o-3t-real-runtime-prerequisite-dependency-and-trust-boundary-hardening-plan.md
 - tasks/active/20260827-0933-idle-awaiting-human-decision-post-149o-20l-7o-3t.md
 - PROJECT_STATUS.md
 - tasks/TODO.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
