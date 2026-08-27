@@ -467,17 +467,46 @@ altered in either file. Three wholly new files added.
 ## 49. Fast Green
 
 `implementation_baseline` (phase-entry SHA): `daebfdbb2d8664518c51e904b64aad555195d626`.
-Functional candidate SHA: recorded at phase close in the canonical phase
-report (post-commit).
+Functional candidate SHA: `289bd75d2d9843e95f336bcba2eed35bc414adb7`
+(final commit of this phase's three-commit sequence: `6e765341`,
+`1d53ed19`, `289bd75d`).
 
-- New test files (8 files, 190 tests): all pass.
+- New test files (8 files, 190 tests): all pass, isolated and combined.
 - Pre-existing dry-path suites (`test_runtime_dry_consumption_3s2.py`,
   `test_session_bootstrap_dry_runtime_3s2.py`): unchanged, pass.
 - Pre-existing PB foundation/policy-framework suites
   (`test_permission_broker_foundation.py`,
   `test_permission_broker_policy_rule_framework.py`): unchanged, pass.
-- `fast_green`-marked suite (`pytest -m fast_green -n auto`): run at
-  phase close; see canonical phase report for the final count.
+- Pre-existing contract-verification suites for the four frozen contracts
+  this phase reads (RIHAC-001, RIASC-001, PBRD-001 v1.1, RDGO-001 v2.0):
+  unchanged, pass, confirmed post-commit (e.g.
+  `test_phase_149o_1g_hatp_proof_models_canonical_serialization.py::test_permission_broker_untouched`
+  now passes again once the working tree returned to clean/committed
+  state).
+- **Whole-repository `pytest -m fast_green -n auto` could not be completed
+  to a clean final count in this environment.** Two independent,
+  pre-existing, phase-unrelated causes were isolated and confirmed by
+  direct reproduction, not assumed:
+  1. `tests/test_shell_gate.py::TestAuditPersistence::test_audit_verify_cli`
+     spawns `python -m pcae shell-gate audit verify` as a real subprocess
+     with a 15s timeout; in this sandbox that subprocess hangs and never
+     returns, reliably stalling any `-n auto` run that reaches it
+     (reproduced in isolation, unrelated to any file this phase touches).
+  2. Hundreds of historical per-phase self-check tests (e.g.
+     `test_no_src_contracts_or_scripts_changes_since_election`,
+     `test_git_diff_against_pre_phase_head_touches_no_src_pcae_or_contract_file`,
+     `test_all_seven_contracts_byte_unchanged`) assert zero `git diff`
+     against either the current working tree or a *fixed historical
+     commit* far in the past. The former class passes again once this
+     phase's changes are committed (working tree clean); the latter class
+     is structurally guaranteed to fail for any sufficiently later HEAD
+     regardless of what changed, since dozens of legitimate intervening
+     phases (including this repository's own contract repairs, e.g.
+     PBRD-001 v1.0→v1.1) already touch `docs/contracts/`/`src/` between
+     each such test's fixed election commit and any current HEAD. This
+     class of failure is pre-existing debt, not attributable to 3W.
+  Both causes were confirmed by direct, isolated reproduction against
+  files this phase never touched, not by inference alone.
 - **Attributable functional regressions: 0.** One pre-existing 3V.1-scoped
   historical self-check
   (`test_phase_149o_20l_7o_3v_1_contract_verification.py::TestPBAndDryCompatibility::test_future_action_is_not_implemented_but_selected_class_exists`)
