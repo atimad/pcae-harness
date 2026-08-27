@@ -25,6 +25,7 @@ Idle placeholder task awaiting human authorization for 149O.20L.7O.3W.1 (Indepen
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/done/20260827-1357-phase-149o-20l-7o-3w-runtime-invocation-authority-pb-dispatch-request-foundation-implementation.md
 
 ## Forbidden Files
 
