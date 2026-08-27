@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3S.2.1** — Independent End-to-End Production
+  Dry-Lifecycle Runtime Adapter Consumption Verification (verification-only,
+  0 production source changed): independently reconstructed 3S.2's full
+  non-test call graph and drove it live end-to-end against this
+  repository's real task/HEAD authority across ALLOW, forced PB DENY,
+  forced permissive-fake-enforcement-plus-PB-DENY, 10 no-fallback target
+  variants, forced malformed-adapter-result, duplicate-invocation-ID, and
+  5 provenance-spoofing scenarios, all under live subprocess/socket/
+  thread/credential-read instrumentation. Confirmed
+  `PRODUCTION-CONSUMED` (1 non-test production consumer, was 0); PB
+  simulation-only with any real request unconditionally denied by
+  POL-005; Runtime Enforcement never real authority; invocation evidence
+  proven non-authoritative (copied into a foreign sibling repo, context
+  resolution still returns `None`); 0 subprocess/network/credential/
+  background-work calls in the pure RPAC-consuming phase; 0 source
+  mutation; ordinary bootstrap byte-for-byte unchanged.
+  `pcae runtime inspect` verdict: `TRUTHFUL_WITH_LIMITATION` (dry
+  consumer uses a fresh transient registry, structurally disconnected
+  from the persisted registry `runtime inspect` reports). 0 BLOCKING; 2
+  MUST-FIX (both non-blocking, both unreachable via the current
+  production entry point today: an uncaught crash on a malformed
+  non-mock adapter result, and unsanitized `invocation_id` path
+  traversal at the store layer, structurally proven unreachable since
+  `invocation_id` is always internally generated). 37 fresh adversarial
+  tests (36 passed, 1 xfailed-strict). 0 attributable Fast Green
+  regressions (6 pre-existing PB/HATP-suite failures independently
+  reproduced on the pre-3S.2 baseline). Real-runtime readiness: NO,
+  re-derived. Recommended next: a Real-Runtime Prerequisite Dependency
+  and Trust-Boundary Hardening Plan (not begun; human decision
+  required). See
+  `docs/PHASE_149O_20L_7O_3S_2_1_INDEPENDENT_END_TO_END_PRODUCTION_DRY_LIFECYCLE_RUNTIME_ADAPTER_CONSUMPTION_VERIFICATION.md`.
+- Transitioned active task from Phase 149O.20L.7O.3S.2 to Idle: awaiting human decision post-149O.20L.7O.3S.2; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3S.2** — Production Dry-Lifecycle Runtime Adapter
   Consumption (human-approved Option A): wired the verified RPAC-001
   mock/dry adapter into one explicit production consumer, `pcae session

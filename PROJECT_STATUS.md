@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3S.2.1 — Independent End-to-End Production
+Dry-Lifecycle Runtime Adapter Consumption Verification.
+**VERIFICATION-ONLY — COMPLETE.** Independently re-derived 3S.2's
+production-consumption claim from first principles: reconstructed the
+full non-test call graph (CLI parser → `_run_compact_bootstrap_dry` →
+`run_production_dry_invocation` → `resolve_dry_consumer_context` →
+`_run_with_context` → the unmodified `simulate_invocation` coordinator
+→ `RuntimeAdapterResolver` → `MockDryRuntimeAdapter` → `RuntimeInvocationStore`),
+then drove it live end-to-end against this repository's own real
+task/HEAD authority across ALLOW, forced PB DENY, forced
+permissive-fake-enforcement-plus-PB-DENY, unknown/case/whitespace/typo/
+identity/provider-name target variants (all fail closed, no fallback),
+forced malformed-adapter-result, duplicate-invocation-ID, and 5
+identity-spoofing scenarios — all under live `subprocess`/`socket`/
+`threading`/credential-read instrumentation. Confirmed: 1 production
+consumer (was 0), explicit two-part opt-in required with no silent
+fallback, PB simulation-only (any real, non-simulation request is
+unconditionally denied by POL-005), Runtime Enforcement never activated
+as real authority, invocation evidence persisted under gitignored
+`.pcae/runtime-invocations/mock-v1/` is non-authoritative (proven by
+copying evidence into a foreign sibling repo — context resolution still
+returns `None`), 0 subprocess/network/credential/background-work calls
+in the pure RPAC-consuming phase (4 subprocess calls occur only in the
+full entry point, all attributable to PCAE's pre-existing git-HEAD/
+fingerprint helper reuse), 0 source mutation, ordinary bootstrap
+byte-for-byte unchanged. Verdict: `PRODUCTION-CONSUMED`. `pcae runtime
+inspect` verdict: `TRUTHFUL_WITH_LIMITATION` (no field is false; the
+transient per-call RPAC registry the dry consumer uses is structurally
+disconnected from the persisted registry `runtime inspect` queries, so
+the dry-consumption capability is undiscoverable there). 0 BLOCKING; 2
+MUST-FIX (both non-blocking, both structurally unreachable via the
+current production entry point: a malformed non-mock adapter result
+would crash `simulate_invocation` uncaught rather than failing closed
+cleanly, and `RuntimeInvocationStore` does not sanitize `invocation_id`
+against path traversal at the store layer). 37 fresh adversarial tests
+added (36 passed, 1 xfailed-strict documenting the store-layer MUST-FIX).
+0 attributable Fast Green regressions (6 pre-existing PB/HATP-suite
+failures independently reproduced on the pre-3S.2 baseline via a
+disposable worktree). Real-runtime readiness: NO — re-derived, not
+assumed. Recommended next: a Real-Runtime Prerequisite Dependency and
+Trust-Boundary Hardening Plan, starting with PB dispatch-permission-
+semantics redesign (not begun; human decision required). See
+`docs/PHASE_149O_20L_7O_3S_2_1_INDEPENDENT_END_TO_END_PRODUCTION_DRY_LIFECYCLE_RUNTIME_ADAPTER_CONSUMPTION_VERIFICATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3S.2 — Production Dry-Lifecycle Runtime Adapter
 Consumption. **IMPLEMENTATION — COMPLETE.** Human-approved Option A:
 wired the verified RPAC-001 mock/dry adapter into one explicit, narrow
