@@ -1044,6 +1044,46 @@ def _compose(results: tuple[PolicyResult, ...]) -> PermissionBrokerDecision:
     )
 
 
+def _structural_request_failure(request: object) -> PermissionBrokerDecision | None:
+    """Return a fail-closed decision for malformed request shape, else None."""
+    if not isinstance(request, PermissionBrokerRequest):
+        return _decision(
+            DECISION_DENY,
+            "invalid_request_object",
+            matched_no_go_ids=("NG-023",),
+            matched_invariants=("INV-009",),
+            required_remediation=("Submit a valid PermissionBrokerRequest instance.",),
+            precedence_reason="fail_closed_invalid_request",
+        )
+    if request.action_type == ACTION_TYPE_RUNTIME_DISPATCH:
+        if not _valid_runtime_dispatch_request(request):
+            return _decision(
+                DECISION_DENY,
+                "invalid_runtime_dispatch_request",
+                matched_no_go_ids=("NG-023",),
+                matched_invariants=("INV-009",),
+                required_remediation=(
+                    "Rebuild the request from complete validated Option-B facts through "
+                    "the trusted runtime-dispatch construction path.",
+                ),
+                simulation_only=request.simulation_only,
+                precedence_reason="fail_closed_invalid_runtime_dispatch_request",
+            )
+    elif request.runtime_dispatch_context is not None or request._runtime_dispatch_seal is not None:
+        return _decision(
+            DECISION_DENY,
+            "runtime_dispatch_context_on_non_runtime_action",
+            matched_no_go_ids=("NG-023",),
+            matched_invariants=("INV-009",),
+            required_remediation=(
+                "Remove runtime-dispatch-only facts from the non-runtime action.",
+            ),
+            simulation_only=request.simulation_only,
+            precedence_reason="fail_closed_action_context_mismatch",
+        )
+    return None
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Broker
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1076,50 +1116,8 @@ class PermissionBroker:
         """Evaluate a proposed action. Returns a decision. Never executes
         anything; has no side effects."""
 
-        # Structural validation — fail closed on malformed input. This is
-        # request-shape validation, not a policy question, so it happens
-        # before any PolicyRule is asked to evaluate anything.
-        if not isinstance(request, PermissionBrokerRequest):
-            return _decision(
-                DECISION_DENY,
-                "invalid_request_object",
-                matched_no_go_ids=("NG-023",),
-                matched_invariants=("INV-009",),
-                required_remediation=(
-                    "Submit a valid PermissionBrokerRequest instance.",
-                ),
-                precedence_reason="fail_closed_invalid_request",
-            )
-
-        if request.action_type == ACTION_TYPE_RUNTIME_DISPATCH:
-            if not _valid_runtime_dispatch_request(request):
-                return _decision(
-                    DECISION_DENY,
-                    "invalid_runtime_dispatch_request",
-                    matched_no_go_ids=("NG-023",),
-                    matched_invariants=("INV-009",),
-                    required_remediation=(
-                        "Rebuild the request from complete validated Option-B facts through "
-                        "the trusted runtime-dispatch construction path.",
-                    ),
-                    simulation_only=request.simulation_only,
-                    precedence_reason="fail_closed_invalid_runtime_dispatch_request",
-                )
-        elif (
-            request.runtime_dispatch_context is not None
-            or request._runtime_dispatch_seal is not None
-        ):
-            return _decision(
-                DECISION_DENY,
-                "runtime_dispatch_context_on_non_runtime_action",
-                matched_no_go_ids=("NG-023",),
-                matched_invariants=("INV-009",),
-                required_remediation=(
-                    "Remove runtime-dispatch-only facts from the non-runtime action.",
-                ),
-                simulation_only=request.simulation_only,
-                precedence_reason="fail_closed_action_context_mismatch",
-            )
-
+        failure = _structural_request_failure(request)
+        if failure is not None:
+            return failure
         results = self._registry.evaluate_all(request)
         return _compose(results)

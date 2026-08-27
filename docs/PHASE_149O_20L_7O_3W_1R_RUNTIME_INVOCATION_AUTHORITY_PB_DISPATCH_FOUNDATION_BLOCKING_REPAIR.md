@@ -232,7 +232,10 @@ contract drift: **NONE**.
 
 Production changes are confined to the four Matrix-B files. Every changed
 production line maps to B1-B7; no opportunistic refactor or unrelated source
-change is present.
+change is present. B1's PB action-shape guard is factored into the pure
+`_structural_request_failure` helper so `PermissionBroker.evaluate` remains a
+thin two-return orchestrator and the existing broker-thinness regression stays
+valid.
 
 ## 31. Regression attribution
 

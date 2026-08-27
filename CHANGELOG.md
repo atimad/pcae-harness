@@ -11,6 +11,8 @@
   cross-process request identity collision enforcement. POL-005 remains
   source-identical hard DENY; approval consumption, Runtime Enforcement, Shell
   Gate, real execution, provider/network, and credential access remain absent.
+  PB action-shape validation remains a pure helper behind the existing thin
+  broker orchestrator.
   Independent re-verification is still required before Runtime Enforcement
   planning; v0.4.3 remains the public release.
 - **Phase 149O.20L.7O.3W.1** — Independent verification completed with
