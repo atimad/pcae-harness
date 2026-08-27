@@ -10,7 +10,16 @@ and Permission Contract Freeze
 **Scope:** One future, explicitly human-authorized, bounded local-CLI
 runtime invocation attempt.  
 **Schema companion:** RIASC-001 v1.0  
-**Related contracts:** RPAC-001 v1.0, PBRD-001 v1.0, RDGO-001 v1.0.
+**Related contracts:** RPAC-001 v1.0, PBRD-001 v1.1, RDGO-001 v2.0.
+**Reference note (149O.20L.7O.3V.1R):** PBRD-001 and RDGO-001 were repaired
+to v1.1/v2.0 to close two BLOCKING findings independently identified against
+this contract's companions. RIHAC-001 itself is UNCHANGED: its authority
+subject remains bound to `invocation_id`, not to `attempt_id`, because
+approval authorizes at most one attempt via `attempt_limit=1`
+(one-shot, §4) rather than naming a specific attempt in advance — an
+`attempt_id` is minted per dispatch try at RDGO-001 gate 2, after the
+approval subject model was already frozen, and does not change what the
+human approved.
 
 RIHAC-001 is the sole normative authority for the human-authority artifact
 needed by a future real local-CLI runtime dispatch. It freezes authority

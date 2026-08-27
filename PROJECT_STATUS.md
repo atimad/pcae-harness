@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3V.1R — Local-CLI Runtime Dispatch Authority and
+Permission Contract Reconciliation and Repair. **CONTRACT-REPAIR-ONLY —
+COMPLETE.** Repaired exactly the two BLOCKING findings independently
+identified by Phase 149O.20L.7O.3V.1: (B-1) RDGO-001's gates 3/4 are
+transposed so human authority creation (gate 3) strictly precedes static
+preflight (gate 4), matching RPAC-REQ-042's frozen order literally; RDGO-001
+is repaired to **v2.0** (MAJOR, per its own v1.0 §21 reordering rule) with
+gate count unchanged at eleven. (B-2) PBRD-001's twelve immutable facts are
+extended to fourteen with mandatory `attempt_id` and `idempotency_key`,
+both PCAE-coordinator-owned and minted at gate 2 before approval; PBRD-001
+is repaired to **v1.1** (MINOR, per its own §16 additive-fact rule).
+RDGO-001 durable item 1 was enriched to bind both identifiers
+unconditionally (no longer "`attempt_id` where used"); a new RDGO §10a
+freezes attempt/idempotency semantics, ownership, retry, and crash/replay
+behavior. RIHAC-001 and RIASC-001 remain **v1.0, UNCHANGED** in substance
+(only cross-reference version citations updated) because approval already
+binds one invocation to at most one attempt via `attempt_limit`/
+`dispatch_limit=1` without needing to name a specific `attempt_id`. All
+seven TOCTOU facts, eight durable items (enriched, not expanded), and the
+eleven-gate first-effect boundary (gate 10) are unchanged in count. 21 fresh
+static contract-repair tests pass; zero `src/pcae/**` changes; runtime
+remains `Observed`/`observe`/`unavailable`; POL-005 and the dry
+`adapter_invocation` path are unchanged; API/network remains not frozen.
+Recommended next phase: exactly **149O.20L.7O.3V.1R.1 — Independent
+Verification of Repaired Local-CLI Runtime Dispatch Authority and
+Permission Contracts**; human decision required, not begun. See
+`docs/PHASE_149O_20L_7O_3V_1R_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_PERMISSION_CONTRACT_RECONCILIATION_AND_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3V.1 — Independent Verification of Local-CLI Runtime
 Dispatch Authority and Permission Contract Freeze. **VERIFICATION-ONLY —
 COMPLETE; CONTRACT FREEZE NOT VERIFIED.** Independently reconstructed all

@@ -17,6 +17,16 @@ their manifests, and validation wiring as production behavior. The complete
 Draft 2020-12 shape is frozen below so a later implementation can transcribe
 it under separately authorized governance without redesigning it.
 
+**Reference note (149O.20L.7O.3V.1R):** PBRD-001 (now v1.1) and RDGO-001
+(now v2.0) were repaired to close two BLOCKING findings from Phase
+149O.20L.7O.3V.1. RIASC-001 itself is UNCHANGED: the sixteen required fields,
+the five-member `subject`, and `attempt_limit: {"const": 1}` already
+correctly bind approval to one invocation and one attempt-slot, not to a
+specific `attempt_id`. `attempt_id`/`idempotency_key` are dispatch-layer
+identifiers minted at RDGO-001 gate 2 and belong in the PBRD-001 request and
+the future `RuntimeInvocationRecord`, not in the approval schema; expanding
+`subject` or adding these fields here would be unnecessary widening.
+
 ## 0. Non-authority rule
 
 Schema conformance, digest agreement, storage presence, and identifier shape

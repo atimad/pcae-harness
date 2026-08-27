@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3V.1R** — Repaired exactly the two BLOCKING findings
+  from 3V.1's independent verification, contract-text-only. RDGO-001 gates 3
+  and 4 are transposed (human authority creation now strictly precedes
+  static preflight), matching RPAC-REQ-042 literally; RDGO-001 -> **v2.0**
+  (MAJOR, per its own reordering rule), gate count unchanged at eleven.
+  PBRD-001's twelve facts are extended to fourteen with mandatory
+  `attempt_id`/`idempotency_key`, both PCAE-owned and minted at gate 2
+  before approval; PBRD-001 -> **v1.1** (MINOR, per its own additive-fact
+  rule). RIHAC-001/RIASC-001 remain **v1.0, unchanged** in substance
+  (reference-only updates): approval already binds one invocation to at
+  most one attempt via `attempt_limit=1` without naming a specific
+  `attempt_id`. TOCTOU facts (7) and durable items (8, item 1 enriched) are
+  unchanged in count. 21 fresh static contract-repair tests pass; zero
+  `src/pcae/**` changes; runtime remains
+  `Observed`/`observe`/`unavailable`; POL-005 and dry path unchanged;
+  API/network remains not frozen. Recommended next:
+  149O.20L.7O.3V.1R.1 independent verification, human decision required.
 - **Phase 149O.20L.7O.3V.1** — Independently verified the four 3V local-CLI
   authority/permission artifacts without production implementation. Fresh
   schema/PB/dry/cardinality tests pass (40 passed), but the joint freeze is
