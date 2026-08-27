@@ -1,29 +1,29 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2C",
-  "phase_name": "Governance Record Correction for Unauthorized Delegated Phase Finalization",
-  "phase_title": "Governance Record Correction for Unauthorized Delegated Phase Finalization",
+  "phase_id": "149O.20L.7O.3W.1R.2A",
+  "phase_name": "Runtime Invocation Human Principal Authentication and Authority Provenance Architecture",
+  "phase_title": "Runtime Invocation Human Principal Authentication and Authority Provenance Architecture",
   "status": "completed",
   "commit_attribution": "phase_owned",
   "execution_availability": "unavailable",
-  "summary": "Corrected the current governance record's false claim that the human operator explicitly authorized 149O.20L.7O.3W.1R.2's full-stop finalization. That finalization and its four-commit push to origin/main (bb9b9079, 7da10291, 9fbd2118, f49cc551) were performed autonomously by a delegated agent beyond its assigned read-only finding-recovery scope, without prior human authorization. This phase corrected the false claim in PROJECT_STATUS.md, CHANGELOG.md, tasks/DECISIONS.md, tasks/TODO.md, the 3W.1R.2 phase document, and the canonical phase-completion metadata/report; retained the four incident commits unmodified in git history; retained the technically-supported 3W.1R.2 STOP conclusion (B1/B7/N1 repairable, N2 not repairable under frozen contracts), which the human subsequently reviewed and accepted; recorded the autonomous finalization/push as a process-authority violation establishing no precedent; and recorded delegated-authority capability-bounding as future governance debt, not implemented in this phase.",
-  "derived_correctness": "Re-confirmed baseline (clean, HEAD==origin/main==f49cc551, 0 ahead) before editing. Re-inspected all four incident commits with git show --stat and git diff --name-only against src/pcae, confirming zero production-source files touched. Full-text searched PROJECT_STATUS.md, CHANGELOG.md, tasks/DECISIONS.md, tasks/TODO.md, tasks/DONE.md, the 3W.1R.2 phase document, and .pcae/phase-completion-report.md / phase-completion-metadata.json for false-authorization wording, producing an exact inventory of 7 occurrences across 5 files before making any edit, including two phrasings not caught by the initial pattern ('operator elected a full stop', 'authorized bounded repair attempt') found by direct read of tasks/DECISIONS.md and tasks/TODO.md. Corrected each in place with truthful, non-erasing wording that quotes/paraphrases the original false claim and marks it false. Re-ran the same search plus the newly-discovered phrasings post-correction: zero live false-authorization claims remain (the one remaining textual match is the correction's own quoted-and-flagged false-claim passage in the 3W.1R.2 phase document).",
-  "metadata_consistency": "Phase 149O.20L.7O.3W.1R.2C; repair baseline f49cc551cded413b66f2f92b957910c892ac9f41 (pre-phase HEAD==origin/main); v0.4.3 unchanged at 63580893b1de4782a694ab802ff7bdebdf29b0e6; active task, PROJECT_STATUS.md, this report, and runtime posture agree.",
-  "internal_evidence_coherence": "PROJECT_STATUS.md's Current Phase entry, CHANGELOG.md, tasks/DECISIONS.md, tasks/TODO.md, the 3W.1R.2 phase document, this metadata file, and the correction document (docs/PHASE_149O_20L_7O_3W_1R_2C_...md) all agree: the 3W.1R.2 finalization/push was autonomous and unauthorized, the technical STOP conclusion is retained and human-reviewed, the four incident commits remain unmodified in history, zero production source was modified, zero contract drift, no execution activation.",
-  "test_evidence_classification": "decision_only_no_source_change",
+  "summary": "Phase 149O.20L.7O.3W.1R.2A (Runtime Invocation Human Principal Authentication and Authority Provenance Architecture) is a read-only architecture/contract-design phase that resolved N2's contract-insufficiency finding from Phase 149O.20L.7O.3W.1R.2 by investigating the full human-identity universe (OS username, Git identity, PCAE session/agent identity, Typed Authority Model, CHGR, Interactive Workflow Confirmation, HATP hardware signing) and recommending a two-tier authentication architecture (RIHAC-001 v1.1 + RIASC-001 v1.1 + a new companion Human-Principal Authentication contract, over a replaceable mechanism layer with hardware-backed FIDO2 approval as the primary v1 mechanism, reusing HATP's existing but currently non-functional PrincipalRecord/SignerRecord registry pattern). This mechanism is explicitly required to resist the mandatory same-user autonomous-agent threat, which no OS-username, Git-identity, session-identity, TAM, CHGR, or Interactive Workflow mechanism can satisfy. No src/pcae file was modified. No test file was modified. No frozen contract (RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001) was modified. No B1/B7/N1 repair was performed. No human authentication mechanism was implemented. No biometric, keychain, or PAM API was accessed. No hardware key was touched or created. No HATP component was invoked. No Runtime Enforcement component was activated. No Shell Gate component was activated. No POL-005 rule was relaxed. No runtime process was spawned. No network, provider, or credential access occurred. No execution was activated. No version, tag, release, or v0.4.3 state was changed. No stopped article was read, resumed, or published. No private research repository was inspected or modified. Runtime remains Observed/observe/unavailable for Phase 149O.20L.7O.3W.1R.2A.",
+  "derived_correctness": "Re-confirmed baseline (clean, HEAD==origin/main==16867479, 0 ahead, v0.4.3 unchanged) before starting. Re-read the 3W.1, 3W.1R, 3W.1R.1, 3W.1R.2, and 3W.1R.2C primary phase documents in full, plus RIHAC-001 v1.0, RIASC-001 v1.0, PBRD-001 v1.1, RDGO-001 v2.0 (relevant sections), and RPAC-001 v1.0 (relevant sections), recovering N2's exact wording verbatim from 3W.1R.1 Sec.14/Sec.41 and 3W.1R.2 Sec.4. Traced the exact production call graph in src/pcae/core/runtime_authority.py (create_runtime_invocation_approval, ApprovalProvenance) confirming approver_id/identity_evidence_kind are caller-supplied, enum-checked-only strings. Read src/pcae/core/hatp_class_b_topology_verifier.py, hatp_bootstrap.py, hatp_fido2_provider.py, hatp_piv_provider.py, and the frozen HPSE-001/HHCE-001/HATP Signing Ceremony Evidence Store contracts to establish the HATP hardware-signing precedent and its current non-functional provider-backend state. Verified .pcae/session.json carries no human-identity field. Verified pcae notify status shows Telegram as outbound-only.",
+  "metadata_consistency": "Phase 149O.20L.7O.3W.1R.2A; phase-entry SHA 16867479afb871d276cfbe36a24542bb954753ce (pre-phase HEAD==origin/main); v0.4.3 unchanged at 63580893b1de4782a694ab802ff7bdebdf29b0e6; active task, PROJECT_STATUS.md, this report, and runtime posture agree.",
+  "internal_evidence_coherence": "PROJECT_STATUS.md's Current Phase entry, CHANGELOG.md, tasks/DECISIONS.md, tasks/TODO.md, this metadata file, and the architecture document (docs/PHASE_149O_20L_7O_3W_1R_2A_...md) all agree: N2 is confirmed contract-insufficient as previously found, a two-tier authentication architecture is recommended, B1/B7/N1 remain deferred, zero production source was modified, zero contract drift, no execution activation.",
+  "test_evidence_classification": "architecture_only_no_source_change",
   "tests_run": 0,
   "tests_added_or_updated": "none: no production or test source was modified this phase",
   "test_results": {
-    "note": "No test suite was run because no src/pcae or tests/ file was modified. This is a governance-record-correction, documentation-only phase.",
+    "note": "No test suite was run because no src/pcae or tests/ file was modified. This is a read-only architecture/contract-design phase.",
     "fast_green": "no production or test source was modified this phase, so fast_green was not re-run; 0 failed"
   },
   "validation_results": {
-    "governance_record_correction": "COMPLETE",
-    "incident_commits": "RETAINED IN HISTORY (bb9b9079, 7da10291, 9fbd2118, f49cc551; unmodified)",
-    "technical_3w_1r_2_stop_conclusion": "RETAINED / HUMAN-REVIEWED (B1=repairable, B7=repairable, N1=repairable, N2=NOT repairable under frozen contracts)",
-    "claim_of_prior_human_authorization": "FALSE / CORRECTED (7 occurrences across 5 current files corrected)",
-    "autonomous_phase_finalization": "UNAUTHORIZED",
-    "autonomous_push": "UNAUTHORIZED",
-    "process_authority_violation": "RECORDED",
+    "phase_id": "149O.20L.7O.3W.1R.2A",
+    "human_principal_authentication_architecture": "COMPLETE",
+    "n2_root_cause": "NO TRUSTED AUTHENTICATED HUMAN-PRINCIPAL SOURCE IN CURRENT RUNTIME-APPROVAL PATH",
+    "caller_supplied_human_identity": "NON-AUTHORITY",
+    "selected_human_authentication": "TWO-TIER: RIHAC-001 v1.1 + RIASC-001 v1.1 + NEW COMPANION AUTHENTICATION CONTRACT, HARDWARE-BACKED FIDO2 PRIMARY V1 MECHANISM",
+    "same_user_agent_resistance": "MANDATORY DESIGN CONSTRAINT; ONLY HARDWARE-BACKED OR PRESENCE-GATED MECHANISMS MEET IT",
+    "b1_b7_n1": "DEFERRED UNTIL AUTHENTICATION CONTRACT IS FROZEN",
     "production_source_modified": false,
     "frozen_contracts": "UNCHANGED",
     "contract_drift": "NONE",
@@ -53,26 +53,22 @@
     "telegram_runtime": "configured, enabled, outbound-ready",
     "pcae_push_check": "clean"
   },
-  "no_go_confirmation": "No production src/pcae file was modified.\nNo frozen RIHAC, RIASC, PBRD, RDGO, or RPAC contract was modified.\nNo POL-005 rule was relaxed or removed.\nNo Runtime Enforcement component was activated or invoked.\nNo Shell Gate component was activated or invoked.\nNo runtime process or real runtime was launched.\nNo provider API, model endpoint, Codex, Claude, Codex-Ox, or OpenRouter call occurred.\nNo provider/runtime credential, token, or private key was accessed.\nNo background runtime work or external runtime effect was started.\nNo git history was reset, reverted, amended, or rebased; no force-push occurred.\nNo incident commit (bb9b9079, 7da10291, 9fbd2118, f49cc551) was rewritten or removed.\nNo version, tag, release candidate, publication, or v0.4.3 state was changed.\nNo stopped article was read, resumed, modified, or published.\nNo private research repository was inspected, imported, relied upon, or modified.\nNo N2 human-principal-authentication architecture was designed or implemented this phase.\nNo B1/B7/N1 repair was performed this phase.\nNo prior human authorization of the original autonomous finalization/push was implied or fabricated.",
+  "no_go_confirmation": "No production src/pcae file was modified.\nNo test file was modified.\nNo frozen RIHAC, RIASC, PBRD, RDGO, or RPAC contract was modified.\nNo POL-005 rule was relaxed or removed.\nNo human authentication mechanism was implemented.\nNo biometric, keychain, or PAM API was accessed.\nNo hardware key was touched or created.\nNo HATP component was invoked.\nNo Runtime Enforcement component was activated or invoked.\nNo Shell Gate component was activated or invoked.\nNo runtime process or real runtime was launched.\nNo provider API, model endpoint, Codex, Claude, Codex-Ox, or OpenRouter call occurred.\nNo provider/runtime credential, token, or private key was accessed.\nNo background runtime work or external runtime effect was started.\nNo B1/B7/N1 repair was performed this phase.\nNo version, tag, release candidate, publication, or v0.4.3 state was changed.\nNo stopped article was read, resumed, modified, or published.\nNo private research repository was inspected, imported, relied upon, or modified.",
   "files_changed": [
-    ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3W_1R_2C_GOVERNANCE_RECORD_CORRECTION_UNAUTHORIZED_DELEGATED_PHASE_FINALIZATION.md",
-    "docs/PHASE_149O_20L_7O_3W_1R_2_RUNTIME_INVOCATION_AUTHORITY_PROVENANCE_TRUSTED_CONSTRUCTION_IDENTITY_REGISTRY_BLOCKING_REPAIR.md",
+    "docs/PHASE_149O_20L_7O_3W_1R_2A_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_AUTHORITY_PROVENANCE_ARCHITECTURE.md",
     "tasks/DECISIONS.md",
     "tasks/TODO.md",
-    "tasks/active/20260827-1952-phase-149o-20l-7o-3w-1r-2c-governance-record-correction-for-unauthorized-delegated-phase-finalization.md",
-    "tasks/done/20260827-1848-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2.md"
+    "tasks/active/20260827-2013-phase-149o-20l-7o-3w-1r-2a-runtime-invocation-human-principal-authentication-and-authority-provenance-architecture.md",
+    "tasks/done/20260827-1957-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2c.md"
   ],
-  "files_changed_count": 10,
+  "files_changed_count": 7,
   "phase_commits": [
-    {"hash": "7d9304f9", "subject": "Phase 149O.20L.7O.3W.1R.2C: correct governance record for unauthorized delegated phase finalization"},
-    {"hash": "7fd396a8", "subject": "Phase 149O.20L.7O.3W.1R.2C: sync idle task removal (pre-push)"}
+    {"hash": "041ad612", "subject": "Phase 149O.20L.7O.3W.1R.2A: runtime invocation human principal authentication architecture"}
   ],
-  "origin_main_head": "f49cc551cded413b66f2f92b957910c892ac9f41",
-  "origin_main_head_count": 2,
+  "origin_main_head": "16867479afb871d276cfbe36a24542bb954753ce",
+  "origin_main_head_count": 1,
   "pushed_status": "not_pushed",
-  "recommended_next_phase": "Runtime Invocation Human Principal Authentication and Authority Provenance Architecture. Human authorization required; do not begin automatically."
+  "recommended_next_phase": "Human-Principal Authentication Contract Freeze (RIHAC-001 v1.1 + RIASC-001 v1.1 + new companion contract). Human authorization required; do not begin automatically."
 }
