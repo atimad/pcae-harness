@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3T — Real-Runtime Prerequisite Dependency and
+Trust-Boundary Hardening Plan. **READ-ONLY STRATEGIC PLANNING — COMPLETE.**
+Produced an evidence-derived dependency graph and hardening plan for the
+transition from the verified production dry adapter consumer to a future
+human-authorized real-runtime dispatch, without implementing or
+activating real execution. Re-derived, from primary source, all 16
+RPAC-001 requirements classified `REAL-RUNTIME-PREREQUISITE` (RPAC-REQ-014,
+028, 044, 045, 046, 047, 048, 057, 058, 059, 071, 072, 084, 086, 095, 097),
+each with exact contract wording, current state, and dependency edges.
+Built the dependency DAG: PB request-shape amendment (RPAC-REQ-044) is
+the first unblocker; the hard serial spine is RPAC-044 -> RPAC-045/046
+(Runtime Enforcement real gate) -> RPAC-047 (RE/Shell-Gate division of
+labor) -> RPAC-048 (Shell Gate enforcement) -> RPAC-057 (local CLI
+target) -> RPAC-095 (first real adapter); RPAC-084 (credential-reference
+architecture), RPAC-086 (supply-chain pinning), and RPAC-097
+(legacy-path retirement) are parallelizable now. **First hard blocker
+independently confirmed:** POL-005 (`ExecutionDisabledRule`,
+`src/pcae/core/permission_broker_foundation.py`), which unconditionally
+denies any non-`simulation_only` request regardless of `execution_class`
+("no execution boundary exists yet ... `COMP-002` not_implemented"),
+matching 3S.2.1's finding. Confirmed by direct source read: Runtime
+Enforcement remains design-only/non-authorizing with 0 production
+consumers; Shell Gate remains a non-intercepting classifier; no
+credential-reference abstraction exists anywhere; no PB network-egress
+action exists; CHGR/Interactive Workflow Confirmation explicitly do not
+and must not populate `approval_present` (RWMPC-REQ-023) — human runtime-
+invocation authority is a genuine CONTRACT/AUTHORITY GAP, no artifact
+invented. Recovered both 3S.2.1 MUST-FIX findings verbatim (uncaught
+`AttributeError` on a malformed non-mock adapter result; unsanitized
+`invocation_id` path traversal at the store layer), both still
+non-blocking today, with repair-ordering findings for when each becomes
+load-bearing. Produced 3 PB redesign options, 3 human-authority options,
+Runtime Enforcement integration options, full local-CLI/API trust
+matrices, restart/recovery matrix, threat model, and a minimum-viable
+real-runtime path (local CLI only, no API, no parallel invocations, no
+auto-retry, no background execution, explicit human approval every
+invocation). Real-runtime readiness: **NO**, unchanged. Recommended
+next: "Real Runtime Dispatch Authority and Permission Contract
+Architecture" (combined PB + human-authority contract design, still no
+implementation; human decision required, not begun). See
+`docs/PHASE_149O_20L_7O_3T_REAL_RUNTIME_PREREQUISITE_DEPENDENCY_AND_TRUST_BOUNDARY_HARDENING_PLAN.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3S.2.1 — Independent End-to-End Production
 Dry-Lifecycle Runtime Adapter Consumption Verification.
 **VERIFICATION-ONLY — COMPLETE.** Independently re-derived 3S.2's

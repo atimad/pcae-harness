@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3T** — Real-Runtime Prerequisite Dependency and
+  Trust-Boundary Hardening Plan (read-only strategic planning, 0
+  production source changed, execution NOT activated). Re-derived from
+  primary source all 16 RPAC-001 requirements classified
+  `REAL-RUNTIME-PREREQUISITE`, each with exact contract wording, current
+  status, and dependency edges; built the full dependency DAG (first
+  unblocker: PB request-shape amendment RPAC-REQ-044; hard serial spine
+  RPAC-044 -> RPAC-045/046 -> RPAC-047 -> RPAC-048 -> RPAC-057 ->
+  RPAC-095; RPAC-084/086/097 parallelizable now). Independently
+  reconfirmed the first hard blocker: POL-005
+  (`ExecutionDisabledRule`) unconditionally denies any non-simulation
+  request for every `execution_class`. Confirmed by direct source read:
+  Runtime Enforcement remains design-only/non-authorizing (0 production
+  consumers); Shell Gate remains a non-intercepting classifier; no
+  credential-reference abstraction or PB network-egress action exists
+  anywhere; CHGR/Interactive Workflow Confirmation explicitly do not
+  populate `approval_present` (RWMPC-REQ-023) — human runtime-invocation
+  authority recorded as a genuine CONTRACT/AUTHORITY GAP, no approval
+  semantics invented. Recovered both 3S.2.1 MUST-FIX findings verbatim
+  with repair-ordering analysis. Produced 3 PB redesign options, 3 human
+  -authority options, Runtime Enforcement integration options, local-CLI/
+  API trust matrices, restart/recovery matrix, threat model, and a
+  minimum-viable real-runtime path (local CLI only, no API, no parallel
+  invocations, no auto-retry, no background execution, explicit human
+  approval every invocation). Real-runtime readiness: NO, unchanged.
+  Recommended next: "Real Runtime Dispatch Authority and Permission
+  Contract Architecture" (human decision required, not begun).
+
 - **Phase 149O.20L.7O.3S.2.1** — Independent End-to-End Production
   Dry-Lifecycle Runtime Adapter Consumption Verification (verification-only,
   0 production source changed): independently reconstructed 3S.2's full
