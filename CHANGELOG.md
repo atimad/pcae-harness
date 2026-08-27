@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3V: Local-CLI Runtime Dispatch Authority and Permission Contract Freeze to Idle: awaiting human decision post-149O.20L.7O.3V; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3V** — Local-CLI Runtime Dispatch Authority and
   Permission Contract Freeze (contract-only; no production source/tests,
   execution, PB policy, Runtime Enforcement, adapter, runtime inspect, or dry
