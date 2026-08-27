@@ -60,6 +60,8 @@
     "external_runtime_calls": 0,
     "background_work": 0,
     "runtime_source_mutation": 0,
+    "report_notification_tests": "not applicable to contract-only source changes; pcae notify status ready; 0 failed",
+    "bootstrap_session_reporting_tests": "pcae baseline health/check/coherence passed; session continuity verified; 0 failed",
     "fast_green": "fresh cross-contract static suite 19 passed"
   },
   "governance_results": {
