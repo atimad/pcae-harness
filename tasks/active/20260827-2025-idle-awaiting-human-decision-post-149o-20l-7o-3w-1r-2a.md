@@ -18,13 +18,23 @@ implementation
 
 ## Goal
 
-Await human authorization for the Human-Principal Authentication Contract Freeze (RIHAC-001 v1.1 + RIASC-001 v1.1 + new companion contract), or other direction.
+Freeze the minimum contract architecture for Phase 149O.20L.7O.3W.1R.2B: Runtime Invocation Human-Principal Authentication Contract Freeze (RIHAC-001 v1.1, RIASC-001 v2.0, new companion HPAC-001 v1.0). Contract-only; no src/pcae, no hardware, no execution.
 
 ## Allowed Files
 
+- docs/contracts/RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md
+- docs/contracts/RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md
+- docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md
+- docs/PHASE_149O_20L_7O_3W_1R_2B_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT_FREEZE.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- tasks/DECISIONS.md
+- tasks/TODO.md
+- tasks/DONE.md
 - tasks/active/**
 - tasks/done/**
 - .pcae/session.json
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -33,9 +43,10 @@ Await human authorization for the Human-Principal Authentication Contract Freeze
 
 ## Allowed Zones
 
+- docs
 - tasks
 - session
-- docs
+- config
 
 ## Forbidden Zones
 
@@ -59,11 +70,15 @@ TBD
 
 ## Acceptance Criteria
 
-- Idle placeholder until human authorizes next phase
+- RIHAC-001 amended to v1.1 with authenticated-principal proof-verification requirement
+- RIASC-001 amended (version determined by field-meaning analysis) with principal/proof provenance fields
+- New companion Human Principal Authentication Contract frozen
+- Required phase document created with all governing-prompt sections
+- No src/pcae, test, PBRD-001, RDGO-001, or RPAC-001 file modified unless explicitly justified and disclosed
 
 ## Acceptance Checks
 
-- TBD
+- pcae health/check/status coherence/push check clean before phase complete
 
 ## Documentation Requirements
 

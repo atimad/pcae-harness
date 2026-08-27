@@ -2,6 +2,35 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B contract-freeze disposition (2026-08-27).**
+  Froze RIHAC-001 v1.0->**v1.1** (additive tightening: §3/§12/§16 now
+  require `HumanPrincipalRegistry` lookup plus HPAC-001 authentication-proof
+  verification as part of "identified by provenance evidence"; no subject
+  member removed, no one-shot relaxation, no required-field removal).
+  Froze RIASC-001 v1.0->**v2.0**, not v1.1: `provenance.approver_id` and
+  `identity_evidence_kind` are retired (their *meaning*, not merely their
+  presence, changes), which RIASC-001's own §1 versioning rule classifies
+  as MAJOR, independent of RIHAC-001's own MINOR determination. Froze a new
+  companion contract, **HPAC-001 v1.0** (Human Principal Authentication
+  Contract): `HumanPrincipalRegistry` (deployment-scoped, structurally and
+  namespace-separate from HATP's `registry.json` — Option B reuse: pattern
+  and low-level FIDO2 primitives may be shared, registry/principal-ID
+  space/challenge-domain are not), `HumanAuthenticator` mechanism
+  abstraction (no implementation), `HumanAuthenticationProof` shape, and a
+  ten-step fail-closed verification sequence producing a
+  trusted-construction-only `AuthenticatedHumanPrincipal`. Primary v1
+  mechanism: hardware-backed FIDO2 (`hpac.fido2.presence_gated.v1`),
+  user-presence (UP) required, user-verification (UV) deployment-
+  configurable — UP alone is what resists the mandatory same-user
+  autonomous-agent threat; UV answers a narrower "which human" question not
+  load-bearing for v1's single-principal default. Re-confirmed by full
+  re-read (not assumed from the prior architecture phase) that PBRD-001,
+  RDGO-001, and RPAC-001 require no changes. No `src/pcae`, test, or
+  hardware was touched. Recommend exactly independent verification of this
+  contract freeze (149O.20L.7O.3W.1R.2B.1) next; require human
+  authorization and do not begin implementation or B1/B7/N1 repair
+  automatically.
+
 - **Phase 149O.20L.7O.3W.1R.2A architecture disposition (2026-08-27).**
   Read-only architecture/contract-design phase resolving N2's
   contract-insufficiency (3W.1R.2 §7). Recommend a two-tier architecture:

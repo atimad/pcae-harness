@@ -2,32 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B — Runtime Invocation Human-Principal
+Authentication Contract Freeze. **CONTRACT-ONLY — COMPLETE.** Froze the
+minimum contract architecture required to make `authenticated human
+principal -> explicit invocation approval act -> verifiable approval proof
+-> RuntimeInvocationApproval provenance` a trustworthy chain, closing
+finding N2 (human-confirmation provenance was caller-manufacturable).
+RIHAC-001 amended to **v1.1** (additive tightening: §3/§12/§16 now require
+principal-registry lookup plus authentication-proof verification).
+RIASC-001 amended to **v2.0** (MAJOR: `provenance.approver_id`/
+`identity_evidence_kind` retired and replaced by `principal_id`/
+`authentication_mechanism_id`/`credential_id`/`authentication_proof_ref` —
+a required-field meaning redefinition under RIASC-001's own versioning
+rule, not merely additive). New companion contract **HPAC-001 v1.0** frozen
+(Human Principal Authentication Contract), owning principal identity, a new
+deployment-scoped `HumanPrincipalRegistry` kept structurally and
+namespace-separate from HATP's own `registry.json` (Option B reuse: pattern
+and low-level FIDO2 primitives may be shared; registry, principal-ID space,
+and challenge domain are not), the `HumanAuthenticator` mechanism
+abstraction, and the full proof-production/verification/revocation model.
+Primary v1 mechanism: hardware-backed FIDO2, user-presence (UP) required,
+user-verification (UV) deployment-configurable. PBRD-001, RDGO-001, and
+RPAC-001 required no changes (re-confirmed by full re-read, not assumed).
+No `src/pcae` file, test file, hardware, or execution was touched; B1/B7/N1
+were not repaired. Runtime remains `Observed`/`observe`/`unavailable`;
+v0.4.3 unchanged. Recommended next, not begun: independent verification of
+this contract freeze (149O.20L.7O.3W.1R.2B.1). Human decision required. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT_FREEZE.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2A — Runtime Invocation Human Principal
 Authentication and Authority Provenance Architecture. **READ-ONLY
 ARCHITECTURE — COMPLETE.** Determined the smallest architecture/contract
-evolution required to close finding N2 (human-confirmation provenance is
-caller-manufacturable: `create_runtime_invocation_approval` accepts
-caller-supplied `approver_id`/`identity_evidence_kind` strings with no
-authentication). Investigated the full human-identity universe (OS
-username, Git identity, PCAE session/agent identity, Typed Authority Model,
-CHGR, Interactive Workflow Confirmation, HATP hardware-signing) and found
-none currently supplies genuine authenticated-human evidence without new
-architecture, confirming 3W.1R.2's own N2 contract-insufficiency finding.
-Recommends a two-tier architecture (a portable principal/signature contract
-in RIHAC-001 v1.1/RIASC-001 v1.1 plus a new companion authentication
-contract, over a replaceable mechanism layer) with hardware-backed FIDO2
-approval (reusing HATP's existing but currently non-functional
-`PrincipalRecord`/`SignerRecord` registry pattern) as the primary v1
-mechanism, explicitly required to resist the mandatory same-user
-autonomous-agent threat. No `src/pcae` file, test, or frozen contract
-(RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001) was modified. B1/B7/N1
-were not repaired. Runtime remains `Observed`/`observe`/`unavailable`;
-v0.4.3 unchanged. Recommended next, not begun: a Human-Principal
-Authentication Contract Freeze (RIHAC-001 v1.1 + RIASC-001 v1.1 + new
-companion contract). Human decision required. See
+evolution required to close finding N2. Investigated the full
+human-identity universe and found none currently supplies genuine
+authenticated-human evidence without new architecture. Recommended the
+two-tier architecture this phase (3W.1R.2B) then froze. See
 `docs/PHASE_149O_20L_7O_3W_1R_2A_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_AUTHORITY_PROVENANCE_ARCHITECTURE.md`.
 
-## Prior Phase
+## Older Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2C — Governance Record Correction for Unauthorized
 Delegated Phase Finalization. **CORRECTION-ONLY — COMPLETE.** A

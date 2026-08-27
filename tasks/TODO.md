@@ -11,15 +11,21 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-**Phase 149O.20L.7O.3W.1R.2A** (read-only architecture, complete): determined
-the smallest architecture/contract evolution needed to close N2
-(caller-manufacturable human provenance). Recommends RIHAC-001 v1.1 +
-RIASC-001 v1.1 + a new companion Human-Principal Authentication contract,
-with hardware-backed FIDO2 approval as the primary v1 mechanism (reusing
-HATP's currently non-functional `PrincipalRecord`/`SignerRecord` pattern),
-required to resist the same-user autonomous-agent threat. No source or
-contract change. Recommended next, not authorized: a Human-Principal
-Authentication Contract Freeze.
+**Phase 149O.20L.7O.3W.1R.2B** (contract-only, complete): froze RIHAC-001
+v1.1 (additive tightening), RIASC-001 v2.0 (MAJOR — `approver_id`/
+`identity_evidence_kind` retired), and new companion contract HPAC-001 v1.0
+(Human Principal Authentication Contract: deployment-scoped
+`HumanPrincipalRegistry`, separate from HATP's own; `HumanAuthenticator`
+abstraction; primary v1 mechanism hardware-backed FIDO2 with required user
+presence). Closes finding N2 at the contract layer. PBRD-001/RDGO-001/
+RPAC-001 unchanged. No source or hardware change. Recommended next, not
+authorized: independent verification of this contract freeze
+(149O.20L.7O.3W.1R.2B.1).
+
+Prior: **Phase 149O.20L.7O.3W.1R.2A** (read-only architecture, complete):
+determined the smallest architecture/contract evolution needed to close N2
+(caller-manufacturable human provenance). Recommended the two-tier
+architecture 3W.1R.2B then froze. No source or contract change.
 
 Prior: **Phase 149O.20L.7O.3W.1R.2C** (governance record correction, complete):
 corrected the false claim, described below, that the human operator had

@@ -1,12 +1,14 @@
-# RIASC-001 v1.0 — RuntimeInvocationApproval Schema Contract
+# RIASC-001 v2.0 — RuntimeInvocationApproval Schema Contract
 
 ## Contract identity and status
 
 **Contract:** RIASC-001  
-**Version:** 1.0  
+**Version:** 2.0  
 **Status:** FROZEN  
-**Frozen by:** Phase 149O.20L.7O.3V  
-**Semantic authority:** RIHAC-001 v1.0  
+**Frozen by:** Phase 149O.20L.7O.3V (v1.0); amended by Phase
+149O.20L.7O.3W.1R.2B — Runtime Invocation Human-Principal Authentication
+Contract Freeze (v2.0)  
+**Semantic authority:** RIHAC-001 v1.1  
 **Artifact type:** `runtime_invocation_approval`  
 **Scope:** Normative Markdown schema contract for future local-CLI-v1
 approval artifacts.
@@ -19,13 +21,44 @@ it under separately authorized governance without redesigning it.
 
 **Reference note (149O.20L.7O.3V.1R):** PBRD-001 (now v1.1) and RDGO-001
 (now v2.0) were repaired to close two BLOCKING findings from Phase
-149O.20L.7O.3V.1. RIASC-001 itself is UNCHANGED: the sixteen required fields,
-the five-member `subject`, and `attempt_limit: {"const": 1}` already
-correctly bind approval to one invocation and one attempt-slot, not to a
-specific `attempt_id`. `attempt_id`/`idempotency_key` are dispatch-layer
-identifiers minted at RDGO-001 gate 2 and belong in the PBRD-001 request and
-the future `RuntimeInvocationRecord`, not in the approval schema; expanding
-`subject` or adding these fields here would be unnecessary widening.
+149O.20L.7O.3V.1. Those repairs left RIASC-001 v1.0 itself UNCHANGED: the
+sixteen required top-level fields, the five-member `subject`, and
+`attempt_limit: {"const": 1}` already correctly bound approval to one
+invocation and one attempt-slot, not to a specific `attempt_id`.
+`attempt_id`/`idempotency_key` are dispatch-layer identifiers minted at
+RDGO-001 gate 2 and belong in the PBRD-001 request and the future
+`RuntimeInvocationRecord`, not in the approval schema; expanding `subject`
+or adding these fields here would be unnecessary widening. **That
+determination is unaffected by, and reaffirmed by, this v2.0 amendment**:
+`subject` still has exactly five members (§3, unchanged).
+
+**Reference note (149O.20L.7O.3W.1R.2B, v2.0 — why MAJOR, not MINOR).**
+Phase 149O.20L.7O.3W.1R.2A independently found finding **N2**: v1.0's
+`provenance.approver_id` was an unauthenticated caller-supplied string, and
+`provenance.identity_evidence_kind` was checked only for enum-membership,
+never for whether the claimed evidence actually existed
+(`src/pcae/core/runtime_authority.py:858-860`, read this phase and
+149O.20L.7O.3W.1R.2A alike). Closing N2 requires retiring both fields'
+existing meaning, not merely adding new ones alongside them: `approver_id`
+(a free string) is replaced by `principal_id` (a registry-bound identifier,
+meaningless without a successful `HumanPrincipalRegistry` lookup), and
+`identity_evidence_kind`'s two-member claim-only enum is replaced by
+`authentication_mechanism_id` (a reference to a verified, assurance-rated
+mechanism, HPAC-001 §10/§14). Per this contract's own §1 versioning rule —
+"an authority-widening, required-field removal, type/meaning change, or
+subject relaxation requires a new MAJOR" — a required field's meaning being
+redefined (not merely supplemented) is exactly this case, independently of
+whether the *literal field name* changes. Retaining `approver_id` alongside
+new fields was considered and rejected: an unauthenticated legacy field left
+present, even if unused for trust purposes, would perpetuate exactly the
+"valid provenance-shaped data != authenticated human provenance" hazard this
+freeze exists to close, and would require every future reader to know, out
+of band, that one required field is authoritative and a sibling required
+field of the same object is not. RIASC-001 therefore evolves to **v2.0**,
+distinct from RIHAC-001's own v1.1 determination (§21 of RIHAC-001) — the
+two contracts' versioning rules are independent and this phase evaluates
+each on its own text, per the governing prompt's explicit instruction not to
+force a shared version merely because they are companions.
 
 ## 0. Non-authority rule
 
@@ -41,10 +74,10 @@ applies recursively to every object.
 
 | Field | Frozen value/meaning |
 |---|---|
-| `$id` | `https://pcae.local/contracts/runtime-invocation-approval/1.0/schema.json` |
+| `$id` | `https://pcae.local/contracts/runtime-invocation-approval/2.0/schema.json` |
 | `schema_id` | const `RIASC-001` |
-| `schema_version` | const `1.0` (MAJOR.MINOR) |
-| `contract_version` | const `RIHAC-001/1.0` |
+| `schema_version` | const `2.0` (MAJOR.MINOR) |
+| `contract_version` | const `RIHAC-001/1.1` |
 | `record_type` | const `runtime_invocation_approval` |
 
 Unknown versions and unknown fields fail closed. V1 has no free-form
@@ -126,18 +159,30 @@ decisions exist; it does not rewrite the historical approval record.
 
 ## 7. Provenance
 
-The closed provenance object records:
+**v2.0 change.** The closed `provenance` object's own required-field set is
+re-derived, not carried forward unchanged. v1.0 had five required
+`provenance` subfields; v2.0 has seven. Two are retired
+(`approver_id`, `identity_evidence_kind`) and four are added (`principal_id`,
+`authentication_mechanism_id`, `credential_id`, `authentication_proof_ref`);
+three carry forward unchanged in meaning (`approval_mechanism`,
+`approval_preview_digest`, `producer_component`).
 
-- `approver_id` — identified human, not artifact producer;
-- `identity_evidence_kind` — `typed_confirmation_only` or
-  `os_authenticated_user`;
-- `approval_mechanism` — const `interactive_local_cli_confirmation`;
-- `approval_preview_digest` — exact rendered approval-preview digest; and
-- `producer_component` — const
-  `pcae.trusted_runtime_approval_coordinator`.
+| v1.0 field | v2.0 disposition |
+|---|---|
+| `approver_id` | **Retired.** Replaced by `principal_id` — a registry-bound identifier, meaningless without a successful `HumanPrincipalRegistry` lookup (HPAC-001 §5), not a free string. |
+| `identity_evidence_kind` | **Retired.** Its two-member claim-only enum (`typed_confirmation_only`, `os_authenticated_user`) described an evidentiary *claim*; replaced by `authentication_mechanism_id`, which names a specific, assurance-rated, verifiable mechanism (HPAC-001 §10/§14). |
+| `approval_mechanism` | Unchanged — still the const `interactive_local_cli_confirmation`, still describing how the approval act itself was presented within PCAE's flow, distinct from the authentication mechanism. |
+| `approval_preview_digest` | Unchanged — still the exact rendered approval-preview digest. |
+| `producer_component` | Unchanged — still the const `pcae.trusted_runtime_approval_coordinator`. |
+| `principal_id` | **New.** Non-empty string, resolved against `HumanPrincipalRegistry`; HPAC-001 §7's grammar and immutability rules apply. |
+| `authentication_mechanism_id` | **New.** Non-empty string naming one HPAC-001 §10 mechanism descriptor (e.g. the primary v1 hardware-FIDO2 mechanism, HPAC-001 §14). |
+| `credential_id` | **New.** Non-empty string; the exact enrolled credential (HPAC-001 §9) used to produce the proof, distinct from `principal_id` (a principal MAY own more than one credential, HPAC-001 §9). |
+| `authentication_proof_ref` | **New.** An `artifact_ref` (`proof_id`, `proof_digest`) pointing to the canonically stored `HumanAuthenticationProof` (HPAC-001 §12/§19) — the raw proof/assertion bytes are deliberately NOT embedded here, per the governing prompt's preference for a referenced proof artifact over inline hardware-assertion material; this mirrors `approval_scope`'s existing `filesystem_scope_ref`/`process_profile_ref` referenced-artifact pattern (§5 above) rather than inventing a new embedding convention. |
 
-There is no free-form authority claim. Human identity evidence strength is
-recorded honestly; v1 does not require a cryptographic signature.
+There is no free-form authority claim anywhere in `provenance`. A
+cryptographic signature or assertion is now required for every trusted
+approval (RIHAC-001 v1.1 §12 condition 7): the v1.0 sentence "v1 does not
+require a cryptographic signature" is retired by this amendment.
 
 ## 8. Canonicalization and tamper detection
 
@@ -175,9 +220,9 @@ production-consumed by this phase.
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://pcae.local/contracts/runtime-invocation-approval/1.0/schema.json",
+  "$id": "https://pcae.local/contracts/runtime-invocation-approval/2.0/schema.json",
   "title": "PCAE RuntimeInvocationApproval",
-  "description": "RIASC-001 v1.0 local-CLI one-shot human-authority artifact. Shape validity does not establish authority.",
+  "description": "RIASC-001 v2.0 local-CLI one-shot human-authority artifact. Shape validity does not establish authority. Provenance now requires a verified HPAC-001 authentication proof, not a caller-supplied approver_id string.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -225,8 +270,8 @@ production-consumed by this phase.
   },
   "properties": {
     "schema_id": { "const": "RIASC-001" },
-    "schema_version": { "const": "1.0" },
-    "contract_version": { "const": "RIHAC-001/1.0" },
+    "schema_version": { "const": "2.0" },
+    "contract_version": { "const": "RIHAC-001/1.1" },
     "record_type": { "const": "runtime_invocation_approval" },
     "approval_id": {
       "type": "string",
@@ -332,17 +377,19 @@ production-consumed by this phase.
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "approver_id",
-        "identity_evidence_kind",
+        "principal_id",
+        "authentication_mechanism_id",
+        "credential_id",
+        "authentication_proof_ref",
         "approval_mechanism",
         "approval_preview_digest",
         "producer_component"
       ],
       "properties": {
-        "approver_id": { "$ref": "#/$defs/nonempty_id" },
-        "identity_evidence_kind": {
-          "enum": ["typed_confirmation_only", "os_authenticated_user"]
-        },
+        "principal_id": { "$ref": "#/$defs/nonempty_id" },
+        "authentication_mechanism_id": { "$ref": "#/$defs/nonempty_id" },
+        "credential_id": { "$ref": "#/$defs/nonempty_id" },
+        "authentication_proof_ref": { "$ref": "#/$defs/artifact_ref" },
         "approval_mechanism": {
           "const": "interactive_local_cli_confirmation"
         },
@@ -371,8 +418,17 @@ SHALL additionally enforce:
 - all seven RIHAC-001 invalidation conditions;
 - canonical storage path/identity and exactly one matching artifact;
 - no prior gate-9 consumption/cancellation/uncertainty/completion binding;
-- approval-preview digest correspondence to what the human reviewed; and
-- producer identity distinct from approving human identity.
+- approval-preview digest correspondence to what the human reviewed;
+- producer identity distinct from approving human identity; and
+- **(v2.0, new)** HPAC-001 principal/credential/proof verification
+  (RIHAC-001 v1.1 §16 step 4): `principal_id` resolves to an `active`
+  `HumanPrincipalRegistry` record; `credential_id` resolves to that
+  principal's `active`, non-revoked credential; `authentication_mechanism_id`
+  meets the minimum required assurance level; the referenced
+  `HumanAuthenticationProof` binds to this exact `approval_preview_digest`;
+  the proof's signature/assertion verifies against the credential's public
+  material; and the proof's challenge/nonce has not been previously
+  consumed.
 
 Failure of any check yields no validated-authority projection and no real
 dispatch.
@@ -403,6 +459,6 @@ independent verification before production consumption.
 
 ## 14. Freeze verdict
 
-**RIASC-001 v1.0 schema contract: FROZEN.**  
+**RIASC-001 v2.0 schema contract: FROZEN.**  
 **Executable production schema: NOT IMPLEMENTED / NOT AUTHORIZED.**  
 **Real execution: UNAVAILABLE.**

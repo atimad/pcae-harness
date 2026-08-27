@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B** — Runtime Invocation Human-Principal
+  Authentication Contract Freeze (contract-only; no `src/pcae`, test, or
+  hardware touched). Closes finding N2 by freezing RIHAC-001 **v1.1**
+  (additive tightening: principal-registry lookup plus authentication-proof
+  verification now required for provenance), RIASC-001 **v2.0**
+  (`provenance.approver_id`/`identity_evidence_kind` retired and replaced
+  by `principal_id`/`authentication_mechanism_id`/`credential_id`/
+  `authentication_proof_ref` — a required-field meaning redefinition,
+  hence MAJOR), and a new companion contract **HPAC-001 v1.0** (Human
+  Principal Authentication Contract: `HumanPrincipalRegistry`,
+  `HumanAuthenticator` abstraction, proof production/verification/
+  revocation). Primary v1 mechanism: hardware-backed FIDO2, user-presence
+  required. `HumanPrincipalRegistry` is deployment-scoped and kept
+  structurally/namespace-separate from HATP's own registry (reuses the
+  low-level pattern/primitives only). PBRD-001, RDGO-001, RPAC-001 required
+  no changes. B1/B7/N1 remain deferred pending independent contract
+  verification and implementation. See
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT_FREEZE.md`.
+
 - **Phase 149O.20L.7O.3W.1R.2A** — Runtime Invocation Human Principal
   Authentication and Authority Provenance Architecture (read-only,
   architecture/contract-design only; no `src/pcae`, test, or frozen
