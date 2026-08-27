@@ -71,7 +71,12 @@
     "tasks/done/20260828-0110-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2b-1r-1-1r-1.md"
   ],
   "files_changed_count": 6,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "0f36dc56",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.2: human-principal authentication, protected approval presentation, and proof-lifecycle implementation planning"
+    }
+  ],
   "origin_main_head": "81209d74b3f40f3dcaa70eec4e04a07a2cb32090",
   "origin_main_head_count": 0,
   "pushed_status": "clean",
