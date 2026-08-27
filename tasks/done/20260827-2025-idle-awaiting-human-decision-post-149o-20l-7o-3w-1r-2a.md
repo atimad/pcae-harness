@@ -10,7 +10,7 @@ Idle: awaiting human decision post-149O.20L.7O.3W.1R.2A
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -35,6 +35,7 @@ Freeze the minimum contract architecture for Phase 149O.20L.7O.3W.1R.2B: Runtime
 - tasks/done/**
 - .pcae/session.json
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
