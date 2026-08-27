@@ -24,6 +24,9 @@ Await human decision on whether to authorize 149O.20L.7O.3V.2 (Local-CLI Real-Ru
 
 - tasks/DONE.md
 - tasks/TODO.md
+- tasks/active/20260827-1304-idle-awaiting-human-decision-post-149o-20l-7o-3v-1r-1.md
+- tasks/done/20260827-1248-idle-awaiting-human-decision-post-149o-20l-7o-3v-1r.md
+- tasks/done/20260827-1254-phase-149o-20l-7o-3v-1r-1-independent-verification-of-repaired-local-cli-runtime-dispatch-authority-and-permission-contracts.md
 
 ## Forbidden Files
 
