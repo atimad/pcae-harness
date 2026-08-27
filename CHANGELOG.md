@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3V.2** — Planning-only: produced an
+  implementation-ready sequence for the authority (RIHAC-001 v1.0/
+  RIASC-001 v1.0) and permission (PBRD-001 v1.1) portion of the future
+  local-CLI real-runtime dispatch path. All four verified contracts read
+  directly; exact 14 PBRD facts, 16 RIASC fields (5-member subject), 11
+  RDGO gates, 8 durable items, and 7 TOCTOU facts recovered and classified
+  first-phase-vs-later. Reuse audit: `new_invocation_id`/`new_attempt_id`/
+  `compute_idempotency_key`/`_write_create_only` in
+  `runtime_invocation.py` already match the frozen conventions and are
+  directly reusable. `PermissionBrokerRequest` selected Option B (new
+  optional nested `runtime_dispatch_context` field) over widening the
+  shared envelope. Both pre-existing 3S.2.1 MUST-FIX findings recovered
+  verbatim and confirmed not reachable by the recommended first
+  implementation phase. Recommended next: **Runtime Invocation Authority
+  + PB Dispatch Request Foundation Implementation**, followed mandatorily
+  by a separate independent-verification phase before Runtime Enforcement
+  work begins. POL-005 remains hard deny; RE/Shell Gate not activated;
+  zero `src/pcae/**` changes; human decision required.
 - **Phase 149O.20L.7O.3V.1R.1** — Independently verified (fresh 51-test
   module, not a rerun of 3V.1R's own tests) that Phase 149O.20L.7O.3V.1R's
   repair actually closes both BLOCKING findings from 3V.1. Both CLOSED:

@@ -2,6 +2,25 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3V.2 implementation-planning disposition
+  (2026-08-27).** Produced an implementation-ready sequence for the
+  authority (RIHAC-001 v1.0/RIASC-001 v1.0) and permission (PBRD-001
+  v1.1) portion of the future local-CLI real-runtime dispatch path,
+  reading all four verified contracts directly. Selected PB request
+  architecture Option B (new optional nested `runtime_dispatch_context`
+  field on `PermissionBrokerRequest`) over widening the shared envelope
+  or a generic typed-payload refactor. Selected approval-creation Option
+  A (internal API/test-only first) over an explicit CLI or Interactive
+  Workflow integration, to verify the frozen contracts without
+  prematurely expanding UX. Confirmed both pre-existing 3S.2.1 MUST-FIX
+  findings are not reachable by the recommended first implementation
+  phase and require no repair before/within it. Recommend **Runtime
+  Invocation Authority + PB Dispatch Request Foundation Implementation**
+  as the next phase (Stages 1-7 of the plan's implementation sequence),
+  mandatorily followed by a separate independent-verification phase
+  before any Runtime Enforcement work begins. POL-005 remains hard deny
+  throughout; Runtime Enforcement and Shell Gate are not activated. Human
+  authorization required before implementation begins.
 - **Phase 149O.20L.7O.3V.1R.1 independent verification disposition
   (2026-08-27).** Independently confirm both 3V.1 BLOCKING findings are
   CLOSED by the 3V.1R repair, reconstructed from primary contract text

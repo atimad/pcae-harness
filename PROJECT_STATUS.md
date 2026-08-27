@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3V.2 — Local-CLI Real-Runtime Dispatch Implementation
+Planning. **PLANNING-ONLY — COMPLETE.** Produced an implementation-ready
+sequence for the authority (RIHAC-001 v1.0/RIASC-001 v1.0) and permission
+(PBRD-001 v1.1) portion of the future local-CLI real-runtime dispatch
+path, bounded to the smallest safe first-implementation slice, while
+POL-005 continues to hard-deny real dispatch. All four verified contracts
+(RIHAC-001 v1.0, RIASC-001 v1.0, PBRD-001 v1.1, RDGO-001 v2.0) were read
+directly (not planned from prior reports alone); the exact 14 PBRD facts,
+16 RIASC fields (5-member subject), 11 RDGO gates, 8 durable items, and 7
+TOCTOU facts were recovered and classified against a first-vs-later
+implementation split. Existing-code reuse audit found `new_invocation_id`/
+`new_attempt_id`/`compute_idempotency_key`/`_write_create_only` in
+`src/pcae/core/runtime_invocation.py` already match the frozen ID
+grammar and atomic-store pattern and are directly reusable. `Permission
+BrokerRequest` (`permission_broker_foundation.py`) is a flat 12-field
+frozen dataclass with no extension point; the plan selects Option B (one
+new optional nested `runtime_dispatch_context` field) over widening the
+shared envelope or a generic typed-payload refactor. Both pre-existing
+3S.2.1 MUST-FIX findings (malformed-result crash in `runtime_adapter.py`;
+`RuntimeInvocationStore` path-traversal gap) were recovered verbatim and
+confirmed **not reachable** by the recommended first implementation
+phase — neither requires repair before/within it. Recommended first
+implementation phase: **Runtime Invocation Authority + PB Dispatch
+Request Foundation Implementation** (Stages 1-7: approval model/store/
+validator, attempt/idempotency primitives, `runtime_dispatch` request/
+action vocabulary, PB evaluation plumbing), followed mandatorily by a
+separate independent-verification phase before Runtime Enforcement work
+begins. POL-005 remains hard deny; Runtime Enforcement and Shell Gate not
+activated; no process spawn implemented. Zero `src/pcae/**` changes; zero
+test changes; runtime remains `Observed`/`observe`/`unavailable`; release
+v0.4.3 unchanged; article stopped; private research untouched. Human
+decision required; implementation not begun. See
+`docs/PHASE_149O_20L_7O_3V_2_LOCAL_CLI_REAL_RUNTIME_DISPATCH_IMPLEMENTATION_PLANNING.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3V.1R.1 — Independent Verification of Repaired Local-CLI
 Runtime Dispatch Authority and Permission Contracts. **VERIFICATION-ONLY —
 COMPLETE.** Independently reconstructed (not rereun from 3V.1R's own tests)
@@ -36,7 +72,7 @@ Local-CLI Real-Runtime Dispatch Implementation Planning**; human decision
 required, not begun. See
 `docs/PHASE_149O_20L_7O_3V_1R_1_INDEPENDENT_VERIFICATION_REPAIRED_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_PERMISSION_CONTRACTS.md`.
 
-## Prior Phase
+## Two Prior Phases Ago
 
 Phase 149O.20L.7O.3V.1R — Local-CLI Runtime Dispatch Authority and
 Permission Contract Reconciliation and Repair. **CONTRACT-REPAIR-ONLY —

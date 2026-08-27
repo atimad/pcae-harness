@@ -1,5 +1,15 @@
 # Done
 
+- 2026-08-27 — Phase 149O.20L.7O.3V.2 (planning-only) produced an
+  implementation-ready sequence for the RIHAC-001/RIASC-001 authority and
+  PBRD-001 v1.1 permission portion of the future local-CLI real-runtime
+  dispatch path, reading all four verified contracts directly. Recovered
+  the exact 14 PBRD facts, 16 RIASC fields, 11 RDGO gates, 8 durable
+  items, and 7 TOCTOU facts; recovered both pre-existing 3S.2.1 MUST-FIX
+  findings verbatim and confirmed neither is reachable by the recommended
+  first implementation phase. Zero src/pcae changes. Recommended next:
+  Runtime Invocation Authority + PB Dispatch Request Foundation
+  Implementation, human decision required.
 - 2026-08-27 — Phase 149O.20L.7O.3V.1 independently verified the local-CLI
   authority/permission freeze: RIHAC and normative RIASC complete, but joint
   freeze NOT VERIFIED due to the RPAC/RDGO gate-order contradiction and
@@ -9,6 +19,7 @@
 
 ## Completed
 
+- Idle: awaiting human decision post-149O.20L.7O.3V.1R.1 (20260827-1304-idle-awaiting-human-decision-post-149o-20l-7o-3v-1r-1)
 - Idle: awaiting human decision post-149O.20L.7O.3V (20260827-1124-idle-awaiting-human-decision-post-149o-20l-7o-3v)
 - Phase 149O.20L.7O.3V: Local-CLI Runtime Dispatch Authority and Permission Contract Freeze (20260827-1031-phase-149o-20l-7o-3v-local-cli-runtime-dispatch-authority-and-permission-contract-freeze)
 - Idle: awaiting human decision post-149O.20L.7O.3U (20260827-1004-idle-awaiting-human-decision-post-149o-20l-7o-3u)
