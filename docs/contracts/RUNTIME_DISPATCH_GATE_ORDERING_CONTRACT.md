@@ -1,18 +1,19 @@
-# RDGO-001 v2.0 — Runtime Dispatch Gate Ordering Contract
+# RDGO-001 v3.0 — Runtime Dispatch Gate Ordering Contract
 
 ## Contract identity and status
 
 **Contract:** RDGO-001
-**Version:** 2.0
+**Version:** 3.0
 **Status:** FROZEN
-**Frozen by:** Phase 149O.20L.7O.3V (v1.0); repaired by Phase
-149O.20L.7O.3V.1R (v2.0)
-**Supersedes:** RDGO-001 v1.0 (frozen `2060ebd4`), whose gate 3/gate 4
+**Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
+Invocation Human-Principal Authentication Freeze Repair
+**Supersedes:** RDGO-001 v1.0 and v2.0. V2 proof verification/consumption
+lifecycle is incompatible with v3 and has no migration. V1's gate 3/gate 4
 relative order was independently found to contradict RPAC-REQ-042 by Phase
 149O.20L.7O.3V.1 (Finding B-149O.20L.7O.3V.1-1).
 **Scope:** Future one-attempt local-CLI real-runtime dispatch ordering only.
-**Related contracts:** RPAC-001 v1.0, RIHAC-001 v1.0, RIASC-001 v1.0,
-PBRD-001 v1.1, Runtime Enforcement contracts, Phase 99 Execution Attempt
+**Related contracts:** RPAC-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0,
+HPAC-001 v2.0, PBRD-001 v2.0, Runtime Enforcement contracts, Phase 99 Execution Attempt
 Boundary.
 
 RDGO-001 freezes the gate sequence and cross-gate evidence contract. It
@@ -35,7 +36,7 @@ dispatch completion != accepted change
 runtime result != task completion
 ```
 
-## 1. Frozen eleven-gate order (v2.0 — RPAC-REQ-042-consistent)
+## 1. Frozen eleven-gate order (v3.0 — RPAC-REQ-042-consistent)
 
 | # | Gate | Owner | Input | Output | External effect? |
 |---:|---|---|---|---|---|
@@ -93,10 +94,14 @@ mint a unique request-identity triple, stops the flow.
 
 ## 4. Gate 3 — human authority creation
 
-Gate 3 presents the exact subject, scope, target, prompt identity, adapter
-binding, HEAD/task snapshot, expiry, one-shot limit, and non-effect
-statements. A distinct, non-defaultable human act creates the immutable
-RIASC-001 approval artifact.
+Gate 3 resolves canonical repository/task/invocation/prompt/target/effect/
+scope/expiry/one-shot facts, presents their human-usable representation
+through HPAC-001 v2.0's protected channel, and cryptographically binds the
+identical presentation and subject digests into a fresh v2 challenge. A
+distinct, non-defaultable act with mandatory UP and UV produces a protected,
+verified-and-bound HPAC proof; only then may the trusted coordinator create
+the immutable RIASC-001 v3.0 approval artifact. Agent-controlled stdout/stdin
+and blind touch are insufficient.
 
 The artifact creates human authority only. It does not create PB permission,
 capability, Runtime Enforcement approval, containment, dispatch, acceptance,
@@ -123,7 +128,7 @@ access credentials, open network connections, mutate the repository, or
 create authority. A structurally incapable target now fails **after**
 approval creation but strictly **before** Permission Broker and every later
 gate; it is not asked of a human as a precondition for approval creation
-under v2.0. This is a deliberate consequence of RPAC-REQ-042's fixed order:
+under v3.0. This is a deliberate consequence of RPAC-REQ-042's fixed order:
 an approval that never reaches gate 6 because gate 4 failed is unconsumed,
 imposes no cost beyond an unused artifact, and grants no capability by
 itself (RIHAC-001 §1, §20 — approval never implies capability). Structural
@@ -132,19 +137,27 @@ containment, and dispatch in every case.
 
 ## 6. Gate 5 — approval validation
 
-Gate 5 executes RIHAC-001's ordered validation against current state and
-produces a minimal immutable projection containing:
+Gate 5 freshly resolves the canonical approval, HPAC proof/lifecycle,
+protected registry/configuration, and protected presentation evidence; then
+executes RIHAC-001 v2.0's ordered validation and produces an ephemeral
+validated-authority projection containing:
 
 - approval ID/digest;
 - complete subject/scope binding digest;
-- provenance verdict;
+- authority projection ID/digest and `RIHAC-001/2.0`;
+- proof-validation/request-binding/current-registry digests;
+- provenance, UP, UV, trusted-presentation, domain, and replay verdicts;
 - seven-condition freshness verdict and policy-refresh disposition;
 - expiry verdict;
 - consumption-state verdict; and
 - validation timestamp/version.
 
-It does not produce PB ALLOW. Missing, stale, mismatched, expired, consumed,
-tampered, or ambiguous evidence stops the flow.
+It binds fresh proof state to this approval but does not consume the approval,
+nonce, or proof. Repeating gate 5 before gate 9 is permitted only for the same
+canonical bytes and binding and repeats cryptographic/current-registry/
+revocation checks idempotently. Missing, stale, mismatched, expired, revoked,
+consumed, replayed, tampered, caller-constructed, or ambiguous evidence stops
+the flow. It does not produce PB ALLOW.
 
 ## 7. Gate 6 — Permission Broker
 
@@ -212,8 +225,10 @@ creation. The exact eight items are:
 3. **Target binding:** exact runtime target plus adapter descriptor/config and
    live executable-identity observations.
 4. **Prompt binding:** semantic prompt hash and hash-profile ID.
-5. **Approval binding:** approval ID/digest and validated-authority evidence
-   digest, atomically marked consumed by this write.
+5. **Approval binding:** approval ID/digest, RIHAC v2 authority-projection
+   ID/digest, HPAC proof ID/digest, and proof-validation/current-registry
+   digests, with approval and bound proof atomically marked consumed by this
+   write.
 6. **PB binding:** PB request/decision digest, decision, policy version,
    causing policy IDs, and matched no-go IDs.
 7. **Runtime Enforcement binding:** decision ID/digest, verdict, expiry, and
@@ -226,8 +241,9 @@ approval/PB/RE artifacts. The write is create-only or append-only,
 crash-consistent, and completed before gate 10. If this write cannot be proven
 durable and internally consistent, no dispatch occurs.
 
-`dispatch_attempted` is the approval-consumption point and at-most-once guard.
-It is not proof the external process was created or completed.
+`dispatch_attempted` is the single atomic approval-and-proof consumption point
+and at-most-once guard. PB evaluation does not consume either. It is not proof
+the external process was created or completed.
 
 ## 11. Gate 10 — adapter dispatch
 
@@ -471,12 +487,12 @@ access credentials, or modify runtime capability.
 
 ## 21. Versioning and freeze verdict
 
-RDGO-001 uses contract `MAJOR.MINOR`. Per v1.0 §21, reordering gates is
-incompatible and requires a new MAJOR with explicit migration and
-independent verification — this is exactly why the gate 3/4 transposition
-required by Finding B-149O.20L.7O.3V.1-1 is released as **v2.0**, not a
-patch or minor revision, even though gate content, ownership, and count are
-otherwise unchanged. Adding a later post-result gate may be additive only if
+RDGO-001 uses contract `MAJOR.MINOR`. V3 retains the eleven gates and their
+order, but incompatibly changes load-bearing gate 3/5/9 semantics: v2 can
+consume the HPAC nonce at gate 5, while v3 binds/revalidates at gate 5 and
+atomically consumes approval plus proof only at gate 9. A v2 implementation
+cannot conform without state-machine change, so a MAJOR is required and no
+migration exists. Adding a later post-result gate may be additive only if
 gates 1–11 and gate 10's first-effect boundary retain their meaning and
 order. Merging authority/permission/enforcement/containment, moving the
 durable marker after effect, weakening freshness, or widening effect scope
@@ -485,7 +501,7 @@ migration and independent verification.
 
 Unknown versions fail closed.
 
-**RDGO-001 v2.0: FROZEN for local-CLI-v1 contract purposes.**
+**RDGO-001 v3.0: FROZEN; v2 proof-lifecycle semantics have no migration.**
 **Gate count: 11 (unchanged). Durable-before-effect items: 8 (unchanged;
 item 1 enriched, see §10a). TOCTOU facts: 7 (unchanged).**
 **Real execution: UNAVAILABLE.**

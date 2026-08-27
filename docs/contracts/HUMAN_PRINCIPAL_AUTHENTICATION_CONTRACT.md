@@ -1,14 +1,17 @@
-# HPAC-001 v1.0 — Human Principal Authentication Contract
+# HPAC-001 v2.0 — Human Principal Authentication Contract
 
 ## Contract identity and status
 
 **Contract:** HPAC-001
-**Version:** 1.0
+**Version:** 2.0
 **Status:** FROZEN
-**Frozen by:** Phase 149O.20L.7O.3W.1R.2B — Runtime Invocation
-Human-Principal Authentication Contract Freeze
-**Depends on:** RIHAC-001 v1.1 (`RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md`,
-this contract's consumer for runtime-invocation approval), RIASC-001 v2.0
+**Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
+Invocation Human-Principal Authentication Freeze Repair
+**Supersedes:** HPAC-001 v1.0. V1 proof, registry, enrollment, assurance, and
+presentation semantics are not authority-compatible with v2 and SHALL NOT be
+silently upgraded.
+**Depends on:** RIHAC-001 v2.0 (`RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md`,
+this contract's consumer for runtime-invocation approval), RIASC-001 v3.0
 (`RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md`, the schema whose
 `provenance` object references this contract's artifacts by ID), HPSE-001
 v1.1 and HHCE-001 (pattern precedent only — reused as a *design pattern*,
@@ -46,6 +49,9 @@ contract. An ambiguity at any authority boundary SHALL fail closed.
 
 ```text
 authenticated human principal != confirmation
+credential authentication       != user presence
+user presence                   != user verification
+user verification               != informed approval intent
 confirmation                  != approval
 approval                      != PB permission
 PB permission                 != runtime capability
@@ -67,14 +73,15 @@ human principal                != session agent identity
 - **HPAC-REQ-002.** HPAC-001 governs, and owns exclusively: human principal
   identity (§4); the `HumanPrincipalRegistry` (§5); the `HumanAuthenticator`
   mechanism abstraction (§10-§15); principal and credential enrollment
-  (§8-§9); authentication-proof production and structure (§16-§17); proof
-  verification behavior (§18); revocation (§21); mechanism status (§13);
-  trust/assurance level (§20); and failure behavior (§25).
+  (§8-§9); authentication-proof production and structure (§16-§17); trusted
+  approval-presentation evidence (§16); proof verification behavior (§18);
+  revocation (§21); mechanism status (§13); trust/assurance level (§20); and
+  failure behavior (§25).
 - **HPAC-REQ-003.** HPAC-001 SHALL NOT own, define, or gate: Permission
   Broker permission, runtime-target selection, execution capability, Runtime
   Enforcement, or dispatch. Those remain exclusively RIHAC-001/RIASC-001/
-  PBRD-001/RDGO-001/RPAC-001 territory (§39-§41 below). This contract
-  produces evidence consumed by RIHAC-001's validator (RIHAC-001 v1.1 §16
+  PBRD-001/RDGO-001/RPAC-001 territory. This contract produces evidence
+  consumed by RIHAC-001's validator (RIHAC-001 v2.0 §16
   step 4); it does not itself decide whether a `RuntimeInvocationApproval`
   is created, validated, or consumed.
 - **HPAC-REQ-004.** This contract resolves finding **N2**
@@ -84,14 +91,16 @@ human principal                != session agent identity
   `approver_id`/`identity_evidence_kind` pair with no independent
   verification. This contract makes that verification structurally
   required and independently checkable; it does not itself perform the
-  verification (that remains RIHAC-001 v1.1 §16 step 4's job, consuming
+  verification (that remains RIHAC-001 v2.0 §16 step 4's job, consuming
   this contract's artifacts).
 
 ## 2. Terminology
 
-- **Human principal.** A human identified by a stable `principal_id` (§4) —
-  categorically distinct from any OS account, Git identity, PCAE
-  agent/session identity, or producer identity (§4's own exclusion list).
+- **Human principal.** An opaque PCAE identity represented by a stable
+  `principal_id` (§4), categorically distinct from OS, Git, agent/session,
+  producer, biological, civil, or legal identity. An **authenticated human
+  principal** means only that an active credential enrolled to that ID met
+  the required proof profile against current protected registry state.
 - **Authentication mechanism.** A concrete method (e.g. hardware-backed
   FIDO2) by which a principal proves presence/identity for one specific
   challenge. Described statically by a mechanism descriptor (§14) and
@@ -103,6 +112,12 @@ human principal                != session agent identity
   must incorporate into its proof (§16).
 - **Authentication proof.** The normalized, verifiable artifact a
   `HumanAuthenticator` produces in response to one challenge (§17).
+- **TrustedApprovalPresentation.** Protected-channel evidence that a
+  human-usable representation of PCAE-canonical repository, task, target,
+  operation/effect, prompt/instruction, invocation, expiry, and one-shot facts
+  was displayed and explicitly elected. Its component runs in the protected
+  presentation context configured by HPAC-REQ-080; ordinary agent-controlled
+  stdout/stdin and repository-authored labels cannot produce it.
 - **Assurance level.** A closed vocabulary describing how strong a
   mechanism's presence/identity guarantee is (§20).
 - **Verifier.** The trusted component that checks a proof against a
@@ -117,7 +132,7 @@ human principal                != session agent identity
   independently create authenticated-human authority. Authority exists only
   through this contract's full verification chain (§18) succeeding, and
   even then only as evidence consumed by RIHAC-001's own authority
-  determination (RIHAC-001 v1.1 §12) — HPAC-001 verification is necessary,
+  determination (RIHAC-001 v2.0 §12) — HPAC-001 verification is necessary,
   never solely sufficient, for a `RuntimeInvocationApproval` to be trusted.
 - **HPAC-REQ-006.** No field named `approved`, `authorized`, `permission`,
   `trusted`, `human_verified`, or an equivalent authority shortcut is
@@ -162,11 +177,14 @@ human principal                != session agent identity
   affirms 149O.20L.7O.3W.1R.2A §29's own recommendation and closes the
   governing prompt's item 7 requirement to decide, not defer, this
   question.
-- **HPAC-REQ-013.** The registry SHALL contain exactly two record kinds:
-  `PrincipalRecord` (`principal_id`, `status`) and `CredentialRecord`
-  (`credential_id`, `principal_id`, `mechanism_id`, `public_key_ref`,
-  `status`, `enrolled_at`, `revoked_at`). No third record kind exists in
-  v1. This mirrors HPSE-001's `PrincipalRecord`/`SignerRecord` two-record
+- **HPAC-REQ-013.** The registry SHALL contain exactly two closed record
+  kinds: `PrincipalRecord` (`principal_id`, `status`, `enrollment_provenance_ref`,
+  `enrolled_at`, `revoked_at`) and `CredentialRecord` (`credential_id`,
+  `principal_id`, `mechanism_id`, `public_key`, `assurance_capabilities`,
+  `status`, `enrollment_provenance_ref`, `enrolled_at`, `revoked_at`). No
+  private key, PIN, biometric secret, repository path, or display metadata is
+  permitted. No third record kind exists in v2. This mirrors HPSE-001's
+  `PrincipalRecord`/`SignerRecord` two-record
   shape (schema pattern reuse, HPSE-REQ-007/013) without reusing HPSE-001's
   actual document or namespace (§6 below).
 - **HPAC-REQ-014.** `status` for both record kinds is the closed two-value
@@ -183,7 +201,7 @@ human principal                != session agent identity
   `CredentialRecord`) on every write, for deterministic byte-identical
   serialization — identical discipline to HPSE-REQ-024.
 - **HPAC-REQ-017.** Unknown fields and malformed documents SHALL be
-  rejected; the registry has no free-form extension container in v1.
+  rejected; the registry has no free-form extension container in v2.
 
 ## 6. HATP reuse vs. separation (mandatory determination)
 
@@ -244,30 +262,28 @@ Resolves governing-prompt items 66/68/69 explicitly.
   repo/task-bound"). `RuntimeInvocationApproval`'s existing five-member
   subject (RIHAC-001 §5) already supplies the repo/task-bound half of that
   distinction; this contract supplies only the user-level half.
-- **HPAC-REQ-022.** The canonical registry path SHALL be outside any single
-  repository's own working tree or `.pcae/` governance store — analogous to
-  HATP's own Protected-Root-outside-ordinary-repository-control pattern
-  (HBDC-001), but a **separate** Protected-Root instance from HATP's own
-  (HPAC-REQ-018). This directly closes the malicious-repository threat
-  (§10 below, HPAC-REQ-069): no code path reachable from within a
-  repository's own agent-writable tree can resolve to this path by
-  construction, because the path is never inside the repository at all.
-- **HPAC-REQ-023.** Bootstrap trust root: the first `PrincipalRecord` and
-  its first `CredentialRecord` are established by a **local admin/human
-  bootstrap ceremony**, run by the human who physically controls the
-  deployment machine at that moment — the identical pattern HATP already
-  uses (HBDC-REQ-066's "Admin execution principal", restated at
-  149O.20L.7O.3W.1R.2A §31) and the same trust-anchor-bootstrapping pattern
-  WebAuthn itself uses for first-credential registration. This is
-  necessarily circular-trust-free: no prior PCAE-internal principal exists
-  to check the first enrollment against, so trust is anchored in physical/
-  local-machine control at that one moment, not in any PCAE mechanism.
-  This requirement resolves the governing prompt's item 9 (bootstrap trust
-  root) explicitly rather than leaving it implicit.
-- **HPAC-REQ-024.** The bootstrap/enrollment writer SHALL be a standalone,
-  non-agent-invocable admin tool — never a subcommand of the ordinary
-  agent-reachable `pcae` CLI, mirroring HPSE-REQ-028/029's identical
-  discipline, adopted here as a correct pattern, not a dependency.
+- **HPAC-REQ-022.** Registry, proof-store, mechanism policy, assurance floor,
+  and presentation-channel configuration SHALL resolve from one deployment-
+  scoped protected root outside every repository. The root and every ancestor
+  SHALL be owned and writable only by an OS/equivalent protected administration
+  principal unavailable to ordinary same-user agent execution. Resolution
+  SHALL reject symlinks, traversal, owner/ACL mismatch, replace/delete access,
+  and repository, environment, cwd, task, or caller overrides. Location alone
+  is never the trust basis.
+- **HPAC-REQ-023.** First-principal bootstrap is anchored by an externally
+  established deployment-owner administration principal, not by a prior PCAE
+  principal and not by ordinary same-UID machine access. That protected
+  principal SHALL launch a non-defaultable ceremony, display the exact
+  registry identity and credential being enrolled through a protected
+  presentation channel, require authenticator UP and UV, verify the FIDO2
+  registration response, and atomically create the first records and durable
+  provenance/audit entry. This explicit external OS/equivalent trust anchor
+  terminates bootstrap without circular PCAE self-authorization.
+- **HPAC-REQ-024.** Bootstrap/enrollment mutation SHALL be available only in
+  the protected administration context and never as an ordinary `pcae` CLI,
+  repository hook, task action, agent tool, stdin confirmation, environment
+  toggle, or unattended workflow. A same-UID agent invocation SHALL be denied
+  before credential registration or registry mutation.
 
 ## 8. Enrollment
 
@@ -284,23 +300,25 @@ Resolves governing-prompt items 66/68/69 explicitly.
 - **HPAC-REQ-027.** `enroll_credential` SHALL require an existing, `active`
   `PrincipalRecord` for the supplied `principal_id`. Enrolling a credential
   against a missing or revoked principal fails closed.
-- **HPAC-REQ-028.** Every enrollment/revocation operation SHALL require
-  explicit evidence of a fresh, separate human election authorizing that
-  specific operation — mirroring HPSE-REQ-042's identical discipline. An
-  unverified boolean or free-form "approved" string is never sufficient.
-  The election-evidence reference is recorded as audit metadata only,
-  never cryptographically verified by this writer (mirrors HPSE-REQ-043).
-- **HPAC-REQ-029.** No entity SHALL enroll or expand its own authentication
-  authority without the same fresh-election evidence required to enroll any
-  other principal — mirrors HPSE-REQ-041's identical self-enrollment
-  prohibition, including for the admin's own enrollment.
+- **HPAC-REQ-028.** Every enrollment, replacement, recovery, or revocation
+  SHALL require protected-admin authorization plus a fresh, UV-required,
+  non-defaultable human act over a protected presentation of the exact
+  operation. The writer SHALL cryptographically verify the ceremony evidence
+  before mutation and persist its canonical ID/digest as provenance. A
+  reference-only record, boolean, free-form approval, or ordinary CLI input
+  is insufficient.
+- **HPAC-REQ-029.** No entity may enroll or expand its own authentication
+  authority. The protected writer enforces this independently of caller
+  claims, repository state, and target principal. Recovery after loss uses
+  the external deployment-owner anchor in HPAC-REQ-023; it never lowers the
+  ceremony or permits same-user-agent self-enrollment.
 
 ## 9. Credential ownership and multiplicity
 
 - **HPAC-REQ-030.** Cardinality is exactly one principal → zero or more
   credentials; each `CredentialRecord` names exactly one `principal_id`.
   This contract explicitly permits multiple credentials per principal in
-  v1 (governing-prompt item 35's "prefer simple but recoverable design" —
+  v2 (governing-prompt item 35's "prefer simple but recoverable design" —
   a single-credential-only rule would make ordinary hardware-key loss
   unrecoverable without a bootstrap-ceremony repeat).
 - **HPAC-REQ-031.** Credential rotation (replacing a principal's credential
@@ -367,18 +385,17 @@ Resolves governing-prompt items 66/68/69 explicitly.
   only means an authentication *attempt* may proceed. Only a verified proof
   (§18) constitutes evidence.
 
-## 14. Primary v1 mechanism descriptor — hardware-backed FIDO2
+## 14. Primary v2 mechanism descriptor — hardware-backed FIDO2
 
 Resolves governing-prompt items 12/33/54/55 (mechanism design, assurance
 model, minimum required assurance).
 
-- **HPAC-REQ-039.** `mechanism_id`: `hpac.fido2.presence_gated.v1`.
+- **HPAC-REQ-039.** `mechanism_id`: `hpac.fido2.uv_presence.v2`.
 - **HPAC-REQ-040.** Static descriptor fields: `mechanism_id`; `assurance_level`
   (§20); `offline_capable` (`true`, §17 below); `presence_support` (`true`
   — UP, user-presence gesture, required); `verification_support`
-  (`configurable` — UV, user-verification/biometric-or-PIN, MAY be required
-  by a future deployment policy but is not itself the property that
-  resists §16's same-user-agent threat, see HPAC-REQ-042); `platform_compat`
+  (`required` — UV, user-verification/biometric-or-PIN, is mandatory for the
+  first real-runtime profile); `platform_compat`
   (`macos, linux` — CTAP2 hardware keys are OS-neutral, resolving
   governing-prompt items 46/57 without a platform-specific adapter).
 - **HPAC-REQ-041.** Enrollment ceremony: reuses HPSE-REQ-059's already-frozen
@@ -386,27 +403,21 @@ model, minimum required assurance).
   ceremony producing a stable, durable credential-identity byte string) as
   a *pattern*, applied to this contract's own separate registry (§6) — not
   a live call into HATP's own enrollment writer.
-- **HPAC-REQ-042 (UP/UV determination — resolves item 33 explicitly).**
-  User Presence (UP) — a physical touch gesture — is the property that
-  actually closes the mandatory same-user-agent threat (§16 below): it is
-  the one signal a co-resident autonomous process structurally cannot
-  produce without physical device access, regardless of whether it can
-  silently trigger the device's electrical "wake" state. UP alone is
-  therefore the v1 minimum required flag. User Verification (UV — PIN or
-  biometric binding the gesture to a specific enrolled human, not merely
-  "someone touched it") strengthens identity binding but is not required
-  to resist the *same-user-agent* threat specifically, because that threat
-  is about presence of *a* human, not about distinguishing *which* human
-  among several who might share physical access to the device — a
-  narrower, deployment-specific question this v1 mechanism does not need
-  to answer for the single-principal default (§9 of the required phase
-  document / 149O.20L.7O.3W.1R.2A §50). **v1 minimum: UP required; UV
-  optional, deployment-configurable, not load-bearing for the mandatory
-  threat this contract exists to resist.**
-- **HPAC-REQ-043.** Challenge generation: uses `HumanAuthenticator.
-  prepare_challenge` (§10), which SHALL derive the challenge from the exact
-  RIHAC-001 approval-preview digest plus a fresh cryptographically random
-  nonce (§16) — never a static or predictable value.
+- **HPAC-REQ-042 (UP/UV determination).** UP proves an active presence event
+  at the enrolled authenticator; it does not identify which person acted or
+  prove approval intent. UV proves authenticator-local user verification; it
+  does not prove approval intent. For the first real-runtime profile both UP
+  and UV are mandatory and form an immutable contract minimum. Deployment
+  policy may require stronger assurance but neither repository nor protected
+  administrator may lower this floor. UP-only proofs may be recorded as
+  credential-presence evidence but SHALL NOT authorize real runtime and SHALL
+  NOT yield `AuthenticatedHumanPrincipal`.
+- **HPAC-REQ-043.** Challenge generation uses `HumanAuthenticator.
+  prepare_challenge` (§10) over the exact versioned canonical approval-subject
+  digest, exact trusted-presentation digest, fresh cryptographically random
+  nonce, principal/credential binding, proof-schema version, and v2 domain
+  separator (§16). The protected presentation channel SHALL display the same
+  canonical facts before the non-defaultable approval act.
 - **HPAC-REQ-044.** Signed assertion: the FIDO2 CTAP2 assertion (or
   equivalent future-protocol signature) SHALL be verified against the
   enrolled credential's public verification material resolved from
@@ -427,7 +438,8 @@ model, minimum required assurance).
 
 ## 15. Domain separation (mandatory — resolves items 14/15)
 
-- **HPAC-REQ-047.** A challenge namespace tag, `hpac.runtime_invocation_approval.v1`,
+- **HPAC-REQ-047.** A challenge namespace tag,
+  `pcae.hpac.runtime-invocation-approval.v2`,
   SHALL be included in every challenge this contract's `prepare_challenge`
   constructs. A signed assertion produced for this contract's challenge
   domain SHALL NOT verify successfully as an HATP signing-ceremony
@@ -450,12 +462,17 @@ model, minimum required assurance).
 
 Resolves governing-prompt items 16/17.
 
-- **HPAC-REQ-049.** The challenge SHALL bind, at minimum: `principal_id`
-  (once resolved during proof production), the RIHAC-001 approval-preview
-  digest (which itself already encodes `invocation_id`, `runtime_target_id`,
-  `prompt_hash`, `repository_identity`, `task_id`, and `approval_scope` per
-  RIHAC-001 §10/§11), a fresh nonce, and the `hpac.runtime_invocation_approval.v1`
-  domain tag (§15).
+- **HPAC-REQ-049.** Canonical challenge bytes SHALL encode exactly a closed
+  object containing `domain_separator` const
+  `pcae.hpac.runtime-invocation-approval.v2`, `challenge_version` const
+  `HPAC-CHALLENGE/2.0`, `proof_schema_version` const `HPAC-PROOF/2.0`,
+  `principal_id`, `credential_id`, `approval_subject_digest`,
+  `trusted_presentation_digest`, `nonce`, `issued_at`, and `expires_at`.
+  The subject digest covers repository identity, task ID, runtime target,
+  operation/effect and scope, prompt/instruction identity, invocation ID,
+  expiry, and one-shot status. UTF-8 compact JSON with recursively sorted
+  keys and NFC strings is hashed with SHA-256. Any display, subject, domain,
+  principal, credential, or version mismatch invalidates the proof.
 - **HPAC-REQ-050.** Nonce origin: cryptographically strong random bytes,
   generated by the trusted challenge-construction component (never the
   authenticator, adapter, or caller). Uniqueness: SHALL NOT repeat across
@@ -464,9 +481,10 @@ Resolves governing-prompt items 16/17.
   separately-governed bound (not frozen numerically here — a future
   implementation phase sets it, consistent with RIHAC-001's own precedent
   of not freezing an arbitrary duration for `expires_at`, RIHAC-001 §14).
-  Storage: the nonce SHALL be durably recorded as consumed at the moment
-  verification succeeds (§18), atomically with the proof-consumption record
-  (§24), never before.
+  Storage: the trusted coordinator records lifecycle state in the protected
+  proof store. Successful verification binds the nonce/proof to exactly one
+  approval without consuming it. Consumption occurs only atomically with the
+  gate-9 approval consumption marker (§24).
 - **HPAC-REQ-051.** No predictable, sequential, timestamp-only, or reusable
   challenge value is permitted.
 
@@ -474,21 +492,31 @@ Resolves governing-prompt items 16/17.
 
 Resolves governing-prompt item 18.
 
-- **HPAC-REQ-052.** A `HumanAuthenticationProof` SHALL contain exactly:
-  `proof_id`; `mechanism_id`; `principal_id`; `credential_id`;
-  `challenge_digest` (SHA-256 of the exact challenge bytes, not the raw
-  challenge, mirroring RIASC-001's own digest-not-raw-content discipline);
-  `assertion` (the mechanism-specific signature/response bytes, opaque to
-  this schema, base64url-encoded); `authenticated_at` (UTC RFC 3339,
-  identical grammar to RIHAC-001 §14's timestamp discipline);
-  `verifier_version`. No secret, PIN, private key, or raw biometric
-  template is ever included (§23).
-- **HPAC-REQ-053.** `additionalProperties: false` applies. No free-form
-  extension field exists in v1.
+- **HPAC-REQ-052.** `HumanAuthenticationProof` has schema identity
+  `HPAC-PROOF/2.0` and exactly these closed fields: `proof_schema_version`,
+  `proof_id` (`hap-<32-hex>`), `proof_digest`, `mechanism_id`, `principal_id`,
+  `credential_id`, `challenge_digest`, `approval_subject_digest`,
+  `trusted_presentation_ref` (exact `presentation_id`/`presentation_digest`
+  pair), `assertion` (base64url mechanism bytes), `up` (const true), `uv`
+  (const true), `authenticated_at`, and `verifier_version`. `proof_digest`
+  is SHA-256 over canonical UTF-8 compact JSON excluding only itself, with
+  recursively sorted keys and NFC strings. Unknown/missing fields fail
+  closed. No secret, PIN, private key, raw challenge, or biometric template
+  is included.
+- **HPAC-REQ-053.** Canonical proof storage is the protected deployment path
+  `<HPAC_PROTECTED_ROOT>/proofs/v2/<proof_id>/proof.json`; callers supply only
+  the exact closed reference `(proof_id, proof_digest)`, never a path.
+  Resolution rejects traversal, symlinks, duplicate IDs, non-canonical bytes,
+  digest mismatch, wrong owner/ACL, repository/config override, and missing
+  lifecycle state. The adjacent protected lifecycle record has exactly
+  `CHALLENGE_CREATED`, `ASSERTION_RECEIVED`, `PROOF_VERIFIED_AND_BOUND`,
+  `PROOF_CONSUMED_WITH_APPROVAL`, or terminal `EXPIRED`, `REVOKED`,
+  `REJECTED`. Proof and lifecycle writes are atomic, create/append-only, and
+  read-back verified.
 
 ## 18. Proof verification — exact sequence
 
-Resolves governing-prompt item 19, consumed by RIHAC-001 v1.1 §16 step 4.
+Resolves governing-prompt item 19, consumed by RIHAC-001 v2.0 §16 step 4.
 
 - **HPAC-REQ-054.** Verification SHALL execute in this fail-closed order:
   1. resolve `principal_id` in `HumanPrincipalRegistry`; reject if missing
@@ -499,25 +527,31 @@ Resolves governing-prompt item 19, consumed by RIHAC-001 v1.1 §16 step 4.
      required assurance level (§20);
   4. recompute `challenge_digest` from the exact challenge state and
      compare; reject on mismatch;
-  5. verify subject binding: the challenge's bound approval-preview digest
-     equals the exact `RuntimeInvocationApproval` subject/scope/expiry
-     under validation; reject on mismatch;
+  5. verify subject and informed-intent binding: the challenge's canonical
+     subject digest equals the approval subject/scope/expiry, and the
+     `trusted_presentation_ref` resolves in the protected presentation store
+     to evidence that the identical canonical facts were displayed through a
+     channel the requesting agent could not substitute; reject ordinary
+     agent-controlled stdout/stdin, missing explicit election, blind touch,
+     or any display/challenge mismatch;
   6. verify `assertion` against the resolved credential's public
      verification material; reject on signature/assertion failure;
-  7. verify presence/verification flags meet the mechanism's minimum
-     requirement (§14: UP required, UV per deployment policy); reject if
-     unmet;
+  7. verify both UP and UV flags are true for real-runtime authority; reject
+     UP-only, UV-only, or policy/config downgrade;
   8. verify freshness: `authenticated_at` is recent relative to a trusted
      clock and the challenge has not expired (§16); reject if stale;
-  9. verify the challenge/nonce has not been previously consumed (replay
-     check, §24); reject on replay; and
-  10. emit an immutable, trusted `AuthenticatedHumanPrincipal` result
-      binding `principal_id`, `credential_id`, `mechanism_id`, and the
-      verified challenge/subject digest (§19).
+  9. verify protected lifecycle state is either fresh or already
+     `PROOF_VERIFIED_AND_BOUND` to this exact same approval and bytes; reject
+     cross-binding, expired/revoked state, or consumed replay; and
+  10. atomically transition fresh proof state to `PROOF_VERIFIED_AND_BOUND`
+      for this approval and emit an ephemeral immutable
+      `AuthenticatedHumanPrincipal` binding IDs, assurance, subject, and
+      presentation digest (§19). Same-binding revalidation is idempotent and
+      does not consume the nonce/proof.
 - **HPAC-REQ-055.** No later step runs as a shortcut when an earlier step
   fails. Verification evidence is not itself PB permission, Runtime
   Enforcement approval, or a `RuntimeInvocationApproval` — it is the
-  evidence RIHAC-001 v1.1 §16 step 4 consumes to decide whether one may be
+  evidence RIHAC-001 v2.0 §16 step 4 consumes to decide whether one may be
   trusted.
 
 ## 19. Authenticated-principal result — trusted construction
@@ -535,11 +569,10 @@ Resolves governing-prompt items 20/21/22.
   producer) SHALL NOT construct, serialize-and-replay, or otherwise
   manufacture an `AuthenticatedHumanPrincipal` value without a fresh,
   successful §18 verification producing it.
-- **HPAC-REQ-058.** Serialization boundary: an `AuthenticatedHumanPrincipal`
-  or a `HumanAuthenticationProof` MAY be persisted (e.g. as the canonical
-  proof-store artifact referenced by RIASC-001's `authentication_proof_ref`,
-  §20 of RIASC-001), but deserializing stored proof material SHALL NOT by
-  itself yield trusted `AuthenticatedHumanPrincipal` state — every
+- **HPAC-REQ-058.** Serialization boundary: `AuthenticatedHumanPrincipal` is
+  ephemeral and non-serializable; only the canonical proof/lifecycle evidence
+  may persist. Deserializing stored proof material SHALL NOT by itself yield
+  trusted `AuthenticatedHumanPrincipal` state — every
   consumption SHALL re-run §18's verification sequence against current
   registry state (principal/credential status may have changed since the
   proof was stored) rather than trusting a cached verification result.
@@ -548,23 +581,17 @@ Resolves governing-prompt items 20/21/22.
 
 Resolves governing-prompt items 54/55.
 
-- **HPAC-REQ-059.** Closed vocabulary, minimal by design (governing-prompt
-  item 54's own "maybe a boolean capability set is sufficient" steer,
-  resolved here as a small enum rather than a boolean, because a third,
-  future presence-gated-but-not-hardware-backed mechanism — §22 — needs a
-  middle value): `ASSERTED` (an unverified claim — never sufficient,
-  this is v1.0's retired `identity_evidence_kind` shape, named here only
-  to be excluded); `PRESENCE_GATED` (a mechanism requiring a physical or
-  OS-mediated presence gesture a co-resident process cannot silently
-  trigger, but not backed by dedicated cryptographic hardware — e.g. a
-  correctly OS-presence-gated software key, §22 Option A-fallback);
-  `HARDWARE_BACKED_PRESENCE_GATED` (a dedicated cryptographic authenticator
-  requiring a physical touch gesture — the primary v1 mechanism, §14).
-- **HPAC-REQ-060.** Minimum required assurance for real local-CLI v1
-  dispatch: `PRESENCE_GATED` or stronger. `ASSERTED` SHALL NEVER qualify —
-  this is the structural closure of N2: no mechanism whose evidence is a
-  bare claim, however shaped, may ever satisfy RIHAC-001 v1.1 §12 condition
-  7.
+- **HPAC-REQ-059.** Closed assurance vocabulary is `ASSERTED`,
+  `CREDENTIAL_PRESENCE` (valid enrolled credential plus UP), and
+  `PRINCIPAL_VERIFIED_INTENT` (valid enrolled credential plus UP plus UV plus
+  protected subject-bound presentation/election). Each property is verified
+  independently; none silently implies another.
+- **HPAC-REQ-060.** The immutable minimum for first real local-CLI dispatch
+  is `PRINCIPAL_VERIFIED_INTENT`. `ASSERTED` and `CREDENTIAL_PRESENCE` never
+  qualify. Required mechanism unavailable means approval unavailable; there
+  is no downgrade. This closes N2 at the contract layer because caller IDs,
+  references, booleans, or plausible proof-shaped bytes cannot satisfy the
+  protected-root, cryptographic, current-state, and presentation conjunction.
 
 ## 21. Revocation and recovery
 
@@ -576,11 +603,13 @@ Resolves governing-prompt items 37/38.
   discipline.
 - **HPAC-REQ-062.** Credential revocation: identical monotonic discipline,
   scoped to one `CredentialRecord`.
-- **HPAC-REQ-063.** Effect on unconsumed approvals: revoking a principal or
-  credential does not retroactively invalidate a `RuntimeInvocationApproval`
-  already validated (RIHAC-001 v1.1 §14's identical disposition) — this is
-  the same open question RIHAC-001 v1.1 §14 names, resolved identically in
-  both contracts rather than left to silently diverge.
+- **HPAC-REQ-063.** Principal or credential revocation immediately marks all
+  its unused challenges, verified/bound proofs, unmaterialized approvals,
+  unconsumed approvals, and derived PB authority projections invalid. Gate 5
+  and every pre-gate-9 revalidation SHALL re-resolve current protected
+  registry state; stale cached principal state never qualifies. Only an
+  approval/proof already atomically consumed at gate 9 remains historical
+  evidence, never reusable authority.
 - **HPAC-REQ-064.** Effect on outstanding challenges: revoking a principal
   or credential SHALL invalidate every outstanding, unconsumed challenge
   issued to that principal — a revoked principal/credential SHALL NOT be
@@ -599,18 +628,16 @@ Resolves governing-prompt items 37/38.
 
 Resolves governing-prompt items 52/53.
 
-- **HPAC-REQ-066.** No automatic mechanism fallback exists in v1. If the
+- **HPAC-REQ-066.** No automatic mechanism fallback exists in v2. If the
   primary mechanism (§14) is `unavailable` (§13), authentication SHALL
   fail closed — SHALL NOT silently substitute a weaker mechanism.
-- **HPAC-REQ-067.** A gated software-key mechanism (`hpac.software_key.
-  presence_gated.v1`, assurance `PRESENCE_GATED`, §20) MAY be configured as
-  an explicit, deployment-selected alternative for environments lacking
-  hardware-key access, provided it is gated behind an OS-level presence
-  check (converging toward OS-authentication, 149O.20L.7O.3W.1R.2A §25/§26)
-  — a bare on-disk software key with no additional gate SHALL NOT be
-  registered as a conformant mechanism under this contract, because it
-  does not resist §16's mandatory same-user-agent threat (RIHAC-001 v1.1
-  §3).
+- **HPAC-REQ-067.** No software-key or UP-only alternative qualifies for the
+  first real-runtime profile. A future alternative requires a new governed
+  HPAC version and must independently provide protected-root enrollment,
+  UP-equivalent presence, UV-equivalent principal verification, protected
+  subject presentation, and exact challenge binding. A bare on-disk key,
+  OS username, normal same-UID UI, or ordinary CLI confirmation never
+  qualifies.
 - **HPAC-REQ-068.** Future alternative mechanisms (OS-authenticated
   presence, an external approval service, another hardware authenticator
   family) MAY be added as additional `HumanAuthenticator` implementations,
@@ -638,12 +665,13 @@ Resolves governing-prompt items 58/59.
 
 ## 24. Replay and consumption
 
-- **HPAC-REQ-071.** A durable, checked-under-lock record of consumed
-  challenge/nonce values SHALL exist; §18 step 9 SHALL reject any proof
-  whose challenge/nonce is already so recorded. Consumption is recorded
-  atomically with successful verification (§18 step 10) — never before
-  (which would burn a challenge on a failed attempt) and never after a
-  window in which the same proof could be double-submitted.
+- **HPAC-REQ-071.** Protected lifecycle state SHALL reject any proof consumed
+  with another approval or dispatch. Gate-5 verification binds but does not
+  consume. Gate 9 atomically writes the durable `dispatch_attempted` marker,
+  consumes the canonical approval, and transitions the bound HPAC proof to
+  `PROOF_CONSUMED_WITH_APPROVAL`. Revalidation before gate 9 repeats canonical
+  byte/digest/signature/domain/presentation/current-registry checks against
+  the same binding without a second consumption attempt.
 - **HPAC-REQ-072.** A proof produced for invocation A's subject/preview
   digest SHALL fail verification (§18 step 5) if presented for invocation
   B's subject/preview digest, even under an otherwise-valid, unconsumed
@@ -656,7 +684,7 @@ Resolves governing-prompt items 58/59.
   trust, no default-permissive outcome, no inference of authority from an
   earlier passing step when a later step fails.
 - **HPAC-REQ-074.** Required authenticator unavailable (§13 `unavailable`)
-  → no authenticated proof can be produced → RIHAC-001 v1.1 §12 condition 7
+  → no authenticated proof can be produced → RIHAC-001 v2.0 §12 condition 7
   cannot be satisfied → no `RuntimeInvocationApproval` can be trusted → no
   real dispatch. There is no fallback to a caller assertion under any
   unavailability condition (HPAC-REQ-066).
@@ -674,7 +702,7 @@ Resolves governing-prompt item 63.
   thereafter," matching the mandatory semantic wall (§0) `authenticated
   human principal != confirmation`.
 - **HPAC-REQ-076.** No session-caching layer for authentication exists in
-  v1. If a future implementation ever introduces one (e.g. a device-pairing
+  v2. If a future implementation ever introduces one (e.g. a device-pairing
   state that reduces friction across a burst of approvals), it requires a
   separate governed contract amendment defining TTL, lock/logout boundary,
   invalidation-on-terminal-closure, invalidation-on-sleep, and
@@ -682,14 +710,14 @@ Resolves governing-prompt item 63.
 
 ## 27. Delegation and automated approval
 
-- **HPAC-REQ-077.** No delegation exists in v1: a human principal MAY NOT
+- **HPAC-REQ-077.** No delegation exists in v2: a human principal MAY NOT
   delegate authentication authority to another human, an agent, or a
   policy. A delegated/forked agent (149O.20L.7O.3W.1R.2C's own incident,
   cited as a threat-model example, not a counter-example, by
   149O.20L.7O.3W.1R.2A §17) is never treated as, and can never become, an
   `AuthenticatedHumanPrincipal` under this contract.
 - **HPAC-REQ-078.** No automated or policy-based auto-authentication exists
-  in v1. Every authentication requires a live, fresh proof-production act
+  in v2. Every authentication requires a live, fresh proof-production act
   (§16/§17) — silence, timeout, inactivity, or a default response SHALL
   NOT produce a valid proof.
 
@@ -697,36 +725,34 @@ Resolves governing-prompt item 63.
 
 Resolves governing-prompt items 69/70 explicitly.
 
-- **HPAC-REQ-079.** A repository under agent control SHALL NOT be able to:
-  enroll its own principal or credential (enrollment requires the
-  out-of-repository admin writer, HPAC-REQ-024, and fresh election
-  evidence, HPAC-REQ-028); alter `HumanPrincipalRegistry` (the registry
-  path is outside repository control, HPAC-REQ-022); downgrade the
-  required assurance level (HPAC-REQ-060 is contract-fixed, not
-  repository-configurable); or silently select a weaker authentication
-  mechanism (HPAC-REQ-066 forbids automatic fallback; mechanism selection
-  is deployment-configured outside repository control).
-- **HPAC-REQ-080.** Only the deployment/user-level admin, never repository
-  configuration, MAY configure: the required authenticator mechanism, the
-  registry location, and the enrolled-credential set. Repository
-  configuration SHALL NOT be capable of lowering security below this
-  contract's fixed minimums (HPAC-REQ-060/HPAC-REQ-066).
+- **HPAC-REQ-079.** Repository/task/agent-controlled state SHALL NOT select,
+  redirect, replace, delete, or write the registry/proof/presentation stores;
+  enroll or map principals/credentials; set mechanism allowlists; lower UP,
+  UV, assurance, freshness, or presentation requirements; or supply trusted
+  human-visible labels. Any influence or protected-root validation failure
+  invalidates the ceremony and yields no authority.
+- **HPAC-REQ-080.** Only the external protected deployment administration
+  principal may configure registry/proof paths, credential mapping, enabled
+  mechanisms, assurance/UV floor, and presentation channel. Immutable v2
+  minima cannot be lowered even by that administrator. Configuration is
+  resolved independently of repository, cwd, environment, task, caller, and
+  ordinary same-UID process state.
 
 ## 29. Multiple principals
 
-- **HPAC-REQ-081.** v1 does not require support for more than one enrolled
+- **HPAC-REQ-081.** v2 does not require support for more than one enrolled
   human principal (149O.20L.7O.3W.1R.2A §50's own recommendation, affirmed
   here as binding contract text). The registry schema (§5) does not
   preclude enrolling more than one principal later; no role/RBAC model is
-  introduced in v1.
+  introduced in v2.
 
 ## 30. Offline capability and portability
 
-- **HPAC-REQ-082.** The primary v1 mechanism (§14) SHALL function fully
+- **HPAC-REQ-082.** The primary v2 mechanism (§14) SHALL function fully
   offline: no network call is required to produce or verify a proof.
   Registry lookups and challenge/proof verification are local-only
   operations.
-- **HPAC-REQ-083.** No OS-specific adapter is required for the primary v1
+- **HPAC-REQ-083.** No OS-specific adapter is required for the primary v2
   mechanism: FIDO2 CTAP2 hardware keys are portable across the development
   (macOS) and deployment (Linux) targets without a platform-specific
   presence API, resolving the dev/deploy portability question the
@@ -764,7 +790,7 @@ this section names reusable production components conceptually only.
 
 - **HPAC-REQ-085.** If the required FIDO2 authenticator is unavailable
   (§13 `unavailable`), no authenticated proof can be produced. This
-  propagates, unmodified, through RIHAC-001 v1.1 and RDGO-001 gate 3/5: no
+  propagates, unmodified, through RIHAC-001 v2.0 and RDGO-001 gate 3/5: no
   real dispatch occurs. There is no fallback to a caller assertion under
   any unavailability condition — restated from HPAC-REQ-074 for emphasis
   at this contract's own hardware-specific boundary.
@@ -778,8 +804,10 @@ Resolves governing-prompt item 60.
   process running under the same OS account as the enrolled human cannot,
   by any code path reachable from that process alone, produce a
   `HumanAuthenticationProof` that passes §18 verification, without the
-  human physically performing the presence gesture (§14 UP requirement) at
-  the moment of proof production. This is a normative future verification
+  human performing required UP, UV, and explicit election after a protected
+  presentation of the exact canonical subject. Verification SHALL prove
+  `WHAT HUMAN WAS SHOWN == WHAT HUMAN AUTHENTICATED == WHAT PCAE AUTHORIZES`
+  at the canonical semantic level. This is a normative future verification
   requirement, not evidence produced by this contract-only phase.
 
 ## 35. Delegated-agent isolation (explicit non-reliance)
@@ -802,8 +830,8 @@ integration, Shell Gate, adapter, process launch, credential access,
 network capability, or execution availability. It does not modify
 `src/pcae/core/runtime_authority.py`, `hatp_bootstrap.py`,
 `hatp_fido2_provider.py`, `hatp_piv_provider.py`, RIHAC-001's or RIASC-001's
-own text beyond the amendments this phase makes there, PBRD-001, RDGO-001,
-RPAC-001, CHGR, Interactive Workflow, HATP-001, HPSE-001, HHCE-001, HMIC,
+  own text beyond the amendments this phase makes there, RPAC-001, CHGR,
+  Interactive Workflow, HATP-001, HPSE-001, HHCE-001, HMIC,
 Class-B, CLTR, the dry adapter consumer, or POL-005.
 
 ## 37. Versioning
@@ -820,7 +848,7 @@ principal's granted assurance.
 
 ## 38. Freeze verdict
 
-**HPAC-001 v1.0: FROZEN.**
+**HPAC-001 v2.0: FROZEN; supersedes v1.0 with no authority migration.**
 **`HumanAuthenticator` implementation: NOT BUILT / NOT AUTHORIZED.**
 **`HumanPrincipalRegistry`: NOT CREATED.**
 **Hardware: NOT TOUCHED.**

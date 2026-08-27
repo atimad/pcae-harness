@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1 cross-contract repair disposition
+  (2026-08-27).** Freeze RIHAC v2.0, RIASC v3.0, HPAC v2.0, PBRD v2.0,
+  and RDGO v3.0 as independently derived incompatible versions; retain
+  RPAC v1.0 byte-identically. Require mandatory UP+UV for first real-runtime
+  authority, a protected `TrustedApprovalPresentation`, an external protected
+  deployment-owner bootstrap/admin root, exact HPAC-PROOF/2.0 canonical
+  storage/reference semantics, live revocation validation, a typed RIHAC v2
+  PB evidence projection, idempotent proof binding at gate 5, and atomic
+  proof+approval consumption at gate 9. Treat v1.x/v2 predecessor authority
+  artifacts as historical only with no migration. Close original BLOCKING
+  7/7, MUST-FIX 2/2, N2 contract gap; retain B1/B7/N1/N2 implementation debt,
+  POL-005 hard DENY, and runtime unavailability. Require independent
+  verification before any implementation.
+
 - **Phase 149O.20L.7O.3W.1R.2B.1R scope-sufficiency STOP disposition
   (2026-08-27).** After verbatim recovery and static reproduction of exactly
   seven BLOCKING plus two MUST-FIX findings, do not partially evolve

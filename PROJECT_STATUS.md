@@ -2,25 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime Invocation
+Human-Principal Authentication Freeze Repair. **CONTRACT-ONLY — COMPLETE;
+IMPLEMENTATION READY FOR INDEPENDENT VERIFICATION.** Recovered and reproduced
+exactly seven BLOCKING plus two MUST-FIX findings before editing, then repaired
+RIHAC-001 to v2.0, RIASC-001 to v3.0, HPAC-001 to v2.0, PBRD-001 to v2.0,
+and RDGO-001 to v3.0. RPAC-001 remains byte-identical v1.0. The repaired
+model requires an externally anchored protected registry/enrollment root,
+mandatory UP+UV, protected human-visible exact-subject presentation, v2
+domain-separated canonical proof, current revocation validation, typed PB
+authority evidence, gate-5 bind/revalidate, and atomic gate-9 proof+approval
+consumption. Original BLOCKING 7/7 CLOSED; MUST-FIX 2/2 CLOSED; new BLOCKING
+0; N2 contract gap CLOSED. B1/B7/N1/N2 production repairs remain unperformed;
+authority/PB foundation remains unverified; POL-005 remains hard DENY; real
+runtime is not ready. Fresh static suite: 19 passed. No production, hardware,
+runtime, provider, credential, network, article, private-research, release, or
+execution change. Runtime remains `Observed`/`observe`/`unavailable`; v0.4.3
+unchanged. Recommended next, not begun: exactly
+**149O.20L.7O.3W.1R.2B.1R.1.1 — Independent Verification of Cross-Contract
+Runtime Invocation Human-Principal Authentication Freeze Repair**. Human
+decision required. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_CROSS_CONTRACT_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_FREEZE_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R — Runtime Invocation Human-Principal
 Authentication Contract Freeze Blocking Repair. **STOPPED — SCOPE
-INSUFFICIENT; ZERO CONTRACT CHANGES.** Recovered exactly all seven BLOCKING
-and both MUST-FIX findings verbatim and reproduced each against current
-normative text before any contract edit. The mandatory scope-sufficiency gate
-found B-6 cannot be repaired through RIHAC/RIASC/HPAC alone: the defective
-normative pins physically reside in PBRD-001 (`RIHAC-001 v1.0`) and RDGO-001
-(`RIHAC-001 v1.0`, `RIASC-001 v1.0`), while this phase explicitly forbids
-editing PBRD/RDGO. Per the user's STOP rule, no partial contract repair was
-made. All 7 BLOCKING and 2 MUST-FIX remain open; N2 remains `CONTRACT GAP
-OPEN`; implementation readiness remains NO. Prospective version analysis
-requires RIHAC v2.0, RIASC v3.0, HPAC v2.0 plus coordinated PBRD/RDGO
-evolution. Fresh STOP-gate static suite: 15 passed. No production, contract,
-hardware, provider, credential, runtime, or execution change. Runtime remains
-`Observed`/`observe`/`unavailable`; v0.4.3 unchanged. Recommended next, not
-begun: exactly **149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
-Invocation Human-Principal Authentication Freeze Repair**, contract-only and
-explicitly authorized to evolve RIHAC/RIASC/HPAC/PBRD/RDGO together. Human
-decision required. See
+INSUFFICIENT; ZERO CONTRACT CHANGES.** Recovered exactly seven BLOCKING and
+two MUST-FIX findings and stopped because B-6 required PBRD/RDGO changes
+outside that phase's authorized scope. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT_FREEZE_BLOCKING_REPAIR.md`.
 
 ## Prior Phase

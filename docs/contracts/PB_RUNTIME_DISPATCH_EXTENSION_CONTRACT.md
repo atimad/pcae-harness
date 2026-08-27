@@ -1,20 +1,22 @@
-# PBRD-001 v1.1 — Permission Broker Runtime Dispatch Extension Contract
+# PBRD-001 v2.0 — Permission Broker Runtime Dispatch Extension Contract
 
 ## Contract identity and status
 
 **Contract:** PBRD-001  
-**Version:** 1.1  
+**Version:** 2.0
 **Status:** FROZEN  
-**Frozen by:** Phase 149O.20L.7O.3V (v1.0); repaired by Phase
-149O.20L.7O.3V.1R (v1.1)  
-**Supersedes:** PBRD-001 v1.0 (frozen `2060ebd4`), whose twelve-fact request
+**Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
+Invocation Human-Principal Authentication Freeze Repair
+**Supersedes:** PBRD-001 v1.0 and v1.1. V1.x human-authority binding semantics
+are not valid for v2 requests and have no migration. The original v1.0 twelve-fact request
 was independently found incomplete against RPAC-REQ-025/044/064–068 by
 Phase 149O.20L.7O.3V.1 (Finding B-149O.20L.7O.3V.1-2): it lacked mandatory
 `attempt_id` and `idempotency_key` binding.  
 **Scope:** Contract-only, additive Permission Broker extension for one future
 real local-CLI runtime dispatch.  
 **Related contracts:** Permission Broker Foundation, PBPA-001 v1.0,
-PBPC-001 v1.2, RPAC-001 v1.0, RIHAC-001 v1.0, RDGO-001 v2.0.
+PBPC-001 v1.2, RPAC-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0,
+HPAC-001 v2.0, RDGO-001 v3.0.
 
 PBRD-001 freezes a future PB request/action contract. It does not add source
 constants, policies, request fields, a production consumer, or execution.
@@ -126,7 +128,7 @@ trust owner changed.
 | 11 | `transport_type` | Contract-fixed integration point | const `local_cli` | Yes | PBRD-001 integration | Excludes API/provider transports |
 | 12 | `network_requirement` | Target descriptor + static preflight | const `false` | Yes | Registry/preflight owner | Declared lack of network need; grants none |
 | 13 | `filesystem_scope_ref` | Governed isolated-worktree/scope owner | immutable ID/digest reference | Yes | Filesystem-scope owner | Declared scope for audit/containment; grants no mutation |
-| 14 | `human_authority_binding` | RIHAC validator | closed object containing approval ID/digest and validation-evidence digest | Yes | Human-authority validator | Reference plus validated evidence projection; not raw authority or a boolean |
+| 14 | `human_authority_binding` | RIHAC-001 v2 validator | closed object containing exactly `approval_id`, `approval_digest`, `authority_projection_id`, `authority_projection_digest`, `authority_contract_version` const `RIHAC-001/2.0`, `proof_validation_digest`, and `request_binding_digest` | Yes | Human-authority validator | Canonical approval plus freshly validated authority projection; not raw proof, caller claim, seal, or boolean |
 
 `lifecycle_context` and `human_authority_binding` are each one immutable
 binding fact despite their closed subfields, exactly as in v1.0. This
@@ -179,19 +181,27 @@ verified; it is not an arbitrary caller command string in the PB request.
 PB receives both parts necessary to preserve independent validation:
 
 1. the immutable approval reference (`approval_id`, `record_digest`); and
-2. a minimal validation-evidence projection digest proving that gate 5
-   validated the exact subject/scope/freshness facts now in the PB request.
+2. the exact RIHAC-001 v2 validated-authority projection reference/digest and
+   its proof/request-binding digests proving gate 5 freshly resolved canonical
+   approval and HPAC state for the exact request.
 
-PB SHALL NOT receive or trust raw approval prose or a caller assertion that
-approval exists. It SHALL verify that the validator-owned projection binds to
-the same request digest and approval reference.
+PB SHALL NOT authenticate humans, parse FIDO2 assertions, read HPAC registries,
+receive raw proof material, or trust raw approval prose, a caller assertion,
+`approval_present`, a public digest, or a copyable object seal. It validates
+only the typed projection/reference shape and exact binding to the request;
+RIHAC owns fresh authority validation.
 
-Only successful RIHAC-001 validation may cause the trusted request builder to
+Only successful RIHAC-001 v2.0 validation may cause the trusted request builder to
 set `approval_present=true`. The boolean is a derived Foundation input for
 POL-004; it is not itself authority and is not caller-settable. Missing,
 stale, mismatched, consumed, expired, tampered, or unverifiable approval
 evidence yields `approval_present=false` or request-construction failure and
 can never produce dispatch.
+
+PB evaluation never consumes an approval or HPAC proof. Consumption remains
+the RDGO-001 v3.0 gate-9 atomic dispatch-attempt transition; a PB decision is
+permission evidence only and is invalidated when its authority projection is
+revoked or fails current revalidation.
 
 ## 8. HUMAN_REVIEW semantics
 
@@ -273,11 +283,12 @@ of the following are separately implemented and independently verified:
 1. the `runtime_dispatch` action and the exact `adapter` classification;
 2. trusted construction and digest binding of all fourteen request facts,
    including `attempt_id` and `idempotency_key`;
-3. RIHAC-001/RIASC-001 approval creation, storage, validation, expiry, and
+3. RIHAC-001 v2.0 / RIASC-001 v3.0 / HPAC-001 v2.0 approval creation,
+   protected proof/registry resolution, validation, expiry, and
    one-shot consumption;
 4. current-policy PB evaluation with no precedence weakening;
 5. a real, positive, single-attempt Runtime Enforcement gate over the full
-   RDGO-001 v2.0 projection;
+   RDGO-001 v3.0 projection;
 6. local executable supply-chain identity and live preflight;
 7. Shell Gate/equivalent process containment with network denied;
 8. atomic durable-before-effect state and uncertainty recovery;
@@ -350,11 +361,12 @@ complete projection; it does not rubber-stamp PB or approval.
 
 PBRD-001 uses contract `MAJOR.MINOR`. Additive request evidence may increment
 MINOR only when existing meanings, action behavior, and precedence remain
-unchanged. The v1.0→v1.1 change fits exactly this rule: `attempt_id` and
-`idempotency_key` are new mandatory facts, but no existing fact's meaning,
-type, source, or trust owner changed, no action semantics widened, the
-execution class is unchanged, POL-005 eligibility is unchanged, and
-precedence is unchanged. Widening action semantics, weakening a required
+unchanged. V2 changes the mandatory meaning and closed shape of the existing
+`human_authority_binding`: a v1.1 request could carry a pre-HPAC RIHAC v1.0
+validation digest, whereas v2 requires a freshly resolved RIHAC-001 v2.0
+authority projection with proof/request binding. Because an old valid request
+is no longer valid under the new required meaning, this is a MAJOR, not an
+additive minor. Widening action semantics, weakening a required
 fact, changing the execution class, weakening POL-005 eligibility, or
 altering precedence remains incompatible and requires a new MAJOR plus
 explicit migration and independent verification.
@@ -369,6 +381,6 @@ Enforcement, adapters, runtime inspect, session/bootstrap, schema packages,
 or version/build configuration. It does not launch a process, invoke an
 external runtime, access credentials, or enable network/execution.
 
-**PBRD-001 v1.1: FROZEN for local-CLI-v1 contract purposes.**  
+**PBRD-001 v2.0: FROZEN; v1.x authority bindings have no migration.**
 **POL-005 production behavior: UNCHANGED.**  
 **Real execution: UNAVAILABLE.**

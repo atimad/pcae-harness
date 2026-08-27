@@ -11,15 +11,20 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-**Phase 149O.20L.7O.3W.1R.2B.1R** (contract-repair scope gate, complete —
-STOPPED): recovered/reproduced exactly 7 BLOCKING + 2 MUST-FIX before edits.
-B-6 requires normative PBRD/RDGO pin changes, but both contracts were outside
-the authorized edit set. Mandatory STOP applied; zero contract or production
-changes; 15 fresh static tests pass. All nine findings and N2 remain open.
-Prospective versions: RIHAC v2.0, RIASC v3.0, HPAC v2.0. Recommended next,
-not authorized: exactly **149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
-Invocation Human-Principal Authentication Freeze Repair**, contract-only and
-explicitly scoped to RIHAC/RIASC/HPAC/PBRD/RDGO.
+**Phase 149O.20L.7O.3W.1R.2B.1R.1** (cross-contract contract-only repair,
+complete): recovered/reproduced exactly 7 BLOCKING + 2 MUST-FIX before edits;
+closed 7/7 and 2/2 with 0 new BLOCKING and N2 contract gap closed. Active
+versions are RIHAC v2.0, RIASC v3.0, HPAC v2.0, PBRD v2.0, RDGO v3.0;
+RPAC v1.0 is byte-unchanged. Mandatory UP+UV, protected presentation,
+protected registry/bootstrap, exact proof/store/reference, current revocation,
+typed PB evidence, and bind-at-5/consume-at-9 semantics are frozen. 19 fresh
+static tests pass. Production repair is unperformed; POL-005/runtime remain
+unchanged. Recommended next, not authorized: exactly
+**149O.20L.7O.3W.1R.2B.1R.1.1 — Independent Verification of Cross-Contract
+Runtime Invocation Human-Principal Authentication Freeze Repair**.
+
+Prior: **Phase 149O.20L.7O.3W.1R.2B.1R** stopped on scope insufficiency
+before contract edits because PBRD/RDGO evolution was not then authorized.
 
 Prior: **Phase 149O.20L.7O.3W.1R.2B.1** (independent verification,
 complete; NOT VERIFIED): identified seven BLOCKING and two MUST-FIX defects;

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1** completed the authorized cross-contract
+  human-principal authentication freeze repair: RIHAC v2.0, RIASC v3.0,
+  HPAC v2.0, PBRD v2.0, and RDGO v3.0 now freeze protected bootstrap,
+  mandatory UP+UV, trusted subject-bound presentation, canonical non-replayable
+  proof lifecycle, live revocation, typed PB authority evidence, and coherent
+  gate-5/gate-9 semantics. RPAC v1.0 remains byte-identical. Original
+  BLOCKING 7/7 and MUST-FIX 2/2 are closed, new BLOCKING is zero, and N2 is
+  closed at contract layer. Production/runtime/POL-005/release/hardware remain
+  unchanged; independent verification is required next.
+
 - Corrected the 3W.1R.2B.1R static verifier to resolve its governed phase
   task from `tasks/done/` after lifecycle completion, preserving the combined
   54-test post-close verification result.

@@ -1,18 +1,20 @@
-# RIHAC-001 v1.1 — Runtime Invocation Human Authority Contract
+# RIHAC-001 v2.0 — Runtime Invocation Human Authority Contract
 
 ## Contract identity and status
 
 **Contract:** RIHAC-001  
-**Version:** 1.1  
+**Version:** 2.0
 **Status:** FROZEN  
-**Frozen by:** Phase 149O.20L.7O.3V — Local-CLI Runtime Dispatch Authority
-and Permission Contract Freeze (v1.0); amended by Phase 149O.20L.7O.3W.1R.2B
-— Runtime Invocation Human-Principal Authentication Contract Freeze (v1.1)  
+**Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
+Invocation Human-Principal Authentication Freeze Repair
+**Supersedes:** RIHAC-001 v1.0 and defective v1.1. V1.x approvals remain
+historical evidence only and SHALL NOT satisfy v2 authority; no migration or
+silent upgrade exists.
 **Scope:** One future, explicitly human-authorized, bounded local-CLI
 runtime invocation attempt.  
-**Schema companion:** RIASC-001 v2.0  
-**Related contracts:** RPAC-001 v1.0, PBRD-001 v1.1, RDGO-001 v2.0, HPAC-001
-v1.0 (new, 149O.20L.7O.3W.1R.2B — governs the `HumanAuthenticator`
+**Schema companion:** RIASC-001 v3.0
+**Related contracts:** RPAC-001 v1.0, PBRD-001 v2.0, RDGO-001 v3.0, HPAC-001
+v2.0 (governs the `HumanAuthenticator`
 mechanism, `HumanPrincipalRegistry`, and `HumanAuthenticationProof` this
 amendment now requires §3/§12/§16 to verify against).  
 **Reference note (149O.20L.7O.3V.1R):** PBRD-001 and RDGO-001 were repaired
@@ -24,7 +26,8 @@ v1.0: its authority subject remains bound to `invocation_id`, not to
 advance — an `attempt_id` is minted per dispatch try at RDGO-001 gate 2,
 after the approval subject model was already frozen, and does not change
 what the human approved.  
-**Reference note (149O.20L.7O.3W.1R.2B, v1.1):** Phase 149O.20L.7O.3W.1R.2A
+**Reference note (149O.20L.7O.3W.1R.2B.1R.1, v2.0):** Phase
+149O.20L.7O.3W.1R.2A
 independently found finding **N2** (human-confirmation provenance is
 caller-manufacturable — `create_runtime_invocation_approval` accepted
 caller-supplied `approver_id`/`identity_evidence_kind` strings with no
@@ -32,14 +35,11 @@ independent verification that a real human confirmation or authentication
 event ever occurred) to be a *contract*-insufficiency, not an implementation
 bug: v1.0's §3 stated the requirement ("The approving human SHALL be
 identified by provenance evidence") but never defined what verifying that
-evidence concretely requires. This v1.1 amendment closes that gap. It is an
-**additive tightening**, per §21's own precedent: it narrows what "identified
-by provenance evidence" is permitted to mean (now: a verified principal-proof
-check, not a caller-supplied string), removes no subject member, relaxes no
-one-shot semantics, and removes no existing required field — it only makes an
-already-stated requirement independently checkable. §3/§12/§16 below carry the
-new normative text; every other section is unchanged from v1.0 unless a
-section below says otherwise.
+evidence concretely requires. The defective v1.1 amendment attempted that
+repair but independent verification found its trust root, intent ceremony,
+proof lifecycle, revocation, versioning, and companion pins incomplete. V2
+closes those defects as incompatible authority semantics while retaining the
+five-member invocation subject and one-shot boundary.
 
 RIHAC-001 is the sole normative authority for the human-authority artifact
 needed by a future real local-CLI runtime dispatch. It freezes authority
@@ -79,7 +79,7 @@ combine provenance or become a single authority/permission token.
 
 ## 2. Scope and exclusions
 
-RIHAC-001 v1.0 applies only to one bounded local external process invocation
+RIHAC-001 v2.0 applies only to one bounded local external process invocation
 through an explicitly selected local-CLI runtime target.
 
 It excludes API providers, OpenRouter, provider SDKs, network egress,
@@ -105,7 +105,7 @@ component that renders or persists the artifact is the artifact producer,
 not the approving human. Producer identity SHALL NOT be substituted for the
 approver's identity.
 
-**v1.1 (149O.20L.7O.3W.1R.2B) — what "identified by provenance evidence"
+**v2.0 — what "identified by provenance evidence"
 concretely requires.** A bare caller-supplied identifier string, of any
 shape, name, or claimed evidence kind, SHALL NOT constitute provenance
 evidence. Provenance evidence SHALL consist of exactly:
@@ -114,7 +114,8 @@ evidence. Provenance evidence SHALL consist of exactly:
    canonical `HumanPrincipalRegistry` (HPAC-001 §5); and
 2. a verified `HumanAuthenticationProof` (HPAC-001 §12) produced by that
    principal's enrolled authentication mechanism (HPAC-001 §10) over the
-   exact approval-preview digest (§12 below) and a fresh, single-use
+   exact canonical approval-subject and trusted-presentation digests (§12
+   below) and a fresh, single-use
    challenge (HPAC-001 §16); and
 3. successful proof verification (HPAC-001 §18) performed by the trusted
    `ApprovalAuthorityValidator` (§16 below) — never by the artifact
@@ -123,21 +124,24 @@ evidence. Provenance evidence SHALL consist of exactly:
 `identity_evidence_kind`'s v1.0 two-member enum
 (`typed_confirmation_only`, `os_authenticated_user`) described an
 evidentiary *claim*, never a verified fact, and is retired by this
-amendment (RIASC-001 v2.0 §7). Neither historical value, nor any bare OS
+amendment (RIASC-001 v3.0 §7). Neither historical value, nor any bare OS
 username, git identity, session/agent identity, CHGR record, Typed
 Authority Model claim, or Interactive Workflow confirmer identity,
 constitutes provenance evidence under this contract — each is affirmatively
 excluded by 149O.20L.7O.3W.1R.2A §6-§11, restated here as binding contract
 text, not merely architecture-document commentary.
 
-The v1 approval mechanism remains `interactive_local_cli_confirmation`.
-This is a dedicated runtime-invocation confirmation mechanism. It is not
+The v2 approval mechanism is `trusted_subject_bound_confirmation`. It is a
+dedicated runtime-invocation confirmation ceremony. Ordinary agent-controlled
+terminal output/stdin, including the v1
+`interactive_local_cli_confirmation`, cannot satisfy it under the same-user
+threat. It is not
 CHGR Confirmation, an Interactive Decision Session, a task/phase lifecycle
 decision, or a Typed Authority Model `human_authorization` record. It is
 also, per this amendment, distinct from the *authentication* mechanism
-named by HPAC-001: `interactive_local_cli_confirmation` describes how the
-approval act is presented and confirmed within PCAE's own flow;
-the HPAC-001 `mechanism_id` (e.g. the primary v1 hardware-backed FIDO2
+named by HPAC-001: `trusted_subject_bound_confirmation` describes how the
+approval act is presented and confirmed within PCAE's protected flow;
+the HPAC-001 `mechanism_id` (the primary v2 hardware-backed FIDO2
 mechanism, HPAC-001 §14) describes how the human's presence and identity
 were cryptographically proven for that same act. Both are required; neither
 substitutes for the other.
@@ -152,6 +156,18 @@ autonomous process cannot silently produce on the human's behalf. Provenance
 evidence is valid only if it requires a presence-gated act (HPAC-001 §14)
 that an ordinary agent-controlled process cannot forge.
 
+**Informed-intent property (mandatory).** PCAE does not claim to prove human
+comprehension or consequences understood. It proves only that the human was
+given a trusted opportunity to inspect an integrity-protected representation
+of the exact canonical invocation subject and performed an explicit,
+non-defaultable, UP+UV-authenticated approval act cryptographically bound to
+that representation. The presentation SHALL show human-usable repository and
+task identity, runtime target, operation/effect and approval scope,
+prompt/instruction identity plus recognizable fingerprint, invocation ID or
+fingerprint, expiry, and one-shot nature. Repository-controlled labels and
+raw hashes alone are insufficient. A blind touch or blind authenticator touch, a mismatched
+display, or an agent-substitutable presentation creates no authority.
+
 ## 4. One-shot authority
 
 Exactly one `RuntimeInvocationApproval` authorizes at most one bounded
@@ -162,7 +178,7 @@ one RuntimeInvocationApproval -> one bounded invocation attempt
 ```
 
 `attempt_limit` and `dispatch_limit` SHALL both equal `1`. No session-wide
-or phase-wide reusable authority exists in v1. A consumed approval SHALL
+or phase-wide reusable authority exists in v2. A consumed approval SHALL
 NEVER authorize a second attempt, including a retry of an apparently
 identical prompt and target.
 
@@ -302,7 +318,7 @@ Every approval SHALL record who approved, when, the mechanism used, the
 digest of the exact approval preview, and the trusted producer component.
 Identified human provenance and producer provenance are separate fields.
 
-V1 trust is the conjunction of:
+V2 trust is the conjunction of:
 
 1. strict RIASC-001 schema validation;
 2. exact subject and scope binding;
@@ -310,17 +326,16 @@ V1 trust is the conjunction of:
 4. canonical-storage lookup rather than a caller-supplied arbitrary path;
 5. record-digest recomputation and exact comparison;
 6. current freshness and consumption-state validation; and
-7. **(v1.1, new)** successful HPAC-001 authentication-proof verification —
-   principal lookup, `active` status, credential lookup, challenge/subject
-   binding, and signature/assertion verification, per §16 below.
+7. successful HPAC-001 v2.0 proof verification against current protected
+   registry/proof state, including exact domain, subject, trusted-presentation,
+   UP, UV, nonce/lifecycle, signature, and revocation checks; and
+8. trusted-construction-only validated-authority projection creation.
 
-**v1.1 revision:** the v1.0 sentence "No cryptographic signature is
-required for v1" is retired. A cryptographic signature or assertion is now
+**v2 revision:** the v1.0 sentence "No cryptographic signature is required"
+is retired. A cryptographic signature or assertion is
 required for every approval whose provenance is to be trusted:
-HPAC-001's frozen primary v1 mechanism (hardware-backed FIDO2, HPAC-001
-§14) is presence-gated and assertion-based by construction, and the
-gated software-key fallback (HPAC-001 §15) is signature-based by
-construction. Schema validity or digest agreement alone SHALL NOT imply
+HPAC-001's primary v2 mechanism is UP+UV and trusted-presentation gated.
+There is no real-runtime software-key or UP-only fallback. Schema validity or digest agreement alone SHALL NOT imply
 authority. A caller-supplied boolean, authority-shaped field, or
 unverified proof reference cannot create authority. Condition 7 is
 conjunctive with conditions 1-6; none may substitute for another, and a
@@ -329,7 +344,7 @@ of conditions 1-6's outcome.
 
 ## 13. Freshness and invalidation
 
-All seven 3U conditions are mandatory for v1:
+All seven 3U conditions are mandatory for v2:
 
 | Condition | Bound fact | Dispatch consequence | Fresh approval? |
 |---|---|---|---|
@@ -347,13 +362,13 @@ auto-refreshed by reusing an old PB/RE decision.
 
 ## 14. Expiry, revocation, and cancellation
 
-V1 requires both one-shot consumption and an explicit wall-clock
+V2 requires both one-shot consumption and an explicit wall-clock
 `expires_at`. This contract freezes no arbitrary duration. A future
 approval-creation implementation must present the expiry to the human and
 enforce separately governed bounds; `expires_at` must be later than
 `created_at` and is evaluated against a trusted current clock.
 
-The immutable approval artifact has no mutable `revoked` field and v1 does
+The immutable approval artifact has no mutable `revoked` field and v2 does
 not require an explicit revocation command. An unconsumed approval can be
 made unusable by cancelling the pending invocation workflow or by allowing
 it to expire; any future explicit early-revocation mechanism must be a
@@ -362,24 +377,18 @@ contract amendment. Missing, removed, quarantined, or unreadable approval
 evidence fails closed; deletion is not treated as successful audit-preserving
 revocation.
 
-**v1.1 addition — principal/credential revocation is a distinct, upstream
-freshness input.** HPAC-001 §21 governs principal and credential revocation
-in the `HumanPrincipalRegistry`, a document this contract's approval
-artifact does not embed and does not control. An approval already validated
-at gate 5 (RDGO-001 §6) before a principal or credential is revoked is not
-retroactively invalidated by this contract alone; a future revocation-binding
-requirement, if adopted, must amend both this contract and HPAC-001 together
-(HPAC-001 §21 names this identical open question). §16 step 4's registry
-lookup (a)-(b) already ensures no *new* validation ever succeeds against a
-revoked principal or credential, which is the load-bearing protection for
-every approval not yet consumed.
+Principal/credential revocation is a live upstream freshness input. It
+immediately invalidates every unconsumed approval and its PB projection,
+including one previously validated at gate 5. Every revalidation before gate
+9 re-resolves current HPAC registry/proof state. Only gate-9 atomic
+consumption ends the revocable outstanding-authority state.
 
 ## 15. Canonical storage
 
-The canonical v1 pattern is:
+The canonical v2 pattern is:
 
 ```text
-.pcae/runtime-invocation-approvals/v1/<approval_id>/approval.json
+.pcae/runtime-invocation-approvals/v2/<approval_id>/approval.json
 ```
 
 The approval document is create-only, immutable, canonical JSON, and written
@@ -402,21 +411,24 @@ Validation SHALL execute in this fail-closed order:
 3. validate RIASC-001 identity, version, required fields, closed-field policy,
    and types;
 4. recompute and compare the record digest, then validate producer and human
-   provenance — **v1.1 elaboration:** "validate ... human provenance" now
+   provenance — **v2 elaboration:** "validate ... human provenance" now
    means, in this exact sub-order: (a) resolve `provenance.principal_id`
    against the canonical `HumanPrincipalRegistry` (HPAC-001 §5) and confirm
    `status == active`; (b) resolve `provenance.credential_id` against that
    principal's enrolled credential and confirm the credential is `active`
    and not revoked; (c) resolve `provenance.authentication_mechanism_id`
    and confirm it names a mechanism meeting HPAC-001 §20's minimum required
-   assurance level for real local-CLI dispatch; (d) load the referenced
+   `PRINCIPAL_VERIFIED_INTENT` assurance for real local-CLI dispatch; (d)
+   load the referenced
    `HumanAuthenticationProof` artifact (`provenance.authentication_proof_ref`)
-   from HPAC-001's canonical proof store and verify its `challenge_subject`
-   binds to this exact approval's subject and `approval_preview_digest`
-   (§12 above, HPAC-001 §17); (e) verify the proof's signature/assertion
+   from HPAC-001's protected canonical proof store and verify its
+   `approval_subject_digest` and protected `trusted_presentation_ref` bind to
+   this exact approval's subject/scope/expiry and preview digest; (e) verify
+   the proof's signature/assertion
    against the resolved credential's public verification material
-   (HPAC-001 §18); (f) verify the proof's nonce/challenge has not been
-   previously consumed (HPAC-001 §16's replay check); (g) reject on any
+   (HPAC-001 §18), required UP and UV, and exact v2 domain; (f) verify the
+   proof is unconsumed and either fresh or already bound only to this same
+   approval; (g) reject on any
    registry-miss, revoked status, mechanism-assurance shortfall, subject
    mismatch, signature failure, or replay — no step is skipped and no
    later step substitutes for an earlier failure;
@@ -430,15 +442,19 @@ Validation SHALL execute in this fail-closed order:
 10. validate `created_at`/`expires_at` against a trusted clock;
 11. inspect canonical durable invocation state for prior consumption,
     cancellation, uncertainty, or completion; and
-12. emit an immutable validated-authority evidence projection bound to all
-    checked facts.
+12. emit an ephemeral immutable validated-authority projection with canonical
+    `authority_projection_id`, `authority_projection_digest`, approval
+    ID/digest, `RIHAC-001/2.0`, proof-validation digest, request-binding
+    digest, registry-state digest, validation time, and one-shot state. It is
+    trusted only through fresh canonical re-resolution, never a caller-copyable
+    seal, boolean, or public digest.
 
 No later step runs as an authority shortcut when an earlier step fails.
 Validation evidence is not PB permission or Runtime Enforcement approval.
 
 ## 17. Consumption point
 
-Approval consumption occurs exactly with gate 9's atomic, durable
+Approval and its bound HPAC proof consumption occur exactly with gate 9's atomic, durable
 `dispatch_attempted` state transition. The same durable write SHALL bind the
 approval ID/digest and the minimum eight RDGO-001 pre-effect items.
 
@@ -489,7 +505,7 @@ default, or authority inference.
 - **Result captured:** record `RESULT_CAPTURED_UNTRUSTED`; capture does not
   accept changes or complete the task.
 
-An uncertain or failed real dispatch SHALL NOT retry automatically. V1 retry
+An uncertain or failed real dispatch SHALL NOT retry automatically. V2 retry
 requires a new invocation identity and fresh human approval. Exactly-once
 execution is not promised. The honest guarantee is at-most-once attempt where
 PCAE can prove durable state, plus explicit uncertainty where it cannot.
@@ -516,21 +532,12 @@ A subject-member removal, one-shot relaxation, required-field removal,
 semantic redefinition, or trust weakening is incompatible and requires a new
 MAJOR plus explicit migration and independent verification.
 
-**v1.0 → v1.1 (149O.20L.7O.3W.1R.2B):** this amendment adds a
-proof-verification requirement (§3, §12 condition 7, §16 step 4) and a
-registry dependency (HPAC-001). It removes no subject member (§5 unchanged,
-five members), does not relax one-shot semantics (§4 unchanged), and removes
-no existing required field of RIHAC-001 itself — RIHAC-001 is a semantic
-contract, not a schema, and its own normative text only *narrows* what
-counts as sufficient provenance evidence, which is a tightening consistent
-with this section's MINOR-bump rule (exactly the precedent already used by
-PBRD-001 v1.0→v1.1 and RDGO-001 v1.0→v2.0 for their own additive-tightening
-changes, cited in 149O.20L.7O.3W.1R.2A §39). This determination is
-independent of RIASC-001's own versioning decision (RIASC-001 v2.0 §1):
-RIASC-001's schema-level field-meaning change (`approver_id` retired) is a
-MAJOR-triggering event under RIASC-001's *own* rule, but RIHAC-001's
-semantic text was never bound to that specific field name and requires no
-parallel MAJOR bump.
+**v1.x → v2.0:** an approval valid under v1.0 can lack cryptographic
+authentication, protected registry provenance, UV, trusted presentation, and
+current proof lifecycle state. It therefore cannot remain authority-valid
+under v2. This is mandatory incompatible authority semantics and requires a
+MAJOR. RIHAC v1.0 and defective v1.1 are superseded; neither is migrated or
+silently accepted by a v2 validator.
 
 Existing approvals SHALL always be interpreted under the exact contract and
 schema version they declare. Unknown versions fail closed. No future version
@@ -542,14 +549,11 @@ This freeze does not add an executable schema package, approval CLI,
 approval store, validator, PB field, Runtime Enforcement integration, Shell
 Gate, adapter, process launch, credential access, network capability, or
 execution availability. It does not modify CHGR, Interactive Workflow, HATP,
-HMIC, Class-B, CLTR, the dry adapter consumer, or POL-005. This v1.1
-amendment additionally does not implement `HumanAuthenticator`, does not
-touch hardware, does not write to `HumanPrincipalRegistry`, and does not
-modify PBRD-001, RDGO-001, or RPAC-001 (149O.20L.7O.3W.1R.2A §41-§43,
-reaffirmed unchanged by this amendment — see the required phase document's
-§46-§48 for the full re-derivation).
+HMIC, Class-B, CLTR, the dry adapter consumer, RPAC-001, or POL-005. It does
+not implement `HumanAuthenticator`, touch hardware, or write to
+`HumanPrincipalRegistry`.
 
 ## 23. Freeze verdict
 
-**RIHAC-001 v1.1: FROZEN for local-CLI-v1 contract purposes.**  
+**RIHAC-001 v2.0: FROZEN; v1.x is not authority-compatible.**
 **Real execution: UNAVAILABLE.**
