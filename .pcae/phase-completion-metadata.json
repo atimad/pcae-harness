@@ -83,7 +83,12 @@
     "tasks/active/20260828-0033-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-1-independent-verification-of-trusted-approval-presentation-evidence-and-hpac-proof-lifecycle-canonicalization-repair.md"
   ],
   "files_changed_count": 8,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "fb1cda56",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.1: independent verification of trusted approval presentation evidence and HPAC proof-lifecycle canonicalization repair"
+    }
+  ],
   "origin_main_head": "c63ea6e92aeabd159701dd1ff1b453ba0331a9e8",
   "origin_main_head_count": 0,
   "pushed_status": "clean",
