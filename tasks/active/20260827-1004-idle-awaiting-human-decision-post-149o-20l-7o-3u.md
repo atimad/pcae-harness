@@ -25,6 +25,8 @@ Await human decision on whether to authorize the recommended next phase (PB Runt
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - tasks/DONE.md
+- tasks/active/20260827-1004-idle-awaiting-human-decision-post-149o-20l-7o-3u.md
+- tasks/done/20260827-0952-phase-149o-20l-7o-3u-real-runtime-dispatch-authority-and-permission-contract-architecture.md
 
 ## Forbidden Files
 
