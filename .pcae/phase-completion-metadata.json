@@ -93,7 +93,12 @@
     "tests/test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py"
   ],
   "files_changed_count": 11,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "975c3d50",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1: independently reject incomplete freeze"
+    }
+  ],
   "origin_main_head": "3877a5b1c44bed0a179d8b9d323cbb4aeca1fd8a",
   "origin_main_head_count": 1,
   "pushed_status": "not_pushed",
