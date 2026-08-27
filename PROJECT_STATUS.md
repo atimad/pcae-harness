@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2 — Runtime Invocation Authority Provenance, Trusted
+Construction, and Identity Registry Blocking Repair. **STOPPED —
+CONTRACT-INSUFFICIENT FINDING; NO PRODUCTION REPAIR.** Recovered B1, B7, N1,
+and N2 verbatim from 3W.1R.1 and ran the phase's own required
+contract-sufficiency gate on each before any edit. B1 (copyable
+identity-only trust seals), B7 (copied identity seal bypasses the durable
+registry), and N1 (validation accepts a bare, never-store-verified approval
+object) were each assessed **repairable** under unchanged RIHAC-001 v1.0 /
+RIASC-001 v1.0 / PBRD-001 v1.1 / RDGO-001 v2.0 / RPAC-001 v1.0. N2 (human
+approval provenance is caller-manufacturable) was assessed **not
+repairable** without new authentication/confirmation architecture: RIHAC-001
+§3 explicitly excludes reusing PCAE's existing Interactive Decision
+Session/CHGR/TAM confirmation mechanisms for this dedicated approval act,
+this codebase's own HATP verifier treats OS-username self-assertion as
+untrustworthy elsewhere, and no CLI exists yet to make
+`typed_confirmation_only` genuine. Per the phase's explicit
+any-blocker-contract-insufficient STOP rule, and confirmed with the human
+operator, the phase halted with **zero production source modified** rather
+than partially repairing B1/B7/N1. B2–B6 remain CLOSED (untouched). Runtime
+remains `Observed`/`observe`/`unavailable`; v0.4.3 is unchanged; contract
+drift NONE. Recommended next, not begun: either a contract-evolution phase
+defining authenticated human confirmation for RIHAC-001, or a re-scoped
+**149O.20L.7O.3W.1R.3** bounded to B1/B7/N1 only. Human decision required.
+See
+`docs/PHASE_149O_20L_7O_3W_1R_2_RUNTIME_INVOCATION_AUTHORITY_PROVENANCE_TRUSTED_CONSTRUCTION_IDENTITY_REGISTRY_BLOCKING_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.1 — Independent Verification of Runtime Invocation
 Authority + PB Dispatch Foundation Blocking Repair. **VERIFICATION-ONLY —
 COMPLETE; REPAIR NOT VERIFIED.** Fresh production-only adversarial tests find
@@ -19,13 +47,10 @@ Fixed-SHA attribution exactly reproduced 190/190 shared tests, 99/99 repair
 tests, and baseline 4,077 passed/1 failed versus candidate 4,176 passed/1
 failed with the same pre-existing runtime-snapshot failure; unexplained
 attributable functional regressions remain zero. Runtime remains
-`Observed`/`observe`/`unavailable`; v0.4.3 is unchanged. Recommended next,
-not begun: **149O.20L.7O.3W.1R.2 — Runtime Invocation Authority Provenance,
-Trusted Construction, and Identity Registry Blocking Repair**. Human decision
-required. See
+`Observed`/`observe`/`unavailable`; v0.4.3 is unchanged. See
 `docs/PHASE_149O_20L_7O_3W_1R_1_INDEPENDENT_VERIFICATION_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_FOUNDATION_BLOCKING_REPAIR.md`.
 
-## Prior Phase
+## Second-Prior Phase
 
 Phase 149O.20L.7O.3W.1R — Runtime Invocation Authority + PB Dispatch
 Foundation Blocking Repair. **BOUNDED PRODUCTION REPAIR — COMPLETE; CLAIMED
