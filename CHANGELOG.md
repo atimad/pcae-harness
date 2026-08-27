@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3U** — Real Runtime Dispatch Authority and
+  Permission Contract Architecture (read-only architecture/contract-design,
+  0 production source changed, no PB action implemented, no authority
+  artifact created, execution NOT activated). Made the two decisions
+  Phase 3T deferred: selected PB redesign **Option A** (dedicated
+  `runtime_dispatch` PB action, keeping PB scope narrow per RPAC-REQ-085
+  while process/network/filesystem effects stay owned by Shell Gate, a
+  future network mechanism, and existing mutation actions); selected
+  human authority design **Option A** (dedicated, one-shot
+  `RuntimeInvocationApproval` artifact bound to a five-fact subject
+  tuple, consumed at the durable "dispatch attempted" write). Froze the
+  gate ordering (prompt -> target -> preflight -> human authority ->
+  approval validation -> PB -> Runtime Enforcement -> containment ->
+  durable record -> dispatch -> intake) and the Runtime Enforcement
+  handoff projection. Resolved HUMAN_REVIEW semantics directly from
+  source: POL-004 already resolves to not-triggered exactly when a valid
+  approval sets `approval_present=True`. Produced all 6 required matrices
+  and full authority/permission/cross-gate threat models. Split
+  contract-freeze verdict: ready to freeze for local-CLI-only v1;
+  API-provider path blocked on the still-open network-egress-permission
+  dependency. Both 3S.2.1 MUST-FIX findings carried forward unrepaired.
+  Real-runtime readiness unchanged: NO. See
+  `docs/PHASE_149O_20L_7O_3U_REAL_RUNTIME_DISPATCH_AUTHORITY_AND_PERMISSION_CONTRACT_ARCHITECTURE.md`.
+
 - **Phase 149O.20L.7O.3T** — Real-Runtime Prerequisite Dependency and
   Trust-Boundary Hardening Plan (read-only strategic planning, 0
   production source changed, execution NOT activated). Re-derived from

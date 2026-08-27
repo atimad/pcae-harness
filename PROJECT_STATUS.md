@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3U — Real Runtime Dispatch Authority and Permission
+Contract Architecture. **READ-ONLY ARCHITECTURE/CONTRACT-DESIGN PHASE —
+COMPLETE.** Made the two decisions Phase 3T deliberately deferred.
+Selected PB redesign: **Option A — dedicated `runtime_dispatch` PB
+action** (over Option B's mode-enum-on-existing-action and Option C's
+composite per-effect permissions), keeping PB's scope narrow (coarse
+"may this class of action be attempted at all") while assigning
+process/network/filesystem effects to Shell Gate, a future network
+mechanism, and the existing mutation actions respectively, per
+RPAC-REQ-085's "one granted effect SHALL not imply another." Selected
+human authority design: **Option A — dedicated, one-shot
+`RuntimeInvocationApproval` artifact**, bound to a five-fact subject
+tuple (invocation_id, runtime_target, prompt_hash, repo_identity,
+task_id), consumed at the same durable "dispatch attempted" write that
+marks the effect boundary (not earlier). Froze the gate ordering: prompt
+-> target selection -> static preflight -> human authority creation ->
+approval validation -> Permission Broker (`runtime_dispatch`) -> Runtime
+Enforcement (sole final whether-to-invoke gate, RPAC-REQ-045) -> process/
+network containment -> durable pre-dispatch record -> adapter dispatch ->
+untrusted result capture -> existing intake. Froze the Runtime
+Enforcement handoff projection (PB decision + validated-approval
+reference + fresh preflight facts, never PB ALLOW or approval alone).
+Resolved the mandatory HUMAN_REVIEW question directly from source: POL-004
+(`MissingHumanApprovalRule`) already resolves to not-triggered exactly
+when a valid approval sets `approval_present=True` — no additional review
+layer is invented. Produced all 6 required matrices (current authority
+mechanisms; PB redesign options; authority binding; gate sequence; TOCTOU;
+security invariants) and full authority/permission/cross-gate threat
+models. Split contract-freeze verdict: **Outcome A (ready to freeze)** for
+the local-CLI-only v1 path; **Outcome B (one more architecture-
+clarification phase needed)** for the API-provider path, blocked on the
+still-unresolved network-egress-permission mechanism (flagged as an open
+dependency, not designed here). Neither MUST-FIX finding from 3S.2.1 was
+repaired (both carried forward, disposition confirmed unchanged). 0
+production `src/pcae`/tests files modified; no PB action implemented; no
+authority artifact created; no policy changed; real execution remains
+unavailable. See
+`docs/PHASE_149O_20L_7O_3U_REAL_RUNTIME_DISPATCH_AUTHORITY_AND_PERMISSION_CONTRACT_ARCHITECTURE.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3T — Real-Runtime Prerequisite Dependency and
 Trust-Boundary Hardening Plan. **READ-ONLY STRATEGIC PLANNING — COMPLETE.**
 Produced an evidence-derived dependency graph and hardening plan for the
