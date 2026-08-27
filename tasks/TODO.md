@@ -11,6 +11,18 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**CURRENT — Phase 149O.20L.7O.3V** (Local-CLI Runtime Dispatch Authority
+and Permission Contract Freeze): freeze exactly four separate normative
+local-CLI-v1 artifacts — RIHAC-001 human authority, PBRD-001 PB
+`runtime_dispatch`, RDGO-001 eleven-gate ordering, and RIASC-001
+`RuntimeInvocationApproval` schema contract — without production code,
+execution activation, API/network scope, or dry-path changes. Governed active
+task: `20260827-1031-phase-149o-20l-7o-3v-local-cli-runtime-dispatch-authority-and-permission-contract-freeze`.
+Completion requires contract/static verification, canonical report, governed
+push, unchanged v0.4.3 and `Observed` / `observe` / `unavailable` runtime, then
+exactly one independent-verification recommendation rather than
+implementation.
+
 **Phase 149O.20L.7O.3S** (Deterministic Mock/Dry Runtime Adapter
 Implementation, completed, bounded production implementation): implemented
 the RPAC-001 v1.0 mock-v1 vertical slice frozen by the 3R plan — all 52

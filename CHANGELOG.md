@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3V** — Local-CLI Runtime Dispatch Authority and
+  Permission Contract Freeze (contract-only; no production source/tests,
+  execution, PB policy, Runtime Enforcement, adapter, runtime inspect, or dry
+  consumer change). Froze four separate artifacts: **RIHAC-001 v1.0**
+  (dedicated one-shot human authority), **PBRD-001 v1.0** (additive
+  `runtime_dispatch` with `execution_class=adapter` and twelve immutable
+  request facts), **RDGO-001 v1.0** (eleven gates, eight durable-before-effect
+  items, seven mutable TOCTOU facts), and **RIASC-001 v1.0** (closed
+  `RuntimeInvocationApproval` schema contract; executable schema deliberately
+  deferred as production behavior). Approval binds exact invocation,
+  repository, task, target, and semantic prompt hash; uses one-shot plus
+  explicit expiry; is consumed atomically with durable `dispatch_attempted`;
+  and cannot substitute for PB, capability, Runtime Enforcement, process,
+  filesystem, network, credential, result acceptance, or task completion.
+  POL-005 and dry `adapter_invocation` remain unchanged. API/provider contract
+  freeze remains not authorized/not ready pending network-egress permission
+  architecture. Runtime stays `Observed` / `observe` / `unavailable`;
+  recommended next is exactly 3V.1 independent verification, subject to human
+  decision.
+- Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3U to Phase 149O.20L.7O.3V: Local-CLI Runtime Dispatch Authority and Permission Contract Freeze; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3U** — Real Runtime Dispatch Authority and
   Permission Contract Architecture (read-only architecture/contract-design,
   0 production source changed, no PB action implemented, no authority

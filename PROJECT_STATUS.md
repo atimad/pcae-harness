@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3V — Local-CLI Runtime Dispatch Authority and Permission
+Contract Freeze. **CONTRACT-FREEZE-ONLY — COMPLETE.** Independently re-read
+RPAC-001 v1.0, 3T/3U, Permission Broker Foundation/current implementation,
+Runtime Enforcement, Phase 99 Execution Attempt Boundary, Typed Authority,
+CHGR, Interactive Workflow Confirmation, runtime adapter/invocation/dry
+consumer source, and schema/versioning precedent before freezing four
+separate normative artifacts: **RIHAC-001 v1.0** (dedicated one-shot human
+authority), **PBRD-001 v1.0** (additive `runtime_dispatch`, existing
+`execution_class=adapter`, twelve immutable request facts), **RDGO-001 v1.0**
+(eleven gates, gate 10 first effect, eight durable-before-effect items), and
+**RIASC-001 v1.0** (strict closed `RuntimeInvocationApproval` Draft 2020-12
+schema contract in Markdown; no executable schema/resource implementation).
+The approval subject is exactly invocation/target/prompt/repository/task;
+semantic prompt hashing is `pcae.prompt-semantic.v1`; repository identity
+reuses the git-root fingerprint, not path; one-shot authority also has an
+explicit, non-arbitrary-duration expiry and is consumed atomically with the
+durable `dispatch_attempted` marker. Froze all seven freshness/TOCTOU facts,
+policy/RE re-evaluation, explicit uncertainty, at-most-once-where-provable,
+and no automatic retry. Human authority, PB permission, runtime capability,
+Runtime Enforcement, process/filesystem/network/credential permission,
+dispatch completion, accepted change, and task completion remain distinct.
+POL-005 and the production dry `adapter_invocation` path are unchanged; no
+production source/tests modified and execution remains unavailable. API/
+provider contract freeze is **NOT AUTHORIZED / NOT READY** because network-
+egress permission architecture is unresolved. Both 3S.2.1 MUST-FIX findings
+remain unrepaired with exact safe repair points; runtime inspect remains
+`TRUTHFUL_WITH_LIMITATION` and must be repaired before a first real adapter
+registration/availability claim. Recommended next: exactly
+**149O.20L.7O.3V.1 — Independent Verification of Local-CLI Runtime Dispatch
+Authority and Permission Contract Freeze**; human decision required, not
+begun. See
+`docs/PHASE_149O_20L_7O_3V_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_AND_PERMISSION_CONTRACT_FREEZE.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3U — Real Runtime Dispatch Authority and Permission
 Contract Architecture. **READ-ONLY ARCHITECTURE/CONTRACT-DESIGN PHASE —
 COMPLETE.** Made the two decisions Phase 3T deliberately deferred.

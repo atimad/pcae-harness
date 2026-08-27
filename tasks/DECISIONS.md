@@ -2,6 +2,28 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3V local-CLI authority/permission contract freeze
+  (2026-08-27).** Freeze four separate, non-substitutable artifacts:
+  RIHAC-001 v1.0 (dedicated one-shot `RuntimeInvocationApproval` human
+  authority), PBRD-001 v1.0 (additive `runtime_dispatch` PB action using the
+  existing `adapter` execution class), RDGO-001 v1.0 (eleven gates with gate
+  10 as first external effect), and RIASC-001 v1.0 (strict closed schema
+  contract). Preserve the exact five-member subject `(invocation_id,
+  runtime_target, prompt_hash, repo_identity, task_id)`, seven freshness/
+  TOCTOU conditions, twelve immutable PB request facts, eight durable-before-
+  effect items, one-shot plus wall-clock expiry, gate-9 approval consumption,
+  explicit uncertainty/no automatic replay, and fresh approval for any new
+  post-consumption attempt. Reuse the existing git-root repository fingerprint
+  rather than path identity; define `pcae.prompt-semantic.v1` canonical
+  hashing; keep approval/PB/RE/containment/results separate. POL-005 and the
+  dry `adapter_invocation` path remain unchanged. Do not add an executable
+  schema because this repository treats schema-resource/manifest/validator
+  additions as production behavior; freeze the complete Draft 2020-12 shape
+  normatively in Markdown. API/provider contract freeze remains unauthorized
+  until network-egress permission architecture exists. Recommend exactly
+  149O.20L.7O.3V.1 independent verification; do not proceed directly to
+  implementation.
+
 - **Phase 149O.20L.7O.3Q RPAC-001 v1.0 contract freeze (2026-08-26).**
   Re-derived and froze a trusted-kernel plus replaceable RuntimeAdapter
   architecture. Preserve `AgentIdentity`, `ProducerIdentity`,
