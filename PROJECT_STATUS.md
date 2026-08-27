@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification of Trusted
+Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization
+Repair. **VERIFICATION-ONLY — COMPLETE; VERIFIED.** Independently
+reconstructed all normative changes from primary contract text (not from the
+repair phase's own summary), diffing the repair's entry commit against HEAD
+to confirm exactly HPAC-001, RIHAC-001, and RDGO-001 changed while RIASC-001,
+PBRD-001, and RPAC-001 remain byte-identical. Confirmed the mandatory trust
+roots directly in contract text: presentation evidence is trusted via
+protected-mechanism installation authority plus independently verified
+mechanism attestation (HPAC-REQ-092: "Digest agreement without successful
+attestation verification is non-authority"), and the proof hash-chain's
+genesis is authoritative via protected-root write authority plus
+genesis-gating conditions a caller cannot satisfy, not "the hashes line up."
+Verified blind-touch rejection, exact presentation/challenge subject binding,
+replay rejection, Gate-5 non-consuming revalidation, Gate-9 single atomic
+create-only consumption record, all four crash windows, and attempt/retry
+semantics against contract text. B-3 CLOSED; B-4 CLOSED; other original
+BLOCKING 5/5 and MUST-FIX 2/2 remain closed; new BLOCKING 0; N2 contract gap
+CLOSED. A fresh, independently authored test file (importing neither
+production code nor the repair's own test module) passed 21/21; the repair
+phase's own fresh suite was independently re-run and reproduced 23/23. Two
+OBSERVATION-only findings recorded (pre-existing superseded-snapshot test
+files now failing against replaced contract text; "trusted coordinator"
+lacks its own numbered defining requirement) — neither reopens a prior
+finding. No production, hardware, execution, POL-005, runtime, release,
+article, or private-research change. Recommended next, not begun: exactly
+**149O.20L.7O.3W.1R.2B.1R.1.1R.2 — Human-Principal Authentication, Protected
+Approval Presentation, and Proof-Lifecycle Implementation Planning**. Human
+decision required. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_1_INDEPENDENT_VERIFICATION_TRUSTED_APPROVAL_PRESENTATION_EVIDENCE_HPAC_PROOF_LIFECYCLE_CANONICALIZATION_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R — Trusted Approval Presentation
 Evidence and HPAC Proof-Lifecycle Canonicalization Blocking Repair.
 **CONTRACT-ONLY — COMPLETE; READY FOR INDEPENDENT VERIFICATION.** Recovered
@@ -15,31 +48,11 @@ the eleven-gate state machine; RIASC-001 v3.0, PBRD-001 v2.0, and RPAC-001
 v1.0 remain byte-identical. B-3/B-4 CLOSED; other original BLOCKING 5/5 and
 MUST-FIX 2/2 remain closed; new BLOCKING 0; N2 contract gap CLOSED. Fresh
 static suite: 23 passed. No production, hardware, execution, POL-005,
-runtime, release, article, or private-research change. Recommended next, not
-begun: exactly **149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification
-of Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle
-Canonicalization Repair**. Human decision required. See
+runtime, release, article, or private-research change. Recommended next,
+begun and now complete: **149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent
+Verification of Trusted Approval Presentation Evidence and HPAC
+Proof-Lifecycle Canonicalization Repair**. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_TRUSTED_APPROVAL_PRESENTATION_EVIDENCE_HPAC_PROOF_LIFECYCLE_CANONICALIZATION_BLOCKING_REPAIR.md`.
-
-## Prior Phase
-
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1 — Independent Verification of
-Cross-Contract Runtime Invocation Human-Principal Authentication Freeze
-Repair. **VERIFICATION-ONLY — COMPLETE; NOT VERIFIED.** Independently
-recovered all seven original BLOCKING and both MUST-FIX findings, read all
-six active contracts, and adversarially reconstructed the full trust chain.
-Five of seven original blockers and both MUST-FIX findings are closed, but
-original B-3 remains open because `TrustedApprovalPresentation` has no
-canonical evidence schema/path/closed fields/channel-election attestation,
-and original B-4 remains open because the adjacent proof-lifecycle record has
-no schema/path or approval-binding fields required for same-binding gate-5
-revalidation and atomic gate-9 consumption. New BLOCKING: 0. N2 remains open.
-Fresh static suite: 27 passed. No contract or production source changed;
-RPAC/POL-005/runtime/release/hardware/article/private research are unchanged.
-Recommended next, not begun: exactly **149O.20L.7O.3W.1R.2B.1R.1.1R —
-Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle
-Canonicalization Blocking Repair**. Human decision required. See
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1_INDEPENDENT_VERIFICATION_CROSS_CONTRACT_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_FREEZE_REPAIR.md`.
 
 ## Prior Phase
 
