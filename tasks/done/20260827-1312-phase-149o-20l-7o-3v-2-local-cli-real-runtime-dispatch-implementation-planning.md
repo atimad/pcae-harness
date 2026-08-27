@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3V.2: Local-CLI Real-Runtime Dispatch Implementation Planning
 
 ## Status
 
-active
+done
 
 ## Mode
 

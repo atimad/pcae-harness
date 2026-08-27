@@ -27,7 +27,12 @@
   "no_go_confirmation": "No RuntimeInvocationApproval was implemented.\nNo runtime_dispatch source constant was added.\nNo POL-005 rule was relaxed or removed.\nNo Runtime Enforcement or Shell Gate was activated.\nNo process was launched.\nNo Codex or Claude backend was invoked.\nNo credential was accessed.\nNo network egress was enabled.\nNo execution availability was activated.\nNo dry runtime, runtime inspect, HATP, HMIC, or Class-B behavior changed.\nNo CLTR cutover occurred.\nNo Dell operation occurred.\nNo private research repository was inspected, imported from, or modified.\nNo stopped article was read, modified, resumed, or published.\nNo src/pcae production source was modified.\nNo test source was modified.",
   "origin_main_head": "3482d8cf92eeb352f94f68ca0f478924d69b442b",
   "origin_main_head_count": 0,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "71e5f24b",
+      "subject": "Phase 149O.20L.7O.3V.2: local-CLI real-runtime dispatch implementation planning"
+    }
+  ],
   "phase_id": "149O.20L.7O.3V.2",
   "phase_name": "Local-CLI Real-Runtime Dispatch Implementation Planning",
   "phase_title": "Local-CLI Real-Runtime Dispatch Implementation Planning",
