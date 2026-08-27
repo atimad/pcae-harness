@@ -11,6 +11,8 @@ separately carried historical and test-infrastructure debt.
 - Repair baseline: `abd3f5b4fb1ab6fc763fa2e6172518fa37c513c2`
 - Defective functional baseline for attribution:
   `289bd75d2d9843e95f336bcba2eed35bc414adb7`
+- Repaired functional candidate:
+  `a9d1c912b71a503deb8ca019703f9176901395cf`
 - Public release: v0.4.3 at
   `63580893b1de4782a694ab802ff7bdebdf29b0e6`, unchanged.
 - Entry runtime: `Observed` / `observe` / `unavailable`.
@@ -237,18 +239,50 @@ change is present. B1's PB action-shape guard is factored into the pure
 thin two-return orchestrator and the existing broker-thinness regression stays
 valid.
 
+Exact production files changed:
+
+- `src/pcae/core/runtime_authority.py`
+- `src/pcae/core/runtime_invocation_approval_store.py`
+- `src/pcae/core/runtime_dispatch_permission.py`
+- `src/pcae/core/permission_broker_foundation.py`
+
+Exact test files changed/added:
+
+- `tests/_rdw3w_helpers.py`
+- `tests/test_runtime_authority_validation.py`
+- `tests/test_runtime_invocation_approval_store.py`
+- `tests/test_runtime_dispatch_permission.py`
+- `tests/test_runtime_dispatch_attempt_idempotency.py`
+- `tests/test_runtime_dispatch_no_external_effect.py`
+- `tests/test_runtime_dispatch_regression_pb_actions.py`
+- `tests/test_runtime_authority_pb_verification_3w1.py`
+- `tests/test_runtime_authority_pb_repair_3w1r.py`
+
 ## 31. Regression attribution
 
-Fixed-SHA partitioned baseline/candidate results will be frozen after the
-functional repair commit. No monolithic full-suite claim will be made.
+Fixed-SHA attribution compared defective baseline
+`289bd75d2d9843e95f336bcba2eed35bc414adb7` with repaired candidate
+`a9d1c912b71a503deb8ca019703f9176901395cf` in disposable detached
+worktrees. No monolithic full-suite claim is made.
 
 ### Matrix F — Regression attribution
 
 | Partition/failure | 3W defective baseline | repaired candidate | Classification | Attributable? |
 |---|---:|---:|---|---|
-| Focused authority/PB implementation + verifier/repair | baseline expected unsafe verification assertions | 289 passed | intended repair | No |
-| Representative PB/rollback/push/publication/dry, excluding slow packaging | pending fixed-SHA | 880 passed / 34 deselected working-tree precheck | pending | pending |
-| Slow publication packaging (`python -m build`) | tool unavailable | tool unavailable | ENVIRONMENT_OR_TEST_INFRASTRUCTURE | No |
+| Shared eight-file 3W implementation suite | 190 passed | 190 passed | equivalent | No |
+| Independent verifier + fresh 3W.1R closure suite | not present at 3W functional SHA | 99 passed | intended additive repair evidence | No |
+| PB/runtime/rollback/publication/dry consumer partition, `-n auto -m 'not slow'` | 4,077 passed, 1 failed | 4,176 passed, 1 failed | same failure plus 99 intended tests | No |
+| `test_runtime_snapshot.py::test_verbose_output_includes_runtime_context_section` | failed (`Session:` absent) | same failure | BASELINE_REPRODUCED / PRE_EXISTING | No |
+| Representative PB/rollback/push/publication/dry serial partition, `-m 'not slow'` | 880 passed, 34 deselected | 880 passed, 34 deselected | equivalent | No |
+| Representative slow wheel node (`python -m build`) | failed: optional `build` module unavailable | same | ENVIRONMENT_OR_TEST_INFRASTRUCTURE | No |
+| Broad filename A-F attempt | 2,308 passed, 2 failed, then normal foreground interrupt at 15% after progress stalled | not run | incomplete/non-canonical partition; excluded | No |
+
+Candidate-only functional failures: **0**. Baseline-reproduced failures: **1
+in the completed consumer partition**. Historical/self-check exclusions in
+completed candidate attribution: **0** after preserving the broker-thinness
+invariant. Infrastructure exclusions: **one representative packaging node**;
+the separately carried Shell-Gate debt was not reopened. Remaining unexplained
+attributable failures: **0**.
 
 ## 32. Test infrastructure debt
 
@@ -259,7 +293,11 @@ repaired or reopened. Local publication packaging nodes also lack the optional
 ## 33. Historical self-check debt
 
 Carry separately: fixed-phase historical source/count checks identified by
-3W.1. No bulk historical-test rewrite was performed.
+3W.1. No bulk historical-test rewrite was performed. The historical
+`test_future_action_is_not_implemented_but_selected_class_exists` assertion
+remains **EXPECTED_OBSOLETE_ASSERTION**: it asserts `runtime_dispatch` is
+absent, while Phase 3W intentionally implemented that exact PBRD-required
+capability and current functional tests verify its replacement behavior.
 
 ## 34. Two older MUST-FIX findings
 
@@ -277,8 +315,10 @@ remains `Observed` / `observe` / `unavailable`.
 
 ## 36. New findings
 
-Final counts pending fixed-SHA attribution. No new implementation blocker has
-been observed in focused verification.
+New BLOCKING: **0**. New MUST-FIX: **0**. New NON-BLOCKING: **0**. The broad
+filename A-F attempt was an unsuitable/incomplete partition, not a product
+finding. The already-known Shell-Gate and optional-build environment items
+remain test-infrastructure debt.
 
 ## 37. Seven-finding final disposition
 
@@ -296,8 +336,38 @@ been observed in focused verification.
 
 ## 38. Final verdict
 
-Pending final fixed-SHA attribution and governance closure. The repair itself
-has 7/7 closure evidence and preserves hard-deny/runtime-unavailable invariants.
+**RUNTIME INVOCATION AUTHORITY + PB FOUNDATION BLOCKING REPAIR: COMPLETE.**
+
+- Phase ID: `149O.20L.7O.3W.1R`
+- Status/completeness: complete bounded repair; canonical report complete.
+- 3W.1 blockers: **7 / 7 CLOSED**.
+- Frozen contracts: **UNCHANGED**.
+- RIHAC-001: implementation repaired / contract preserved.
+- RIASC-001: production enforcement repaired / contract preserved.
+- Approval store, provenance, subject binding, freshness, path/symlink,
+  corruption/tamper, trusted projection, Option-B, attempt/idempotency:
+  **PASS**.
+- POL-004: correct trusted-human-approval behavior.
+- POL-005: unchanged source / hard DENY.
+- Approval consumption: **NO / NOT IMPLEMENTED**.
+- Runtime Enforcement calls: **0**; Shell Gate calls: **0**.
+- Runtime subprocess/network/provider/credential/external runtime/background
+  work/runtime source mutation: **0 / 0 / 0 / 0 / 0 / 0**.
+- Dry path: unchanged and passing; PB compatibility: passing; approval
+  persistence/restart: passing.
+- Contract drift: **NONE**; production-diff audit: bounded to B1-B7.
+- Unexplained attributable functional regressions: **0**.
+- Authority/PB foundation self-repair verdict: **COMPLETE, NOT SELF-CERTIFIED**.
+- Independent re-verification required: **YES**.
+- Production source modified: **YES**.
+- Execution activated: **NO**.
+- Entry/final runtime: `Observed` / `observe` / `unavailable`.
+- Release: v0.4.3 unchanged; no tag/version/publication.
+- Article: stopped. Private research: untouched.
+- Functional commits: `2457f600` and `a9d1c912`; normal governance
+  finalization/push recorded by task/phase metadata.
+- Pushed/origin state: required to be clean/zero-ahead at closure.
+- Human decision: **REQUIRED**.
 
 ## 39. Recommended next phase
 

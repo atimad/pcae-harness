@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R final disposition (2026-08-27).** Close all
+  seven 3W.1 BLOCKING findings under unchanged frozen contracts; classify
+  every one `CLOSED`. Fixed-SHA detached-worktree attribution against
+  `289bd75d2d9843e95f336bcba2eed35bc414adb7` and repaired candidate
+  `a9d1c912b71a503deb8ca019703f9176901395cf` found zero candidate-only
+  functional failures and the same pre-existing runtime-snapshot node at both
+  SHAs; therefore **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0**.
+  Do not claim monolithic FULL FAST GREEN: carry the Shell-Gate order/hang
+  debt, optional-build environment exclusion, historical self-check debt, and
+  obsolete future-action assertion separately. Preserve v0.4.3, POL-005,
+  approval non-consumption, dry runtime, and execution unavailability. This
+  repair does not self-certify. Recommend exactly **149O.20L.7O.3W.1R.1 —
+  Independent Verification of Runtime Invocation Authority + PB Dispatch
+  Foundation Blocking Repair**; require human authorization and do not begin
+  Runtime Enforcement planning automatically.
+
 - **Phase 149O.20L.7O.3W.1R bounded repair design (2026-08-27).** Recovered
   exactly seven BLOCKING findings verbatim from the canonical 3W.1 artifact and
   reproduced every one independently at clean baseline

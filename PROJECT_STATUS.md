@@ -2,73 +2,49 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1 — Independent End-to-End Runtime Invocation
-Authority + PB Dispatch Request Foundation Verification.
-**VERIFICATION-ONLY — COMPLETE; NOT VERIFIED.** Fresh independent tests
-confirmed five-member subject binding, the seven freshness dispositions,
-attempt IDs, deterministic PB precedence, unchanged POL-005 hard DENY,
-existing PB/dry compatibility, and zero Runtime Enforcement, Shell Gate,
-runtime-process, network/provider, or credential effects. They also found
-seven BLOCKING trust-boundary defects: forgeable validated-authority/raw
-`approval_present` paths and optional dispatch context; approval-store
-symlink/hardlink escape; incomplete RIASC and duplicate-key enforcement;
-unbound preview provenance; incomplete descriptor/filesystem-scope binding;
-lexical timestamp comparison; and incomplete/non-durable idempotency
-identity. The 190 implementation tests pass and 83 fresh verifier tests
-pass as evidence of observed behavior. Safety-compatible fixed-SHA A–Z
-partitions found **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0**,
-but no monolithic FULL FAST GREEN PASS is claimed. Runtime remains
-`Observed`/`observe`/`unavailable`; release v0.4.3 unchanged. Recommended
-next, not begun: **Runtime Invocation Authority + PB Dispatch Foundation
-Blocking Repair**, followed by independent re-verification. Human decision
+Phase 149O.20L.7O.3W.1R — Runtime Invocation Authority + PB Dispatch
+Foundation Blocking Repair. **BOUNDED PRODUCTION REPAIR — COMPLETE; 7/7
+BLOCKING FINDINGS CLOSED; INDEPENDENT RE-VERIFICATION REQUIRED.** Recovered
+all seven 3W.1 findings verbatim and reproduced each against clean repair
+baseline `abd3f5b4fb1ab6fc763fa2e6172518fa37c513c2` before editing. All were
+implementation defects under unchanged RIHAC-001 v1.0, RIASC-001 v1.0,
+PBRD-001 v1.1, RDGO-001 v2.0, and RPAC-001 v1.0. Repaired validator/PB
+trusted construction; link-safe canonical approval persistence; complete
+RIASC/duplicate-key enforcement; preview provenance; full descriptor/scope
+cross-binding; instant timestamp comparison; and complete durable
+cross-process identity collision enforcement. The shared 3W suite remains
+190/190; updated independent verifier plus fresh closure suite are 99/99;
+representative PB/rollback/push/publication/dry is 880/880 with 34 slow nodes
+deselected; fixed-SHA consumer attribution is baseline 4,077 passed/1 failed
+and candidate 4,176 passed/1 failed (the same pre-existing runtime-snapshot
+node, plus 99 intended repair tests). **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL
+REGRESSIONS = 0**; no monolithic FULL FAST GREEN PASS is claimed. POL-005 is
+source-identical hard DENY; approval consumption remains unimplemented; RE
+and Shell Gate calls are zero; runtime remains `Observed`/`observe`/
+`unavailable`; v0.4.3 unchanged. Recommended next, not begun:
+**149O.20L.7O.3W.1R.1 — Independent Verification of Runtime Invocation
+Authority + PB Dispatch Foundation Blocking Repair**. Human decision
 required. See
-`docs/PHASE_149O_20L_7O_3W_1_INDEPENDENT_END_TO_END_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_REQUEST_FOUNDATION_VERIFICATION.md`.
+`docs/PHASE_149O_20L_7O_3W_1R_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_FOUNDATION_BLOCKING_REPAIR.md`.
 
 ## Prior Phase
 
-Phase 149O.20L.7O.3W — Runtime Invocation Authority + PB Dispatch Request
-Foundation Implementation. **IMPLEMENTATION — COMPLETE, INDEPENDENT
-VERIFICATION NOT PASSED.** Added the authority/store/PB Option-B foundation
-without activating execution and with POL-005 unchanged. Its claimed
-properties are superseded for readiness purposes by the 3W.1 findings above.
+Phase 149O.20L.7O.3W.1 — Independent End-to-End Runtime Invocation
+Authority + PB Dispatch Request Foundation Verification. **VERIFICATION-ONLY
+— COMPLETE; NOT VERIFIED; SEVEN BLOCKERS SUBSEQUENTLY REPAIRED BY 3W.1R.**
+The canonical artifact remains the authority for the seven original findings
+and its fixed-SHA attribution/debt classifications.
 See
-`docs/PHASE_149O_20L_7O_3W_RUNTIME_INVOCATION_AUTHORITY_AND_PB_DISPATCH_REQUEST_FOUNDATION_IMPLEMENTATION.md`.
+`docs/PHASE_149O_20L_7O_3W_1_INDEPENDENT_END_TO_END_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_REQUEST_FOUNDATION_VERIFICATION.md`.
 
 ## Second-Prior Phase
 
-Phase 149O.20L.7O.3V.1R.1 — Independent Verification of Repaired Local-CLI
-Runtime Dispatch Authority and Permission Contracts. **VERIFICATION-ONLY —
-COMPLETE.** Independently reconstructed (not rereun from 3V.1R's own tests)
-whether Phase 149O.20L.7O.3V.1R's repair actually closes both BLOCKING
-findings from 3V.1. **3V.1 BLOCKING 1 (RDGO gate order vs RPAC-REQ-042):
-CLOSED** — RDGO-001 v2.0's gate table independently re-read shows gate 3
-(human authority creation) strictly precedes gate 4 (static preflight),
-an exact literal match to RPAC-REQ-042's own steps 3/4, re-read directly
-from RPAC-001 primary text. **3V.1 BLOCKING 2 (PBRD attempt/idempotency
-binding): CLOSED** — PBRD-001 v1.1's fact table independently recounted at
-exactly fourteen rows, with `attempt_id`/`idempotency_key` both required
-and PCAE-coordinator-owned. RPAC-REQ-042 verdict: **CONSISTENT**.
-Cross-contract identifier matrix, cardinality sweep (PB 12->14, gates 11,
-durable items 8, TOCTOU facts 7, RIASC 16 required/5-subject fields), and
-terminology audit found zero new contradictions. Notable independent
-finding: the existing shipped production mock/dry path
-(`simulate_invocation` in `src/pcae/core/runtime_adapter.py`, plus
-`runtime_invocation.py`'s `InvocationRequest`) already implements
-RPAC-REQ-042-consistent gate ordering and matching `attempt_id`/
-`idempotency_key` conventions, independently corroborating the repair
-without constituting an implementation of the future `runtime_dispatch`
-action (read-only cross-check; `src/pcae` untouched by this phase). 51
-fresh verification tests pass (0 failed; distinct module, not a rerun of
-3V.1R's own tests). **LOCAL-CLI AUTHORITY/PERMISSION IMPLEMENTATION READY:
-YES.** REAL-RUNTIME READY: NO. BLOCKING: 0; MUST-FIX: 0 new (2 pre-existing
-3S.2.1 findings carried forward unchanged, deferred-real-runtime);
-NON-BLOCKING: 1. Zero `src/pcae/**` changes; runtime remains
-`Observed`/`observe`/`unavailable`; POL-005 and the dry path unchanged;
-API/network remains not frozen; release v0.4.3 unchanged; article stopped;
-private research untouched. Recommended next phase: **149O.20L.7O.3V.2 —
-Local-CLI Real-Runtime Dispatch Implementation Planning**; human decision
-required, not begun. See
-`docs/PHASE_149O_20L_7O_3V_1R_1_INDEPENDENT_VERIFICATION_REPAIRED_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_PERMISSION_CONTRACTS.md`.
+Phase 149O.20L.7O.3W — Runtime Invocation Authority + PB Dispatch Request
+Foundation Implementation. **IMPLEMENTATION — COMPLETE; ITS SEVEN VERIFIED
+BLOCKERS SUBSEQUENTLY REPAIRED BY 3W.1R.** This is the defective functional
+baseline `289bd75d2d9843e95f336bcba2eed35bc414adb7` used for 3W.1R fixed-SHA
+attribution. See
+`docs/PHASE_149O_20L_7O_3W_RUNTIME_INVOCATION_AUTHORITY_AND_PB_DISPATCH_REQUEST_FOUNDATION_IMPLEMENTATION.md`.
 
 ## Two Prior Phases Ago
 
