@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Transitioned the stopped 3W.1R.2B.1R task to idle awaiting explicit human
+  authorization for any broadened cross-contract repair; no successor work
+  began automatically.
+
 - **Phase 149O.20L.7O.3W.1R.2B.1R** stopped at its mandatory contract-scope
   gate after recovering and reproducing exactly seven BLOCKING and two
   MUST-FIX findings. B-6 requires PBRD/RDGO normative pin changes, but those
