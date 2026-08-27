@@ -57,6 +57,8 @@
     "external_runtime_calls": 0,
     "background_work": 0,
     "runtime_source_mutation": 0,
+    "report_notification_tests": "not applicable to contract-only changes; pcae notify status ready; 0 failed",
+    "bootstrap_session_reporting_tests": "pcae health/check/coherence passed; session continuity verified; 0 failed",
     "fast_green": "fresh contract/static suite 23 passed"
   },
   "governance_results": {
@@ -66,9 +68,9 @@
     "pcae_doctor_task_memory": "historical tasks/DONE.md sync warnings only",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, outbound-ready",
-    "pcae_push_check": "pending governed commit/push"
+    "pcae_push_check": "clean"
   },
-  "no_go_confirmation": "No production src/pcae file was modified.\nNo RIASC, PBRD, RPAC, PB policy, POL-005, Runtime Enforcement, Shell Gate, adapter, dry-runtime, or runtime-inspect file was modified.\nNo HumanPrincipalRegistry, presentation UI, authenticator, proof store, or consumption store was implemented.\nNo B1/B7/N1/N2 production repair was performed.\nNo authenticator was enumerated, enrolled, touched, signed, or verified.\nNo runtime process or real execution was launched.\nNo provider API, model endpoint, credential, keychain, PAM, biometric API, or network was accessed.\nNo release, tag, publication, article, or private research state was accessed or changed.",
+  "no_go_confirmation": "No production src/pcae file was modified.\nNo RIASC contract file was modified.\nNo PBRD contract or Permission Broker implementation was modified.\nNo RPAC contract or POL-005 rule was modified.\nNo Runtime Enforcement, Shell Gate, adapter, dry-runtime, or runtime-inspect file was modified.\nNo HumanPrincipalRegistry was implemented.\nNo trusted presentation UI or presentation store was implemented.\nNo authenticator, proof store, lifecycle store, or consumption store was implemented.\nNo B1/B7/N1/N2 production repair was performed.\nNo authenticator was enumerated, enrolled, touched, signed, or verified.\nNo runtime process or real execution was launched.\nNo provider API, model endpoint, credential, keychain, PAM, biometric API, or network was accessed.\nNo release, tag, or publication state was changed.\nNo stopped article was accessed, resumed, modified, or published.\nNo private research repository was inspected, accessed, relied upon, or modified.",
   "files_changed": [
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
@@ -95,10 +97,18 @@
     {
       "hash": "9c6c0804",
       "subject": "Transition phase 149O.20L.7O.3W.1R.2B.1R.1.1R to idle"
+    },
+    {
+      "hash": "dc73f7af",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R: sync completion metadata"
+    },
+    {
+      "hash": "acd27b73",
+      "subject": "Record phase 149O.20L.7O.3W.1R.2B.1R.1.1R completion index"
     }
   ],
-  "origin_main_head": "bd11deaebd6e7022cf68e0148ade96b2f7d4a1ba",
-  "origin_main_head_count": 2,
-  "pushed_status": "not_pushed",
+  "origin_main_head": "acd27b73acec17f940ae713ad7eb1622c0308b02",
+  "origin_main_head_count": 0,
+  "pushed_status": "pushed",
   "recommended_next_phase": "Exactly 149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification of Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization Repair. Human authorization required; do not begin implementation automatically."
 }
