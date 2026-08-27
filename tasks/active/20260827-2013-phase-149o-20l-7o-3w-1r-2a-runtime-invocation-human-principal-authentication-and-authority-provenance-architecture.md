@@ -47,6 +47,7 @@ Read-only architecture/contract-design phase to determine the smallest architect
 - docs
 - tasks
 - session
+- config
 
 ## Forbidden Zones
 
