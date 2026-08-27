@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R** stopped at its mandatory contract-scope
+  gate after recovering and reproducing exactly seven BLOCKING and two
+  MUST-FIX findings. B-6 requires PBRD/RDGO normative pin changes, but those
+  contracts were explicitly out of scope, so zero contract or production
+  edits were made. Fifteen fresh static tests pass; N2 and all nine findings
+  remain open; runtime and v0.4.3 are unchanged. Recommended next, subject to
+  human authorization: broadened contract-only phase 3W.1R.2B.1R.1.
+
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1 independent
   verification to idle awaiting explicit human decision; no repair or
   implementation was started.

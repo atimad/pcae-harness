@@ -2,6 +2,18 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R scope-sufficiency STOP disposition
+  (2026-08-27).** After verbatim recovery and static reproduction of exactly
+  seven BLOCKING plus two MUST-FIX findings, do not partially evolve
+  RIHAC/RIASC/HPAC: B-6 necessarily requires changing PBRD's normative
+  `RIHAC-001 v1.0` pin and RDGO's normative `RIHAC-001 v1.0`/`RIASC-001
+  v1.0` pins, while this phase explicitly excludes PBRD/RDGO edits. Preserve
+  every contract byte and leave all nine findings/N2 open. Prospective
+  evidence-derived versions are RIHAC v2.0, RIASC v3.0, and HPAC v2.0, but
+  no version is frozen here. Recommend exactly broadened contract-only phase
+  149O.20L.7O.3W.1R.2B.1R.1 with RIHAC/RIASC/HPAC/PBRD/RDGO in scope;
+  require human authorization.
+
 - **Phase 149O.20L.7O.3W.1R.2B.1 independent verification disposition
   (2026-08-27).** Do not certify RIHAC-001 v1.1 + RIASC-001 v2.0 + HPAC-001
   v1.0 and do not begin implementation or B1/B7/N1 repair. Seven BLOCKING

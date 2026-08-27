@@ -1,5 +1,10 @@
 # Done
 
+- 2026-08-27 — Phase 149O.20L.7O.3W.1R.2B.1R recovered and reproduced all
+  seven BLOCKING plus two MUST-FIX findings, then **STOPPED — SCOPE
+  INSUFFICIENT** because B-6 requires prohibited PBRD/RDGO edits. Zero
+  contract/production changes; 15 fresh tests pass; N2 remains open.
+
 - 2026-08-27 — Phase 149O.20L.7O.3W.1R.2B.1 independently verified the
   human-principal authentication contract freeze and returned **NOT
   VERIFIED** with seven BLOCKING and two MUST-FIX findings. N2 and B1/B7/N1
@@ -34,6 +39,7 @@
 
 ## Completed
 
+- Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B.1 (20260827-2138-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2b-1)
 - Phase 149O.20L.7O.3W.1R.2B.1: Independent Verification of Runtime Invocation Human-Principal Authentication Contract Freeze (20260827-2117-phase-149o-20l-7o-3w-1r-2b-1-independent-verification-of-runtime-invocation-human-principal-authentication-contract-freeze)
 - Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B (20260827-2053-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2b)
 - Phase 149O.20L.7O.3W.1R.2B: Runtime Invocation Human-Principal Authentication Contract Freeze (20260827-2053-phase-149o-20l-7o-3w-1r-2b-runtime-invocation-human-principal-authentication-contract-freeze)
