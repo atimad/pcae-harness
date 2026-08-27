@@ -51,12 +51,13 @@
     "runtime_source_mutation": 0,
     "report_notification_tests": "not applicable to planning-only phase; pcae notify status ready; 0 failed",
     "bootstrap_session_reporting_tests": "pcae health/check passed; session continuity verified; 0 failed",
-    "fast_green": "not applicable — planning-only phase, no test changes"
+    "fast_green": "0 passed, 0 failed (planning-only phase, no test changes)"
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
+    "pcae_doctor_task_memory": "historical tasks/DONE.md sync warnings only",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, outbound-ready",
     "pcae_push_check": "clean"
