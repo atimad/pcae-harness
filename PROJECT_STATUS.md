@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.2 — Human-Principal Authentication,
+Protected Approval Presentation, and Proof-Lifecycle Implementation
+Planning. **PLANNING-ONLY — COMPLETE.** Produced a bounded, 8-layer staged
+implementation plan (canonical models/stores → deterministic
+protected-presentation mechanism → mechanism-neutral HPAC verifier +
+principal registry → deterministic/mock authentication proof path →
+B1/B7/N1/N2 production authority repair → real FIDO2 mechanism → real
+protected human approval UI → independent end-to-end verification) realizing
+the verified contract baseline (RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001
+v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0 unchanged) frozen by
+149O.20L.7O.3W.1R.2B.1R.1.1R.1. Every new normative requirement across the
+six contracts is mapped (Matrix A) to existing reusable code, a new
+component/schema/store/validator/test, or an explicitly deferred
+real-hardware dependency; no requirement left unmapped. Grounded B1/B7/N1/N2
+production repairs in exact file/line citations from the current source
+(`runtime_authority.py`, `runtime_dispatch_permission.py`,
+`runtime_invocation_approval_store.py`) rather than re-describing the
+contract text. Recommended first implementation slice: HumanPrincipalRegistry
+model/store + TrustedApprovalPresentationEvidence model/store +
+HumanAuthenticationProof + HPACLifecycleStore model/store + deterministic
+non-real HumanAuthenticator/ProtectedApprovalPresentationMechanism
+implementations, with no PB integration and no `runtime_authority.py` change
+in this first slice. No production, test, hardware, execution, POL-005,
+runtime, release, article, or private-research change; runtime remains
+Observed/observe/unavailable; v0.4.3 (`63580893`) unchanged. Recommended
+next, not begun: the first bounded implementation phase (canonical
+human-principal/presentation/proof-lifecycle models and stores plus
+deterministic authenticator/presentation fixtures). Human decision required
+before any implementation code is written. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_2_HUMAN_PRINCIPAL_AUTHENTICATION_PROTECTED_APPROVAL_PRESENTATION_PROOF_LIFECYCLE_IMPLEMENTATION_PLANNING.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification of Trusted
 Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization
 Repair. **VERIFICATION-ONLY — COMPLETE; VERIFIED.** Independently
