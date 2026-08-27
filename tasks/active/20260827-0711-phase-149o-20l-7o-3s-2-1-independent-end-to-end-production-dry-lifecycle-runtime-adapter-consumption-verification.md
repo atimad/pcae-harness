@@ -30,6 +30,7 @@ Independently verify Phase 149O.20L.7O.3S.2's claim that the RPAC-001 mock/dry a
 - tasks/TODO.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/204861a6898df501644f5746cfe9e6b224eef15d4a9a5403052e2576e1d17e55.json
 - tasks/active/20260827-0016-idle-awaiting-human-decision-post-149o-20l-7o-3s-2.md
 - tasks/done/20260827-0016-idle-awaiting-human-decision-post-149o-20l-7o-3s-2.md
 - tasks/active/20260827-0711-phase-149o-20l-7o-3s-2-1-independent-end-to-end-production-dry-lifecycle-runtime-adapter-consumption-verification.md
