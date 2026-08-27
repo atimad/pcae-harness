@@ -11,15 +11,6 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-**CURRENT — Phase 149O.20L.7O.3V.1** (Independent Verification of
-Local-CLI Runtime Dispatch Authority and Permission Contract Freeze):
-independently challenge RIHAC-001, PBRD-001, RDGO-001, and RIASC-001 against
-primary contracts, current PB/dry-runtime source, schema precedent, and fresh
-adversarial evidence. Verification baseline:
-`60de4bda64af32e94a29039d10fdd96a811350dd`. No implementation, execution,
-API/network freeze, production source change, article work, or private
-research access is authorized.
-
 **Phase 149O.20L.7O.3S** (Deterministic Mock/Dry Runtime Adapter
 Implementation, completed, bounded production implementation): implemented
 the RPAC-001 v1.0 mock-v1 vertical slice frozen by the 3R plan — all 52

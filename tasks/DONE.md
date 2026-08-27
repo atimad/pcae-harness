@@ -1,5 +1,12 @@
 # Done
 
+- 2026-08-27 — Phase 149O.20L.7O.3V.1 independently verified the local-CLI
+  authority/permission freeze: RIHAC and normative RIASC complete, but joint
+  freeze NOT VERIFIED due to the RPAC/RDGO gate-order contradiction and
+  missing attempt/idempotency binding in PBRD/RDGO. Fresh tests: 44 passed;
+  no production source or execution change. Recommended 3V.1R contract repair,
+  human decision required.
+
 ## Completed
 
 - Idle: awaiting human decision post-149O.20L.7O.3V (20260827-1124-idle-awaiting-human-decision-post-149o-20l-7o-3v)
