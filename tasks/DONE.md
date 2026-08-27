@@ -1,5 +1,15 @@
 # Done
 
+- 2026-08-27 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R completed the bounded
+  contract-only repair: B-3/B-4 closed; the other original blockers 5/5 and
+  MUST-FIX 2/2 remain closed; new BLOCKING 0; N2 contract gap closed. HPAC
+  now freezes canonical attested presentation evidence, hash-chained proof
+  lifecycle, exact Gate-5 binding, and one crash-safe Gate-9 consumption
+  record. RIHAC 2.0/HPAC 2.0/RDGO 3.0 are correctively completed;
+  RIASC 3.0/PBRD 2.0/RPAC 1.0 remain byte-identical. Twenty-three fresh
+  static tests pass; production, hardware, POL-005, runtime, and v0.4.3 are
+  unchanged. Independent verification is required next.
+
 - 2026-08-27 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1 independently verified the
   cross-contract repair and returned **NOT VERIFIED**: original BLOCKING 5/7
   closed, MUST-FIX 2/2 closed, B-3/B-4 open, new BLOCKING 0, N2 open. The
