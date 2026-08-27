@@ -3168,3 +3168,14 @@
   all real-runtime prerequisites are independently satisfied. `codex-ox`
   remains an agent/session identity only and implies no OpenRouter, model,
   target, credential, or execution.
+- Phase 149O.20L.7O.3W.1R.1 does not accept a module-global object seal as
+  unforgeable provenance: frozen dataclass replacement preserves the seal, so
+  B1 and B7 remain OPEN when copied projections, PB requests, or identities
+  bypass fresh validation/registry proof.
+- Phase 149O.20L.7O.3W.1R.1 classifies canonical-store provenance and trusted
+  human-confirmation provenance as separate mandatory boundaries. A bare
+  approval object or caller-supplied approver/evidence strings cannot satisfy
+  RIHAC authority merely because schema, constants, and digests are valid.
+- Runtime Enforcement planning remains blocked. The next dependency is a
+  bounded authority provenance/trusted-construction/identity-registry repair
+  under unchanged contracts, followed by independent verification.

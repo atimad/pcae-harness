@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.1** — Independently re-verified the 3W.1R
+  authority/PB repair from original findings, contracts, current source, and
+  97 fresh production-only adversarial tests. Verdict: **REPAIR NOT
+  VERIFIED**. Five original blockers are closed, but B1 remains open because
+  validator/PB request seals are transferable through ordinary dataclass
+  copying, and B7 remains open because an identity seal/digest can be copied
+  to an unregistered attempt. Two new BLOCKING findings: validation is not
+  bound to canonical-store provenance, and identified-human provenance can be
+  minted from caller strings. Frozen contracts and POL-005 are unchanged;
+  strongest real request remains DENY; all foundation external-effect counts
+  are zero. Fixed-SHA counts reproduce 190/190, 99/99, and 4,077/1 versus
+  4,176/1 with the same pre-existing failure; unexplained attributable
+  regressions remain zero. Runtime stays Observed/observe/unavailable and
+  v0.4.3 remains current.
 - **Phase 149O.20L.7O.3W.1R** — Repaired the seven independently verified
   Runtime Invocation Authority/PB foundation blockers under unchanged frozen
   contracts: validator-issued authority and trusted Option-B construction,

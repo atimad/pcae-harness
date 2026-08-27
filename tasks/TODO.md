@@ -11,6 +11,13 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149O.20L.7O.3W.1R.1** (authorized independent verification,
+completed): re-derived the seven original authority/PB blockers and current
+repair. Verdict **NOT VERIFIED**: B1/B7 remain open and two new authority-
+origin/provenance blockers were found. Recommended next, not authorized:
+149O.20L.7O.3W.1R.2 bounded authority provenance/trusted-construction/
+identity-registry repair. Runtime remains unavailable.
+
 **Phase 149O.20L.7O.3S** (Deterministic Mock/Dry Runtime Adapter
 Implementation, completed, bounded production implementation): implemented
 the RPAC-001 v1.0 mock-v1 vertical slice frozen by the 3R plan — all 52

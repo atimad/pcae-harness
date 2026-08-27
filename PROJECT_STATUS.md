@@ -2,9 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.1 — Independent Verification of Runtime Invocation
+Authority + PB Dispatch Foundation Blocking Repair. **VERIFICATION-ONLY —
+COMPLETE; REPAIR NOT VERIFIED.** Fresh production-only adversarial tests find
+five of seven original 3W.1 blockers independently CLOSED, but original B1
+and B7 remain OPEN: validator/PB/identity object seals are transferable via
+ordinary dataclass copying, allowing forged authority or an unregistered
+attempt to retain trusted status. Two new BLOCKING findings also remain:
+`validate_approval` accepts a bare approval object without canonical-store
+provenance, and the public approval creator manufactures identified-human
+provenance from caller strings without a trusted confirmation result. Frozen
+contracts and POL-005 are unchanged; the strongest valid real request remains
+hard DENY; RE, Shell Gate, subprocess, network/provider, credential, external
+runtime, background work, and runtime-source-mutation counts are zero.
+Fixed-SHA attribution exactly reproduced 190/190 shared tests, 99/99 repair
+tests, and baseline 4,077 passed/1 failed versus candidate 4,176 passed/1
+failed with the same pre-existing runtime-snapshot failure; unexplained
+attributable functional regressions remain zero. Runtime remains
+`Observed`/`observe`/`unavailable`; v0.4.3 is unchanged. Recommended next,
+not begun: **149O.20L.7O.3W.1R.2 — Runtime Invocation Authority Provenance,
+Trusted Construction, and Identity Registry Blocking Repair**. Human decision
+required. See
+`docs/PHASE_149O_20L_7O_3W_1R_1_INDEPENDENT_VERIFICATION_RUNTIME_INVOCATION_AUTHORITY_PB_DISPATCH_FOUNDATION_BLOCKING_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R — Runtime Invocation Authority + PB Dispatch
-Foundation Blocking Repair. **BOUNDED PRODUCTION REPAIR — COMPLETE; 7/7
-BLOCKING FINDINGS CLOSED; INDEPENDENT RE-VERIFICATION REQUIRED.** Recovered
+Foundation Blocking Repair. **BOUNDED PRODUCTION REPAIR — COMPLETE; CLAIMED
+7/7 BLOCKING FINDINGS CLOSED; SUBSEQUENT INDEPENDENT VERIFICATION DID NOT
+VERIFY THE REPAIR.** Recovered
 all seven 3W.1 findings verbatim and reproduced each against clean repair
 baseline `abd3f5b4fb1ab6fc763fa2e6172518fa37c513c2` before editing. All were
 implementation defects under unchanged RIHAC-001 v1.0, RIASC-001 v1.0,
