@@ -2,35 +2,40 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1R.2B — Runtime Invocation Human-Principal
-Authentication Contract Freeze. **CONTRACT-ONLY — COMPLETE.** Froze the
-minimum contract architecture required to make `authenticated human
-principal -> explicit invocation approval act -> verifiable approval proof
--> RuntimeInvocationApproval provenance` a trustworthy chain, closing
-finding N2 (human-confirmation provenance was caller-manufacturable).
-RIHAC-001 amended to **v1.1** (additive tightening: §3/§12/§16 now require
-principal-registry lookup plus authentication-proof verification).
-RIASC-001 amended to **v2.0** (MAJOR: `provenance.approver_id`/
-`identity_evidence_kind` retired and replaced by `principal_id`/
-`authentication_mechanism_id`/`credential_id`/`authentication_proof_ref` —
-a required-field meaning redefinition under RIASC-001's own versioning
-rule, not merely additive). New companion contract **HPAC-001 v1.0** frozen
-(Human Principal Authentication Contract), owning principal identity, a new
-deployment-scoped `HumanPrincipalRegistry` kept structurally and
-namespace-separate from HATP's own `registry.json` (Option B reuse: pattern
-and low-level FIDO2 primitives may be shared; registry, principal-ID space,
-and challenge domain are not), the `HumanAuthenticator` mechanism
-abstraction, and the full proof-production/verification/revocation model.
-Primary v1 mechanism: hardware-backed FIDO2, user-presence (UP) required,
-user-verification (UV) deployment-configurable. PBRD-001, RDGO-001, and
-RPAC-001 required no changes (re-confirmed by full re-read, not assumed).
-No `src/pcae` file, test file, hardware, or execution was touched; B1/B7/N1
-were not repaired. Runtime remains `Observed`/`observe`/`unavailable`;
-v0.4.3 unchanged. Recommended next, not begun: independent verification of
-this contract freeze (149O.20L.7O.3W.1R.2B.1). Human decision required. See
-`docs/PHASE_149O_20L_7O_3W_1R_2B_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT_FREEZE.md`.
+Phase 149O.20L.7O.3W.1R.2B.1 — Independent Verification of Runtime
+Invocation Human-Principal Authentication Contract Freeze.
+**VERIFICATION-ONLY — COMPLETE; NOT VERIFIED.** Independent fixed-history
+reconstruction and 39 fresh static/adversarial tests found useful positive
+structure in RIHAC-001 v1.1, RIASC-001 v2.0, and HPAC-001 v1.0, but seven
+BLOCKING defects prevent certification: the registry/bootstrap trust root
+does not resist a same-OS-user agent; UP-only evidence overclaims an
+authenticated named human; blind-touch/informed-intent evidence is absent;
+the proof schema/store/reference model is incomplete and inconsistent;
+revocation does not invalidate an outstanding gate-5-validated approval;
+PBRD/RDGO retain normative v1.0 contract pins; and proof nonce consumption
+at gate 5 contradicts required restart/drift revalidation before gate 9.
+Two MUST-FIX defects also remain: RIHAC's semantic v1.0->v1.1 change requires
+a MAJOR version, and several internal cross-references are stale or
+mistargeted. N2 therefore remains OPEN; B1/B7/N1 remain OPEN; the authority/PB
+foundation and implementation readiness are NOT VERIFIED. No production,
+contract, hardware, provider, credential, runtime, or execution change was
+made. Runtime remains `Observed`/`observe`/`unavailable`; v0.4.3 is unchanged.
+Recommended next, not begun: exactly **149O.20L.7O.3W.1R.2B.1R — Runtime
+Invocation Human-Principal Authentication Contract Freeze Blocking Repair**
+(contract-only). Human decision required. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1_INDEPENDENT_VERIFICATION_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT_FREEZE.md`.
 
 ## Prior Phase
+
+Phase 149O.20L.7O.3W.1R.2B — Runtime Invocation Human-Principal
+Authentication Contract Freeze. **CONTRACT-ONLY — COMPLETE; SUBSEQUENT
+INDEPENDENT VERIFICATION DID NOT VERIFY THE FREEZE.** Froze RIHAC-001 v1.1,
+RIASC-001 v2.0, and new HPAC-001 v1.0. Its claim that N2 closed at the
+contract layer is superseded by 3W.1R.2B.1's seven BLOCKING findings. No
+production implementation was made. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT_FREEZE.md`.
+
+## Earlier Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2A — Runtime Invocation Human Principal
 Authentication and Authority Provenance Architecture. **READ-ONLY

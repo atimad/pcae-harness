@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1** independently verified the runtime
+  invocation human-principal authentication contract freeze and returned
+  **NOT VERIFIED**. Thirty-nine fresh static/adversarial tests identify seven
+  BLOCKING defects spanning same-user trust-root bootstrap, UP-only identity
+  assurance, informed approval, proof persistence/reference semantics,
+  revocation, active-version dependency pins, and gate-5/gate-9 replay
+  lifecycle. RIHAC versioning and internal references are also MUST-FIX.
+  N2 and B1/B7/N1 remain open. No production, contract, hardware, runtime,
+  provider, credential, release, or execution change; v0.4.3 and
+  `Observed`/`observe`/`unavailable` are preserved. Recommended next, subject
+  to human authorization: contract-only repair 149O.20L.7O.3W.1R.2B.1R.
+
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B: Runtime Invocation Human-Principal Authentication Contract Freeze to Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3W.1R.2A to Phase 149O.20L.7O.3W.1R.2B: Runtime Invocation Human-Principal Authentication Contract Freeze; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B** — Runtime Invocation Human-Principal

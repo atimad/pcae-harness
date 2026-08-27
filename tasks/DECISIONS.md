@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B.1 independent verification disposition
+  (2026-08-27).** Do not certify RIHAC-001 v1.1 + RIASC-001 v2.0 + HPAC-001
+  v1.0 and do not begin implementation or B1/B7/N1 repair. Seven BLOCKING
+  defects leave N2 open: HPAC's path/convention bootstrap is not a trust root
+  against a same-OS-user agent; UP without required UV/custody cannot identify
+  a named human; proof of informed intent is absent; proof schema/store/ref
+  semantics are incomplete; revocation does not invalidate an outstanding
+  validated approval; PBRD/RDGO retain v1.0 dependency pins; and gate-5 nonce
+  consumption conflicts with gate-9 restart/drift revalidation. Also require
+  a RIHAC MAJOR version and repair stale/mistargeted cross-references. Preserve
+  runtime unavailability and v0.4.3. Recommend exactly contract-only phase
+  **149O.20L.7O.3W.1R.2B.1R — Runtime Invocation Human-Principal
+  Authentication Contract Freeze Blocking Repair**; human authorization is
+  required.
+
 - **Phase 149O.20L.7O.3W.1R.2B contract-freeze disposition (2026-08-27).**
   Froze RIHAC-001 v1.0->**v1.1** (additive tightening: §3/§12/§16 now
   require `HumanPrincipalRegistry` lookup plus HPAC-001 authentication-proof

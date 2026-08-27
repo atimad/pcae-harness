@@ -11,16 +11,22 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-**Phase 149O.20L.7O.3W.1R.2B** (contract-only, complete): froze RIHAC-001
-v1.1 (additive tightening), RIASC-001 v2.0 (MAJOR — `approver_id`/
-`identity_evidence_kind` retired), and new companion contract HPAC-001 v1.0
-(Human Principal Authentication Contract: deployment-scoped
-`HumanPrincipalRegistry`, separate from HATP's own; `HumanAuthenticator`
-abstraction; primary v1 mechanism hardware-backed FIDO2 with required user
-presence). Closes finding N2 at the contract layer. PBRD-001/RDGO-001/
-RPAC-001 unchanged. No source or hardware change. Recommended next, not
-authorized: independent verification of this contract freeze
-(149O.20L.7O.3W.1R.2B.1).
+**Phase 149O.20L.7O.3W.1R.2B.1** (independent verification, complete):
+verdict **NOT VERIFIED**. Seven BLOCKING contract defects leave N2 open:
+same-user-resistant trust-root bootstrap is absent; UP-only overclaims a
+named human; informed approval is not evidenced; proof schema/store/reference
+semantics are incomplete; revocation leaves outstanding approvals usable;
+PBRD/RDGO pin superseded v1.0 contracts; and gate-5 nonce consumption
+contradicts gate-9 revalidation. RIHAC versioning and internal references are
+MUST-FIX. B1/B7/N1 remain open. No production, contract, hardware, or runtime
+change. Recommended next, not authorized: exactly
+**149O.20L.7O.3W.1R.2B.1R — Runtime Invocation Human-Principal
+Authentication Contract Freeze Blocking Repair** (contract-only).
+
+Prior: **Phase 149O.20L.7O.3W.1R.2B** (contract-only, complete; subsequent
+verification did not verify the freeze): froze RIHAC-001 v1.1, RIASC-001
+v2.0, and new HPAC-001 v1.0. Its contract-layer N2 closure claim is
+superseded by 3W.1R.2B.1.
 
 Prior: **Phase 149O.20L.7O.3W.1R.2A** (read-only architecture, complete):
 determined the smallest architecture/contract evolution needed to close N2
