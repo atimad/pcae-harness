@@ -472,6 +472,23 @@ def compute_idempotency_key(projection: Mapping[str, object]) -> str:
     return _digest(dict(projection))
 
 
+def compute_runtime_dispatch_idempotency_key(projection: Mapping[str, object]) -> str:
+    """RDGO-001 §10a / RPAC-REQ-065, widened for the real-dispatch fact
+    set (Phase 149O.20L.7O.3W): a SHA-256 digest over canonical-content
+    fields only -- repository fingerprint/base commit, `task_id`,
+    `prompt_hash`, `runtime_target_id`, adapter/descriptor/config digests,
+    requested effect/capability profile, and approval scope -- excluding
+    `attempt_id` and any timestamp or other attempt-specific mutable
+    observation. Kept as a sibling function rather than widening
+    `compute_idempotency_key` itself: that function's existing canonical
+    shape belongs exclusively to the mock-v1 dry path (PBRD-001 §13
+    forbids migrating the dry path onto real-dispatch fact shapes), so the
+    real-dispatch projection needs its own explicitly-scoped function even
+    though the hashing *mechanism* (sorted-key canonical JSON, SHA-256) is
+    identical and reused as-is."""
+    return _digest(dict(projection))
+
+
 #: Fields an untrusted caller (adapter, runtime response, external
 #: payload) must never be able to set on a request via generic/dict
 #: construction (RPAC-REQ-026, §13 of the 3R plan).

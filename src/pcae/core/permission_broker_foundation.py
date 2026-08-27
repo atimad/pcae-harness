@@ -103,6 +103,11 @@ ACTION_ROLLBACK = "rollback"
 ACTION_SHELL_COMMAND = "shell_command"
 ACTION_BACKEND_INVOCATION = "backend_invocation"
 ACTION_ADAPTER_INVOCATION = "adapter_invocation"
+ACTION_TYPE_RUNTIME_DISPATCH = "runtime_dispatch"
+"""PBRD-001 v1.1 §1 -- additive local-CLI real-runtime dispatch action.
+Reuses `EXECUTION_CLASS_ADAPTER` (no new execution class needed). Adding
+this one recognized action/class pair is purely additive: no existing
+action's mapping changes (PBRD-001 §1/§13)."""
 
 KNOWN_ACTION_TYPES: frozenset[str] = frozenset({
     ACTION_READ,
@@ -115,6 +120,7 @@ KNOWN_ACTION_TYPES: frozenset[str] = frozenset({
     ACTION_SHELL_COMMAND,
     ACTION_BACKEND_INVOCATION,
     ACTION_ADAPTER_INVOCATION,
+    ACTION_TYPE_RUNTIME_DISPATCH,
 })
 
 EXECUTION_CLASS_NONE = "none"
@@ -139,6 +145,72 @@ KNOWN_EXECUTION_CLASSES: frozenset[str] = frozenset({
 
 
 @dataclass(frozen=True)
+class RuntimeDispatchLifecycleContext:
+    """PBRD-001 §4 fact 6 -- one immutable binding fact despite its closed
+    subfields. `session_id` is present iff actually session-scoped."""
+
+    phase_id: str
+    session_id: str | None = None
+
+
+@dataclass(frozen=True)
+class RuntimeDispatchAdapterDescriptorBinding:
+    """PBRD-001 §4 fact 8."""
+
+    adapter_id: str
+    descriptor_version: str
+    descriptor_digest: str
+    target_config_digest: str
+
+
+@dataclass(frozen=True)
+class RuntimeDispatchFilesystemScopeRef:
+    """PBRD-001 §4 fact 13 -- immutable ID/digest reference. Declares scope
+    for audit/containment; grants no mutation by itself."""
+
+    scope_id: str
+    scope_digest: str
+
+
+@dataclass(frozen=True)
+class RuntimeDispatchHumanAuthorityBinding:
+    """PBRD-001 §4 fact 14 -- a reference plus a validated-evidence-
+    projection digest, never raw authority or a caller-settable boolean.
+    Only the trusted RIHAC-001 gate-5 validator may cause this to be
+    constructed with real values (see `runtime_dispatch_permission.py`)."""
+
+    approval_id: str
+    approval_record_digest: str
+    validation_evidence_digest: str
+
+
+@dataclass(frozen=True)
+class RuntimeDispatchRequestFacts:
+    """PBRD-001 v1.1 §4 -- the exact fourteen immutable binding facts for
+    one `runtime_dispatch` request. Only a trusted, contract-fixed PCAE
+    integration point may construct this (§5); an adapter, runtime, or
+    caller payload SHALL NOT set any of these fields directly (§15) --
+    enforced by `runtime_dispatch_permission.py` never accepting these as
+    raw caller input, only as the output of its own trusted builder.
+    """
+
+    invocation_id: str
+    attempt_id: str
+    idempotency_key: str
+    repository_identity: str
+    task_id: str
+    lifecycle_context: RuntimeDispatchLifecycleContext
+    runtime_target_id: str
+    adapter_descriptor_binding: RuntimeDispatchAdapterDescriptorBinding
+    prompt_hash: str
+    requested_capability: str
+    filesystem_scope_ref: RuntimeDispatchFilesystemScopeRef
+    human_authority_binding: RuntimeDispatchHumanAuthorityBinding
+    transport_type: str = "local_cli"
+    network_requirement: bool = False
+
+
+@dataclass(frozen=True)
 class PermissionBrokerRequest:
     """A canonical, evaluate-only request. The broker never executes this.
 
@@ -146,6 +218,12 @@ class PermissionBrokerRequest:
     boundary (`COMP-002` is `not_implemented`), so every request the
     broker evaluates today is inherently a policy simulation, never a
     real execution attempt.
+
+    `runtime_dispatch_context` (PBRD-001 v1.1 §17, Phase 149O.20L.7O.3V.2
+    Option B): an optional nested runtime-dispatch-specific fact bundle.
+    Every existing action type leaves this `None`; only `runtime_dispatch`
+    requests populate it. This is additive and backward compatible --
+    existing `build_permission_broker_request` callers are unaffected.
     """
 
     request_id: str
@@ -160,6 +238,7 @@ class PermissionBrokerRequest:
     evidence_available: bool
     approval_present: bool
     simulation_only: bool = True
+    runtime_dispatch_context: RuntimeDispatchRequestFacts | None = None
 
 
 def build_permission_broker_request(
@@ -174,6 +253,7 @@ def build_permission_broker_request(
     evidence_available: bool = False,
     approval_present: bool = False,
     simulation_only: bool = True,
+    runtime_dispatch_context: RuntimeDispatchRequestFacts | None = None,
 ) -> PermissionBrokerRequest:
     """Build a `PermissionBrokerRequest` with a generated ID and timestamp."""
     return PermissionBrokerRequest(
@@ -189,6 +269,7 @@ def build_permission_broker_request(
         evidence_available=evidence_available,
         approval_present=approval_present,
         simulation_only=simulation_only,
+        runtime_dispatch_context=runtime_dispatch_context,
     )
 
 

@@ -2,6 +2,30 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W — Runtime Invocation Authority + PB Dispatch
+Request Foundation Implementation. **IMPLEMENTATION — IN PROGRESS.**
+Implements Stages 1-7 of Phase 149O.20L.7O.3V.2's blueprint: the
+`RuntimeInvocationApproval` model (RIASC-001 v1.0, 16 fields, 5-member
+subject) with the RIHAC-001 v1.0 twelve-step ordered validator and all
+seven freshness conditions (`src/pcae/core/runtime_authority.py`); a
+canonical create-only, path-confined approval store
+(`src/pcae/core/runtime_invocation_approval_store.py`); the PBRD-001
+v1.1 `runtime_dispatch` PB request architecture using the selected
+Option B nested `runtime_dispatch_context` field on the existing
+`PermissionBrokerRequest` (`src/pcae/core/runtime_dispatch_permission.py`,
+additive changes to `permission_broker_foundation.py` and
+`runtime_invocation.py`). POL-005 (`ExecutionDisabledRule`) is
+byte-unmodified and remains an unconditional hard deny for every real
+(`simulation_only=False`) `runtime_dispatch` request, proved by dedicated
+regression tests. Runtime Enforcement and Shell Gate are not activated;
+no process spawn, network, or credential access exists in any new
+module (statically and dynamically verified). Approval creation is
+internal-API-only (Option A) — no public CLI added. Runtime remains
+`Observed`/`observe`/`unavailable`; release v0.4.3 unchanged. See
+`docs/PHASE_149O_20L_7O_3W_RUNTIME_INVOCATION_AUTHORITY_AND_PB_DISPATCH_REQUEST_FOUNDATION_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3V.2 — Local-CLI Real-Runtime Dispatch Implementation
 Planning. **PLANNING-ONLY — COMPLETE.** Produced an implementation-ready
 sequence for the authority (RIHAC-001 v1.0/RIASC-001 v1.0) and permission
@@ -12,31 +36,12 @@ POL-005 continues to hard-deny real dispatch. All four verified contracts
 directly (not planned from prior reports alone); the exact 14 PBRD facts,
 16 RIASC fields (5-member subject), 11 RDGO gates, 8 durable items, and 7
 TOCTOU facts were recovered and classified against a first-vs-later
-implementation split. Existing-code reuse audit found `new_invocation_id`/
-`new_attempt_id`/`compute_idempotency_key`/`_write_create_only` in
-`src/pcae/core/runtime_invocation.py` already match the frozen ID
-grammar and atomic-store pattern and are directly reusable. `Permission
-BrokerRequest` (`permission_broker_foundation.py`) is a flat 12-field
-frozen dataclass with no extension point; the plan selects Option B (one
-new optional nested `runtime_dispatch_context` field) over widening the
-shared envelope or a generic typed-payload refactor. Both pre-existing
-3S.2.1 MUST-FIX findings (malformed-result crash in `runtime_adapter.py`;
-`RuntimeInvocationStore` path-traversal gap) were recovered verbatim and
-confirmed **not reachable** by the recommended first implementation
-phase — neither requires repair before/within it. Recommended first
-implementation phase: **Runtime Invocation Authority + PB Dispatch
-Request Foundation Implementation** (Stages 1-7: approval model/store/
-validator, attempt/idempotency primitives, `runtime_dispatch` request/
-action vocabulary, PB evaluation plumbing), followed mandatorily by a
-separate independent-verification phase before Runtime Enforcement work
-begins. POL-005 remains hard deny; Runtime Enforcement and Shell Gate not
-activated; no process spawn implemented. Zero `src/pcae/**` changes; zero
-test changes; runtime remains `Observed`/`observe`/`unavailable`; release
-v0.4.3 unchanged; article stopped; private research untouched. Human
-decision required; implementation not begun. See
+implementation split. Recommended first implementation phase: **Runtime
+Invocation Authority + PB Dispatch Request Foundation Implementation**
+— now Phase 149O.20L.7O.3W above. See
 `docs/PHASE_149O_20L_7O_3V_2_LOCAL_CLI_REAL_RUNTIME_DISPATCH_IMPLEMENTATION_PLANNING.md`.
 
-## Prior Phase
+## Second-Prior Phase
 
 Phase 149O.20L.7O.3V.1R.1 — Independent Verification of Repaired Local-CLI
 Runtime Dispatch Authority and Permission Contracts. **VERIFICATION-ONLY —
