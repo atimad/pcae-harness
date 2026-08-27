@@ -2282,3 +2282,5 @@
 - 2026-08-26: 20260826-2234-idle-awaiting-human-decision-post-149o-20l-7o-3s-1
 - 2026-08-26: 20260826-2340-phase-149o-20l-7o-3s-2-production-dry-lifecycle-runtime-adapter-consumption
 - 2026-08-27: 20260827-0711-phase-149o-20l-7o-3s-2-1-independent-end-to-end-production-dry-lifecycle-runtime-adapter-consumption-verification
+- 2026-08-27: 20260827-1248-idle-awaiting-human-decision-post-149o-20l-7o-3v-1r
+- 2026-08-27: 20260827-1254-phase-149o-20l-7o-3v-1r-1-independent-verification-of-repaired-local-cli-runtime-dispatch-authority-and-permission-contracts
