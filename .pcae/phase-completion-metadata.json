@@ -30,12 +30,16 @@
   "internal_evidence_coherence": "The repair document and 21 fresh tests consistently classify PBRD-001 REPAIRED (v1.1, 14 facts, attempt_id/idempotency_key bound), RDGO-001 REPAIRED (v2.0, 11 gates, gate 3/4 transposed, RPAC-REQ-042-consistent), RIHAC-001 UNCHANGED (v1.0), and RIASC-001 UNCHANGED (v1.0). Eight durable items (item 1 enriched, not expanded) and seven TOCTOU facts remain unchanged in count. Production schema/action/validator/RE/containment/adapter remain absent. Dry adapter_invocation remains unchanged.",
   "metadata_consistency": "Phase ID 149O.20L.7O.3V.1R, phase-entry SHA 6933f6e033ba89647889ad1a6343faf37609c26c, repair commit fa51c1bc, v0.4.3 identity, runtime posture, task, PROJECT_STATUS, repair document, metadata, and report agree.",
   "no_go_confirmation": "No production src/pcae source was modified.\nNo runtime_dispatch source constant was added.\nNo approval store was implemented.\nNo approval validator was implemented.\nNo Runtime Enforcement or Shell Gate was activated.\nNo POL-005 rule was relaxed or removed.\nNo process, adapter, Codex, Claude, or external runtime was launched.\nNo credential was accessed and no network egress was enabled.\nNo dry runtime, runtime inspect, HATP, HMIC, Class-B, or CLTR behavior changed.\nNo release, article, private-research, or Dell operation occurred.\nNo execution availability was enabled.",
-  "origin_main_head": "fa51c1bc84de7b6981bddd671135d709e7ec9129",
+  "origin_main_head": "dca371c19207f38ec42d9a806260e51e82e35871",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "fa51c1bc",
       "subject": "Phase 149O.20L.7O.3V.1R: repair RDGO gate order and PBRD attempt/idempotency binding"
+    },
+    {
+      "hash": "dca371c1",
+      "subject": "Phase 149O.20L.7O.3V.1R: sync phase-completion-metadata fast_green wording (pre-push)"
     }
   ],
   "phase_id": "149O.20L.7O.3V.1R",
