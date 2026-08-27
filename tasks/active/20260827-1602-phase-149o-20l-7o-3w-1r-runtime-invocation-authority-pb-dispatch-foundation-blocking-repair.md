@@ -98,8 +98,11 @@ strict
 - pcae check
 - pcae status coherence
 - pcae doctor task-memory
-- pcae push check
 - pcae runtime inspect
+
+Lifecycle note: `pcae push check` is the post-closure governance gate because its
+phase-identity check requires this task to be in completed state. It remains a
+mandatory final check under the acceptance criteria above.
 
 ## Documentation Requirements
 
