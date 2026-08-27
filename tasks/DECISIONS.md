@@ -2,6 +2,27 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2A architecture disposition (2026-08-27).**
+  Read-only architecture/contract-design phase resolving N2's
+  contract-insufficiency (3W.1R.2 §7). Recommend a two-tier architecture:
+  a portable principal/signature contract layer (RIHAC-001 v1.1 + RIASC-001
+  v1.1 amendments, additive/tightening, plus a new companion Human-Principal
+  Authentication contract mirroring the existing HPSE-001/HHCE-001 split)
+  over a replaceable authentication-mechanism layer, with hardware-backed
+  FIDO2 approval (Option B) as the primary v1 mechanism because it is the
+  only investigated option that structurally resists the mandatory
+  same-user autonomous-agent threat without a platform-specific adapter.
+  PBRD-001, RDGO-001, and RPAC-001 require no changes: PB already receives
+  only a validated-authority reference (not raw human identity), Gate
+  3/Gate 5 already own human-authority creation/validation, and
+  RPAC-REQ-049 already permits a future hardware-backed-authority policy
+  without amendment. B1/B7/N1 repair is explicitly sequenced *after* this
+  contract freeze, not in parallel, since B1's already-designed repair
+  becomes more load-bearing once N2 closes. No `src/pcae`, test, or frozen
+  contract file was modified. Recommend exactly a **Human-Principal
+  Authentication Contract Freeze** next; require human authorization and do
+  not begin B1/B7/N1 repair or implementation automatically.
+
 - **Phase 149O.20L.7O.3W.1R final disposition (2026-08-27).** Close all
   seven 3W.1 BLOCKING findings under unchanged frozen contracts; classify
   every one `CLOSED`. Fixed-SHA detached-worktree attribution against

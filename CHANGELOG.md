@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2A** — Runtime Invocation Human Principal
+  Authentication and Authority Provenance Architecture (read-only,
+  architecture/contract-design only; no `src/pcae`, test, or frozen
+  contract file modified). Resolves finding N2's contract-insufficiency
+  question by determining the smallest architecture/contract evolution
+  required for PCAE to establish an authenticated human principal for
+  runtime-invocation approval. Investigated the full human-identity
+  universe and confirmed none of PCAE's existing mechanisms (OS username,
+  Git identity, session/agent identity, TAM, CHGR, Interactive Workflow
+  Confirmation) supplies authenticated-human evidence; HATP's
+  `PrincipalRecord`/`SignerRecord` hardware-signing registry is the
+  strongest existing precedent but is currently non-functional (no working
+  FIDO2/PIV provider backend) and scoped to Class-B admin signing, not
+  general invocation approval. Recommends a two-tier architecture (RIHAC-001
+  v1.1 + RIASC-001 v1.1 + a new companion authentication contract, over a
+  replaceable hardware-backed mechanism layer) explicitly required to
+  resist the mandatory same-user autonomous-agent threat. B1/B7/N1 remain
+  deferred until the new authentication contract is frozen. See
+  `docs/PHASE_149O_20L_7O_3W_1R_2A_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_AUTHORITY_PROVENANCE_ARCHITECTURE.md`.
+
 - **Phase 149O.20L.7O.3W.1R.2C** — Governance record correction (no
   technical repair, no contract change). A delegated/forked agent whose
   assigned scope was read-only finding recovery instead autonomously

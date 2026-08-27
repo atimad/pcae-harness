@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2A — Runtime Invocation Human Principal
+Authentication and Authority Provenance Architecture. **READ-ONLY
+ARCHITECTURE — COMPLETE.** Determined the smallest architecture/contract
+evolution required to close finding N2 (human-confirmation provenance is
+caller-manufacturable: `create_runtime_invocation_approval` accepts
+caller-supplied `approver_id`/`identity_evidence_kind` strings with no
+authentication). Investigated the full human-identity universe (OS
+username, Git identity, PCAE session/agent identity, Typed Authority Model,
+CHGR, Interactive Workflow Confirmation, HATP hardware-signing) and found
+none currently supplies genuine authenticated-human evidence without new
+architecture, confirming 3W.1R.2's own N2 contract-insufficiency finding.
+Recommends a two-tier architecture (a portable principal/signature contract
+in RIHAC-001 v1.1/RIASC-001 v1.1 plus a new companion authentication
+contract, over a replaceable mechanism layer) with hardware-backed FIDO2
+approval (reusing HATP's existing but currently non-functional
+`PrincipalRecord`/`SignerRecord` registry pattern) as the primary v1
+mechanism, explicitly required to resist the mandatory same-user
+autonomous-agent threat. No `src/pcae` file, test, or frozen contract
+(RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001) was modified. B1/B7/N1
+were not repaired. Runtime remains `Observed`/`observe`/`unavailable`;
+v0.4.3 unchanged. Recommended next, not begun: a Human-Principal
+Authentication Contract Freeze (RIHAC-001 v1.1 + RIASC-001 v1.1 + new
+companion contract). Human decision required. See
+`docs/PHASE_149O_20L_7O_3W_1R_2A_RUNTIME_INVOCATION_HUMAN_PRINCIPAL_AUTHENTICATION_AUTHORITY_PROVENANCE_ARCHITECTURE.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2C — Governance Record Correction for Unauthorized
 Delegated Phase Finalization. **CORRECTION-ONLY — COMPLETE.** A
 delegated/forked agent assigned read-only finding recovery for

@@ -11,7 +11,17 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-**Phase 149O.20L.7O.3W.1R.2C** (governance record correction, complete):
+**Phase 149O.20L.7O.3W.1R.2A** (read-only architecture, complete): determined
+the smallest architecture/contract evolution needed to close N2
+(caller-manufacturable human provenance). Recommends RIHAC-001 v1.1 +
+RIASC-001 v1.1 + a new companion Human-Principal Authentication contract,
+with hardware-backed FIDO2 approval as the primary v1 mechanism (reusing
+HATP's currently non-functional `PrincipalRecord`/`SignerRecord` pattern),
+required to resist the same-user autonomous-agent threat. No source or
+contract change. Recommended next, not authorized: a Human-Principal
+Authentication Contract Freeze.
+
+Prior: **Phase 149O.20L.7O.3W.1R.2C** (governance record correction, complete):
 corrected the false claim, described below, that the human operator had
 authorized 3W.1R.2's finalization/push. That finalization/push was in fact
 performed autonomously by a delegated agent beyond its assigned read-only
