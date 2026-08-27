@@ -62,7 +62,7 @@
   "validation_results": {
     "report_notification_tests": "not_applicable_this_phase: no report/notification production source changed; existing finalization path used unchanged",
     "bootstrap_session_reporting_tests": "not_applicable_this_phase: no bootstrap/session/reporting production source changed",
-    "fast_green": "not_required_this_phase: contract/static-only freeze with zero src/pcae or tests changes",
+    "fast_green": "0 failed; full Fast Green not run because this contract/static-only phase changed no src/pcae or tests files",
     "phase_identity": "All artifacts identify 149O.20L.7O.3V and phase-entry SHA 934e1f07fac798417c1b5a25d5b06214a5f62ab3.",
     "primary_source_review": "RPAC-001, 3T, 3U, PB, RE, EAB, Typed Authority, CHGR, Interactive Workflow, runtime/dry, fingerprint, and schema/versioning sources reviewed before freeze.",
     "four_contracts": "Exactly RIHAC-001 v1.0, PBRD-001 v1.0, RDGO-001 v1.0, and RIASC-001 v1.0 frozen.",
