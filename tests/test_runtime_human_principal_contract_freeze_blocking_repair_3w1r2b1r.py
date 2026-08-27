@@ -19,7 +19,7 @@ RIASC = ROOT / "docs/contracts/RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md"
 PBRD = ROOT / "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md"
 RDGO = ROOT / "docs/contracts/RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md"
 RPAC = ROOT / "docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md"
-TASK = ROOT / "tasks/active/20260827-2147-phase-149o-20l-7o-3w-1r-2b-1r-runtime-invocation-human-principal-authentication-contract-freeze-blocking-repair.md"
+TASK = ROOT / "tasks/done/20260827-2147-phase-149o-20l-7o-3w-1r-2b-1r-runtime-invocation-human-principal-authentication-contract-freeze-blocking-repair.md"
 
 
 BLOCKING = (

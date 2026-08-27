@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Corrected the 3W.1R.2B.1R static verifier to resolve its governed phase
+  task from `tasks/done/` after lifecycle completion, preserving the combined
+  54-test post-close verification result.
+
 - Transitioned the stopped 3W.1R.2B.1R task to idle awaiting explicit human
   authorization for any broadened cross-contract repair; no successor work
   began automatically.
