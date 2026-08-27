@@ -1,328 +1,298 @@
-# Phase 149O.20L.7O.3T Complete — Real-Runtime Prerequisite Dependency and Trust-Boundary Hardening Plan
+# Phase 149O.20L.7O.3U Complete — Real Runtime Dispatch Authority and Permission Contract Architecture
 
-**Verdict: COMPLETE. READ-ONLY STRATEGIC PLANNING. NO SRC/PCAE MODIFIED. EXECUTION NOT ACTIVATED.**
+**Verdict: COMPLETE. READ-ONLY ARCHITECTURE/CONTRACT-DESIGN. NO SRC/PCAE MODIFIED. NO PB ACTION IMPLEMENTED. NO AUTHORITY ARTIFACT CREATED. EXECUTION NOT ACTIVATED.**
 
-Phase 149O.20L.7O.3T produced an evidence-derived dependency graph and
-hardening plan for the transition from the verified production dry
-adapter consumer (`pcae session bootstrap --compact --dry-runtime
---runtime-target <id>`, 149O.20L.7O.3S.2 / independently verified by
-149O.20L.7O.3S.2.1) to a future human-authorized real-runtime dispatch,
-without implementing or activating real execution.
+Phase 149O.20L.7O.3U made the two decisions Phase 3T deliberately
+deferred: a Permission Broker (PB) real-dispatch redesign option and a
+human runtime-authority artifact design, and defined the binding between
+them, preserving `human authority != PB permission != runtime capability
+!= Runtime Enforcement decision != dispatch != execution` throughout. No
+implementation was performed.
 
-**Phase-entry SHA:** `c7037b388bf5ea0f0713f6e534689816e9c4885b`.
+**Phase-entry SHA:** `8adf11afbdcc87f30dd5969620ea5fda57bb2241`.
 **v0.4.3 public state:** unchanged, `63580893b1de4782a694ab802ff7bdebdf29b0e6`.
 **Runtime state:** `Observed` / `observe` / `unavailable`, unchanged at
 phase entry and phase close. **Production dry consumer state:**
-IMPLEMENTED, VERIFIED, PRODUCTION-CONSUMED (unchanged from 3S.2/3S.2.1).
+IMPLEMENTED, VERIFIED, PRODUCTION-CONSUMED (unchanged from 3S.2/3S.2.1),
+untouched by this phase.
 
-## The 16 real-runtime prerequisites
+## RPAC-REQ-044/045/046 (re-derived, exact wording, unchanged)
 
-Re-derived directly from `docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md`
-(RPAC-001 v1.0) and the 3R classification
-(`docs/PHASE_149O_20L_7O_3R_DETERMINISTIC_MOCK_DRY_RUNTIME_ADAPTER_IMPLEMENTATION_PLAN.md`,
-line 93: "16 REAL-RUNTIME-PREREQUISITE"): RPAC-REQ-014, 028, 044, 045,
-046, 047, 048, 057, 058, 059, 071, 072, 084, 086, 095, 097. All 16 appear
-in the phase document (`docs/PHASE_149O_20L_7O_3T_...md`, Section 4)
-with exact contract wording, current status (Section 5), and dependency
-edges (Section 6). None is fully satisfied; all remain UNSTARTED,
-PARTIALLY SATISFIED, or an explicit named gap.
+Quoted verbatim from `docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md`
+lines 334/341/346: RPAC-REQ-044 (PB request-shape gap, must bind target/
+adapter/prompt-digest/repository/effects/network-filesystem/credentials/
+budget/idempotency); RPAC-REQ-045 (Runtime Enforcement is the sole final
+whether-to-invoke gate, after human approval/target facts/PB permission,
+before any adapter effect); RPAC-REQ-046 (Runtime Enforcement must
+evaluate the complete bound request, all effect-specific permissions,
+freshness, approval validity, no-go evidence; a positive decision expires
+and is single-attempt scoped). None makes PB or human approval
+authoritative by itself.
 
-## Dependency ordering
+## POL-005 exact semantics (unmodified)
 
-First unblocker: **RPAC-REQ-044** (Permission Broker request-shape
-amendment). Hard serial spine: RPAC-044 -> RPAC-045/046 (Runtime
-Enforcement real gate) -> RPAC-047 (RE/Shell-Gate division of labor) ->
-RPAC-048 (Shell Gate enforcement) -> RPAC-057 (local CLI target) ->
-RPAC-095 (first real adapter). Parallelizable now: RPAC-084
-(credential-reference architecture), RPAC-086 (supply-chain pinning),
-RPAC-097 (legacy-path retirement).
-
-## First hard blocker: POL-005
-
-Independently re-confirmed by direct source read of
+Confirmed by direct source read of
 `src/pcae/core/permission_broker_foundation.py` lines 489-518
-(`ExecutionDisabledRule`): `if request.simulation_only: return
-_not_triggered(...)`, else unconditional `DECISION_DENY` with reason
-`"execution_boundary_unavailable"`. No `applicable_execution_classes`
-override is declared, so the rule applies to every `execution_class`
-(`none`, `mutation`, `shell`, `backend`, `adapter`, `rollback`)
-unconditionally, matching its own docstring ("Unconditionally active by
-construction (NG-025)"). This confirms and extends 3S.2.1's finding: it
-is the structurally first blocker because nothing downstream in the
-dependency graph is reachable while it unconditionally denies any
-non-simulation request.
+(`ExecutionDisabledRule`): unconditional `DECISION_DENY` for any
+non-`simulation_only` request, for every `execution_class`, reason
+`"execution_boundary_unavailable"`. Classified as an invariant condition
+tied to the missing `COMP-002` execution boundary, not a permanent
+universal deny and not a reversible kill-switch flag — its own
+`required_remediation` names the exact unblock condition. Not modified by
+this phase.
 
-## PB action vocabulary and redesign options
+## Current PB action/execution-class inventory
 
-Existing vocabulary (`permission_broker_foundation.py` lines 94-134):
-action_types `read`, `source_mutation`, `docs_mutation`, `test_mutation`,
-`commit`, `push`, `rollback`, `shell_command`, `backend_invocation`,
-`adapter_invocation`; execution_classes `none`, `mutation`, `shell`,
-`backend`, `adapter`, `rollback`. `adapter_invocation`/`adapter` is the
-existing closest match for runtime dispatch but is confirmed
-structurally insufficient (RPAC-REQ-044: no target/adapter/prompt-digest/
-repository/effects/credentials/budget/idempotency binding). Three bounded
-redesign options produced (phase document Section 41): (A) new explicit
-`runtime_dispatch` permission action; (B) reuse `adapter_invocation` with
-a simulation/real mode enum; (C) separate transport/network/process
-permissions per effect class (RPAC-REQ-085-aligned). No option selected;
-Option C is noted as most aligned with existing contract language and
-the pre-existing fine-grained `RuntimeEnforcementEvidenceBundle`
-vocabulary, at higher implementation cost.
+10 `action_types` (`read`, `source_mutation`, `docs_mutation`,
+`test_mutation`, `commit`, `push`, `rollback`, `shell_command`,
+`backend_invocation`, `adapter_invocation`); 6 `execution_classes`
+(`none`, `mutation`, `shell`, `backend`, `adapter`, `rollback`). Decision
+vocabulary confirmed by direct source read: `ALLOW`/`DENY`/`HUMAN_REVIEW`,
+composed with precedence `DENY > HUMAN_REVIEW > ALLOW`; `ALLOW` is
+annotated `INV-008`, "Never an executable authorization." POL-004
+(`MissingHumanApprovalRule`) is the existing rule that resolves
+`HUMAN_REVIEW` to not-triggered exactly when `approval_present` is
+`True`, for `{shell, backend, adapter, rollback}` execution classes.
 
-## Human authority
+## PB redesign: 3 options evaluated, Option A selected
 
-Searched CHGR-001 (schema/artifact-only per its own README: "Not
-implemented ... runtime consumption, or authority resolution"),
-Interactive Workflow Confirmation (explicitly barred from populating
-`approval_present` by RWMPC-REQ-023: "Confirmation is not approval"),
-and phase/session approvals (too coarse). **No existing artifact
-cleanly authorizes real runtime invocation. Classified
-CONTRACT/AUTHORITY GAP** — no approval semantics invented. Three options
-produced (Section 42): (A) new explicit runtime-invocation approval
-record; (B) new CHGR record type/subject; (C) phase/session approval
-binds invocation (rejected as too coarse, blurs the required
-`registered != ... != authorized != dispatched` distinctions).
+**Option A (selected) — dedicated `runtime_dispatch` action.** Scored
+across 9 criteria (semantic clarity, backward compatibility, policy
+complexity, least privilege, future CLI/API support, local CLI
+compatibility, API provider compatibility, auditability, risk of
+authority conflation) against **Option B** (existing `adapter_invocation`
++ `invocation_mode` enum) and **Option C** (composite per-effect
+permissions for adapter/process/network/filesystem). Option A selected
+because it closes RPAC-REQ-044 with high semantic clarity and low
+authority-conflation risk while keeping PB's own scope narrow (per
+RPAC-REQ-085's "one granted effect SHALL not imply another") — process
+authority stays with Shell Gate, network authority is explicitly deferred
+as an open dependency, filesystem-mutation authority stays with the
+existing, unmodified mutation actions. Full Matrix B in the phase
+document Section 10.
 
-## Runtime Enforcement
+## Human authority: 3 options evaluated, Option A selected
 
-Confirmed by direct source read of `src/pcae/core/backend_invocations.py`
-(`RuntimeEnforcementCoordinator`/`RuntimeEnforcementEvidenceBundle`,
-Phase 103A/101B): design-only, non-executing, non-authorizing, 0
-production consumers; output vocabulary has no "granted"/"authorized"
-terminal state at all (only `denied`/`fail_closed`/`blocked_by_*`/
-`evidence_only`/`design_review_only`); `validate()` hard-asserts
-`execution_available`/`execution_authorized`/`push_authorized` must be
-`False`. Cannot evaluate a real adapter invocation today. Contract
-evolution required; an adapter-specific projection into the existing
-evidence-bundle vocabulary (which already declares
-`adapter_execution_authorized`/`network_authorized`/`subprocess_authorized`/
-`shell_authorized`/`mutation_authorized`) appears more economical than
-building a duplicate engine — no duplicate enforcement engine
-recommended.
+**Option A (selected) — dedicated, one-shot `RuntimeInvocationApproval`
+artifact.** Rejected **Option B** (extend CHGR-001 — its own README
+explicitly disclaims "authority resolution" and "runtime consumption")
+and **Option C** (bind to phase/session approval — too coarse, blurs the
+`registered != ... != authorized != dispatched` distinction). Subject
+bound to a five-fact tuple: `invocation_id`, `runtime_target`,
+`prompt_hash`, `repo_identity`, `task_id`. One-shot only for v1 (no
+session-wide or phase-wide reuse), narrowest-authority default.
 
-## Shell Gate
+## One-shot/reusable, subject, freshness, revocation, storage, trust
 
-Confirmed simulation-only: `src/pcae/core/shell_gate.py` module
-docstring, "Never executes command text. Never grants authorization."
-Classification: **MANDATORY** (or an enforcing equivalent, per
-RPAC-REQ-047's "Shell Gate or an equivalent") before any local CLI
-runtime dispatch that constructs shell text/pipelines/`shell=True`; a
-fixed-argv-only adapter still requires an equivalent enforcing
-process-construction policy.
+**Scope:** one invocation per approval (§17 of the phase document).
+**Subject:** the five-tuple above; changing any member invalidates the
+approval entirely (a different subject, not merely stale). **Freshness:**
+7 mandatory-for-v1 invalidating conditions (HEAD change, task-state
+change, prompt change, runtime-target change, adapter-config change,
+policy-version change, timeout/expiry) — none deferred. **Revocation:**
+no explicit revoke command required for v1; one-shot consumption plus
+bounded expiry are sufficient to avoid stale authority. **Storage:** the
+`.pcae` canonical governance store pattern (sibling to, not merged with,
+`RuntimeInvocationStore` or CHGR). **Trust:** reuse of the existing
+schema/manifest/tamper-detection pattern already proven for CHGR; no
+signature required for v1.
 
-## Process supervision / environment isolation / filesystem containment
+## Approval creation/consumption; PB/authority relationship
 
-Process supervision: none of process ownership, PID/tree tracking,
-timeout, cancellation, detached-descendant containment exist today (no
-`subprocess.Popen`/process-group code found in the runtime-adapter
-modules); process ownership, timeout, and detached-descendant
-containment are hard blockers before any local CLI dispatch.
-Environment isolation: no env allowlist or secret-injection mechanism
-exists; depends on the missing credential-reference architecture.
-Filesystem containment: no runtime-specific sandboxing exists; an
-isolated `git worktree` (a pattern PCAE already uses for its own
-disposable verification work) is recommended as the lowest-cost first
-containment mechanism.
+**Creation:** PCAE presents bound facts (target, prompt/hash, repo/task,
+effect class) to an identified human, who explicitly approves; a
+canonical artifact is created (design only, no CLI built). **Consumption:**
+lookup by reference → subject-tuple exact match → freshness check →
+one-shot-not-already-consumed check; fails closed on any failure, with no
+partial-credit state. **PB/authority relationship:** PB independently
+validates a *reference* to the approval, never receives the raw artifact
+or a caller-supplied boolean; the approval-validation step and PB
+evaluation remain separately owned, feeding into the same existing
+`approval_present` field POL-004 already consumes.
 
-## Network requirements
+## Gate ordering (frozen)
 
-No PB action or execution_class for network egress exists at all
-(confirmed absent from `KNOWN_ACTION_TYPES`/`KNOWN_EXECUTION_CLASSES`).
-Must become an explicit, default-denied PB action before any API/
-provider adapter (RPAC-REQ-085). A local CLI adapter making no network
-calls needs no such action, reinforcing local CLI as the lower-
-trust-complexity first target.
+Prompt prepared → explicit runtime target selected → static
+capability/preflight → human authority created → approval validated →
+Permission Broker (`runtime_dispatch`) → Runtime Enforcement (sole final
+whether-to-invoke gate) → process/network containment (Shell Gate /
+future network mediation) → durable pre-dispatch record → adapter
+dispatch → untrusted result capture → existing Stage-B intake. Capability
+preflight runs before human authority (cheap, avoids wasting human
+attention on a structurally incapable target) but is re-checked live
+immediately before dispatch. PB runs before Runtime Enforcement, matching
+RPAC-REQ-045's literal ordering.
 
-## Credential-reference architecture
+## Runtime Enforcement handoff projection
 
-Confirmed absent entirely from `src/pcae` (searched broadly; the term
-exists only in RPAC-001 contract prose). RPAC-REQ-084 itself names this
-"an explicit blocker for a real authenticated adapter." Classified: hard
-dependency, missing entirely. No secret access was performed in
-confirming this.
+Runtime Enforcement must not infer authority from PB ALLOW alone or from
+approval alone. It receives: the full bound request; PB's decision value
+and matched-policy IDs as evidence (not authority); the validated-approval
+reference plus its freshness verdict, independently re-verified; fresh
+live-preflight facts. Only Runtime Enforcement's own decision can produce
+a "may dispatch" outcome.
 
-## Provider/model identity
+## Execution Attempt Boundary mapping
 
-Minimum trusted source must be PCAE-owned configuration
-(`RuntimeTargetConfiguration`), never a runtime-reported claim, per
-RPAC-REQ-006/007/008/028 and directly corroborated by 3S.2.1's
-provenance-spoofing tests (adapter_id never changed despite 5 spoofed
-agent_id values).
+Read from `docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_BOUNDARY_DESIGN.md`
+without redefinition: gates 1-6 (prompt through PB) sit entirely "before
+execution attempt"; gate 7 (Runtime Enforcement's decision) is the
+execution-attempt decision point; gate 10 (adapter dispatch) is the first
+external effect.
 
-## Local CLI vs. API comparison
+## Durable-before-effect requirements
 
-Local CLI chain: RPAC-048 -> 057 -> 058 -> process supervision ->
-filesystem containment. API chain: RPAC-059 -> 084 (shared) -> network
-policy -> cost/budget governance. Shared blockers: RPAC-044, 045/046,
-084, 086, human authorization. Local CLI has strictly fewer unique
-blockers and needs no network PB action for a no-network executable.
+Must be durable before any real external effect: invocation ID;
+repo/task binding; runtime target; prompt hash (new field); human-authority
+reference (new); PB decision + digest (new); Runtime Enforcement decision
++ digest (new); dispatch-intent marker written immediately before the
+process/network call (new, most safety-critical addition).
 
-## Invocation persistence/recovery, at-most-once/retry
+## TOCTOU findings
 
-`RuntimeInvocationStore` (`src/pcae/core/runtime_invocation.py`) uses
-atomic tmp-then-`Path.replace()` writes; before-dispatch durability
-exists, after-dispatch uncertainty is entirely unaddressed (no dispatch
-layer or "dispatch attempted" marker exists yet). Desired guarantee:
-**at-most-once** dispatch attempt with retry requiring fresh human
-authorization — **exactly-once is explicitly not claimed** as possible
-for local-process/network dispatch. Retry taxonomy already specified in
-contract (RPAC-REQ-071/072) with no implementation yet; retryable classes
-(pre-dispatch unavailability, confirmed-non-accepted rate-limiting,
-confirmed-non-delivered transport failure, pre-effect timeout) vs.
-non-retryable (unknown delivery, runtime mutation, malformed/conflicting
-completion, ambiguous process termination).
+Must be snapshot-bound at authorization time: HEAD, prompt hash, runtime
+target, adapter config identity. Must be freshly re-checked immediately
+before dispatch, not merely snapshot-bound: task state, adapter executable
+identity/hash, policy/decision freshness. Full Matrix E in the phase
+document Section 33.
 
-## Result capture / generic intake / mutation trust
+## Prompt hash / repo / task / runtime binding
 
-Result must remain untrusted (RPAC-REQ-084, corroborated by 3S.2.1's
-finding that `build_intake_handoff` never calls the actual
-acceptance/ingest entry point). Existing Stage-B intake-candidate builder
-already consumes any `RuntimeInvocationResult`-shaped object without
-new trust-contract evolution for evidence production; the acceptance
-half (`validate_and_ingest_intake_candidate`) remains a separate,
-unmodified, human/governance-gated step. File-based/patch-based intake
-is the preferred return path over direct worktree mutation by the
-runtime. Explicit chain preserved: runtime produced file != trusted
-source != accepted change != authorized commit; all existing
-intake/review/promotion gates (114A-114R) remain intact.
+Prompt hash: covers only semantically load-bearing content, excludes
+unstable formatting/environment metadata. Repository binding: git-derived
+fingerprint (reusing the dry consumer's existing pattern), never a raw
+path. Task/phase bound always; session bound only when session-scoped
+work exists. Runtime target: exact match, no fallback (mirrors the
+already-proven dry-consumer no-fallback design).
 
-## Cancellation / detached-process risk
+## PB HUMAN_REVIEW semantics (resolved from source, not guessed)
 
-Local CLI: SIGTERM then escalation, mandatory bounded timeout. API:
-client-side cancellation may not stop provider-side completion/billing
-("unknown delivery" retry-taxonomy bucket). Detached/background process
-risk: no process-group/session containment exists anywhere in
-`src/pcae` today; mandatory before any local CLI execution.
+POL-004 (`MissingHumanApprovalRule`) already resolves `HUMAN_REVIEW` to
+not-triggered exactly when `approval_present` is `True`. **Frozen
+meaning:** a valid, matching, current, unconsumed `RuntimeInvocationApproval`
+is precisely what sets `approval_present=True`; this is not additional
+review beyond the approval already obtained, not policy escalation, and
+not automatically reusable for a different request — the exact-tuple
+binding prevents cross-request reuse.
 
-## Threat model
+## Simulation/backward compatibility
 
-Full 11-row threat matrix produced in the phase document (Section 37):
-malicious prompt/context, provider compromise, arbitrary shell/tool
-behavior, filesystem escape, network exfiltration, credential leakage,
-process escape, result spoofing, replay/duplicate execution, cost abuse
-— each mapped to current exposure and existing/missing mitigation.
+The dry (`simulation_only=True`) path is entirely untouched — no field,
+gate, or artifact from this design is retrofitted onto it. No existing PB
+behavior changes for rollback, push, publication, or the existing
+mutation-root actions. The new `runtime_dispatch` action is strictly
+additive.
 
-## 2 MUST-FIX findings recovered (3S.2.1)
+## Policy/authority versioning; crash/retry semantics
 
-Recovered verbatim from
-`docs/PHASE_149O_20L_7O_3S_2_1_INDEPENDENT_END_TO_END_PRODUCTION_DRY_LIFECYCLE_RUNTIME_ADAPTER_CONSUMPTION_VERIFICATION.md`
-Section 62: (1) malformed non-mock adapter `collect()` result crashes
-`simulate_invocation` with an uncaught `AttributeError` inside
-`RuntimeInvocationStore.write_result` rather than producing a clean
-`FAILURE_MALFORMED_RESULT`, unreachable today because the only
-registered adapter is the mock (which always returns well-formed
-results); becomes a de facto blocker the moment a second, real adapter
-is registered. (2) `RuntimeInvocationStore._invocation_dir`/
-`_write_create_only` perform no path-traversal sanitization on
-`invocation_id`, unreachable today because both public production entry
-points always use internally `new_invocation_id()`-generated IDs
-(`f"inv-{uuid.uuid4().hex}"`); becomes load-bearing only if a future
-surface accepts a caller-supplied `invocation_id`. Neither repaired this
-phase (not separately authorized).
+Policy version must be bound to the Runtime Enforcement decision, which
+must re-evaluate (not cache) across a policy-version change. Approval
+consumption is tied to the same durable write that marks "dispatch
+attempted" (not earlier, at PB or Runtime Enforcement ALLOW alone; not
+later, only after confirmed dispatch) — this was chosen after analyzing
+all four candidate consumption points' crash windows. Crash-before-dispatch
+and crash-after-dispatch both require fresh human authorization on retry;
+no automatic replay is permitted (RPAC-REQ-072).
 
-## Runtime inspect limitation disposition
+## Local CLI specialization / API extension path
 
-`TRUTHFUL_WITH_LIMITATION` carried forward unchanged; `pcae runtime
-inspect` not modified. Determined the limitation must be repaired
-**before the first real adapter is registered** (not before release, not
-"after registration," not "not required") — an operator relying on the
-tool to assess real-execution availability needs the dry/real
-distinction discoverable once a real adapter exists.
+v1 local-CLI fields: exact runtime target, command descriptor identity,
+repo/task, prompt hash, no network field required true, bounded
+filesystem scope. API extension (out of v1 scope): provider/model
+identity (mandatory for API targets only), network permission, cost/
+budget, credential reference — additive to the same action, never
+mandatory universally.
 
-## Failure-before-effect / durable-before-effect / TOCTOU
+## Network permission disposition (open dependency)
 
-Mandatory pre-spawn/pre-network-send/pre-billing/pre-mutation check
-lists produced (Section 45). Durable-before-effect fields identified:
-invocation ID, target, prompt hash (new), authority reference (new), PB
-decision + digest (new), Runtime Enforcement decision + digest (new),
-repo/task binding — secrets never persisted. TOCTOU analysis: HEAD,
-prompt hash, and adapter/target configuration must be snapshot-bound;
-task state, credential/account validity, executable identity, and
-policy/decision freshness must be freshly re-checked immediately before
-dispatch, not merely snapshot-bound.
+No PB network action or execution_class exists today. This phase
+explicitly does **not** resolve network-egress permission — it is flagged
+as an unresolved, deliberately deferred dependency, out of scope for the
+local-CLI-only v1 path (which needs no network PB action at all) and
+blocking for any future API-provider path.
 
-## Adapter config trust / executable trust / API trust / cost governance
+## Filesystem/process authority distinction
 
-Adapter configuration must be repository-local/admin-controlled, never
-accepted from untrusted task/model content. Executable trust for v1:
-resolved/pinned executable with hash verification, not bare PATH lookup
-(RPAC-REQ-086). API trust deferred (endpoint pinning, TLS reliance,
-model allowlist, non-self-asserted provenance) until an API adapter is
-actually built. Cost/budget governance: classified as later hardening
-for the local-CLI-only v1 path, but a hard prerequisite before any API
-adapter (no mechanism exists today).
+`runtime_dispatch` PB permission never implies mutation authority (the
+existing `source_mutation`/`docs_mutation`/`test_mutation` actions remain
+the sole mutation gate, unmodified) or process/shell authority (Shell
+Gate or an equivalent enforcing process-construction policy remains
+independently required, unmodified, and non-enforcing today).
 
-## Audit / explainability
+## Two 3S.2.1 MUST-FIX findings — disposition unchanged
 
-Audit fields required: requester, repo/task, prompt hash, target,
-authority, PB decision, Runtime Enforcement decision, dispatch-attempt
-marker, process/provider identity, outcome, result-intake reference. The
-existing atomic `RuntimeInvocationStore` document model is the correct
-extension point — no new mechanism needed, only new fields, and PB/RE
-decisions must start flowing into it to answer all six explainability
-questions posed by the instructions.
+Recovered verbatim again: (1) uncaught `AttributeError` on a malformed
+non-mock adapter result — unaffected by this architecture, still becomes
+a de facto blocker only once a second (real) adapter is registered. (2)
+`invocation_id` path-traversal in `RuntimeInvocationStore` — unaffected;
+this design's new fields do not introduce any caller-supplied
+`invocation_id` surface. Neither repaired this phase.
 
-## Restart/recovery, local-CLI, and API/provider trust matrices
+## Runtime-inspect limitation disposition — unchanged
 
-Full matrices produced in the phase document (Sections 55-57), covering
-6 crash points and 7 local-CLI / 6 API-provider trust concerns each with
-current control, gap, and blocking-status.
+`TRUTHFUL_WITH_LIMITATION` unaffected in substance by this phase; still
+must be repaired before the first real adapter is registered, not before
+release and not "not required."
 
-## 16-prerequisite matrix and dependency DAG
+## Authority / permission / cross-gate threat models
 
-Full matrix (Section 58) and human-readable DAG (Section 59) produced,
-covering current state, dependency, contract/implementation/security
-work, and priority for all 16 requirements.
+Authority threat model: 8 threats (forged/stale/reused approval, approval
+for a different runtime/prompt/repo-task, tampering, replay after crash),
+each mitigated by the subject-tuple binding, freshness set, and one-shot
+consumption. Permission threat model: 6 threats (request manipulation,
+simulation-flag confusion, execution-class/action-type confusion, policy
+drift, decision replay), each mitigated by existing structural validation
+plus the new action's distinctness. Cross-gate threat model: all 3 named
+confusions (approval-as-permission, PB-ALLOW-as-authorization,
+RE-ALLOW-as-both) made structurally impossible by construction — full
+justification in the phase document Sections 59-61.
 
-## Minimum viable real-runtime path / initial scope restrictions
+## Security invariants (Matrix F)
 
-One explicit target (no fallback), one fresh invocation-scoped human
-authorization, no automatic retry, one runtime/one repo/one task,
-bounded timeout, bounded sanitized environment, untrusted result routed
-through the existing unmodified intake/review pipeline. v1 restrictions:
-local CLI only, no API providers, no parallel invocations, no automatic
-retries, no background/detached execution, no unattended scheduling, no
-multi-repo, explicit human approval every invocation.
+10 invariants frozen, including: no approval → no real dispatch; stale/
+mismatched approval → no real dispatch; PB DENY or failure → no real
+dispatch; PB ALLOW without approval → no real dispatch (already enforced
+by POL-004 today for the relevant classes); approval without PB ALLOW →
+no real dispatch; Runtime Enforcement deny → no real dispatch; runtime
+unavailable → no dispatch; adapter cannot self-authorize. Full matrix in
+the phase document Section 62.
 
-## First real adapter recommendation
+## Combined-artifact decision
 
-Ranked (Section 30, per RPAC-REQ-095's own explicit sequencing): (1)
-generic local fixed-argv executable with a deterministic non-AI fixture
-— lowest trust complexity, exercises the full process-supervision/
-containment/Shell-Gate chain independent of AI-specific concerns; (2)
-Codex CLI; (3) Claude-local; (4) API/OpenRouter-style provider (highest
-trust complexity, ranked last).
+Assessed and rejected: approval and PB decision must never live in one
+artifact (different lifecycles, different provenance, different trust
+boundaries). Separate provenance with linkage (references/hashes) is
+preferred.
 
-## Release implications
+## Future contract artifacts recommended
 
-No release decision made. The real-runtime chapter is a plausible v0.5.0
-candidate given the magnitude of the capability shift, but no version is
-frozen; this is a planning placeholder only.
+Runtime Invocation Human Authority Contract; PB Runtime Dispatch
+Extension Contract; Dispatch Gate Ordering Contract; invocation authority
+schema. None frozen this phase.
 
-## Exact next phase
+## Contract-freeze readiness (split verdict)
 
-**"Real Runtime Dispatch Authority and Permission Contract
-Architecture"** — evidence-derived: PB (POL-005/RPAC-044) is
-structurally the first blocker, but RPAC-REQ-045 requires Runtime
-Enforcement to sit "after human approval ... and Permission Broker
-permission" as adjacent, interdependent gates in the same short chain —
-so PB redesign and the human-authority artifact must be designed
-together, not sequentially. This phase recommends a combined
-contract-design phase (still no implementation): select a PB redesign
-option, select a human-authority artifact design, and define the binding
-between them. **Human decision required.**
+**Outcome A (ready to freeze in the next phase)** for the local-CLI-only
+v1 path. **Outcome B (one more architecture-clarification phase
+required)** for the API-provider path, blocked on the open
+network-egress-permission dependency.
+
+## Implementation dependency order
+
+Authority artifact + storage → PB request-shape support → approval-
+validation logic → independent verification → Runtime Enforcement
+integration → Shell Gate enforcement / local-CLI target descriptor
+(parallel), converging at the first real adapter (RPAC-REQ-095).
 
 ## Production source modified / execution activated / external invocation
 
-**Production source modified: NO** (git diff confirms 0 `src/pcae`
-files touched — only `docs/`, `PROJECT_STATUS.md`, `CHANGELOG.md`, and
-task-lifecycle/report files). **Execution activated: NO.** **External
-runtime invocation: NONE.** Runtime remains `Observed`/`observe`/
-`unavailable`, unchanged throughout. **Version/release: unchanged**,
-v0.4.3 still resolves to `63580893b1de4782a694ab802ff7bdebdf29b0e6`.
-Article remains STOPPED; private research repository
-(`~/repos/pcae-deepseek-research`) untouched, not inspected.
+**Production source modified: NO** (`git diff --stat -- src/pcae tests`
+confirmed empty). **Execution activated: NO.** **External runtime
+invocation: NONE.** Runtime remains `Observed`/`observe`/`unavailable`,
+unchanged throughout. **Version/release: unchanged**, v0.4.3 still
+resolves to `63580893b1de4782a694ab802ff7bdebdf29b0e6`. Article remains
+STOPPED; private research repository (`~/repos/pcae-deepseek-research`)
+untouched, not inspected.
 
 ## Checks run
 
@@ -330,8 +300,8 @@ Article remains STOPPED; private research repository
 coherent. `pcae doctor task-memory`: warnings limited to pre-existing
 `tasks/DONE.md` synchronization debt (unrelated to this phase). `pcae
 push check`: clean. `pcae runtime inspect`: unchanged
-(`not_implemented`/`Observed`/`observe`/`unavailable`). Telegram: configured,
-enabled, outbound-ready.
+(`not_implemented`/`Observed`/`observe`/`unavailable`). Telegram:
+configured, enabled, outbound-ready.
 
 ## Commits, pushed, origin/main..HEAD
 
@@ -339,19 +309,18 @@ Commits and push state recorded in `.pcae/phase-completion-metadata.json`
 (`phase_commits`, `pushed_status`, `origin_main_head`,
 `origin_main_head_count`).
 
-**REAL-RUNTIME PREREQUISITE PLAN: COMPLETE**
-**PRODUCTION DRY RUNTIME: VERIFIED / CONSUMED**
-**REAL-RUNTIME READY: NO**
-**FIRST HARD BLOCKER: POL-005 (ExecutionDisabledRule) — unconditional deny of any non-simulation request**
-**POL-005: intentional temporary safeguard, denies unconditionally until COMP-002 (execution boundary) is implemented and verified**
-**PB REAL-DISPATCH SEMANTICS: CONTRACT WORK REQUIRED (3 bounded options produced, none selected)**
-**HUMAN AUTHORITY: CONTRACT/AUTHORITY GAP — no existing artifact authorizes real runtime invocation**
-**RUNTIME ENFORCEMENT: design-only, non-authorizing, 0 production consumers — contract evolution or adapter-specific projection required**
-**PROCESS SUPERVISION: absent — hard blocker before local CLI**
-**ENVIRONMENT CONTAINMENT: absent — depends on missing credential-reference architecture**
-**INVOCATION RECOVERY: atomic before-dispatch durability exists; after-dispatch uncertainty unaddressed; at-most-once (not exactly-once) is the achievable guarantee**
-**16 PREREQUISITES: DEPENDENCY-ORDERED (see Section 59 DAG)**
-**FIRST REAL ADAPTER: generic local fixed-argv executable, non-AI deterministic fixture**
+**REAL RUNTIME AUTHORITY/PERMISSION ARCHITECTURE: COMPLETE**
+**REAL EXECUTION: UNAVAILABLE**
+**PB REAL-DISPATCH MODEL: Option A — dedicated `runtime_dispatch` action**
+**HUMAN RUNTIME AUTHORITY: Option A — dedicated, one-shot `RuntimeInvocationApproval` artifact**
+**AUTHORITY: SEPARATE FROM PB PERMISSION**
+**PB PERMISSION: SEPARATE FROM RUNTIME CAPABILITY**
+**RUNTIME ENFORCEMENT: SEPARATE PRE-DISPATCH GATE**
+**APPROVAL SCOPE: one-shot**
+**DISPATCH BINDING: repo + task + runtime target + prompt/invocation identity**
+**POL-005: UNCHANGED**
+**SIMULATION PATH: UNCHANGED**
+**TOCTOU: EXPLICITLY BOUND / REVALIDATED**
+**NEXT: PB Runtime Dispatch + Human Authority Contract Freeze (local-CLI-only v1 scope)**
 **EXECUTION ACTIVATION: NOT PERFORMED**
-**NEXT PHASE: Real Runtime Dispatch Authority and Permission Contract Architecture**
 **HUMAN DECISION: REQUIRED**
