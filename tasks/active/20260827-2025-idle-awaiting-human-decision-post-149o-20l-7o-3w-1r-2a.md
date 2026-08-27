@@ -35,6 +35,7 @@ Await human authorization for the Human-Principal Authentication Contract Freeze
 
 - tasks
 - session
+- docs
 
 ## Forbidden Zones
 
