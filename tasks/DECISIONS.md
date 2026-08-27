@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3V.1R.1 independent verification disposition
+  (2026-08-27).** Independently confirm both 3V.1 BLOCKING findings are
+  CLOSED by the 3V.1R repair, reconstructed from primary contract text
+  (RPAC-001, PBRD-001 v1.1, RDGO-001 v2.0, RIHAC-001, RIASC-001) with a
+  fresh 51-test module rather than a rerun of 3V.1R's own tests.
+  RPAC-REQ-042 verdict CONSISTENT; cross-contract identifiers, cardinality
+  (PB 14 facts, 11 gates, 8 durable items, 7 TOCTOU facts, RIASC
+  16-required/5-subject), and terminology all reconcile with zero new
+  contradictions. LOCAL-CLI AUTHORITY/PERMISSION IMPLEMENTATION READY: YES;
+  REAL-RUNTIME READY: NO; BLOCKING: 0. The two pre-existing 3S.2.1 MUST-FIX
+  findings (store path confinement; malformed-result handling) remain
+  explicit, unresolved, deferred-real-runtime prerequisites — not
+  repaired, not newly discovered. Recommend 149O.20L.7O.3V.2
+  (implementation planning, not implementation) as the next phase; require
+  human authorization before it begins. Do not begin implementation
+  automatically.
+
 - **Phase 149O.20L.7O.3V.1 independent verification disposition
   (2026-08-27).** Do not certify or implement the 3V four-contract system.
   RIHAC-001 and normative RIASC-001 are complete, but PBRD-001 is incomplete

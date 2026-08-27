@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3V.1R.1** — Independently verified (fresh 51-test
+  module, not a rerun of 3V.1R's own tests) that Phase 149O.20L.7O.3V.1R's
+  repair actually closes both BLOCKING findings from 3V.1. Both CLOSED:
+  RDGO-001 v2.0's gate 3/gate 4 order independently re-read as an exact
+  literal match to RPAC-REQ-042 (approval strictly before preflight);
+  PBRD-001 v1.1's fact table independently recounted at exactly fourteen
+  rows with `attempt_id`/`idempotency_key` required and PCAE-owned.
+  RPAC-REQ-042 verdict: **CONSISTENT**. Cross-contract identifier matrix,
+  cardinality sweep (PB 12->14, gates 11, durable items 8, TOCTOU facts 7,
+  RIASC 16-required/5-subject), and terminology audit found zero new
+  contradictions. Notable finding: the shipped mock/dry
+  `simulate_invocation()` gate order and `runtime_invocation.py`'s
+  `InvocationRequest` already independently corroborate the repaired
+  ordering and identifier conventions (read-only cross-check; `src/pcae`
+  untouched). **LOCAL-CLI AUTHORITY/PERMISSION IMPLEMENTATION READY: YES.**
+  REAL-RUNTIME READY: NO. BLOCKING: 0; MUST-FIX: 0 new (2 pre-existing
+  3S.2.1 findings unchanged, deferred-real-runtime); NON-BLOCKING: 1. Zero
+  `src/pcae/**` changes; runtime remains `Observed`/`observe`/`unavailable`;
+  POL-005 and dry path unchanged; API/network remains not frozen.
+  Recommended next: 149O.20L.7O.3V.2 (implementation planning), human
+  decision required.
 - **Phase 149O.20L.7O.3V.1R** — Repaired exactly the two BLOCKING findings
   from 3V.1's independent verification, contract-text-only. RDGO-001 gates 3
   and 4 are transposed (human authority creation now strictly precedes

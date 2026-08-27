@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3V.1R.1 — Independent Verification of Repaired Local-CLI
+Runtime Dispatch Authority and Permission Contracts. **VERIFICATION-ONLY —
+COMPLETE.** Independently reconstructed (not rereun from 3V.1R's own tests)
+whether Phase 149O.20L.7O.3V.1R's repair actually closes both BLOCKING
+findings from 3V.1. **3V.1 BLOCKING 1 (RDGO gate order vs RPAC-REQ-042):
+CLOSED** — RDGO-001 v2.0's gate table independently re-read shows gate 3
+(human authority creation) strictly precedes gate 4 (static preflight),
+an exact literal match to RPAC-REQ-042's own steps 3/4, re-read directly
+from RPAC-001 primary text. **3V.1 BLOCKING 2 (PBRD attempt/idempotency
+binding): CLOSED** — PBRD-001 v1.1's fact table independently recounted at
+exactly fourteen rows, with `attempt_id`/`idempotency_key` both required
+and PCAE-coordinator-owned. RPAC-REQ-042 verdict: **CONSISTENT**.
+Cross-contract identifier matrix, cardinality sweep (PB 12->14, gates 11,
+durable items 8, TOCTOU facts 7, RIASC 16 required/5-subject fields), and
+terminology audit found zero new contradictions. Notable independent
+finding: the existing shipped production mock/dry path
+(`simulate_invocation` in `src/pcae/core/runtime_adapter.py`, plus
+`runtime_invocation.py`'s `InvocationRequest`) already implements
+RPAC-REQ-042-consistent gate ordering and matching `attempt_id`/
+`idempotency_key` conventions, independently corroborating the repair
+without constituting an implementation of the future `runtime_dispatch`
+action (read-only cross-check; `src/pcae` untouched by this phase). 51
+fresh verification tests pass (0 failed; distinct module, not a rerun of
+3V.1R's own tests). **LOCAL-CLI AUTHORITY/PERMISSION IMPLEMENTATION READY:
+YES.** REAL-RUNTIME READY: NO. BLOCKING: 0; MUST-FIX: 0 new (2 pre-existing
+3S.2.1 findings carried forward unchanged, deferred-real-runtime);
+NON-BLOCKING: 1. Zero `src/pcae/**` changes; runtime remains
+`Observed`/`observe`/`unavailable`; POL-005 and the dry path unchanged;
+API/network remains not frozen; release v0.4.3 unchanged; article stopped;
+private research untouched. Recommended next phase: **149O.20L.7O.3V.2 —
+Local-CLI Real-Runtime Dispatch Implementation Planning**; human decision
+required, not begun. See
+`docs/PHASE_149O_20L_7O_3V_1R_1_INDEPENDENT_VERIFICATION_REPAIRED_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_PERMISSION_CONTRACTS.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3V.1R — Local-CLI Runtime Dispatch Authority and
 Permission Contract Reconciliation and Repair. **CONTRACT-REPAIR-ONLY —
 COMPLETE.** Repaired exactly the two BLOCKING findings independently
@@ -25,12 +61,10 @@ eleven-gate first-effect boundary (gate 10) are unchanged in count. 21 fresh
 static contract-repair tests pass; zero `src/pcae/**` changes; runtime
 remains `Observed`/`observe`/`unavailable`; POL-005 and the dry
 `adapter_invocation` path are unchanged; API/network remains not frozen.
-Recommended next phase: exactly **149O.20L.7O.3V.1R.1 — Independent
-Verification of Repaired Local-CLI Runtime Dispatch Authority and
-Permission Contracts**; human decision required, not begun. See
+See
 `docs/PHASE_149O_20L_7O_3V_1R_LOCAL_CLI_RUNTIME_DISPATCH_AUTHORITY_PERMISSION_CONTRACT_RECONCILIATION_AND_REPAIR.md`.
 
-## Prior Phase
+## Two Prior Phases Ago
 
 Phase 149O.20L.7O.3V.1 — Independent Verification of Local-CLI Runtime
 Dispatch Authority and Permission Contract Freeze. **VERIFICATION-ONLY —
