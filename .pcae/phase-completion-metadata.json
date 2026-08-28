@@ -3,7 +3,7 @@
   "phase_name": "Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair",
   "phase_title": "Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair",
   "status": "completed",
-  "commit_attribution": "phase-owned implementation and evidence commits through canonical-report staging; later generated lifecycle/task closure commits are additive and returned to the human because a commit cannot self-list its own hash",
+  "commit_attribution": "phase-owned implementation and evidence commits before canonical-report authoring; later canonical-report, metadata, task-closure, and idle-transition commits are additive and returned to the human because a commit cannot self-list its own hash",
   "execution_availability": "unavailable",
   "summary": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 completed the bounded HPAC trust-root repair. Protected registry root/writer and durable fixture non-reality, installed presentation-mechanism and attestation provenance, proof-writer provenance, authoritative lifecycle genesis, complete predecessor validation, and fork rejection are implemented. Each .3.1 technical finding is REPAIRED \u2014 INDEPENDENT VERIFICATION PENDING \u2014 NOT CLOSED. Thirty-eight fresh tests and all 80 original .3 tests pass; the unchanged .3.1 suite is 28 passed/7 expected old-acceptance failures. Fixed-SHA Fast Green found zero candidate-only nonpassing nodes. Gate 9 remains inert; PB/runtime integration, B1/B7/N1/N2 repair, real authentication/UI, and external effects remain absent. The .3 delegated finalization/commit/push remains UNAUTHORIZED and preserved. Exact next: .3.2.1 independent verification; do not begin Layer 3.",
   "derived_correctness": "Requirements were re-derived from the complete verified contracts, B-3/B-4 material, .2 plan, and authoritative .3.1 evidence. Authority now requires a fixed/protected store context, root-bound opaque writer, matching canonical provenance, and resolver seal; public shape, path, bytes, and digest remain non-authority. Lifecycle resolution validates every canonical predecessor to authorized genesis and rejects disconnected/copy/fork state. Fixed-SHA raw node sets compare entry 36eb3cec to pushed candidate bbd1b9a2 with 351 common nonpassing nodes, one baseline-only currentness node, and zero candidate-only nodes. The canonical helper's commit-subject baseline collapse was rejected and separately disclosed.",
@@ -116,10 +116,14 @@
     {
       "hash": "0e564ce48b6fd4e1c7dfc0b50337d1507baafecc",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: record fixed-SHA closure evidence"
+    },
+    {
+      "hash": "7ccfa76c74e182e4925adb03ddd87716ba87c32b",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: sync evidence commit attribution"
     }
   ],
-  "origin_main_head": "7ccfa76c74e182e4925adb03ddd87716ba87c32b",
-  "origin_main_head_count": 2,
-  "pushed_status": "not_pushed",
+  "origin_main_head": "f82d10b72e351179d9692c827cee72cb9f04ec02",
+  "origin_main_head_count": 0,
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 \u2014 Independent Verification of Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Repair. New human authorization required; do not begin Layer 3."
 }

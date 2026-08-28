@@ -25,6 +25,7 @@ Preserve idle repository state after completed Phase 149O.20L.7O.3W.1R.2B.1R.1.1
 - tasks/**
 - .pcae/session.json
 - .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -35,6 +36,7 @@ Preserve idle repository state after completed Phase 149O.20L.7O.3W.1R.2B.1R.1.1
 
 - tasks
 - docs
+- config
 
 ## Forbidden Zones
 

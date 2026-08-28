@@ -163,7 +163,7 @@ implemented; digest/path/caller shape are not authority; Gate 9 is inert;
 PB/runtime integration and real mechanisms are absent; attributable regressions
 are zero.
 
-Phase-owned implementation/evidence commits through canonical-report staging:
+Phase-owned implementation/evidence commits before canonical-report authoring:
 
 - `7089854e254e618fae9b67f75f2a255ff59bd663`
 - `ad816df5dc50061e62f3dde4e43f22d3826c5a26`
