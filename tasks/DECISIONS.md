@@ -3360,3 +3360,10 @@
   its three-commit field omits four phase-owned completion/report/task commits,
   and its structural consistency validator does not establish Git-history
   completeness.
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 uses the governed fixed-SHA Fast
+  Green attribution artifact plus the focused 35-case independent and
+  115-case combined HPAC suites as closure checks. The generic
+  `python -m pytest -n auto` check is retained as independently reported
+  infrastructure evidence, not a task-closure oracle: its collection aborts
+  before execution because two historical parametrizations generate
+  worker-specific UUID node IDs. No skip-check override is used.
