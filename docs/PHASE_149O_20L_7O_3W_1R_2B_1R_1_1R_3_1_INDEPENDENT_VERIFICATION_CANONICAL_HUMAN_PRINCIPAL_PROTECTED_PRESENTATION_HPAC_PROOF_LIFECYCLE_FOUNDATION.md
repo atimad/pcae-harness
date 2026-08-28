@@ -465,6 +465,18 @@ the same fixed SHA under today's repository/external state, and no historical
 raw node-set artifact accompanies it. This phase independently verifies the
 zero-attributable-regression conclusion, not the historical exact counts.
 
+The governed commit-anchored attribution command was then run separately for
+the `.3.1` evidence commit. Its first 300-second attempt timed out during
+serial collection and produced no artifact. A bounded 900-second retry
+completed **PASS** and persisted
+`.pcae/fast-green-attribution/a2a5549d054afa1095b2dc6b43ea4a96816be60f5da852d09d7aaa46302b4745.json`:
+baseline `47bcc8f3`, candidate `be1585aa`, 341 baseline failures plus 9
+errors, 342 candidate failures plus 9 errors, 350 pre-existing nonpassing
+nodes, one expected local-only push-currentness artifact, and **zero
+attributable failures**. This second independently generated result agrees
+with the manual fixed-SHA conclusion despite its distinct serial collection
+mode and counts.
+
 ## 18. Verification acceptance matrix
 
 | Acceptance item | Result |
