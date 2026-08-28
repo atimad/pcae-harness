@@ -195,8 +195,11 @@ Phase commits:
 - `40d742c3cf133d77ec1040c0613a27ab1360a853`
 - `817cdadbb110aeb0ab8cc1f7bf771d8529b14f9f`
 - `e8549d8009635c0b4d2763c00e6027a56d0412f6`
+- `a86a42904baf2de9ae9667f9fd372429acd4d9e1`
+- `95f8d15df4861ce8eeae815812b2b74d1f1ddc2a`
+- `3ac136e772c2be55ec1b4249653aee7245b8a728`
 
-Pushed: pending (to be finalized after `pcae push`).
+Pushed: `befd7a5a..3ac136e7` → `origin/main`. `origin/main..HEAD`: 0.
 
 ## Recommended next phase
 
