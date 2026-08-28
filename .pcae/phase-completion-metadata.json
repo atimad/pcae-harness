@@ -1,129 +1,102 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2",
-  "phase_name": "Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair",
-  "phase_title": "Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1",
+  "phase_name": "Independent Verification of Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Repair",
+  "phase_title": "Independent Verification of Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Repair",
   "status": "completed",
-  "commit_attribution": "phase-owned implementation and evidence commits before canonical-report authoring; later canonical-report, metadata, task-closure, and idle-transition commits are additive and returned to the human because a commit cannot self-list its own hash",
+  "commit_attribution": "Phase-owned verification evidence, canonical-report, and task-closure commits before metadata reconciliation; later metadata/report reconciliation and idle-transition commits are additive and returned to the human because a commit cannot self-list its own hash.",
   "execution_availability": "unavailable",
-  "summary": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 completed the bounded HPAC trust-root repair. Protected registry root/writer and durable fixture non-reality, installed presentation-mechanism and attestation provenance, proof-writer provenance, authoritative lifecycle genesis, complete predecessor validation, and fork rejection are implemented. Each .3.1 technical finding is REPAIRED \u2014 INDEPENDENT VERIFICATION PENDING \u2014 NOT CLOSED. Thirty-eight fresh tests and all 80 original .3 tests pass; the unchanged .3.1 suite is 28 passed/7 expected old-acceptance failures. Fixed-SHA Fast Green found zero candidate-only nonpassing nodes. Gate 9 remains inert; PB/runtime integration, B1/B7/N1/N2 repair, real authentication/UI, and external effects remain absent. The .3 delegated finalization/commit/push remains UNAUTHORIZED and preserved. Exact next: .3.2.1 independent verification; do not begin Layer 3.",
-  "derived_correctness": "Requirements were re-derived from the complete verified contracts, B-3/B-4 material, .2 plan, and authoritative .3.1 evidence. Authority now requires a fixed/protected store context, root-bound opaque writer, matching canonical provenance, and resolver seal; public shape, path, bytes, and digest remain non-authority. Lifecycle resolution validates every canonical predecessor to authorized genesis and rejects disconnected/copy/fork state. Fixed-SHA raw node sets compare entry 36eb3cec to pushed candidate bbd1b9a2 with 351 common nonpassing nodes, one baseline-only currentness node, and zero candidate-only nodes. The canonical helper's commit-subject baseline collapse was rejected and separately disclosed.",
-  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/DECISIONS.md, tasks/DONE.md, the .3.2 implementation report, this metadata, and generated canonical report agree on bounded repair complete, independent verification pending/not closed, preserved unauthorized .3 incident, zero runtime/PB effect, and exact .3.2.1 recommendation.",
-  "internal_evidence_coherence": "The source inventory, repair table, findings, acceptance matrix, focused/inherited tests, fixed-SHA raw-node artifact, runtime tuple, governance incident, and next recommendation derive from the same 36eb3cec entry and bbd1b9a2 pushed repair candidate.",
+  "summary": "Independent verification did not verify the .3.2 repair. HumanPrincipalRegistry and HumanAuthenticationProof provenance close. Protected presentation and lifecycle remain partially closed because the deterministic attestation violates HPAC-REQ-092's exact closed schema and absolute caller proof IDs escape lifecycle and inert Gate-9 store roots. Fresh adversarial testing reproduced both Blocking defects. Fixed-SHA comparison found zero unexplained attributable regressions and production consumer inspection found zero PB/runtime effects. The .3 delegated finalization/commit/push remains UNAUTHORIZED. Exact next: .3.2.2 narrow containment and attestation-schema repair; do not begin Layer 3.",
+  "derived_correctness": "Requirements were re-derived from the frozen contracts, B-3/B-4 repair and independent verification, the .2 plan, and authoritative .3.1 evidence. Public construction, canonical bytes, matching digests, path shape, and internally consistent chains were attacked independently. Opaque writer/resolver provenance closes principal and proof findings and the authority portions of presentation and lifecycle. Direct filesystem attacks prove absolute proof IDs can mutate outside configured lifecycle and inert Gate-9 roots, while exact object comparison proves deterministic presentation attestation has two contract-forbidden fields. Explicit immutable SHAs 36eb3cec and 13f7f0ce were used because the canonical subject resolver is not authoritative for this phase history.",
+  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/DECISIONS.md, tasks/DONE.md, the hand-authored .3.2.1 verification report, this metadata, and the canonical completion report agree on NOT VERIFIED, the two Blocking defects, zero unexplained attributable regressions, zero runtime/PB effect, preserved unauthorized .3 incident, and exact .3.2.2 recommendation.",
+  "internal_evidence_coherence": "The source inventory, four-finding adjudication, fresh 53-node suite, inherited-suite analysis, exact fixed-SHA node sets, runtime tuple, governance incident, and next recommendation derive from the same 13f7f0ce verification entry and the true 36eb3cec .3.2 baseline.",
   "test_evidence_classification": "inherited_regression",
-  "tests_run": 197,
-  "tests_added_or_updated": "197 bounded test nodes: 38 fresh .3.2, 80 original .3, 35 unchanged historical .3.1, and 44 B-3/B-4 contract/storage regressions; 38 tests added in one new file",
+  "tests_run": 250,
+  "tests_added_or_updated": "53 fresh independent verification nodes in one new .3.2.1 test file; 38 .3.2 repair nodes, 80 original .3 nodes, 35 unchanged historical .3.1 nodes, and 44 B-3/B-4 regressions also assessed",
   "test_results": {
-    "hpac_repair_focused": "38 passed, 0 failed",
-    "hpac_original_3": "80 passed, 0 failed",
-    "hpac_combined_current": "118 passed, 0 failed",
-    "hpac_3_1_historical": "28 passed, 7 expected failures; all seven are unchanged blocking_reproduction tests whose asserted old unsafe acceptance is now rejected",
-    "b3_b4_contract_storage": "44 passed, 0 failed",
-    "static_runtime_pb_boundary": "contracts/POL/runtime/PB/Shell Gate/deterministic authenticator/Gate-9 primitive byte-unchanged; zero external production consumers",
-    "fast_green": "0 failed (passed); unexplained attributable functional regressions = 0 by exact fixed-SHA raw-node comparison",
+    "fresh_independent_suite": "53 passed, including three passing tests that independently reproduce unsafe root escape",
+    "hpac_repair_3_2": "38 passed",
+    "hpac_original_3": "80 passed",
+    "hpac_3_1_historical": "28 passed, 7 failed; all seven unchanged old-acceptance assertions analyzed at the actual rejection boundary",
+    "b3_b4_contract_storage": "44 passed",
+    "static_runtime_pb_boundary": "zero PB, runtime authority, dispatch permission, Gate-5, Gate-9 production, or Gate-10 consumers; zero external effects",
+    "fast_green": "0 failed (passed); unexplained attributable functional regressions = 0 by explicit fixed-SHA node comparison",
     "fixed_sha_fast_green": {
       "baseline_commit": "36eb3cec4cc4e3ff28444eb67cfd5716a6af8d3c",
-      "candidate_commit": "bbd1b9a2c34031bf0b1001d26593895bccf28237",
-      "baseline_failed": 343,
+      "candidate_commit": "13f7f0cef76fa13d3d59c22cb07aa831b9b9aac6",
+      "baseline_passed": 8815,
+      "baseline_failed": 342,
       "baseline_errors": 9,
+      "baseline_skipped": 5,
+      "candidate_passed": 8815,
       "candidate_failed": 342,
       "candidate_errors": 9,
-      "common_nonpassing": 351,
-      "candidate_only_nonpassing": [],
-      "baseline_only_nonpassing": [
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main"
-      ],
-      "artifact_path": ".pcae/fast-green-attribution/4f02d9f968fc0ff205d7e3f63e6bf29162a289e58f966dd33fbe5731ad7bfcc3.json",
-      "artifact_digest": "4f02d9f968fc0ff205d7e3f63e6bf29162a289e58f966dd33fbe5731ad7bfcc3"
+      "candidate_skipped": 5,
+      "candidate_only_unexplained_regressions": 0,
+      "passed_baseline_digest": "2d6d82ddd0696323131d5d0e655a8045ed2e0cd8b7f57abea0b15119269f7ff2",
+      "passed_candidate_digest": "a4fd371630ab1db902c45b5657ef889674953ab2da84b2ae7f12a209904d547c",
+      "failed_baseline_digest": "1bbbad5848f8bed4efce86119f9ef9d1fceb9728eeaaf012d7a06fb4b342a718",
+      "failed_candidate_digest": "553131cb316cfb7e51c0769cc007eecaf77d6f5585788bd3147b5f38610e447b",
+      "errors_digest": "80c7aedd9bfef8eb93f945955d6c0d4deb956a90c38d290a8144979d45229fa5",
+      "skipped_digest": "7ccce470b7396e067d5e82741c26dd0d3b659b59e01fd19a7156f1480d5b9e16"
     },
-    "fast_green_canonical_helper": "self-baseline run rejected as evidence: commit-subject-only resolver collapsed baseline and candidate to bbd1b9a2 because governed commit subjects omitted the long phase token; no false equivalence claim retained",
-    "full_repository_pytest_xdist": "not rerun; .3.1 independently established 14 collection worker errors from historical random UUID-valued node IDs; separate infrastructure debt, not an HPAC regression",
-    "report_notification_tests": "not directly applicable: notification/report production code unchanged; notify status confirms configured outbound-ready governance foundation",
+    "fast_green_canonical_helper": "not accepted as evidence: phase-subject inference resolves the .3.2 baseline to bbd1b9a2 instead of true entry 36eb3cec and omitted implementation-bearing commits",
+    "full_repository_pytest_xdist": "not rerun; .3.1 established historical random UUID node-ID collection disagreement; separate infrastructure debt",
+    "report_notification_tests": "not directly applicable; notification implementation unchanged and canonical report notification dispatched successfully",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
   "validation_results": {
-    "hpac_repair_focused": "38 passed, 0 failed",
-    "hpac_original_3": "80 passed, 0 failed",
-    "hpac_combined_current": "118 passed, 0 failed",
-    "hpac_3_1_historical": "28 passed, 7 expected failures; all seven are unchanged blocking_reproduction tests whose asserted old unsafe acceptance is now rejected",
-    "b3_b4_contract_storage": "44 passed, 0 failed",
-    "static_runtime_pb_boundary": "contracts/POL/runtime/PB/Shell Gate/deterministic authenticator/Gate-9 primitive byte-unchanged; zero external production consumers",
-    "fast_green": "0 failed (passed); unexplained attributable functional regressions = 0 by exact fixed-SHA raw-node comparison",
-    "fixed_sha_fast_green": {
-      "baseline_commit": "36eb3cec4cc4e3ff28444eb67cfd5716a6af8d3c",
-      "candidate_commit": "bbd1b9a2c34031bf0b1001d26593895bccf28237",
-      "baseline_failed": 343,
-      "baseline_errors": 9,
-      "candidate_failed": 342,
-      "candidate_errors": 9,
-      "common_nonpassing": 351,
-      "candidate_only_nonpassing": [],
-      "baseline_only_nonpassing": [
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main"
-      ],
-      "artifact_path": ".pcae/fast-green-attribution/4f02d9f968fc0ff205d7e3f63e6bf29162a289e58f966dd33fbe5731ad7bfcc3.json",
-      "artifact_digest": "4f02d9f968fc0ff205d7e3f63e6bf29162a289e58f966dd33fbe5731ad7bfcc3"
-    },
-    "fast_green_canonical_helper": "self-baseline run rejected as evidence: commit-subject-only resolver collapsed baseline and candidate to bbd1b9a2 because governed commit subjects omitted the long phase token; no false equivalence claim retained",
-    "full_repository_pytest_xdist": "not rerun; .3.1 independently established 14 collection worker errors from historical random UUID-valued node IDs; separate infrastructure debt, not an HPAC regression",
-    "report_notification_tests": "not directly applicable: notification/report production code unchanged; notify status confirms configured outbound-ready governance foundation",
-    "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
+    "fresh_independent_suite": "53 passed, including three passing unsafe-behavior reproductions",
+    "hpac_repair_3_2": "38 passed",
+    "hpac_original_3": "80 passed",
+    "hpac_3_1_historical": "28 passed, 7 failed with independent rejection-reason analysis",
+    "b3_b4_contract_storage": "44 passed",
+    "fast_green": "0 failed (passed); unexplained attributable functional regressions = 0",
+    "runtime_boundary": "Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, subprocess, provider/network, credential, hardware, or external-effect calls",
+    "blocking_findings": "absolute proof-ID canonical-store escape reproduced in lifecycle and inert Gate-9 stores; deterministic presentation attestation has two fields forbidden by HPAC-REQ-092"
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions; no current-phase error",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "pending final governed push",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities",
-    "telegram_runtime": "configured and outbound-ready; dispatch reserved for governed phase completion"
+    "telegram_runtime": "configured and outbound-ready; canonical completion report dispatched successfully",
+    "delegated_3_finalization_commit_push": "UNAUTHORIZED"
   },
-  "notification_dispatch_result": "pending governed phase finalization",
-  "report_consistency": "pending governed generation from internally coherent metadata",
-  "no_go_confirmation": "No normative contract was modified.\nNo historical .3 or .3.1 report, metadata, test, or incident commit was rewritten.\nNo incident commit was reverted, amended, rebased, or retroactively authorized.\nNo force push or hook bypass was performed.\nNo delegated agent was used or granted commit, finalization, or push authority.\nNo Layer 3 verifier or verified-principal production resolver was begun.\nNo B1, B7, N1, or N2 production repair was performed.\nNo Permission Broker integration was added.\nNo Runtime Enforcement call was added or made.\nNo Shell Gate call or shell interception was added or made.\nNo Gate 5, Gate 9, or Gate 10 production wiring was added.\nNo real backend invocation occurred.\nNo adapter execution occurred.\nNo subprocess execution occurred as runtime authority or product behavior.\nNo provider or runtime network call occurred.\nNo physical authenticator, FIDO2, WebAuthn, CTAP, PAM, biometric, keychain, credential, or hardware operation occurred.\nNo real enrollment, principal registration, protected approval UI, approval CLI, or enrollment CLI was created.\nNo external runtime effect occurred.\nNo release, version, tag, publication, Dell, private-research, or article work occurred.\nNo next phase was started automatically.",
+  "notification_dispatch_result": "sent successfully by canonical report creation; reconciliation marker is already_dispatched",
+  "report_consistency": "canonical report trust and derived-correctness checks passed before task closure; final metadata reconciliation pending governed commit/push",
+  "no_go_confirmation": "No production implementation repair.\nNo normative contract modification.\nNo historical .3, .3.1, or .3.2 artifact rewrite.\nNo Layer 3 planning or implementation.\nNo Permission Broker integration.\nNo Runtime Enforcement or Shell Gate activation.\nNo B1, B7, N1, or N2 production repair.\nNo real FIDO2, WebAuthn, CTAP, enrollment, credential operation, protected approval UI, approval CLI, or enrollment CLI.\nNo provider, network, subprocess, hardware, or external runtime effect.\nNo release, deployment, Dell, research, or article work.\nNo revert, force push, history rewrite, or hook bypass.\nNo delegated agent was used or granted commit, phase-finalization, or push authority.\nNo next phase was started automatically.",
   "files_changed": [
-    ".pcae/fast-green-attribution/4f02d9f968fc0ff205d7e3f63e6bf29162a289e58f966dd33fbe5731ad7bfcc3.json",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
+    ".pcae/phase-metadata-repairs.log",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_CANONICAL_HPAC_FOUNDATION_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_BLOCKING_REPAIR.md",
-    "src/pcae/core/approval_presentation.py",
-    "src/pcae/core/approval_presentation_deterministic.py",
-    "src/pcae/core/hpac_foundation.py",
-    "src/pcae/core/hpac_lifecycle.py",
-    "src/pcae/core/human_authentication_proof.py",
-    "src/pcae/core/human_principal_registry.py",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_1_INDEPENDENT_VERIFICATION_CANONICAL_HPAC_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_REPAIR.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/active/20260828-0728-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-canonical-hpac-foundation-trust-root-writer-provenance-and-lifecycle-validation-blocking-repair.md",
-    "tasks/done/20260828-0418-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2b-1r-1-1r-3-1.md",
-    "tests/test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py"
+    "tasks/done/20260828-0909-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2.md",
+    "tasks/done/20260828-1012-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-1-independent-verification-of-canonical-hpac-foundation-trust-root-writer-provenance-and-lifecycle-validation-repair.md",
+    "tests/test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py"
   ],
-  "files_changed_count": 17,
+  "files_changed_count": 11,
   "phase_commits": [
     {
-      "hash": "7089854e254e618fae9b67f75f2a255ff59bd663",
-      "subject": "repair HPAC trust roots and lifecycle provenance"
+      "hash": "5c13fc6e16b25133ffe701019c0774f1600f2ffa",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1: independently verify HPAC repair"
     },
     {
-      "hash": "ad816df5dc50061e62f3dde4e43f22d3826c5a26",
-      "subject": "document HPAC repair and harden path provenance"
+      "hash": "53a2dfe4bf508ffcd097ca89595f3bad39a5b80b",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1: record canonical verification report"
     },
     {
-      "hash": "bbd1b9a2c34031bf0b1001d26593895bccf28237",
-      "subject": "complete HPAC repair file inventory"
-    },
-    {
-      "hash": "0e564ce48b6fd4e1c7dfc0b50337d1507baafecc",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: record fixed-SHA closure evidence"
-    },
-    {
-      "hash": "7ccfa76c74e182e4925adb03ddd87716ba87c32b",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: sync evidence commit attribution"
+      "hash": "32fa10dcda4485fa5043cb1ae15b2691ee26b41a",
+      "subject": "Finish Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 independent verification"
     }
   ],
-  "origin_main_head": "f82d10b72e351179d9692c827cee72cb9f04ec02",
-  "origin_main_head_count": 0,
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 \u2014 Independent Verification of Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Repair. New human authorization required; do not begin Layer 3."
+  "origin_main_head": "5c13fc6e16b25133ffe701019c0774f1600f2ffa",
+  "origin_main_head_count": 2,
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2 — HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Blocking Repair. New human authorization required; do not begin Layer 3."
 }
