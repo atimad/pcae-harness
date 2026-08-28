@@ -55,7 +55,7 @@
     "b1_b7_n1_n2_status": "B1 contract closed / implementation open; B7 contract closed / implementation open; N1 contract closed / implementation open; N2 contract closed / implementation open"
   },
   "notification_dispatch_result": "pending_phase_complete",
-  "report_consistency": "canonical report trust, derived-correctness, and reconciliation checks pending pcae phase complete",
+  "report_consistency": "canonical report trust and derived-correctness checks passed at staging; final reconciliation performed at pcae phase complete promotion",
   "no_go_confirmation": "No Layer 3 mechanism-neutral production verifier or resolver.\nNo normative contract modification (HPAC-001, RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001, POL-005 all untouched).\nNo historical .3, .3.1, or .3.2 artifact rewrite.\nNo Permission Broker integration.\nNo Runtime Enforcement or Shell Gate activation.\nNo B1, B7, N1, or N2 production repair.\nNo real FIDO2, WebAuthn, CTAP, enrollment, credential operation, protected approval UI, approval CLI, or enrollment CLI.\nNo provider, network, subprocess, hardware, or external runtime effect.\nNo Gate-9 production wiring, Gate-10 dispatch, or RuntimeInvocationApproval/PB/runtime-dispatch consumption.\nNo release, deployment, or unrelated research/article work.\nNo revert, force push, history rewrite, or hook bypass.\nNo delegated agent was granted commit, phase-finalization, or push authority (the implementation fork made file edits only; all pcae task/commit/push/phase-complete commands were run by the primary operator).\nNo next phase was started automatically.",
   "files_changed": [
     ".pcae/phase-completion-metadata.json",
@@ -93,8 +93,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: remove stale active-task file after transition to idle"
     }
   ],
-  "origin_main_head": "93f120c99ed2efd6d86ea5cd4d49438b7e814ece",
-  "origin_main_head_count": 4,
-  "pushed_status": "pending",
+  "origin_main_head": "5ead7e515b33c80d0c661426ac13f89f6e4c92a6",
+  "origin_main_head_count": 0,
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1 — Independent Verification of HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Repair. New human authorization required; do not begin Layer 3."
 }
