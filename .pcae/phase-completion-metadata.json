@@ -28,7 +28,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions; no current-phase error",
-    "pcae_push_check": "not_ready_pending_this_report",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -63,8 +63,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1: close task, open idle placeholder pending human authorization of blocking-repair follow-up"
     }
   ],
-  "origin_main_head": "1df9c855",
-  "origin_main_head_count": 3,
-  "pushed_status": "not_yet_pushed",
+  "origin_main_head": "325ddb80c56ccc2151dd233e1a3f4672a118af0a",
+  "origin_main_head_count": 0,
+  "pushed_status": "nothing_to_push",
   "recommended_next_phase": "Not canonically assigned this phase (no-invent-an-ID constraint). Recommended: a narrow blocking-repair phase closing the object.__new__ trusted-construction bypass in AuthenticatedHumanPrincipal (F1), with F2-F4 folded in or explicitly deferred, pending separate explicit human authorization and phase-ID assignment."
 }
