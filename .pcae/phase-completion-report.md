@@ -1,104 +1,154 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1 Complete — Independent Verification of Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2 Complete — AuthenticatedHumanPrincipal Trusted-Construction and Provenance Blocking Repair
 
 Status: completed.
 
-Verification-entry commit (HEAD at start): `1df9c855`.
+Phase-entry commit (HEAD at start): `befd7a5a0b2e7dff037e973f9df7bdb5f5d7533f`.
 
 Canonical hand-authored phase doc:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_1_INDEPENDENT_VERIFICATION_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY.md`.
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_2_AUTHENTICATEDHUMANPRINCIPAL_TRUSTED_CONSTRUCTION_AND_PROVENANCE_BLOCKING_REPAIR.md`.
 
 ## Technical verdict
 
-**NOT VERIFIED — AUTHENTICATED-PRINCIPAL RESULT AUTHORITY DEFECT.**
+**F1 REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.**
 
-`.1R.5` is not independently verified as complete. Independently
-re-derived `HPAC-REQ-054`'s ten-step sequence directly from
-`docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` §18 (not
-from `.1R.5`'s or `.1R.4`'s prose) and compared it line-by-line against
-`hpac_verifier.py`.
+Repairs `.1R.5.1`'s BLOCKING finding: `AuthenticatedHumanPrincipal`'s
+`HPAC-REQ-056` trusted-construction seal was enforced only inside
+`__init__`, so `object.__new__` bypassed it entirely, producing an
+`isinstance`-true, `PRODUCTION`-assurance forged instance without any
+verification ever running.
 
-## BLOCKING finding (F1)
+## Why blocking `object.__new__` itself is not the fix
 
-`AuthenticatedHumanPrincipal`'s `HPAC-REQ-056` trusted-construction seal
-is enforced only inside `__init__`. The class defines no `__new__`
-override, so `object.__new__(AuthenticatedHumanPrincipal)` allocates a
-fully-populated, `isinstance`-true instance — including
-`is_real_runtime_eligible == True` at `PRODUCTION` assurance — without
-ever running `verify_human_authentication`. Independently reproduced by
-direct interactive probe against the installed module:
+Independently confirmed: `object.__new__(AuthenticatedHumanPrincipal)`
+is a call to a different, unrelated method than any subclass `__new__`
+override — it bypasses the subclass's method-resolution order entirely,
+so overriding `AuthenticatedHumanPrincipal.__new__` has zero effect on
+this exact attack. No field, sentinel, or digest stored on the instance
+survives being copied by a caller who reproduces the object's
+`__slots__` state via `object.__new__` + `setattr`. Object shape,
+constructor path, and non-serializability are therefore not sufficient
+proof of provenance.
+
+## Repair architecture
+
+A new verifier-owned, identity-keyed provenance boundary:
 
 ```python
-forged = object.__new__(AuthenticatedHumanPrincipal)
-forged.assurance_class = HPACAuthorityClass.PRODUCTION
-...
-isinstance(forged, AuthenticatedHumanPrincipal)   # True
-forged.is_real_runtime_eligible                    # True
+def is_verifier_authenticated_principal(candidate: object) -> bool:
+    return (
+        isinstance(candidate, AuthenticatedHumanPrincipal)
+        and candidate in _AUTHENTIC_PRINCIPAL_REGISTRY
+    )
 ```
 
-Currently non-exploitable in production: zero consumers of
-`hpac_verifier.py` / `AuthenticatedHumanPrincipal` exist anywhere in
-`src/pcae` (confirmed by grep and by re-running the existing AST-based
-zero-consumer test), so no live code path can reach a forged instance
-today — but the construction boundary the module and `HPAC-REQ-056`
-claim to enforce is not actually closed.
+`_AUTHENTIC_PRINCIPAL_REGISTRY` is a module-private set populated **only**
+by `verify_human_authentication`'s own return path. Membership is keyed
+by Python object identity (the class's `__hash__`/`__eq__` were already
+identity-only, independently confirmed sound by `.1R.5.1`). A
+caller-manufactured lookalike — direct construction (even with the real
+module-private seal), `object.__new__`, a subclass attempt (now refused
+at class-definition time via `__init_subclass__`), `copy`/`deepcopy`/
+`pickle` (still `TypeError` via `__reduce__`, unchanged), manual
+`__slots__` state copying, or reflection — is a different Python object
+and can never be a registry member, regardless of field values.
+`is_real_runtime_eligible` and every other field remain plain data, not
+authority; every future consumer of a verification result must call
+`is_verifier_authenticated_principal` first (this module still has zero
+production consumers today, so no call site exists to update yet). The
+`__init__` seal check is retained as defense-in-depth for the ordinary
+direct-construction mistake, documented as not itself the trust
+boundary.
 
-## Non-blocking findings
+**Design trade-off, documented:** the registry is a plain (strong-
+reference) `set`, not a `weakref.WeakSet`, because adding `"__weakref__"`
+to `__slots__` would break `.1R.5.1`'s preserved historical evidence test
+(`test_verifier_result_attribute_copy_produces_a_distinguishable_object`,
+which iterates the literal `__slots__` tuple and `setattr`s every entry —
+`__weakref__` has no attribute setter). Verified results therefore
+remain referenced by the module for the process lifetime; still never
+persisted, still non-serializable, still lost on restart. Accepted given
+zero production consumers exist today; flagged for revisit if/when a
+real production consumer is wired.
 
-- **F2** — `HPAC-REQ-054` step 4 (independent `challenge_digest`
-  recomputation from canonical challenge state) is not implemented; only
-  a string-equality cross-check against the lifecycle genesis binding
-  exists, deferred into step 9's logic. Bounded by the foundation having
-  no standalone canonical `Challenge` store yet.
-- **F3** — Traced to `.1R.4`'s own planning document, which mislabels
-  `HPAC-REQ-054` as an "eight-step algorithm" and silently drops contract
-  step 4 in its own re-derivation. Pre-existing debt from an
-  already-closed phase, not introduced by `.1R.5` — but its consequence
-  propagated into `.1R.5`'s (and this phase's predecessor report's) claim
-  of full "ten-step" fidelity.
-- **F4** — `tests/test_hpac_verifier.py::test_caller_constructed_verifier_result_rejected`
-  overclaims relative to what it proves: it exercises only the
-  `__init__`-with-wrong-seal path, never `object.__new__`.
+## F1–F4 disposition
 
-## What independently verified clean
+- **F1 — REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.**
+- **F2, F3 — unchanged, deferred.** Not technically coupled to F1's
+  result-object provenance defect.
+- **F4 — not self-closed.** The existing overclaiming test
+  (`tests/test_hpac_verifier.py::test_caller_constructed_verifier_result_rejected`)
+  is preserved unmodified; this phase's new tests instead use accurately
+  scoped names for each path they cover, so the overclaiming pattern is
+  not repeated in new evidence.
 
-Canonical-resolution-only input handling for principal, credential,
-presentation, and proof; UP and UV checked as genuinely independent
-booleans; anti-transfer / invocation-binding; non-serializability
-(`pickle`, `deepcopy`, and shallow `copy` all raise `TypeError`);
-deterministic `NON_REAL` assurance classification with no caller-driven
-upgrade path; zero PB / runtime-authority / Gate-9 imports (AST-checked);
-`B1`/`B7`/`N1`/`N2` production files untouched since the `.1R.4` baseline
-(`817b788a`).
+## Historical F1 test handling
+
+`tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py` is
+preserved **unmodified**. Two of its tests remain failing, permanently,
+by design:
+
+- `test_object_dunder_new_bypasses_trusted_construction_seal` asserts
+  `not isinstance(forged, AuthenticatedHumanPrincipal)` — not achievable
+  in Python without a metaclass `__instancecheck__` override, which was
+  judged far more invasive than this phase's scope, and not attempted.
+- `test_forged_via_object_new_would_report_real_runtime_eligible` asserts
+  `is_real_runtime_eligible is False` on a hand-forged instance — a
+  data-shape property this phase deliberately did not entangle with the
+  authority registry (see the data/authority distinction above).
+
+Both are exactly the two tests `.1R.5.1` itself reported as the evidence
+of F1's existence, and remain that record. This phase's repair is proven
+by the new suite below, not by rewriting these assertions.
 
 ## Tests
 
-Fresh, independently-derived adversarial suite added (not copied from
-the existing `.1R.5` tests):
-
 ```
-tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py
-27 passed, 2 failed
+tests/test_hpac_verifier_repair_3w1r2b1r1115a2.py
+20 passed
 ```
 
-The 2 failures are exactly and only the `object.__new__`
-construction-boundary defect (F1), asserted as the contract-required
-behavior and left failing rather than adjusted to match the
-implementation.
+Fresh suite covering direct construction (with and without the real
+seal), `object.__new__`, subclass refusal, shallow/deep copy, pickle,
+manual slot-state copy, reflection, forged-with-identical-fields,
+non-principal inputs, cross-call non-equality, registry lifetime/
+strong-reference behavior, deterministic `NON_REAL` regression, and
+zero PB/runtime/Gate-9 imports / zero production consumers.
 
-Existing suite re-run unmodified:
+Existing and historical suites re-run unmodified:
 
 ```
 tests/test_hpac_verifier.py
 27 passed
+
+tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py
+27 passed, 2 failed (permanently, by design — see above)
 ```
 
-## Fast Green
+## Fast Green / regression scope
 
-**Not run this phase** (explicit scope limitation). Full fixed-SHA
-regression re-attribution against the 8796-test Fast Green baseline was
-not performed — only the two verifier-specific test files above were
-re-run. This is disclosed as a limitation, not treated as equivalent to
-a full regression pass.
+Full 20-file HPAC-family test scope run as a `git stash` A/B against
+phase-entry commit `befd7a5a`:
+
+```
+Baseline:   409 passed, 54 failed
+Candidate:  429 passed, 54 failed
+```
+
+The 54 failures are identical (by test ID) between baseline and
+candidate — all pre-existing, unrelated to `hpac_verifier.py`. The +20
+are this phase's new suite. **Unexplained attributable regressions in
+this scope: 0.**
+
+Full 38,100-test repository suite: **not run this phase.** `pytest -n
+auto` produces pre-existing xdist worker-collection-mismatch errors on
+both baseline and candidate (confirmed identical via the same stash A/B)
+— the already-carried "xdist random-UUID parametrization instability"
+tooling debt, not introduced or worsened by this phase. A full serial
+run was not attempted, disclosed as an explicit scope limitation
+consistent with `.1R.5.1`'s own precedent (§15), and judged acceptable
+because `hpac_verifier.py` has zero production consumers anywhere in
+`src/pcae` — no code outside the 20-file HPAC-family scope could
+possibly be affected by this phase's change.
 
 ## Consumer inventory
 
@@ -110,15 +160,14 @@ grep -rn "hpac_verifier|AuthenticatedHumanPrincipal|verify_human_authentication"
 Zero production consumers of `hpac_verifier.py` exist. PB, runtime
 authority, and Gate 9 (`runtime_invocation_authority_consumption.py`)
 remain unreferenced by the verifier (AST-checked, independently
-re-confirmed).
+re-confirmed by this phase's own new test).
 
 ## Governance verdict
 
-**DELEGATED FINALIZATION / COMMIT / PUSH: UNAUTHORIZED** (historical `.3`
-incident, preserved, not revisited). No delegated agent was granted
-commit, phase-finalization, or push authority in this phase; all
-governed-state mutations were performed only by the primary
-human-authorized operator.
+**DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED** (historical
+incident, preserved, not revisited). This phase's commit/finalize/push
+sequence was performed only by the primary operator the human explicitly
+authorized for this exact phase ID.
 
 ## No-Go confirmation
 
@@ -130,13 +179,12 @@ human-authorized operator.
 - No provider, network, subprocess, hardware, or external runtime effect.
 - No Gate-9 production wiring, Gate-10 dispatch, or PB/runtime-dispatch
   consumption.
-- No production trust-path file modified (task scope explicitly forbade
-  editing `hpac_verifier.py`, `hpac_foundation.py`, `hpac_lifecycle.py`,
-  and the B1/B7/N1/N2 files this phase).
+- Only one production file modified: `src/pcae/core/hpac_verifier.py`.
+  `hpac_foundation.py`, `hpac_lifecycle.py`, and the B1/B7/N1/N2 files
+  untouched (task scope explicitly forbade editing them this phase).
 - No normative contract modification.
 - No revert, force push, history rewrite, or hook bypass.
-- **No repair of F1-F4 performed** — findings documented and left for a
-  separate, explicitly-authorized follow-up phase.
+- No `.1R.5.2.1` (independent verification) work begun.
 
 Runtime remains `Observed / observe / unavailable`. POL-005 unchanged.
 
@@ -144,17 +192,16 @@ Runtime remains `Observed / observe / unavailable`. POL-005 unchanged.
 
 Phase commits:
 
-- `7621087c0939b52475a489d5c0b01a975894d08f`
-- `125fc25559c855202da9ca9533ff3bd26f4612b9`
-- `a36f5c289df25fe43970ea373d7b6c402e46ba95`
+- `40d742c3cf133d77ec1040c0613a27ab1360a853`
+- `817cdadbb110aeb0ab8cc1f7bf771d8529b14f9f`
+- `e8549d8009635c0b4d2763c00e6027a56d0412f6`
 
 Pushed: pending (to be finalized after `pcae push`).
 
 ## Recommended next phase
 
 **Not canonically assigned this phase** (no-invent-an-ID constraint).
-Recommended: a narrow blocking-repair phase closing the `object.__new__`
-trusted-construction bypass in `AuthenticatedHumanPrincipal` (F1), with
-F2-F4 folded in or explicitly deferred with their own named follow-up.
-**Requires separate explicit human authorization and formal phase-ID
-assignment before starting.**
+Recommended: `149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1` — Independent
+Verification of AuthenticatedHumanPrincipal Trusted-Construction and
+Provenance Repair. **Requires separate explicit human authorization
+before starting.**
