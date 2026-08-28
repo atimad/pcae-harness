@@ -484,8 +484,12 @@ It completed **PASS** for baseline `47bcc8f3` and candidate `0d2e2e3e`, with
 342 baseline failures plus 9 errors, 341 candidate failures plus 9 errors,
 350 pre-existing nonpassing nodes, no environment exclusions, no expected
 pre-push artifacts, and **zero attributable failures**. This post-push
-artifact is the structured evidence used by final completion metadata; the
-pre-push artifact remains preserved as lifecycle history.
+artifact was the first pushed-state checkpoint; the pre-push artifact remains
+preserved as lifecycle history. Because the lifecycle contract invalidates a
+checkpoint after any verification-affecting report edit, the final structured
+artifact is regenerated against the report's final committed bytes and is
+identified exactly by the completion metadata and generated canonical report.
+No verification-affecting file is changed after that final checkpoint.
 
 ## 18. Verification acceptance matrix
 
