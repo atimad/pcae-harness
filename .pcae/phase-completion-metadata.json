@@ -13,12 +13,12 @@
   "tests_run": 29,
   "tests_added_or_updated": "tests/test_hpac_verifier_repair_independent_verification_3w1r2b1r1115a21.py (29 new tests, independently derived, all passing, covering every attack path in this phase's own governing checklist plus registry write-path inventory, lifetime/GC/restart/reload semantics, and F2/F3 regression guards). No existing test file modified: tests/test_hpac_verifier.py (27), tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py (27 pass / 2 permanently-failing-by-design, unchanged), and tests/test_hpac_verifier_repair_3w1r2b1r1115a2.py (20) all re-run unmodified and confirmed still passing/unchanged.",
   "test_results": {
-    "fast_green": "27 passed in 0.99s (this phase's own fresh independent suite, deselect-free -- no historical permanently-failing tests belong to this phase's own new file, unlike .1R.5.2's fast_green composition which had to deselect 2 historical tests from a different file; those 2 remain deselected from fast_green's overall composition for the same reason .1R.5.2 disclosed, and are not re-counted here since this phase modified no production source)",
+    "fast_green": "29 passed (this phase's own fresh independent suite, tests/test_hpac_verifier_repair_independent_verification_3w1r2b1r1115a21.py, zero deselections needed; the separate 21-file HPAC-family regression sweep result -- 458 passed with pre-existing unrelated failures identical by test ID to .1R.5.2's own disclosed baseline -- is documented in full in the canonical phase doc Sec 14 and this report's prose, not in this structured field, since this phase modified no production source and this field certifies this phase's own new evidence)",
     "report_notification_tests": "not_applicable_this_phase",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
   "validation_results": {
-    "fast_green": "27 passed (this phase's own new suite; see test_results.fast_green for composition notes and the 21-file HPAC-family sweep result: 458 passed / 54 pre-existing unrelated failed, exact match to .1R.5.2's disclosed baseline plus this phase's 29 new tests)",
+    "fast_green": "29 passed (this phase's own new suite; see test_results.fast_green for composition notes and the canonical doc Sec 14 for the full 21-file HPAC-family sweep detail)",
     "runtime_boundary": "Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, subprocess, provider/network, credential, hardware, or external-effect calls (one same-process-isolated Python subprocess is used internally by this phase's own test suite for test-isolation purposes only, disclosed in the report §26, not an external tool/network/credential access)",
     "report_notification_tests": "not_applicable_this_phase",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
@@ -64,10 +64,14 @@
     {
       "hash": "50ae9c23948e92a28d380af7b94204371aac01fc",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1: close task, transition to idle"
+    },
+    {
+      "hash": "e00934bfad4fa4fc13b06dd3f7388d08e6d8a869",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1: author canonical completion metadata and report"
     }
   ],
-  "origin_main_head": "50ae9c23948e92a28d380af7b94204371aac01fc",
-  "origin_main_head_count": 0,
-  "pushed_status": "pushed",
+  "origin_main_head": "e00934bfad4fa4fc13b06dd3f7388d08e6d8a869",
+  "origin_main_head_count": 4,
+  "pushed_status": "not_pushed",
   "recommended_next_phase": "Not canonically assigned this phase (no-invent-an-ID constraint). The .1R.5 family (mechanism-neutral HPAC verifier and principal-registry consumption boundary: implemented .1R.5, found blocking .1R.5.1, repaired .1R.5.2, independently verified complete .1R.5.2.1) is now closed. Requires separate explicit human authorization and phase-ID confirmation to determine the next canonical phase."
 }
