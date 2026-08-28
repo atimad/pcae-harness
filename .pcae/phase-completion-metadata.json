@@ -75,8 +75,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: record idle-task closure from verification-phase startup"
     }
   ],
-  "origin_main_head": "664352a4b156fcf9f978fda3f6fd929e8e5b31cd",
+  "origin_main_head": "5214c501da4f07ebbdbe6f0f9891485f5a4e78e1",
   "origin_main_head_count": 0,
-  "pushed_status": "nothing_to_push",
+  "pushed_status": "pushed",
   "recommended_next_phase": "None. B1/B7/N1/N2 are independently confirmed closed at the production authority implementation boundary; control returns to .1R.6 and PROJECT_STATUS.md. Gate-5/Gate-9 coordinator wiring remains a distinct, unscheduled later chapter with no assigned phase ID and requires its own separate planning phase under explicit human authorization; no ID is invented here."
 }
