@@ -67,7 +67,7 @@
     "delegated_3_finalization_commit_push": "UNAUTHORIZED"
   },
   "notification_dispatch_result": "sent successfully by canonical report creation; reconciliation marker is already_dispatched",
-  "report_consistency": "canonical report trust and derived-correctness checks passed before task closure; final metadata reconciliation pending governed commit/push",
+  "report_consistency": "canonical report trust, derived-correctness, and reconciliation checks passed; the already-dispatched notification binding is preserved and no conflicting re-dispatch is accepted",
   "no_go_confirmation": "No production implementation repair.\nNo normative contract modification.\nNo historical .3, .3.1, or .3.2 artifact rewrite.\nNo Layer 3 planning or implementation.\nNo Permission Broker integration.\nNo Runtime Enforcement or Shell Gate activation.\nNo B1, B7, N1, or N2 production repair.\nNo real FIDO2, WebAuthn, CTAP, enrollment, credential operation, protected approval UI, approval CLI, or enrollment CLI.\nNo provider, network, subprocess, hardware, or external runtime effect.\nNo release, deployment, Dell, research, or article work.\nNo revert, force push, history rewrite, or hook bypass.\nNo delegated agent was used or granted commit, phase-finalization, or push authority.\nNo next phase was started automatically.",
   "files_changed": [
     ".pcae/phase-completion-metadata.json",
@@ -95,10 +95,18 @@
     {
       "hash": "32fa10dcda4485fa5043cb1ae15b2691ee26b41a",
       "subject": "Finish Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 independent verification"
+    },
+    {
+      "hash": "c1c65ffa242c8c8358d18ffe3a3cfcc9a7f10b14",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1: reconcile metadata and transition to idle"
+    },
+    {
+      "hash": "3dcf1b564b2fee92541f56fdfb87cda5549c072f",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1: complete report trust metadata"
     }
   ],
-  "origin_main_head": "5c13fc6e16b25133ffe701019c0774f1600f2ffa",
-  "origin_main_head_count": 2,
-  "pushed_status": "not_pushed",
+  "origin_main_head": "3dcf1b564b2fee92541f56fdfb87cda5549c072f",
+  "origin_main_head_count": 0,
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2 — HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Blocking Repair. New human authorization required; do not begin Layer 3."
 }
