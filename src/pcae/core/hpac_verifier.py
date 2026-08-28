@@ -32,6 +32,47 @@ Result type: ``AuthenticatedHumanPrincipal`` is trusted-construction only
 (no public constructor) and non-serializable (``__reduce__`` raises) per
 HPAC-REQ-056/058 -- a caller cannot construct, copy, or persist one; every
 consumer must call :func:`verify_human_authentication` fresh.
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2 repair (F1, BLOCKING, found by
+``...1R.5.1``): the ``_VERIFIER_CONSTRUCTOR_SEAL`` check inside ``__init__``
+is real but insufficient on its own -- ``object.__new__(cls)`` allocates a
+bare instance without ever calling ``__init__``, so a caller can populate
+every ``__slots__`` attribute directly and obtain an ``isinstance``-true,
+field-identical lookalike that was never produced by
+:func:`verify_human_authentication`. No field-based seal, sentinel, or
+constructor restriction can close this in pure Python: ``object.__new__``
+bypasses *any* subclass ``__new__`` override too (it is a call to a
+different, unrelated method, not a call that goes through the subclass's
+MRO), and copying/reconstructing an object's ``__slots__`` state
+reproduces every field including a copied sentinel. Object shape,
+constructor path, private fields, and non-serializability are therefore
+never sufficient proof that a value came from a real §18 verification --
+this is the exact "forgeable-seal" mistake B1
+(``149O.20L.7O.3W.1R.2`` §9) already named, applied here to a different
+class.
+
+The actual trust boundary is :func:`is_verifier_authenticated_principal`,
+which does not inspect the candidate's fields at all: it checks whether
+*this exact Python object* (by identity) is present in this module's own
+process-local identity registry, ``_AUTHENTIC_PRINCIPAL_REGISTRY``, which
+only :func:`verify_human_authentication`'s own return path ever adds to.
+A caller-manufactured lookalike -- however it was allocated
+(``object.__new__``, a subclass, ``copy``/``deepcopy``, manual slot
+injection, or reflection) -- is a different Python object and is
+therefore never a member, regardless of what its fields say. Every future
+consumer of a verification result (a later Gate 5, PB projection, or any
+other production code) MUST call :func:`is_verifier_authenticated_principal`
+before trusting a value's ``assurance_class``/``is_real_runtime_eligible``;
+``isinstance()`` alone, or reading any attribute, is not sufficient and
+was never meant to be (this module still has zero production consumers,
+so no such call site exists yet -- this is the boundary a future consumer
+is required to use, not a change to a call site that exists today).
+
+The existing ``_seal`` check in ``__init__`` is retained as defense in
+depth against the ordinary, common-case direct-construction call
+(``AuthenticatedHumanPrincipal(...)``) -- it gives a clear error for that
+case and costs nothing -- but it is not, and was never, the actual trust
+boundary; the identity registry is.
 """
 
 from __future__ import annotations
@@ -73,6 +114,7 @@ __all__ = [
     "HPACVerificationError",
     "AuthenticatedHumanPrincipal",
     "verify_human_authentication",
+    "is_verifier_authenticated_principal",
 ]
 
 #: The only mechanism identity this phase's verifier can ever certify.
@@ -103,7 +145,22 @@ class AuthenticatedHumanPrincipal:
     written to any store. ``assurance_class`` is copied from the resolved
     foundation records, never caller-declared (HPAC-REQ-059/060): a
     deterministic NON-REAL verification can never present itself as
-    ``PRODUCTION`` assurance."""
+    ``PRODUCTION`` assurance.
+
+    This object's fields, type, ``repr``/``hash``/equality, and the
+    ``_seal`` check in ``__init__`` are data-shape properties, not the
+    trust boundary -- all of them can be reproduced by a caller via
+    ``object.__new__``, a subclass, ``copy``/``deepcopy``, or manual
+    slot injection, without ever calling
+    :func:`verify_human_authentication` (see this module's docstring,
+    F1 of ``...1R.5.1``). The actual, authoritative trust boundary is
+    :func:`is_verifier_authenticated_principal`: an instance is a
+    genuine verification result if and only if it is a member of this
+    module's own process-local identity registry, which only this
+    class's construction inside :func:`verify_human_authentication`
+    populates. Every consumer that needs to know whether a value came
+    from a real verification MUST call that function; ``isinstance()``
+    and attribute access are insufficient by design."""
 
     __slots__ = (
         "principal_id",
@@ -117,6 +174,16 @@ class AuthenticatedHumanPrincipal:
         "verified_at",
         "_verifier_seal",
     )
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        # A subclass could define its own __init__ that never checks
+        # _VERIFIER_CONSTRUCTOR_SEAL at all, trivially recreating the same
+        # "isinstance-true, never verified" shape this phase repairs.
+        # There is no legitimate reason to subclass a trusted-construction
+        # result type, so subclassing itself is refused at definition time.
+        raise HPACAuthorityError(
+            "AuthenticatedHumanPrincipal must not be subclassed"
+        )
 
     def __init__(
         self,
@@ -161,11 +228,74 @@ class AuthenticatedHumanPrincipal:
     def __eq__(self, other: object) -> bool:
         # Identity-only equality: a byte-identical-looking lookalike built
         # by any means other than this module's own construction path is
-        # never treated as "the same" authenticated result.
+        # never treated as "the same" authenticated result. This is a
+        # data-equality property only -- two objects being unequal (or a
+        # single object being equal only to itself) does not by itself
+        # grant or deny authority; see is_verifier_authenticated_principal
+        # for the actual authority check, which this hash/eq scheme makes
+        # possible (identity-keyed registry membership below).
         return self is other
 
     def __hash__(self) -> int:
         return id(self)
+
+
+#: HPAC-REQ-056's actual provenance boundary (see the module and class
+#: docstrings above for why a field/seal check inside __init__ is
+#: insufficient). Membership is keyed by object identity -- this class's
+#: __hash__/__eq__ are already identity-only (id(self)/`self is other`),
+#: so a caller-manufactured lookalike, whatever its field values, can
+#: never collide with a genuine entry here. Nothing outside this module
+#: ever adds to this registry -- the only insertion point is
+#: verify_human_authentication's own return path, below.
+#:
+#: This holds ordinary strong references, not weak ones: adding
+#: "__weakref__" to __slots__ above (the usual way to let instances be
+#: weakly referenced, so a registry entry would disappear on its own once
+#: every caller-held reference is dropped) would break
+#: `...1R.5.1`'s already-verified historical evidence test
+#: (`test_verifier_result_attribute_copy_produces_a_distinguishable_object`
+#: in `tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py`),
+#: which iterates the literal `__slots__` tuple and `setattr`s every
+#: entry -- `__weakref__` has no attribute setter, so that historical test
+#: (preserved unmodified per this phase's own instructions) would start
+#: raising `AttributeError`. This is a deliberate, documented trade-off:
+#: every genuine verification result stays referenced by this module for
+#: the life of the process, rather than being freed once the caller drops
+#: it. `hpac_verifier.py` has zero production consumers today (see this
+#: module's docstring and the zero-consumer tests), so unbounded growth is
+#: not a live concern; a future phase wiring a real, long-running
+#: production consumer of this module must revisit this (e.g. a bounded/
+#: LRU registry, or adding "__weakref__" together with updating the
+#: historical test) before that consumption path is trusted.
+_AUTHENTIC_PRINCIPAL_REGISTRY: "set[AuthenticatedHumanPrincipal]" = set()
+
+
+def is_verifier_authenticated_principal(candidate: object) -> bool:
+    """HPAC-REQ-056's authoritative trust check.
+
+    Returns ``True`` only if ``candidate`` is the literal object a past
+    call to :func:`verify_human_authentication` returned -- never based on
+    ``isinstance``, field values, equality, or any other shape property,
+    all of which a caller can reproduce without ever verifying anything
+    (``object.__new__``, a copy, manual slot injection, or reflection).
+    Fails closed: any input that is not a genuine, still-referenced
+    verification result -- including a well-formed-looking forgery, a
+    stale/garbage-collected handle, or a non-``AuthenticatedHumanPrincipal``
+    value -- returns ``False``. There is no fallback field comparison.
+
+    This is the boundary every future consumer of a verification result
+    (a later Gate 5, PB projection, or other production code) MUST call
+    before trusting ``candidate.assurance_class`` or
+    ``candidate.is_real_runtime_eligible``; this module itself has zero
+    production consumers today, so no call site exists yet -- this
+    function is the contract those future consumers are required to use.
+    """
+
+    return (
+        isinstance(candidate, AuthenticatedHumanPrincipal)
+        and candidate in _AUTHENTIC_PRINCIPAL_REGISTRY
+    )
 
 
 def _resolve_principal(
@@ -418,7 +548,7 @@ def verify_human_authentication(
     if not invocation_id:
         raise HPACVerificationError("presentation canonical_subject has no invocation_id")
 
-    return AuthenticatedHumanPrincipal(
+    result = AuthenticatedHumanPrincipal(
         principal_id=proof.principal_id,
         credential_id=proof.credential_id,
         mechanism_id=proof.mechanism_id,
@@ -430,3 +560,8 @@ def verify_human_authentication(
         verified_at=occurred_at,
         _seal=_VERIFIER_CONSTRUCTOR_SEAL,
     )
+    # This is the only place anything is ever added to the identity
+    # registry that is_verifier_authenticated_principal checks -- the
+    # actual HPAC-REQ-056 provenance boundary (see module/class docstrings).
+    _AUTHENTIC_PRINCIPAL_REGISTRY.add(result)
+    return result
