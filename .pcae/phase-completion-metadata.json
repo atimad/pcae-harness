@@ -1,35 +1,35 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.7",
-  "phase_name": "B1/B7/N1/N2 Production Authority Repair Implementation",
-  "phase_title": "B1/B7/N1/N2 Production Authority Repair Implementation",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.8",
+  "phase_name": "Independent Verification of B1/B7/N1/N2 Production Authority Repair Implementation",
+  "phase_title": "Independent Verification of B1/B7/N1/N2 Production Authority Repair Implementation",
   "status": "completed",
-  "commit_attribution": "Production repair, adversarial tests, immutable-SHA attribution, implementation report, project memory, and task closure authored by the human-authorized primary operator for this exact phase. A commit cannot self-list its own hash; live push state is reconciled by the governed finalizer.",
+  "commit_attribution": "Independent adversarial verification suite, canonical verification report, project memory, and task lifecycle authored by the human-authorized primary operator for this exact phase. A commit cannot self-list its own hash; live push state is reconciled by the governed finalizer. No delegated worker committed, finalized, or pushed.",
   "execution_availability": "unavailable",
-  "summary": "Implemented the .1R.6 Option-A structural production authority repair in exactly runtime_authority.py, runtime_dispatch_permission.py, and hpac_verifier.py. B1 projections now require exact-object registry provenance, recomputed content/invocation binding, and fresh canonical revalidation; B7 dispatch request construction rereads the invocation/idempotency/attempt identity records; N1 validates only approval IDs loaded from the exact canonical approval store and rejects caller objects; N2 derives approver provenance only from a freshly reverified verifier-authenticated principal; HPAC-REQ-054 Step 4 independently recomputes the exact Challenge digest. Approval creation and validation both hard-reject deterministic FIXTURE_NON_REAL assurance. No contract, approval-store structure, Gate-5/Gate-9 coordinator, PB policy/POL-005, provider adapter, FIDO2/UI, runtime capability, or execution path was changed. B1/B7/N1/N2 and F2 are repaired, independent verification pending, not closed; real authority and runtime execution remain unavailable.",
-  "derived_correctness": "The implementation maps one-to-one to .1R.6's production matrix and defensive validation matrix. A fixed detached baseline at b85e903c62f386f3c5a45747ded5ff7682b77267 produced the same exact two affected-existing failures and the same exact 54 HPAC/foundation failures as the candidate. Candidate-only nonpassing nodes and unexplained attributable functional regressions are zero. Seven contracts plus the PB foundation/POL-005 source retain their frozen SHA-256 values; git diff from the entry SHA names exactly the three authorized production modules under src/pcae.",
-  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/TODO.md, tasks/DONE.md, tasks/DECISIONS.md, the completed task contract, and the canonical .1R.7 implementation document agree that B1/B7/N1/N2 and HPAC Step 4 are repaired but not closed; deterministic NON-REAL remains rejected; Gate 5/Gate 9/PB/runtime/FIDO2/UI remain unwired or unchanged; runtime is Observed/observe/unavailable; and .1R.8 independent verification is the exact next recommended phase, not begun.",
-  "internal_evidence_coherence": "All phase-specific rejection tests, immutable-baseline comparisons, contract hashes, consumer inventory, production-file allowlist, runtime inspection, and governance checks were rerun against the final candidate. The heterogeneous full-suite historical failures are reported separately and are not used to conceal or infer the fixed-SHA attribution result.",
+  "summary": "Independently verified the .1R.7 B1/B7/N1/N2 production authority repair. Re-derived every defect from the fixed pre-.1R.7 baseline b85e903c and from primary contracts (RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001 v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0, POL-005), not from .1R.7's report or tests. Confirmed all .1R.7 source/test change is isolated in commit 3fc26199 touching exactly runtime_authority.py, runtime_dispatch_permission.py, and hpac_verifier.py (matching .1R.6's frozen matrix). B1: the copyable module-singleton _validator_seal is gone; ValidatedAuthorityProjection is eq=False, held by exact-object identity in _VALIDATED_AUTHORITY_CONTEXTS, with a content binding recomputed over every authority field; copies, dataclasses.replace, field mutation, hand-built lookalikes, and cross-invocation transfers all fail is_trusted_validated_authority_projection and the dispatch consumer. B7: RuntimeDispatchIdentityTracker.revalidate re-reads the durable invocation/idempotency/attempt records at request-build time; deleted, content-changed, or foreign-tracker identity fails closed. N1: validate_approval takes an opaque approval ID, requires type(approval_store) is RuntimeInvocationApprovalStore exactly, re-loads by ID, and unconditionally rejects caller RuntimeInvocationApproval objects and duck-typed stores before any HPAC trust or projection; validation does not mutate the canonical record. N2: caller approver_id/identity_evidence_kind raise TypeError; provenance derives only from a freshly re-verified verifier-owned AuthenticatedHumanPrincipal; object.__new__/copy/deepcopy/pickle forgeries are refused (AuthenticatedHumanPrincipal.__reduce__ raises). Option-A NON-REAL hard stop verified in both create_runtime_invocation_approval and validate_approval: no deterministically-writable HPACStoreAuthority can carry PRODUCTION authority_class (writer() raises unless FIXTURE_NON_REAL; production() root init fails closed on this host), so the full-strength deterministic chain still fails specifically with non_real_authenticated_principal_cannot_create_production_approval and zero positive real-authority paths exist. HPAC-REQ-054 Step 4 independently recomputes the exact Challenge digest from the canonical 10-field body. Gate-5/Gate-9 coordinator wiring = 0; Gate-9 consumption = 0; Gate-10 effects = 0; PB policy, POL-005, and all seven contracts byte-unchanged; runtime Observed/observe/unavailable. Fixed-SHA attribution (baseline b85e903c vs candidate, hpac/runtime affected selection): identical 23-node pre-existing failure set, zero candidate-only nonpassing nodes, zero unexplained attributable functional regressions; the full -m fast_green marker run is 344 failed at baseline vs 343 failed at candidate (candidate has one fewer failure and introduces none). 47 fresh independent adversarial tests pass; 201 passed across all phase-affected modules. Non-blocking findings O1 (B1 positive-emission path unreachable under Option-A -- inherent, not a defect), O2 (N1 store trust is canonical-path + file-integrity, not a cryptographic writer seal -- the documented F7 same-process boundary), O3 (minor .1R.7 test-name over-promise, F4 class), O4 (pre-existing tasks/DONE.md hygiene debt). F2 repaired; F3/F4/F7 unchanged and not broadened. Verdict: INDEPENDENTLY VERIFIED -- B1/B7/N1/N2 PRODUCTION AUTHORITY REPAIR COMPLETE (with non-blocking findings). B1/B7/N1/N2 INDEPENDENTLY CONFIRMED CLOSED AT PRODUCTION AUTHORITY IMPLEMENTATION BOUNDARY -- this does not mean real FIDO2, protected UI, Gate-5/Gate-9 wiring, PB integration, runtime capability, or execution. No canonical next phase ID exists.",
+  "derived_correctness": "Each of .1R.6's defensive validation matrix cases (its section 14) was independently re-derived and re-exercised against current source and the fixed baseline, not trusted from .1R.7. The three repaired production files map one-to-one to .1R.6's frozen production-file matrix; git diff --name-only b85e903c HEAD -- src/pcae names exactly those three, and .1R.8 itself touches zero src/ files (git diff --name-only 96f7d3ec HEAD -- src is empty). Seven contracts plus permission_broker_foundation.py retain their pre-.1R.7 SHA-256 bytes (verified at b85e903c and at 7b1f5b56). The fixed-SHA affected comparison produced a byte-for-byte identical 23-node failing set at baseline and candidate with zero candidate-only nonpassing nodes.",
+  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/DONE.md, the completed .1R.8 task contract, and the canonical .1R.8 verification document agree that B1/B7/N1/N2 are independently confirmed closed at the production authority implementation boundary with non-blocking findings O1-O4; that real FIDO2/protected UI/Gate-5/Gate-9 wiring/PB integration/runtime capability/execution remain unavailable; that no contract, approval-store structure, Gate coordinator, PB policy, or POL-005 changed; that runtime is Observed/observe/unavailable; and that no canonical next phase ID exists (Gate-5/Gate-9 coordinator wiring is a distinct unscheduled later chapter).",
+  "internal_evidence_coherence": "All source/contract re-derivations, the 47-case independent adversarial suite, the fixed-SHA baseline-vs-candidate comparison, contract byte hashes, AST consumer inventory, production-file allowlist, runtime introspection constants, and governance checks were run against the final candidate tree. The heterogeneous full -m fast_green marker failures are reported separately with a baseline-vs-candidate count and are not used to conceal or infer the affected-set attribution result.",
   "test_evidence_classification": "inherited_regression",
-  "tests_run": 38170,
-  "tests_added_or_updated": "41 phase-specific adversarial tests added; affected historical helpers/tests updated only for exact challenge, canonical store, verifier principal, current-time, and tracker lifetime APIs.",
+  "tests_run": 9157,
+  "tests_added_or_updated": "47 fresh independent adversarial tests added in tests/test_b1_b7_n1_n2_production_authority_repair_independent_verification_3w1r2b1r1_1r8.py; no production source and no prior test modified by this phase.",
   "test_results": {
-    "fast_green": "117 passed (phase adversarial + passing verifier suites); 27 canonical approval-store tests passed",
-    "fixed_sha_affected": "baseline 462 passed / 2 failed; candidate 462 passed / 2 failed; exact same failed node IDs; candidate-only nonpassing 0",
-    "hpac_foundation": "baseline 458 passed / 54 failed; candidate 458 passed / 54 failed; exact same failed node IDs; candidate-only nonpassing 0",
-    "full_suite": "raw -n auto collected 38170 then hit historical UUID node-ID instability; split complete coverage: 37451 passed, 691 historical failures, 9 historical errors, 18 skipped, 1 xfailed",
-    "report_notification_tests": "54 passed, 1 historical failure; phase finalization/report production files and the failing historical test are unchanged from fixed entry SHA b85e903c62f386f3c5a45747ded5ff7682b77267",
-    "bootstrap_session_reporting_tests": "pcae health healthy; pcae check passed; pcae status coherence coherent"
+    "fast_green": "201 passed (47 fresh independent + 41 .1R.7 adversarial + hpac_verifier + runtime_authority_validation + runtime_dispatch_permission + runtime_invocation_approval_store); 0 failed across all phase-affected modules",
+    "fixed_sha_affected": "baseline b85e903c: 760 passed / 23 failed; candidate: 802 passed / 23 failed; exact same failed node IDs; candidate-only nonpassing 0; baseline-only nonpassing 0 (selection: -k 'hpac or runtime_authority or runtime_dispatch', -p no:randomly, full collection)",
+    "full_suite": "-m fast_green marker: baseline b85e903c 8813 passed / 344 failed / 9 errors; candidate 8814 passed / 343 failed / 9 errors -- candidate has one fewer failure and introduces none; failures are the known pre-existing HMIC/HATP/Class-B host- and order-sensitive suites and xdist random-UUID parametrization instability",
+    "independent_suite": "tests/test_b1_b7_n1_n2_production_authority_repair_independent_verification_3w1r2b1r1_1r8.py: 47 passed",
+    "report_notification_tests": "not applicable this phase -- .1R.8 changes no phase-report or notification implementation file; the .1R.7-reported single historical failure is present and identical in the fixed baseline b85e903c and unrelated to any .1R.7/.1R.8 change",
+    "bootstrap_session_reporting_tests": "pcae health healthy; pcae check passed; pcae status coherence coherent; session continuity verified"
   },
   "validation_results": {
-    "fast_green": "117 passed plus 27 store tests passed",
-    "fixed_sha_attribution": "unexplained attributable functional regressions = 0",
-    "runtime_boundary": "not_implemented / Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, runtime subprocess, provider/network, credential, hardware, Gate-9 consumption, or Gate-10 effect calls",
-    "contract_identity": "RIHAC/RIASC/HPAC/PBRD/RDGO/RPAC/PBPA/POL-005 frozen hashes unchanged",
-    "report_notification_tests": "54 passed, 1 historical failure; no candidate change to the finalization/report implementation or failing test",
-    "bootstrap_session_reporting_tests": "health/check/coherence passed before task closure; session continuity verified"
+    "fast_green": "201 passed across all phase-affected modules; 0 failed",
+    "fixed_sha_attribution": "unexplained attributable functional regressions = 0 (identical 23-node failing set at baseline b85e903c and candidate; zero candidate-only nonpassing nodes; full -m fast_green marker candidate has one fewer failure than baseline)",
+    "runtime_boundary": "not_implemented / Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, runtime subprocess, provider/network, credential, hardware, Gate-9 consumption, or Gate-10 effect calls; the only subprocesses used by verification were read-only git history inspection and the local pytest runner (including one isolated baseline worktree at b85e903c), disclosed and distinct from any product/runtime execution path",
+    "contract_identity": "RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001 v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0, PBPA-001, and POL-005 (permission_broker_foundation.py) SHA-256 bytes unchanged since b85e903c; git diff --name-only b85e903c HEAD -- docs/contracts is empty",
+    "report_notification_tests": "not applicable this phase; .1R.8 modifies no finalization/report/notification source",
+    "bootstrap_session_reporting_tests": "health/check/coherence passed; session continuity verified"
   },
   "governance_results": {
-    "pcae_health": "healthy before task closure",
+    "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions; no current-phase error",
@@ -37,56 +37,46 @@
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
-    "b1_b7_n1_n2_status": "B1 repaired / independent verification pending / not closed; B7 repaired / independent verification pending / not closed; N1 repaired / independent verification pending / not closed; N2 repaired / independent verification pending / not closed"
+    "b1_b7_n1_n2_status": "B1 INDEPENDENTLY CONFIRMED CLOSED AT PRODUCTION AUTHORITY IMPLEMENTATION BOUNDARY; B7 INDEPENDENTLY CONFIRMED CLOSED AT PRODUCTION AUTHORITY IMPLEMENTATION BOUNDARY; N1 INDEPENDENTLY CONFIRMED CLOSED AT PRODUCTION AUTHORITY IMPLEMENTATION BOUNDARY; N2 INDEPENDENTLY CONFIRMED CLOSED AT PRODUCTION AUTHORITY IMPLEMENTATION BOUNDARY -- verified with non-blocking findings O1-O4; real FIDO2/protected UI/Gate-5/Gate-9 wiring/PB integration/runtime capability/execution remain unavailable",
+    "final_verdict": "INDEPENDENTLY VERIFIED -- B1/B7/N1/N2 PRODUCTION AUTHORITY REPAIR COMPLETE (VERIFIED WITH NON-BLOCKING FINDINGS)",
+    "next_phase_status": "no canonical next phase ID exists; Gate-5/Gate-9 coordinator wiring remains a distinct, unscheduled later chapter with no assigned ID (no-invent-an-ID discipline); control returns to .1R.6 and PROJECT_STATUS.md"
   },
   "notification_dispatch_result": "pending_phase_complete",
   "report_consistency": "canonical report promotion will be reconciled after governed push",
-  "no_go_confirmation": "No Gate-5 or Gate-9 coordinator wiring.\nNo approval/proof consumption and no Gate-10 dispatch.\nNo Permission Broker policy or POL-005 modification.\nNo Runtime Enforcement or Shell Gate activation.\nNo runtime capability elevation or execution.\nNo real FIDO2, WebAuthn, CTAP, physical authenticator, hardware enumeration, attestation, credential ceremony, or enrollment.\nNo protected approval UI, trusted display, approval CLI, enrollment CLI, or human ceremony.\nNo contract or canonical approval-store structure change.\nNo deterministic FIXTURE_NON_REAL creation or validation of production authority.\nNo provider, external network, credential, hardware, or Dell target access.\nNo raw git commit/push, hook bypass, force push, history rewrite, rollback, or delegated lifecycle authority.\nNo authorization of the historical delegated .3 finalization, commit, or push.\nNo start of Phase .1R.8; it is recommended only.",
+  "no_go_confirmation": "No Gate-5 or Gate-9 coordinator wiring begun.\nNo approval/proof consumption and no Gate-10 dispatch.\nNo Permission Broker policy or POL-005 modification.\nNo Runtime Enforcement or Shell Gate activation.\nNo runtime capability elevation or execution.\nNo real FIDO2, WebAuthn, CTAP, physical authenticator, hardware enumeration, attestation, credential ceremony, or enrollment.\nNo protected approval UI, trusted display, approval CLI, enrollment CLI, or human ceremony.\nNo contract or canonical approval-store structure change.\nNo deterministic FIXTURE_NON_REAL creation or validation of production authority.\nNo weakening of any .1R.7 test.\nNo provider, external network, credential, hardware, or Dell target access.\nNo raw git commit/push, hook bypass, force push, history rewrite, rollback, or delegated lifecycle authority.\nNo authorization of the historical delegated .3 finalization, commit, or push.\nNo new phase begun; no phase ID invented for the Gate-5/Gate-9 coordinator chapter.\nNo src/ file modified by this verification phase.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_7_B1_B7_N1_N2_PRODUCTION_AUTHORITY_REPAIR_IMPLEMENTATION.md",
-    "src/pcae/core/hpac_verifier.py",
-    "src/pcae/core/runtime_authority.py",
-    "src/pcae/core/runtime_dispatch_permission.py",
-    "tasks/DECISIONS.md",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_8_INDEPENDENT_VERIFICATION_B1_B7_N1_N2_PRODUCTION_AUTHORITY_REPAIR_IMPLEMENTATION.md",
     "tasks/DONE.md",
-    "tasks/TODO.md",
-    "tasks/done/20260828-2001-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-6.md",
-    "tasks/done/20260828-2028-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-7-b1-b7-n1-n2-production-authority-repair-implementation.md",
-    "tests/_rdw3w_helpers.py",
-    "tests/test_hpac_verifier.py",
-    "tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py",
-    "tests/test_hpac_verifier_repair_3w1r2b1r1115a2.py",
-    "tests/test_hpac_verifier_repair_independent_verification_3w1r2b1r1115a21.py",
-    "tests/test_runtime_authority_model.py",
-    "tests/test_runtime_authority_pb_repair_3w1r.py",
-    "tests/test_runtime_authority_pb_reverification_3w1r1.py",
-    "tests/test_runtime_authority_pb_verification_3w1.py",
-    "tests/test_runtime_authority_production_repair_3w1r2b1r1117.py",
-    "tests/test_runtime_authority_validation.py",
-    "tests/test_runtime_dispatch_attempt_idempotency.py",
-    "tests/test_runtime_dispatch_permission.py",
+    "tasks/active/20260829-0051-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-8.md",
+    "tasks/done/20260828-2214-idle-awaiting-explicit-human-authorization-for-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-8.md",
+    "tasks/done/20260829-0031-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-8-independent-verification-of-b1-b7-n1-n2-production-authority-repair-implementation.md",
+    "tests/test_b1_b7_n1_n2_production_authority_repair_independent_verification_3w1r2b1r1_1r8.py",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 26,
+  "files_changed_count": 10,
   "phase_commits": [
     {
-      "hash": "3fc26199466c2c510164b28fdec3bce7d38b0435",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7: implement B1/B7/N1/N2 authority repair"
+      "hash": "ee703f8dae905031a9042470aa4e54e9fd5a5976",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: independently verify B1/B7/N1/N2 production authority repair — INDEPENDENTLY VERIFIED (non-blocking findings)"
     },
     {
-      "hash": "58e83b987b876b3acd073ea2cf1e43c839aa98b2",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7: close implementation task"
+      "hash": "3282d9baee2a29fc2b283a008d16fe8eb79168d9",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: record independent verification in project status and changelog"
     },
     {
-      "hash": "81b22e2f86c1406f87801a9ef305a9caa714a0f7",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7: stage canonical completion metadata and report"
+      "hash": "710b127c1b8a42238d65a03f0be5f482b2dcf3ec",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: close task, transition to idle"
+    },
+    {
+      "hash": "664352a4b156fcf9f978fda3f6fd929e8e5b31cd",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: record idle-task closure from verification-phase startup"
     }
   ],
-  "origin_main_head": "81b22e2f86c1406f87801a9ef305a9caa714a0f7",
+  "origin_main_head": "664352a4b156fcf9f978fda3f6fd929e8e5b31cd",
   "origin_main_head_count": 0,
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.8 -- Independent Verification of B1/B7/N1/N2 Production Authority Repair Implementation. Requires separate explicit human authorization; not begun. Gate 5/Gate 9 coordinator wiring remains a distinct unscheduled later chapter."
+  "pushed_status": "nothing_to_push",
+  "recommended_next_phase": "None. B1/B7/N1/N2 are independently confirmed closed at the production authority implementation boundary; control returns to .1R.6 and PROJECT_STATUS.md. Gate-5/Gate-9 coordinator wiring remains a distinct, unscheduled later chapter with no assigned phase ID and requires its own separate planning phase under explicit human authorization; no ID is invented here."
 }
