@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2 — HPAC Canonical-Store Containment
+and Protected-Presentation Attestation-Schema Blocking Repair.
+**IMPLEMENTATION REPAIR COMPLETE; INDEPENDENT VERIFICATION PENDING; FINDINGS
+NOT CLOSED.** Repairs the two Blocking findings left open by `.3.2.1`.
+Protected-presentation attestation now serializes exactly the eight
+HPAC-REQ-092 fields (`attestation_version`, `presentation_id`, `approval_id`,
+`approval_subject_digest`, `human_visible_representation_digest`,
+`descriptor_digest`, `election`, `presented_at`) and no others; installed-
+mechanism authority and permanently-non-real classification remain proven by
+the already-closed writer-provenance sidecar and `FIXTURE_NON_REAL`
+verifier-kind channels, untouched here. Canonical-store containment adds a
+`require_safe_relative_id_component` check, enforced before any file I/O, to
+the HPAC lifecycle store and the inert Gate-9 authority-consumption store,
+closing the absolute-path/`Path.__truediv__` escape (record identity is now
+separate from filesystem path; callers cannot select storage location).
+Twenty-eight new fresh tests pass. Regressions: principal and proof-writer
+provenance remain independently closed; B-3/B-4: 44 passed (exact match to
+`.3.2.1` baseline); full HPAC family 267/278 passed, with all 11 non-passes
+explained (7 pre-existing historical `.3.1` failures, 1 pre-existing flaky
+concurrency test, 3 `.3.2.1` blocking-reproduction tests that now correctly
+fail because they documented the now-fixed defects). Fast Green candidate-
+vs-clean-HEAD diff investigated; the 16 differing node IDs reproduce
+identically on a clean tree with zero diff present, falsifying attribution to
+this repair. No contract file modified; no CONTRACT/IMPLEMENTATION
+INCOMPATIBILITY encountered. PB/runtime wiring and effects remain zero;
+B1/B7/N1/N2 remain contract closed / implementation open; runtime remains
+Observed/observe/unavailable. The `.3` delegated finalization/commit/push
+remains **UNAUTHORIZED**. Recommended next, not begun:
+**149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1 — Independent Verification of HPAC
+Canonical-Store Containment and Protected-Presentation Attestation-Schema
+Repair**. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_2_HPAC_CANONICAL_STORE_CONTAINMENT_AND_PROTECTED_PRESENTATION_ATTESTATION_SCHEMA_BLOCKING_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 — Independent Verification of
 Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-
 Validation Repair. **VERIFICATION-ONLY — COMPLETE; NOT VERIFIED — HPAC TRUST
@@ -19,13 +54,10 @@ acceptance assertions failed. Explicit-SHA serial Fast Green found zero
 unexplained attributable regressions. PB/runtime wiring and effects remain
 zero; B1/B7/N1/N2 remain contract closed / implementation open; runtime
 remains Observed/observe/unavailable. The `.3` delegated finalization/commit/
-push remains **UNAUTHORIZED**. Recommended next, not begun and requiring new
-human authorization: **149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2 — HPAC Canonical-
-Store Containment and Protected-Presentation Attestation-Schema Blocking
-Repair**. See
+push remains **UNAUTHORIZED**. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_1_INDEPENDENT_VERIFICATION_CANONICAL_HPAC_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_REPAIR.md`.
 
-## Prior Phase
+## Earlier Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation
 Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair.

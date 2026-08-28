@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2** repairs the two Blocking
+  findings left open by `.3.2.1`. Protected-presentation attestation now
+  serializes exactly the eight HPAC-REQ-092 fields and no others; installed-
+  mechanism authority and non-real classification remain proven by the
+  already-closed writer-provenance and `FIXTURE_NON_REAL` channels. Canonical-
+  store containment adds a `require_safe_relative_id_component` check,
+  enforced before any file I/O, to the HPAC lifecycle store and the inert
+  Gate-9 authority-consumption store, closing the absolute-path escape via
+  `Path.__truediv__`. Twenty-eight new tests pass; principal and proof-writer
+  provenance remain independently closed; B-3/B-4: 44 passed; full HPAC
+  family 267/278 passed with all 11 non-passes explained as pre-existing or
+  intentional historical-defect reproductions. Fast Green diff investigated
+  and attributed to pre-existing run-to-run noise, not this repair. No
+  contract modified; no CONTRACT/IMPLEMENTATION INCOMPATIBILITY. PB/runtime
+  effects remain zero; runtime remains Observed/observe/unavailable.
+  Recommends `.3.2.2.1` independent verification, not begun.
+- Transitioned active task from Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: HPAC canonical-store containment and protected-presentation attestation-schema blocking repair; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1** independently verified the
   HPAC trust-root repair and returned **NOT VERIFIED — HPAC TRUST FOUNDATION
   DEFECT REMAINS**. Registry and proof provenance close; presentation and
