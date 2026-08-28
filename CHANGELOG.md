@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1** independently verified Phase
+  `.1R.5`'s mechanism-neutral HPAC verifier — **NOT VERIFIED** —
+  `AuthenticatedHumanPrincipal`'s HPAC-REQ-056 trusted-construction seal is
+  enforced only in `__init__`; `object.__new__` bypasses it, producing an
+  `isinstance`-true, `PRODUCTION`-assurance forged instance without any
+  verification ever running (BLOCKING F1, currently non-exploitable — zero
+  production consumers of the module exist). Non-blocking: HPAC-REQ-054
+  step 4's independent challenge-digest recomputation is not implemented
+  (F2), traced to `.1R.4`'s planning doc mislabeling the sequence as
+  eight-step and silently dropping step 4 (F3); one existing `.1R.5` test
+  overclaims relative to what it proves (F4). All other trust-bearing areas
+  (canonical-only resolution, UP/UV independence, anti-transfer, non-
+  serializability, deterministic NON-REAL assurance, PB/runtime/Gate-9
+  isolation, B1/B7/N1/N2 untouched) independently confirmed clean. Added
+  `tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py`
+  (29 tests, 27 pass / 2 correctly fail documenting F1). No repair
+  performed this phase; recommends a narrow follow-up blocking-repair phase
+  pending human authorization.
+- Transitioned active task from Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1: Independent Verification of Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5: Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5** implemented
   `src/pcae/core/hpac_verifier.py`, the mechanism-neutral HPAC verifier and

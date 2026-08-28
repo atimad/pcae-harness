@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1 — Independent Verification of
+Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary
+Implementation. **NOT VERIFIED — AUTHENTICATED-PRINCIPAL RESULT AUTHORITY
+DEFECT.** Independently re-derived HPAC-REQ-054's ten-step sequence directly
+from `HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` §18 (not from `.1R.5`'s or
+`.1R.4`'s prose) and compared it line-by-line against `hpac_verifier.py`.
+**BLOCKING finding (F1):** `AuthenticatedHumanPrincipal`'s HPAC-REQ-056
+trusted-construction seal is enforced only inside `__init__`; the class
+defines no `__new__` override, so `object.__new__(AuthenticatedHumanPrincipal)`
+allocates a fully-populated, `isinstance`-true instance — including
+`is_real_runtime_eligible == True` at `PRODUCTION` assurance — without ever
+running `verify_human_authentication`. Independently reproduced outside the
+test suite. Currently non-exploitable in production: zero consumers of
+`hpac_verifier.py`/`AuthenticatedHumanPrincipal` exist anywhere in `src/pcae`
+(confirmed by grep and AST scan), so no live code path can reach a forged
+instance today — but the construction boundary the module and HPAC-REQ-056
+claim to enforce is not actually closed. Non-blocking findings: (F2) contract
+step 4 (independent `challenge_digest` recomputation from canonical challenge
+state) is not implemented, only a string-equality cross-check deferred into
+step 9, bounded by the foundation having no standalone canonical Challenge
+store yet; (F3) this traces to `.1R.4`'s own planning document mislabeling
+HPAC-REQ-054 as an "eight-step algorithm" and silently dropping contract step
+4 in its re-derivation — pre-existing debt, not introduced by `.1R.5`; (F4)
+`tests/test_hpac_verifier.py::test_caller_constructed_verifier_result_rejected`
+overclaims — it only tests the `__init__`-wrong-seal path, never
+`object.__new__`. Everything else independently verified clean: canonical-
+resolution-only input handling, UP/UV checked as genuinely independent
+booleans, anti-transfer/invocation-binding, non-serializability (pickle,
+deepcopy, and shallow-copy all raise), deterministic NON-REAL assurance with
+no caller-driven upgrade path, zero PB/runtime-authority/Gate-9 imports,
+B1/B7/N1/N2 files untouched since the `.1R.4` baseline. Fresh independent
+29-test suite added (`tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py`);
+27 pass, 2 correctly fail (documenting F1 rather than being adjusted to match
+the implementation). Existing 27 `.1R.5` tests re-run unmodified, still pass.
+Fixed-SHA full-suite regression attribution against the 8796-test Fast Green
+baseline was **not** performed this phase (explicit scope limitation — only
+the two verifier-specific test files were re-run). No repair of F1-F4
+performed (out of scope for this verification phase); recommended next phase
+is a narrow blocking-repair phase closing the `object.__new__` gap, pending
+separate explicit human authorization and a formally assigned phase ID — not
+pre-assigned here per this phase's own no-invent-an-ID constraint. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_1_INDEPENDENT_VERIFICATION_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5 — Mechanism-Neutral HPAC Verifier and
 Principal-Registry Consumption Boundary Implementation. **IMPLEMENTED —
 INDEPENDENT VERIFICATION PENDING — NOT YET CERTIFIED.** Implemented
