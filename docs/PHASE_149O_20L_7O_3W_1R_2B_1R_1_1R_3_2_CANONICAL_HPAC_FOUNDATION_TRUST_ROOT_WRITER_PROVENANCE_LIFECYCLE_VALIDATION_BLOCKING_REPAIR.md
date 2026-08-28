@@ -297,10 +297,33 @@ UUID-valued node IDs independently in each worker. It was not repaired here
 because it does not block bounded HPAC verification and is not an HPAC
 regression.
 
-The final governed Fast Green artifact and its fixed-SHA baseline/candidate,
-node attribution, and zero/nonzero attributable result are recorded in the
-canonical completion metadata generated after the implementation commit. No
-aggregate-count-only equivalence claim is used.
+The canonical helper was first invoked against pushed `bbd1b9a2`, but its
+commit-subject-only baseline resolver found no subject beginning with the long
+phase token and therefore collapsed baseline and candidate to `bbd1b9a2`.
+That self-comparison was rejected as evidence and its generated artifact was
+removed before metadata authoring; no history was amended to conceal the
+limitation.
+
+The identical serial Fast Green command and collector were then run in
+isolated worktrees at the independently fixed phase-entry SHA
+`36eb3cec4cc4e3ff28444eb67cfd5716a6af8d3c` and pushed repair candidate
+`bbd1b9a2c34031bf0b1001d26593895bccf28237`. The content-addressed raw-node
+artifact is
+`.pcae/fast-green-attribution/4f02d9f968fc0ff205d7e3f63e6bf29162a289e58f966dd33fbe5731ad7bfcc3.json`.
+
+| Outcome | Fixed entry | Pushed repair | Attribution |
+|---|---:|---:|---|
+| Failed node IDs | 343 | 342 | 342 common; 0 candidate-only |
+| Error node IDs | 9 | 9 | 9 common; 0 candidate-only |
+| Combined nonpassing node IDs | 352 | 351 | 351 common; 0 candidate-only |
+
+The sole baseline-only node is the expected historical detached-currentness
+check
+`TestCandidateCurrentness::test_head_equals_origin_main`; it passes at the
+pushed candidate. **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.**
+The claim is derived from exact node sets, not aggregate counts. The helper's
+phase-subject baseline collapse is recorded as infrastructure debt and is not
+misrepresented as the fixed-SHA result.
 
 ## 13. Runtime and no-effect result
 
@@ -344,6 +367,7 @@ authorization. No subagent was used.
 | NB-3.2-01 | NON-BLOCKING | Test evidence | Seven unchanged historical blocker-reproduction tests now fail because unsafe acceptance was removed | Expected repaired-behavior evidence; new `.3.2` suite is current oracle pending independent verification |
 | O-3.2-01 | OBSERVATION | Infrastructure debt | Full-suite xdist has pre-existing UUID node-ID collection nondeterminism | Deferred separately; not attributable to HPAC repair |
 | O-3.2-02 | OBSERVATION | Deferred implementation | Real writer provisioning, real enrollment, real mechanism attestation, and Layer-3 verifier remain absent | Required no-go; later human authorization only after `.3.2.1` |
+| O-3.2-03 | OBSERVATION | Infrastructure debt | Fast Green's canonical baseline resolver collapses to HEAD when governed commit subjects omit the phase token, even when task/Git parentage fixes an earlier entry | Self-comparison rejected; exact fixed-SHA isolated comparison used and persisted; separate tooling repair only if prioritized |
 
 ## 16. Acceptance matrix
 
@@ -371,6 +395,7 @@ authorization. No subagent was used.
 | B1/B7/N1/N2 repair | ABSENT |
 | Real FIDO2/protected UI | ABSENT |
 | Runtime | Observed / observe / unavailable |
+| Unexplained attributable functional regressions | 0 |
 
 ## 17. Repair verdict and exact next phase
 
