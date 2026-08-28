@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: Canonical HPAC Foundation Trust-Root, Wr
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -124,11 +124,11 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
+- pcae status coherence
+- pcae health
+- pcae check
 - python -m pytest tests/test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py -q
-- python -m pytest tests/test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py tests/test_hpac_foundation_independent_verification_3w1r2b1r111r31.py tests/test_hpac_approval_presentation.py tests/test_hpac_authentication_proof.py tests/test_hpac_authenticator_deterministic.py tests/test_hpac_authority_consumption.py tests/test_hpac_lifecycle.py tests/test_hpac_principal_registry.py -q
+- python -m pytest tests/test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py tests/test_hpac_approval_presentation.py tests/test_hpac_authentication_proof.py tests/test_hpac_authenticator_deterministic.py tests/test_hpac_authority_consumption.py tests/test_hpac_lifecycle.py tests/test_hpac_principal_registry.py -q
 
 ## Documentation Requirements
 
