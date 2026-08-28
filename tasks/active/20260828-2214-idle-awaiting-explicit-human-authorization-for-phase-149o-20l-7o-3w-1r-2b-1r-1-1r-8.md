@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting explicit human authorization for Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8
+Idle: awaiting explicit human authorization for the next independent verification
 
 ## Status
 
@@ -23,6 +23,7 @@ Keep the repository inert after .1R.7 completion. Do not begin .1R.8 or any Gate
 ## Allowed Files
 
 - .pcae/phase-completion-*
+- .pcae/session.json
 - PROJECT_STATUS.md
 - tasks/TODO.md
 - tasks/DONE.md
