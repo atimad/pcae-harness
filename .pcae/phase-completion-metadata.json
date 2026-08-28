@@ -101,9 +101,17 @@
     {
       "hash": "e3db4253",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3: canonical human-principal, protected-presentation, and HPAC proof-lifecycle foundation implementation"
+    },
+    {
+      "hash": "9bd2f5c4",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3: sync completion metadata commit hash"
+    },
+    {
+      "hash": "2c3505a9",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3: repair fast_green derived-correctness field and sync post-push commit/pushed-status metadata"
     }
   ],
-  "origin_main_head": "9bd2f5c455a3830844c87ddd78ef8f968c777c56",
+  "origin_main_head": "2c3505a9543300255a5b089bf70b127acd6bf1fc",
   "origin_main_head_count": 0,
   "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 -- Independent Verification of Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle Foundation. Human authorization required; do not proceed to Layer 3-5 (verifier, B1/B7/N1/N2 repair, real FIDO2, real presentation UI) automatically."
