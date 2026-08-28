@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1** independently verified the
+  HPAC trust-root repair and returned **NOT VERIFIED — HPAC TRUST FOUNDATION
+  DEFECT REMAINS**. Registry and proof provenance close; presentation and
+  lifecycle are partial. Fresh attacks show absolute caller `proof_id` values
+  can write lifecycle and inert Gate-9 files outside configured roots, with
+  canonical lifecycle rejection occurring only after mutation, and show the
+  deterministic presentation attestation violates HPAC-REQ-092's exact closed
+  schema. Fresh suite: 53 passed (including three passing defect
+  reproductions); `.3.2` 38 passed; original `.3` 80 passed; B-3/B-4 44
+  passed. Explicit-SHA Fast Green found zero unexplained attributable
+  regressions. PB/runtime/effects remain absent; runtime remains
+  Observed/observe/unavailable; the historical delegated finalization remains
+  unauthorized. Recommends narrow `.3.2.2` containment/attestation repair;
+  Layer 3 was not begun.
+
+- Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1: Independent Verification of Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Repair; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2** repairs the canonical HPAC
   foundation's protected-root, writer-provenance, installed-mechanism,
   proof-writer, authoritative-genesis, predecessor-validation, and fork-

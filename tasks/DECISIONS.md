@@ -2,6 +2,27 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 independent verification
+  disposition (2026-08-28).** Do not certify the repaired HPAC foundation or
+  begin Layer 3. Close the HumanPrincipalRegistry root/writer/fixture-
+  provenance finding and HumanAuthenticationProof writer-provenance finding.
+  Partially close presentation because installed-descriptor, attestation-
+  verification, evidence-writer, and copy/forgery rejection boundaries work,
+  but keep exact attestation conformance open: the implementation requires
+  `installation_store_id` and `simulation_only`, which HPAC-REQ-092's exact
+  closed object forbids. Partially close lifecycle because authoritative
+  genesis, complete predecessor validation, alternate-chain rejection, and
+  fork rejection work for valid IDs, but keep canonical-store containment
+  open: absolute `proof_id` values cause lifecycle and inert Gate-9 writes
+  outside configured roots, and canonical genesis detects the escape only
+  after mutation. Preserve zero PB/runtime/effect coupling, B1/B7/N1/N2 as
+  implementation-open, runtime unavailable, all contract bytes, and the `.3`
+  delegated-finalization verdict as unauthorized. Record commit-subject Fast
+  Green baseline inference and UUID-valued xdist disagreement as separate
+  infrastructure debt. Recommend exactly `.3.2.2` canonical-store containment
+  and protected-presentation attestation-schema blocking repair, followed by
+  independent verification; require new human authorization.
+
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 repair architecture
   (2026-08-28).** Treat every public HPAC model constructor and public digest
   as data/integrity only. Establish authority through a fixed zero-argument

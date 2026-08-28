@@ -2,6 +2,31 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 — Independent Verification of
+Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-
+Validation Repair. **VERIFICATION-ONLY — COMPLETE; NOT VERIFIED — HPAC TRUST
+FOUNDATION DEFECT REMAINS.** Independent attacks close the registry and proof
+writer-provenance findings and verify installed presentation authority plus
+valid-ID genesis/predecessor/fork semantics. They also reproduce two Blocking
+defects: absolute caller `proof_id` values make lifecycle and inert Gate-9
+stores write outside their roots (the canonical lifecycle path rejects only
+after creating the escaped file), and the deterministic presentation
+attestation contains two fields forbidden by HPAC-REQ-092's exact closed
+schema. Fresh suite: 53 passed, including three passing unsafe-behavior
+reproductions. `.3.2`: 38 passed; original `.3`: 80 passed; B-3/B-4: 44
+passed; historical `.3.1`: 28 passed / 7 intentionally incompatible unsafe-
+acceptance assertions failed. Explicit-SHA serial Fast Green found zero
+unexplained attributable regressions. PB/runtime wiring and effects remain
+zero; B1/B7/N1/N2 remain contract closed / implementation open; runtime
+remains Observed/observe/unavailable. The `.3` delegated finalization/commit/
+push remains **UNAUTHORIZED**. Recommended next, not begun and requiring new
+human authorization: **149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2 — HPAC Canonical-
+Store Containment and Protected-Presentation Attestation-Schema Blocking
+Repair**. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_1_INDEPENDENT_VERIFICATION_CANONICAL_HPAC_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation
 Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair.
 **IMPLEMENTATION REPAIR COMPLETE; INDEPENDENT VERIFICATION PENDING; FINDINGS
@@ -35,7 +60,7 @@ HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation
 Repair**. Do not proceed to Layer 3. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_CANONICAL_HPAC_FOUNDATION_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_BLOCKING_REPAIR.md`.
 
-## Prior Phase
+## Second-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 — Independent Verification of
 Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle
@@ -47,7 +72,7 @@ Also recorded the `.3` delegated finalization/commit/push as unauthorized and
 the `.3` report/metadata as phase-commit-incomplete. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_1_INDEPENDENT_VERIFICATION_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION.md`.
 
-## Second-Prior Phase
+## Third-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3 — Canonical Human-Principal,
 Protected-Presentation, and HPAC Proof-Lifecycle Foundation Implementation.
@@ -59,7 +84,7 @@ and independently classified the delegated finalization/commit/push as
 unauthorized. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION_IMPLEMENTATION.md`.
 
-## Third-Prior Phase
+## Fourth-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.2 — Human-Principal Authentication,
 Protected Approval Presentation, and Proof-Lifecycle Implementation
@@ -74,7 +99,7 @@ v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0 unchanged) frozen by
 149O.20L.7O.3W.1R.2B.1R.1.1R.1. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_2_HUMAN_PRINCIPAL_AUTHENTICATION_PROTECTED_APPROVAL_PRESENTATION_PROOF_LIFECYCLE_IMPLEMENTATION_PLANNING.md`.
 
-## Fourth-Prior Phase
+## Fifth-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification of Trusted
 Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization
