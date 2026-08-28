@@ -912,9 +912,14 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         "hpac_lifecycle.py", "runtime_invocation_authority_consumption.py",
     }
     module_names = {"pcae.core." + name.removesuffix(".py") for name in owned}
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5's mechanism-neutral HPAC
+    # verifier is the one sanctioned consumer of this foundation; see the
+    # identical note in test_hpac_foundation_independent_verification_
+    # 3w1r2b1r111r31.py::test_new_hpac_modules_have_zero_preexisting_production_consumers.
+    expected_consumers = {"hpac_verifier.py"}
     consumers: list[tuple[str, str]] = []
     for path in core.glob("*.py"):
-        if path.name in owned:
+        if path.name in owned or path.name in expected_consumers:
             continue
         for imported in _module_imports(path):
             if imported in module_names:

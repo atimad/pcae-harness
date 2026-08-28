@@ -745,9 +745,17 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
         "pcae.core.runtime_invocation_authority_consumption",
     }
     owning_files = {module.rsplit(".", 1)[-1] + ".py" for module in new_modules}
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5 introduces the first legitimate
+    # consumer of this foundation: the mechanism-neutral HPAC verifier
+    # itself (that is exactly this repository's planned Layer-3-consumes-
+    # Layer-1/2 architecture, `...1R.4` planning doc §6). Excluding it here
+    # preserves this test's original intent -- no *unexpected* consumer --
+    # without re-freezing "zero consumers ever" past the phase whose whole
+    # purpose is to add the one sanctioned consumer.
+    expected_consumers = {"hpac_verifier.py"}
     consumers: list[tuple[str, str]] = []
     for path in core_dir.glob("*.py"):
-        if path.name in owning_files:
+        if path.name in owning_files or path.name in expected_consumers:
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):

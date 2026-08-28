@@ -785,9 +785,14 @@ def test_hpac_repair_has_zero_preexisting_production_consumers():
         "pcae.core.runtime_invocation_authority_consumption",
     }
     owning = {name.rsplit(".", 1)[-1] + ".py" for name in modules}
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5's mechanism-neutral HPAC
+    # verifier is the one sanctioned consumer of this foundation; see the
+    # identical note in test_hpac_foundation_independent_verification_
+    # 3w1r2b1r111r31.py::test_new_hpac_modules_have_zero_preexisting_production_consumers.
+    expected_consumers = {"hpac_verifier.py"}
     consumers = []
     for path in core.glob("*.py"):
-        if path.name in owning:
+        if path.name in owning or path.name in expected_consumers:
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
