@@ -2,6 +2,38 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2 — AuthenticatedHumanPrincipal
+Trusted-Construction and Provenance Blocking Repair. **F1 REPAIRED —
+INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Repairs `.1R.5.1`'s BLOCKING
+finding: `AuthenticatedHumanPrincipal`'s HPAC-REQ-056 seal was enforced only
+in `__init__`, so `object.__new__` bypassed it. Rather than trying to make
+`object.__new__`-allocated instances stop being `isinstance`-true (not
+achievable in Python, and would not survive a subclass/copy/reflection
+variant of the same bypass anyway), adds `is_verifier_authenticated_principal`
+— an identity-keyed, verifier-owned registry populated only by
+`verify_human_authentication`'s own return path. A caller-manufactured
+lookalike, however allocated (direct construction, `object.__new__`, a
+subclass — now refused at definition time — `copy`/`deepcopy`, manual slot
+copying, or reflection) is a different Python object and is never a member,
+regardless of field values; `is_real_runtime_eligible` and other fields
+remain plain data, not authority. Registry is a strong-reference `set`, not a
+weak one — adding `__weakref__` to `__slots__` would break `.1R.5.1`'s
+preserved historical evidence test — a documented trade-off given zero
+production consumers exist. Added `tests/test_hpac_verifier_repair_3w1r2b1r1115a2.py`
+(20 tests, all passing). `.1R.5.1`'s own 29-test suite preserved unmodified:
+27 pass, 2 fail by design (their `not isinstance(...)` premise is
+unsatisfiable in Python; documented, not rewritten). Zero unexplained
+attributable regressions across the full HPAC-family test scope (20 files,
+429 passed / 54 pre-existing unrelated failures identical to baseline; full
+38,100-test-suite scope not run, disclosed as a scope limitation, judged
+acceptable because `hpac_verifier.py` has zero production consumers so no
+other code path could be affected). No B1/B7/N1/N2 repair, no PB/runtime
+integration, no real FIDO2/UI. Recommends `.1R.5.2.1` (independent
+verification) next, pending separate human authorization. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_2_AUTHENTICATEDHUMANPRINCIPAL_TRUSTED_CONSTRUCTION_AND_PROVENANCE_BLOCKING_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1 — Independent Verification of
 Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary
 Implementation. **NOT VERIFIED — AUTHENTICATED-PRINCIPAL RESULT AUTHORITY

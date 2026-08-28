@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2** repairs `.1R.5.1`'s BLOCKING F1
+  finding: `AuthenticatedHumanPrincipal`'s HPAC-REQ-056 trusted-construction
+  seal was enforced only in `__init__`, so `object.__new__` bypassed it
+  entirely. Rather than trying to block `object.__new__` itself (impossible
+  to make the result stop being `isinstance`-true, and would not survive a
+  subclass/copy/reflection variant anyway), adds a verifier-owned,
+  identity-keyed provenance boundary: `is_verifier_authenticated_principal`,
+  which checks membership in a new process-local registry that only
+  `verify_human_authentication`'s own return path ever populates. A
+  caller-manufactured lookalike — via direct construction, `object.__new__`,
+  a subclass (now refused at definition time via `__init_subclass__`),
+  `copy`/`deepcopy` (still `TypeError` via `__reduce__`), manual slot
+  copying, or reflection — is a different Python object and is never a
+  member, regardless of field values. `is_real_runtime_eligible` and other
+  fields remain plain data properties, not authority; every future consumer
+  must call the new function before trusting them. Registry uses a strong
+  (not weak) reference set — adding `__weakref__` to `__slots__` would break
+  `.1R.5.1`'s preserved historical evidence test — documented as an accepted
+  trade-off given zero production consumers exist. Added
+  `tests/test_hpac_verifier_repair_3w1r2b1r1115a2.py` (20 tests). `.1R.5.1`'s
+  own suite preserved unmodified: 27 of 29 still pass; the 2 that don't
+  assert an unsatisfiable-in-Python postcondition (`not isinstance(...)`)
+  and are documented as permanently failing by design. Zero unexplained
+  attributable regressions across the full HPAC-family test scope (429
+  passed / 54 pre-existing unrelated failures, identical to baseline).
+  F1: REPAIRED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED. F2-F4
+  unchanged/deferred. No B1/B7/N1/N2 repair, no PB/runtime integration.
+  Recommends `.1R.5.2.1` (independent verification) next, pending human
+  authorization.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1: Independent Verification of Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.1; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1** independently verified Phase
   `.1R.5`'s mechanism-neutral HPAC verifier — **NOT VERIFIED** —
