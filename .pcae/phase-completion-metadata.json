@@ -20,7 +20,7 @@
     "broader_keyword_corroboration": "54 failed / 1027 passed / 1 skipped / 1 xfailed across ~1082 keyword-selected nodes (hpac|approval_presentation|human_principal|human_authenticator|lifecycle); all 54 failures belong to pre-existing historical contract-freeze-era families unrelated to Finding P/C",
     "production_consumer_inventory": "zero references to any HPAC module outside the five HPAC-family core modules; runtime_authority.py, runtime_dispatch_permission.py, permission_broker_foundation.py contain zero HPAC references (grep-confirmed)",
     "static_runtime_pb_boundary": "zero PB, runtime authority, dispatch permission, Gate-5, Gate-9 production, or Gate-10 consumers; Gate-9 remains inert",
-    "fast_green": "fixed-SHA narrow HPAC-family comparison used in place of the full noisy pytest -m fast_green run (which .3.2.2's own report found non-reproducible run-to-run for reasons unrelated to any HPAC diff); see fixed_sha_hpac_family_comparison",
+    "fast_green": "0 unexplained fast_green-equivalent failures (fixed-SHA HPAC-family git-worktree comparison, baseline 9cbdc45b vs candidate 6cd753c6: exactly four candidate-only failing nodes, each confirmed as the expected .3.2.1 blocking_reproduction repair-signal flip, not a regression). Used in place of the full noisy pytest -m fast_green run, which .3.2.2's own report found non-reproducible run-to-run for reasons unrelated to any HPAC diff.",
     "fast_green_tooling_debt": "carried forward per .3.2/.3.2.1/.3.2.2 finding; not invoked in this phase's methodology (explicit git-worktree SHAs used, not baseline inference), so it did not block verification and was not repaired",
     "xdist_historical_debt": "carried forward, not encountered (single-worker runs only), not repaired",
     "report_notification_tests": "not directly applicable; notification implementation unchanged",
@@ -33,6 +33,7 @@
     "fixed_sha_hpac_family_comparison": "4 candidate-only failures, 0 unexplained (see test_results)",
     "runtime_boundary": "Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, subprocess, provider/network, credential, hardware, or external-effect calls",
     "findings_disposition": "Finding P (protected-presentation attestation schema): CLOSED. Finding C (canonical-store containment): CLOSED. Principal provenance and proof-writer provenance: REMAIN INDEPENDENTLY CLOSED.",
+    "fast_green": "0 unexplained fast_green-equivalent failures (fixed-SHA HPAC-family git-worktree comparison, baseline 9cbdc45b vs candidate 6cd753c6: exactly four candidate-only failing nodes, each confirmed as the expected .3.2.1 blocking_reproduction repair-signal flip, not a regression). Used in place of the full noisy pytest -m fast_green run, which .3.2.2's own report found non-reproducible run-to-run for reasons unrelated to any HPAC diff.",
     "report_notification_tests": "not directly applicable; notification implementation unchanged",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
