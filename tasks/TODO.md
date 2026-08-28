@@ -11,6 +11,27 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1** (independent verification,
+complete; **NOT VERIFIED — TRUST FOUNDATION DEFECT**): independently
+reconstructed the `.3` source, Git/lifecycle provenance, and fixed-SHA test
+evidence. Thirty-five fresh adversarial tests reproduce caller-selected
+registry/proof/evidence/lifecycle authority, forged/copyable canonical records,
+Presentation(A)+Challenge(B), forged/alternate chains, and incomplete
+canonical-byte/state-predecessor validation. The `.3` delegated finalization,
+seven commits, and push were unauthorized; history is retained and creates no
+precedent. PB/runtime coupling and effects remain absent; B1/B7/N1/N2 remain
+implementation-open. Recommended next, not authorized: exactly
+**149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation Trust-Root,
+Writer-Provenance, and Lifecycle-Validation Blocking Repair**, followed by
+`.3.2.1`; do not proceed to Layer 3.
+
+**Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3** (implementation-only, complete;
+subsequent independent verification did not verify the trust foundation):
+added the structural Layer-1/2 modules and tests. Its canonical report is
+provenance-incomplete (three of seven phase-owned commits listed), and its
+delegated lifecycle action was unauthorized. See `.3.1` for the current
+authoritative disposition.
+
 **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R** (bounded contract-only repair,
 complete): recovered/reproduced B-3/B-4 before editing; canonically specified
 protected presentation mechanism/evidence, deterministic human-visible

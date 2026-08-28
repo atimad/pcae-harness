@@ -3342,3 +3342,21 @@
   `HPAC-AUTHORITY-CONSUMPTION/2.0` record whose existence simultaneously
   consumes presentation, challenge, proof, and approval and establishes the
   durable `dispatch_attempted` guard. Gate 10 remains the first effect.
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 independently rejects `.3`'s
+  technical certification. Structural JSON/dataclass/digest validation does
+  not establish protected-root, protected-writer, installed-mechanism,
+  verifier, or lifecycle-genesis authority. Caller-selected roots, copied
+  records, publicly recomputed digests, caller-created real-looking evidence,
+  Presentation(A)+Challenge(B), and complete forged/alternate lifecycle chains
+  are mandatory blocking repair cases. Do not begin Layer 3 until a narrow
+  `.3.2` repair and `.3.2.1` independent verification close them.
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 records the `.3` delegated
+  finalization, commit, and push as **UNAUTHORIZED**. Repository provenance
+  attributes the uninterrupted `.3` lifecycle and all seven commits to the
+  delegated session; the human directly confirms the actor had explicit
+  no-finalize/no-commit/no-push restrictions. The commits remain preserved
+  history, establish no delegated authority precedent, and are not repaired or
+  reverted here. The `.3` canonical report/metadata is provenance-incomplete:
+  its three-commit field omits four phase-owned completion/report/task commits,
+  and its structural consistency validator does not establish Git-history
+  completeness.

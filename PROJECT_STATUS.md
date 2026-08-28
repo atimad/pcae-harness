@@ -2,38 +2,52 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3 — Canonical Human-Principal,
-Protected-Presentation, and HPAC Proof-Lifecycle Foundation
-Implementation. **IMPLEMENTATION-ONLY — COMPLETE; NOT INDEPENDENTLY
-VERIFIED.** Implemented the first bounded slice (Layer 1-2) of
-149O.20L.7O.3W.1R.2B.1R.1.1R.2's 8-layer plan: `HumanPrincipalRegistry`
-model/store, `TrustedApprovalPresentationEvidence` model/store,
-`HumanAuthenticationProof` model/store, HPAC hash-chained lifecycle
-model/store, deterministic non-real `HumanAuthenticator`/
-`ProtectedApprovalPresentationMechanism` implementations, and the inert
-Gate-9 `RuntimeInvocationAuthorityConsumption` model/store, realizing the
-verified contract baseline (RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001
-v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0 — all six unchanged).
-Nine new `src/pcae/core/` modules, six new test files (80 tests, all
-passing); zero regressions across 341 `runtime_authority`/PB-adjacent
-tests, 55 HATP tests, and 366 PB/dry-runtime tests. No `runtime_
-authority.py`, `runtime_dispatch_permission.py`, or PB production
-change; no B1/B7/N1/N2 repair; no real FIDO2/UI/hardware; no Gate-5/9
-wiring; no CLI surface. Deterministic fixtures are structurally
-ineligible for real-runtime authority (fixed `SIMULATION_ONLY`/
-`mechanism_id` constants, no override path). Presentation-evidence trust
-is honestly structural-only (not cryptographic) at this layer, per the
-foundation's own documented boundary. No production, hardware,
-execution, POL-005, runtime, release, article, or private-research
-change; runtime remains Observed/observe/unavailable; v0.4.3
-(`63580893`) unchanged. Recommended next, not begun:
-149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 — Independent Verification of Canonical
-Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle
-Foundation. Human decision required before Layer 3-5 (verifier,
-B1/B7/N1/N2 repair, real FIDO2, real presentation UI). See
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION_IMPLEMENTATION.md`.
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 — Independent Verification of
+Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle
+Foundation. **VERIFICATION-ONLY — COMPLETE; NOT VERIFIED — TRUST FOUNDATION
+DEFECT.** Independently re-derived the Layer-1/2 requirements from RIHAC-001
+v2.0, RIASC-001 v3.0, HPAC-001 v2.0, PBRD-001 v2.0, RDGO-001 v3.0,
+RPAC-001 v1.0, POL-005, the final B-3/B-4 material and its independent
+verification, and the verified `.2` plan. Fresh production-boundary tests
+show that caller-selected roots, publicly recomputed digests, copied JSON,
+and caller-created canonical-looking objects can establish structurally
+resolved registry, presentation, proof, and lifecycle records. Protected
+root/writer/installed-mechanism/verifier/genesis provenance is absent;
+Presentation(A)+Challenge(B) can open lifecycle genesis; complete forged,
+copied, and alternate chains resolve; and canonical bytes plus the complete
+state/predecessor table are not enforced. Thirty-five fresh adversarial tests
+pass as blocker reproductions; the inherited 80 tests pass but substantially
+prove shape/helper behavior rather than the production trust boundary. A
+fixed-SHA node comparison found zero unexplained attributable functional
+regressions. Gate-9's inert primitive was plan-authorized and remains inert;
+PB integration, B1/B7/N1/N2 repair, real mechanisms/UI, and runtime effects
+remain absent. Runtime remains Observed/observe/unavailable.
+
+The `.3` delegated finalization/commit/push is separately **UNAUTHORIZED**:
+the delegated actor exceeded explicit human-granted authority. All seven
+incident commits remain preserved history and establish no precedent. The
+canonical `.3` report/metadata list only three of the seven phase-owned
+commits and are provenance-incomplete despite structural consistency. No
+revert or historical repair was performed. Recommended next, not begun and
+requiring new human authorization: exactly
+**149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation Trust-Root,
+Writer-Provenance, and Lifecycle-Validation Blocking Repair**, followed by
+`.3.2.1` independent verification; do not proceed to Layer 3. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_1_INDEPENDENT_VERIFICATION_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION.md`.
 
 ## Prior Phase
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3 — Canonical Human-Principal,
+Protected-Presentation, and HPAC Proof-Lifecycle Foundation Implementation.
+**IMPLEMENTATION-ONLY — COMPLETE; SUBSEQUENT INDEPENDENT VERIFICATION DID NOT
+VERIFY THE TRUST FOUNDATION.** Added nine structural foundation modules and
+six test files. Subsequent `.3.1` verification found protected provenance,
+genesis, challenge-binding, canonical-byte, and lifecycle-transition defects,
+and independently classified the delegated finalization/commit/push as
+unauthorized. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION_IMPLEMENTATION.md`.
+
+## Second-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.2 — Human-Principal Authentication,
 Protected Approval Presentation, and Proof-Lifecycle Implementation
@@ -48,7 +62,7 @@ v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0 unchanged) frozen by
 149O.20L.7O.3W.1R.2B.1R.1.1R.1. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_2_HUMAN_PRINCIPAL_AUTHENTICATION_PROTECTED_APPROVAL_PRESENTATION_PROOF_LIFECYCLE_IMPLEMENTATION_PLANNING.md`.
 
-## Second-Prior Phase
+## Third-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification of Trusted
 Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization
