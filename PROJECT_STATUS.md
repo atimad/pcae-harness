@@ -3,7 +3,8 @@
 ## Current Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7 — B1/B7/N1/N2 Production Authority
-Repair Implementation. **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING —
+Repair Implementation (completed, independent verification pending).
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING —
 REAL AUTHORITY STILL UNAVAILABLE.** Implemented the frozen `.1R.6` Option-A
 repair in exactly `runtime_authority.py`, `runtime_dispatch_permission.py`,
 and `hpac_verifier.py`: B1 projections are exact-object registered,
