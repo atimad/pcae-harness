@@ -10,7 +10,7 @@ Idle: awaiting explicit human authorization for the next independent verificatio
 
 ## Status
 
-active
+done
 
 ## Mode
 
