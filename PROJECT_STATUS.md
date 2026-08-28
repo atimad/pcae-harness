@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5 — Mechanism-Neutral HPAC Verifier and
+Principal-Registry Consumption Boundary Implementation. **IMPLEMENTED —
+INDEPENDENT VERIFICATION PENDING — NOT YET CERTIFIED.** Implemented
+`src/pcae/core/hpac_verifier.py`, executing `HPAC-REQ-054`'s ten-step
+fail-closed verification sequence against the existing, independently-
+verified Layer-1/2 foundation stores (registry, presentation, proof,
+lifecycle). Every authority-bearing input is resolved by the verifier
+itself through its owning canonical store — only bare identifiers
+(`proof_id`, `approval_id`) are accepted from a caller. The result type,
+`AuthenticatedHumanPrincipal`, is trusted-construction only (no public
+constructor) and non-serializable (`__reduce__` raises), closing the
+anti-forgery/anti-transfer threat model by construction; assurance
+classification is copied from resolved records, never caller-declared,
+so the deterministic NON-REAL path can never present itself as real
+human authentication even with UP/UV both true. One deliberate,
+documented scope deviation from `.1R.4`'s own input table: the verifier
+does not resolve `RuntimeInvocationApproval` via
+`RuntimeInvocationApprovalStore` (no adapter between that record and the
+HPAC-side `CanonicalRuntimeApprovalSubject` exists yet, and building one
+would exceed this phase's no-go-bounded scope) — `approval_id` is
+consumed only as an opaque binding key checked against records that
+already carry it. 27 focused/adversarial tests added
+(`tests/test_hpac_verifier.py`), all passing. Full HPAC foundation
+regression family re-run; zero attributable regressions (fixed-SHA A/B
+against baseline `817b788a` confirms all failures pre-exist unchanged).
+Three pre-existing "zero production consumers of the foundation"
+regression tests were updated to exclude exactly `hpac_verifier.py` as
+the one sanctioned, intentional consumer this phase introduces. Zero
+production consumers of `hpac_verifier.py` itself exist (confirmed by
+AST-based static check); PB, runtime authority, and Gate 9 remain
+completely untouched and unreferenced. B1/B7/N1/N2 remain contract
+closed / implementation open; no real FIDO2, no real protected UI;
+runtime remains Observed/observe/unavailable; POL-005 unchanged. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION.md`.
+Recommended next phase (**requires separate explicit human authorization
+before starting**): `149O.20L.7O.3W.1R.2B.1R.1.1R.5.1` — Independent
+Verification of Mechanism-Neutral HPAC Verifier and Principal-Registry
+Consumption Boundary Implementation.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4 — Mechanism-Neutral HPAC Verifier and
 Principal-Registry Consumption Boundary Implementation Planning.
 **PLANNING COMPLETE.** Reconciled `.1R.2`'s implicit "eight non-collapsible
@@ -28,9 +69,6 @@ FIDO2, and real UI remain untouched and unscheduled by this document; runtime
 remains Observed/observe/unavailable; POL-005 unchanged. No verifier code and
 no production trust-path file was modified in this phase. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_4_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION_PLANNING.md`.
-Recommended next phase (**requires separate explicit human authorization
-before starting**): `149O.20L.7O.3W.1R.2B.1R.1.1R.5` — Mechanism-Neutral HPAC
-Verifier and Principal-Registry Consumption Boundary Implementation.
 
 ## Prior Phase
 

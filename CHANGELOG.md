@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5** implemented
+  `src/pcae/core/hpac_verifier.py`, the mechanism-neutral HPAC verifier and
+  principal-registry consumption boundary: executes HPAC-REQ-054's ten-step
+  fail-closed verification sequence against the existing foundation stores,
+  resolving every authority-bearing input canonically (never accepting a
+  caller-constructed record). `AuthenticatedHumanPrincipal` is
+  trusted-construction-only and non-serializable, closing anti-forgery/
+  anti-transfer by construction; assurance classification is copied from
+  resolved records, so the deterministic path always remains NON-REAL.
+  27 new adversarial/focused tests (`tests/test_hpac_verifier.py`), all
+  passing; zero attributable regressions against the full HPAC foundation
+  family (fixed-SHA A/B vs. baseline `817b788a`). Zero production
+  consumers of the new module exist; PB, runtime authority, and Gate 9
+  remain untouched. B1/B7/N1/N2 remain contract closed / implementation
+  open. See
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION.md`.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4: Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation Planning to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.4; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4** (planning only) reconciled
   `.1R.2`'s unenumerated "eight non-collapsible layers" claim against its
