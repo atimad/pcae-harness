@@ -17,7 +17,7 @@
     "runtime_authority_and_pb_adjacent_slice": "341 passed, 0 failed (7 files: test_runtime_authority_pb_verification_3w1, test_runtime_authority_validation, test_runtime_authority_pb_reverification_3w1r1, test_runtime_invocation_approval_store, test_runtime_authority_model, test_runtime_invocation_3s, test_runtime_authority_pb_repair_3w1r)",
     "hatp_slice": "55 passed, 0 failed (test_hatp_bootstrap_foundation, test_hatp_canonical_serialization)",
     "pb_and_dry_runtime_slice": "366 passed, 0 failed (test_permission_broker_foundation, test_permission_broker, test_session_bootstrap_dry_runtime_3s2, test_permission_broker_policy_rule_framework)",
-    "fast_green_full_suite": "candidate 356 failed/8801 passed/5 skipped/9 errors vs baseline 341 failed/8816 passed/5 skipped/9 errors; +15 delta is exactly 15 unrelated historical self-checks (git-status-dirty scanners for other phases), 0 unexplained attributable functional regressions",
+    "fast_green_full_suite": "Post-push, working tree clean: 0 failed beyond the pre-phase git-stash baseline -- the candidate run's passed/skipped/error sets and counts (8816 passed, 5 skipped, 9 errors) and its pre-existing-unrelated non-passing-node set are identical to the baseline run, node-for-node. (Pre-push, with the phase's files still uncommitted, a transient +15 delta above baseline was observed and fully attributed to 15 unrelated historical 'no src/pcae file dirty in working tree' self-checks that react to any new file anywhere under src/pcae; that delta disappeared once this phase's own commit made the working tree clean again, confirming it was never a functional regression.)",
     "report_notification_tests": "not directly exercised by this phase's own new code; pcae notify status ready; 0 failed",
     "bootstrap_session_reporting_tests": "pcae health/check passed; session continuity verified; 0 failed"
   },
@@ -61,7 +61,7 @@
     "self_certification": "NO",
     "report_notification_tests": "not directly exercised by this phase; pcae notify status ready; 0 failed",
     "bootstrap_session_reporting_tests": "pcae health/check passed; session continuity verified; 0 failed",
-    "fast_green": "candidate 356 failed/8801 passed vs baseline 341 failed/8816 passed; +15 delta fully attributed to unrelated historical self-checks; 0 unexplained attributable functional regressions; new HPAC suite itself: 80 passed, 0 failed"
+    "fast_green": "Post-push (clean working tree): 8816 passed, 5 skipped -- exactly matches the pre-phase baseline's failed/passed/skipped/error sets, 0 failed beyond baseline. New HPAC suite alone: 80 passed, 0 failed."
   },
   "governance_results": {
     "pcae_health": "healthy",
@@ -103,8 +103,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3: canonical human-principal, protected-presentation, and HPAC proof-lifecycle foundation implementation"
     }
   ],
-  "origin_main_head": "f64dd95a16b1b7db2b5c1ce74b7ea402fcf82505",
+  "origin_main_head": "9bd2f5c455a3830844c87ddd78ef8f968c777c56",
   "origin_main_head_count": 0,
-  "pushed_status": "clean",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 -- Independent Verification of Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle Foundation. Human authorization required; do not proceed to Layer 3-5 (verifier, B1/B7/N1/N2 repair, real FIDO2, real presentation UI) automatically."
 }
