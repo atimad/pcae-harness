@@ -1,108 +1,128 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5 Complete — Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1 Complete — Independent Verification of Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation
 
 Status: completed.
 
-Implementation-entry commit: `d502fc5c705dbce6b7f36cf73fac9bb7d427ebf0`.
+Verification-entry commit (HEAD at start): `1df9c855`.
 
 Canonical hand-authored phase doc:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION.md`.
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_1_INDEPENDENT_VERIFICATION_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY.md`.
 
 ## Technical verdict
 
-**MECHANISM-NEUTRAL HPAC VERIFIER: IMPLEMENTED — INDEPENDENT VERIFICATION
-PENDING — NOT YET CERTIFIED.**
+**NOT VERIFIED — AUTHENTICATED-PRINCIPAL RESULT AUTHORITY DEFECT.**
 
-Implemented `src/pcae/core/hpac_verifier.py`, executing
-`HPAC-REQ-054`'s ten-step fail-closed verification sequence
-(`docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` §18, read
-directly rather than relying on `.1R.4`'s paraphrase) against the
-existing, independently-verified Layer-1/2 foundation:
+`.1R.5` is not independently verified as complete. Independently
+re-derived `HPAC-REQ-054`'s ten-step sequence directly from
+`docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` §18 (not
+from `.1R.5`'s or `.1R.4`'s prose) and compared it line-by-line against
+`hpac_verifier.py`.
 
-1. Resolve the canonical proof by `proof_id` only.
-2. Resolve the principal; require `active` status.
-3. Resolve the credential; require `active` status and binding to the
-   claimed principal.
-4. Mechanism compatibility + assertion-material check.
-5. Presentation evidence: canonical resolution plus `approval_id`/
-   `approval_subject_digest` binding checks.
-6. Challenge-state consistency via the lifecycle chain's genesis binding.
-7. UP/UV, both mandatory.
-8. Freshness against `now` and the approval subject's `expires_at`.
-9. Full canonical lifecycle chain resolution and genesis-binding
-   cross-check.
-10. Idempotent-or-fresh `PROOF_VERIFIED_AND_BOUND` transition, then
-    ephemeral `AuthenticatedHumanPrincipal` emission.
+## BLOCKING finding (F1)
 
-`AuthenticatedHumanPrincipal` is trusted-construction-only (no public
-constructor) and non-serializable (`__reduce__` raises); assurance
-classification is copied from resolved records, never caller-declared —
-the deterministic path always remains `FIXTURE_NON_REAL`, even with
-UP/UV both true.
+`AuthenticatedHumanPrincipal`'s `HPAC-REQ-056` trusted-construction seal
+is enforced only inside `__init__`. The class defines no `__new__`
+override, so `object.__new__(AuthenticatedHumanPrincipal)` allocates a
+fully-populated, `isinstance`-true instance — including
+`is_real_runtime_eligible == True` at `PRODUCTION` assurance — without
+ever running `verify_human_authentication`. Independently reproduced by
+direct interactive probe against the installed module:
 
-## Deliberate scope decision
+```python
+forged = object.__new__(AuthenticatedHumanPrincipal)
+forged.assurance_class = HPACAuthorityClass.PRODUCTION
+...
+isinstance(forged, AuthenticatedHumanPrincipal)   # True
+forged.is_real_runtime_eligible                    # True
+```
 
-`.1R.4` §9's input table lists `RuntimeInvocationApprovalStore` as a
-verifier input. This implementation does **not** call it: no adapter
-between `RuntimeInvocationApproval` (RIASC) and the HPAC-side
-`CanonicalRuntimeApprovalSubject` exists in this codebase, building one
-would exceed `.1R.4` §36's own restated no-go-bounded scope, and
-`runtime_invocation_approval_store.py` is one of the three files the
-future B1/B7/N1/N2 repair phase is scoped to modify. `approval_id` is
-consumed only as an opaque binding key checked against records that
-already carry it. Documented in the phase doc §9 as an explicit,
-narrower-not-broader deviation, flagged for `...1R.5.1` to confirm or
-revise.
+Currently non-exploitable in production: zero consumers of
+`hpac_verifier.py` / `AuthenticatedHumanPrincipal` exist anywhere in
+`src/pcae` (confirmed by grep and by re-running the existing AST-based
+zero-consumer test), so no live code path can reach a forged instance
+today — but the construction boundary the module and `HPAC-REQ-056`
+claim to enforce is not actually closed.
+
+## Non-blocking findings
+
+- **F2** — `HPAC-REQ-054` step 4 (independent `challenge_digest`
+  recomputation from canonical challenge state) is not implemented; only
+  a string-equality cross-check against the lifecycle genesis binding
+  exists, deferred into step 9's logic. Bounded by the foundation having
+  no standalone canonical `Challenge` store yet.
+- **F3** — Traced to `.1R.4`'s own planning document, which mislabels
+  `HPAC-REQ-054` as an "eight-step algorithm" and silently drops contract
+  step 4 in its own re-derivation. Pre-existing debt from an
+  already-closed phase, not introduced by `.1R.5` — but its consequence
+  propagated into `.1R.5`'s (and this phase's predecessor report's) claim
+  of full "ten-step" fidelity.
+- **F4** — `tests/test_hpac_verifier.py::test_caller_constructed_verifier_result_rejected`
+  overclaims relative to what it proves: it exercises only the
+  `__init__`-with-wrong-seal path, never `object.__new__`.
+
+## What independently verified clean
+
+Canonical-resolution-only input handling for principal, credential,
+presentation, and proof; UP and UV checked as genuinely independent
+booleans; anti-transfer / invocation-binding; non-serializability
+(`pickle`, `deepcopy`, and shallow `copy` all raise `TypeError`);
+deterministic `NON_REAL` assurance classification with no caller-driven
+upgrade path; zero PB / runtime-authority / Gate-9 imports (AST-checked);
+`B1`/`B7`/`N1`/`N2` production files untouched since the `.1R.4` baseline
+(`817b788a`).
 
 ## Tests
 
-27 new tests (`tests/test_hpac_verifier.py`), all passing:
-happy-path/assurance classification, canonical-resolution-only inputs,
-presentation/invocation/approval binding, UP/UV defense-in-depth,
-lifecycle state/replay, fixture-to-real upgrade rejection,
-anti-forgery/anti-transfer, and zero-consumer/zero-effect static checks.
+Fresh, independently-derived adversarial suite added (not copied from
+the existing `.1R.5` tests):
 
 ```
-python -m pytest tests/test_hpac_verifier.py -q
+tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py
+27 passed, 2 failed
+```
+
+The 2 failures are exactly and only the `object.__new__`
+construction-boundary defect (F1), asserted as the contract-required
+behavior and left failing rather than adjusted to match the
+implementation.
+
+Existing suite re-run unmodified:
+
+```
+tests/test_hpac_verifier.py
 27 passed
 ```
 
-Three pre-existing "zero production consumers of the foundation"
-regression tests were updated by exactly one exclusion-set line each to
-allow `hpac_verifier.py` — the phase's own sanctioned, intentional
-consumer — while continuing to reject any other consumer.
-
 ## Fast Green
 
-`8796 passed, 0 failed` (5 skipped) after deselecting the exact 370
-nodeids that failed or errored across repeated full
-`pytest -m fast_green` runs at this phase's own HEAD — all independently
-confirmed, by fixed-SHA `git stash` A/B against baseline `817b788a`, to
-be pre-existing and confined to the unrelated HATP/HMIC/Class-B/HBDC
-host-specific and order-sensitive test cluster (documented repository
-debt). Zero attributable regressions.
+**Not run this phase** (explicit scope limitation). Full fixed-SHA
+regression re-attribution against the 8796-test Fast Green baseline was
+not performed — only the two verifier-specific test files above were
+re-run. This is disclosed as a limitation, not treated as equivalent to
+a full regression pass.
 
 ## Consumer inventory
 
 ```
-grep -rl "hpac_verifier" src/pcae --include="*.py" | grep -v "hpac_verifier.py$"   → (empty)
-grep -rn "hpac_verifier" src/pcae/core/runtime_authority.py
-                          src/pcae/core/runtime_dispatch_permission.py            → (empty)
+grep -rn "hpac_verifier|AuthenticatedHumanPrincipal|verify_human_authentication" src/pcae
+  → one hit outside hpac_verifier.py itself: a comment in human_authenticator.py
 ```
 
 Zero production consumers of `hpac_verifier.py` exist. PB, runtime
 authority, and Gate 9 (`runtime_invocation_authority_consumption.py`)
-remain unreferenced by the verifier (AST-checked).
+remain unreferenced by the verifier (AST-checked, independently
+re-confirmed).
 
 ## Governance verdict
 
 **DELEGATED FINALIZATION / COMMIT / PUSH: UNAUTHORIZED** (historical `.3`
 incident, preserved, not revisited). No delegated agent was granted
-commit, phase-finalization, or push authority in this phase.
+commit, phase-finalization, or push authority in this phase; all
+governed-state mutations were performed only by the primary
+human-authorized operator.
 
 ## No-Go confirmation
 
-- No B1, B7, N1, or N2 production repair (all remain contract closed /
-  implementation open).
+- No B1, B7, N1, or N2 production repair.
 - No Permission Broker integration.
 - No Runtime Enforcement or Shell Gate activation.
 - No real FIDO2, WebAuthn, CTAP, enrollment, or credential operation.
@@ -110,9 +130,13 @@ commit, phase-finalization, or push authority in this phase.
 - No provider, network, subprocess, hardware, or external runtime effect.
 - No Gate-9 production wiring, Gate-10 dispatch, or PB/runtime-dispatch
   consumption.
-- No production trust-path file modified.
+- No production trust-path file modified (task scope explicitly forbade
+  editing `hpac_verifier.py`, `hpac_foundation.py`, `hpac_lifecycle.py`,
+  and the B1/B7/N1/N2 files this phase).
 - No normative contract modification.
 - No revert, force push, history rewrite, or hook bypass.
+- **No repair of F1-F4 performed** — findings documented and left for a
+  separate, explicitly-authorized follow-up phase.
 
 Runtime remains `Observed / observe / unavailable`. POL-005 unchanged.
 
@@ -120,16 +144,17 @@ Runtime remains `Observed / observe / unavailable`. POL-005 unchanged.
 
 Phase commits:
 
-- `d502fc5c705dbce6b7f36cf73fac9bb7d427ebf0`
-- `accf6273a972274da28e4e7d449eb92221294304`
-- `319a64f075a0846fe0a553fed169443fc2bfb261`
-- `2883315a2202bf2216ec6cd56a870c7b2cd858bf`
+- `7621087c0939b52475a489d5c0b01a975894d08f`
+- `125fc25559c855202da9ca9533ff3bd26f4612b9`
+- `a36f5c289df25fe43970ea373d7b6c402e46ba95`
 
 Pushed: pending (to be finalized after `pcae push`).
 
 ## Recommended next phase
 
-**`149O.20L.7O.3W.1R.2B.1R.1.1R.5.1`** — Independent Verification of
-Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption
-Boundary Implementation. **Requires separate explicit human
-authorization before starting.**
+**Not canonically assigned this phase** (no-invent-an-ID constraint).
+Recommended: a narrow blocking-repair phase closing the `object.__new__`
+trusted-construction bypass in `AuthenticatedHumanPrincipal` (F1), with
+F2-F4 folded in or explicitly deferred with their own named follow-up.
+**Requires separate explicit human authorization and formal phase-ID
+assignment before starting.**
