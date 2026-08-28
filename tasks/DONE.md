@@ -73,6 +73,7 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4: Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation Planning (20260828-1356-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-4-mechanism-neutral-hpac-verifier-and-principal-registry-consumption-boundary-implementation-planning)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1: Independent Verification of HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Repair (20260828-1310-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-2-1-independent-verification-of-hpac-canonical-store-containment-and-protected-presentation-attestation-schema-repair)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: HPAC canonical-store containment and protected-presentation attestation-schema blocking repair (20260828-1202-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-2-hpac-canonical-store-containment-and-protected-presentation-attestation-schema-blocking-repair)
 - Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 (20260828-1123-idle-awaiting-human-authorization-post-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-1)

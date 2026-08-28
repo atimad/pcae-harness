@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4: Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation Planning to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.4; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4** (planning only) reconciled
   `.1R.2`'s unenumerated "eight non-collapsible layers" claim against its
   concrete §52/Matrix E phase sequence, which bundled the mechanism-neutral
