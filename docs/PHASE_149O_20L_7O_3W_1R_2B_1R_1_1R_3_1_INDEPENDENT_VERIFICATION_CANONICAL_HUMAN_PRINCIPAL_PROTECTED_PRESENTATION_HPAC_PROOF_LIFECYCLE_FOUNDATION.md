@@ -477,6 +477,16 @@ attributable failures**. This second independently generated result agrees
 with the manual fixed-SHA conclusion despite its distinct serial collection
 mode and counts.
 
+After the initial governed push, the attribution command was rerun with
+`pushed_status=pushed` and persisted
+`.pcae/fast-green-attribution/8e09a9469f86e20f27a0135c34fb071793e524f856d6d7f693b4b53229fbff3e.json`.
+It completed **PASS** for baseline `47bcc8f3` and candidate `0d2e2e3e`, with
+342 baseline failures plus 9 errors, 341 candidate failures plus 9 errors,
+350 pre-existing nonpassing nodes, no environment exclusions, no expected
+pre-push artifacts, and **zero attributable failures**. This post-push
+artifact is the structured evidence used by final completion metadata; the
+pre-push artifact remains preserved as lifecycle history.
+
 ## 18. Verification acceptance matrix
 
 | Acceptance item | Result |
