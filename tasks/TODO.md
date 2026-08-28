@@ -11,6 +11,14 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
+**Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7** (implementation complete;
+independent verification pending): repaired B1/B7/N1/N2 and HPAC-REQ-054
+Step 4 in exactly the three `.1R.6` production files. Deterministic NON-REAL
+assurance remains hard-rejected, and Gate 5/Gate 9/PB/runtime/FIDO2/UI remain
+unwired or unavailable. Recommended next, not begun and requiring separate
+human authorization: exactly **149O.20L.7O.3W.1R.2B.1R.1.1R.8 — Independent
+Verification of B1/B7/N1/N2 Production Authority Repair Implementation**.
+
 **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1** (independent verification,
 complete; **NOT VERIFIED — TRUST FOUNDATION DEFECT**): independently
 reconstructed the `.3` source, Git/lifecycle provenance, and fixed-SHA test

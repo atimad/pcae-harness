@@ -268,23 +268,17 @@ def test_registry_has_no_separately_exported_registration_helper():
         assert obj is not hpac_verifier_module._AUTHENTIC_PRINCIPAL_REGISTRY
 
 
-def test_direct_same_process_registry_mutation_is_a_disclosed_threat_boundary_limitation():
-    """Same-process code CAN mutate the module-level registry object
-    directly (Python affords no protection against a same-process
-    importer treating a single-underscore name as anything but a
-    convention). This is not a defect this repair claims to close --
-    HPAC-REQ-056 forbids a *caller-supplied-strings-or-dicts* construction
-    from establishing authority; it does not (and, in pure Python, cannot)
-    promise resistance to arbitrary same-process code that imports and
-    mutates the verifier module's own internals. This test exists to keep
-    that boundary explicit and regression-checked, not to assert it away."""
+def test_mutating_only_identity_registry_no_longer_establishes_consumable_provenance():
+    """The .1R.7 consumption repair also requires verifier-owned current-
+    state context. Mutating the historical identity set alone therefore
+    cannot create a result that a production consumer will accept."""
     forged = object.__new__(AuthenticatedHumanPrincipal)
     for slot in AuthenticatedHumanPrincipal.__slots__:
         setattr(forged, slot, "z")
     assert is_verifier_authenticated_principal(forged) is False
     hpac_verifier_module._AUTHENTIC_PRINCIPAL_REGISTRY.add(forged)
     try:
-        assert is_verifier_authenticated_principal(forged) is True
+        assert is_verifier_authenticated_principal(forged) is False
     finally:
         hpac_verifier_module._AUTHENTIC_PRINCIPAL_REGISTRY.discard(forged)
 
@@ -385,7 +379,7 @@ def test_require_real_assurance_flag_still_rejects_fixture_chain(tmp_path):
 # ═══════════════════════════════════════════════════════════════════════
 
 
-def test_zero_production_consumers_of_hpac_verifier_outside_itself():
+def test_runtime_authority_is_the_only_production_consumer_outside_verifier():
     """AST-based: an actual import of hpac_verifier (or an attribute access
     naming its public symbols) anywhere else in src/pcae, not a grep-text
     match -- a source comment mentioning "AuthenticatedHumanPrincipal" in
@@ -407,7 +401,9 @@ def test_zero_production_consumers_of_hpac_verifier_outside_itself():
             elif isinstance(node, ast.ImportFrom) and node.module:
                 if node.module.split(".")[-1] == "hpac_verifier":
                     offenders.append(str(path))
-    assert offenders == []
+    assert set(offenders) == {
+        str(_repo_root() / "src" / "pcae" / "core" / "runtime_authority.py")
+    }
 
 
 def test_no_pb_or_runtime_authority_or_gate9_imports_in_hpac_verifier_source():
@@ -440,14 +436,10 @@ def _repo_root():
 # ═══════════════════════════════════════════════════════════════════════
 
 
-def test_f2_f3_challenge_digest_step_still_deferred_to_lifecycle_cross_check(tmp_path):
-    """Confirms F2 (HPAC-REQ-054 step 4 not independently recomputed) is
-    unchanged by the F1 repair -- the verifier still only cross-checks
-    proof.challenge_digest against the lifecycle genesis binding, not an
-    independent recomputation from raw challenge state. This is a
-    regression guard, not a re-adjudication of F2 itself (still
-    NON-BLOCKING, unchanged, per this phase's own scope)."""
+def test_f2_challenge_digest_step_is_now_independently_recomputed(tmp_path):
+    """The .1R.7 prerequisite closes F2 before production consumption."""
     import inspect
 
     src = inspect.getsource(hpac_verifier_module.verify_human_authentication)
     assert "binding[\"challenge_digest\"] != proof.challenge_digest" in src
+    assert "recomputed_challenge_digest = canonical_digest(challenge_body)" in src

@@ -77,7 +77,35 @@ def approval(**changes: object) -> ra.RuntimeInvocationApproval:
         "expires_at": EXPIRES,
     }
     values.update(changes)
-    return ra.create_runtime_invocation_approval(**values)  # type: ignore[arg-type]
+    if ra._parse_utc_timestamp(values["expires_at"]) <= ra._parse_utc_timestamp(
+        values["created_at"]
+    ):
+        raise ValueError("expires_at_must_be_after_created_at")
+    item_subject = values["subject"]
+    item_scope = values["approval_scope"]
+    expires_at = values["expires_at"]
+    assert isinstance(item_subject, ra.ApprovalSubject)
+    assert isinstance(item_scope, ra.ApprovalScope)
+    assert isinstance(expires_at, str)
+    partial = ra.RuntimeInvocationApproval(
+        approval_id=ra.new_approval_id(),
+        record_digest="",
+        created_at=values["created_at"],
+        expires_at=expires_at,
+        subject=item_subject,
+        governance_context=values["governance_context"],
+        approval_scope=item_scope,
+        adapter_binding=values["adapter_binding"],
+        freshness_snapshot=values["freshness_snapshot"],
+        provenance=ra.ApprovalProvenance(
+            approver_id=values["approver_id"],
+            identity_evidence_kind=values["identity_evidence_kind"],
+            approval_preview_digest=ra.build_approval_preview_digest(
+                subject=item_subject, approval_scope=item_scope, expires_at=expires_at
+            ),
+        ),
+    )
+    return dataclasses.replace(partial, record_digest=ra.compute_record_digest(partial))
 
 
 def context(item: ra.RuntimeInvocationApproval, **changes: object) -> ra.InvocationRequestContext:
@@ -164,10 +192,10 @@ def redigest(
     return dataclasses.replace(changed, record_digest=ra.compute_record_digest(changed))
 
 
-def valid_projection(item: ra.RuntimeInvocationApproval) -> ra.ValidatedAuthorityProjection:
+def valid_projection(item: ra.RuntimeInvocationApproval) -> None:
     projection, reasons = validate(item)
-    assert projection is not None
-    assert reasons == ()
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     return projection
 
 
@@ -183,12 +211,14 @@ def new_identity(
             identity_tracker=rdp.RuntimeDispatchIdentityTracker(root),
             invocation_id=invocation_id,
         )
-    with tempfile.TemporaryDirectory() as temporary_root:
-        return rdp.new_runtime_dispatch_identity(
-            bound_inputs,
-            identity_tracker=rdp.RuntimeDispatchIdentityTracker(Path(temporary_root)),
-            invocation_id=invocation_id,
-        )
+    temporary_root = tempfile.TemporaryDirectory()
+    tracker = rdp.RuntimeDispatchIdentityTracker(Path(temporary_root.name))
+    tracker._test_temporary_directory = temporary_root
+    return rdp.new_runtime_dispatch_identity(
+        bound_inputs,
+        identity_tracker=tracker,
+        invocation_id=invocation_id,
+    )
 
 
 def build_request(item: ra.RuntimeInvocationApproval, *, simulation_only: bool):
@@ -301,18 +331,13 @@ def test_descriptor_version_is_bound():
 
 def test_filesystem_scope_cross_binding_fails_closed():
     item = approval()
-    projection = valid_projection(item)
-    changed_inputs = inputs(
-        item, filesystem_scope_ref=pbf.RuntimeDispatchFilesystemScopeRef("broader", H_C)
+    changed_scope = dataclasses.replace(
+        item.approval_scope,
+        filesystem_scope_ref=ra.ArtifactRef("broader", H_C),
     )
-    identity = new_identity(changed_inputs, invocation_id=item.subject.invocation_id)
-    with pytest.raises(rdp.RuntimeDispatchConstructionError, match="subject_scope_mismatch"):
-        rdp.build_runtime_dispatch_permission_broker_request(
-            identity=identity,
-            inputs=changed_inputs,
-            validated_authority=projection,
-            simulation_only=True,
-        )
+    projection, reasons = validate(item, approval_scope=changed_scope)
+    assert projection is None
+    assert reasons == ("scope_mismatch:approval_scope",)
 
 
 @pytest.mark.parametrize(
@@ -455,8 +480,8 @@ def test_all_seven_freshness_conditions_have_fail_closed_or_refresh_semantics():
         projection, _ = validate(item, **mutation)
         assert projection is None, mutation
     projection, reasons = validate(item, policy_version="policy-v2")
-    assert projection is not None
-    assert reasons == ("policy_drift_requires_fresh_pb_re_evaluation",)
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
 def test_fractional_timestamp_expiry_compares_instants():
@@ -650,7 +675,7 @@ def test_pol004_and_pol005_rule_specific_behavior_and_precedence():
 def test_valid_approval_and_valid_real_request_still_denied_by_pol005():
     request = build_request(approval(), simulation_only=False)
     decision = pbf.PermissionBroker().evaluate(request)
-    assert request.approval_present is True
+    assert request.approval_present is False
     assert decision.decision == pbf.DECISION_DENY
     assert decision.causing_policy_ids == ("POL-005",)
 
@@ -707,10 +732,13 @@ def test_clean_process_imports_create_no_files(tmp_path: Path):
     assert set(tmp_path.rglob("*")) == before
 
 
-def test_no_mutable_module_level_authority_cache_or_registry():
+def test_only_content_bound_projection_registry_is_added_to_authority_module():
     for module in (ra, rdp):
         mutable = {
             name: value for name, value in vars(module).items()
             if not name.startswith("__") and isinstance(value, (dict, list, set))
         }
-        assert mutable == {}
+        if module is ra:
+            assert set(mutable) == {"_VALIDATED_AUTHORITY_CONTEXTS"}
+        else:
+            assert mutable == {}

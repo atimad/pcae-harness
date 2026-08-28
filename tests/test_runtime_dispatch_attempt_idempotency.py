@@ -44,8 +44,9 @@ def test_attempt_id_distinct_from_idempotency_key():
 
 
 def test_idempotency_key_distinct_from_approval_id():
-    _, projection, request, _ = full_chain()
-    assert request.runtime_dispatch_context.idempotency_key != projection.approval_id
+    approval, projection, request, _ = full_chain()
+    assert projection is None
+    assert request.runtime_dispatch_context.idempotency_key != approval.approval_id
 
 
 def test_same_invocation_retry_shares_idempotency_key_but_not_attempt_id(tmp_path: Path):

@@ -31,14 +31,12 @@ from _rdw3w_helpers import (
 )
 
 
-def test_matching_context_validates_successfully():
+def test_matching_caller_object_is_still_rejected_as_noncanonical():
     approval = build_approval()
     ctx = matching_context(approval)
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
-    assert reasons == ()
-    assert projection is not None
-    assert projection.approval_id == approval.approval_id
-    assert projection.record_digest == approval.record_digest
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
 def test_none_approval_fails_closed_step_1_2():
@@ -218,8 +216,8 @@ def test_freshness_policy_version_drift_does_not_invalidate_but_flags_re_evaluat
     approval = build_approval()
     ctx = dataclasses.replace(matching_context(approval), policy_version=POLICY_VERSION_B)
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
-    assert projection is not None
-    assert reasons == ("policy_drift_requires_fresh_pb_re_evaluation",)
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
 def test_freshness_seven_conditions_are_exactly_head_task_prompt_target_adapter_policy_expiry():
@@ -261,8 +259,8 @@ def test_current_time_one_second_before_expiry_is_fresh():
     approval = build_approval(created_at="2026-08-27T00:00:00Z", expires_at="2026-08-27T01:00:00Z")
     ctx = dataclasses.replace(matching_context(approval), current_time="2026-08-27T00:59:59Z")
     projection, reasons = ra.validate_approval(approval, context=ctx, consumption_lookup=always_unconsumed)
-    assert projection is not None
-    assert reasons == ()
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
 # ── Step 11: consumption/cancellation/uncertainty/completion ────────────
@@ -305,8 +303,8 @@ def test_validating_an_unconsumed_approval_repeatedly_never_consumes_it():
         for _ in range(5)
     ]
     for projection, reasons in results:
-        assert projection is not None
-        assert reasons == ()
+        assert projection is None
+        assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
 # ── Provenance ─────────────────────────────────────────────────────────

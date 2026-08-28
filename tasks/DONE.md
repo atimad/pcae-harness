@@ -1,5 +1,15 @@
 # Done
 
+- 2026-08-28 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7 implemented the
+  frozen Option-A production authority repair: B1 projection provenance is
+  exact-object/content/current-state bound; B7 rereads durable dispatch
+  identity state; N1 resolves canonical approval IDs and rejects caller
+  objects; N2 derives provenance only from freshly reverified principals; and
+  HPAC Step 4 independently recomputes challenge state. Deterministic NON-REAL
+  remains hard-rejected, with zero candidate-only affected/foundation
+  regressions. Gate 5/Gate 9/PB/runtime/FIDO2/UI remain unchanged or absent.
+  B1/B7/N1/N2 are repaired, independent verification pending, not closed.
+
 - 2026-08-28 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 implemented the
   bounded HPAC trust-root repair: fixed production-root resolution, opaque
   authorized writers, durable fixture non-reality, installed-mechanism and
@@ -73,6 +83,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.6) (20260828-2001-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-6)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.6: B1/B7/N1/N2 Production Authority Repair Integration Planning (20260828-1951-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-6-b1-b7-n1-n2-production-authority-repair-integration-planning)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1: Independent Verification of AuthenticatedHumanPrincipal Trusted-Construction and Provenance Repair (20260828-1918-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-5-2-1-independent-verification-of-authenticatedhumanprincipal-trusted-construction-and-provenance-repair)
 - Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.2 (20260828-1856-idle-awaiting-human-authorization-post-149o-20l-7o-3w-1r-2b-1r-1-1r-5-2)

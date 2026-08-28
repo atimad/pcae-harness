@@ -218,6 +218,7 @@ class _Fixture:
             descriptor_store=self.descriptor_store,
             proof_store=self.proof_store,
             lifecycle_store=self.lifecycle_store,
+            challenge=self.challenge,
             proof_id=self.proof_id,
             approval_id=self.approval_id,
             now=NOW,
@@ -794,7 +795,7 @@ def test_verifier_result_attribute_copy_produces_a_distinguishable_object(tmp_pa
 # ═══════════════════════════════════════════════════════════════════════
 
 
-def test_hpac_verifier_module_has_zero_production_consumers():
+def test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier():
     import ast
     import pathlib
 
@@ -814,7 +815,9 @@ def test_hpac_verifier_module_has_zero_production_consumers():
                 for alias in node.names:
                     if "hpac_verifier" in alias.name:
                         consumers.append(str(path))
-    assert consumers == [], f"unexpected production consumers of hpac_verifier: {consumers}"
+    assert set(consumers) == {
+        str(src_root / "core" / "runtime_authority.py")
+    }
 
 
 def test_hpac_verifier_module_never_imports_pb_runtime_authority_or_gate9():

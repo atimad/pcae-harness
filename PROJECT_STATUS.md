@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7 — B1/B7/N1/N2 Production Authority
+Repair Implementation. **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING —
+REAL AUTHORITY STILL UNAVAILABLE.** Implemented the frozen `.1R.6` Option-A
+repair in exactly `runtime_authority.py`, `runtime_dispatch_permission.py`,
+and `hpac_verifier.py`: B1 projections are exact-object registered,
+content/invocation bound, and freshly revalidated; B7 rereads all durable
+dispatch-identity records at request construction; N1 resolves approval IDs
+through the exact canonical store and rejects caller objects; N2 derives
+human provenance only from freshly reverified verifier-owned principals; and
+HPAC-REQ-054 Step 4 independently recomputes the exact challenge digest.
+Both approval creation and validation hard-reject deterministic NON-REAL
+assurance. Forty-one new adversarial tests pass; the exact affected comparison
+is baseline/candidate 462 passed + the same two historical failures, and the
+21-file HPAC/foundation comparison is baseline/candidate 458 passed + the same
+54 historical failures, yielding zero candidate-only nonpassing nodes. The
+38,170-item full coverage split fallback completed with the historical
+non-green aggregate separately classified. Contracts, approval-store shape,
+Gate 5/Gate 9 coordinator wiring, PB policy/POL-005, providers, FIDO2/UI, and
+runtime enablement are unchanged. Runtime remains `Observed / observe /
+unavailable`. B1/B7/N1/N2 are repaired but not closed pending independent
+verification. Recommended next phase, not begun and requiring separate human
+authorization: **149O.20L.7O.3W.1R.2B.1R.1.1R.8 — Independent Verification
+of B1/B7/N1/N2 Production Authority Repair Implementation.** See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_7_B1_B7_N1_N2_PRODUCTION_AUTHORITY_REPAIR_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.6 — B1/B7/N1/N2 Production Authority
 Repair Integration Planning. **PLANNING COMPLETE — NOT IMPLEMENTED.**
 Planning-only phase; re-derived all four outstanding production defects

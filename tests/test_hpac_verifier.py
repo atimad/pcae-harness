@@ -216,6 +216,7 @@ class _Rig:
             descriptor_store=self.descriptor_store,
             proof_store=self.proof_store,
             lifecycle_store=self.lifecycle_store,
+            challenge=self.challenge,
             proof_id=self.proof_id,
             approval_id=self.approval_id,
             now=NOW,
@@ -527,7 +528,7 @@ def test_hpac_verifier_module_does_not_import_pb_or_runtime_authority_modules():
             assert not module_name.endswith(suffix), f"hpac_verifier.py must not import {module_name}"
 
 
-def test_zero_production_consumers_of_hpac_verifier_module():
+def test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier_module():
     consumers = []
     for path in _all_python_sources():
         if path.name == "hpac_verifier.py":
@@ -535,7 +536,7 @@ def test_zero_production_consumers_of_hpac_verifier_module():
         text = path.read_text(encoding="utf-8")
         if "hpac_verifier" in text:
             consumers.append(str(path.relative_to(_REPO_ROOT)))
-    assert consumers == [], f"unexpected production consumers of hpac_verifier: {consumers}"
+    assert consumers == ["src/pcae/core/runtime_authority.py"]
 
 
 def test_gate9_consumption_store_is_never_referenced_by_the_verifier():

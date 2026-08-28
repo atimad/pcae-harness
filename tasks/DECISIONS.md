@@ -3406,3 +3406,40 @@
   infrastructure evidence, not a task-closure oracle: its collection aborts
   before execution because two historical parametrizations generate
   worker-specific UUID node IDs. No skip-check override is used.
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7 implements `.1R.6` Option A without
+  architectural substitution: B1 exact-object/content-bound projection
+  provenance, B7 durable dispatch-identity reread, N1 exact canonical-store
+  ID resolution, N2 freshly reverified verifier-principal-derived provenance,
+  and HPAC-REQ-054 Step-4 exact challenge digest recomputation land together.
+- Phase `.1R.7` requires current canonical revalidation at each existing
+  authority consumption point. `AuthenticatedHumanPrincipal` retains its
+  private store/challenge verification context; projection consumption reruns
+  approval/HPAC/expiry/consumption validation; dispatch request construction
+  rereads all three identity-registry records. These are validation-only
+  primitives, not Gate-5 coordinator or Gate-9 consumption wiring.
+- Phase `.1R.7` preserves the frozen approval-store and legacy RIASC v1.0
+  persisted envelope because store/contracts are forbidden scope. Both
+  production authority transitions independently hard-reject the only current
+  deterministic `FIXTURE_NON_REAL` assurance, so this structural limitation
+  creates no real authority path. A schema/store migration remains separate.
+- Phase `.1R.7` keeps deterministic approval construction exclusively in
+  `tests/_rdw3w_helpers.py`; production modules are AST-checked not to import
+  it. Positive B1 mechanics are tested only with explicit private
+  same-process scaffolding because real PRODUCTION HPAC authority does not
+  exist; no deterministic result is asserted real.
+- Phase `.1R.7` classifies regression evidence by immutable SHA
+  `b85e903c62f386f3c5a45747ded5ff7682b77267`: affected-existing baseline and
+  candidate both 462 passed / the same two failures; 21-file HPAC/foundation
+  baseline and candidate both 458 passed / the same 54 failures. Candidate-only
+  nonpassing nodes and unexplained attributable regressions are zero.
+- Phase `.1R.7` retains raw `python -m pytest -n auto` as infrastructure
+  evidence: 38,170 items collect but execution aborts because one historical
+  module generates worker-specific UUID node IDs. Complete coverage was run as
+  38,004 items under xdist excluding that module plus 166 serial module items:
+  combined 37,451 passed, 691 historical failures, 9 historical errors,
+  18 skipped, 1 xfailed. This aggregate is not the attribution oracle.
+- Phase `.1R.7` leaves F3/F4 deferred, F7 unchanged, Gate-5/Gate-9 coordinator
+  wiring unscheduled, PB/POL-005 unchanged, runtime unavailable, and the `.3`
+  delegated finalization/commit/push incident `UNAUTHORIZED`. B1/B7/N1/N2 and
+  F2 are repaired but not closed pending the separately authorized exact next
+  phase `.1R.8` independent verification.

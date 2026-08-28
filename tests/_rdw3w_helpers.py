@@ -75,6 +75,50 @@ def build_approval(
     expires_at: str = EXPIRES_AT,
     approver_id: str = "atila-madai",
 ) -> ra.RuntimeInvocationApproval:
+    """Compatibility alias for the explicitly non-production fixture path."""
+    return construct_test_only_deterministic_approval(
+        invocation_id=invocation_id,
+        runtime_target_id=runtime_target_id,
+        prompt=prompt,
+        repository_identity=repository_identity,
+        task_id=task_id,
+        phase_id=phase_id,
+        session_id=session_id,
+        head_commit=head_commit,
+        task_contract_digest=task_contract_digest,
+        policy_version=policy_version,
+        created_at=created_at,
+        expires_at=expires_at,
+        approver_id=approver_id,
+    )
+
+
+def construct_test_only_deterministic_approval(
+    *,
+    approval_id: str | None = None,
+    invocation_id: str | None = None,
+    runtime_target_id: str = TARGET_A,
+    prompt: str = "Do the thing.",
+    repository_identity: str = REPO_A,
+    task_id: str = TASK_A,
+    phase_id: str = PHASE_ID,
+    session_id: str | None = None,
+    head_commit: str = HEAD_COMMIT_A,
+    task_contract_digest: str = TASK_CONTRACT_DIGEST_A,
+    policy_version: str = POLICY_VERSION_A,
+    created_at: str = CREATED_AT,
+    expires_at: str = EXPIRES_AT,
+    approver_id: str = "test-only-non-real-principal",
+) -> ra.RuntimeInvocationApproval:
+    """Build a NON-REAL approval-shaped object without production authority.
+
+    This test-module-only helper intentionally bypasses both the production
+    creation hard stop and canonical persistence.  Production code is
+    forbidden from importing it; an AST guard in the .1R.7 suite enforces
+    that boundary.
+    """
+    if ra._parse_utc_timestamp(expires_at) <= ra._parse_utc_timestamp(created_at):
+        raise ValueError("expires_at_must_be_after_created_at")
     subject = ra.ApprovalSubject(
         invocation_id=invocation_id or new_invocation_id(),
         runtime_target_id=runtime_target_id,
@@ -101,17 +145,28 @@ def build_approval(
         task_contract_digest=task_contract_digest,
         policy_version=policy_version,
     )
-    return ra.create_runtime_invocation_approval(
+    preview_digest = ra.build_approval_preview_digest(
+        subject=subject,
+        approval_scope=scope,
+        expires_at=expires_at,
+    )
+    partial = ra.RuntimeInvocationApproval(
+        approval_id=approval_id or ra.new_approval_id(),
+        record_digest="",
+        created_at=created_at,
+        expires_at=expires_at,
         subject=subject,
         governance_context=gov,
         approval_scope=scope,
         adapter_binding=adapter,
         freshness_snapshot=freshness,
-        approver_id=approver_id,
-        identity_evidence_kind=ra.IDENTITY_EVIDENCE_TYPED_CONFIRMATION_ONLY,
-        created_at=created_at,
-        expires_at=expires_at,
+        provenance=ra.ApprovalProvenance(
+            approver_id=approver_id,
+            identity_evidence_kind=ra.IDENTITY_EVIDENCE_TYPED_CONFIRMATION_ONLY,
+            approval_preview_digest=preview_digest,
+        ),
     )
+    return replace(partial, record_digest=ra.compute_record_digest(partial))
 
 
 def matching_context(
@@ -201,33 +256,43 @@ def new_dispatch_identity(
             identity_tracker=rdp.RuntimeDispatchIdentityTracker(root),
             invocation_id=invocation_id,
         )
-    with tempfile.TemporaryDirectory() as temporary_root:
-        return rdp.new_runtime_dispatch_identity(
-            inputs,
-            identity_tracker=rdp.RuntimeDispatchIdentityTracker(Path(temporary_root)),
-            invocation_id=invocation_id,
-        )
+    temporary_root = tempfile.TemporaryDirectory()
+    tracker = rdp.RuntimeDispatchIdentityTracker(Path(temporary_root.name))
+    # Keep the test-only directory alive for the identity's dispatch-time
+    # registry reread. RuntimeDispatchIdentity retains the tracker.
+    tracker._test_temporary_directory = temporary_root
+    return rdp.new_runtime_dispatch_identity(
+        inputs,
+        identity_tracker=tracker,
+        invocation_id=invocation_id,
+    )
 
 
 def full_chain(
     *, simulation_only: bool = True, tracker: rdp.RuntimeDispatchIdentityTracker | None = None
 ):
-    """End-to-end: approval -> validation -> PB request -> decision, all
-    matching. Returns (approval, projection, request, decision)."""
+    """End-to-end deterministic fixture through the production hard stop.
+
+    The approval-shaped object is intentionally noncanonical and NON-REAL,
+    so production validation rejects it and PB receives no authority.
+    """
     approval = build_approval()
     ctx = matching_context(approval)
     projection, reasons = ra.validate_approval(
         approval, context=ctx, consumption_lookup=always_unconsumed
     )
-    assert projection is not None and reasons == ()
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     inputs = dispatch_inputs()
     if tracker is None:
-        with tempfile.TemporaryDirectory() as temporary_root:
-            identity = rdp.new_runtime_dispatch_identity(
-                inputs,
-                identity_tracker=rdp.RuntimeDispatchIdentityTracker(Path(temporary_root)),
-                invocation_id=approval.subject.invocation_id,
-            )
+        temporary_root = tempfile.TemporaryDirectory()
+        tracker = rdp.RuntimeDispatchIdentityTracker(Path(temporary_root.name))
+        tracker._test_temporary_directory = temporary_root
+        identity = rdp.new_runtime_dispatch_identity(
+            inputs,
+            identity_tracker=tracker,
+            invocation_id=approval.subject.invocation_id,
+        )
     else:
         identity = rdp.new_runtime_dispatch_identity(
             inputs,

@@ -1,5 +1,5 @@
 """
-Runtime Dispatch Permission — Phase 149O.20L.7O.3W.
+Runtime Dispatch Permission — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7.
 
 Implements PBRD-001 v1.1's `runtime_dispatch` request architecture
 extension: the trusted construction of a `PermissionBrokerRequest`
@@ -8,12 +8,14 @@ carrying the exact fourteen immutable binding facts
 trusted approval projection adapter (PBRD-001 §7 / §22) that is the only
 path by which `approval_present` may ever become true for this action.
 
-This module is a pure construction/evaluation boundary. It never spawns a
-process, never touches the network, never reads credentials, and never
-calls `pcae.core.runtime_authority`'s validator itself -- it *consumes*
-that validator's output (`ValidatedAuthorityProjection`), matching
-RIHAC-001's wall: "human approval != PB permission" (gate 5 and gate 6
-are independent gates; this module implements gate 6 only).
+This module is a construction/evaluation boundary. It never spawns a
+process, never touches the network, and never reads credentials directly.
+Before projecting an existing `ValidatedAuthorityProjection`, it asks the
+authority boundary to re-resolve and revalidate every canonical dependency;
+that is a B1 currentness check, not Gate-5 coordinator wiring. It then
+constructs the already-existing PB request shape, preserving RIHAC-001's
+wall that human approval is not PB permission. This phase changes no PB
+policy or evaluator.
 
 POL-005 (`ExecutionDisabledRule`) is untouched by this module and by
 design: every `runtime_dispatch` request built here with
@@ -44,6 +46,7 @@ from .runtime_authority import (
     ValidatedAuthorityProjection,
     compute_canonical_digest,
     is_trusted_validated_authority_projection,
+    revalidate_validated_authority_projection,
 )
 from .runtime_invocation import (
     compute_runtime_dispatch_idempotency_key,
@@ -244,6 +247,9 @@ class RuntimeDispatchIdentity:
     idempotency_key: str
     _identity_seal: object | None = field(default=None, repr=False, compare=False)
     _registration_digest: str = field(default="", repr=False, compare=False)
+    _identity_tracker: RuntimeDispatchIdentityTracker | None = field(
+        default=None, repr=False, compare=False
+    )
 
 
 def _identity_registration_digest(identity: RuntimeDispatchIdentity) -> str:
@@ -282,6 +288,7 @@ def new_runtime_dispatch_identity(
             canonical_runtime_dispatch_projection(inputs, invocation_id=resolved_invocation_id)
         ),
         _identity_seal=_RUNTIME_DISPATCH_IDENTITY_SEAL,
+        _identity_tracker=identity_tracker,
     )
     identity_tracker.register(identity)
     return replace(identity, _registration_digest=_identity_registration_digest(identity))
@@ -324,6 +331,24 @@ class RuntimeDispatchIdentityTracker:
             if not stat.S_ISDIR(entry_stat.st_mode) or stat.S_ISLNK(entry_stat.st_mode):
                 raise RuntimeDispatchConstructionError("identity_store_path_untrusted")
 
+    def _require_directory(self, path: Path) -> None:
+        """Verify every existing registry path component without creating it."""
+        try:
+            root_stat = self._repository_root.lstat()
+        except FileNotFoundError as exc:
+            raise RuntimeDispatchConstructionError("identity_store_root_missing") from exc
+        if not stat.S_ISDIR(root_stat.st_mode) or stat.S_ISLNK(root_stat.st_mode):
+            raise RuntimeDispatchConstructionError("identity_store_root_untrusted")
+        current = self._repository_root
+        for component in path.relative_to(self._repository_root).parts:
+            current = current / component
+            try:
+                entry_stat = current.lstat()
+            except FileNotFoundError as exc:
+                raise RuntimeDispatchConstructionError("identity_store_record_missing") from exc
+            if not stat.S_ISDIR(entry_stat.st_mode) or stat.S_ISLNK(entry_stat.st_mode):
+                raise RuntimeDispatchConstructionError("identity_store_path_untrusted")
+
     def _read_record(self, path: Path) -> dict:
         try:
             entry_stat = path.lstat()
@@ -344,6 +369,8 @@ class RuntimeDispatchIdentityTracker:
             finally:
                 os.close(fd)
             parsed = json.loads(payload.decode("utf-8"))
+        except FileNotFoundError as exc:
+            raise RuntimeDispatchConstructionError("identity_store_record_missing") from exc
         except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise RuntimeDispatchConstructionError("identity_record_corrupt") from exc
         if not isinstance(parsed, dict):
@@ -410,12 +437,53 @@ class RuntimeDispatchIdentityTracker:
             allow_identical=False,
         )
 
+    def revalidate(self, identity: RuntimeDispatchIdentity) -> None:
+        """Re-read and exactly match all three durable identity records.
+
+        This is the B7 dispatch-time check, separate from construction-time
+        registration.  Missing, substituted, extended, corrupt, linked, or
+        symlinked state fails closed; no registry directory or record is
+        recreated by revalidation.
+        """
+
+        if (
+            type(identity) is not RuntimeDispatchIdentity
+            or identity._identity_tracker is not self
+            or identity._registration_digest != _identity_registration_digest(identity)
+        ):
+            raise RuntimeDispatchConstructionError("untrusted_runtime_dispatch_identity")
+        invocation_record = {
+            "invocation_id": identity.invocation_id,
+            "idempotency_key": identity.idempotency_key,
+        }
+        expected_records = (
+            (
+                self._root / "invocations" / f"{identity.invocation_id}.json",
+                invocation_record,
+            ),
+            (
+                self._root / "idempotency" / f"{identity.idempotency_key}.json",
+                invocation_record,
+            ),
+            (
+                self._root / "attempts" / f"{identity.attempt_id}.json",
+                {**invocation_record, "attempt_id": identity.attempt_id},
+            ),
+        )
+        for path, expected in expected_records:
+            self._require_directory(path.parent)
+            if self._read_record(path) != expected:
+                raise RuntimeDispatchConstructionError(
+                    f"identity_registry_mismatch:{path.parent.name}"
+                )
+
 
 def project_human_authority_binding(
     validated_authority: ValidatedAuthorityProjection | None,
     *,
     identity: RuntimeDispatchIdentity,
     inputs: RuntimeDispatchRequestConstructionInput,
+    current_time: str | None = None,
 ) -> tuple[RuntimeDispatchHumanAuthorityBinding, bool]:
     """PBRD-001 §7/§22: the ONLY function in this module (indeed, in this
     phase's entire surface) that may cause `approval_present=True`. It
@@ -435,6 +503,10 @@ def project_human_authority_binding(
         )
     if not is_trusted_validated_authority_projection(validated_authority):
         raise RuntimeDispatchConstructionError("untrusted_validated_authority_projection")
+    if current_time is None or not revalidate_validated_authority_projection(
+        validated_authority, current_time=current_time
+    ):
+        raise RuntimeDispatchConstructionError("stale_validated_authority_projection")
     expected_binding = _expected_subject_scope_binding_digest(identity=identity, inputs=inputs)
     if validated_authority.subject_scope_binding_digest != expected_binding:
         raise RuntimeDispatchConstructionError("validated_authority_subject_scope_mismatch")
@@ -453,6 +525,7 @@ def build_runtime_dispatch_permission_broker_request(
     identity: RuntimeDispatchIdentity,
     inputs: RuntimeDispatchRequestConstructionInput,
     validated_authority: ValidatedAuthorityProjection | None,
+    authority_current_time: str | None = None,
     simulation_only: bool = True,
 ) -> PermissionBrokerRequest:
     """The trusted, contract-fixed PCAE integration point for
@@ -474,6 +547,8 @@ def build_runtime_dispatch_permission_broker_request(
         or identity._registration_digest != _identity_registration_digest(identity)
     ):
         raise RuntimeDispatchConstructionError("untrusted_runtime_dispatch_identity")
+    if type(identity._identity_tracker) is not RuntimeDispatchIdentityTracker:
+        raise RuntimeDispatchConstructionError("runtime_dispatch_identity_tracker_missing")
     if not is_valid_generated_id(identity.invocation_id, prefix="inv"):
         raise RuntimeDispatchConstructionError(f"invalid_invocation_id:{identity.invocation_id!r}")
     if not is_valid_generated_id(identity.attempt_id, prefix="att"):
@@ -488,8 +563,15 @@ def build_runtime_dispatch_permission_broker_request(
             f"presented={identity.idempotency_key!r} expected={expected_key!r}"
         )
 
+    # B7: identity construction is not cached authority.  Re-read the
+    # append-only durable registry at the dispatch-request choke point.
+    identity._identity_tracker.revalidate(identity)
+
     human_authority_binding, approval_present = project_human_authority_binding(
-        validated_authority, identity=identity, inputs=inputs
+        validated_authority,
+        identity=identity,
+        inputs=inputs,
+        current_time=authority_current_time,
     )
 
     facts = RuntimeDispatchRequestFacts(

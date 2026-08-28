@@ -78,6 +78,7 @@ boundary; the identity registry is.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Optional
 
 from pcae.core.hpac_foundation import (
@@ -85,9 +86,11 @@ from pcae.core.hpac_foundation import (
     HPACAuthorityError,
     HPACResolvedRecord,
     HPACWriterCapability,
+    canonical_digest,
     require_nonempty_str,
     require_timestamp,
 )
+from pcae.core.human_authenticator import Challenge
 from pcae.core.hpac_lifecycle import (
     HPACLifecycleStateError,
     HPACLifecycleStore,
@@ -115,6 +118,7 @@ __all__ = [
     "AuthenticatedHumanPrincipal",
     "verify_human_authentication",
     "is_verifier_authenticated_principal",
+    "reverify_authenticated_principal",
 ]
 
 #: The only mechanism identity this phase's verifier can ever certify.
@@ -271,6 +275,34 @@ class AuthenticatedHumanPrincipal:
 _AUTHENTIC_PRINCIPAL_REGISTRY: "set[AuthenticatedHumanPrincipal]" = set()
 
 
+@dataclass(frozen=True)
+class _PrincipalVerificationContext:
+    """Verifier-owned inputs needed to re-resolve a result at consumption.
+
+    This context is deliberately process-local and keyed by exact result
+    identity.  It is neither authority-bearing data nor serializable state;
+    losing it (including across process restart) makes the old result
+    unusable and requires a new authentication ceremony.
+    """
+
+    registry: HumanPrincipalRegistryStore
+    presentation_store: TrustedApprovalPresentationStore
+    descriptor_store: PresentationMechanismDescriptorStore
+    proof_store: HumanAuthenticationProofStore
+    lifecycle_store: HPACLifecycleStore
+    challenge: Challenge
+    proof_id: str
+    approval_id: str
+    gate5_writer: HPACWriterCapability
+    verifier_version: str
+    max_proof_age_seconds: Optional[int]
+
+
+_AUTHENTIC_PRINCIPAL_CONTEXTS: dict[
+    AuthenticatedHumanPrincipal, _PrincipalVerificationContext
+] = {}
+
+
 def is_verifier_authenticated_principal(candidate: object) -> bool:
     """HPAC-REQ-056's authoritative trust check.
 
@@ -295,7 +327,71 @@ def is_verifier_authenticated_principal(candidate: object) -> bool:
     return (
         isinstance(candidate, AuthenticatedHumanPrincipal)
         and candidate in _AUTHENTIC_PRINCIPAL_REGISTRY
+        and candidate in _AUTHENTIC_PRINCIPAL_CONTEXTS
     )
+
+
+def reverify_authenticated_principal(
+    candidate: object,
+    *,
+    now: str,
+    occurred_at: str,
+    require_real_assurance: bool = False,
+) -> AuthenticatedHumanPrincipal:
+    """Freshly re-run the complete canonical verification for ``candidate``.
+
+    Registry membership proves only that the exact object was emitted by a
+    past verifier call.  Authority consumption must also re-resolve current
+    principal, credential, proof, presentation, and lifecycle state.  This
+    helper owns that second half of HPAC-REQ-058 and deliberately has no
+    fallback based on object shape or copied fields.
+    """
+
+    require_timestamp(now, context="reverify_authenticated_principal.now")
+    require_timestamp(occurred_at, context="reverify_authenticated_principal.occurred_at")
+    if not is_verifier_authenticated_principal(candidate):
+        raise HPACVerificationError(
+            "authenticated principal is not a current verifier-issued result"
+        )
+    assert isinstance(candidate, AuthenticatedHumanPrincipal)
+    context = _AUTHENTIC_PRINCIPAL_CONTEXTS.get(candidate)
+    if context is None:
+        raise HPACVerificationError("authenticated principal verification context is unavailable")
+    refreshed = verify_human_authentication(
+        registry=context.registry,
+        presentation_store=context.presentation_store,
+        descriptor_store=context.descriptor_store,
+        proof_store=context.proof_store,
+        lifecycle_store=context.lifecycle_store,
+        challenge=context.challenge,
+        proof_id=context.proof_id,
+        approval_id=context.approval_id,
+        now=now,
+        occurred_at=occurred_at,
+        gate5_writer=context.gate5_writer,
+        verifier_version=context.verifier_version,
+        require_real_assurance=require_real_assurance,
+        max_proof_age_seconds=context.max_proof_age_seconds,
+    )
+    try:
+        if (
+            refreshed.principal_id != candidate.principal_id
+            or refreshed.credential_id != candidate.credential_id
+            or refreshed.mechanism_id != candidate.mechanism_id
+            or refreshed.approval_id != candidate.approval_id
+            or refreshed.invocation_id != candidate.invocation_id
+            or refreshed.proof_id != candidate.proof_id
+            or refreshed.presentation_id != candidate.presentation_id
+        ):
+            raise HPACVerificationError(
+                "fresh verification result does not match the consumed principal binding"
+            )
+    finally:
+        # ``refreshed`` is verification evidence for this consumption, not
+        # a separately issued authority object.  Keeping it registered would
+        # grow the strong-reference provenance registry on every recheck.
+        _AUTHENTIC_PRINCIPAL_CONTEXTS.pop(refreshed, None)
+    return candidate
 
 
 def _resolve_principal(
@@ -345,6 +441,17 @@ def _verify_assertion_material(
     against ``credential.public_key``.
     """
 
+    if not credential.public_key:
+        raise HPACVerificationError("credential has no public verification material")
+    if not proof.assertion:
+        raise HPACVerificationError("proof assertion is empty")
+
+
+def _verify_mechanism_eligibility(
+    credential: CredentialRecord, proof: HumanAuthenticationProof
+) -> None:
+    """HPAC-REQ-054 step 3, kept separate from step-6 assertion checks."""
+
     if credential.mechanism_id != proof.mechanism_id:
         raise HPACVerificationError(
             "credential mechanism_id does not match proof mechanism_id "
@@ -355,10 +462,6 @@ def _verify_assertion_material(
             "no real assertion-verification mechanism is implemented in this "
             f"phase: {proof.mechanism_id!r}"
         )
-    if not credential.public_key:
-        raise HPACVerificationError("credential has no public verification material")
-    if not proof.assertion:
-        raise HPACVerificationError("proof assertion is empty")
 
 
 def _check_up_uv(proof: HumanAuthenticationProof) -> None:
@@ -395,6 +498,7 @@ def verify_human_authentication(
     descriptor_store: PresentationMechanismDescriptorStore,
     proof_store: HumanAuthenticationProofStore,
     lifecycle_store: HPACLifecycleStore,
+    challenge: Challenge,
     proof_id: str,
     approval_id: str,
     now: str,
@@ -426,6 +530,8 @@ def verify_human_authentication(
     require_nonempty_str(approval_id, context="verify_human_authentication.approval_id")
     require_timestamp(now, context="verify_human_authentication.now")
     require_timestamp(occurred_at, context="verify_human_authentication.occurred_at")
+    if type(challenge) is not Challenge:
+        raise HPACVerificationError("exact Challenge state is required for digest recomputation")
 
     # Step 1 (partial): resolve the canonical proof by ID only.
     try:
@@ -442,9 +548,43 @@ def verify_human_authentication(
         registry, proof.credential_id, expected_principal_id=proof.principal_id
     )
 
-    # Step 3 + step 6: mechanism resolution/compatibility and assertion
-    # verification against the resolved credential's public material.
-    _verify_assertion_material(resolved_credential.record, proof)
+    # Step 3: mechanism resolution/compatibility and minimum eligibility.
+    _verify_mechanism_eligibility(resolved_credential.record, proof)
+
+    # Step 4: independently recompute the digest from the complete exact
+    # ephemeral challenge state.  A lifecycle/proof agreement is not a
+    # substitute for this computation: two records can agree on the same
+    # caller-manufactured digest.  The exact field set mirrors
+    # HPACLifecycleStore.open_challenge_canonical and HPAC-REQ-049.
+    challenge_body = {
+        "domain_separator": challenge.domain_separator,
+        "challenge_version": challenge.challenge_version,
+        "proof_schema_version": challenge.proof_schema_version,
+        "principal_id": challenge.principal_id,
+        "credential_id": challenge.credential_id,
+        "approval_subject_digest": challenge.approval_subject_digest,
+        "trusted_presentation_digest": challenge.trusted_presentation_digest,
+        "nonce": challenge.nonce,
+        "issued_at": challenge.issued_at,
+        "expires_at": challenge.expires_at,
+    }
+    recomputed_challenge_digest = canonical_digest(challenge_body)
+    if recomputed_challenge_digest != challenge.challenge_digest:
+        raise HPACVerificationError(
+            "challenge_digest does not match independently recomputed challenge state"
+        )
+    if challenge.challenge_digest != proof.challenge_digest:
+        raise HPACVerificationError("challenge state does not match the canonical proof")
+    if (
+        challenge.principal_id != proof.principal_id
+        or challenge.credential_id != proof.credential_id
+        or challenge.approval_subject_digest != proof.approval_subject_digest
+        or challenge.trusted_presentation_digest
+        != proof.trusted_presentation_ref.get("presentation_digest")
+    ):
+        raise HPACVerificationError(
+            "challenge state does not match proof principal/credential/subject/presentation binding"
+        )
 
     # Step 5: presentation evidence -- canonical resolution re-verifies
     # installed-mechanism provenance, attestation exactness, and
@@ -470,25 +610,50 @@ def verify_human_authentication(
             "presentation approval_subject_digest does not match proof approval_subject_digest"
         )
 
-    # Step 4: challenge-state consistency. No standalone canonical
-    # Challenge store exists in the foundation (Challenge is ephemeral,
-    # HPAC-REQ-049) -- the trusted record of "what challenge was answered"
-    # is the lifecycle chain's genesis binding, cross-checked against the
-    # proof's own challenge_digest below (step 9's chain resolution).
+    # Step 6: assertion verification against the resolved credential's
+    # public material.  Kept after challenge and presentation binding so
+    # HPAC-REQ-054's fail-closed sequence is literal, not merely complete.
+    _verify_assertion_material(resolved_credential.record, proof)
 
     # Step 7: UP/UV, both mandatory.
     _check_up_uv(proof)
 
     # Step 8: freshness.
-    if proof.authenticated_at > now:
+    presentation_expires_at = presentation.canonical_subject.get("expires_at", "")
+    for timestamp_name, timestamp in (
+        ("challenge.issued_at", challenge.issued_at),
+        ("challenge.expires_at", challenge.expires_at),
+        ("proof.authenticated_at", proof.authenticated_at),
+        ("presentation.expires_at", presentation_expires_at),
+        ("now", now),
+    ):
+        require_timestamp(timestamp, context=timestamp_name)
+
+    def _instant(value: str) -> datetime:
+        return datetime.fromisoformat(value.removesuffix("Z") + "+00:00").astimezone(
+            timezone.utc
+        )
+
+    if _instant(challenge.expires_at) <= _instant(challenge.issued_at):
+        raise HPACVerificationError("challenge expiry is not after issuance")
+    if _instant(proof.authenticated_at) > _instant(now):
         raise HPACVerificationError("proof authenticated_at is in the future relative to now")
-    if presentation.canonical_subject.get("expires_at", "") < now:
+    if _instant(now) >= _instant(presentation_expires_at):
         raise HPACVerificationError("approval subject has expired")
+    if not (
+        _instant(challenge.issued_at)
+        <= _instant(proof.authenticated_at)
+        < _instant(challenge.expires_at)
+    ):
+        raise HPACVerificationError("proof authentication is outside the challenge lifetime")
+    if _instant(now) >= _instant(challenge.expires_at):
+        raise HPACVerificationError("challenge has expired")
     if max_proof_age_seconds is not None:
-        # Defensive hook for a future trusted-clock integration; this
-        # phase's fixtures use fixed deterministic timestamps, so no
-        # numeric bound is exercised unless a caller explicitly opts in.
-        pass
+        if max_proof_age_seconds < 0:
+            raise HPACVerificationError("max_proof_age_seconds must not be negative")
+        proof_age = (_instant(now) - _instant(proof.authenticated_at)).total_seconds()
+        if proof_age > max_proof_age_seconds:
+            raise HPACVerificationError("proof is older than the configured maximum age")
 
     # Step 9: full lifecycle chain, canonical (provenance-checked) resolution.
     try:
@@ -564,4 +729,17 @@ def verify_human_authentication(
     # registry that is_verifier_authenticated_principal checks -- the
     # actual HPAC-REQ-056 provenance boundary (see module/class docstrings).
     _AUTHENTIC_PRINCIPAL_REGISTRY.add(result)
+    _AUTHENTIC_PRINCIPAL_CONTEXTS[result] = _PrincipalVerificationContext(
+        registry=registry,
+        presentation_store=presentation_store,
+        descriptor_store=descriptor_store,
+        proof_store=proof_store,
+        lifecycle_store=lifecycle_store,
+        challenge=challenge,
+        proof_id=proof_id,
+        approval_id=approval_id,
+        gate5_writer=gate5_writer,
+        verifier_version=verifier_version,
+        max_proof_age_seconds=max_proof_age_seconds,
+    )
     return result

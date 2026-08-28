@@ -71,26 +71,38 @@ def _adapter() -> authority.AdapterBinding:
 
 
 def _approval(*, invocation_id: str = "inv-" + "1" * 32) -> authority.RuntimeInvocationApproval:
-    return authority.create_runtime_invocation_approval(
-        subject=authority.ApprovalSubject(
+    item_subject = authority.ApprovalSubject(
             invocation_id=invocation_id,
             runtime_target_id=TARGET,
             prompt_hash=PROMPT,
             repository_identity=REPO,
             task_id=TASK,
-        ),
+        )
+    item_scope = _scope()
+    partial = authority.RuntimeInvocationApproval(
+        approval_id=authority.new_approval_id(),
+        record_digest="",
+        created_at=CREATED,
+        expires_at=EXPIRES,
+        subject=item_subject,
         governance_context=authority.GovernanceContext(phase_id=PHASE),
-        approval_scope=_scope(),
+        approval_scope=item_scope,
         adapter_binding=_adapter(),
         freshness_snapshot=authority.FreshnessSnapshot(
             head_commit=HEAD,
             task_contract_digest=TASK_DIGEST,
             policy_version="policy-v1",
         ),
-        approver_id="human:independent-verifier",
-        identity_evidence_kind=authority.IDENTITY_EVIDENCE_TYPED_CONFIRMATION_ONLY,
-        created_at=CREATED,
-        expires_at=EXPIRES,
+        provenance=authority.ApprovalProvenance(
+            approver_id="human:independent-verifier",
+            identity_evidence_kind=authority.IDENTITY_EVIDENCE_TYPED_CONFIRMATION_ONLY,
+            approval_preview_digest=authority.build_approval_preview_digest(
+                subject=item_subject, approval_scope=item_scope, expires_at=EXPIRES
+            ),
+        ),
+    )
+    return dataclasses.replace(
+        partial, record_digest=authority.compute_record_digest(partial)
     )
 
 
@@ -253,25 +265,34 @@ def test_original_b1_naive_projection_raw_boolean_and_missing_context_are_closed
     assert pb.PermissionBroker().evaluate(direct).decision == pb.DECISION_DENY
 
 
-def test_original_b1_exposes_blocker_projection_seal_is_copyable(tmp_path):
+def test_original_b1_copy_attack_is_closed_by_registry_and_content_binding(tmp_path):
     approval = _approval()
     legitimate, reasons = _validate(approval)
-    assert legitimate is not None and reasons == ()
+    assert legitimate is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     inputs = _inputs()
     identity = _identity(tmp_path, inputs, approval.subject.invocation_id)
+    original = authority.ValidatedAuthorityProjection(
+        approval_id=approval.approval_id,
+        record_digest=approval.record_digest,
+        subject_scope_binding_digest=_binding_digest(identity, inputs),
+        provenance_verdict="principal_derived",
+        freshness_verdict_digest="4" * 64,
+        expiry_verdict="not_expired",
+        consumption_state_verdict=authority.CONSUMPTION_STATE_NONE,
+        validated_at=NOW,
+    )
     forged = dataclasses.replace(
-        legitimate,
+        original,
         approval_id="ria-" + "f" * 32,
         record_digest="e" * 64,
         subject_scope_binding_digest=_binding_digest(identity, inputs),
     )
-    assert authority.is_trusted_validated_authority_projection(forged)
-    request = dispatch.build_runtime_dispatch_permission_broker_request(
-        identity=identity, inputs=inputs, validated_authority=forged, simulation_only=True
-    )
-    decision = pb.PermissionBroker().evaluate(request)
-    assert request.approval_present is True
-    assert decision.decision == pb.DECISION_ALLOW
+    assert authority.is_trusted_validated_authority_projection(forged) is False
+    with pytest.raises(dispatch.RuntimeDispatchConstructionError, match="untrusted"):
+        dispatch.build_runtime_dispatch_permission_broker_request(
+            identity=identity, inputs=inputs, validated_authority=forged, simulation_only=True
+        )
 
 
 def test_original_b1_exposes_blocker_sealed_pb_request_can_gain_fake_authority(tmp_path):
@@ -458,8 +479,9 @@ def test_tamper_variants_fail_closed(mutation):
         assert _validate(candidate)[0] is None
     elif mutation == "approval_id":
         candidate = _resign(approval, approval_id="ria-" + "f" * 32)
-        assert _validate(candidate)[0] is not None
-        # The model alone cannot prove canonical filename identity; the store must.
+        projection, reasons = _validate(candidate)
+        assert projection is None
+        assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     elif mutation == "unknown_field":
         data = approval.to_dict()
         data["approved"] = True
@@ -529,7 +551,8 @@ def test_original_b6_fractional_instants_are_chronological():
     projection, reasons = _validate(
         fractional, _context(fractional, current_time="2026-08-27T12:30:00Z")
     )
-    assert projection is not None and reasons == ()
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     projection, reasons = _validate(
         fractional, _context(fractional, current_time="2026-08-27T12:30:01Z")
     )
@@ -606,7 +629,7 @@ print(compute_runtime_dispatch_idempotency_key(d.canonical_runtime_dispatch_proj
     assert first == second and len(first) == 64
 
 
-def test_original_b7_exposes_blocker_identity_seal_is_copyable_and_registry_not_rechecked(tmp_path):
+def test_original_b7_copy_attack_is_closed_by_registry_reread(tmp_path):
     inputs = _inputs()
     identity = _identity(tmp_path, inputs)
     forged_attempt = "att-" + "f" * 32
@@ -621,10 +644,10 @@ def test_original_b7_exposes_blocker_identity_seal_is_copyable_and_registry_not_
             }
         ),
     )
-    request = dispatch.build_runtime_dispatch_permission_broker_request(
-        identity=forged, inputs=inputs, validated_authority=None
-    )
-    assert request.runtime_dispatch_context.attempt_id == forged_attempt
+    with pytest.raises(dispatch.RuntimeDispatchConstructionError, match="record_missing"):
+        dispatch.build_runtime_dispatch_permission_broker_request(
+            identity=forged, inputs=inputs, validated_authority=None
+        )
     assert not (
         tmp_path / ".pcae/runtime-dispatch-identities/v1/attempts" / f"{forged_attempt}.json"
     ).exists()
@@ -671,8 +694,8 @@ def test_policy_drift_requires_fresh_pb_without_erasing_human_act():
     projection, reasons = _validate(
         approval, _context(approval, policy_version="policy-v2")
     )
-    assert projection is not None
-    assert reasons == ("policy_drift_requires_fresh_pb_re_evaluation",)
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
 @pytest.mark.parametrize(
@@ -699,7 +722,8 @@ def test_one_shot_is_not_consumed_before_gate_9(tmp_path):
     store.create(approval)
     loaded = store.load(approval.approval_id)
     projection, reasons = _validate(loaded)
-    assert projection is not None and reasons == ()
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     inputs = _inputs()
     identity = _identity(tmp_path, inputs, approval.subject.invocation_id)
     request = dispatch.build_runtime_dispatch_permission_broker_request(
@@ -709,13 +733,15 @@ def test_one_shot_is_not_consumed_before_gate_9(tmp_path):
     assert decision.decision == pb.DECISION_DENY
     assert decision.causing_policy_id == "POL-005"
     projection_again, reasons_again = _validate(store.load(approval.approval_id))
-    assert projection_again is not None and reasons_again == ()
+    assert projection_again is None
+    assert reasons_again == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
 def test_strongest_valid_request_is_denied_only_by_pol005(tmp_path):
     approval = _approval()
     projection, reasons = _validate(approval)
-    assert projection is not None and reasons == ()
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     inputs = _inputs()
     identity = _identity(tmp_path, inputs, approval.subject.invocation_id)
     request = dispatch.build_runtime_dispatch_permission_broker_request(
@@ -725,7 +751,7 @@ def test_strongest_valid_request_is_denied_only_by_pol005(tmp_path):
     assert decision.decision == pb.DECISION_DENY
     assert decision.causing_policy_ids == ("POL-005",)
     assert decision.decision_reason == "execution_boundary_unavailable"
-    assert "POL-004" not in decision.triggered_policy_ids
+    assert "POL-004" in decision.triggered_policy_ids
 
 
 def test_missing_authority_triggers_pol004_and_forged_naive_authority_stays_missing(tmp_path):
@@ -867,7 +893,8 @@ def test_pure_authority_pb_path_has_no_process_network_credential_or_background_
 ):
     approval = _approval()
     projection, reasons = _validate(approval)
-    assert projection is not None and reasons == ()
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     inputs = _inputs()
     identity = _identity(tmp_path, inputs, approval.subject.invocation_id)
     observed = {"process": 0, "network": 0, "credential": 0, "thread": 0}
@@ -942,16 +969,24 @@ def test_identity_state_is_repository_local(tmp_path):
     assert (repo_b / dispatch.RuntimeDispatchIdentityTracker.STORE_ROOT).is_dir()
 
 
-def test_exposes_blocker_direct_approval_object_bypasses_canonical_store_provenance():
+def test_direct_approval_object_no_longer_bypasses_canonical_store_provenance():
     approval = _approval()
     projection, reasons = _validate(approval)
-    assert projection is not None and reasons == ()
-    assert projection.approval_id == approval.approval_id
+    assert projection is None
+    assert reasons == ("noncanonical_approval_reference:caller_supplied_object",)
 
 
-def test_exposes_blocker_caller_strings_can_mint_human_provenance():
+def test_caller_strings_no_longer_mint_human_provenance():
     approval = _approval()
-    assert approval.provenance.approver_id == "human:independent-verifier"
-    projection, reasons = _validate(approval)
-    assert projection is not None and reasons == ()
-    assert projection.provenance_verdict == "identified_human_distinct_from_producer"
+    with pytest.raises(TypeError, match="caller-supplied approver_id"):
+        authority.create_runtime_invocation_approval(
+            subject=approval.subject,
+            governance_context=approval.governance_context,
+            approval_scope=approval.approval_scope,
+            adapter_binding=approval.adapter_binding,
+            freshness_snapshot=approval.freshness_snapshot,
+            approver_id="human:independent-verifier",
+            identity_evidence_kind=authority.IDENTITY_EVIDENCE_TYPED_CONFIRMATION_ONLY,
+            created_at=CREATED,
+            expires_at=EXPIRES,
+        )

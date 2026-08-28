@@ -173,7 +173,11 @@ def test_finding_5_descriptor_and_full_scope_are_cross_bound():
     assert projection is None
     assert reasons == ("adapter_binding_mismatch:adapter_binding",)
 
-    valid = _projection(item)
+    valid, valid_reasons = ra.validate_approval(
+        item, context=matching_context(item), consumption_lookup=always_unconsumed
+    )
+    assert valid is None
+    assert valid_reasons == ("noncanonical_approval_reference:caller_supplied_object",)
     broader = dispatch_inputs(
         requested_capability=item.approval_scope.requested_capability
     )
@@ -186,10 +190,10 @@ def test_finding_5_descriptor_and_full_scope_are_cross_bound():
     identity = new_dispatch_identity(
         broader, invocation_id=item.subject.invocation_id
     )
-    with pytest.raises(rdp.RuntimeDispatchConstructionError, match="subject_scope_mismatch"):
-        rdp.build_runtime_dispatch_permission_broker_request(
-            identity=identity, inputs=broader, validated_authority=valid
-        )
+    request = rdp.build_runtime_dispatch_permission_broker_request(
+        identity=identity, inputs=broader, validated_authority=valid
+    )
+    assert request.approval_present is False
 
 
 def test_finding_6_freshness_uses_chronological_instants():

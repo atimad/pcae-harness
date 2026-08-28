@@ -80,9 +80,9 @@ def test_network_requirement_fixed_false():
 # ── approval_present projection (PBRD-001 §7/§22) ────────────────────────
 
 
-def test_valid_approval_projects_approval_present_true():
+def test_noncanonical_non_real_fixture_never_projects_approval_present_true():
     _, _, request, _ = full_chain()
-    assert request.approval_present is True
+    assert request.approval_present is False
 
 
 def test_missing_approval_projects_approval_present_false():
@@ -136,9 +136,9 @@ def test_mismatched_subject_approval_never_reaches_pb_as_present():
 # ── POL-004 / POL-005 interaction ────────────────────────────────────────
 
 
-def test_valid_request_simulation_only_allows():
+def test_structural_request_without_real_authority_requires_human_review():
     _, _, _, decision = full_chain(simulation_only=True)
-    assert decision.decision == pbf.DECISION_ALLOW
+    assert decision.decision == pbf.DECISION_HUMAN_REVIEW
 
 
 def test_missing_approval_triggers_pol004_human_review():
@@ -152,16 +152,13 @@ def test_missing_approval_triggers_pol004_human_review():
     assert "POL-004" in decision.causing_policy_ids
 
 
-def test_valid_approval_does_not_trigger_pol004():
+def test_non_real_fixture_does_not_satisfy_pol004():
     _, _, request, decision = full_chain(simulation_only=True)
-    assert "POL-004" not in decision.causing_policy_ids
+    assert request.approval_present is False
+    assert "POL-004" in decision.causing_policy_ids
 
 
-def test_real_dispatch_always_denied_by_pol005_regardless_of_valid_approval():
-    """The primary execution-safety invariant (spec §34): valid approval +
-    valid runtime_dispatch request + all other checks passing MUST still
-    result in DENY for real (non-simulation) dispatch, because POL-005 is
-    untouched."""
+def test_real_dispatch_always_denied_by_pol005_after_non_real_rejection():
     _, _, request, decision = full_chain(simulation_only=False)
     assert request.simulation_only is False
     assert decision.decision == pbf.DECISION_DENY
@@ -182,14 +179,11 @@ def test_pol005_deny_precedes_pol004_human_review_when_both_would_fire():
     assert "POL-005" in decision.causing_policy_ids
 
 
-def test_positive_control_plane_structural_validity_distinguished_from_pol005_deny():
-    """Structural validity (request valid, approval valid, POL-004
-    compatible) is provable independently of the final POL-005-caused
-    DENY -- proving foundation correctness without enabling execution."""
+def test_structural_non_real_path_remains_distinct_from_pol005_deny():
     approval, projection, sim_request, sim_decision = full_chain(simulation_only=True)
-    assert sim_request.approval_present is True
-    assert "POL-004" not in sim_decision.causing_policy_ids
-    assert sim_decision.decision == pbf.DECISION_ALLOW  # structural: would allow if execution existed
+    assert sim_request.approval_present is False
+    assert "POL-004" in sim_decision.causing_policy_ids
+    assert sim_decision.decision == pbf.DECISION_HUMAN_REVIEW
 
     inputs = dispatch_inputs()
     identity = new_dispatch_identity(inputs, invocation_id=approval.subject.invocation_id)
@@ -197,8 +191,8 @@ def test_positive_control_plane_structural_validity_distinguished_from_pol005_de
         identity=identity, inputs=inputs, validated_authority=projection, simulation_only=False,
     )
     real_decision = pbf.PermissionBroker().evaluate(real_request)
-    assert real_request.approval_present is True  # same valid authority
-    assert real_decision.decision == pbf.DECISION_DENY  # but real dispatch still denied
+    assert real_request.approval_present is False
+    assert real_decision.decision == pbf.DECISION_DENY
     assert real_decision.causing_policy_ids == ("POL-005",)
 
 
@@ -227,7 +221,9 @@ def test_human_authority_binding_is_reference_plus_digest_not_raw_authority():
     binding = request.runtime_dispatch_context.human_authority_binding
     field_names = {f.name for f in dataclasses.fields(binding)}
     assert field_names == {"approval_id", "approval_record_digest", "validation_evidence_digest"}
-    assert binding.approval_id.startswith("ria-")
+    assert binding.approval_id == ""
+    assert binding.approval_record_digest == ""
+    assert binding.validation_evidence_digest == ""
 
 
 # ── Construction-time identity validation ────────────────────────────────

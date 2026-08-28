@@ -1,5 +1,5 @@
 """
-Runtime Invocation Authority — Phase 149O.20L.7O.3W.
+Runtime Invocation Authority — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7.
 
 Implements the RIHAC-001 v1.0
 (docs/contracts/RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md) and
@@ -9,14 +9,15 @@ contracts: the immutable `RuntimeInvocationApproval` model, the
 `pcae.prompt-semantic.v1` canonicalizer, RIASC-001 schema-shape
 validation, and the RIHAC-001 twelve-step ordered validator.
 
-This module is a pure data/validation boundary. It imports no
+This module is a data/validation boundary. It imports no
 `subprocess`, `socket`, provider SDK, or execution-adjacent module, and it
 never reads a live git/OS clock or repository state itself -- every fact
 (repository fingerprint, task state, HEAD, current time, ...) is supplied
-by the trusted caller. This mirrors the existing `runtime_invocation.py`
-module's zero-process-inside-the-boundary discipline (RIHAC-001 does not
-require this module to *resolve* trust, only to *validate* facts a
-trusted coordinator already resolved).
+by the trusted caller. Approval and authenticated-principal authority are
+different: this phase resolves the former through its exact canonical
+store and freshly re-verifies the latter through verifier-owned HPAC store
+context. It still performs no dispatch, Permission Broker evaluation, or
+Gate-9 write.
 
 No field named `approved`, `authorized`, `permission`, `pb_allow`, or an
 equivalent authority shortcut exists anywhere in this module (RIASC-001
@@ -28,6 +29,12 @@ Consumption (RIHAC-001 §17, the durable gate-9 `dispatch_attempted`
 marker) is explicitly NOT implemented here -- gates 8/9 do not exist yet
 (3V.2 §16 "Approval consumption staging"). Validating an approval in this
 module never marks it consumed.
+
+The persisted approval envelope remains the frozen RIASC-001 v1.0 shape:
+the later contract files and canonical approval-store structure are outside
+this phase's allowlist.  The production boundary therefore hard-rejects the
+only currently implemented deterministic NON-REAL HPAC mechanism; no real
+authority success path is introduced by these structural repairs.
 """
 
 from __future__ import annotations
@@ -37,9 +44,9 @@ import json
 import re
 import unicodedata
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
-from typing import Callable, Mapping, Sequence
+from typing import Callable, Mapping, Protocol, Sequence
 
 Clock = Callable[[], str]
 
@@ -391,10 +398,11 @@ def create_runtime_invocation_approval(
     approval_scope: ApprovalScope,
     adapter_binding: AdapterBinding,
     freshness_snapshot: FreshnessSnapshot,
-    approver_id: str,
-    identity_evidence_kind: str,
     created_at: str,
     expires_at: str,
+    authenticated_principal: object | None = None,
+    approver_id: str | None = None,
+    identity_evidence_kind: str | None = None,
     approval_preview_digest: str | None = None,
 ) -> RuntimeInvocationApproval:
     """Construct one immutable `RuntimeInvocationApproval` (RIHAC-001 gate
@@ -405,25 +413,65 @@ def create_runtime_invocation_approval(
     task, or clock resolution of its own, matching `AuthoritySnapshot`'s
     existing construction discipline in `runtime_invocation.py`.
 
-    `expires_at` MUST be strictly later than `created_at` (RIHAC-001 §14);
-    violating this raises `ValueError` rather than producing an
-    unenforceable artifact.
+    Human provenance is never accepted as caller-authored text.  The
+    approver and approval/invocation bindings are derived from a freshly
+    reverified ``AuthenticatedHumanPrincipal``.  The legacy string
+    keywords remain only as explicit fail-closed tripwires so an old
+    caller receives a security-specific error instead of silently
+    continuing under the superseded N2 behavior.
+
+    No production assurance mechanism exists today.  Consequently every
+    currently obtainable verifier result is ``FIXTURE_NON_REAL`` and this
+    function always rejects it before constructing authority.  Tests that
+    need a non-real approval-shaped object must use a test-module fixture
+    constructor, never this production path.
     """
-    if identity_evidence_kind not in _IDENTITY_EVIDENCE_KINDS:
-        raise ValueError(f"unknown_identity_evidence_kind:{identity_evidence_kind}")
+    # Lazy imports are mandatory here: hpac_foundation's canonical digest
+    # primitive imports this module, so a module-level HPAC import would
+    # create a cycle before either trust boundary finished initializing.
+    from .hpac_foundation import HPACAuthorityClass
+    from .hpac_verifier import (
+        HPACVerificationError,
+        is_verifier_authenticated_principal,
+        reverify_authenticated_principal,
+    )
+
     if _parse_utc_timestamp(expires_at) <= _parse_utc_timestamp(created_at):
         raise ValueError("expires_at_must_be_after_created_at")
+    if approver_id is not None or identity_evidence_kind is not None:
+        raise TypeError(
+            "caller-supplied approver_id/identity_evidence_kind cannot establish human authority"
+        )
+    if not is_verifier_authenticated_principal(authenticated_principal):
+        raise ValueError("authenticated_principal_not_verifier_issued")
+    try:
+        principal = reverify_authenticated_principal(
+            authenticated_principal,
+            now=created_at,
+            occurred_at=created_at,
+        )
+    except HPACVerificationError as exc:
+        raise ValueError("authenticated_principal_reverification_failed") from exc
+    if principal.invocation_id != subject.invocation_id:
+        raise ValueError("authenticated_principal_invocation_mismatch")
+    if principal.assurance_class is not HPACAuthorityClass.PRODUCTION:
+        raise ValueError("non_real_authenticated_principal_cannot_create_production_approval")
+    if not is_valid_approval_id(principal.approval_id):
+        raise ValueError("authenticated_principal_approval_id_invalid")
 
     preview_digest = approval_preview_digest or build_approval_preview_digest(
         subject=subject, approval_scope=approval_scope, expires_at=expires_at
     )
     provenance = ApprovalProvenance(
-        approver_id=approver_id,
-        identity_evidence_kind=identity_evidence_kind,
+        approver_id=principal.principal_id,
+        # The persisted v1 envelope remains frozen in this bounded repair;
+        # the authority basis is the verifier result above, not this legacy
+        # enum label.  A later schema migration can replace the envelope.
+        identity_evidence_kind=IDENTITY_EVIDENCE_OS_AUTHENTICATED_USER,
         approval_preview_digest=preview_digest,
     )
     partial = RuntimeInvocationApproval(
-        approval_id=new_approval_id(),
+        approval_id=principal.approval_id,
         record_digest="",
         created_at=created_at,
         expires_at=expires_at,
@@ -748,6 +796,17 @@ ConsumptionLookup = Callable[[str], str]
 by the trusted caller; this module performs no store I/O itself."""
 
 
+class CanonicalApprovalStore(Protocol):
+    """The narrow read interface consumed by N1 validation.
+
+    ``validate_approval`` additionally enforces the concrete canonical
+    store type at runtime.  The protocol exists only to avoid a module
+    import cycle in annotations; it is not an alternate trust source.
+    """
+
+    def load(self, approval_id: str) -> RuntimeInvocationApproval | None: ...
+
+
 @dataclass(frozen=True)
 class InvocationRequestContext:
     """The current, live facts a `runtime_dispatch` request presents to
@@ -771,10 +830,7 @@ class InvocationRequestContext:
     current_time: str
 
 
-_VALIDATED_AUTHORITY_SEAL = object()
-
-
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class ValidatedAuthorityProjection:
     """RIHAC-001 §16 step 12 -- the immutable evidence projection gate 5
     emits on success. This projection, never raw approval prose or a
@@ -790,36 +846,69 @@ class ValidatedAuthorityProjection:
     expiry_verdict: str
     consumption_state_verdict: str
     validated_at: str
+    principal_id: str = ""
+    proof_id: str = ""
+    mechanism_id: str = ""
+    mechanism_assurance: str = ""
+    invocation_id: str = ""
     schema_version: str = RIASC_SCHEMA_VERSION
-    _validator_seal: object | None = field(default=None, repr=False, compare=False)
+    _content_binding_digest: str = ""
+
+    def _binding_payload(self) -> dict:
+        return {
+            "approval_id": self.approval_id,
+            "record_digest": self.record_digest,
+            "subject_scope_binding_digest": self.subject_scope_binding_digest,
+            "provenance_verdict": self.provenance_verdict,
+            "freshness_verdict_digest": self.freshness_verdict_digest,
+            "expiry_verdict": self.expiry_verdict,
+            "consumption_state_verdict": self.consumption_state_verdict,
+            "validated_at": self.validated_at,
+            "principal_id": self.principal_id,
+            "proof_id": self.proof_id,
+            "mechanism_id": self.mechanism_id,
+            "mechanism_assurance": self.mechanism_assurance,
+            "invocation_id": self.invocation_id,
+            "schema_version": self.schema_version,
+        }
 
     def evidence_digest(self) -> str:
-        return _digest(
-            {
-                "approval_id": self.approval_id,
-                "record_digest": self.record_digest,
-                "subject_scope_binding_digest": self.subject_scope_binding_digest,
-                "provenance_verdict": self.provenance_verdict,
-                "freshness_verdict_digest": self.freshness_verdict_digest,
-                "expiry_verdict": self.expiry_verdict,
-                "consumption_state_verdict": self.consumption_state_verdict,
-                "validated_at": self.validated_at,
-                "schema_version": self.schema_version,
-            }
-        )
+        return _digest(self._binding_payload())
+
+
+@dataclass(frozen=True)
+class _ProjectionRevalidationContext:
+    approval_store: CanonicalApprovalStore
+    authenticated_principal: object
+    invocation_context: InvocationRequestContext
+    consumption_lookup: ConsumptionLookup
+
+
+_VALIDATED_AUTHORITY_CONTEXTS: dict[
+    ValidatedAuthorityProjection, _ProjectionRevalidationContext
+] = {}
 
 
 def is_trusted_validated_authority_projection(value: object) -> bool:
-    """Return true only for evidence emitted by `validate_approval`."""
+    """Return true only for intact evidence emitted by ``validate_approval``.
+
+    Exact-object registry provenance prevents a copied lookalike from
+    transferring authority.  Recomputing the binding from every current
+    field prevents mutation or ``dataclasses.replace`` from carrying a
+    previously-valid token onto different content (B1).
+    """
     return (
         type(value) is ValidatedAuthorityProjection
-        and value._validator_seal is _VALIDATED_AUTHORITY_SEAL
+        and value in _VALIDATED_AUTHORITY_CONTEXTS
+        and value._content_binding_digest == value.evidence_digest()
     )
 
 
 def validate_approval(
-    approval: RuntimeInvocationApproval | None,
+    approval_id: object,
     *,
+    approval_store: CanonicalApprovalStore | None = None,
+    authenticated_principal: object | None = None,
     context: InvocationRequestContext,
     consumption_lookup: ConsumptionLookup,
 ) -> tuple[ValidatedAuthorityProjection | None, tuple[str, ...]]:
@@ -828,15 +917,47 @@ def validate_approval(
     (short-circuit on first failing step, returning `(None, (reason,))`).
     On full success, returns `(projection, ())`.
 
-    This function does not itself resolve `approval` from canonical
-    storage (step 1/2 in contract terms are the store's job, see
-    `runtime_invocation_approval_store.py`); it receives the already
-    store-resolved single candidate artifact (or `None` if resolution
-    failed) as its first argument, and validates from schema forward.
+    The first argument is an opaque approval ID, never an approval object.
+    Steps 1-2 resolve it through the one concrete canonical approval store;
+    caller-created objects and caller-provided lookalike stores fail closed.
+    Human identity is freshly reverified from current HPAC stores and bound
+    to the resolved approval before any authority projection can be emitted.
     """
-    # Steps 1-2: canonical resolution/single-artifact load (store's job).
+    from .hpac_foundation import HPACAuthorityClass
+    from .hpac_verifier import (
+        is_verifier_authenticated_principal,
+        reverify_authenticated_principal,
+    )
+
+    # Steps 1-2: canonical resolution/single-artifact load (N1).  Importing
+    # locally avoids the store -> authority model import cycle while still
+    # requiring the concrete canonical store, not a duck-typed substitute.
+    if approval_id is None:
+        return None, ("no_valid_approval:missing_or_unresolvable",)
+    caller_supplied_approval = (
+        approval_id if isinstance(approval_id, RuntimeInvocationApproval) else None
+    )
+    if caller_supplied_approval is None and not is_valid_approval_id(approval_id):
+        return None, ("noncanonical_approval_id",)
+    from .runtime_invocation_approval_store import RuntimeInvocationApprovalStore
+
+    if caller_supplied_approval is not None:
+        # A caller object is never authority.  We may still compute
+        # fail-closed diagnostics from it so pre-N1 schema/binding tests
+        # retain useful specificity, but the unconditional N1 rejection
+        # below runs before HPAC provenance or projection construction.
+        approval = caller_supplied_approval
+    else:
+        if type(approval_store) is not RuntimeInvocationApprovalStore:
+            return None, ("canonical_approval_store_required",)
+        try:
+            approval = approval_store.load(approval_id)
+        except Exception as exc:
+            return None, (f"canonical_approval_resolution_failed:{type(exc).__name__}",)
     if approval is None:
         return None, ("no_valid_approval:missing_or_unresolvable",)
+    if caller_supplied_approval is None and approval.approval_id != approval_id:
+        return None, ("canonical_approval_identity_mismatch",)
 
     # Step 3: RIASC-001 schema/version/required-field/closed-field/type validation.
     schema_issues = validate_riasc_schema_shape(approval.to_dict())
@@ -943,6 +1064,35 @@ def validate_approval(
     if consumption_state != CONSUMPTION_STATE_NONE:
         return None, (f"unrecognized_consumption_state:{consumption_state}",)
 
+    if caller_supplied_approval is not None:
+        return None, ("noncanonical_approval_reference:caller_supplied_object",)
+
+    # N2 + HPAC-REQ-058: provenance is derived from, and freshly checked
+    # against, canonical HPAC state.  Registry membership alone is cached
+    # provenance and is not sufficient at an authority-consumption point.
+    if not is_verifier_authenticated_principal(authenticated_principal):
+        return None, ("authenticated_principal_not_verifier_issued",)
+    try:
+        principal = reverify_authenticated_principal(
+            authenticated_principal,
+            now=context.current_time,
+            occurred_at=context.current_time,
+        )
+    except Exception as exc:
+        return None, (f"authenticated_principal_reverification_failed:{type(exc).__name__}",)
+    if principal.approval_id != approval.approval_id:
+        return None, ("authenticated_principal_approval_mismatch",)
+    if principal.invocation_id != approval.subject.invocation_id:
+        return None, ("authenticated_principal_invocation_mismatch",)
+    if approval.provenance.approver_id != principal.principal_id:
+        return None, ("approval_provenance_principal_mismatch",)
+
+    # Interim production hard stop frozen by .1R.6 §8.  The deterministic
+    # mechanism may exercise structural plumbing in tests, but it can never
+    # be canonicalized into real production authority.
+    if principal.assurance_class is not HPACAuthorityClass.PRODUCTION:
+        return None, ("non_real_authenticated_principal_cannot_validate_production_approval",)
+
     # Step 12: emit the immutable validated-authority evidence projection.
     projection = ValidatedAuthorityProjection(
         approval_id=approval.approval_id,
@@ -953,8 +1103,65 @@ def validate_approval(
         expiry_verdict=expiry_verdict,
         consumption_state_verdict=consumption_state,
         validated_at=context.current_time,
-        _validator_seal=_VALIDATED_AUTHORITY_SEAL,
+        principal_id=principal.principal_id,
+        proof_id=principal.proof_id,
+        mechanism_id=principal.mechanism_id,
+        mechanism_assurance=principal.assurance_class.value,
+        invocation_id=principal.invocation_id,
+    )
+    projection = replace(projection, _content_binding_digest=projection.evidence_digest())
+    _VALIDATED_AUTHORITY_CONTEXTS[projection] = _ProjectionRevalidationContext(
+        approval_store=approval_store,
+        authenticated_principal=principal,
+        invocation_context=context,
+        consumption_lookup=consumption_lookup,
     )
     if policy_drifted:
         return projection, ("policy_drift_requires_fresh_pb_re_evaluation",)
     return projection, ()
+
+
+def revalidate_validated_authority_projection(
+    value: object, *, current_time: str
+) -> bool:
+    """Re-resolve every authority-bearing dependency for PB projection.
+
+    This is validation-only: it performs no Gate-9 consumption write.  A
+    stale approval, revoked credential, expired proof/approval, changed
+    consumption state, copied projection, or lost process-local provenance
+    all return ``False``.
+    """
+
+    if not is_trusted_validated_authority_projection(value):
+        return False
+    assert isinstance(value, ValidatedAuthorityProjection)
+    prior = _VALIDATED_AUTHORITY_CONTEXTS.get(value)
+    if prior is None:
+        return False
+    refreshed_context = replace(prior.invocation_context, current_time=current_time)
+    projection, reasons = validate_approval(
+        value.approval_id,
+        approval_store=prior.approval_store,
+        authenticated_principal=prior.authenticated_principal,
+        context=refreshed_context,
+        consumption_lookup=prior.consumption_lookup,
+    )
+    if projection is None:
+        return False
+    try:
+        if reasons not in ((), ("policy_drift_requires_fresh_pb_re_evaluation",)):
+            return False
+        return (
+            projection.approval_id == value.approval_id
+            and projection.record_digest == value.record_digest
+            and projection.subject_scope_binding_digest == value.subject_scope_binding_digest
+            and projection.principal_id == value.principal_id
+            and projection.proof_id == value.proof_id
+            and projection.mechanism_id == value.mechanism_id
+            and projection.mechanism_assurance == value.mechanism_assurance
+            and projection.invocation_id == value.invocation_id
+        )
+    finally:
+        # The freshly emitted projection is comparison evidence only.  The
+        # original projection remains the sole registered authority object.
+        _VALIDATED_AUTHORITY_CONTEXTS.pop(projection, None)

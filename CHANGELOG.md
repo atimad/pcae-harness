@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7** — implemented the bounded
+  B1/B7/N1/N2 production authority repair and HPAC-REQ-054 Step-4
+  prerequisite. Approval projections now require exact-object verifier
+  provenance, recomputed content/invocation binding, and fresh canonical
+  revalidation; dispatch construction rereads the durable identity registry;
+  approval validation resolves IDs only through the canonical store; approval
+  provenance is derived only from a freshly reverified
+  `AuthenticatedHumanPrincipal`; and deterministic NON-REAL assurance is
+  hard-rejected at production approval creation and validation. Added 41
+  phase-specific adversarial tests; fixed-SHA affected and HPAC/foundation
+  comparisons have zero candidate-only nonpassing nodes. Contracts, store
+  shape, Gate 5/Gate 9 coordinator wiring, PB/POL-005, providers, FIDO2/UI,
+  and runtime state are unchanged. B1/B7/N1/N2 are repaired, independent
+  verification pending, not closed; runtime remains unavailable.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.6) to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7: B1/B7/N1/N2 Production Authority Repair Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.6: B1/B7/N1/N2 Production Authority Repair Integration Planning to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.6); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.6** — B1/B7/N1/N2 Production
   Authority Repair Integration Planning. **PLANNING COMPLETE — NOT

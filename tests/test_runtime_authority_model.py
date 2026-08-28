@@ -281,7 +281,7 @@ def test_create_approval_rejects_expiry_equal_created():
 
 
 def test_create_approval_rejects_unknown_identity_evidence_kind():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError, match="caller-supplied"):
         ra.create_runtime_invocation_approval(
             subject=build_approval().subject,
             governance_context=ra.GovernanceContext(phase_id="p"),

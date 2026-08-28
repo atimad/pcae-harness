@@ -352,7 +352,7 @@ def test_repair_did_not_introduce_pb_or_runtime_authority_or_gate9_imports():
             assert not module_name.endswith(suffix), f"hpac_verifier.py must not import {module_name}"
 
 
-def test_repair_still_has_zero_production_consumers():
+def test_runtime_authority_is_the_only_production_consumer_after_integration():
     src_root = _REPO_ROOT / "src" / "pcae"
     consumers = []
     for path in src_root.rglob("*.py"):
@@ -361,15 +361,14 @@ def test_repair_still_has_zero_production_consumers():
         text = path.read_text(encoding="utf-8")
         if "hpac_verifier" in text:
             consumers.append(str(path.relative_to(_REPO_ROOT)))
-    assert consumers == [], f"unexpected production consumers of hpac_verifier: {consumers}"
+    assert consumers == ["src/pcae/core/runtime_authority.py"]
 
 
-def test_repair_did_not_add_new_top_level_public_names():
-    # Only the one new provenance-boundary function was added; no other
-    # public surface expanded.
+def test_reverification_is_the_only_added_public_consumption_surface():
     assert set(hpac_verifier_module.__all__) == {
         "HPACVerificationError",
         "AuthenticatedHumanPrincipal",
         "verify_human_authentication",
         "is_verifier_authenticated_principal",
+        "reverify_authenticated_principal",
     }
