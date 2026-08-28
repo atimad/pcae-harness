@@ -70,8 +70,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5: remove stale active-task file after transition to idle"
     }
   ],
-  "origin_main_head": "817b788a4d9580fd925005ea4fd5788f227eda8a",
-  "origin_main_head_count": 4,
-  "pushed_status": "unpushed",
+  "origin_main_head": "b65f61d731c7b04b01f36402031ea768c6d8ecae",
+  "origin_main_head_count": 0,
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.5.1 -- Independent Verification of Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation. Requires separate explicit human authorization before starting."
 }
