@@ -73,7 +73,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions; no current-phase error",
-    "pcae_push_check": "passed; three implementation/documentation commits pushed to origin/main before canonical report staging",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready; dispatch reserved for governed phase completion"
   },
@@ -118,8 +118,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: record fixed-SHA closure evidence"
     }
   ],
-  "origin_main_head": "0e564ce48b6fd4e1c7dfc0b50337d1507baafecc",
-  "origin_main_head_count": 1,
-  "pushed_status": "local_only",
+  "origin_main_head": "7ccfa76c74e182e4925adb03ddd87716ba87c32b",
+  "origin_main_head_count": 2,
+  "pushed_status": "not_pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 \u2014 Independent Verification of Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Repair. New human authorization required; do not begin Layer 3."
 }

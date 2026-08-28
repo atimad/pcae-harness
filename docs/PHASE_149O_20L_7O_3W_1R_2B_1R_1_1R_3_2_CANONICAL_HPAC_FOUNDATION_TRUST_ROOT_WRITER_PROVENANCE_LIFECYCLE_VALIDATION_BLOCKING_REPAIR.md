@@ -409,7 +409,7 @@ begun and requiring new human authorization, is:
 
 Do not proceed to Layer 3 before that independent verification and an explicit
 governance/provenance disposition. This phase owns the source repairs, the
-fresh 36-test suite, this implementation document, ordinary governance-memory
+fresh 38-test suite, this implementation document, ordinary governance-memory
 updates, and its governed completion artifacts. Exact phase-owned commits,
 pushed status, and final `origin/main..HEAD` are stated by the canonical phase
 report and returned to the human after the governed push lifecycle.
