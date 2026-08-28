@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5: Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5** implemented
   `src/pcae/core/hpac_verifier.py`, the mechanism-neutral HPAC verifier and
   principal-registry consumption boundary: executes HPAC-REQ-054's ten-step
