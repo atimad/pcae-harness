@@ -80,8 +80,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1: remove stale active-task file after transition to idle"
     }
   ],
-  "origin_main_head": "6cd753c6192c8ee27372013ed49a659b2dafe23c",
+  "origin_main_head": "d64b24f6ef0f2fdb2eb512ce8c33f8d2f25c5bfc",
   "origin_main_head_count": 0,
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "No authoritative next-phase ID/title disclosed by canonical project state at this phase's entry. Explicit human authorization and the canonical next-phase ID/title from the authoritative eight-layer plan are required before any Layer 3 work begins."
 }
