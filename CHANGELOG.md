@@ -2,6 +2,45 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1** independently verifies
+  `.1R.5.2`'s F1 repair. **VERIFIED WITH NON-BLOCKING FINDINGS — VERIFIER
+  IMPLEMENTATION COMPLETE.** Independently re-derived HPAC-REQ-056 from the
+  contract text and re-executed every attack in the governing prompt's
+  checklist against current source, without trusting `.1R.5.2`'s own report
+  or test suite as an oracle: `object.__new__` forgery (still
+  `isinstance`-true, an unavoidable Python fact, but never
+  `is_verifier_authenticated_principal`-true), direct construction with and
+  without the real stolen seal, shallow copy, deepcopy, pickle, manual
+  slot-by-slot cloning, reflection-based reconstruction
+  (`type(x).__new__`), subclassing (refused at class-definition time),
+  equality/hash-collision, object-ID reuse after `del`+GC (foreclosed by
+  the registry's strong-reference design), and module-reload as a
+  restart-semantics proxy (run in an isolated subprocess to avoid
+  cross-test contamination in this phase's own draft, a bug caught and
+  fixed during this phase, disclosed in the report). Every attack
+  HPAC-REQ-056 requires to fail, fails. The one attack that succeeds —
+  same-process direct mutation of the module-level registry object via
+  `from pcae.core.hpac_verifier import _AUTHENTIC_PRINCIPAL_REGISTRY` — is
+  analyzed as outside HPAC-REQ-056's own scope (resistance to
+  caller-supplied-string/dict forgery, not to an attacker who already has
+  independent same-process code-execution capability, a limitation B1's
+  own identical-pattern repair already shares); disclosed as new
+  observation F7, not treated as a regression or hidden. **F1: CLOSED.**
+  F2 (HPAC-REQ-054 step 4 recomputation gap), F3 (`.1R.4` planning-doc
+  debt), F4 (pre-existing test-name overclaim) independently re-confirmed
+  unchanged — none touched by the `.1R.5.2` diff, none self-closed here.
+  Added `tests/test_hpac_verifier_repair_independent_verification_3w1r2b1r1115a21.py`
+  (29 tests, independently derived from the contract, not copied from
+  `.1R.5.2`'s own new suite; only the `_Rig` fixture harness reused).
+  Full 21-file HPAC-family regression sweep: 458 passed / 54 pre-existing
+  unrelated failures — exact arithmetic match to `.1R.5.2`'s own disclosed
+  429-pass candidate state plus this phase's 29 new tests, same 54 failure
+  names. Zero unexplained attributable regressions. No B1/B7/N1/N2 repair,
+  no PB/runtime integration, no real FIDO2/UI, no production source
+  modified this phase (verification-only). Next canonical phase not
+  invented; requires separate human authorization. See
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_2_1_INDEPENDENT_VERIFICATION_AUTHENTICATEDHUMANPRINCIPAL_TRUSTED_CONSTRUCTION_AND_PROVENANCE_REPAIR.md`.
+- Transitioned active task from Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.2 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1: Independent Verification of AuthenticatedHumanPrincipal Trusted-Construction and Provenance Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2: AuthenticatedHumanPrincipal Trusted-Construction and Provenance Blocking Repair to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.2; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2** repairs `.1R.5.1`'s BLOCKING F1
   finding: `AuthenticatedHumanPrincipal`'s HPAC-REQ-056 trusted-construction

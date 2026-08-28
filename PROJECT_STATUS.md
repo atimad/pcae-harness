@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1 — Independent Verification of
+AuthenticatedHumanPrincipal Trusted-Construction and Provenance Repair.
+**VERIFIED WITH NON-BLOCKING FINDINGS — VERIFIER IMPLEMENTATION COMPLETE.**
+Independently re-derived HPAC-REQ-056 directly from the contract and
+independently re-executed every attack in the governing prompt's checklist
+against current source (not trusted from `.1R.5.2`'s own report or tests):
+`object.__new__` forgery (isinstance unavoidably True, but never
+verifier-authenticated), direct construction with and without the real
+seal, shallow/deep copy, pickle, manual slot cloning, reflection-based
+reconstruction, subclassing, equality/hash collision, object-ID reuse,
+strong-reference lifetime, and module-reload (restart-proxy) semantics —
+every attack HPAC-REQ-056 requires to fail, fails. One attack succeeds
+(same-process direct mutation of the module-level registry object) and is
+analyzed as outside HPAC-REQ-056's scope as written (resistance to
+caller-supplied-data forgery, not to an attacker with independent
+same-process code-execution capability — a limitation shared by B1's own
+identical-pattern precedent, disclosed as new observation F7, not a
+regression). **F1: CLOSED.** F2/F3/F4 unchanged, not self-closed, carried
+forward. Added `tests/test_hpac_verifier_repair_independent_verification_3w1r2b1r1115a21.py`
+(29 tests, independently derived, all passing). Full 21-file HPAC-family
+regression sweep: 458 passed / 54 pre-existing unrelated failures (exact
+arithmetic match to `.1R.5.2`'s own disclosed 429 + this phase's 29 new;
+same 54 failure names). Zero unexplained attributable regressions. No
+B1/B7/N1/N2 repair, no PB/runtime integration, no real FIDO2/UI. Next
+canonical phase not invented; requires separate human authorization. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_2_1_INDEPENDENT_VERIFICATION_AUTHENTICATEDHUMANPRINCIPAL_TRUSTED_CONSTRUCTION_AND_PROVENANCE_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2 — AuthenticatedHumanPrincipal
 Trusted-Construction and Provenance Blocking Repair. **F1 REPAIRED —
 INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Repairs `.1R.5.1`'s BLOCKING
