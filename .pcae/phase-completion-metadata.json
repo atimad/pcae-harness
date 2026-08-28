@@ -112,10 +112,14 @@
     {
       "hash": "bbd1b9a2c34031bf0b1001d26593895bccf28237",
       "subject": "complete HPAC repair file inventory"
+    },
+    {
+      "hash": "0e564ce48b6fd4e1c7dfc0b50337d1507baafecc",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: record fixed-SHA closure evidence"
     }
   ],
-  "origin_main_head": "bbd1b9a2c34031bf0b1001d26593895bccf28237",
-  "origin_main_head_count": 0,
-  "pushed_status": "pushed",
+  "origin_main_head": "0e564ce48b6fd4e1c7dfc0b50337d1507baafecc",
+  "origin_main_head_count": 1,
+  "pushed_status": "local_only",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 \u2014 Independent Verification of Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Repair. New human authorization required; do not begin Layer 3."
 }
