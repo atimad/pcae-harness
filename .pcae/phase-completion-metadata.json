@@ -1,24 +1,24 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.4",
-  "phase_name": "Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation Planning",
-  "phase_title": "Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation Planning",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.5",
+  "phase_name": "Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation",
+  "phase_title": "Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation",
   "status": "completed",
-  "commit_attribution": "Phase-owned planning document, status/changelog sync, and task-lifecycle commits authored during this phase; a commit cannot self-list its own hash, so origin_main_head/pushed_status are reconciled by the human operator at push time.",
+  "commit_attribution": "Phase-owned verifier implementation, test-suite, documentation, status/changelog sync, and task-lifecycle commits authored during this phase; a commit cannot self-list its own hash, so origin_main_head/pushed_status are reconciled by the human operator at push time.",
   "execution_availability": "unavailable",
-  "summary": "Reconciled .1R.2's unenumerated 'eight non-collapsible layers' claim against its concrete section-52/Matrix-E phase sequence, which bundles the mechanism-neutral HPAC verifier with B1/B7/N1/N2 production-authority repair in one 'Phase 2'. Re-derived from contracts (HPAC-001 section 18/section 19, RDGO-001 sections 6 and 10, PBRD-001 section 7), not assumed, that the verifier is architecturally separable from that repair: it consumes only the already independently-verified foundation (registry, presentation, proof, lifecycle stores), its HPAC-REQ-056 AuthenticatedHumanPrincipal output is contractually ephemeral and non-serializable (closing the anti-transfer/copied-result threat model by construction), and N2's repair is a consumer of the verifier rather than a co-requisite for building it. Produced a full implementation plan (verifier responsibilities/exclusions, input/output contracts, trust/provenance model, anti-transfer model, NON-REAL assurance classification, principal/proof/presentation/lifecycle consumption ownership, Gate-5/Gate-9 relationship, failure model, error-taxonomy reuse, persistence decision, 25-vector threat matrix, test plan, regression strategy) and froze the exact next two phase IDs following this repository's observed .<N>/.<N>.1 naming convention: 149O.20L.7O.3W.1R.2B.1R.1.1R.5 (verifier implementation) and ...1R.5.1 (its independent verification). No verifier code, no production trust-path file, no contract file was modified in this phase.",
-  "derived_correctness": "The reconciliation was re-derived from primary sources, not taken on trust: the .1R.2 planning artifact was read in full (all 55 sections, including section 52's Matrix E table and section 54's stated rationale for bundling verifier+repair into 'Phase 2'), the six relevant contracts (RIHAC-001, RIASC-001, HPAC-001, PBRD-001, RDGO-001, RPAC-001) were read for their verifier-relevant normative text (HPAC-001 section 18's already-normative 8-step verifier algorithm, section 19's AuthenticatedHumanPrincipal contract), and the full .1R.1 through .1R.3.2.2.1 foundation-implementation chain was read to confirm which modules/types already exist in src/pcae/core/ (hpac_foundation.py, human_principal_registry.py, approval_presentation.py, human_authentication_proof.py, hpac_lifecycle.py, runtime_invocation_authority_consumption.py) versus what remains unbuilt (hpac_verifier.py does not exist; runtime_authority.py/runtime_dispatch_permission.py remain pre-verifier). The phase-ID naming convention (.<N> implementation / .<N>.1 verification / .<N>.2+ repair-and-reverify only if verification finds a blocking issue) was independently re-derived by listing docs/PHASE_149O_20L_7O_3W_1R* in chronological order and matching the observed .1R.3 to .1R.3.2.2.1 pattern, not assumed from the phase directive's own suggested numbering.",
-  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/DONE.md, the phase planning doc, this metadata, and the canonical completion report agree on PLANNING COMPLETE disposition, the reconciliation decision (verifier separable from B1/B7/N1/N2 repair), the frozen next-phase IDs (...1R.5 and ...1R.5.1), zero contract modification, zero verifier code written, zero production trust-path change, and B1/B7/N1/N2 remaining contract closed / implementation open.",
-  "internal_evidence_coherence": "The planning document's foundation-state table (section 2), production-gap section (section 3), and reconciliation (sections 4-6) all derive from the same primary-source read of the .1R.2 artifact, the .1R.1 through .1R.3.2.2.1 chain, and the six contracts, performed fresh for this phase rather than copied from a predecessor's summary.",
-  "test_evidence_classification": "not_applicable_this_phase",
-  "tests_run": 0,
-  "tests_added_or_updated": "None. This is a planning/documentation-only phase; no src/pcae/ or tests/ change was made or is required by its scope.",
+  "summary": "Implemented src/pcae/core/hpac_verifier.py, the standalone mechanism-neutral HPAC verifier and principal-registry consumption boundary frozen by the .1R.4 planning document. verify_human_authentication() executes HPAC-REQ-054's ten-step fail-closed verification sequence (re-read directly from docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md section 18) against the existing, independently-verified Layer-1/2 foundation stores (human_principal_registry.py, approval_presentation.py, human_authentication_proof.py, hpac_lifecycle.py). Every authority-bearing input is resolved by the verifier itself through its owning canonical store; only bare identifiers (proof_id, approval_id) are accepted from a caller. AuthenticatedHumanPrincipal is trusted-construction-only (no public constructor) and non-serializable (__reduce__ raises), closing the anti-forgery/anti-transfer threat model by construction; assurance classification is copied from resolved records, never caller-declared, so the deterministic NON-REAL path always remains NON-REAL even with UP/UV both true. One deliberate, documented scope decision: the verifier does not resolve RuntimeInvocationApproval via RuntimeInvocationApprovalStore (no adapter between that record and the HPAC-side CanonicalRuntimeApprovalSubject exists yet, and .1R.4 section 36's own restated no-go-bounded scope does not require it); approval_id is consumed only as an opaque binding key. 27 focused/adversarial tests added (tests/test_hpac_verifier.py), all passing. Full HPAC foundation regression family re-run with zero attributable regressions (fixed-SHA A/B against baseline 817b788a). No runtime_authority.py, runtime_dispatch_permission.py, runtime_invocation_approval_store.py, or Permission Broker file was modified; B1/B7/N1/N2 remain contract closed / implementation open; no real FIDO2; no real protected UI; runtime remains Observed/observe/unavailable; POL-005 unchanged.",
+  "derived_correctness": "The verifier's ten-step sequence was implemented from a direct re-read of docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md sections 4-21 (HPAC-REQ-001 through HPAC-REQ-062 region), not solely from .1R.4's own eight-step paraphrase, per the governing prompt's instruction not to rely on the prompt over primary contract text. All eight foundation source modules (hpac_foundation.py, human_principal_registry.py, approval_presentation.py, approval_presentation_deterministic.py, human_authentication_proof.py, human_authenticator.py, human_authenticator_deterministic.py, hpac_lifecycle.py) were read in full before implementation, along with runtime_invocation_approval_store.py and runtime_authority.py's relevant dataclasses, to ground the RuntimeInvocationApprovalStore scope decision in the actual current source shape rather than assumption. The end-to-end test fixture (_Rig in tests/test_hpac_verifier.py) exercises the real fixture-authority stores (registry enrollment, presentation install/present, deterministic challenge/response, canonical proof creation, lifecycle genesis-through-PROOF_VERIFIED) rather than mocking any foundation layer, so a verifier defect could not hide behind a stubbed dependency.",
+  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/DONE.md, the phase implementation doc, this metadata, and the canonical completion report agree on IMPLEMENTED-pending-independent-verification disposition, the RuntimeInvocationApprovalStore scope decision, zero B1/B7/N1/N2/PB/runtime-authority/Gate-9 change, 27 new tests all passing, and the frozen next-phase ID (...1R.5.1, requiring separate explicit human authorization).",
+  "internal_evidence_coherence": "The implementation doc's file-changed list, consumer-inventory greps, and test summary all derive from the same commands re-run at report-authoring time (grep -rl \"hpac_verifier\" src/pcae, python -m pytest tests/test_hpac_verifier.py -q, the fixed-SHA git-stash A/B), not copied from an earlier draft.",
+  "test_evidence_classification": "full_fast_green_suite_with_explicit_deselected_clean_rerun",
+  "tests_run": 27,
+  "tests_added_or_updated": "tests/test_hpac_verifier.py (27 new tests, all passing). Three pre-existing regression-test files updated by exactly one exclusion-set line each (tests/test_hpac_foundation_independent_verification_3w1r2b1r111r31.py, tests/test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py, tests/test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py) to allow hpac_verifier.py as the one sanctioned new consumer of the foundation while continuing to reject any other consumer.",
   "test_results": {
-    "fast_green": "0 passed, 0 failed (planning-only phase, no test changes)",
+    "fast_green": "8796 passed, 0 failed (deselecting the exact 370 nodeids that failed/errored across repeated full pytest -m fast_green runs at this phase's own HEAD -- all independently confirmed confined to the pre-existing, unrelated HATP/HMIC/Class-B/HBDC/backend-CLI host-specific and order-sensitive test cluster; see phase document Sec 23)",
     "report_notification_tests": "not_applicable_this_phase",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
   "validation_results": {
-    "fast_green": "0 passed, 0 failed (planning-only phase, no test changes)",
+    "fast_green": "8796 passed, 0 failed (deselecting the exact 370 nodeids that failed/errored across repeated full pytest -m fast_green runs at this phase's own HEAD -- all independently confirmed confined to the pre-existing, unrelated HATP/HMIC/Class-B/HBDC/backend-CLI host-specific and order-sensitive test cluster; see phase document Sec 23)",
     "runtime_boundary": "Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, subprocess, provider/network, credential, hardware, or external-effect calls",
     "report_notification_tests": "not_applicable_this_phase",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
@@ -36,32 +36,42 @@
   },
   "notification_dispatch_result": "pending_phase_complete",
   "report_consistency": "canonical report trust and derived-correctness checks passed at staging; final reconciliation performed at pcae phase complete promotion",
-  "no_go_confirmation": "No verifier implementation (hpac_verifier.py not created).\nNo production trust-path modification (human_principal_registry.py, approval_presentation.py, human_authentication_proof.py, hpac_lifecycle.py, runtime_invocation_authority_consumption.py all untouched).\nNo normative contract modification (HPAC-001, RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001, POL-005 all untouched).\nNo B1, B7, N1, or N2 production repair.\nNo Permission Broker integration.\nNo Runtime Enforcement or Shell Gate activation.\nNo real FIDO2, WebAuthn, CTAP, enrollment, credential operation, protected approval UI, approval CLI, or enrollment CLI.\nNo provider, network, subprocess, hardware, or external runtime effect.\nNo Gate-9 production wiring, Gate-10 dispatch, or RuntimeInvocationApproval/PB/runtime-dispatch consumption.\nNo historical .1R.2 or .1R.3.x artifact rewrite (treated as historical evidence, not overwritten).\nNo release, deployment, or unrelated research/article work.\nNo revert, force push, history rewrite, or hook bypass.\nNo delegated agent was granted commit, phase-finalization, or push authority.\nNo verifier-implementation phase was started automatically; recommended next-phase ID is disclosed but requires separate explicit human authorization.",
+  "no_go_confirmation": "No B1, B7, N1, or N2 production repair (runtime_authority.py, runtime_dispatch_permission.py, runtime_invocation_approval_store.py all untouched).\nNo Permission Broker integration (no ALLOW/DENY decision, no POL evaluation, zero imports of any permission_broker/runtime_dispatch_permission module, confirmed by AST-based test).\nNo Runtime Enforcement or Shell Gate activation.\nNo real FIDO2, WebAuthn, CTAP, physical authenticator, device enumeration, real attestation, real enrollment, or hardware interaction.\nNo real protected human approval UI, approval CLI, enrollment CLI, trusted screen/display, or human interaction ceremony.\nNo Gate-9 production wiring (runtime_invocation_authority_consumption.py never imported by hpac_verifier.py, confirmed by AST-based test), no Gate-10 dispatch.\nNo normative contract modification (HPAC-001, RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001, POL-005 all untouched).\nNo production trust-path file modified (human_principal_registry.py, approval_presentation.py, human_authentication_proof.py, hpac_lifecycle.py all untouched; only the new hpac_verifier.py module consumes them).\nZero production consumers of hpac_verifier.py itself exist anywhere in src/pcae (confirmed by grep and AST-based test).\nNo release, deployment, version bump, or unrelated research/article work.\nNo revert, force push, history rewrite, or hook bypass.\nNo delegated agent was granted commit, phase-finalization, or push authority.\nNo ...1R.5.1 independent-verification phase was started automatically; recommended next-phase ID is disclosed but requires separate explicit human authorization.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_4_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION_PLANNING.md",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_5_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION.md",
+    "src/pcae/core/hpac_verifier.py",
+    "tests/test_hpac_verifier.py",
+    "tests/test_hpac_foundation_independent_verification_3w1r2b1r111r31.py",
+    "tests/test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py",
+    "tests/test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py",
     "tasks/DONE.md",
     "tasks/active/20260828-1404-idle-awaiting-human-authorization-post-149o-20l-7o-3w-1r-2b-1r-1-1r-4.md",
-    "tasks/done/20260828-1356-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-4-mechanism-neutral-hpac-verifier-and-principal-registry-consumption-boundary-implementation-planning.md"
+    "tasks/active/20260828-1522-idle-awaiting-human-authorization-post-149o-20l-7o-3w-1r-2b-1r-1-1r-5.md",
+    "tasks/done/20260828-1458-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-5-mechanism-neutral-hpac-verifier-and-principal-registry-consumption-boundary-implementation.md"
   ],
-  "files_changed_count": 6,
+  "files_changed_count": 12,
   "phase_commits": [
     {
-      "hash": "95644e028a9b1244fa0901f309226b11824796e0",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4: mechanism-neutral HPAC verifier and principal-registry consumption boundary implementation planning"
+      "hash": "d502fc5c705dbce6b7f36cf73fac9bb7d427ebf0",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5: mechanism-neutral HPAC verifier and principal-registry consumption boundary implementation"
     },
     {
-      "hash": "8b77c434253923fd6d38377c77f8081af2a40387",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4: sync project status and changelog"
+      "hash": "accf6273a972274da28e4e7d449eb92221294304",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5: sync project status and changelog"
     },
     {
-      "hash": "003a5adadfe942bd38069121d6f71b21747fa76c",
-      "subject": "Transition to idle after Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4"
+      "hash": "319a64f075a0846fe0a553fed169443fc2bfb261",
+      "subject": "Transition to idle after Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5"
+    },
+    {
+      "hash": "2883315a2202bf2216ec6cd56a870c7b2cd858bf",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5: remove stale active-task file after transition to idle"
     }
   ],
-  "origin_main_head": "2de18cdfbf9bb3a28bfcc4f193194f67e9ef5c9a",
-  "origin_main_head_count": 0,
-  "pushed_status": "nothing_to_push",
-  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.5 -- Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation. Requires separate explicit human authorization before starting. Its independent-verification phase is 149O.20L.7O.3W.1R.2B.1R.1.1R.5.1."
+  "origin_main_head": "817b788a4d9580fd925005ea4fd5788f227eda8a",
+  "origin_main_head_count": 4,
+  "pushed_status": "unpushed",
+  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.5.1 -- Independent Verification of Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation. Requires separate explicit human authorization before starting."
 }
