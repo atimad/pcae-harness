@@ -2,40 +2,64 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1 — Independent Verification of HPAC
+Canonical-Store Containment and Protected-Presentation Attestation-Schema
+Repair. **INDEPENDENTLY VERIFIED — CANONICAL HUMAN-PRINCIPAL,
+PROTECTED-PRESENTATION, AND HPAC PROOF-LIFECYCLE FOUNDATION COMPLETE.**
+HPAC-REQ-092's closed 8-field attestation schema was independently
+re-derived from `HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` §39.2 (not from
+`.3.2.2` source) and compared field-for-field against production — exact
+match. Deterministic-to-real upgrade, extra-field injection, and
+non-deterministic `verifier_kind` installation were all attacked fresh; all
+rejected for the correct authority reasons. A 10-vector absolute-path/
+traversal/backslash/empty-string attack matrix against both the HPAC
+lifecycle store and the inert Gate-9 store was independently re-run — all
+rejected before any file I/O. Symlink escape, cross-store substitution, and
+canonical-root-placement-without-provenance were each freshly attacked and
+rejected for the correct reason (the last two confirming containment and
+writer-provenance remain independently enforced properties). Fixed-SHA
+(`git worktree`, not baseline inference) HPAC-family comparison
+(`9cbdc45b` vs current HEAD) found exactly the 4 expected candidate-only
+failing nodes (the `.3.2.1` `blocking_reproduction` tests that now correctly
+fail because they documented the fixed defects) and zero unexplained
+regressions. Finding P: **CLOSED**. Finding C: **CLOSED**. Principal and
+proof-writer provenance: **remain independently closed**.
+Genesis/predecessor/fork semantics: valid, unchanged. A fresh 29-test
+independent suite committed
+(`tests/test_hpac_canonical_containment_attestation_schema_independent_verification_3w1r2b1r111r3221.py`).
+No repair applied in this phase (verification-only, per instruction). No
+CONTRACT/IMPLEMENTATION INCOMPATIBILITY encountered; no contract file
+modified. PB/runtime wiring and effects remain zero; B1/B7/N1/N2 remain
+contract closed / implementation open; runtime remains
+Observed/observe/unavailable. The `.3` delegated finalization/commit/push
+remains **UNAUTHORIZED** (historical verdict, unmodified). **Layer 3 not
+begun**: canonical project state discloses no authoritative next-phase
+ID/title at this phase's entry; explicit human authorization and the
+canonical next-phase ID from the authoritative eight-layer plan are required
+before any Layer 3 work. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_2_1_INDEPENDENT_VERIFICATION_HPAC_CANONICAL_STORE_CONTAINMENT_AND_PROTECTED_PRESENTATION_ATTESTATION_SCHEMA_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2 — HPAC Canonical-Store Containment
 and Protected-Presentation Attestation-Schema Blocking Repair.
-**IMPLEMENTATION REPAIR COMPLETE; INDEPENDENT VERIFICATION PENDING; FINDINGS
-NOT CLOSED.** Repairs the two Blocking findings left open by `.3.2.1`.
+**IMPLEMENTATION REPAIR COMPLETE; INDEPENDENTLY VERIFIED BY
+`.3.2.2.1`.** Repaired the two Blocking findings left open by `.3.2.1`.
 Protected-presentation attestation now serializes exactly the eight
 HPAC-REQ-092 fields (`attestation_version`, `presentation_id`, `approval_id`,
 `approval_subject_digest`, `human_visible_representation_digest`,
 `descriptor_digest`, `election`, `presented_at`) and no others; installed-
 mechanism authority and permanently-non-real classification remain proven by
 the already-closed writer-provenance sidecar and `FIXTURE_NON_REAL`
-verifier-kind channels, untouched here. Canonical-store containment adds a
+verifier-kind channels, untouched here. Canonical-store containment added a
 `require_safe_relative_id_component` check, enforced before any file I/O, to
 the HPAC lifecycle store and the inert Gate-9 authority-consumption store,
 closing the absolute-path/`Path.__truediv__` escape (record identity is now
 separate from filesystem path; callers cannot select storage location).
-Twenty-eight new fresh tests pass. Regressions: principal and proof-writer
-provenance remain independently closed; B-3/B-4: 44 passed (exact match to
-`.3.2.1` baseline); full HPAC family 267/278 passed, with all 11 non-passes
-explained (7 pre-existing historical `.3.1` failures, 1 pre-existing flaky
-concurrency test, 3 `.3.2.1` blocking-reproduction tests that now correctly
-fail because they documented the now-fixed defects). Fast Green candidate-
-vs-clean-HEAD diff investigated; the 16 differing node IDs reproduce
-identically on a clean tree with zero diff present, falsifying attribution to
-this repair. No contract file modified; no CONTRACT/IMPLEMENTATION
-INCOMPATIBILITY encountered. PB/runtime wiring and effects remain zero;
-B1/B7/N1/N2 remain contract closed / implementation open; runtime remains
-Observed/observe/unavailable. The `.3` delegated finalization/commit/push
-remains **UNAUTHORIZED**. Recommended next, not begun:
-**149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1 — Independent Verification of HPAC
-Canonical-Store Containment and Protected-Presentation Attestation-Schema
-Repair**. See
+Twenty-eight new fresh tests pass. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_2_HPAC_CANONICAL_STORE_CONTAINMENT_AND_PROTECTED_PRESENTATION_ATTESTATION_SCHEMA_BLOCKING_REPAIR.md`.
 
-## Prior Phase
+## Earlier Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 — Independent Verification of
 Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-
@@ -57,7 +81,7 @@ remains Observed/observe/unavailable. The `.3` delegated finalization/commit/
 push remains **UNAUTHORIZED**. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_1_INDEPENDENT_VERIFICATION_CANONICAL_HPAC_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_REPAIR.md`.
 
-## Earlier Prior Phase
+## Second-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation
 Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair.
@@ -92,7 +116,7 @@ HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation
 Repair**. Do not proceed to Layer 3. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_CANONICAL_HPAC_FOUNDATION_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_BLOCKING_REPAIR.md`.
 
-## Second-Prior Phase
+## Third-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 — Independent Verification of
 Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle

@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1** independently verified the
+  `.3.2.2` HPAC repair and returned **INDEPENDENTLY VERIFIED — CANONICAL
+  HUMAN-PRINCIPAL, PROTECTED-PRESENTATION, AND HPAC PROOF-LIFECYCLE
+  FOUNDATION COMPLETE**. HPAC-REQ-092's closed 8-field attestation schema was
+  independently re-derived from the contract text (not `.3.2.2` source) and
+  matched exactly against production. A 10-vector absolute-path/traversal
+  attack matrix, symlink escape, cross-store substitution, and
+  canonical-root-placement-without-provenance were freshly attacked; all
+  rejected for the correct authority reasons. Fixed-SHA (`git worktree`)
+  HPAC-family comparison found exactly the 4 expected candidate-only failing
+  nodes and zero unexplained regressions. Finding P: CLOSED. Finding C:
+  CLOSED. Principal and proof-writer provenance remain independently closed.
+  A fresh 29-test independent suite committed. No repair applied
+  (verification-only); Layer 3 not begun — no next-phase ID disclosed by
+  canonical project state, so none invented; new human authorization
+  required.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: HPAC canonical-store containment and protected-presentation attestation-schema blocking repair to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2** repairs the two Blocking
   findings left open by `.3.2.1`. Protected-presentation attestation now
