@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit human authorization for the next independent verification to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: Independent Verification of B1/B7/N1/N2 Production Authority Repair Implementation; session refreshed and governance continuity revalidated.
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8** — independently verified the
+  B1/B7/N1/N2 production authority repair. Re-derived every defect from the
+  fixed pre-`.1R.7` baseline `b85e903c` and from primary contracts, not from
+  `.1R.7`'s report or tests. Confirmed all source change is isolated in commit
+  `3fc26199` touching exactly three production files (matching `.1R.6`'s frozen
+  matrix); the copyable `_validator_seal` is gone (B1); the durable dispatch
+  identity registry is re-read at request build (B7); `validate_approval`
+  resolves only opaque IDs through the exact canonical store (N1); human
+  provenance derives only from a freshly re-verified verifier-owned principal
+  and caller strings raise (N2); the Option-A deterministic NON-REAL hard stop
+  is present and effective in both authority transitions with zero positive
+  real-authority paths; HPAC-REQ-054 Step 4 independently recomputes the exact
+  Challenge digest. Gate-5/Gate-9/Gate-10, PB policy, POL-005, and contracts
+  are byte-unchanged; runtime stays `Observed / observe / unavailable`.
+  Fixed-SHA attribution (baseline vs candidate, affected selection): identical
+  23-node pre-existing failure set, zero candidate-only nonpassing nodes, zero
+  unexplained attributable functional regressions. Added 47 fresh independent
+  adversarial tests (all pass; 201 passed across all phase-affected modules).
+  Non-blocking findings O1–O4 recorded; F2 repaired, F3/F4/F7 unchanged and not
+  broadened. Verdict: **INDEPENDENTLY VERIFIED — B1/B7/N1/N2 PRODUCTION
+  AUTHORITY REPAIR COMPLETE (with non-blocking findings)**; B1/B7/N1/N2
+  independently confirmed closed at the production authority implementation
+  boundary. No canonical next phase ID exists; Gate-5/Gate-9 coordinator wiring
+  remains a distinct unscheduled later chapter. The unauthorized delegated
+  `.3` finalization/commit/push governance incident is preserved unchanged.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7** — implemented the bounded
   B1/B7/N1/N2 production authority repair and HPAC-REQ-054 Step-4
   prerequisite. Approval projections now require exact-object verifier

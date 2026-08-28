@@ -2,8 +2,64 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8 — Independent Verification of
+B1/B7/N1/N2 Production Authority Repair Implementation.
+**INDEPENDENTLY VERIFIED — B1/B7/N1/N2 PRODUCTION AUTHORITY REPAIR COMPLETE
+(non-blocking findings) — REAL AUTHORITY / RUNTIME EXECUTION STILL
+UNAVAILABLE.** Re-derived each defect from the fixed pre-`.1R.7` baseline
+`b85e903c` and from primary contracts (RIHAC-001 v2.0, RIASC-001 v3.0,
+HPAC-001 v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0, POL-005), not
+from `.1R.7`'s report/tests. All `.1R.7` source/test change is isolated in
+commit `3fc26199`; exactly three production files changed
+(`runtime_authority.py`, `runtime_dispatch_permission.py`,
+`hpac_verifier.py`), matching `.1R.6`'s frozen matrix. **B1** — the
+copyable `_validator_seal` is gone; the projection is `eq=False`, held by
+exact-object identity in `_VALIDATED_AUTHORITY_CONTEXTS`, and its content
+binding is recomputed over every authority field; copies, `replace`,
+mutations, lookalikes, and cross-invocation transfers are all rejected.
+**B7** — `RuntimeDispatchIdentityTracker.revalidate` re-reads the durable
+invocation/idempotency/attempt records at request-build time; deleted,
+changed, or foreign-tracker identity fails closed. **N1** —
+`validate_approval` takes an opaque approval ID, requires the exact
+`RuntimeInvocationApprovalStore`, re-loads by ID, and unconditionally
+rejects caller objects and duck-typed stores. **N2** — caller
+`approver_id`/`identity_evidence_kind` raise; provenance derives only from
+a freshly re-verified verifier-owned `AuthenticatedHumanPrincipal`; forged
+/ copied / pickled principals are refused. **Option-A NON-REAL hard stop**
+verified in both `create_runtime_invocation_approval` and
+`validate_approval`: no deterministically-writable HPAC store can carry
+`PRODUCTION` assurance, so the full-strength deterministic chain still
+fails specifically on `FIXTURE_NON_REAL` — zero positive real-authority
+paths. **HPAC-REQ-054 Step 4** independently recomputes the exact
+`Challenge` digest from the canonical 10-field body. Gate-5/Gate-9
+coordinator wiring = 0; Gate-9 consumption = 0; Gate-10 effects = 0; PB
+policy/POL-005/contracts byte-unchanged; runtime `Observed / observe /
+unavailable`. Fixed-SHA attribution (`b85e903c` vs candidate, affected
+selection): 23 pre-existing failures, byte-for-byte identical set at
+baseline and candidate, **zero candidate-only nonpassing nodes, zero
+unexplained attributable functional regressions**. 47 fresh independent
+adversarial tests pass; 201 passed across all phase-affected modules.
+Non-blocking findings: O1 (B1 positive-emission path unreachable under
+Option-A — inherent, not a defect), O2 (N1 store trust is canonical-path +
+file-integrity, not a cryptographic writer seal — the documented F7
+boundary), O3 (minor `.1R.7` test-name over-promise, F4 class), O4
+(pre-existing `tasks/DONE.md` hygiene debt). F2 repaired; F3/F4/F7
+unchanged and not broadened. Verdict:
+**INDEPENDENTLY VERIFIED — B1/B7/N1/N2 PRODUCTION AUTHORITY REPAIR
+COMPLETE (VERIFIED WITH NON-BLOCKING FINDINGS).** B1/B7/N1/N2
+**INDEPENDENTLY CONFIRMED CLOSED AT PRODUCTION AUTHORITY IMPLEMENTATION
+BOUNDARY** — this does not mean real FIDO2, protected UI, Gate-5/Gate-9
+wiring, PB integration, runtime capability, or execution. No canonical
+next phase ID exists: Gate-5/Gate-9 coordinator wiring remains a distinct,
+unscheduled later chapter with no assigned ID (no-invent-an-ID
+discipline). The `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+governance incident is preserved unchanged. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_8_INDEPENDENT_VERIFICATION_B1_B7_N1_N2_PRODUCTION_AUTHORITY_REPAIR_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7 — B1/B7/N1/N2 Production Authority
-Repair Implementation (completed, independent verification pending).
+Repair Implementation (completed, independently verified by `.1R.8`).
 **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING —
 REAL AUTHORITY STILL UNAVAILABLE.** Implemented the frozen `.1R.6` Option-A
 repair in exactly `runtime_authority.py`, `runtime_dispatch_permission.py`,
