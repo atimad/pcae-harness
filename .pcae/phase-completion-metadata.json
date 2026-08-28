@@ -13,12 +13,12 @@
   "tests_run": 0,
   "tests_added_or_updated": "None. This is a planning/documentation-only phase; no src/pcae/ or tests/ change was made or is required by its scope.",
   "test_results": {
-    "fast_green": "not_applicable_this_phase",
+    "fast_green": "0 passed, 0 failed (planning-only phase, no test changes)",
     "report_notification_tests": "not_applicable_this_phase",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
   "validation_results": {
-    "fast_green": "not_applicable_this_phase",
+    "fast_green": "0 passed, 0 failed (planning-only phase, no test changes)",
     "runtime_boundary": "Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, subprocess, provider/network, credential, hardware, or external-effect calls",
     "report_notification_tests": "not_applicable_this_phase",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
