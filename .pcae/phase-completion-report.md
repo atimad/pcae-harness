@@ -1,82 +1,140 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1 Complete — Independent Verification of HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Repair
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4 Complete — Mechanism-Neutral HPAC Verifier and Principal-Registry Consumption Boundary Implementation Planning
 
 Status: completed.
 
-Verification-entry commit: `888be35c15493e5ba515985c301531bbedffe51f`.
+Planning-entry commit: `95644e028a9b1244fa0901f309226b11824796e0`.
 
 Canonical hand-authored phase doc:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_2_1_INDEPENDENT_VERIFICATION_HPAC_CANONICAL_STORE_CONTAINMENT_AND_PROTECTED_PRESENTATION_ATTESTATION_SCHEMA_REPAIR.md`.
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_4_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION_PLANNING.md`.
 
 ## Technical verdict
 
-**INDEPENDENTLY VERIFIED — CANONICAL HUMAN-PRINCIPAL, PROTECTED-PRESENTATION, AND HPAC PROOF-LIFECYCLE FOUNDATION COMPLETE.**
+**PLANNING COMPLETE.**
 
-Both Blocking findings repaired in `.3.2.2` are independently closed:
+`.1R.2`'s §1 claims the design is "eight non-collapsible layers" but never
+enumerates them; §52/Matrix E instead lists ten concrete sub-phases whose
+"Phase 2" bundles the mechanism-neutral HPAC verifier together with
+B1/B7/N1/N2 production-authority repair. This phase:
 
-1. **Finding P (protected-presentation attestation schema).** HPAC-REQ-092's closed 8-field attestation schema was independently re-derived directly from `docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` §39.2 — not from `.3.2.2`'s own source or test module — and matched field-for-field, name-for-name against `presentation_attestation_object()`. Deterministic-to-real upgrade attempts (installing a `verifier_kind` crafted to look real, injecting extra fields into the attested object) were freshly attacked and rejected for the correct authority reason: `_verify_installed_attestation` honors only `verifier_kind == "deterministic-test-fixture"`, and any extra-field object fails re-verification against the closed 8-field re-derivation.
-2. **Finding C (canonical-store containment).** A 10-vector attack matrix (absolute paths, `../` traversal variants, backslash, `.`/`..`, empty string) was independently re-run against both `HPACLifecycleStore._dir()` and `RuntimeInvocationAuthorityConsumptionStore._path()` — all 10 rejected before any file I/O, on both stores. Symlink escape, cross-store substitution, and canonical-root-placement-without-provenance were each freshly attacked: all rejected for the correct reason (the last two confirming containment and writer-provenance remain two independently enforced properties, not one).
+1. Reconstructed the only eight-item decomposition consistent with both
+   claims (splitting old Phase 1 into L1/L2/L4 and old Phase 2 into L3/L5).
+2. Re-derived from primary contract text — not assumed — that L3 (verifier)
+   is architecturally separable from L5 (B1/B7/N1/N2 repair): the verifier
+   consumes only the already independently-verified foundation, its
+   HPAC-REQ-056 `AuthenticatedHumanPrincipal` output is contractually
+   ephemeral and non-serializable (HPAC-REQ-058), and N2's repair is a
+   *consumer* of the verifier, not a co-requisite for building it.
+3. Produced a full implementation plan for the standalone verifier:
+   responsibilities (HPAC-001 §18's already-normative 8-step algorithm),
+   explicit non-responsibilities, input/output contracts, trust/provenance
+   model, anti-transfer model, NON-REAL assurance classification,
+   principal/proof/presentation/lifecycle consumption ownership, Gate-5/
+   Gate-9 relationship, fail-closed failure model, error-taxonomy reuse
+   (no new parallel taxonomy), persistence decision (ephemeral only, no
+   new store), a 25-vector threat matrix, and a test plan.
+4. Froze the exact next-phase IDs following this repository's observed
+   `.<N>`/`.<N>.1` naming convention (re-derived from `docs/` listing, not
+   assumed): **`149O.20L.7O.3W.1R.2B.1R.1.1R.5`** (verifier implementation)
+   and **`...1R.5.1`** (its independent verification) — not `.1R.4.x`,
+   which would incorrectly imply this planning phase itself needed repair.
 
-No contract file was modified. No repair was applied in this phase — verification-only, per phase instruction. No CONTRACT/IMPLEMENTATION INCOMPATIBILITY was encountered.
+No verifier code was written. No production trust-path file
+(`human_principal_registry.py`, `approval_presentation.py`,
+`human_authentication_proof.py`, `hpac_lifecycle.py`,
+`runtime_invocation_authority_consumption.py`, `runtime_authority.py`,
+`runtime_dispatch_permission.py`) was modified. No contract file was
+modified. `.1R.2` was treated as historical evidence and not overwritten.
 
-## Independent evidence summary
+## Reconciliation summary
 
-- HPAC-REQ-092 re-derived from contract text first, compared against production second (not the reverse) — exact 8-field match.
-- Fresh 29-test independent suite committed (does not import from `.3.2.2`'s test module):
-  `tests/test_hpac_canonical_containment_attestation_schema_independent_verification_3w1r2b1r111r3221.py` — **29/29 passed**.
-- Fixed-SHA HPAC-family comparison (`git worktree`, not baseline inference or `git stash`): baseline `9cbdc45b` (pre-`.3.2.2`) = 47 failed/303 passed across 15 files; candidate `6cd753c6` (post-`.3.2.2`, pre-this-phase) = 51 failed/327 passed across 16 files (the 16th being `.3.2.2`'s own new 28-test file, all passing). Exact failing-node-ID diff: **exactly 4 candidate-only failures, 0 baseline-only failures** — all 4 are `.3.2.1`-suite `blocking_reproduction` tests that now correctly fail because they positively documented the pre-repair defects that are now fixed. Individually re-run and confirmed.
-- Broader keyword-filtered corroborating run (`hpac|approval_presentation|human_principal|human_authenticator|lifecycle`, 54 failed/1027 passed/1 skipped/1 xfailed of ~1082 selected): all 54 failures belong to pre-existing historical `TestBlocking*`/`test_b1_`/`test_m1_` families unrelated to Finding P/C.
-- `test_hpac_canonical_containment_and_attestation_schema_repair_3w1r2b1r111r322.py` (`.3.2.2`'s own 28-test suite): re-run independently, **28/28 passed**.
-- `test_hpac_lifecycle.py` + `test_hpac_principal_registry.py` + `test_hpac_authentication_proof.py` + `test_hpac_authority_consumption.py` + `test_hpac_approval_presentation.py` + `test_hpac_authenticator_deterministic.py` (genesis/predecessor/fork/principal/proof-provenance regression): **80/80 passed**, unchanged.
-- Production consumer inventory: zero references to any HPAC module outside the five HPAC-family core modules; `runtime_authority.py`, `runtime_dispatch_permission.py`, `permission_broker_foundation.py` contain zero HPAC references (grep-confirmed).
-- Runtime: `Observed / observe / unavailable`; zero registered plugins/capabilities (`pcae runtime inspect`).
-
-## Findings disposition
-
-| ID | Result |
+| | |
 |---|---|
-| Finding P — protected-presentation attestation schema | **CLOSED** |
-| Finding C — canonical-store containment | **CLOSED** |
-| Principal provenance | **REMAINS INDEPENDENTLY CLOSED** |
-| Proof writer provenance | **REMAINS INDEPENDENTLY CLOSED** |
+| Old plan | `.1R.2 §52` Phase 2 = verifier (L3) + B1/B7/N1/N2 repair (L5), bundled |
+| Verified implementation experience | L1/L2/L4 foundation required three repair/re-verify rounds (`.1R.3.1→.3.2→.3.2.1→.3.2.2→.3.2.2.1`) at fine single-responsibility granularity; N2 repair structurally consumes the verifier's output, so a phase building both cannot be independently verified without first independently verifying the thing it depends on |
+| Revised sequence | L3 becomes its own governed phase (`...1R.5`) with its own independent verification (`...1R.5.1`), before L5 (`...1R.6`/`...1R.6.1`) begins |
+
+## Central planning decision
+
+**Verifier-only separation is architecturally valid.** Re-derived from
+HPAC-001 §18/§19, RDGO-001 §6/§10, and PBRD-001 §7: the verifier can
+consume trusted canonical HPAC foundation state, produce a
+mechanism-neutral non-authorizing ephemeral result, remain unconsumed by
+production runtime authority, remain independent of PB, and remain
+independent of `RuntimeInvocationApproval` repair — all five criteria hold
+without forcing a carve-out.
+
+## Verifier scope frozen for the next phase
+
+- **Responsibilities:** HPAC-001 §18's 8-step algorithm in full (canonical
+  approval/proof resolution, registry/credential/subject binding, trusted
+  presentation/attestation verification, credential signature
+  verification, UP+UV, freshness, lifecycle/replay resolution, atomic
+  `PROOF_VERIFIED_AND_BOUND` creation + `AuthenticatedHumanPrincipal`
+  emission).
+- **Exclusions:** no PB `ALLOW`/POL evaluation; no Gate-5 projection
+  object; no Gate-9 consumption write; no B1/B7/N1/N2 repair; no real
+  FIDO2/UI; no cacheable "verified" flag.
+- **Output/authority model:** `AuthenticatedHumanPrincipal` is the
+  existing frozen contract type (HPAC-REQ-056) — not invented here.
+  Trusted-construction only, ephemeral, non-serializable — closes the
+  anti-transfer/copied-result/caller-forgeable-boolean threats by
+  construction, not by adding new binding fields.
+- **NON-REAL handling:** deterministic-mechanism success must carry
+  `FIXTURE_NON_REAL` assurance classification copied from the resolved
+  mechanism's provenance, never conflated with real human authentication.
+- **Persistence:** ephemeral only; no new canonical store; the durable
+  evidence is the existing `PROOF_VERIFIED_AND_BOUND` lifecycle event.
+
+## Threat matrix and test plan
+
+25-vector threat matrix (forged/copied principal, proof, presentation,
+attestation; mechanism/installation/challenge/invocation substitution;
+UP/UV false; revocation; expiry; replay; stale/disconnected lifecycle;
+copied/constructed/reused verifier result; deterministic relabeling;
+canonical-looking record outside trusted store; internal failure) is
+mapped to specific rejection behavior in the phase doc §30. Test plan
+(§31) covers per-step unit tests, all 25 adversarial cases, foundation
+regression re-run (80 passing per `.1R.3.2.2.1`), and PB/runtime-authority
+zero-consumer tests.
 
 ## Governance verdict
 
-**DELEGATED FINALIZATION / COMMIT / PUSH: UNAUTHORIZED** (historical `.3` incident, preserved, not revisited). No delegated agent was granted commit, phase-finalization, or push authority in this phase.
+**DELEGATED FINALIZATION / COMMIT / PUSH: UNAUTHORIZED** (historical `.3`
+incident, preserved, not revisited). No delegated agent was granted
+commit, phase-finalization, or push authority in this phase.
 
 ## No-Go confirmation
 
-- No Layer 3 mechanism-neutral production verifier or resolver.
+- No verifier implementation (`hpac_verifier.py` not created).
+- No production trust-path modification.
 - No normative contract modification.
-- No historical `.3`, `.3.1`, `.3.2`, `.3.2.1`, or `.3.2.2` artifact rewrite.
+- No B1, B7, N1, or N2 production repair (all remain contract closed /
+  implementation open).
 - No Permission Broker integration.
 - No Runtime Enforcement or Shell Gate activation.
-- No B1, B7, N1, or N2 production repair (all remain contract closed / implementation open).
 - No real FIDO2, WebAuthn, CTAP, enrollment, or credential operation.
 - No protected approval UI, approval CLI, or enrollment CLI.
 - No provider, network, subprocess, hardware, or external runtime effect.
-- No Gate-9 production wiring, Gate-10 dispatch, or PB/runtime-dispatch consumption.
-- No repair applied to `.3.2.2`'s implementation in this phase.
+- No Gate-9 production wiring, Gate-10 dispatch, or PB/runtime-dispatch
+  consumption.
+- No historical `.1R.2` or `.1R.3.x` artifact rewrite.
 - No revert, force push, history rewrite, or hook bypass.
 
-Runtime remains `Observed / observe / unavailable`.
+Runtime remains `Observed / observe / unavailable`. POL-005 unchanged.
 
 ## Commit and push state
 
 Phase commits:
 
-- `888be35c15493e5ba515985c301531bbedffe51f`
-- `72582d82fa6ba45be97cab6aff630de4578db9ff`
-- `dacea3fec879c453b4cf159e9e74c700ea452834`
-- `7a03d166d3c1ed298ff90b15df7d3328bf6e21a2`
+- `95644e028a9b1244fa0901f309226b11824796e0`
+- `8b77c434253923fd6d38377c77f8081af2a40387`
+- `003a5adadfe942bd38069121d6f71b21747fa76c`
 
 Pushed: pending (to be finalized after `pcae push`).
 
 ## Recommended next phase
 
-Canonical project state discloses no authoritative next-phase ID/title at
-this phase's entry (the "Planned" section listed only this verification
-phase itself; the "Limitations" section explicitly notes no recommended
-next phase was disclosed). Per phase instruction §37, this report does not
-invent one. **Explicit human authorization and the canonical next-phase
-ID/title from the authoritative eight-layer plan are required before any
-Layer 3 work begins.**
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.5`** — Mechanism-Neutral HPAC Verifier and
+Principal-Registry Consumption Boundary Implementation. **Requires
+separate explicit human authorization before starting.** Its independent
+verification phase is **`149O.20L.7O.3W.1R.2B.1R.1.1R.5.1`**.
