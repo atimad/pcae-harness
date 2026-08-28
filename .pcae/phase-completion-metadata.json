@@ -68,10 +68,14 @@
     {
       "hash": "e00934bfad4fa4fc13b06dd3f7388d08e6d8a869",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1: author canonical completion metadata and report"
+    },
+    {
+      "hash": "33a5df4c9d240c64121904d2726bff17adc2bb94",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1: repair fast_green and push-state metadata fields for finalization gate"
     }
   ],
-  "origin_main_head": "e00934bfad4fa4fc13b06dd3f7388d08e6d8a869",
-  "origin_main_head_count": 4,
-  "pushed_status": "not_pushed",
+  "origin_main_head": "33a5df4c9d240c64121904d2726bff17adc2bb94",
+  "origin_main_head_count": 0,
+  "pushed_status": "pushed",
   "recommended_next_phase": "Not canonically assigned this phase (no-invent-an-ID constraint). The .1R.5 family (mechanism-neutral HPAC verifier and principal-registry consumption boundary: implemented .1R.5, found blocking .1R.5.1, repaired .1R.5.2, independently verified complete .1R.5.2.1) is now closed. Requires separate explicit human authorization and phase-ID confirmation to determine the next canonical phase."
 }
