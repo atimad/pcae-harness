@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: HPAC canonical-store containment and protected-presentation attestation-schema blocking repair to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2** repairs the two Blocking
   findings left open by `.3.2.1`. Protected-presentation attestation now
   serializes exactly the eight HPAC-REQ-092 fields and no others; installed-
