@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4** (planning only) reconciled
+  `.1R.2`'s unenumerated "eight non-collapsible layers" claim against its
+  concrete §52/Matrix E phase sequence, which bundled the mechanism-neutral
+  HPAC verifier with B1/B7/N1/N2 production repair in one "Phase 2."
+  Re-derived from contracts that the verifier is architecturally separable
+  from that repair (ephemeral, non-serializable `AuthenticatedHumanPrincipal`
+  output per HPAC-REQ-056/058; N2 repair is a consumer, not a co-requisite).
+  Produced the full implementation plan (responsibilities, input/output
+  contracts, anti-transfer model, 25-vector threat matrix, test plan) and
+  froze the next two phase IDs: `...1R.5` (verifier implementation) and
+  `...1R.5.1` (its independent verification), per this repository's observed
+  `.<N>`/`.<N>.1` naming convention. No verifier code, no production
+  trust-path file touched. See
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_4_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION_PLANNING.md`.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1: Independent Verification of HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Repair to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1** independently verified the
   `.3.2.2` HPAC repair and returned **INDEPENDENTLY VERIFIED — CANONICAL

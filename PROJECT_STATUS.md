@@ -2,6 +2,38 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.4 — Mechanism-Neutral HPAC Verifier and
+Principal-Registry Consumption Boundary Implementation Planning.
+**PLANNING COMPLETE.** Reconciled `.1R.2`'s implicit "eight non-collapsible
+layers" claim (never enumerated as a list) against its concrete §52/Matrix E
+phase sequence, which bundles the mechanism-neutral HPAC verifier together
+with B1/B7/N1/N2 production-authority repair in a single "Phase 2." Re-derived
+from contracts (not assumed) that the verifier is architecturally separable
+from that repair: it consumes only the already independently-verified
+foundation (registry, presentation, proof, lifecycle stores), its
+HPAC-REQ-056 `AuthenticatedHumanPrincipal` output is contractually ephemeral
+and non-serializable (closing the anti-transfer/copied-result threat model by
+construction), and N2's repair is a *consumer* of the verifier rather than a
+co-requisite for building it. Produced a full implementation plan (verifier
+responsibilities/exclusions, input/output contracts, anti-transfer model,
+NON-REAL assurance classification, Gate-5/Gate-9 relationship, 25-vector
+threat matrix, test plan, error-taxonomy reuse) and froze the exact next two
+phase IDs following this repository's observed naming convention
+(`.<N>` implementation, `.<N>.1` independent verification —
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.5`** for the verifier implementation and
+**`...1R.5.1`** for its independent verification; not `.1R.4.x`, which would
+incorrectly imply this planning phase itself needed repair). B1/B7/N1/N2
+remain contract closed / implementation open; PB, Runtime Enforcement, real
+FIDO2, and real UI remain untouched and unscheduled by this document; runtime
+remains Observed/observe/unavailable; POL-005 unchanged. No verifier code and
+no production trust-path file was modified in this phase. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_4_MECHANISM_NEUTRAL_HPAC_VERIFIER_AND_PRINCIPAL_REGISTRY_CONSUMPTION_BOUNDARY_IMPLEMENTATION_PLANNING.md`.
+Recommended next phase (**requires separate explicit human authorization
+before starting**): `149O.20L.7O.3W.1R.2B.1R.1.1R.5` — Mechanism-Neutral HPAC
+Verifier and Principal-Registry Consumption Boundary Implementation.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1 — Independent Verification of HPAC
 Canonical-Store Containment and Protected-Presentation Attestation-Schema
 Repair. **INDEPENDENTLY VERIFIED — CANONICAL HUMAN-PRINCIPAL,
