@@ -1,36 +1,37 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3 — Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle Foundation Implementation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 — Independent Verification of Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle Foundation
 
-Canonical hand-authored completion content is the required phase document:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION_IMPLEMENTATION.md`.
+Status: completed.
 
-Verdict: CANONICAL HPAC FOUNDATION IMPLEMENTED; NOT INDEPENDENTLY VERIFIED.
-Implemented the first bounded slice (Layer 1-2) of the 8-layer plan from
-149O.20L.7O.3W.1R.2B.1R.1.1R.2: `HumanPrincipalRegistry` model/store,
-`TrustedApprovalPresentationEvidence` model/store, `HumanAuthenticationProof`
-model/store, the HPAC hash-chained lifecycle model/store, deterministic
-non-real `HumanAuthenticator`/`ProtectedApprovalPresentationMechanism`
-implementations, and the inert Gate-9 `RuntimeInvocationAuthorityConsumption`
-model/store, realizing the verified contract baseline (RIHAC-001 v2.0,
-RIASC-001 v3.0, HPAC-001 v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0
-— all six unchanged). Nine new `src/pcae/core/` modules and six new test
-files (80 tests, all passing); 0 failed beyond the pre-phase fast_green
-baseline across the full suite, confirmed via git-stash baseline
-comparison. No `runtime_authority.py`, `runtime_dispatch_permission.py`,
-or Permission Broker production change; no B1/B7/N1/N2 repair; no real
-FIDO2/UI/hardware; no Gate-5/9 wiring; no CLI surface. Deterministic
-fixtures are structurally ineligible for real-runtime authority (fixed
-`SIMULATION_ONLY`/`mechanism_id` constants, no override path).
-Presentation-evidence trust is honestly structural-only (not
-cryptographic) at this layer, per the foundation's own documented
-boundary. All 47 required sections and Matrices A-E present. No
-production-authority, hardware, execution, POL-005, runtime, release,
-article, or private-research change beyond the nine new inert/foundation
-modules; runtime remains `Observed / observe / unavailable`; release
-`v0.4.3` (`63580893`) unchanged.
+Canonical hand-authored verification content:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_1_INDEPENDENT_VERIFICATION_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION.md`.
 
-This phase does not self-certify.
+Technical verdict: **NOT VERIFIED — TRUST FOUNDATION DEFECT.** Fresh
+production-boundary tests reproduce caller-selected and copied registry,
+presentation, proof, and lifecycle authority; caller-manufactured real-looking
+evidence; Presentation(A)+Challenge(B); forged genesis and alternate complete
+chains; and incomplete canonical-byte/state-predecessor enforcement. Protected
+root, protected writer, installed-mechanism, verifier, and genesis provenance
+are not established by the current foundation.
 
-Exact next, not begun: 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 — Independent
-Verification of Canonical Human-Principal, Protected-Presentation, and
-HPAC Proof-Lifecycle Foundation. Human decision required before Layer 3-5
-(verifier, B1/B7/N1/N2 repair, real FIDO2, real presentation UI).
+Delegated finalization / commit / push verdict: **UNAUTHORIZED.** The delegated
+actor exceeded explicit human-granted authority. All seven `.3` commits remain
+preserved history and establish no delegated authority precedent. The `.3`
+canonical report/metadata lists only three of those seven phase-owned commits
+and is provenance-incomplete despite structural consistency. No revert,
+history rewrite, or historical-report repair was authorized or performed.
+
+Independent tests: 35/35 passed as adversarial blocker reproductions. Inherited
+`.3` tests: 80/80 passed after independent quality review. Combined focused
+HPAC result: 115/115 passed. Fixed-SHA manual JUnit and governed structured
+Fast Green comparisons both found zero unexplained attributable failures. The
+repository-wide `pytest -n auto` check separately aborts during collection
+because historical tests generate random UUID-valued node IDs per worker.
+
+PB integration, B1/B7/N1/N2 production repair, real FIDO2/UI/hardware,
+Runtime Enforcement, Shell Gate, provider/network calls, and external runtime
+effects remain absent. Runtime remains `Observed / observe / unavailable`.
+
+Recommended next phase, not begun and requiring new human authorization:
+149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation Trust-Root,
+Writer-Provenance, and Lifecycle-Validation Blocking Repair, followed by
+`.3.2.1` independent verification. Do not proceed to Layer 3.
