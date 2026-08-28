@@ -55,6 +55,7 @@ __all__ = [
     "require_revoked_at_consistency",
     "new_hpac_id",
     "id_pattern_matches",
+    "require_safe_relative_id_component",
     "write_atomic_replace",
     "write_atomic_create_only",
     "read_canonical_json_document",
@@ -630,6 +631,26 @@ def require_nonempty_str(value: object, *, context: str) -> str:
     if len(value) > 256:
         raise HPACMalformedError(f"{context}: exceeds the 256-character bound")
     return value
+
+
+def require_safe_relative_id_component(value: object, *, context: str) -> str:
+    """Require `value` to be usable as exactly one filesystem path segment.
+
+    A canonical store's record identity is not its filesystem location
+    (contract principle: RECORD ID != FILESYSTEM PATH). Rejecting `.`, `..`,
+    and any path separator here -- before the caller-supplied identifier is
+    ever joined onto a store root -- means an absolute path, a UNC/drive
+    form (which cannot be expressed without a backslash), or a `../`
+    traversal segment can never select a storage location outside the
+    owning store's configured root; `Path.__truediv__` silently discards a
+    root prefix when joined with an absolute string, so this check must run
+    before that join, not after.
+    """
+
+    text = require_nonempty_str(value, context=context)
+    if text in {".", ".."} or "/" in text or "\\" in text:
+        raise HPACMalformedError(f"{context}: must be exactly one safe path component")
+    return text
 
 
 def require_status(value: object, *, context: str) -> str:

@@ -580,11 +580,7 @@ class TrustedApprovalPresentationStore:
             raise ApprovalPresentationTrustError("mechanism attestation object is malformed") from exc
         if not isinstance(attestation_object, dict):
             raise ApprovalPresentationTrustError("mechanism attestation object is not a closed object")
-        expected_attestation = presentation_attestation_object(
-            resolved,
-            installation_store_id=attestation_object.get("installation_store_id"),
-            simulation_only=attestation_object.get("simulation_only"),
-        )
+        expected_attestation = presentation_attestation_object(resolved)
         if attestation_object != expected_attestation or canonical_json_bytes(attestation_object) != attestation_bytes:
             raise ApprovalPresentationTrustError("mechanism attestation object does not bind the evidence exactly")
         return resolved
@@ -672,11 +668,7 @@ class TrustedApprovalPresentationStore:
             attestation_object = json.loads(attestation_bytes.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise ApprovalPresentationTrustError("deterministic mechanism attestation is malformed") from exc
-        expected = presentation_attestation_object(
-            evidence,
-            installation_store_id=installed.store_id,
-            simulation_only=True,
-        )
+        expected = presentation_attestation_object(evidence)
         if attestation_object != expected or canonical_json_bytes(attestation_object) != attestation_bytes:
             raise ApprovalPresentationTrustError("mechanism attestation does not verify against installed descriptor state")
 
@@ -693,10 +685,18 @@ def _decode_attestation(value: object) -> bytes:
 
 def presentation_attestation_object(
     evidence: TrustedApprovalPresentationEvidence,
-    *,
-    installation_store_id: Optional[str],
-    simulation_only: bool,
 ) -> dict:
+    """HPAC-REQ-092's exact closed attested object.
+
+    Only these eight fields are permitted; no other or omitted field is
+    contract-conformant. Installation/writer authority and the deterministic
+    mechanism's permanent non-real assurance class are established by
+    separate channels -- the store's writer-provenance sidecar
+    (`HPACStoreAuthority.record_write`/`verify_record`) and the installed
+    descriptor's `verifier_kind`/`HPACAuthorityClass` -- and must never be
+    smuggled into this attested object itself.
+    """
+
     return {
         "attestation_version": PRESENTATION_ATTESTATION_VERSION,
         "presentation_id": evidence.presentation_id,
@@ -706,8 +706,6 @@ def presentation_attestation_object(
         "descriptor_digest": evidence.mechanism_ref.get("descriptor_digest"),
         "election": evidence.election,
         "presented_at": evidence.presented_at,
-        "installation_store_id": installation_store_id,
-        "simulation_only": simulation_only,
     }
 
 

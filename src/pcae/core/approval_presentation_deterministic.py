@@ -146,7 +146,6 @@ class DeterministicTestPresentationMechanism:
             canonical_subject,
             approval_id,
             descriptor=sealed_descriptor,
-            installation_store_id=None,
             canonical_facts=False,
         )
 
@@ -171,7 +170,6 @@ class DeterministicTestPresentationMechanism:
             canonical_subject,
             approval_id,
             descriptor=descriptor,
-            installation_store_id=installed_descriptor.store_id,
             canonical_facts=True,
         )
 
@@ -181,7 +179,6 @@ class DeterministicTestPresentationMechanism:
         approval_id: str,
         *,
         descriptor: PresentationMechanismDescriptor,
-        installation_store_id: str | None,
         canonical_facts: bool,
     ) -> TrustedApprovalPresentationEvidence:
         presentation_id = new_presentation_id()
@@ -249,11 +246,7 @@ class DeterministicTestPresentationMechanism:
             presentation_digest="",
             **unsigned_body,
         )
-        attestation_object = presentation_attestation_object(
-            unsigned_evidence,
-            installation_store_id=installation_store_id,
-            simulation_only=True,
-        )
+        attestation_object = presentation_attestation_object(unsigned_evidence)
         attestation_bytes = canonical_json_bytes(attestation_object)
         mechanism_attestation = base64.urlsafe_b64encode(attestation_bytes).decode("ascii").rstrip("=")
         mechanism_attestation_digest = hashlib.sha256(attestation_bytes).hexdigest()

@@ -25,6 +25,7 @@ from pcae.core.hpac_foundation import (
     canonical_digest,
     read_canonical_json_document,
     reject_symlink,
+    require_safe_relative_id_component,
     write_atomic_create_only,
 )
 
@@ -162,7 +163,8 @@ class RuntimeInvocationAuthorityConsumptionStore:
         self._root = Path(root)
 
     def _path(self, proof_id: str) -> Path:
-        return self._root / "proofs" / "v2" / proof_id / "consumption.json"
+        safe_proof_id = require_safe_relative_id_component(proof_id, context="proof_id")
+        return self._root / "proofs" / "v2" / safe_proof_id / "consumption.json"
 
     def create(self, proof_id: str, record: RuntimeInvocationAuthorityConsumption) -> RuntimeInvocationAuthorityConsumption:
         reject_symlink(self._root)

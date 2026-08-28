@@ -38,6 +38,7 @@ from pcae.core.hpac_foundation import (
     new_hpac_id,
     read_canonical_json_document,
     reject_symlink,
+    require_safe_relative_id_component,
     write_atomic_create_only,
 )
 from pcae.core.human_authenticator import Challenge
@@ -219,7 +220,8 @@ class HPACLifecycleStore:
         return self._authority.writer(self._TERMINAL_WRITER_ROLE, subject=proof_id)
 
     def _dir(self, proof_id: str) -> Path:
-        return self._root / "proofs" / "v2" / proof_id / "lifecycle"
+        safe_proof_id = require_safe_relative_id_component(proof_id, context="proof_id")
+        return self._root / "proofs" / "v2" / safe_proof_id / "lifecycle"
 
     def _path(self, proof_id: str, sequence: int) -> Path:
         return self._dir(proof_id) / f"{sequence:04d}.json"
