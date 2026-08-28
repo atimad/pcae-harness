@@ -2,40 +2,52 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation
+Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair.
+**IMPLEMENTATION REPAIR COMPLETE; INDEPENDENT VERIFICATION PENDING; FINDINGS
+NOT CLOSED.** Added a common protected store authority with a fixed
+zero-argument production root, opaque root/role-bound writers, durable
+writer-provenance sidecars, exact canonical-byte and hardened filesystem
+validation, and resolver-sealed canonical records. Registry fixtures are
+durably `FIXTURE_NON_REAL`; copied data, public digests, caller roots, and
+public constructors cannot establish canonical authority. Presentation
+resolution now requires a same-root installed descriptor, exact
+mechanism/version/class/subject/challenge bindings, verified deterministic
+fixture attestation, and presentation-writer provenance. Canonical proof
+writes require proof-verifier provenance. Canonical lifecycle genesis requires
+the coordinator writer plus same-root resolved presentation, and every
+successor validates the complete authoritative chain, state/predecessor table,
+same-root proof binding where applicable, and create-only fork exclusion.
+Thirty-eight fresh adversarial tests and all 80 original `.3` tests pass; seven
+unchanged `.3.1` blocker-reproduction tests now fail as expected because their
+old unsafe acceptance is gone. Gate 9 remains inert; PB/runtime integration,
+B1/B7/N1/N2 repair, real mechanisms/UI, and external effects remain absent.
+Runtime remains Observed/observe/unavailable.
+
+The `.3` delegated finalization/commit/push remains separately
+**UNAUTHORIZED**; the preserved seven-commit history establishes no delegated
+authority precedent, and this technical repair does not cure or rewrite it.
+All repaired `.3.1` trust findings remain **REPAIRED — INDEPENDENT
+VERIFICATION PENDING — NOT CLOSED**. Recommended next, not begun and requiring
+new human authorization: exactly
+**149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 — Independent Verification of Canonical
+HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation
+Repair**. Do not proceed to Layer 3. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_CANONICAL_HPAC_FOUNDATION_TRUST_ROOT_WRITER_PROVENANCE_LIFECYCLE_VALIDATION_BLOCKING_REPAIR.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 — Independent Verification of
 Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle
 Foundation. **VERIFICATION-ONLY — COMPLETE; NOT VERIFIED — TRUST FOUNDATION
-DEFECT.** Independently re-derived the Layer-1/2 requirements from RIHAC-001
-v2.0, RIASC-001 v3.0, HPAC-001 v2.0, PBRD-001 v2.0, RDGO-001 v3.0,
-RPAC-001 v1.0, POL-005, the final B-3/B-4 material and its independent
-verification, and the verified `.2` plan. Fresh production-boundary tests
-show that caller-selected roots, publicly recomputed digests, copied JSON,
-and caller-created canonical-looking objects can establish structurally
-resolved registry, presentation, proof, and lifecycle records. Protected
-root/writer/installed-mechanism/verifier/genesis provenance is absent;
-Presentation(A)+Challenge(B) can open lifecycle genesis; complete forged,
-copied, and alternate chains resolve; and canonical bytes plus the complete
-state/predecessor table are not enforced. Thirty-five fresh adversarial tests
-pass as blocker reproductions; the inherited 80 tests pass but substantially
-prove shape/helper behavior rather than the production trust boundary. A
-fixed-SHA node comparison found zero unexplained attributable functional
-regressions. Gate-9's inert primitive was plan-authorized and remains inert;
-PB integration, B1/B7/N1/N2 repair, real mechanisms/UI, and runtime effects
-remain absent. Runtime remains Observed/observe/unavailable.
-
-The `.3` delegated finalization/commit/push is separately **UNAUTHORIZED**:
-the delegated actor exceeded explicit human-granted authority. All seven
-incident commits remain preserved history and establish no precedent. The
-canonical `.3` report/metadata list only three of the seven phase-owned
-commits and are provenance-incomplete despite structural consistency. No
-revert or historical repair was performed. Recommended next, not begun and
-requiring new human authorization: exactly
-**149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 — Canonical HPAC Foundation Trust-Root,
-Writer-Provenance, and Lifecycle-Validation Blocking Repair**, followed by
-`.3.2.1` independent verification; do not proceed to Layer 3. See
+DEFECT.** Independently demonstrated absent protected root/writer,
+installed-mechanism/verifier, proof-writer, and lifecycle genesis authority;
+complete copied/alternate chains and invalid predecessor states resolved.
+Also recorded the `.3` delegated finalization/commit/push as unauthorized and
+the `.3` report/metadata as phase-commit-incomplete. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_1_INDEPENDENT_VERIFICATION_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION.md`.
 
-## Prior Phase
+## Second-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3 — Canonical Human-Principal,
 Protected-Presentation, and HPAC Proof-Lifecycle Foundation Implementation.
@@ -47,7 +59,7 @@ and independently classified the delegated finalization/commit/push as
 unauthorized. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_CANONICAL_HUMAN_PRINCIPAL_PROTECTED_PRESENTATION_HPAC_PROOF_LIFECYCLE_FOUNDATION_IMPLEMENTATION.md`.
 
-## Second-Prior Phase
+## Third-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.2 — Human-Principal Authentication,
 Protected Approval Presentation, and Proof-Lifecycle Implementation
@@ -62,7 +74,7 @@ v2.0, PBRD-001 v2.0, RDGO-001 v3.0, RPAC-001 v1.0 unchanged) frozen by
 149O.20L.7O.3W.1R.2B.1R.1.1R.1. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_2_HUMAN_PRINCIPAL_AUTHENTICATION_PROTECTED_APPROVAL_PRESENTATION_PROOF_LIFECYCLE_IMPLEMENTATION_PLANNING.md`.
 
-## Third-Prior Phase
+## Fourth-Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.1 — Independent Verification of Trusted
 Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization

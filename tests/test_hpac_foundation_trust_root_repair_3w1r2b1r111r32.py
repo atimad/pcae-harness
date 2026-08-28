@@ -31,6 +31,7 @@ from pcae.core.approval_presentation_deterministic import (
 from pcae.core.hpac_foundation import (
     HPACAuthorityClass,
     HPACAuthorityError,
+    HPACSymlinkError,
     HPACStoreAuthority,
     ProtectedAdminCapability,
     canonical_digest,
@@ -315,6 +316,21 @@ def test_world_writable_registry_root_is_rejected(tmp_path: Path):
         )
 
 
+def test_symlinked_fixture_root_component_is_rejected(tmp_path: Path):
+    actual = tmp_path / "actual"
+    actual.mkdir()
+    linked = tmp_path / "linked"
+    linked.symlink_to(actual, target_is_directory=True)
+    store = HumanPrincipalRegistryStore(linked / "hpac")
+    with pytest.raises(HPACSymlinkError, match="symlink"):
+        store.enroll_principal(
+            ProtectedAdminCapability(),
+            principal_id=PRINCIPAL_ID,
+            enrollment_provenance_ref="fixture",
+            enrolled_at="2026-08-28T00:00:00Z",
+        )
+
+
 # Protected presentation ---------------------------------------------------------
 
 
@@ -526,6 +542,34 @@ def test_raw_parsed_canonical_and_resolved_proof_stages_remain_distinct(tmp_path
     assert isinstance(canonical, HumanAuthenticationProof)
     assert resolved is not None and resolved.record == canonical
     assert not hasattr(resolved, "verified_principal")
+
+
+def test_deterministic_authenticator_up_uv_and_matches_remain_independent_but_non_real():
+    outcomes = []
+    for up, uv in ((False, False), (False, True), (True, False), (True, True)):
+        authenticator = DeterministicTestHumanAuthenticator(
+            principal_id=PRINCIPAL_ID,
+            credential_id=CREDENTIAL_ID,
+            up=up,
+            uv=uv,
+            principal_matches=not up,
+            credential_matches=not uv,
+        )
+        challenge = authenticator.prepare_challenge("1" * 64, "2" * 64)
+        proof = authenticator.verify_response(challenge, f"{up}:{uv}".encode())
+        principal_id, credential_id = authenticator.resolve_principal(proof)
+        outcomes.append((proof.up, proof.uv, principal_id, credential_id))
+        assert proof.mechanism_id == DETERMINISTIC_MECHANISM_ID
+        assert authenticator.SIMULATION_ONLY is True
+
+    assert {(up, uv) for up, uv, _principal, _credential in outcomes} == {
+        (False, False),
+        (False, True),
+        (True, False),
+        (True, True),
+    }
+    assert outcomes[0][2] == PRINCIPAL_ID and outcomes[0][3] == CREDENTIAL_ID
+    assert outcomes[-1][2] != PRINCIPAL_ID and outcomes[-1][3] != CREDENTIAL_ID
 
 
 # HPAC lifecycle ----------------------------------------------------------------

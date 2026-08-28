@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 repair architecture
+  (2026-08-28).** Treat every public HPAC model constructor and public digest
+  as data/integrity only. Establish authority through a fixed zero-argument
+  production root, an authority manifest bound to root identity, opaque
+  non-serializable root/role/subject-bound writer capabilities, canonical
+  writer-provenance sidecars, and non-serializable resolver seals. Permit
+  caller-root fixture authorities only with a durable store-level
+  `FIXTURE_NON_REAL` class that cannot be upgraded by editing record fields or
+  copying paths. Require same-root installed-descriptor plus deterministic
+  fixture-attestation verification for canonical presentation, proof-verifier
+  provenance for canonical proof, and coordinator genesis plus complete
+  chain/state/predecessor/same-root evidence validation for canonical
+  lifecycle. Preserve structural `.3` fixture APIs as non-authoritative data
+  compatibility seams. Keep Gate 9 inert, all contracts unchanged,
+  B1/B7/N1/N2 implementation open, runtime unavailable, and the `.3`
+  delegated-finalization violation preserved. All repairs remain pending
+  independent `.3.2.1` verification and are not self-closed.
+
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1 independent verification disposition
   (2026-08-27).** Do not certify or plan implementation against the repaired
   contract graph. Original B-3 remains open: `TrustedApprovalPresentation`

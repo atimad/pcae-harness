@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2** repairs the canonical HPAC
+  foundation's protected-root, writer-provenance, installed-mechanism,
+  proof-writer, authoritative-genesis, predecessor-validation, and fork-
+  rejection boundaries. Public constructors, copied JSON, caller paths, and
+  recomputed digests no longer establish canonical authority; deterministic
+  fixtures remain durably non-real. Thirty-eight fresh adversarial tests and all
+  80 original `.3` tests pass. The `.3` delegated-finalization violation is
+  preserved; Gate 9 stays inert; contracts, PB/runtime integration,
+  B1/B7/N1/N2, real authentication/UI, execution, and release state remain
+  unchanged. Independent `.3.2.1` verification is required; findings are not
+  self-closed.
+
 - Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1** independently verified the
   canonical human-principal, protected-presentation, and HPAC proof-lifecycle

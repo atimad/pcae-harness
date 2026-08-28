@@ -1,5 +1,15 @@
 # Done
 
+- 2026-08-28 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2 implemented the
+  bounded HPAC trust-root repair: fixed production-root resolution, opaque
+  authorized writers, durable fixture non-reality, installed-mechanism and
+  presentation attestation provenance, canonical proof-writer provenance,
+  authoritative lifecycle genesis, complete predecessor validation, and fork
+  rejection. Thirty-eight fresh tests and all 80 original `.3` tests pass.
+  Repairs remain pending independent `.3.2.1` verification and are not closed;
+  Gate 9/runtime/PB/real-auth/no-go boundaries and the historical unauthorized
+  `.3` lifecycle finding are preserved.
+
 - 2026-08-27 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R completed the bounded
   contract-only repair: B-3/B-4 closed; the other original blockers 5/5 and
   MUST-FIX 2/2 remain closed; new BLOCKING 0; N2 contract gap closed. HPAC

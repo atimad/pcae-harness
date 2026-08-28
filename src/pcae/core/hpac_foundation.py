@@ -172,10 +172,19 @@ def reject_symlink(target: Path) -> None:
         raise HPACSymlinkError(f"HPAC-001 protected path is a symlink: {target}")
 
 
+def _reject_symlink_components(path: Path) -> None:
+    """Reject every existing component without resolving through a link."""
+
+    absolute = Path(path).absolute()
+    for component in reversed((absolute, *absolute.parents)):
+        reject_symlink(component)
+
+
 def _ensure_directory(path: Path, *, create: bool) -> bool:
     """Reject symlinks/non-directories and create missing descendants 0700."""
 
     absolute = path.absolute()
+    _reject_symlink_components(absolute)
     missing: list[Path] = []
     current = absolute
     while not current.exists():
@@ -357,6 +366,7 @@ class HPACStoreAuthority:
             )
 
     def _ensure_root(self, *, create: bool) -> None:
+        _reject_symlink_components(self.root)
         if not self.root.exists():
             if not create or self.authority_class is HPACAuthorityClass.PRODUCTION:
                 raise HPACAuthorityError(f"HPAC authority root is unavailable: {self.root}")
@@ -472,6 +482,7 @@ class HPACStoreAuthority:
 
     def _relative_record_path(self, path: Path) -> str:
         absolute = Path(path).absolute()
+        _reject_symlink_components(absolute)
         try:
             relative = absolute.relative_to(self.root)
         except ValueError as exc:
