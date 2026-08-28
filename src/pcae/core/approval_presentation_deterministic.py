@@ -19,25 +19,38 @@ identical discipline.
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import json
 from dataclasses import dataclass, field
 from typing import Final
 
 from pcae.core.approval_presentation import (
     CanonicalRuntimeApprovalSubject,
-    PRESENTATION_ATTESTATION_VERSION,
     PRESENTATION_EVIDENCE_SCHEMA_VERSION,
     PresentationMechanismDescriptor,
     TrustedApprovalPresentationEvidence,
     new_election_event_id,
     new_presentation_id,
+    presentation_attestation_object,
 )
-from pcae.core.hpac_foundation import canonical_digest
+from pcae.core.hpac_foundation import (
+    HPACAuthorityError,
+    HPACResolvedRecord,
+    canonical_digest,
+    canonical_json_bytes,
+)
 
 #: Never equal to a real installed mechanism id.
 DETERMINISTIC_PRESENTATION_MECHANISM_ID: Final[str] = "hpac.deterministic.presentation.test-only.v1"
 
 
-def compute_deterministic_human_visible_representation_digest(expires_at: str) -> str:
+def compute_deterministic_human_visible_representation_digest(
+    expires_at: str,
+    *,
+    subject: dict | None = None,
+    approval_scope: dict | None = None,
+) -> str:
     """Test-fixture helper: the exact `human_visible_representation_digest`
     `DeterministicTestPresentationMechanism.present()` will compute for a
     given `expires_at`, so a caller can pre-populate
@@ -47,6 +60,8 @@ def compute_deterministic_human_visible_representation_digest(expires_at: str) -
     code has no analogous shortcut because a real mechanism's rendering
     is not predictable in advance."""
 
+    if subject is not None:
+        return canonical_digest(_canonical_fixture_facts(subject, approval_scope or {}, expires_at))
     human_visible_facts = {
         "repository_identity": "deterministic-fixture-repo",
         "repository_display": "deterministic-fixture-repo (fixture)",
@@ -63,6 +78,30 @@ def compute_deterministic_human_visible_representation_digest(expires_at: str) -
         "one_shot_notice": True,
     }
     return canonical_digest(human_visible_facts)
+
+
+def _canonical_fixture_facts(subject: dict, approval_scope: dict, expires_at: str) -> dict:
+    repository_identity = subject.get("repository_identity")
+    task_id = subject.get("task_id")
+    runtime_target_id = subject.get("runtime_target_id")
+    prompt_hash = subject.get("prompt_hash")
+    invocation_id = subject.get("invocation_id")
+    scope_display = json.dumps(approval_scope, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return {
+        "repository_identity": repository_identity,
+        "repository_display": f"{repository_identity} (deterministic fixture)",
+        "task_id": task_id,
+        "task_display": f"{task_id} (deterministic fixture)",
+        "runtime_target_id": runtime_target_id,
+        "runtime_target_display": f"{runtime_target_id} (deterministic fixture)",
+        "operation_effect_scope_display": scope_display,
+        "prompt_hash": prompt_hash,
+        "prompt_instruction_display": f"prompt {str(prompt_hash)[:12]} (deterministic fixture)",
+        "invocation_id": invocation_id,
+        "invocation_display": f"{invocation_id} (deterministic fixture)",
+        "expires_at": expires_at,
+        "one_shot_notice": True,
+    }
 
 
 @dataclass
@@ -98,10 +137,57 @@ class DeterministicTestPresentationMechanism:
     def present(
         self, canonical_subject: CanonicalRuntimeApprovalSubject, approval_id: str
     ) -> TrustedApprovalPresentationEvidence:
+        descriptor = self.descriptor()
+        descriptor_digest = canonical_digest(descriptor.to_document(include_digest=False))
+        sealed_descriptor = PresentationMechanismDescriptor(
+            **{**descriptor.__dict__, "descriptor_digest": descriptor_digest}
+        )
+        return self._present(
+            canonical_subject,
+            approval_id,
+            descriptor=sealed_descriptor,
+            installation_store_id=None,
+            canonical_facts=False,
+        )
+
+    def present_installed(
+        self,
+        canonical_subject: CanonicalRuntimeApprovalSubject,
+        approval_id: str,
+        installed_descriptor: HPACResolvedRecord[PresentationMechanismDescriptor],
+    ) -> TrustedApprovalPresentationEvidence:
+        """Emit canonical fixture evidence bound to one installed descriptor.
+
+        Even a successful result is permanently non-real because the installed
+        descriptor resolution is required to carry ``FIXTURE_NON_REAL``.
+        """
+
+        descriptor = installed_descriptor.record
+        if installed_descriptor.is_real_runtime_eligible:
+            raise HPACAuthorityError("deterministic presentation cannot use production assurance")
+        if descriptor.mechanism_id != DETERMINISTIC_PRESENTATION_MECHANISM_ID:
+            raise HPACAuthorityError("deterministic presentation mechanism substitution")
+        return self._present(
+            canonical_subject,
+            approval_id,
+            descriptor=descriptor,
+            installation_store_id=installed_descriptor.store_id,
+            canonical_facts=True,
+        )
+
+    def _present(
+        self,
+        canonical_subject: CanonicalRuntimeApprovalSubject,
+        approval_id: str,
+        *,
+        descriptor: PresentationMechanismDescriptor,
+        installation_store_id: str | None,
+        canonical_facts: bool,
+    ) -> TrustedApprovalPresentationEvidence:
         presentation_id = new_presentation_id()
         approval_subject_digest = canonical_subject.digest()
 
-        human_visible_facts = {
+        legacy_facts = {
             "repository_identity": "deterministic-fixture-repo",
             "repository_display": "deterministic-fixture-repo (fixture)",
             "task_id": "deterministic-fixture-task",
@@ -116,6 +202,15 @@ class DeterministicTestPresentationMechanism:
             "expires_at": canonical_subject.expires_at,
             "one_shot_notice": True,
         }
+        human_visible_facts = (
+            _canonical_fixture_facts(
+                canonical_subject.subject,
+                canonical_subject.approval_scope,
+                canonical_subject.expires_at,
+            )
+            if canonical_facts
+            else legacy_facts
+        )
 
         human_visible_representation_digest = canonical_digest(human_visible_facts)
         if self.fault == "digest_mismatch":
@@ -132,25 +227,11 @@ class DeterministicTestPresentationMechanism:
 
         mechanism_ref = {
             "mechanism_id": DETERMINISTIC_PRESENTATION_MECHANISM_ID,
-            "descriptor_version": "test-only-v1",
-            "descriptor_digest": canonical_digest({"fixture": "descriptor"}),
+            "descriptor_version": descriptor.descriptor_version,
+            "descriptor_digest": descriptor.descriptor_digest,
         }
 
-        attestation_object = {
-            "attestation_version": PRESENTATION_ATTESTATION_VERSION,
-            "presentation_id": presentation_id,
-            "approval_id": approval_id,
-            "approval_subject_digest": approval_subject_digest,
-            "human_visible_representation_digest": human_visible_representation_digest,
-            "descriptor_digest": mechanism_ref["descriptor_digest"],
-            "election": election,
-            "presented_at": presented_at,
-        }
-        mechanism_attestation_digest = canonical_digest(attestation_object)
-        if self.fault == "forged_attestation":
-            mechanism_attestation_digest = canonical_digest({"forged": True})
-
-        body_without_digest = {
+        unsigned_body = {
             "presentation_schema_version": PRESENTATION_EVIDENCE_SCHEMA_VERSION,
             "presentation_id": presentation_id,
             "approval_id": approval_id,
@@ -161,7 +242,27 @@ class DeterministicTestPresentationMechanism:
             "human_visible_representation_digest": human_visible_representation_digest,
             "presented_at": presented_at,
             "election": election,
-            "mechanism_attestation": "ZGV0ZXJtaW5pc3RpYy1maXh0dXJl",  # base64url, non-empty, non-real
+            "mechanism_attestation": "",
+            "mechanism_attestation_digest": "",
+        }
+        unsigned_evidence = TrustedApprovalPresentationEvidence(
+            presentation_digest="",
+            **unsigned_body,
+        )
+        attestation_object = presentation_attestation_object(
+            unsigned_evidence,
+            installation_store_id=installation_store_id,
+            simulation_only=True,
+        )
+        attestation_bytes = canonical_json_bytes(attestation_object)
+        mechanism_attestation = base64.urlsafe_b64encode(attestation_bytes).decode("ascii").rstrip("=")
+        mechanism_attestation_digest = hashlib.sha256(attestation_bytes).hexdigest()
+        if self.fault == "forged_attestation":
+            mechanism_attestation_digest = "0" * 64
+
+        body_without_digest = {
+            **unsigned_body,
+            "mechanism_attestation": mechanism_attestation,
             "mechanism_attestation_digest": mechanism_attestation_digest,
         }
         presentation_digest = canonical_digest(body_without_digest)

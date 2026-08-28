@@ -1,23 +1,11 @@
 """
 HPAC-001 v2.0 §4-§9 — `HumanPrincipalRegistry` canonical model/store.
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3 (Layer 1-2 foundation). Implements
-only the canonical registry mechanics: `PrincipalRecord`/`CredentialRecord`
-models, atomic create/read/list/revoke store operations, and their
-preview variants. It does **not** implement the real protected-admin
-bootstrap/enrollment ceremony (HPAC-REQ-023/028/029) -- that requires a
-real human, real hardware, and a real protected-admin execution context,
-none of which this phase may touch (plan §8). Mutation is gated behind
-`hpac_foundation.ProtectedAdminCapability`, an honest non-production
-marker, not a real ceremony result.
-
-canonical registry mechanics implemented; real trusted enrollment not
-implemented (this module's own honest boundary statement, per phase
-instruction §7).
-
-This module performs no filesystem write at import time and holds no
-mutable module-global canonical-authority cache; every store instance is
-explicit and bound to a caller-supplied `root: Path`.
+Phase 149O...3.2 repairs the data/authority collapse in the original
+foundation. Public records remain ordinary data. Canonical membership now
+requires a fixed production resolver or a permanently non-real fixture root,
+an opaque root-bound writer, a root-identity manifest, and a matching writer-
+provenance record. Real enrollment ceremony remains deferred.
 """
 
 from __future__ import annotations
@@ -27,9 +15,14 @@ from pathlib import Path
 from typing import Optional
 
 from pcae.core.hpac_foundation import (
+    HPACAuthorityError,
+    HPACResolvedRecord,
+    HPACStoreAuthority,
+    HPACWriterCapability,
     HPACMalformedError,
     ProtectedAdminCapability,
     canonical_digest,
+    canonical_json_bytes,
     new_hpac_id,
     read_canonical_json_document,
     reject_symlink,
@@ -253,20 +246,30 @@ def _parse_registry_document(document: object) -> _ParsedRegistry:
 
 
 class HumanPrincipalRegistryStore:
-    """Deployment/user-scoped canonical `HumanPrincipalRegistry` store
-    (HPAC-REQ-012/021). Constructed with an explicit `root: Path` --
-    production callers pass `hpac_foundation.resolve_hpac_protected_root()`;
-    tests inject an isolated directory. This class itself performs **no**
-    repository/cwd/environment/task lookup anywhere in its own code, so
-    repository-controlled state structurally cannot select, override, or
-    influence which registry a given instance reads or writes
-    (HPAC-REQ-079/080) -- the only input is the `root` the caller
-    supplied at construction.
+    """Canonical registry store bound to one :class:`HPACStoreAuthority`.
+
+    Passing a ``Path`` is retained only as a test compatibility seam and
+    always creates a ``FIXTURE_NON_REAL`` authority. Production construction
+    is exclusively :meth:`production`, which accepts no path.
     """
 
-    def __init__(self, root: Path) -> None:
-        self._root = Path(root)
+    _WRITER_ROLE = "human_principal_registry_admin"
+
+    def __init__(self, root: Path | HPACStoreAuthority) -> None:
+        self._authority = root if isinstance(root, HPACStoreAuthority) else HPACStoreAuthority.fixture(Path(root))
+        self._root = self._authority.root
         self._path = self._root / _REGISTRY_RELATIVE_PATH
+
+    @classmethod
+    def production(cls) -> "HumanPrincipalRegistryStore":
+        return cls(HPACStoreAuthority.production())
+
+    @property
+    def authority(self) -> HPACStoreAuthority:
+        return self._authority
+
+    def fixture_admin_writer(self) -> HPACWriterCapability:
+        return self._authority.writer(self._WRITER_ROLE)
 
     @property
     def path(self) -> Path:
@@ -278,38 +281,104 @@ class HumanPrincipalRegistryStore:
         if not self._path.exists():
             return _ParsedRegistry(schema_version=REGISTRY_SCHEMA_VERSION, principals=(), credentials=())
         document = read_canonical_json_document(self._path)
-        return _parse_registry_document(document)
+        parsed = _parse_registry_document(document)
+        self._authority.verify_record(
+            self._path,
+            canonical_digest(document),
+            roles=frozenset({self._WRITER_ROLE}),
+        )
+        return parsed
 
-    def _write(self, parsed: _ParsedRegistry) -> None:
+    @staticmethod
+    def _document(parsed: _ParsedRegistry) -> dict:
+        return {
+            "schema_version": REGISTRY_SCHEMA_VERSION,
+            "principals": [p.to_document() for p in parsed.principals],
+            "credentials": [c.to_document() for c in parsed.credentials],
+        }
+
+    def _write(
+        self,
+        parsed: _ParsedRegistry,
+        writer: HPACWriterCapability,
+        *,
+        expected_current: _ParsedRegistry,
+    ) -> None:
         document = {
             "schema_version": REGISTRY_SCHEMA_VERSION,
             "principals": [p.to_document() for p in parsed.principals],
             "credentials": [c.to_document() for c in parsed.credentials],
         }
-        import json
+        with self._authority.writer_transaction(writer, self._WRITER_ROLE):
+            current = self._load()
+            if self._document(current) != self._document(expected_current):
+                raise HumanPrincipalRegistryConflictError(
+                    "registry changed after read; refusing stale/conflicting writer"
+                )
+            payload = canonical_json_bytes(document)
+            write_atomic_replace(self._path, payload)
+            self._authority.record_write(
+                self._path,
+                canonical_digest(document),
+                writer,
+                role=self._WRITER_ROLE,
+                replace=True,
+            )
+            # Read-back verification (HPAC-REQ-015).
+            readback = read_canonical_json_document(self._path)
+            if readback != document:
+                raise HPACMalformedError("HumanPrincipalRegistry read-back verification failed after write")
 
-        payload = json.dumps(document, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-        write_atomic_replace(self._path, payload)
-        # Read-back verification (HPAC-REQ-015).
-        readback = read_canonical_json_document(self._path)
-        if readback != document:
-            raise HPACMalformedError("HumanPrincipalRegistry read-back verification failed after write")
+    def _writer(self, capability: ProtectedAdminCapability | HPACWriterCapability) -> HPACWriterCapability:
+        try:
+            if isinstance(capability, HPACWriterCapability):
+                self._authority.require_writer(capability, self._WRITER_ROLE)
+                return capability
+            return self._authority.legacy_fixture_writer(capability, self._WRITER_ROLE)
+        except HPACAuthorityError as exc:
+            raise HumanPrincipalRegistryError(str(exc)) from exc
 
     # ── read-only resolution (open to any caller, HPAC-REQ-021) ──────
 
     def resolve_principal(self, principal_id: str) -> Optional[PrincipalRecord]:
+        """Return validated registry data, without conferring canonical authority."""
         parsed = self._load()
         for record in parsed.principals:
             if record.principal_id == principal_id:
                 return record
         return None
 
+    def resolve_canonical_principal(self, principal_id: str) -> Optional[HPACResolvedRecord[PrincipalRecord]]:
+        record = self.resolve_principal(principal_id)
+        if record is None:
+            return None
+        document = read_canonical_json_document(self._path)
+        return self._authority.resolve_record(
+            record=record,
+            record_path=self._path,
+            record_digest=canonical_digest(document),
+            roles=frozenset({self._WRITER_ROLE}),
+        )
+
     def resolve_credential(self, credential_id: str) -> Optional[CredentialRecord]:
+        """Return validated credential data, without conferring canonical authority."""
         parsed = self._load()
         for record in parsed.credentials:
             if record.credential_id == credential_id:
                 return record
         return None
+
+    def resolve_canonical_credential(self, credential_id: str) -> Optional[HPACResolvedRecord[CredentialRecord]]:
+        record = self.resolve_credential(credential_id)
+        if record is None:
+            return None
+        document = read_canonical_json_document(self._path)
+        return self._authority.resolve_record(
+            record=record,
+            record_path=self._path,
+            record_digest=canonical_digest(document),
+            roles=frozenset({self._WRITER_ROLE}),
+        )
 
     def list_principals(self) -> tuple[PrincipalRecord, ...]:
         return self._load().principals
@@ -358,14 +427,13 @@ class HumanPrincipalRegistryStore:
 
     def enroll_principal(
         self,
-        capability: ProtectedAdminCapability,
+        capability: ProtectedAdminCapability | HPACWriterCapability,
         *,
         principal_id: str,
         enrollment_provenance_ref: str,
         enrolled_at: str,
     ) -> PrincipalRecord:
-        if not isinstance(capability, ProtectedAdminCapability):
-            raise HumanPrincipalRegistryError("enroll_principal requires a ProtectedAdminCapability marker")
+        writer = self._writer(capability)
         parsed = self._load()
         for record in parsed.principals:
             if record.principal_id == principal_id:
@@ -384,14 +452,13 @@ class HumanPrincipalRegistryStore:
             principals=tuple(sorted((*parsed.principals, new_record), key=lambda p: p.principal_id)),
             credentials=parsed.credentials,
         )
-        self._write(updated)
+        self._write(updated, writer, expected_current=parsed)
         return new_record
 
     def revoke_principal(
-        self, capability: ProtectedAdminCapability, *, principal_id: str, revoked_at: str
+        self, capability: ProtectedAdminCapability | HPACWriterCapability, *, principal_id: str, revoked_at: str
     ) -> PrincipalRecord:
-        if not isinstance(capability, ProtectedAdminCapability):
-            raise HumanPrincipalRegistryError("revoke_principal requires a ProtectedAdminCapability marker")
+        writer = self._writer(capability)
         parsed = self._load()
         existing = None
         for record in parsed.principals:
@@ -415,12 +482,12 @@ class HumanPrincipalRegistryStore:
             principals=tuple(sorted((*remaining, revoked_record), key=lambda p: p.principal_id)),
             credentials=parsed.credentials,
         )
-        self._write(updated)
+        self._write(updated, writer, expected_current=parsed)
         return revoked_record
 
     def enroll_credential(
         self,
-        capability: ProtectedAdminCapability,
+        capability: ProtectedAdminCapability | HPACWriterCapability,
         *,
         credential_id: str,
         principal_id: str,
@@ -430,8 +497,7 @@ class HumanPrincipalRegistryStore:
         enrollment_provenance_ref: str,
         enrolled_at: str,
     ) -> CredentialRecord:
-        if not isinstance(capability, ProtectedAdminCapability):
-            raise HumanPrincipalRegistryError("enroll_credential requires a ProtectedAdminCapability marker")
+        writer = self._writer(capability)
         parsed = self._load()
         principal = next((p for p in parsed.principals if p.principal_id == principal_id), None)
         if principal is None or principal.status != "active":
@@ -460,14 +526,13 @@ class HumanPrincipalRegistryStore:
             principals=parsed.principals,
             credentials=tuple(sorted((*parsed.credentials, new_record), key=lambda c: c.credential_id)),
         )
-        self._write(updated)
+        self._write(updated, writer, expected_current=parsed)
         return new_record
 
     def revoke_credential(
-        self, capability: ProtectedAdminCapability, *, credential_id: str, revoked_at: str
+        self, capability: ProtectedAdminCapability | HPACWriterCapability, *, credential_id: str, revoked_at: str
     ) -> CredentialRecord:
-        if not isinstance(capability, ProtectedAdminCapability):
-            raise HumanPrincipalRegistryError("revoke_credential requires a ProtectedAdminCapability marker")
+        writer = self._writer(capability)
         parsed = self._load()
         existing = next((c for c in parsed.credentials if c.credential_id == credential_id), None)
         if existing is None:
@@ -491,7 +556,7 @@ class HumanPrincipalRegistryStore:
             principals=parsed.principals,
             credentials=tuple(sorted((*remaining, revoked_record), key=lambda c: c.credential_id)),
         )
-        self._write(updated)
+        self._write(updated, writer, expected_current=parsed)
         return revoked_record
 
 

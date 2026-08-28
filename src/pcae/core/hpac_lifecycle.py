@@ -9,37 +9,38 @@ caller can construct a `LifecycleEvent` directly and have it accepted --
 only the store computes `event_digest`, chains `previous_event_digest`,
 and enforces HPAC-REQ-095's entry/exit table.
 
-Genesis gating (HPAC-REQ-096, plan §19): `open_challenge` requires the
-caller to pass an already-resolved `TrustedApprovalPresentationEvidence`
-for the exact `approval_id` being challenged (via
-`approval_presentation.TrustedApprovalPresentationStore.resolve_structural`,
-called by the caller before invoking this method and the resolved
-evidence's own `approval_id` cross-checked here) -- there is no bare
-"create sequence 0 from an approval_id string alone" code path.
-
-hash consistency != canonical authority: fork/gap/duplicate-sequence
-detection here proves *chain* integrity, not that the *writer* is the
-trusted challenge coordinator -- HPAC-REQ-096's genesis authority
-requirement is enforced structurally instead, via the presentation-
-resolution dependency above, not merely by a checkable field.
+Phase .3.2 preserves the historical structural transition API for non-real
+fixtures and adds a distinct canonical API. Canonical genesis requires a
+resolver-sealed presentation, an exact challenge object, and the bound
+challenge-coordinator writer. Every later event carries an independently
+verified role-specific provenance sidecar. ``resolve_canonical_chain``
+validates the complete transition/evidence table back to that genesis;
+hash consistency by itself remains non-authority.
 """
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 from pcae.core.approval_presentation import TrustedApprovalPresentationEvidence
 from pcae.core.hpac_foundation import (
+    HPACAuthorityError,
     HPACMalformedError,
+    HPACResolvedRecord,
+    HPACStoreAuthority,
+    HPACWriterCapability,
     canonical_digest,
+    canonical_json_bytes,
     id_pattern_matches,
     new_hpac_id,
     read_canonical_json_document,
     reject_symlink,
     write_atomic_create_only,
 )
+from pcae.core.human_authenticator import Challenge
 
 LIFECYCLE_SCHEMA_VERSION = "HPAC-PROOF-LIFECYCLE-EVENT/2.0"
 
@@ -184,8 +185,38 @@ class HPACLifecycleStore:
     produce an accepted event; there is no generic "append any event"
     method."""
 
-    def __init__(self, root: Path) -> None:
-        self._root = Path(root)
+    _GENESIS_WRITER_ROLE = "hpac_challenge_coordinator"
+    _ASSERTION_WRITER_ROLE = "hpac_assertion_recorder"
+    _VERIFIED_WRITER_ROLE = "human_authentication_proof_verifier"
+    _BOUND_WRITER_ROLE = "hpac_gate5_binder"
+    _TERMINAL_WRITER_ROLE = "hpac_lifecycle_terminator"
+
+    def __init__(self, root: Path | HPACStoreAuthority) -> None:
+        self._authority = root if isinstance(root, HPACStoreAuthority) else HPACStoreAuthority.fixture(Path(root))
+        self._root = self._authority.root
+
+    @classmethod
+    def production(cls) -> "HPACLifecycleStore":
+        return cls(HPACStoreAuthority.production())
+
+    @property
+    def authority(self) -> HPACStoreAuthority:
+        return self._authority
+
+    def fixture_genesis_writer(self, proof_id: str) -> HPACWriterCapability:
+        return self._authority.writer(self._GENESIS_WRITER_ROLE, subject=proof_id)
+
+    def fixture_assertion_writer(self, proof_id: str) -> HPACWriterCapability:
+        return self._authority.writer(self._ASSERTION_WRITER_ROLE, subject=proof_id)
+
+    def fixture_verifier_writer(self, proof_id: str) -> HPACWriterCapability:
+        return self._authority.writer(self._VERIFIED_WRITER_ROLE, subject=proof_id)
+
+    def fixture_gate5_writer(self, proof_id: str) -> HPACWriterCapability:
+        return self._authority.writer(self._BOUND_WRITER_ROLE, subject=proof_id)
+
+    def fixture_terminal_writer(self, proof_id: str) -> HPACWriterCapability:
+        return self._authority.writer(self._TERMINAL_WRITER_ROLE, subject=proof_id)
 
     def _dir(self, proof_id: str) -> Path:
         return self._root / "proofs" / "v2" / proof_id / "lifecycle"
@@ -193,7 +224,9 @@ class HPACLifecycleStore:
     def _path(self, proof_id: str, sequence: int) -> Path:
         return self._dir(proof_id) / f"{sequence:04d}.json"
 
-    def _load_chain(self, proof_id: str) -> list[LifecycleEvent]:
+    def _load_chain(self, proof_id: str, *, provenance_required: bool = False) -> list[LifecycleEvent]:
+        if provenance_required and not id_pattern_matches("hap", proof_id):
+            raise HPACLifecycleStateError("proof_id does not match ^hap-[0-9a-f]{32}$")
         reject_symlink(self._root)
         directory = self._dir(proof_id)
         if not directory.exists():
@@ -209,8 +242,25 @@ class HPACLifecycleStore:
                 )
             path = directory / filename
             reject_symlink(path)
-            document = read_canonical_json_document(path)
+            if provenance_required:
+                try:
+                    document = read_canonical_json_document(path)
+                except HPACMalformedError as exc:
+                    raise HPACLifecycleForkError(
+                        f"lifecycle event {filename} is not canonical (fork or tamper)"
+                    ) from exc
+            else:
+                try:
+                    document = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                    raise HPACLifecycleForkError(
+                        f"lifecycle event {filename} is malformed (fork or tamper)"
+                    ) from exc
             _validate_event_document(document)
+            if document["proof_id"] != proof_id:
+                raise HPACLifecycleForkError(
+                    f"lifecycle event {filename} names a different proof_id"
+                )
             stored_digest = document.get("event_digest")
             without_digest = {k: v for k, v in document.items() if k != "event_digest"}
             recomputed = canonical_digest(without_digest)
@@ -233,9 +283,103 @@ class HPACLifecycleStore:
                     **without_digest,
                 )
             )
+            self._validate_transition(events)
+            if provenance_required:
+                role = self._role_for_state(events[-1].state)
+                try:
+                    self._authority.verify_record(
+                        path,
+                        stored_digest,
+                        roles=frozenset({role}),
+                        subject=proof_id,
+                    )
+                except HPACAuthorityError as exc:
+                    raise HPACLifecycleStateError(
+                        f"lifecycle event {filename} lacks authoritative writer provenance"
+                    ) from exc
         return events
 
-    def _append(self, proof_id: str, *, state: str, binding: dict, evidence_fields: dict, terminal_reason_code: Optional[str] = None) -> LifecycleEvent:
+    @classmethod
+    def _role_for_state(cls, state: str) -> str:
+        return {
+            STATE_CHALLENGE_CREATED: cls._GENESIS_WRITER_ROLE,
+            STATE_ASSERTION_RECEIVED: cls._ASSERTION_WRITER_ROLE,
+            STATE_PROOF_VERIFIED: cls._VERIFIED_WRITER_ROLE,
+            STATE_PROOF_VERIFIED_AND_BOUND: cls._BOUND_WRITER_ROLE,
+            STATE_EXPIRED: cls._TERMINAL_WRITER_ROLE,
+            STATE_REVOKED: cls._TERMINAL_WRITER_ROLE,
+            STATE_REJECTED: cls._TERMINAL_WRITER_ROLE,
+        }[state]
+
+    @staticmethod
+    def _validate_transition(events: list[LifecycleEvent]) -> None:
+        event = events[-1]
+        if event.sequence == 0:
+            if event.state != STATE_CHALLENGE_CREATED or event.previous_event_digest is not None:
+                raise HPACLifecycleStateError("sequence 0 must be authoritative CHALLENGE_CREATED genesis")
+            if any(
+                value is not None
+                for value in (
+                    event.assertion_digest,
+                    event.proof_digest,
+                    event.approval_digest,
+                    event.registry_state_digest,
+                    event.verifier_version,
+                    event.terminal_reason_code,
+                )
+            ):
+                raise HPACLifecycleStateError("genesis contains fields forbidden at sequence 0")
+            return
+        previous = events[-2]
+        if previous.state in _TERMINAL_STATES:
+            raise HPACLifecycleStateError("no lifecycle event may follow a terminal state")
+        if event.state in _TERMINAL_STATES:
+            if not event.terminal_reason_code:
+                raise HPACLifecycleStateError("terminal lifecycle event requires reason code")
+            return
+        expected_state = {
+            STATE_CHALLENGE_CREATED: STATE_ASSERTION_RECEIVED,
+            STATE_ASSERTION_RECEIVED: STATE_PROOF_VERIFIED,
+            STATE_PROOF_VERIFIED: STATE_PROOF_VERIFIED_AND_BOUND,
+        }.get(previous.state)
+        if event.state != expected_state:
+            raise HPACLifecycleStateError(
+                f"invalid lifecycle predecessor relation: {previous.state} -> {event.state}"
+            )
+        if event.state == STATE_ASSERTION_RECEIVED:
+            if not event.assertion_digest or any(
+                value is not None
+                for value in (
+                    event.proof_digest, event.approval_digest,
+                    event.registry_state_digest, event.verifier_version,
+                    event.terminal_reason_code,
+                )
+            ):
+                raise HPACLifecycleStateError("ASSERTION_RECEIVED staged evidence is invalid")
+        elif event.state == STATE_PROOF_VERIFIED:
+            if not all(
+                (event.assertion_digest, event.proof_digest, event.registry_state_digest, event.verifier_version)
+            ) or event.approval_digest is not None or event.terminal_reason_code is not None:
+                raise HPACLifecycleStateError("PROOF_VERIFIED staged evidence is invalid")
+        elif event.state == STATE_PROOF_VERIFIED_AND_BOUND:
+            if not all(
+                (
+                    event.assertion_digest, event.proof_digest, event.approval_digest,
+                    event.registry_state_digest, event.verifier_version,
+                )
+            ) or event.terminal_reason_code is not None:
+                raise HPACLifecycleStateError("PROOF_VERIFIED_AND_BOUND staged evidence is invalid")
+
+    def _append(
+        self,
+        proof_id: str,
+        *,
+        state: str,
+        binding: dict,
+        evidence_fields: dict,
+        terminal_reason_code: Optional[str] = None,
+        writer: Optional[HPACWriterCapability] = None,
+    ) -> LifecycleEvent:
         chain = self._load_chain(proof_id)
         sequence = len(chain)
         previous_digest = chain[-1].event_digest if chain else None
@@ -260,10 +404,17 @@ class HPACLifecycleStore:
         }
         digest = canonical_digest(body_without_digest)
         payload_document = {**body_without_digest, "event_digest": digest}
-        import json
-
-        payload = json.dumps(payload_document, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-        write_atomic_create_only(self._path(proof_id, sequence), payload)
+        path = self._path(proof_id, sequence)
+        write_atomic_create_only(path, canonical_json_bytes(payload_document))
+        if writer is not None:
+            role = self._role_for_state(state)
+            self._authority.record_write(
+                path,
+                digest,
+                writer,
+                role=role,
+                subject=proof_id,
+            )
         return LifecycleEvent(event_digest=digest, **body_without_digest)
 
     # ── narrow transition API (plan §20) ──────────────────────────────
@@ -282,6 +433,7 @@ class HPACLifecycleStore:
         challenge_digest: str,
         occurred_at: str,
         resolved_presentation: TrustedApprovalPresentationEvidence,
+        _writer: Optional[HPACWriterCapability] = None,
     ) -> LifecycleEvent:
         """Sequence 0. Genesis-gated (HPAC-REQ-096, plan §19): the caller
         MUST already hold a `resolve_structural`-resolved presentation
@@ -318,22 +470,114 @@ class HPACLifecycleStore:
             },
             "challenge_digest": challenge_digest,
         }
+        if _writer is not None:
+            self._authority.require_writer(
+                _writer, self._GENESIS_WRITER_ROLE, subject=proof_id
+            )
         return self._append(
             proof_id,
             state=STATE_CHALLENGE_CREATED,
             binding=binding,
             evidence_fields={"occurred_at": occurred_at},
+            writer=_writer,
         )
 
-    def record_assertion(self, *, proof_id: str, assertion_digest: str, occurred_at: str) -> LifecycleEvent:
+    def open_challenge_canonical(
+        self,
+        writer: HPACWriterCapability,
+        *,
+        proof_id: str,
+        approval_id: str,
+        invocation_id: str,
+        attempt_id: str,
+        principal_id: str,
+        credential_id: str,
+        mechanism_id: str,
+        occurred_at: str,
+        resolved_presentation: HPACResolvedRecord[TrustedApprovalPresentationEvidence],
+        challenge: Challenge,
+    ) -> LifecycleEvent:
+        """Create authoritative sequence 0 from resolved presentation + challenge."""
+
+        try:
+            presentation = self._authority.require_resolution(resolved_presentation)
+            self._authority.require_writer(
+                writer, self._GENESIS_WRITER_ROLE, subject=proof_id
+            )
+        except HPACAuthorityError as exc:
+            raise HPACLifecycleStateError(str(exc)) from exc
+        challenge_body = {
+            "domain_separator": challenge.domain_separator,
+            "challenge_version": challenge.challenge_version,
+            "proof_schema_version": challenge.proof_schema_version,
+            "principal_id": challenge.principal_id,
+            "credential_id": challenge.credential_id,
+            "approval_subject_digest": challenge.approval_subject_digest,
+            "trusted_presentation_digest": challenge.trusted_presentation_digest,
+            "nonce": challenge.nonce,
+            "issued_at": challenge.issued_at,
+            "expires_at": challenge.expires_at,
+        }
+        if canonical_digest(challenge_body) != challenge.challenge_digest:
+            raise HPACLifecycleStateError("challenge_digest does not match canonical challenge bytes")
+        if (
+            challenge.principal_id != principal_id
+            or challenge.credential_id != credential_id
+            or challenge.approval_subject_digest != presentation.approval_subject_digest
+            or challenge.trusted_presentation_digest != presentation.presentation_digest
+        ):
+            raise HPACLifecycleStateError("challenge/presentation/principal/credential substitution")
+        subject = presentation.canonical_subject.get("subject")
+        if not isinstance(subject, dict) or subject.get("invocation_id") != invocation_id:
+            raise HPACLifecycleStateError("presentation invocation binding does not match lifecycle")
+        return self.open_challenge(
+            proof_id=proof_id,
+            approval_id=approval_id,
+            invocation_id=invocation_id,
+            attempt_id=attempt_id,
+            principal_id=principal_id,
+            credential_id=credential_id,
+            mechanism_id=mechanism_id,
+            approval_subject_digest=presentation.approval_subject_digest,
+            challenge_digest=challenge.challenge_digest,
+            occurred_at=occurred_at,
+            resolved_presentation=presentation,
+            _writer=writer,
+        )
+
+    def record_assertion(
+        self,
+        *,
+        proof_id: str,
+        assertion_digest: str,
+        occurred_at: str,
+        _writer: Optional[HPACWriterCapability] = None,
+    ) -> LifecycleEvent:
         chain = self._load_chain(proof_id)
         if not chain or chain[-1].state != STATE_CHALLENGE_CREATED:
             raise HPACLifecycleStateError(f"record_assertion requires current state CHALLENGE_CREATED for {proof_id}")
+        if _writer is not None:
+            self._authority.require_writer(
+                _writer, self._ASSERTION_WRITER_ROLE, subject=proof_id
+            )
         return self._append(
             proof_id,
             state=STATE_ASSERTION_RECEIVED,
             binding=chain[0].binding,
             evidence_fields={"occurred_at": occurred_at, "assertion_digest": assertion_digest},
+            writer=_writer,
+        )
+
+    def record_assertion_canonical(
+        self, writer: HPACWriterCapability, *, proof_id: str, assertion_digest: str, occurred_at: str
+    ) -> LifecycleEvent:
+        # Require canonical predecessor, not a merely structural chain.
+        self.resolve_canonical_chain(proof_id)
+        return self.record_assertion(
+            proof_id=proof_id,
+            assertion_digest=assertion_digest,
+            occurred_at=occurred_at,
+            _writer=writer,
         )
 
     def record_verified(
@@ -344,10 +588,15 @@ class HPACLifecycleStore:
         registry_state_digest: str,
         verifier_version: str,
         occurred_at: str,
+        _writer: Optional[HPACWriterCapability] = None,
     ) -> LifecycleEvent:
         chain = self._load_chain(proof_id)
         if not chain or chain[-1].state != STATE_ASSERTION_RECEIVED:
             raise HPACLifecycleStateError(f"record_verified requires current state ASSERTION_RECEIVED for {proof_id}")
+        if _writer is not None:
+            self._authority.require_writer(
+                _writer, self._VERIFIED_WRITER_ROLE, subject=proof_id
+            )
         return self._append(
             proof_id,
             state=STATE_PROOF_VERIFIED,
@@ -359,12 +608,63 @@ class HPACLifecycleStore:
                 "registry_state_digest": registry_state_digest,
                 "verifier_version": verifier_version,
             },
+            writer=_writer,
         )
 
-    def bind_gate5(self, *, proof_id: str, approval_digest: str, occurred_at: str) -> LifecycleEvent:
+    def record_verified_canonical(
+        self,
+        writer: HPACWriterCapability,
+        *,
+        resolved_proof: HPACResolvedRecord,
+        registry_state_digest: str,
+        verifier_version: str,
+        occurred_at: str,
+    ) -> LifecycleEvent:
+        from pcae.core.human_authentication_proof import HumanAuthenticationProof
+
+        try:
+            proof = self._authority.require_resolution(resolved_proof)
+        except HPACAuthorityError as exc:
+            raise HPACLifecycleStateError(str(exc)) from exc
+        if not isinstance(proof, HumanAuthenticationProof):
+            raise HPACLifecycleStateError("record_verified_canonical requires canonical proof record")
+        chain = self.resolve_canonical_chain(proof.proof_id)
+        binding = chain[0].record.binding
+        if any(
+            (
+                proof.principal_id != binding["principal_id"],
+                proof.credential_id != binding["credential_id"],
+                proof.mechanism_id != binding["mechanism_id"],
+                proof.challenge_digest != binding["challenge_digest"],
+                proof.approval_subject_digest != binding["approval_subject_digest"],
+                proof.trusted_presentation_ref != binding["trusted_presentation_ref"],
+            )
+        ):
+            raise HPACLifecycleStateError("canonical proof does not match lifecycle binding")
+        return self.record_verified(
+            proof_id=proof.proof_id,
+            proof_digest=proof.proof_digest,
+            registry_state_digest=registry_state_digest,
+            verifier_version=verifier_version,
+            occurred_at=occurred_at,
+            _writer=writer,
+        )
+
+    def bind_gate5(
+        self,
+        *,
+        proof_id: str,
+        approval_digest: str,
+        occurred_at: str,
+        _writer: Optional[HPACWriterCapability] = None,
+    ) -> LifecycleEvent:
         chain = self._load_chain(proof_id)
         if not chain:
             raise HPACLifecycleStateError(f"bind_gate5 requires an existing chain for {proof_id}")
+        if _writer is not None:
+            self._authority.require_writer(
+                _writer, self._BOUND_WRITER_ROLE, subject=proof_id
+            )
         if chain[-1].state == STATE_PROOF_VERIFIED_AND_BOUND:
             if chain[-1].approval_digest == approval_digest:
                 # Idempotent same-binding revalidation (HPAC-REQ-097).
@@ -384,9 +684,34 @@ class HPACLifecycleStore:
                 "registry_state_digest": chain[-1].registry_state_digest,
                 "verifier_version": chain[-1].verifier_version,
             },
+            writer=_writer,
         )
 
-    def terminate(self, *, proof_id: str, state: str, reason_code: str, occurred_at: str) -> LifecycleEvent:
+    def bind_gate5_canonical(
+        self,
+        writer: HPACWriterCapability,
+        *,
+        proof_id: str,
+        approval_digest: str,
+        occurred_at: str,
+    ) -> LifecycleEvent:
+        self.resolve_canonical_chain(proof_id)
+        return self.bind_gate5(
+            proof_id=proof_id,
+            approval_digest=approval_digest,
+            occurred_at=occurred_at,
+            _writer=writer,
+        )
+
+    def terminate(
+        self,
+        *,
+        proof_id: str,
+        state: str,
+        reason_code: str,
+        occurred_at: str,
+        _writer: Optional[HPACWriterCapability] = None,
+    ) -> LifecycleEvent:
         if state not in _TERMINAL_STATES:
             raise HPACLifecycleStateError(f"terminate requires a terminal state, got {state!r}")
         chain = self._load_chain(proof_id)
@@ -397,6 +722,10 @@ class HPACLifecycleStore:
         if not reason_code:
             raise HPACLifecycleStateError("terminate requires a non-empty reason_code")
         last = chain[-1]
+        if _writer is not None:
+            self._authority.require_writer(
+                _writer, self._TERMINAL_WRITER_ROLE, subject=proof_id
+            )
         return self._append(
             proof_id,
             state=state,
@@ -410,7 +739,46 @@ class HPACLifecycleStore:
                 "verifier_version": last.verifier_version,
             },
             terminal_reason_code=reason_code,
+            writer=_writer,
+        )
+
+    def terminate_canonical(
+        self,
+        writer: HPACWriterCapability,
+        *,
+        proof_id: str,
+        state: str,
+        reason_code: str,
+        occurred_at: str,
+    ) -> LifecycleEvent:
+        self.resolve_canonical_chain(proof_id)
+        return self.terminate(
+            proof_id=proof_id,
+            state=state,
+            reason_code=reason_code,
+            occurred_at=occurred_at,
+            _writer=writer,
         )
 
     def resolve_chain(self, proof_id: str) -> tuple[LifecycleEvent, ...]:
+        """Return validated lifecycle data, without conferring canonical authority."""
         return tuple(self._load_chain(proof_id))
+
+    def resolve_canonical_chain(
+        self, proof_id: str
+    ) -> tuple[HPACResolvedRecord[LifecycleEvent], ...]:
+        events = self._load_chain(proof_id, provenance_required=True)
+        if not events:
+            return ()
+        resolved: list[HPACResolvedRecord[LifecycleEvent]] = []
+        for event in events:
+            resolved.append(
+                self._authority.resolve_record(
+                    record=event,
+                    record_path=self._path(proof_id, event.sequence),
+                    record_digest=event.event_digest,
+                    roles=frozenset({self._role_for_state(event.state)}),
+                    subject=proof_id,
+                )
+            )
+        return tuple(resolved)

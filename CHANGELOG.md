@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B.1R.1.1R.3.1 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2: Canonical HPAC Foundation Trust-Root, Writer-Provenance, and Lifecycle-Validation Blocking Repair; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.1** independently verified the
   canonical human-principal, protected-presentation, and HPAC proof-lifecycle
   foundation and returned **NOT VERIFIED — TRUST FOUNDATION DEFECT**. A new

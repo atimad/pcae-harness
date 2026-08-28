@@ -1,37 +1,34 @@
-"""
-HPAC-001 v2.0 shared foundation — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.
+"""Shared HPAC-001 v2.0 trust-store foundation.
 
-Bounded supporting helpers reused by every new HPAC-001 model/store module
-(`human_principal_registry.py`, `approval_presentation.py`,
-`human_authentication_proof.py`, `hpac_lifecycle.py`,
-`runtime_invocation_authority_consumption.py`). This module owns nothing
-normative on its own -- it exists only to avoid duplicating identical
-canonicalization/atomic-write/symlink-rejection code six times (plan
-149O.20L.7O.3W.1R.2B.1R.1.1R.2 §35's reuse recommendation), per this
-phase's own "bounded supporting validators/helpers" allowance.
+The public HPAC dataclasses are data. Authority is established separately by
+an :class:`HPACStoreAuthority`, an opaque writer capability bound to that
+authority, protected canonical store state, and a resolver-produced
+``HPACResolvedRecord``. Serialized fields, public digests, and paths never
+serialize the in-process authority seal.
 
-This module imports no `subprocess`, `socket`, hardware, or network
-primitive, performs no filesystem write or directory creation at import
-time, and does not read `hatp_bootstrap.py`'s registry, principal_id
-space, or challenge domain (HPAC-REQ-018/084) -- it defines HPAC-001's own
-entirely separate protected-root constant.
-
-Canonicalization: `pcae.core.runtime_authority.compute_canonical_digest`
-already implements HPAC-REQ-089's exact rule (NFC-normalized strings,
-recursively sorted-key compact JSON, SHA-256) and is reused directly
-rather than reimplemented, per plan §35's explicit recommendation.
+This layer deliberately exposes only fixture writer capabilities. They are
+permanently ``FIXTURE_NON_REAL`` and therefore cannot qualify for real-runtime
+human authority. The production resolver accepts no caller path and expects
+an externally provisioned protected root; real enrollment/writer ceremony is
+still deferred.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import re
+import stat
 import sys
 import tempfile
+import unicodedata
 import uuid
-from dataclasses import dataclass
+from collections.abc import Mapping
+from contextlib import contextmanager
+from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Generic, Optional, TypeVar
 
 from pcae.core.runtime_authority import compute_canonical_digest
 
@@ -41,9 +38,15 @@ __all__ = [
     "HPACMalformedError",
     "HPACCorruptionError",
     "HPACDuplicateError",
+    "HPACAuthorityError",
     "HPACUnsupportedPlatformError",
+    "HPACAuthorityClass",
+    "HPACStoreAuthority",
+    "HPACWriterCapability",
+    "HPACResolvedRecord",
     "ProtectedAdminCapability",
     "canonical_digest",
+    "canonical_json_bytes",
     "resolve_hpac_protected_root",
     "reject_symlink",
     "require_nonempty_str",
@@ -63,153 +66,580 @@ class HPACFoundationError(Exception):
 
 
 class HPACSymlinkError(HPACFoundationError):
-    """A protected HPAC-001 path is, or resolves through, a symlink.
-    Refused rather than followed (HPAC-REQ-022/053/093/094)."""
+    """A protected path is, or contains, a symlink."""
 
 
 class HPACMalformedError(HPACFoundationError):
-    """A document exists but fails strict, closed-schema validation.
-    Never partially accepted (HPAC-REQ-017/052/091/095/098)."""
+    """A document fails closed schema or canonical-byte validation."""
 
 
 class HPACCorruptionError(HPACFoundationError):
-    """A document exists, parses as JSON, but its digest, chain, or
-    read-back verification fails. Treated identically to
-    'durability-uncertain' -- never interpreted as either valid or
-    absent (HPAC-REQ-100)."""
+    """A protected record fails integrity/provenance validation."""
 
 
 class HPACDuplicateError(HPACFoundationError):
-    """A create-only write target already exists. The create-only
-    guarantee is never silently overwritten (HPAC-REQ-053/093/098)."""
+    """A create-only target already exists."""
+
+
+class HPACAuthorityError(HPACFoundationError):
+    """The requested writer, root, or resolution lacks HPAC authority."""
 
 
 class HPACUnsupportedPlatformError(HPACFoundationError):
-    """No fixed protected-root implementation exists for this platform.
-    Fails closed rather than falling back to an environment-derived
-    location (mirrors `hatp_bootstrap._default_production_trust_root`'s
-    identical discipline)."""
+    """No fixed production HPAC root exists for this platform."""
+
+
+class HPACAuthorityClass(str, Enum):
+    FIXTURE_NON_REAL = "fixture_non_real"
+    PRODUCTION = "production"
 
 
 _STATUS_VALUES = frozenset({"active", "revoked"})
 _TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$")
+_AUTHORITY_SCHEMA_VERSION = "HPAC-STORE-AUTHORITY/1.0"
+_PROVENANCE_SCHEMA_VERSION = "HPAC-WRITER-PROVENANCE/1.0"
+_AUTHORITY_DIR = ".authority"
+_AUTHORITY_MANIFEST = "manifest.json"
+_AUTHORITY_CONSTRUCTOR_SEAL = object()
+_WRITER_CONSTRUCTOR_SEAL = object()
+_RESOLUTION_CONSTRUCTOR_SEAL = object()
 
 
-@dataclass(frozen=True)
 class ProtectedAdminCapability:
-    """A structural marker write APIs require as an explicit parameter
-    before mutating any HPAC-001 store.
+    """Legacy fixture-only mutation marker retained for `.3` tests.
 
-    This is honestly **not** a real protected-admin ceremony
-    (HPAC-REQ-023/028/029's external deployment-owner anchor, UV-required
-    non-defaultable act, and FIDO2 registration-response verification are
-    all explicitly out of scope for this foundation phase). Constructing
-    this object is deliberately trivial and grants no real-world
-    authority whatsoever -- its only purpose is to make store mutation a
-    structurally distinct, non-default call shape that ordinary read
-    access can never produce by accident, so that a later phase has a
-    single, obvious seam to replace with a verified ceremony result. A
-    caller holding one of these MUST NOT be treated, described, or
-    logged as "authorized" or "the protected administrator" -- doing so
-    would itself violate HPAC-REQ-006's forbidden-authority-shortcut
-    rule.
+    It is intentionally public and reproducible, and for exactly that reason
+    can never authorize a production store. New repair tests use a bound
+    :class:`HPACWriterCapability`; this marker is only a compatibility seam for
+    non-real fixtures.
     """
 
-    acknowledgement: str = "phase-1-foundation-non-production-capability-marker"
+    __slots__ = ()
 
-    def __post_init__(self) -> None:
-        if self.acknowledgement != "phase-1-foundation-non-production-capability-marker":
-            raise HPACFoundationError(
-                "ProtectedAdminCapability.acknowledgement is a fixed constant; "
-                "it cannot be repurposed to carry caller-supplied authority claims."
-            )
+    def __reduce__(self):  # pragma: no cover - defensive serialization guard
+        raise TypeError("ProtectedAdminCapability is process-local and non-serializable")
+
+
+def _normalize_recursive(value: object) -> object:
+    if isinstance(value, str):
+        return unicodedata.normalize("NFC", value)
+    if isinstance(value, Mapping):
+        return {key: _normalize_recursive(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_normalize_recursive(item) for item in value]
+    return value
+
+
+def canonical_json_bytes(value: object) -> bytes:
+    normalized = _normalize_recursive(value)
+    return json.dumps(
+        normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
 
 
 def canonical_digest(value: object) -> str:
-    """HPAC-REQ-089's exact canonicalization rule, reused verbatim from
-    `runtime_authority.compute_canonical_digest` rather than
-    reimplemented."""
-
     return compute_canonical_digest(value)
 
-
-# ═══════════════════════════════════════════════════════════════════════
-# Deployment/user-scoped protected root (HPAC-REQ-021/022) -- entirely
-# separate from HATP's own trust-store root (HPAC-REQ-018).
-# ═══════════════════════════════════════════════════════════════════════
 
 _MACOS_FIXED_PROTECTED_ROOT = Path("/Library/Application Support/PCAE/HPAC/protected-root")
 _LINUX_FIXED_PROTECTED_ROOT = Path("/etc/pcae/hpac/protected-root")
 
 
 def resolve_hpac_protected_root() -> Path:
-    """The authoritative HPAC-001 protected-root location: a fixed,
-    platform-level path taking **no** arguments and consulting no
-    repository state, current working directory, environment variable,
-    task, or caller input (HPAC-REQ-022/079/080). Deliberately distinct
-    from `hatp_bootstrap._default_production_trust_root` -- a different
-    path, under a different directory tree, in HPAC-001's own namespace
-    (HPAC-REQ-018).
-
-    This function does not create, provision, resolve symlinks in, or
-    otherwise touch the returned path -- it is a pure constant lookup.
-    Every store in this phase takes a `root: Path` constructor argument
-    explicitly so tests can inject an isolated directory; production
-    callers are expected to pass `resolve_hpac_protected_root()`. This
-    function itself never accepts an override argument, so no caller can
-    redirect where a *production* resolution would land.
-    """
+    """Return the fixed production root; no override input is accepted."""
 
     if os.name != "posix":
         raise HPACUnsupportedPlatformError(
-            f"HPAC-001 protected root has no fixed-path implementation for platform {os.name!r}; failing closed."
+            f"HPAC-001 protected root has no fixed-path implementation for {os.name!r}"
         )
     if sys.platform == "darwin":
         return _MACOS_FIXED_PROTECTED_ROOT
     if sys.platform == "linux":
         return _LINUX_FIXED_PROTECTED_ROOT
     raise HPACUnsupportedPlatformError(
-        f"HPAC-001 protected root has no fixed-path implementation for platform {sys.platform!r}; failing closed."
+        f"HPAC-001 protected root has no fixed-path implementation for {sys.platform!r}"
     )
 
 
 def reject_symlink(target: Path) -> None:
-    if target.is_symlink():
-        raise HPACSymlinkError(f"HPAC-001 protected path is a symlink, refusing: {target}")
+    try:
+        mode = target.lstat().st_mode
+    except FileNotFoundError:
+        return
+    except OSError as exc:
+        raise HPACCorruptionError(f"cannot inspect HPAC path: {target}") from exc
+    if stat.S_ISLNK(mode):
+        raise HPACSymlinkError(f"HPAC-001 protected path is a symlink: {target}")
+
+
+def _ensure_directory(path: Path, *, create: bool) -> bool:
+    """Reject symlinks/non-directories and create missing descendants 0700."""
+
+    absolute = path.absolute()
+    missing: list[Path] = []
+    current = absolute
+    while not current.exists():
+        reject_symlink(current)
+        missing.append(current)
+        parent = current.parent
+        if parent == current:
+            break
+        current = parent
+    reject_symlink(current)
+    if current.exists() and not current.is_dir():
+        raise HPACAuthorityError(f"HPAC path ancestor is not a directory: {current}")
+    if missing and not create:
+        return False
+    for directory in reversed(missing):
+        directory.mkdir(mode=0o700)
+    reject_symlink(absolute)
+    if not absolute.is_dir():
+        raise HPACAuthorityError(f"HPAC path is not a directory: {absolute}")
+    return True
+
+
+def _regular_single_link(path: Path) -> os.stat_result:
+    reject_symlink(path)
+    try:
+        result = path.stat()
+    except OSError as exc:
+        raise HPACCorruptionError(f"cannot stat HPAC record: {path}") from exc
+    if not stat.S_ISREG(result.st_mode) or result.st_nlink != 1:
+        raise HPACCorruptionError(f"HPAC record is not a single-link regular file: {path}")
+    return result
+
+
+class HPACWriterCapability:
+    """Opaque, non-serializable, authority-instance-bound writer token."""
+
+    __slots__ = ("_authority_seal", "role", "subject", "authority_class")
+
+    def __init__(
+        self,
+        authority_seal: object,
+        role: str,
+        subject: Optional[str],
+        authority_class: HPACAuthorityClass,
+        *,
+        _seal: object,
+    ) -> None:
+        if _seal is not _WRITER_CONSTRUCTOR_SEAL:
+            raise HPACAuthorityError("HPAC writer capabilities cannot be caller-constructed")
+        self._authority_seal = authority_seal
+        self.role = require_nonempty_str(role, context="writer.role")
+        self.subject = subject
+        self.authority_class = authority_class
+
+    def __reduce__(self):
+        raise TypeError("HPACWriterCapability is process-local and non-serializable")
+
+
+T = TypeVar("T")
+
+
+class HPACResolvedRecord(Generic[T]):
+    """A resolver-produced canonical record plus non-serialized provenance."""
+
+    __slots__ = (
+        "record",
+        "authority_class",
+        "store_id",
+        "record_digest",
+        "record_path",
+        "writer_role",
+        "writer_subject",
+        "_authority_seal",
+    )
+
+    def __init__(
+        self,
+        *,
+        record: T,
+        authority_class: HPACAuthorityClass,
+        store_id: str,
+        record_digest: str,
+        record_path: Path,
+        writer_role: str,
+        writer_subject: Optional[str],
+        authority_seal: object,
+        _seal: object,
+    ) -> None:
+        if _seal is not _RESOLUTION_CONSTRUCTOR_SEAL:
+            raise HPACAuthorityError("canonical HPAC resolutions cannot be caller-constructed")
+        self.record = record
+        self.authority_class = authority_class
+        self.store_id = store_id
+        self.record_digest = record_digest
+        self.record_path = record_path
+        self.writer_role = writer_role
+        self.writer_subject = writer_subject
+        self._authority_seal = authority_seal
+
+    @property
+    def is_real_runtime_eligible(self) -> bool:
+        return self.authority_class is HPACAuthorityClass.PRODUCTION
+
+    def __reduce__(self):
+        raise TypeError("HPACResolvedRecord authority is process-local and non-serializable")
+
+
+class HPACStoreAuthority:
+    """Canonical root identity plus process-internal authority seal.
+
+    ``fixture()`` accepts a root but permanently labels it non-real.
+    ``production()`` accepts no root and resolves the platform constant.
+    There is intentionally no public production-writer factory in this phase.
+    """
+
+    __slots__ = ("root", "authority_class", "_seal", "_store_id", "_root_identity_digest")
+
+    def __init__(
+        self,
+        root: Path,
+        authority_class: HPACAuthorityClass,
+        *,
+        _seal: object,
+    ) -> None:
+        if _seal is not _AUTHORITY_CONSTRUCTOR_SEAL:
+            raise HPACAuthorityError("HPACStoreAuthority must be obtained from a trusted factory")
+        self.root = Path(root).absolute()
+        self.authority_class = authority_class
+        self._seal = object()
+        self._store_id: Optional[str] = None
+        self._root_identity_digest: Optional[str] = None
+
+    @classmethod
+    def fixture(cls, root: Path) -> "HPACStoreAuthority":
+        return cls(Path(root), HPACAuthorityClass.FIXTURE_NON_REAL, _seal=_AUTHORITY_CONSTRUCTOR_SEAL)
+
+    @classmethod
+    def production(cls) -> "HPACStoreAuthority":
+        return cls(resolve_hpac_protected_root(), HPACAuthorityClass.PRODUCTION, _seal=_AUTHORITY_CONSTRUCTOR_SEAL)
+
+    @property
+    def is_real_runtime_eligible(self) -> bool:
+        return self.authority_class is HPACAuthorityClass.PRODUCTION
+
+    @property
+    def store_id(self) -> str:
+        self._ensure_root(create=False)
+        assert self._store_id is not None
+        return self._store_id
+
+    def _manifest_path(self) -> Path:
+        return self.root / _AUTHORITY_DIR / _AUTHORITY_MANIFEST
+
+    def _root_identity(self) -> dict:
+        result = self.root.stat()
+        return {"device": result.st_dev, "inode": result.st_ino}
+
+    def _validate_fixture_permissions(self) -> None:
+        mode = stat.S_IMODE(self.root.stat().st_mode)
+        if mode & (stat.S_IWGRP | stat.S_IWOTH):
+            raise HPACAuthorityError("fixture HPAC root is group/world writable")
+
+    def _validate_production_boundary(self) -> None:
+        if self.root != resolve_hpac_protected_root().absolute():
+            raise HPACAuthorityError("production HPAC authority cannot be redirected")
+        from pcae.core.hatp_class_b_topology_verifier import (
+            _ancestor_chain_safe,
+            _current_agent_identity,
+            _effective_write_access,
+        )
+
+        agent_uid, agent_gids = _current_agent_identity()
+        writable, reason, _evidence = _effective_write_access(self.root, agent_uid, agent_gids)
+        ancestors_safe, diagnostics = _ancestor_chain_safe(self.root, agent_uid, agent_gids)
+        if writable is not False or ancestors_safe is not True:
+            raise HPACAuthorityError(
+                "production HPAC root is not protected from the current agent "
+                f"(root={reason}, ancestors={diagnostics})"
+            )
+
+    def _ensure_root(self, *, create: bool) -> None:
+        if not self.root.exists():
+            if not create or self.authority_class is HPACAuthorityClass.PRODUCTION:
+                raise HPACAuthorityError(f"HPAC authority root is unavailable: {self.root}")
+            _ensure_directory(self.root, create=True)
+            os.chmod(self.root, 0o700)
+        reject_symlink(self.root)
+        if not self.root.is_dir():
+            raise HPACAuthorityError(f"HPAC authority root is not a directory: {self.root}")
+        if self.authority_class is HPACAuthorityClass.PRODUCTION:
+            self._validate_production_boundary()
+        else:
+            self._validate_fixture_permissions()
+
+        authority_dir = self.root / _AUTHORITY_DIR
+        manifest_path = self._manifest_path()
+        if not manifest_path.exists():
+            if not create or self.authority_class is HPACAuthorityClass.PRODUCTION:
+                raise HPACAuthorityError("HPAC authority manifest is absent")
+            _ensure_directory(authority_dir, create=True)
+            os.chmod(authority_dir, 0o700)
+            identity = self._root_identity()
+            manifest = {
+                "schema_version": _AUTHORITY_SCHEMA_VERSION,
+                "store_id": f"hpacs-{uuid.uuid4().hex}",
+                "authority_class": self.authority_class.value,
+                "root_identity": identity,
+            }
+            write_atomic_create_only(manifest_path, canonical_json_bytes(manifest))
+
+        manifest = read_canonical_json_document(manifest_path)
+        if not isinstance(manifest, dict) or set(manifest) != {
+            "schema_version", "store_id", "authority_class", "root_identity"
+        }:
+            raise HPACAuthorityError("HPAC authority manifest has an invalid closed schema")
+        if manifest.get("schema_version") != _AUTHORITY_SCHEMA_VERSION:
+            raise HPACAuthorityError("HPAC authority manifest version is unsupported")
+        if manifest.get("authority_class") != self.authority_class.value:
+            raise HPACAuthorityError("HPAC root assurance class does not match its resolver")
+        if manifest.get("root_identity") != self._root_identity():
+            raise HPACAuthorityError("HPAC root was copied or replaced; root identity binding failed")
+        store_id = manifest.get("store_id")
+        if not isinstance(store_id, str) or not store_id.startswith("hpacs-"):
+            raise HPACAuthorityError("HPAC authority manifest store_id is malformed")
+        self._store_id = store_id
+        self._root_identity_digest = canonical_digest(manifest["root_identity"])
+
+    def writer(self, role: str, *, subject: Optional[str] = None) -> HPACWriterCapability:
+        """Issue a bound fixture writer; real writer ceremony is deferred."""
+
+        if self.authority_class is not HPACAuthorityClass.FIXTURE_NON_REAL:
+            raise HPACAuthorityError("no production HPAC writer is implemented in this foundation phase")
+        self._ensure_root(create=True)
+        if subject is not None:
+            require_nonempty_str(subject, context="writer.subject")
+        return HPACWriterCapability(
+            self._seal,
+            role,
+            subject,
+            self.authority_class,
+            _seal=_WRITER_CONSTRUCTOR_SEAL,
+        )
+
+    def legacy_fixture_writer(
+        self, capability: ProtectedAdminCapability, role: str, *, subject: Optional[str] = None
+    ) -> HPACWriterCapability:
+        if not isinstance(capability, ProtectedAdminCapability):
+            raise HPACAuthorityError("legacy fixture mutation requires ProtectedAdminCapability")
+        return self.writer(role, subject=subject)
+
+    def require_writer(
+        self, writer: HPACWriterCapability, role: str, *, subject: Optional[str] = None
+    ) -> None:
+        if not isinstance(writer, HPACWriterCapability) or writer._authority_seal is not self._seal:
+            raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
+        if writer.role != role or writer.subject != subject:
+            raise HPACAuthorityError("writer capability role/subject does not match this operation")
+        if writer.authority_class is not self.authority_class:
+            raise HPACAuthorityError("writer capability assurance-class mismatch")
+        self._ensure_root(create=True)
+
+    @contextmanager
+    def writer_transaction(
+        self, writer: HPACWriterCapability, role: str, *, subject: Optional[str] = None
+    ):
+        """Serialize one read/validate/write transaction at the root.
+
+        The lock is only a concurrency primitive; it carries no authority.
+        Authority is checked before the lock is opened and remains rooted in
+        the writer seal plus protected store state.
+        """
+
+        self.require_writer(writer, role, subject=subject)
+        import fcntl
+
+        lock_path = self.root / _AUTHORITY_DIR / "writer.lock"
+        reject_symlink(lock_path)
+        fd = os.open(
+            lock_path,
+            os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0),
+            0o600,
+        )
+        try:
+            result = os.fstat(fd)
+            if not stat.S_ISREG(result.st_mode) or result.st_nlink != 1:
+                raise HPACAuthorityError("HPAC writer lock is not a single-link regular file")
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            finally:
+                os.close(fd)
+
+    def _relative_record_path(self, path: Path) -> str:
+        absolute = Path(path).absolute()
+        try:
+            relative = absolute.relative_to(self.root)
+        except ValueError as exc:
+            raise HPACAuthorityError("record path escapes the canonical HPAC root") from exc
+        if any(part in {"", ".", ".."} for part in relative.parts):
+            raise HPACAuthorityError("record path contains traversal components")
+        current = self.root
+        reject_symlink(current)
+        for part in relative.parts:
+            current = current / part
+            reject_symlink(current)
+            if current.exists() and current.is_dir():
+                if self.authority_class is HPACAuthorityClass.FIXTURE_NON_REAL:
+                    mode = stat.S_IMODE(current.stat().st_mode)
+                    if mode & (stat.S_IWGRP | stat.S_IWOTH):
+                        raise HPACAuthorityError(
+                            f"fixture HPAC descendant directory is group/world writable: {current}"
+                        )
+                else:
+                    from pcae.core.hatp_class_b_topology_verifier import (
+                        _current_agent_identity,
+                        _effective_write_access,
+                    )
+
+                    agent_uid, agent_gids = _current_agent_identity()
+                    writable, reason, _evidence = _effective_write_access(
+                        current, agent_uid, agent_gids
+                    )
+                    if writable is not False:
+                        raise HPACAuthorityError(
+                            f"production HPAC descendant is agent-writable or indeterminate: {current}:{reason}"
+                        )
+        return relative.as_posix()
+
+    def _provenance_path(self, record_path: Path) -> Path:
+        relative = self._relative_record_path(record_path)
+        key = hashlib.sha256(relative.encode("utf-8")).hexdigest()
+        return self.root / _AUTHORITY_DIR / "provenance" / f"{key}.json"
+
+    def record_write(
+        self,
+        record_path: Path,
+        record_digest: str,
+        writer: HPACWriterCapability,
+        *,
+        role: str,
+        subject: Optional[str] = None,
+        replace: bool = False,
+    ) -> None:
+        self.require_writer(writer, role, subject=subject)
+        _regular_single_link(record_path)
+        relative = self._relative_record_path(record_path)
+        provenance = {
+            "schema_version": _PROVENANCE_SCHEMA_VERSION,
+            "store_id": self.store_id,
+            "authority_class": self.authority_class.value,
+            "root_identity_digest": self._root_identity_digest,
+            "record_relative_path": relative,
+            "record_digest": record_digest,
+            "writer_role": role,
+            "writer_subject": subject,
+        }
+        provenance_path = self._provenance_path(record_path)
+        payload = canonical_json_bytes(provenance)
+        if replace:
+            write_atomic_replace(provenance_path, payload)
+        else:
+            write_atomic_create_only(provenance_path, payload)
+
+    def verify_record(
+        self,
+        record_path: Path,
+        record_digest: str,
+        *,
+        roles: frozenset[str],
+        subject: Optional[str] = None,
+    ) -> dict:
+        self._ensure_root(create=False)
+        _regular_single_link(record_path)
+        relative = self._relative_record_path(record_path)
+        provenance_path = self._provenance_path(record_path)
+        if not provenance_path.exists():
+            raise HPACAuthorityError("HPAC record has no writer provenance")
+        try:
+            provenance = read_canonical_json_document(provenance_path)
+        except HPACFoundationError as exc:
+            raise HPACAuthorityError("HPAC writer provenance is malformed or corrupt") from exc
+        if not isinstance(provenance, dict) or set(provenance) != {
+            "schema_version", "store_id", "authority_class", "root_identity_digest",
+            "record_relative_path", "record_digest", "writer_role", "writer_subject",
+        }:
+            raise HPACAuthorityError("HPAC writer provenance has an invalid closed schema")
+        expected = {
+            "schema_version": _PROVENANCE_SCHEMA_VERSION,
+            "store_id": self.store_id,
+            "authority_class": self.authority_class.value,
+            "root_identity_digest": self._root_identity_digest,
+            "record_relative_path": relative,
+            "record_digest": record_digest,
+        }
+        for key, value in expected.items():
+            if provenance.get(key) != value:
+                raise HPACAuthorityError(f"HPAC writer provenance mismatch: {key}")
+        if provenance.get("writer_role") not in roles:
+            raise HPACAuthorityError("HPAC record was not emitted by an allowed writer role")
+        if subject is not None and provenance.get("writer_subject") != subject:
+            raise HPACAuthorityError("HPAC writer subject binding mismatch")
+        return provenance
+
+    def resolve_record(
+        self,
+        *,
+        record: T,
+        record_path: Path,
+        record_digest: str,
+        roles: frozenset[str],
+        subject: Optional[str] = None,
+    ) -> HPACResolvedRecord[T]:
+        provenance = self.verify_record(
+            record_path, record_digest, roles=roles, subject=subject
+        )
+        return HPACResolvedRecord(
+            record=record,
+            authority_class=self.authority_class,
+            store_id=self.store_id,
+            record_digest=record_digest,
+            record_path=record_path,
+            writer_role=provenance["writer_role"],
+            writer_subject=provenance["writer_subject"],
+            authority_seal=self._seal,
+            _seal=_RESOLUTION_CONSTRUCTOR_SEAL,
+        )
+
+    def require_resolution(self, resolution: HPACResolvedRecord[T]) -> T:
+        if not isinstance(resolution, HPACResolvedRecord) or resolution._authority_seal is not self._seal:
+            raise HPACAuthorityError("canonical record resolution is forged or belongs to another HPAC root")
+        if resolution.store_id != self.store_id or resolution.authority_class is not self.authority_class:
+            raise HPACAuthorityError("canonical record resolution store/assurance mismatch")
+        return resolution.record
 
 
 def require_nonempty_str(value: object, *, context: str) -> str:
     if not isinstance(value, str) or value == "" or value != value.strip():
-        raise HPACMalformedError(f"{context}: expected a non-empty, non-whitespace-padded string, got {value!r}")
+        raise HPACMalformedError(f"{context}: expected a non-empty, non-whitespace-padded string")
     if len(value) > 256:
-        raise HPACMalformedError(f"{context}: exceeds the 256-character HPAC-001 identifier grammar bound")
+        raise HPACMalformedError(f"{context}: exceeds the 256-character bound")
     return value
 
 
 def require_status(value: object, *, context: str) -> str:
     if value not in _STATUS_VALUES:
-        raise HPACMalformedError(f"{context}: status must be one of {sorted(_STATUS_VALUES)}, got {value!r}")
+        raise HPACMalformedError(f"{context}: invalid status {value!r}")
     return value  # type: ignore[return-value]
 
 
 def require_timestamp(value: object, *, context: str) -> str:
     if not isinstance(value, str) or not _TIMESTAMP_RE.fullmatch(value):
-        raise HPACMalformedError(f"{context}: expected an RFC3339 UTC timestamp, got {value!r}")
+        raise HPACMalformedError(f"{context}: expected an RFC3339 UTC timestamp")
     return value
 
 
 def require_revoked_at_consistency(status: str, revoked_at: object, *, context: str) -> Optional[str]:
-    """HPAC-REQ-061/062's monotonic revocation discipline requires
-    `revoked_at` to be present exactly when `status == 'revoked'` --
-    never present alongside `active`, never absent alongside
-    `revoked`."""
-
     if status == "revoked":
         if revoked_at is None:
-            raise HPACMalformedError(f"{context}: status is 'revoked' but revoked_at is missing")
+            raise HPACMalformedError(f"{context}: revoked_at is required")
         return require_timestamp(revoked_at, context=f"{context}.revoked_at")
     if revoked_at is not None:
-        raise HPACMalformedError(f"{context}: status is 'active' but revoked_at is set")
+        raise HPACMalformedError(f"{context}: active record cannot carry revoked_at")
     return None
 
 
@@ -225,10 +655,6 @@ _ID_PATTERNS: dict[str, re.Pattern[str]] = {
 
 
 def new_hpac_id(prefix: str) -> str:
-    """Opaque `<prefix>-<32-hex>` ID generator, mirroring
-    `runtime_authority.new_approval_id`'s pattern with a new prefix per
-    HPAC-001 artifact family. `prefix` must be a key of `_ID_PATTERNS`."""
-
     if prefix not in _ID_PATTERNS:
         raise HPACFoundationError(f"unknown HPAC-001 ID prefix: {prefix!r}")
     return f"{prefix}-{uuid.uuid4().hex}"
@@ -240,84 +666,84 @@ def id_pattern_matches(prefix: str, value: object) -> bool:
     return isinstance(value, str) and bool(_ID_PATTERNS[prefix].match(value))
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# Atomic write primitives
-# ═══════════════════════════════════════════════════════════════════════
-
-
 def write_atomic_replace(path: Path, data: bytes) -> None:
-    """Race-safe, crash-consistent whole-document replace: temp file in
-    the same directory, fsync, atomic `os.replace`. Used for the mutable
-    (append-only-per-record) `HumanPrincipalRegistry` document, which is
-    read-modify-rewritten as a whole file but must never lose or corrupt
-    any other record while doing so (HPAC-REQ-015). Mirrors
-    `repository_identity._write_atomic`'s existing idiom exactly."""
-
     directory = path.parent
-    directory.mkdir(parents=True, exist_ok=True)
+    _ensure_directory(directory, create=True)
     reject_symlink(path)
-    fd, tmp_name = tempfile.mkstemp(prefix=".tmp-hpac-", dir=str(directory))
+    fd, temporary = tempfile.mkstemp(prefix=".tmp-hpac-", dir=str(directory))
     try:
+        os.fchmod(fd, 0o600)
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
         reject_symlink(path)
-        os.replace(tmp_name, path)
+        os.replace(temporary, path)
+        directory_fd = os.open(directory, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
     finally:
-        if os.path.exists(tmp_name):
-            os.unlink(tmp_name)
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def write_atomic_create_only(path: Path, data: bytes) -> None:
-    """Single-winner, create-only atomic commit for every immutable
-    per-ID HPAC-001 record (presentation evidence, proof, lifecycle
-    event, consumption record): write to a protected temporary sibling,
-    fsync, then install only if the final path is absent, using
-    `O_CREAT | O_EXCL` for the exclusivity guarantee (HPAC-REQ-093/094/
-    100). Two concurrent callers racing for the same path produce
-    exactly one winner; the loser raises `HPACDuplicateError` and MUST
-    re-read the just-created record rather than retry the create
-    (HPAC-REQ-099/HPAC-REQ-024's "no in-process lock is sufficient
-    alone" discipline)."""
+    """Durably link a complete temp file into an absent final name."""
 
     directory = path.parent
-    directory.mkdir(parents=True, exist_ok=True)
+    _ensure_directory(directory, create=True)
     reject_symlink(path)
     if path.exists():
         raise HPACDuplicateError(f"HPAC-001 create-only path already exists: {path}")
-    fd, tmp_name = tempfile.mkstemp(prefix=".tmp-hpac-", dir=str(directory))
+    fd, temporary = tempfile.mkstemp(prefix=".tmp-hpac-", dir=str(directory))
+    temporary_path = Path(temporary)
     try:
+        os.fchmod(fd, 0o600)
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
         try:
-            create_fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            os.link(temporary_path, path, follow_symlinks=False)
         except FileExistsError as exc:
             raise HPACDuplicateError(f"HPAC-001 create-only path already exists: {path}") from exc
-        os.close(create_fd)
-        os.replace(tmp_name, path)
+        directory_fd = os.open(directory, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
     finally:
-        if os.path.exists(tmp_name):
-            os.unlink(tmp_name)
+        if temporary_path.exists():
+            temporary_path.unlink()
+
+
+class _DuplicateKeyError(ValueError):
+    pass
+
+
+def _reject_duplicate_keys(pairs):
+    output = {}
+    for key, value in pairs:
+        if key in output:
+            raise _DuplicateKeyError(key)
+        output[key] = value
+    return output
 
 
 def read_canonical_json_document(path: Path) -> object:
-    """Symlink-rejecting, strict-JSON read. Raises `HPACMalformedError`
-    on any decode failure -- truncated/corrupt bytes are never
-    partially parsed (HPAC-REQ-017/094)."""
+    """Read one single-link regular file and require exact canonical bytes."""
 
-    reject_symlink(path)
-    if not path.exists():
-        raise FileNotFoundError(str(path))
+    _regular_single_link(path)
     try:
-        raw = path.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise HPACCorruptionError(f"HPAC-001 protected path could not be read: {path}") from exc
-    import json
-
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise HPACMalformedError(f"HPAC-001 protected path is not valid JSON: {path}") from exc
+        raw = path.read_bytes()
+        text = raw.decode("utf-8")
+        document = json.loads(text, object_pairs_hook=_reject_duplicate_keys)
+    except (OSError, UnicodeDecodeError) as exc:
+        raise HPACCorruptionError(f"HPAC-001 record could not be read: {path}") from exc
+    except (json.JSONDecodeError, _DuplicateKeyError) as exc:
+        raise HPACMalformedError(f"HPAC-001 record is not strict JSON: {path}") from exc
+    if raw != canonical_json_bytes(document):
+        raise HPACMalformedError(f"HPAC-001 record is not encoded as exact canonical JSON: {path}")
+    return document
