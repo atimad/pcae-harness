@@ -52,14 +52,16 @@
     "b3_b4_contract_storage": "44 passed",
     "fast_green": "0 failed (passed); unexplained attributable functional regressions = 0",
     "runtime_boundary": "Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, subprocess, provider/network, credential, hardware, or external-effect calls",
-    "blocking_findings": "absolute proof-ID canonical-store escape reproduced in lifecycle and inert Gate-9 stores; deterministic presentation attestation has two fields forbidden by HPAC-REQ-092"
+    "blocking_findings": "absolute proof-ID canonical-store escape reproduced in lifecycle and inert Gate-9 stores; deterministic presentation attestation has two fields forbidden by HPAC-REQ-092",
+    "report_notification_tests": "not directly applicable; notification implementation unchanged and canonical report notification dispatched successfully",
+    "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions; no current-phase error",
-    "pcae_push_check": "pending final governed push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready; canonical completion report dispatched successfully",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED"
