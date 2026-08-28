@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.6 — B1/B7/N1/N2 Production Authority
+Repair Integration Planning. **PLANNING COMPLETE — NOT IMPLEMENTED.**
+Planning-only phase; re-derived all four outstanding production defects
+(B1: identity-only copyable `_validator_seal`; B7: dispatch identity
+built without registry revalidation; N1: approval objects bypass
+canonical-store provenance; N2: caller-manufactured `approver_id`)
+directly from current `runtime_authority.py`, `runtime_dispatch_permission.py`,
+and `runtime_invocation_approval_store.py` source, not from historical
+summary prose. Selected Option A (structural repair with a deterministic
+NON-REAL hard-rejection point at approval canonicalization) as the
+staging architecture: all four defects can be repaired now without
+creating a real-runtime-authority path, since `verify_human_authentication`
+remains permanently NON-REAL until real FIDO2 exists. Adjudicated F2
+(HPAC-REQ-054 Step 4) as now a prerequisite before production consumption;
+F3/F4/F7 remain non-blocking/deferred. Recorded an explicit
+"N2-STOP-lifted" correction: `.1R.2`'s original STOP (RIHAC-001 v1.0, no
+authentication mechanism existed) was resolved by the `.1R.3`-`.1R.5.2.1`
+contract-evolution chain (RIHAC-001 v2.0, HPAC-001 v2.0), never previously
+stated explicitly. Froze next phase IDs:
+`149O.20L.7O.3W.1R.2B.1R.1.1R.7` (B1/B7/N1/N2 production authority repair
+implementation) and `149O.20L.7O.3W.1R.2B.1R.1.1R.8` (its independent
+verification); Gate 5/Gate 9 coordinator wiring is planned architecturally
+but deliberately left with no phase ID (no-invent-an-ID discipline;
+separate later chapter). No production trust-path file modified, no
+contract modified, no PB integration, no runtime enablement. Requires
+separate explicit human authorization to begin `.1R.7`. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_6_B1_B7_N1_N2_PRODUCTION_AUTHORITY_REPAIR_INTEGRATION_PLANNING.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1 — Independent Verification of
 AuthenticatedHumanPrincipal Trusted-Construction and Provenance Repair.
 **VERIFIED WITH NON-BLOCKING FINDINGS — VERIFIER IMPLEMENTATION COMPLETE.**

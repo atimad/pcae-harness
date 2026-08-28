@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.6** — B1/B7/N1/N2 Production
+  Authority Repair Integration Planning. **PLANNING COMPLETE — NOT
+  IMPLEMENTED.** Re-derived B1 (`ValidatedAuthorityProjection._validator_seal`
+  is identity-only and copyable, `runtime_authority.py`), B7 (dispatch
+  identity built without durable-registry revalidation,
+  `runtime_dispatch_permission.py`), N1 (approval objects bypass
+  canonical-store lookup, `runtime_authority.py`/`runtime_invocation_approval_store.py`),
+  and N2 (`approver_id` is caller-manufacturable) directly from current
+  production source. Selected Option A staging: structural repair of all
+  four defects now, gated by a deterministic-NON-REAL hard-rejection point
+  at approval canonicalization, since `verify_human_authentication` stays
+  NON-REAL until real FIDO2 exists. F2 (HPAC-REQ-054 Step 4) reclassified
+  non-blocking → prerequisite for the next implementation phase; F3/F4/F7
+  remain deferred/non-blocking. Recorded the previously-implicit
+  "N2-STOP-lifted" contract-evolution correction. Froze
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.7` (implementation) and `.1R.8`
+  (independent verification) as the next phase IDs; Gate 5/Gate 9
+  coordinator wiring planned but left unscheduled (no invented ID). No
+  production trust-path file, contract, PB integration, or runtime state
+  touched. See `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_6_B1_B7_N1_N2_PRODUCTION_AUTHORITY_REPAIR_INTEGRATION_PLANNING.md`.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1: Independent Verification of AuthenticatedHumanPrincipal Trusted-Construction and Provenance Repair to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1); session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1** independently verifies
   `.1R.5.2`'s F1 repair. **VERIFIED WITH NON-BLOCKING FINDINGS — VERIFIER
