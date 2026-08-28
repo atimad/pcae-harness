@@ -65,7 +65,26 @@ The `.3.1` lifecycle findings that separately described challenge substitution,
 alternate/copied chains, and incomplete state transitions are all addressed by
 the fourth repair; they are not silently collapsed or declared closed.
 
-## 4. Shared trust-root and writer architecture
+## 4. Files changed
+
+Production repairs are limited to:
+
+- `src/pcae/core/hpac_foundation.py`;
+- `src/pcae/core/human_principal_registry.py`;
+- `src/pcae/core/approval_presentation.py`;
+- `src/pcae/core/approval_presentation_deterministic.py`;
+- `src/pcae/core/human_authentication_proof.py`; and
+- `src/pcae/core/hpac_lifecycle.py`.
+
+The phase also adds the focused `.3.2` test file and this implementation
+document, and updates the ordinary project/task/governance memory plus governed
+completion artifacts. `human_authenticator.py`,
+`human_authenticator_deterministic.py`, and
+`runtime_invocation_authority_consumption.py` remain byte-identical to the
+phase-entry commit. All normative contracts, PB/runtime production paths,
+POL-005, packaging, and release files remain byte-identical.
+
+## 5. Shared trust-root and writer architecture
 
 `hpac_foundation.py` now separates authority class, store authority, writer
 capability, and resolved record:
@@ -95,7 +114,7 @@ writer provisioning remain deferred. Fixture writer availability cannot be
 upgraded because the non-real classification comes from the sealed root/writer
 boundary, not from a caller-editable model field.
 
-## 5. Filesystem boundary and hash role
+## 6. Filesystem boundary and hash role
 
 The common store layer now requires containment beneath its authority root,
 rejects path traversal and symlinks, verifies regular single-link files,
@@ -118,7 +137,7 @@ writer-provenance, and resolver checks. Consequently:
 - canonical path as trust: **ABSENT**;
 - caller-manufactured trusted object: **REJECTED by canonical resolution**.
 
-## 6. HumanPrincipalRegistry result
+## 7. HumanPrincipalRegistry result
 
 The authoritative registry is deployment/user scoped through the shared fixed
 production root. Writes require the registry writer bound to that exact root.
@@ -139,7 +158,7 @@ another location, cannot alter the store-level authority class. Fixture
 non-upgradeability is therefore durable and independent of naming, path,
 environment variables, or caller booleans.
 
-## 7. Protected presentation and installed-mechanism result
+## 8. Protected presentation and installed-mechanism result
 
 An installed mechanism descriptor is now authoritative only after it is
 written through the descriptor-installer role and freshly resolved from the
@@ -169,7 +188,7 @@ classes fail closed because real attestation verification belongs to later
 authorized work. No valid combination of UP/UV or other fields can convert the
 deterministic presentation mechanism into real-runtime authority.
 
-## 8. HumanAuthenticationProof and deterministic authenticator result
+## 9. HumanAuthenticationProof and deterministic authenticator result
 
 The existing separation remains intact:
 
@@ -199,7 +218,7 @@ alone is not proof of the future verifier's expiry/revocation/malformed-
 response rejection remains deferred with that verifier; it was not
 misclassified as one of this phase's trust-root blockers.
 
-## 9. HPAC lifecycle result
+## 10. HPAC lifecycle result
 
 Canonical sequence zero is no longer equivalent to a record whose predecessor
 is null. `open_challenge_canonical` requires a coordinator/genesis writer and a
@@ -219,7 +238,7 @@ alternate roots, copied chains, absent or non-authoritative predecessors,
 digest mismatches, stale predecessors, immediate forks, and deep forks. There
 is no last-writer, lexical, digest, or caller-selected branch winner.
 
-## 10. Gate 9, production coupling, and deferred defects
+## 11. Gate 9, production coupling, and deferred defects
 
 The plan-authorized `RuntimeInvocationAuthorityConsumption` primitive remains
 present and inert. This phase does not wire RDGO Gate 9, consume production
@@ -247,7 +266,7 @@ enrollment/registration, protected approval UI, approval/enrollment CLI,
 biometric, PAM, keychain, credential-management, provider, or network
 implementation was added.
 
-## 11. Fresh and inherited test evidence
+## 12. Fresh and inherited test evidence
 
 The fresh repair suite is:
 
@@ -283,7 +302,7 @@ node attribution, and zero/nonzero attributable result are recorded in the
 canonical completion metadata generated after the implementation commit. No
 aggregate-count-only equivalence claim is used.
 
-## 12. Runtime and no-effect result
+## 13. Runtime and no-effect result
 
 At repair completion the runtime remains:
 
@@ -298,7 +317,7 @@ subprocess execution, network/provider call, shell interception, enforcement,
 automatic apply, credential access, hardware access, or external runtime
 effect.
 
-## 13. Governance incident preservation
+## 14. Governance incident preservation
 
 **DELEGATED FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
 
@@ -312,7 +331,7 @@ governance violation. No revert was authorized or performed.
 This `.3.2` work was performed by the primary operator under explicit human
 authorization. No subagent was used.
 
-## 14. Findings and repair disposition
+## 15. Findings and repair disposition
 
 | ID | Severity | Category | Result | Disposition |
 |---|---|---|---|---|
@@ -326,7 +345,7 @@ authorization. No subagent was used.
 | O-3.2-01 | OBSERVATION | Infrastructure debt | Full-suite xdist has pre-existing UUID node-ID collection nondeterminism | Deferred separately; not attributable to HPAC repair |
 | O-3.2-02 | OBSERVATION | Deferred implementation | Real writer provisioning, real enrollment, real mechanism attestation, and Layer-3 verifier remain absent | Required no-go; later human authorization only after `.3.2.1` |
 
-## 15. Acceptance matrix
+## 16. Acceptance matrix
 
 | Acceptance item | Repair result |
 |---|---|
@@ -353,7 +372,7 @@ authorization. No subagent was used.
 | Real FIDO2/protected UI | ABSENT |
 | Runtime | Observed / observe / unavailable |
 
-## 16. Repair verdict and exact next phase
+## 17. Repair verdict and exact next phase
 
 **IMPLEMENTATION REPAIR COMPLETE — INDEPENDENT VERIFICATION REQUIRED.**
 
