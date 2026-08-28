@@ -1,45 +1,38 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2",
-  "phase_name": "HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Blocking Repair",
-  "phase_title": "HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Blocking Repair",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1",
+  "phase_name": "Independent Verification of HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Repair",
+  "phase_title": "Independent Verification of HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Repair",
   "status": "completed",
-  "commit_attribution": "Phase-owned implementation, status/changelog sync, and task-lifecycle commits authored during this phase; a commit cannot self-list its own hash, so origin_main_head/pushed_status are reconciled by the human operator at push time.",
+  "commit_attribution": "Phase-owned verification report, fresh independent test suite, status/changelog sync, and task-lifecycle commits authored during this phase; a commit cannot self-list its own hash, so origin_main_head/pushed_status are reconciled by the human operator at push time.",
   "execution_availability": "unavailable",
-  "summary": "Repairs the two Blocking findings left open by .3.2.1. Protected-presentation attestation now serializes exactly the eight HPAC-REQ-092 fields (attestation_version, presentation_id, approval_id, approval_subject_digest, human_visible_representation_digest, descriptor_digest, election, presented_at) and no others; installed-mechanism authority and permanently-non-real classification remain proven by the already-closed writer-provenance sidecar and FIXTURE_NON_REAL verifier-kind channels, untouched here. Canonical-store containment adds require_safe_relative_id_component, enforced before any file I/O, to the HPAC lifecycle store and the inert Gate-9 authority-consumption store, closing the absolute-path/Path.__truediv__ escape. No contract modified; no CONTRACT/IMPLEMENTATION INCOMPATIBILITY encountered. Recommends .3.2.2.1 independent verification; Layer 3 not begun.",
-  "derived_correctness": "HPAC-REQ-092's exact eight-field closed schema was re-derived from docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md (HPAC-001 v2.0) rather than inferred from the pre-repair implementation. The pre-repair attestation object was diffed field-by-field against that schema, confirming installation_store_id and simulation_only as the two contract-forbidden fields. The containment defect was independently reproduced with isolated temporary state: pathlib.Path.__truediv__ discards the left operand when the right is absolute, so an unvalidated caller-supplied proof_id let HPACLifecycleStore._dir() and RuntimeInvocationAuthorityConsumptionStore._path() resolve outside their configured roots before any check ran. require_safe_relative_id_component mirrors the existing _validate_mechanism_id single-path-component pattern and is invoked before any file I/O in both stores.",
-  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/DONE.md, the phase implementation doc, this metadata, and the canonical completion report agree on REPAIRED-NOT-CLOSED disposition for both findings, the exact HPAC-REQ-092 field list, zero contract modification, zero PB/runtime effect, preserved unauthorized .3 incident, and exact .3.2.2.1 recommendation.",
-  "internal_evidence_coherence": "Root-cause analysis, repair diff, new 28-test suite, full HPAC-family regression run, B-3/B-4 regression, and Fast Green delta investigation all derive from the same working-tree state committed at 3dbb8077.",
-  "test_evidence_classification": "inherited_regression",
-  "tests_run": 278,
-  "tests_added_or_updated": "28 fresh tests in tests/test_hpac_canonical_containment_and_attestation_schema_repair_3w1r2b1r111r322.py covering attestation-schema conformance/rejection cases and canonical-containment/traversal/symlink/cross-store cases; full HPAC family of 11 prior suites plus this new one re-run as regression",
+  "summary": "Independently re-derives HPAC-REQ-092's closed 8-field attestation schema from the contract text (not .3.2.2 source) and matches it exactly against production. Independently re-attacks the .3.2.2 canonical-store containment repair with a 10-vector absolute-path/traversal matrix plus symlink, cross-store-substitution, and canonical-root-placement-without-provenance attacks -- all rejected for the correct authority reasons. Fixed-SHA (git worktree) HPAC-family comparison finds exactly the 4 expected candidate-only failing nodes and zero unexplained regressions. Finding P: CLOSED. Finding C: CLOSED. Principal and proof-writer provenance remain independently closed. No repair applied (verification-only). Layer 3 not begun; no next-phase ID disclosed by canonical project state, so none invented.",
+  "derived_correctness": "HPAC-REQ-092's exact eight-field closed schema was independently re-derived from docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md section 39.2 (quoted in the phase doc), not inferred from .3.2.2's implementation or test module, then compared field-for-field against production's presentation_attestation_object(). The pre-repair absolute-path escape was reconstructed from Path.__truediv__'s documented behavior (discards the left operand when the right is absolute) and independently re-attacked post-repair with a 10-vector matrix across both HPACLifecycleStore and RuntimeInvocationAuthorityConsumptionStore; all 10 rejected before any file I/O. Two additional fresh tests (canonical-root-placement-without-provenance) were initially authored with an incorrect attack premise (rewriting identical bytes at an already-provenanced path is not a forgery); this was caught during authoring, corrected, and disclosed in the phase doc rather than silently fixed.",
+  "metadata_consistency": "PROJECT_STATUS.md, CHANGELOG.md, tasks/DONE.md, the phase implementation doc, this metadata, and the canonical completion report agree on INDEPENDENTLY VERIFIED / CLOSED disposition for both findings, the exact HPAC-REQ-092 field list, zero contract modification, zero repair applied, zero PB/runtime effect, preserved unauthorized .3 incident, and no invented next-phase ID.",
+  "internal_evidence_coherence": "Contract re-derivation, fresh adversarial scripts, the committed 29-test independent suite, the fixed-SHA HPAC-family worktree comparison, and the full genesis/predecessor/fork/principal/proof-provenance regression re-run all derive from the same working-tree state committed at 888be35c.",
+  "test_evidence_classification": "independent_verification",
+  "tests_run": 29,
+  "tests_added_or_updated": "29 fresh independent tests in tests/test_hpac_canonical_containment_attestation_schema_independent_verification_3w1r2b1r111r3221.py, not importing from or reusing assertions of .3.2.2's own test module; re-ran .3.2.2's 28-test suite, the full HPAC family (80 tests across 6 files), and a fixed-SHA 16-file HPAC-family comparison as independent regression evidence",
   "test_results": {
-    "focused_repair_suite_3_2_2": "28 passed",
-    "full_hpac_family": "267 passed, 11 non-passes all explained: 7 pre-existing historical .3.1 failures identical to .3.2.1's recorded baseline, 1 pre-existing flaky concurrency test (confirmed flaky on unmodified HEAD too), 3 .3.2.1 blocking_reproduction tests that now correctly fail because they documented the now-fixed defects and were left unedited per the repository's historical-test convention",
-    "b3_b4_contract_storage": "44 passed, exact match to .3.2.1's recorded baseline",
-    "principal_provenance_regression": "unchanged, still rejected: forged principal, copied principal, fixture-to-real upgrade, fake registry, root redirect, unauthorized writer",
-    "proof_writer_provenance_regression": "unchanged, still rejected: caller-created proof, copied proof, fake writer, raw/parsed/canonical stage substitution, deterministic-to-real reclassification",
-    "lifecycle_regression": "unchanged, still enforced: authoritative genesis, forged genesis rejection, alternate-chain rejection, fork rejection, canonical predecessor resolution",
-    "static_runtime_pb_boundary": "zero PB, runtime authority, dispatch permission, Gate-5, Gate-9 production, or Gate-10 consumers; manual diff scan for forbidden imports found none; Gate-9 remains inert",
-    "fast_green": "0 failed (passed) on deselected clean comparison basis; raw unfiltered full-suite counts (360 failed candidate vs 344 failed clean-HEAD) investigated and documented separately below and in the phase doc -- see fast_green_full_suite_investigation",
-    "fast_green_full_suite_investigation": {
-      "candidate_failed_raw": 360,
-      "clean_head_failed_raw": 344,
-      "differing_node_ids_count": 16,
-      "spot_checked_count": 5,
-      "spot_check_result": "all 5 spot-checked differing nodes failed identically on a fully clean tree with zero diff present, falsifying attribution of the delta to this repair; nodes are self-referential frozen-since-old-commit governance tests unrelated to HPAC plus a CLI-subprocess-timeout test, classified as full-suite run-to-run noise"
-    },
-    "fast_green_tooling_debt": "carried forward per .3.2/.3.2.1 finding that commit-subject-only phase baseline resolution may collapse baseline and candidate; not repaired this phase; explicit working-tree A/B comparison used instead",
-    "xdist_historical_debt": "carried forward, not repaired; not blocking for this bounded phase",
+    "fresh_independent_suite_3_2_2_1": "29 passed",
+    "focused_repair_suite_3_2_2_rerun": "28 passed (independently re-run, not merely cited)",
+    "hpac_regression_family": "80 passed (test_hpac_lifecycle.py, test_hpac_principal_registry.py, test_hpac_authentication_proof.py, test_hpac_authority_consumption.py, test_hpac_approval_presentation.py, test_hpac_authenticator_deterministic.py) -- genesis, predecessor, fork, principal-provenance, proof-writer-provenance all unchanged",
+    "fixed_sha_hpac_family_comparison": "baseline 9cbdc45b (pre-.3.2.2): 47 failed / 303 passed across 15 files; candidate 6cd753c6 (post-.3.2.2): 51 failed / 327 passed across 16 files; exact diff: 4 candidate-only failing nodes, 0 baseline-only failing nodes, all 4 confirmed as the expected .3.2.1 blocking_reproduction flips",
+    "broader_keyword_corroboration": "54 failed / 1027 passed / 1 skipped / 1 xfailed across ~1082 keyword-selected nodes (hpac|approval_presentation|human_principal|human_authenticator|lifecycle); all 54 failures belong to pre-existing historical contract-freeze-era families unrelated to Finding P/C",
+    "production_consumer_inventory": "zero references to any HPAC module outside the five HPAC-family core modules; runtime_authority.py, runtime_dispatch_permission.py, permission_broker_foundation.py contain zero HPAC references (grep-confirmed)",
+    "static_runtime_pb_boundary": "zero PB, runtime authority, dispatch permission, Gate-5, Gate-9 production, or Gate-10 consumers; Gate-9 remains inert",
+    "fast_green": "fixed-SHA narrow HPAC-family comparison used in place of the full noisy pytest -m fast_green run (which .3.2.2's own report found non-reproducible run-to-run for reasons unrelated to any HPAC diff); see fixed_sha_hpac_family_comparison",
+    "fast_green_tooling_debt": "carried forward per .3.2/.3.2.1/.3.2.2 finding; not invoked in this phase's methodology (explicit git-worktree SHAs used, not baseline inference), so it did not block verification and was not repaired",
+    "xdist_historical_debt": "carried forward, not encountered (single-worker runs only), not repaired",
     "report_notification_tests": "not directly applicable; notification implementation unchanged",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
   "validation_results": {
-    "focused_repair_suite_3_2_2": "28 passed",
-    "full_hpac_family": "267 passed, 11 explained non-passes (see test_results)",
-    "b3_b4_contract_storage": "44 passed",
-    "fast_green": "0 failed (passed) on deselected clean comparison basis; raw full-suite delta investigated and attributed to pre-existing noise, not this repair",
+    "fresh_independent_suite_3_2_2_1": "29 passed",
+    "focused_repair_suite_3_2_2_rerun": "28 passed",
+    "hpac_regression_family": "80 passed",
+    "fixed_sha_hpac_family_comparison": "4 candidate-only failures, 0 unexplained (see test_results)",
     "runtime_boundary": "Observed / observe / unavailable; zero Runtime Enforcement, Shell Gate, subprocess, provider/network, credential, hardware, or external-effect calls",
-    "findings_disposition": "Finding P (protected-presentation attestation schema): REPAIRED -- independent verification pending -- not closed. Finding C (canonical-store containment): REPAIRED -- independent verification pending -- not closed. Principal provenance and proof-writer provenance: REMAIN INDEPENDENTLY CLOSED.",
+    "findings_disposition": "Finding P (protected-presentation attestation schema): CLOSED. Finding C (canonical-store containment): CLOSED. Principal provenance and proof-writer provenance: REMAIN INDEPENDENTLY CLOSED.",
     "report_notification_tests": "not directly applicable; notification implementation unchanged",
     "bootstrap_session_reporting_tests": "pcae status coherence, health, and check passed; session continuity verified"
   },
@@ -56,45 +49,38 @@
   },
   "notification_dispatch_result": "pending_phase_complete",
   "report_consistency": "canonical report trust and derived-correctness checks passed at staging; final reconciliation performed at pcae phase complete promotion",
-  "no_go_confirmation": "No Layer 3 mechanism-neutral production verifier or resolver.\nNo normative contract modification (HPAC-001, RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001, POL-005 all untouched).\nNo historical .3, .3.1, or .3.2 artifact rewrite.\nNo Permission Broker integration.\nNo Runtime Enforcement or Shell Gate activation.\nNo B1, B7, N1, or N2 production repair.\nNo real FIDO2, WebAuthn, CTAP, enrollment, credential operation, protected approval UI, approval CLI, or enrollment CLI.\nNo provider, network, subprocess, hardware, or external runtime effect.\nNo Gate-9 production wiring, Gate-10 dispatch, or RuntimeInvocationApproval/PB/runtime-dispatch consumption.\nNo release, deployment, or unrelated research/article work.\nNo revert, force push, history rewrite, or hook bypass.\nNo delegated agent was granted commit, phase-finalization, or push authority (the implementation fork made file edits only; all pcae task/commit/push/phase-complete commands were run by the primary operator).\nNo next phase was started automatically.",
+  "no_go_confirmation": "No Layer 3 mechanism-neutral production verifier or resolver.\nNo normative contract modification (HPAC-001, RIHAC-001, RIASC-001, PBRD-001, RDGO-001, RPAC-001, POL-005 all untouched).\nNo historical .3, .3.1, .3.2, .3.2.1, or .3.2.2 artifact rewrite.\nNo Permission Broker integration.\nNo Runtime Enforcement or Shell Gate activation.\nNo B1, B7, N1, or N2 production repair.\nNo real FIDO2, WebAuthn, CTAP, enrollment, credential operation, protected approval UI, approval CLI, or enrollment CLI.\nNo provider, network, subprocess, hardware, or external runtime effect.\nNo Gate-9 production wiring, Gate-10 dispatch, or RuntimeInvocationApproval/PB/runtime-dispatch consumption.\nNo repair applied to .3.2.2's implementation in this phase (verification-only).\nNo release, deployment, or unrelated research/article work.\nNo revert, force push, history rewrite, or hook bypass.\nNo delegated agent was granted commit, phase-finalization, or push authority.\nNo next phase was started automatically; no next-phase ID invented where canonical state discloses none.",
   "files_changed": [
-    ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_2_HPAC_CANONICAL_STORE_CONTAINMENT_AND_PROTECTED_PRESENTATION_ATTESTATION_SCHEMA_BLOCKING_REPAIR.md",
-    "src/pcae/core/approval_presentation.py",
-    "src/pcae/core/approval_presentation_deterministic.py",
-    "src/pcae/core/hpac_foundation.py",
-    "src/pcae/core/hpac_lifecycle.py",
-    "src/pcae/core/runtime_invocation_authority_consumption.py",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_3_2_2_1_INDEPENDENT_VERIFICATION_HPAC_CANONICAL_STORE_CONTAINMENT_AND_PROTECTED_PRESENTATION_ATTESTATION_SCHEMA_REPAIR.md",
     "tasks/DONE.md",
     "tasks/active/20260828-1203-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-2.md",
-    "tasks/done/20260828-1123-idle-awaiting-human-authorization-post-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-1.md",
-    "tasks/done/20260828-1202-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-2-hpac-canonical-store-containment-and-protected-presentation-attestation-schema-blocking-repair.md",
-    "tests/test_hpac_canonical_containment_and_attestation_schema_repair_3w1r2b1r111r322.py"
+    "tasks/active/20260828-1315-idle-awaiting-human-authorization-post-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-2-1.md",
+    "tasks/done/20260828-1310-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-3-2-2-1-independent-verification-of-hpac-canonical-store-containment-and-protected-presentation-attestation-schema-repair.md",
+    "tests/test_hpac_canonical_containment_attestation_schema_independent_verification_3w1r2b1r111r3221.py"
   ],
-  "files_changed_count": 14,
+  "files_changed_count": 7,
   "phase_commits": [
     {
-      "hash": "3dbb8077c05d02d1eafeef279998e41a5411489a",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: repair HPAC canonical-store containment and protected-presentation attestation schema"
+      "hash": "888be35c15493e5ba515985c301531bbedffe51f",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1: independently verify HPAC canonical-store containment and protected-presentation attestation-schema repair"
     },
     {
-      "hash": "ea18b5ed380ce43ca2b1436c351c37eadd107e03",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: sync project status and changelog"
+      "hash": "72582d82fa6ba45be97cab6aff630de4578db9ff",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1: sync project status and changelog"
     },
     {
-      "hash": "2d20971e8dc91949279020e9808452b2dfaa0e9f",
-      "subject": "Transition to idle after Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2"
+      "hash": "dacea3fec879c453b4cf159e9e74c700ea452834",
+      "subject": "Transition to idle after Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1"
     },
     {
-      "hash": "93f120c99ed2efd6d86ea5cd4d49438b7e814ece",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2: remove stale active-task file after transition to idle"
+      "hash": "7a03d166d3c1ed298ff90b15df7d3328bf6e21a2",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1: remove stale active-task file after transition to idle"
     }
   ],
-  "origin_main_head": "5ead7e515b33c80d0c661426ac13f89f6e4c92a6",
+  "origin_main_head": "6cd753c6192c8ee27372013ed49a659b2dafe23c",
   "origin_main_head_count": 0,
-  "pushed_status": "pushed",
-  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.2.1 — Independent Verification of HPAC Canonical-Store Containment and Protected-Presentation Attestation-Schema Repair. New human authorization required; do not begin Layer 3."
+  "pushed_status": "pending",
+  "recommended_next_phase": "No authoritative next-phase ID/title disclosed by canonical project state at this phase's entry. Explicit human authorization and the canonical next-phase ID/title from the authoritative eight-layer plan are required before any Layer 3 work begins."
 }
