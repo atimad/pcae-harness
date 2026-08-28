@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2: AuthenticatedHumanPrincipal Trusted-Construction and Provenance Blocking Repair to Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.2; session refreshed and governance continuity revalidated.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.5.2** repairs `.1R.5.1`'s BLOCKING F1
   finding: `AuthenticatedHumanPrincipal`'s HPAC-REQ-056 trusted-construction
   seal was enforced only in `__init__`, so `object.__new__` bypassed it
