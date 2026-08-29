@@ -924,7 +924,15 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         for imported in _module_imports(path):
             if imported in module_names:
                 consumers.append((path.name, imported))
-    assert consumers == []
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: the `.1R.10`
+    # authorized Gate-5 coordinator (`runtime_dispatch_gate5.py`, `.1R.9`
+    # §6.2 row 23 / §16.1 slice 1) imports `hpac_lifecycle` for its
+    # read-only `resolve_gate5_binding_event` resolver + the
+    # `STATE_PROOF_VERIFIED_AND_BOUND` constant only -- no writer, no gate
+    # wiring, no PB/Gate-9 consumption (`.1R.11`-verified).
+    assert sorted(consumers) == [
+        ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
+    ]
 
 
 def test_foundation_implements_no_real_auth_ui_network_hardware_or_process_path():

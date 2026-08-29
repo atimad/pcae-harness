@@ -765,7 +765,18 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
                 for alias in node.names:
                     if alias.name in new_modules:
                         consumers.append((path.name, alias.name))
-    assert consumers == []
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: the `.1R.10`
+    # authorized Gate-5 approval-validation coordinator
+    # (`runtime_dispatch_gate5.py`, `.1R.9` §6.2 row 23 / §16.1 slice 1)
+    # imports `hpac_lifecycle` for the read-only, provenance-checked
+    # `resolve_gate5_binding_event` resolver and the
+    # `STATE_PROOF_VERIFIED_AND_BOUND` constant only -- no writer capability,
+    # no consumption primitive, no PB. Independently re-derived and
+    # re-confirmed by `.1R.11` (`test_coordinator_is_the_only_authorized_new_
+    # consumer_and_is_bounded`).
+    assert sorted(consumers) == [
+        ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
+    ]
 
 
 def test_gate9_module_has_no_pb_runtime_dispatch_or_external_effect_imports():

@@ -707,10 +707,20 @@ def test_isolation_only_three_production_files_changed_since_baseline():
         ["git", "diff", "--name-only", PRE_1R7_BASELINE, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout.split()
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline (`.1R.9` §29 /
+    # prompt §29): `.1R.10` added the authorized Gate-5 approval-validation
+    # coordinator (`runtime_dispatch_gate5.py`, new) plus a +21-line
+    # read-only accessor in `runtime_authority.py` and a +27-line read-only
+    # resolver in `hpac_lifecycle.py` (`.1R.9` §6.2 row 23 / §16.1 slice 1).
+    # `.1R.11` independently re-derived that this is the exact authorized
+    # slice, introduces no PB / Gate-9 / runtime path, and leaves the
+    # NON-REAL hard stop and every B1/B7/N1/N2/F1 property intact.
     assert set(changed) == {
         "src/pcae/core/hpac_verifier.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_permission.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+        "src/pcae/core/hpac_lifecycle.py",
     }
 
 
@@ -736,9 +746,23 @@ def test_isolation_no_gate_coordinator_or_gate9_consumption_wiring():
             for node in ast.walk(tree):
                 if isinstance(node, (ast.Import, ast.ImportFrom)) and "hpac_verifier" in ast.dump(node):
                     hpac_consumers.add(rel)
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: `.1R.10` added the
+    # authorized Gate-5 coordinator. It reads `ValidatedAuthorityProjection`
+    # only through `runtime_authority.trusted_projection_gate5_binding`
+    # (gated on `is_trusted_validated_authority_projection`) and imports the
+    # `hpac_verifier` public predicate `is_verifier_authenticated_principal`
+    # only. `gate9_callers` stays empty -- the coordinator calls no Gate-9
+    # atomic-consumption primitive (`.1R.11`-verified; `.1R.12`+ is the PB
+    # slice, Gate 9 remains frozen).
     assert gate9_callers == set()
-    assert projection_consumers == {"src/pcae/core/runtime_dispatch_permission.py"}
-    assert hpac_consumers == {"src/pcae/core/runtime_authority.py"}
+    assert projection_consumers == {
+        "src/pcae/core/runtime_dispatch_permission.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+    }
+    assert hpac_consumers == {
+        "src/pcae/core/runtime_authority.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+    }
 
 
 def test_isolation_repaired_modules_import_nothing_effectful():

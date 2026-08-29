@@ -800,7 +800,14 @@ def test_hpac_repair_has_zero_preexisting_production_consumers():
                 consumers.append((path.name, node.module))
             elif isinstance(node, ast.Import):
                 consumers.extend((path.name, alias.name) for alias in node.names if alias.name in modules)
-    assert consumers == []
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: the `.1R.10`
+    # authorized Gate-5 coordinator (`runtime_dispatch_gate5.py`, `.1R.9`
+    # §6.2 row 23 / §16.1 slice 1) reads `hpac_lifecycle`'s read-only
+    # `resolve_gate5_binding_event` + `STATE_PROOF_VERIFIED_AND_BOUND` only.
+    # No writer, no consumption, no PB/Gate-9 path (`.1R.11`-verified).
+    assert sorted(consumers) == [
+        ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
+    ]
 
 
 def test_no_real_mechanism_ui_hardware_network_or_process_implementation_added():

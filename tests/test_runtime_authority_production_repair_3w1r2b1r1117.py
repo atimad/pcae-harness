@@ -576,10 +576,19 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         capture_output=True,
         text=True,
     ).stdout.splitlines()
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline (`.1R.9` §29):
+    # `.1R.10` added the authorized Gate-5 approval-validation coordinator
+    # (`runtime_dispatch_gate5.py`) plus read-only hooks in
+    # `runtime_authority.py` (+21) and `hpac_lifecycle.py` (+27) -- `.1R.9`
+    # §6.2 row 23 / §16.1 slice 1. `.1R.11` independently confirmed the
+    # slice touches exactly these five files and introduces no PB / Gate-9 /
+    # runtime path.
     assert set(changed) == {
         "src/pcae/core/hpac_verifier.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_permission.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+        "src/pcae/core/hpac_lifecycle.py",
     }
 
 
@@ -645,8 +654,20 @@ def test_consumer_inventory_is_bounded_and_gate9_stays_unwired():
             and path.name != "runtime_invocation_authority_consumption.py"
         ):
             gate9_consumers.add(relative)
-    assert hpac_consumers == {"src/pcae/core/runtime_authority.py"}
-    assert projection_consumers == {"src/pcae/core/runtime_dispatch_permission.py"}
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: `.1R.10`'s
+    # authorized Gate-5 coordinator consumes the `hpac_verifier` public
+    # predicate and `ValidatedAuthorityProjection` (via the gated
+    # `trusted_projection_gate5_binding` accessor) only. `gate9_consumers`
+    # stays empty -- no Gate-9 atomic-consumption wiring
+    # (`.1R.11`-verified; Gate 9 frozen per `.1R.9`).
+    assert hpac_consumers == {
+        "src/pcae/core/runtime_authority.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+    }
+    assert projection_consumers == {
+        "src/pcae/core/runtime_dispatch_permission.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+    }
     assert gate9_consumers == set()
 
 
