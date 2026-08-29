@@ -77,7 +77,7 @@
    "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11: close task, transition to idle"
   }
  ],
- "origin_main_head": "be6ef3387cc7da1c1c89ec5af9db598511369aa6",
+ "origin_main_head": "fcaae811448ee95049fa0c8172e295b8c56a4a01",
  "origin_main_head_count": 0,
  "pushed_status": "nothing_to_push",
  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.12 -- Gate-6 Permission Broker Production Consumption Integration Implementation (.1R.9 section 16.1 slice 2 / section 16.2). Scope: wire a real runtime_dispatch PermissionBrokerRequest carrying the Gate-5 validated projection (PBRD-001 section 7 human_authority_binding, section 14) through the current PB evaluator; preserve DENY over HUMAN_REVIEW over ALLOW; POL-005 still DENYs simulation_only=False; no PB policy/evaluator change; no POL-005 change. Requires its own separate explicit human authorization to begin. .1R.13 (Independent Verification of Gate-6) and .1R.14/.1R.15 (Gate-9 Atomic Authority Consumption Coordinator Integration + Verification, .1R.14 blocked until the Gate-7/Gate-8 chapters exist or an explicit test-path-first scope is human-authorized) remain frozen. Gate 7 and Gate 8 chapters have no invented ID. Recommended (not a prerequisite): reconcile findings V-2/V-3 -- RDGO-001 section 4/6 vs the verified HPAC-REQ-054 step-10 sequence-3 create -- in the .1R.12 planning phase's contract-review section or a dedicated contract-clarification task."
