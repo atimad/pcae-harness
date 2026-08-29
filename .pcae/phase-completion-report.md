@@ -1,178 +1,203 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.10 Complete — Gate-5 Approval-Validation Coordinator Integration Implementation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 Complete — Independent Verification of the Gate-5 Approval-Validation Coordinator Integration
 
-Status: completed. **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT
-CLOSED.** Implemented only the RDGO-001 v3.0 §6 Gate-5 integration frozen by
-`.1R.9` §16.1 slice 1 / §16.2. No Gate-6 Permission Broker production
-consumption. No Gate-7 / Gate-8. No Gate-9 consumption. No Gate-10. No
-runtime execution. No real FIDO2 / WebAuthn / CTAP / protected UI / ceremony.
-No normative contract modified. Runtime remains
-`not_implemented / Observed / observe / unavailable`.
+Status: completed. **VERIFIED WITH NON-BLOCKING FINDINGS — GATE-5
+APPROVAL-VALIDATION COORDINATOR INTEGRATION COMPLETE.** Independent
+verification of `.1R.10`. No production source changed
+(`git diff --name-only 54278f2a HEAD -- src` is empty). No `.1R.12` begun.
+No Gate-6 Permission Broker production consumption integration. No Gate-7 /
+Gate-8. No Gate-9 consumption. No Gate-10. No runtime execution. No real
+FIDO2 / WebAuthn / CTAP / protected UI / ceremony. No normative contract
+modified. Runtime remains `not_implemented / Observed / observe /
+unavailable`.
 
-Phase-entry commit: `1810c8d8` (governed task-transition; no `src/pcae`
-change since the `.1R.9` push before it).
+Verification-entry SHA: `54278f2a76c20f9b7a6f09eec44a050e0dd4c9cf`.
+Immutable pre-`.1R.10` baseline: `b504670e` / `1810c8d8` (`src/pcae`
+identical).
 
-Canonical implementation evidence:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_10_GATE_5_APPROVAL_VALIDATION_COORDINATOR_INTEGRATION_IMPLEMENTATION.md`.
+Canonical verification evidence:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_11_INDEPENDENT_VERIFICATION_GATE5_APPROVAL_VALIDATION_COORDINATOR_INTEGRATION.md`.
 
-## Outcome
+## Method
 
-New `src/pcae/core/runtime_dispatch_gate5.py` — the **Option C (layered)**
-Gate-5 approval-validation coordinator (`run_gate5`), the single owner of
-"Gate 5 ran". It sequences the already-independently-verified sub-checks in
-RIHAC-001 v2.0 §16 order and owns the fail-closed envelope, duplicating no
-authority semantics:
+RE-DERIVE, DO NOT TRUST. Every Gate-5 requirement was re-derived from
+RDGO-001 v3.0 §4/§6, RIHAC-001 v2.0 §16, HPAC-001 v2.0 HPAC-REQ-054/097,
+RIASC-001 v3.0, PBRD-001 v2.0, POL-005, the `.1R.9` planning document, and
+current production source — not trusted from the `.1R.10` report, the
+`.1R.10` tests, function or type names, aggregate pass counts, a lifecycle
+label, non-serializability, or a current snapshot. `run_gate5`'s layered
+flow was reconstructed from AST and source, not the `.1R.10` diagram. 39
+fresh independent tests
+(`tests/test_gate5_approval_validation_coordinator_integration_independent_verification_3w1r2b1r1_1r11.py`)
+that do not import the `.1R.10` suite.
 
-- approval validation (RIASC-001 shape/version, record digest, producer/human
-  provenance, repository/task/phase/session binding, invocation + exact
-  target, prompt hash, capability/scope/adapter descriptor, seven freshness
-  conditions, expiry vs trusted clock, prior consumption, RIHAC-001 §16
-  steps 1-12) → `runtime_authority.validate_approval`;
-- principal provenance + the complete HPAC-REQ-054 reverification (incl.
-  Step-4 independent challenge-digest recomputation, credential currentness,
-  proof/challenge/presentation freshness, §40 lifecycle chain) → the
-  mechanism-neutral HPAC verifier via `validate_approval`'s mandatory
-  `reverify_authenticated_principal` call; plus `run_gate5`'s upfront
-  `is_verifier_authenticated_principal` precheck;
-- HPAC lifecycle sequence-3 `PROOF_VERIFIED_AND_BOUND` (HPAC-REQ-097)
-  → **confirmed** via the new read-only
-  `HPACLifecycleStore.resolve_gate5_binding_event` (canonical,
-  provenance-checked chain resolution; exact approval/invocation/principal
-  binding compare; event-digest self-check).
+## `.1R.10` range (re-reconstructed from immutable SHAs)
 
-Output: the existing ephemeral `ValidatedAuthorityProjection` plus an
-identity-only, non-serializable (`__reduce__` raises), constructor-sealed,
-process-local-registry-provenanced `Gate5Result` — never a boolean, bearer
-token, or caller-copyable `validated=true` seal. `run_gate5` **consumes
-nothing** (approval bytes unchanged, no `consumption.json` anywhere, no
-Gate-9 primitive called) and is idempotently repeatable.
+All production weight is in `0924e584` (`runtime_dispatch_gate5.py` new,
+`runtime_authority.py` +21 read-only accessor, `hpac_lifecycle.py` +27
+read-only resolver). `1810c8d8` / `95340815` are task-lifecycle only;
+`abab3475` is docs only; `076b7c8c`/`3af7faa3`/`ced98ea9`/`54278f2a` are
+governed finalization only. `git diff --name-only 1810c8d8 HEAD -- src/pcae`
+= exactly the three files.
 
-## NON-REAL hard stop — inherited, not re-implemented
+## Gate-5 adjudication — CLOSED (at the coordinator-integration boundary, with non-blocking findings)
 
-`run_gate5` invokes `validate_approval` and inherits its assurance-gated
-hard stop at line ~1093
-(`non_real_authenticated_principal_cannot_validate_production_approval`); it
-does not re-implement, relocate, or make it conditional. No production
-assurance writer exists (`HPACStoreAuthority.writer`), so the fully wired
-coordinator returns fail-closed in production for every real request. A
-complete deterministic local HPAC chain — canonical principal, presentation,
-proof, `UP=UV=true`, verifier provenance, canonical approval, exact
-invocation binding — still fails Gate-5 eligibility and never reaches a
-`Gate5Result`, PB request, or Gate-9 consumption:
+Independent evidence: Option-C layering matches `.1R.9` §6 / RIHAC-001 §16
+order (`run_gate5` delegates to `validate_approval` and to
+`reverify_authenticated_principal` reached inside it; re-implements none of
+the twelve-step logic, the NON-REAL hard stop, or a lifecycle writer call —
+AST-checked); the revalidation matrix rows 1–23 are re-resolved at run time
+with none merely inherited (proven load-bearing by post-authentication
+credential revocation); HPAC-REQ-054 Step 4 is enforced through the Gate-5
+path (a fully self-consistent substituted challenge yields no verifier
+principal); the strongest deterministic path still returns `(None,
+non_real_authenticated_principal_cannot_validate_production_approval)` with
+no `Gate5Result`; NON_REAL leaves no `Gate5Result`, no PB request, no
+Gate-9 eligibility, no `consumption.json`, no Gate-10 effect; `Gate5Result`
+is not transferable authority (`_seal` guard + `is_gate5_result`
+identity-registry membership; `__reduce__`/`__eq__`/`__init_subclass__`;
+forgery / copy / deepcopy / field reconstruction / `object.__new__` all
+rejected); a valid canonical sequence-3 event alone does not substitute for
+Gate-5 validation; Gate 5 consumes nothing and repeated Gate 5 is
+idempotently non-forking; late failure leaves no partial authority; no
+downstream gate (6/7/8/9) or external effect (10) was introduced.
 
-```text
-NON_REAL Gate-5 candidate -> REJECTED at validate_approval:1093
-  -> no Gate5Result -> no projection consumed downstream -> no PB request
-  -> no Gate-9 eligibility -> no consumption.json
-```
+"CLOSED at the coordinator-integration boundary" does **not** mean real
+FIDO2, protected UI, PB production consumption, Gate-7/Gate-8 chapters,
+Gate-9 consumption, runtime capability, or execution.
 
-## Production files changed (against `.1R.9` §25)
+## Sequence-3 adjudication — PROOF_VERIFIED_AND_BOUND SUPPORT — CLOSED
 
-`git diff --name-only 1810c8d8 HEAD -- src/pcae` = exactly:
+Correct authoritative writer (`bind_gate5` under the `_BOUND_WRITER_ROLE`
+writer-capability gate); canonical provenance via `resolve_canonical_chain`
+under the protected root; exact predecessor `PROOF_VERIFIED →
+PROOF_VERIFIED_AND_BOUND` enforced; Gate-5 confirmation semantics (read-only
+re-resolve + `approval_id`/`invocation_id`/`principal_id` binding compare +
+event-digest self-check); no lifecycle-as-bearer-authority (event present,
+still `(None, NON_REAL)` — HPAC-REQ-097 §40.2).
 
-- `src/pcae/core/runtime_dispatch_gate5.py` **(new)** — the coordinator.
-  Imports only `hpac_lifecycle`, `runtime_authority`, and (lazily)
-  `hpac_verifier.is_verifier_authenticated_principal`. AST-verified to import
-  nothing effectful (no subprocess/socket/http/fido2/webauthn/ctap/…).
-- `src/pcae/core/runtime_authority.py` **(+21 lines)** — new read-only
-  `trusted_projection_gate5_binding(value)` gated on
-  `is_trusted_validated_authority_projection`. No change to the twelve-step
-  logic, the NON-REAL hard stop, the projection trust predicate,
-  `ValidatedAuthorityProjection`, or `create_runtime_invocation_approval`.
-- `src/pcae/core/hpac_lifecycle.py` **(+27 lines)** — new read-only
-  `HPACLifecycleStore.resolve_gate5_binding_event(proof_id)`. No schema,
-  genesis, transition-table, `bind_gate5`, or `*_canonical` change.
+## IF-1 adjudication — CONFIRMED NON-BLOCKING ARCHITECTURAL OBSERVATION
 
-Narrower than `.1R.9` §25 anticipated: `runtime_dispatch_permission.py` is
-**not** touched (that is `.1R.12`), and the coordinator *confirms*
-sequence-3 rather than performing a duplicate write (finding IF-1).
+`git blame`: `bind_gate5` / `bind_gate5_canonical` from `.1R.3`; the
+verifier's HPAC-REQ-054 **step 10** `bind_gate5_canonical` call from `.1R.5`
+(`d502fc5c`), verified `.1R.5.2.1`; `hpac_verifier.py` byte-unchanged since
+the pre-`.1R.10` baseline. `verify_human_authentication` has no direct
+production caller — reached only via `reverify_authenticated_principal` from
+`create_runtime_invocation_approval` (Gate 3) and `validate_approval`
+(Gate 5) — so the sequence-3 event is created at Gate-3 / approval-creation
+time over the `approval_subject_digest`, and Gate 5 **confirms** it. Every
+trust property RDGO-001 §6 substantively requires holds (not bearer
+authority; bound to exact approval/invocation/principal; consumes nothing;
+idempotent same-binding; cross-binding fails closed; more restrictive not
+less). Not a contract contradiction; no `.1R.9` §13.7 STOP was owed because
+no inter-contract contradiction exists and no trust property is lost.
 
-## Finding IF-1 — sequence-3 write is already wired through the verifier
+## New non-blocking findings
 
-`.1R.9` §13.3 stated `validate_approval` "does not touch `hpac_lifecycle`".
-Primary source shows it does transitively:
-`validate_approval → reverify_authenticated_principal →
-verify_human_authentication`, whose **HPAC-REQ-054 step 10** already
-performs the atomic `bind_gate5_canonical` create (or same-binding-idempotent
-accept, raising on cross-binding), wired since `.1R.5` and verified by
-`.1R.5.2.1`. This step is assurance-independent by contract design; a
-persisted lifecycle event is not authority (HPAC-REQ-097 §40.2, governing
-prompt §22). Disposition: **not a contract contradiction, no STOP, no
-architecture redesign** — the coordinator owns sequence-3 by **confirmation
-+ binding compare + digest capture into the ephemeral result**, not a
-duplicate write, and never holds a lifecycle writer capability. On the
-production-unreachable NON-REAL path the verifier's step-10 event may exist
-from reverification, but `run_gate5` produces no `Gate5Result` and takes no
-sequence-3 action (governing prompt §9 satisfied at the coordinator
-boundary). The pre-existing ordering (NON-REAL stop after reverification
-within one `validate_approval` call, since `.1R.7`) is unchanged; the
-coordinator-owned authority-bearing act occurs strictly after the NON-REAL
-gate.
+- **V-1** — `.1R.10` §14.2 regression attribution **undercounts** the
+  attributable meta-guard failures: the true candidate-only nonpassing set
+  is 7 left-red + 4 updated, not the enumerated 4 + 4. The 3 undisclosed
+  guards — `test_new_hpac_modules_have_zero_preexisting_production_consumers`
+  (`.3.2.2.1`), `test_hpac_repair_has_zero_preexisting_production_consumers`
+  (`.3.2.2.2`), `test_foundation_has_no_production_consumers_or_gate_wiring`
+  (`.3.2.2.2.1`) — are the same non-functional consumer-inventory class,
+  tripped solely because `runtime_dispatch_gate5` imports `hpac_lifecycle`
+  for the read-only `resolve_gate5_binding_event` resolver and the
+  `STATE_PROOF_VERIFIED_AND_BOUND` constant. Corrected and re-baselined
+  here. `UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0` still holds.
+- **V-2** — RDGO-001 §4/§6's literal "**Gate 5, not gate 3, creates** the
+  final `PROOF_VERIFIED_AND_BOUND` event **over the completed approval
+  digest**" is not satisfied: the create is at Gate-3 / step-10 over the
+  *subject* digest, and Gate 5 confirms. Non-blocking contract-alignment
+  debt; recommend reconciliation in the `.1R.12` planning phase's
+  contract-review section (not a prerequisite).
+- **V-3** — the completed RIASC `record_digest` is not bound into or
+  checked against the sequence-3 event (subsumed by V-2;
+  `validate_approval` step 4 checks it via the projection, and `run_gate5`
+  binds the projection to the event by `approval_id`).
 
-## Regression attribution (fixed baseline `1810c8d8`, `git stash -u` A/B)
+No contract blocker.
 
-- **Targeted functional suites** (Gate-5 coordinator + HPAC verifier /
-  lifecycle + runtime-authority + B1/B7/N1/N2 + authority-consumption,
-  6 pre-existing historical/isolation nodes deselected): **358 passed, 0
-  failed.** 29 new focused defensive tests, rejection-only + structural
-  (no positive Gate-5 success is manufacturable under the permanent NON-REAL
-  mechanism — `.1R.9` §41; no authority is manufactured for a positive test).
-- **fast_green marker (`-n auto`):** baseline 344 failed / 8813 passed;
-  candidate 359 failed / 8798 passed. **Net +15 attributable failures, 0 of
-  them functional**: all are point-in-time isolation / consumer-inventory /
-  "no src changed since phase X" snapshot guards from earlier phases that
-  any authorized `src/pcae` change trips. Of the 15: 4 general/`.1R.5.x`
-  hpac_verifier-consumer audits were **updated** to include the authorized
-  second consumer `runtime_dispatch_gate5.py` (still enforcing "only these
-  audited consumers"); 4 `.1R.7`/`.1R.8` file-count / no-coordinator
-  snapshots were **left unmodified** per `.1R.9` §29 / governing prompt §29
-  and are re-baselined by `.1R.11`; ~7 are unrelated cross-phase
-  (HATP/HMIC/HMRC/deployment/class-B) "no src touched" guards.
-- **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.** B1/B7/N1/N2 and
-  F1 functional closure intact. `hpac_verifier.py` not modified.
-  `hpac_lifecycle.py` transition table / genesis / fork rejection unchanged.
-- 344 pre-existing fast_green failures unchanged (the "23 pre-existing
-  historical/contradiction-documentation" class carried by `.1R.8` §26,
-  plus unrelated subsystems).
+## `.1R.7` / `.1R.8` / `.3.2.2.x` isolation re-baselining (`.1R.9` §29)
 
-## Findings adjudication
+Seven point-in-time meta-guards re-baselined, each with the full 5-step
+protocol (old snapshot shown, new observed consumer shown, traced to `.1R.9`
+§6.2 row 23 / §16.1 slice 1, proven to introduce no unauthorized PB /
+Gate-9 / runtime path, then the expectation updated — not the guard
+weakened):
 
-- **O1–O4** carried unchanged; none a prerequisite; none repaired; none
-  worsened.
-- **F2 / HPAC-REQ-054 Step 4:** REPAIRED, confirmed a **satisfied
-  prerequisite**, now **load-bearing** — `run_gate5` routes through
-  `reverify_authenticated_principal` and does not bypass Step 4; a
-  self-consistent substituted challenge is rejected during verification so
-  no verifier-issued principal exists and the coordinator fails closed.
-- **F3 / F4:** carried, deferred, cosmetic; new tests accurately named.
-- **F7:** carried unchanged, **threat model NOT broadened** — same-account
-  autonomous-agent assumption; `Gate5Result` claims no protection against
-  arbitrary in-process memory mutation; not expanded into process isolation.
-- **HPAC-REQ-054 Step 4** (governing prompt §33): satisfied prerequisite,
-  proven via the substituted-challenge rejection test; `.1R.11` re-derives
-  independently.
+| File | Tests |
+|---|---|
+| `test_b1_b7_n1_n2_..._1r8.py` | `test_isolation_only_three_production_files_changed_since_baseline`, `test_isolation_no_gate_coordinator_or_gate9_consumption_wiring` |
+| `test_runtime_authority_production_repair_3w1r2b1r1117.py` | `test_production_file_allowlist_matches_frozen_phase_matrix`, `test_consumer_inventory_is_bounded_and_gate9_stays_unwired` |
+| `test_hpac_foundation_independent_verification_3w1r2b1r111r31.py` | `test_new_hpac_modules_have_zero_preexisting_production_consumers` |
+| `test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py` | `test_hpac_repair_has_zero_preexisting_production_consumers` |
+| `test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py` | `test_foundation_has_no_production_consumers_or_gate_wiring` |
+
+Every re-baselined guard still asserts `gate9_callers` / `gate9_consumers`
+remain empty and "only these audited consumers, nothing else". The four
+`.1R.5.x` `hpac_verifier`-consumer guards updated by `.1R.10` were
+independently re-confirmed correct.
+
+## Fixed-SHA regression attribution (deterministic — authoritative)
+
+Baseline `1810c8d8` (isolated `git worktree`) vs candidate `HEAD`,
+`python -m pytest -p no:randomly` with an explicit file list (no `xdist`),
+over all 27 `tests/` files referencing the changed modules:
+
+- baseline 45 failed / 872 passed; candidate 44 failed / 940 passed;
+- **candidate-only nonpassing nodes after re-baseline = 0**;
+- base-only = 1 (`test_concurrent_conflicting_successors_have_one_canonical_winner`,
+  an order-sensitive concurrency test that flaked at baseline and passes on
+  the candidate — not a regression);
+- 44 shared failures = the pre-existing contradiction-documentation /
+  cross-contract-freeze-repair class (`.1R.8` §26), byte-identical at both
+  SHAs.
+
+Informational `-m fast_green` marker (`-n auto`, carries the documented
+`xdist` instability): baseline 341 failed / 8816 passed / 9 errors;
+candidate 344 failed / 8813 passed / 9 errors. No functional node
+identified; the deterministic comparison is authoritative.
+
+**UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.
+CANDIDATE-ONLY NONPASSING NODES = 0.**
+
+## Carried findings
+
+- **B1 / B7 / N1 / N2** — independently re-confirmed closed. Gate 5
+  reintroduced no copyable/transferrable authority, public-digest
+  authority, caller approval objects, or caller human/principal strings.
+- **F1** — `AuthenticatedHumanPrincipal` provenance: Gate 5 consumes
+  verifier-owned provenance (`is_verifier_authenticated_principal` — exact
+  identity in `_AUTHENTIC_PRINCIPAL_REGISTRY` **and**
+  `_AUTHENTIC_PRINCIPAL_CONTEXTS`), not type/shape; an `object.__new__`
+  lookalike is rejected.
+- **O1–O4** — carried unchanged; none worsened; none a prerequisite; none
+  incidentally resolved.
+- **F2 / HPAC-REQ-054 Step 4** — independently re-confirmed a satisfied,
+  load-bearing prerequisite.
+- **F3 / F4** — carried, deferred (documentation-labeling / cosmetic).
+- **F7** — carried unchanged; **threat model NOT broadened** —
+  `Gate5Result` ephemerality is not claimed to protect against arbitrary
+  trusted-process memory mutation; process isolation remains a separate,
+  unscheduled, non-prerequisite topic.
 
 ## Contract byte identity
 
-`git diff 1810c8d8 HEAD -- docs/contracts` is empty. RDGO-001 v3.0,
-RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001 v2.0, PBRD-001 v2.0, RPAC-001 v1.0,
-PBPA-001, POL-005 (`permission_broker_foundation.py`) all byte-unchanged.
+`git diff 1810c8d8 HEAD -- docs/contracts` is empty. All 8 pinned SHA-256
+digests (RDGO-001 v3.0, RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001 v2.0,
+PBRD-001 v2.0, RPAC-001 v1.0, PBPA-001, POL-005 /
+`permission_broker_foundation.py`) recomputed and matched.
 
-## No-go confirmations
+## Runtime / no-effect proof
 
-No Gate-6 PB production consumption (no ALLOW/DENY; POL-005 untouched). No
-Gate-7 / Gate-8 activation; no ID invented. No Gate-9 consumption
-(`proof consumption = 0`, `approval consumption = 0`, `consumption records =
-0`). No Gate-10 dispatch, adapter invocation, subprocess, provider/network,
-credential, or hardware access. No runtime capability elevation —
-`runtime_introspection.py` constants unchanged (`Observed / observe /
-unavailable`). No real FIDO2 / WebAuthn / CTAP / physical authenticator /
-attestation / enrollment; no protected UI / trusted display / human
-ceremony. No test-only fixture importable from the new coordinator; no
-production backdoor, no fixture-registry upgrade, no synthetic
-eligible-assurance object. No `.1R.7` / `.1R.8` test weakened. No Dell
-target, third-party system, external account, or external credential
-accessed. No raw git commit/push, `--no-verify`, force push, history
-rewrite, or hook bypass.
+Runtime Enforcement calls = 0 · Shell Gate calls = 0 · runtime subprocess
+calls = 0 · provider/network calls = 0 · credential operations = 0 ·
+hardware operations = 0 · PB production decisions = 0 · Gate-9 consumption
+writes = 0 · Gate-10 effects = 0. `runtime_invocation_authority_consumption`
+has zero production importers repo-wide. Test-infrastructure subprocesses
+disclosed separately: `pytest`, one isolated `git worktree` at `1810c8d8`
+(since removed), read-only `git` history/diff inspection, and the `pcae`
+governance CLI.
 
 ## Governance
 
@@ -180,24 +205,27 @@ rewrite, or hook bypass.
 DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 ```
 
-Preserved unchanged. This phase's finalization, commits, and push were
+Preserved unchanged. This phase's task lifecycle, commits, and push were
 performed by the primary human-authorized operator for
-`149O.20L.7O.3W.1R.2B.1R.1.1R.10`, through the governed `pcae` lifecycle —
+`149O.20L.7O.3W.1R.2B.1R.1.1R.11`, through the governed `pcae` lifecycle —
 no raw git commit/push, no `--no-verify`, no force push, no hook bypass, no
-history rewrite. No delegated worker committed, finalized, or pushed.
+history rewrite, no rollback. No delegated worker committed, finalized, or
+pushed.
 
 ## Disposition and next-phase status
 
 ```text
-GATE-5 APPROVAL-VALIDATION COORDINATOR: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED
-PROOF_VERIFIED_AND_BOUND SEQUENCE-3 SUPPORT: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING
+GATE-5 APPROVAL-VALIDATION COORDINATOR INTEGRATION: INDEPENDENTLY VERIFIED — COMPLETE (VERIFIED WITH NON-BLOCKING FINDINGS)
+PROOF_VERIFIED_AND_BOUND SEQUENCE-3 SUPPORT: CLOSED
+IF-1: CONFIRMED NON-BLOCKING ARCHITECTURAL OBSERVATION
+NEW FINDINGS: V-1 (corrected), V-2, V-3 — all non-blocking
 ```
 
-Gate 5 is **not** independently verified. `.1R.10` is **not** self-closed.
-Recommended next phase: **`149O.20L.7O.3W.1R.2B.1R.1.1R.11` — Independent
-Verification of Gate-5 Approval-Validation Coordinator Integration** —
-which must also re-baseline the `.1R.7`/`.1R.8` isolation snapshots and
-independently confirm IF-1. Do not begin it. `.1R.12` (Gate-6 PB) /
-`.1R.13`, `.1R.14` (Gate-9, blocked) / `.1R.15` remain frozen; Gate 7 and
-Gate 8 chapters have no invented ID. Runtime remains `not_implemented /
-Observed / observe / unavailable`.
+Recommended next phase (requires separate explicit human authorization; do
+not begin): **`149O.20L.7O.3W.1R.2B.1R.1.1R.12` — Gate-6 Permission Broker
+Production Consumption Integration Implementation** (`.1R.9` §16.1 slice 2).
+`.1R.13`, `.1R.14`/`.1R.15` (Gate-9; `.1R.14` blocked) remain frozen. The
+Gate-7 and Gate-8 chapters have no invented ID. Recommended (not a
+prerequisite): reconcile V-2/V-3 in the `.1R.12` planning phase's
+contract-review section. Runtime remains `not_implemented / Observed /
+observe / unavailable`.
