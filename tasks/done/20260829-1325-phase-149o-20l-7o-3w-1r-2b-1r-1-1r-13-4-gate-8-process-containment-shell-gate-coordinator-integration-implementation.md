@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.4: Gate-8 Process Containment (Shell Gate)
 
 ## Status
 
-active
+done
 
 ## Mode
 
