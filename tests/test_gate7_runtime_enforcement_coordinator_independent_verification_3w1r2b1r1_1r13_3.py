@@ -154,10 +154,18 @@ def test_gate7_is_sole_production_owner_of_runtime_enforcement_boundary():
 
 
 def test_no_downstream_production_consumer_of_gate7_result():
+    # .1R.13.4 (V-13-1): Gate 8 (runtime_dispatch_gate8.py) is the sole
+    # authorized downstream production consumer of the Gate-7 result
+    # (is_gate7_result + decision == "ALLOW"); RDGO-001 §9. Phase-aware
+    # invariant: the Gate7Result consumer set is a SUBSET of {gate7 (defines),
+    # gate8 (sole authorized consumer)} — any other consumer still fails.
     hits = set(subprocess.run(
         ["git", "grep", "-l", "-E", r"Gate7Result|is_gate7_result", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
-    assert hits == {"src/pcae/core/runtime_dispatch_gate7.py"}
+    assert hits <= {
+        "src/pcae/core/runtime_dispatch_gate7.py",
+        "src/pcae/core/runtime_dispatch_gate8.py",
+    }, f"unexpected Gate7Result consumer: {sorted(hits)}"
 
 
 def test_gate7_is_the_only_new_gate6_decision_consumer():
@@ -523,10 +531,18 @@ def test_no_gate8_gate9_gate10_symbol_or_effect_import():
 
 
 def test_runtime_introspection_constants_unchanged_since_baseline():
-    out = subprocess.run(
+    # .1R.13.4 (V-13-1): the later authorized Gate-8 phase adds exactly
+    # runtime_dispatch_gate8.py. Phase-aware invariant: the src/pcae change
+    # set since the .1R.13.1 baseline is a SUBSET of {gate7, gate8}, and
+    # runtime_introspection.py in particular is untouched.
+    out = set(subprocess.run(
         ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split()
-    assert out == ["src/pcae/core/runtime_dispatch_gate7.py"]
+        cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
+    assert out <= {
+        "src/pcae/core/runtime_dispatch_gate7.py",
+        "src/pcae/core/runtime_dispatch_gate8.py",
+    }, f"unauthorized production-file expansion since the .1R.13.1 baseline: {sorted(out)}"
+    assert "src/pcae/core/runtime_introspection.py" not in out
 
 
 def test_contracts_and_pol005_bytes_unchanged_since_baseline():

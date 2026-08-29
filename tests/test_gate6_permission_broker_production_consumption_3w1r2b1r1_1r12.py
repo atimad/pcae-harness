@@ -385,10 +385,12 @@ def test_only_expected_production_file_changed_since_baseline():
     # Phase-aware invariant (V-13-1 conversion, .1R.13.2): the .1R.12
     # production weight is runtime_dispatch_permission.py; any later change
     # must be a member of the individually-authorized runtime-dispatch-gate
-    # chain surface (.1R.13.2 adds runtime_dispatch_gate7.py).
+    # chain surface (.1R.13.2 adds runtime_dispatch_gate7.py; .1R.13.4 adds
+    # runtime_dispatch_gate8.py).
     assert set(_git_names("src/pcae")) <= {
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
+        "src/pcae/core/runtime_dispatch_gate8.py",
     }
 
 

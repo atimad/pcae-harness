@@ -592,6 +592,7 @@ def test_no_consumption_json_and_runtime_constants_unchanged(tmp_path, monkeypat
 _AUTHORIZED_POST_1R12_CHAIN_SURFACE = {
     "src/pcae/core/runtime_dispatch_permission.py",  # Gate 6 (.1R.12)
     "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
+    "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
 }
 
 
@@ -642,11 +643,13 @@ def test_known_pre_existing_point_in_time_scope_guard_failures_are_attributable(
       * non-functional (frozen-baseline hygiene assertions),
       * NOT re-triggered or worsened by .1R.13 (which adds no src/ file).
     This test pins that attribution so a future reader is not surprised."""
-    # .1R.13 itself added no src file. The later authorized .1R.13.2 phase
-    # adds exactly runtime_dispatch_gate7.py (Gate 7) — a phase-aware
-    # invariant, not an unbounded expansion (V-13-1 conversion).
+    # .1R.13 itself added no src file. The later authorized .1R.13.2 / .1R.13.4
+    # phases add exactly runtime_dispatch_gate7.py (Gate 7) and
+    # runtime_dispatch_gate8.py (Gate 8) — a phase-aware invariant, not an
+    # unbounded expansion (V-13-1 conversion).
     assert set(_git_names("src/pcae", base=PHASE_1R13_ENTRY, head="HEAD")) <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
+        "src/pcae/core/runtime_dispatch_gate8.py",
     }
     # the guarded tests still exist and still name a frozen past-phase SHA
     t10 = (REPO_ROOT / "tests/test_gate5_approval_validation_coordinator_3w1r2b1r1_1r10.py").read_text()

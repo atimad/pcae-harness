@@ -727,6 +727,7 @@ def test_isolation_only_three_production_files_changed_since_baseline():
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
+        "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
     }
     unexpected = set(changed) - _authorized
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -762,9 +763,10 @@ def test_isolation_no_gate_coordinator_or_gate9_consumption_wiring():
     # only. `gate9_callers` stays empty -- the coordinator calls no Gate-9
     # atomic-consumption primitive (`.1R.11`-verified; `.1R.12`+ is the PB
     # slice, Gate 9 remains frozen).
-    # .1R.13.2 (V-13-1): Gate 7 (runtime_dispatch_gate7.py) re-trusts the
-    # Gate-5 ValidatedAuthorityProjection at its own point of use; it
-    # imports NO hpac_verifier symbol and calls NO Gate-9 primitive.
+    # .1R.13.2 / .1R.13.4 (V-13-1): Gate 7 (runtime_dispatch_gate7.py) and
+    # Gate 8 (runtime_dispatch_gate8.py) re-trust the Gate-5
+    # ValidatedAuthorityProjection at their own point of use; neither imports
+    # a hpac_verifier symbol and neither calls a Gate-9 primitive.
     # Phase-aware invariant: projection consumers subset of the authorized
     # chain; gate9_callers stays empty.
     assert gate9_callers == set()
@@ -772,6 +774,7 @@ def test_isolation_no_gate_coordinator_or_gate9_consumption_wiring():
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
+        "src/pcae/core/runtime_dispatch_gate8.py",
     }, f"unexpected ValidatedAuthorityProjection consumer: {sorted(projection_consumers)}"
     assert hpac_consumers == {
         "src/pcae/core/runtime_authority.py",

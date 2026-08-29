@@ -386,6 +386,8 @@ _AUTHORIZED_RUNTIME_DISPATCH_CHAIN_SURFACE = {
     "src/pcae/core/runtime_dispatch_permission.py",
     # Gate 7 (.1R.13.2) — new coordinator module
     "src/pcae/core/runtime_dispatch_gate7.py",
+    # Gate 8 (.1R.13.4) — new coordinator module
+    "src/pcae/core/runtime_dispatch_gate8.py",
 }
 
 

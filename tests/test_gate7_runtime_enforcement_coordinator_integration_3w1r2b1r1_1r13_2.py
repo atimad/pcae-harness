@@ -642,11 +642,19 @@ def test_runtime_state_unchanged_after_gate7_runs(chain):
 # 10. Production-scope invariant + contract byte identity
 # ═══════════════════════════════════════════════════════════════════════
 def test_production_scope_since_baseline_is_the_single_new_gate7_file():
-    changed = subprocess.run(
+    # .1R.13.4 (V-13-1): the later authorized Gate-8 phase adds exactly
+    # runtime_dispatch_gate8.py. Phase-aware invariant: the src/pcae change
+    # set since the .1R.13.1 baseline is a SUBSET of {gate7, gate8}; gate7
+    # itself must still be present (the .1R.13.2 functional weight).
+    changed = set(subprocess.run(
         ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
-    ).stdout.split()
-    assert set(changed) == {"src/pcae/core/runtime_dispatch_gate7.py"}
+    ).stdout.split())
+    assert "src/pcae/core/runtime_dispatch_gate7.py" in changed
+    assert changed <= {
+        "src/pcae/core/runtime_dispatch_gate7.py",
+        "src/pcae/core/runtime_dispatch_gate8.py",
+    }, f"unauthorized production-file expansion: {sorted(changed)}"
 
 
 def test_contracts_and_pol005_bytes_unchanged_since_baseline():

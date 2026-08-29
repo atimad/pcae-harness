@@ -596,6 +596,7 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
+        "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
     }
     unexpected = set(changed) - _authorized_surface
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -673,15 +674,17 @@ def test_consumer_inventory_is_bounded_and_gate9_stays_unwired():
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
     }
-    # .1R.13.2 (V-13-1): Gate 7 (runtime_dispatch_gate7.py) re-trusts the
-    # Gate-5 ValidatedAuthorityProjection at its own point of use (RDGO-001
-    # §8 item 3; plan §29). Phase-aware invariant: projection consumers must
-    # be a SUBSET of the individually-authorized runtime-dispatch-gate-chain
-    # modules; gate9 consumers stay empty.
+    # .1R.13.2 / .1R.13.4 (V-13-1): Gate 7 (runtime_dispatch_gate7.py) and
+    # Gate 8 (runtime_dispatch_gate8.py) re-trust the Gate-5
+    # ValidatedAuthorityProjection at their own point of use (RDGO-001 §8
+    # item 3 / §9; plan §29). Phase-aware invariant: projection consumers
+    # must be a SUBSET of the individually-authorized
+    # runtime-dispatch-gate-chain modules; gate9 consumers stay empty.
     assert projection_consumers <= {
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
+        "src/pcae/core/runtime_dispatch_gate8.py",
     }, f"unexpected ValidatedAuthorityProjection consumer: {sorted(projection_consumers)}"
     assert gate9_consumers == set()
 

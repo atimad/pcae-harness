@@ -505,6 +505,7 @@ _AUTHORIZED_GATE_CHAIN_SURFACE = {
     "src/pcae/core/hpac_lifecycle.py",
     "src/pcae/core/runtime_dispatch_permission.py",  # Gate 6 (.1R.12)
     "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
+    "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
 }
 
 
