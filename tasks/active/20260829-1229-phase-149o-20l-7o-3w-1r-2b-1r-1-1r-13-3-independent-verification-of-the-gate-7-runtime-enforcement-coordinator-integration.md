@@ -71,7 +71,11 @@ strict
 
 ## Acceptance Criteria
 
-- TBD
+- Gate-7 requirements independently re-derived from RDGO-001 v3.0 §8, PBRD-001 v2.0 §14, POL-005, the RE no-go vocabulary, and .1R.13.1 §4/§6/§7/§10/§13/§24 — not trusted from the .1R.13.2 report or its tests.
+- Dual upstream provenance (Gate6Decision + Gate5Result), DENY/HUMAN_REVIEW anti-escalation, projection re-trust/revalidation, invocation + subject/scope binding, internal runtime-posture resolution, current-posture DENY with RE-NOGO-002, Gate7Result anti-transfer, no-consumption, and Gate-8/9/10 isolation all independently confirmed.
+- V-13-1 ten guard-conversions verified to preserve/strengthen the original security intent; fixed-SHA A/B shows 0 candidate-only unexplained functional nonpassing nodes and 0 attributable regressions.
+- Canonical independent-verification report authored; fresh .1R.13.3 verification suite (62 tests) passing.
+- Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — GATE-7 CLOSED; findings V-13-3-1/2/3 recorded, none blocking.
 
 ## Acceptance Checks
 
