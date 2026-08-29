@@ -31,7 +31,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing O4 hygiene debt); no current-phase error",
-    "pcae_push_check": "nothing_to_push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -71,10 +71,22 @@
     {
       "hash": "f8aa4a8f88e4f235b08728c92ac050710126b9f0",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9: close task, transition to idle"
+    },
+    {
+      "hash": "bda453eee653d53640f30e7be8a1351299e683fe",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9: stage canonical completion metadata and report"
+    },
+    {
+      "hash": "501efe8a7f10e0efd9cbebef3fa5575de4aea696",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9: expand idle-task allowed-file zone for canonical completion authorship"
+    },
+    {
+      "hash": "f5365b22c6eac91aa51ab8ce4563b5f17e21ba70",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9: align completion metadata test-evidence fields to planning-phase schema"
     }
   ],
-  "origin_main_head": "f8aa4a8f88e4f235b08728c92ac050710126b9f0",
+  "origin_main_head": "f5365b22c6eac91aa51ab8ce4563b5f17e21ba70",
   "origin_main_head_count": 0,
-  "pushed_status": "pushed",
+  "pushed_status": "clean",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.10 -- Gate-5 Approval-Validation Coordinator Integration Implementation. Scope: the Gate-5 approval-validation coordinator (Option C, layered) plus the HPAC lifecycle sequence-3 PROOF_VERIFIED_AND_BOUND creation prerequisite, confined to a new runtime_dispatch_gate5.py plus minimal wiring in runtime_authority.py and hpac_lifecycle.py. The NON-REAL hard stop is inherited unchanged. Requires its own separate explicit human authorization to begin; this planning phase grants none. It is followed by 149O.20L.7O.3W.1R.2B.1R.1.1R.11 (Independent Verification of Gate-5 Approval-Validation Coordinator Integration). Also frozen: .1R.12/.1R.13 (Gate-6 Permission Broker Production Consumption Integration + Verification) and .1R.14/.1R.15 (Gate-9 Atomic Authority Consumption Coordinator Integration + Verification, .1R.14 blocked until the Gate-7/Gate-8 chapters exist or an explicit test-path-first scope is human-authorized). Gate 7 and Gate 8 chapters have no invented ID."
 }
