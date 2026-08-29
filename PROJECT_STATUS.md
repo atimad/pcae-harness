@@ -2,6 +2,109 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.14 — Gate-9 Atomic Authority Consumption
+Coordinator Integration Implementation.
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.**
+Implemented the frozen `.1R.9` §16.1 slice-3 Gate-9 atomic one-shot proof +
+approval consumption coordinator in **one new production file**,
+`src/pcae/core/runtime_dispatch_gate9.py`
+(`run_gate9_atomic_authority_consumption` — the frozen **sole** owner of the
+RDGO-001 §10 authority-consumption boundary — plus `Gate9Result`,
+`is_gate9_result`, `_GATE9_RESULTS`). Unblocked by `.1R.13.5` (all eight
+`.1R.13.1` §17 criteria SATISFIED; §16 Gate-8 → Gate-9 handoff frozen +
+independently re-reviewed); the **test-path-first scope** of `.1R.9` §16.1
+row 3 / §29 was explicitly human-authorized. Phase-entry SHA `c1ea2c8b`.
+The coordinator: requires a registry-provenanced `Gate8Result` via
+`is_gate8_result` **and** `containment_established is True` (a trusted
+**negative** result is a hard stop `gate9_gate8_containment_not_established`
+**before** any lock-side consumption attempt — provenance ≠ containment
+success, the B1 class); re-derives the `Gate7Result` (`is_gate7_result` +
+`decision == "ALLOW"`), the `Gate6Decision` (`is_gate6_decision` +
+`decision == "ALLOW"`), and the `Gate5Result` (`is_gate5_result`); enforces
+one consistent invocation (`invocation_id`/`attempt_id` equal across
+g5/g6/g7/g8/identity, `request_id` across g6/g7/g8); cross-checks
+`gate8_result.gate7_result_digest == _gate7_result_digest(gate7_result)`;
+**independently reconstructs the full containment evidence** by re-running
+the Gate-8 owner `run_gate8_process_containment` over the same trusted
+upstream objects + a freshly re-resolved descriptor / executable /
+repository-scoped cwd and requiring every recomputed digest
+(`containment_evidence_digest` / `effect_plan_digest` /
+`live_preflight_digest` / `gate7_result_digest`) to match the handed
+`Gate8Result` — **this closes `.1R.13.5`'s V-13-5-1** for the
+runtime-dispatch consumption path (no stored digest is self-authenticating);
+inside the serialization boundary (the per-`proof_id` create-only atomic
+primitive itself — `.1R.9` §18, no second lock) re-trusts + revalidates the
+`ValidatedAuthorityProjection` (`revalidate_validated_authority_projection`
+re-runs `validate_approval` → principal / credential / proof / approval
+currentness, expiry, revocation, prior-consumption), recomputes the
+subject/scope binding digest, confirms the HPAC lifecycle sequence-3
+`PROOF_VERIFIED_AND_BOUND` binding read-only, requires the exact
+proof + approval pair of the same lineage, re-reads the runtime capability
+snapshot (fail closed unless still `unavailable`), and checks the absence of
+a consumption record; then performs **one** create-only, crash-consistent,
+read-back-verified `RuntimeInvocationAuthorityConsumptionStore.create` of
+the closed eight-item `HPAC-AUTHORITY-CONSUMPTION/2.0` record (the inert
+store is consumed **unchanged**). Proof + approval + presentation +
+challenge are consumed **together** by this one write — there is no state in
+which only one is consumed (HPAC-REQ-098/100/102). One-shot: the first valid
+consumption succeeds; every replay / concurrency loser / crash-after-commit
+retry resolves deterministically to `already_consumed` (never a second
+success, never continue-to-Gate-10); crash-before-commit leaves both
+unconsumed; ambiguous / partial → `...DurabilityUncertainError` → fail
+closed. `Gate9Result` is identity-only, non-serializable, sealed,
+registry-provenanced; `is_gate9_result` is **provenance ≠ success** —
+frozen forward invariant: a future Gate 10 MUST additionally require
+`status == "consumed"` + re-read the durable record. `Gate9Result` has
+**zero downstream production consumers** (Gate 10 does not exist). Gate 9
+ends after durable consumption — **no** subprocess / adapter / provider /
+network / credential / hardware; local canonical consumption-store writes
+are the expected Gate-9 effect and are categorically distinct from external
+runtime effects. **No positive production Gate-9 path today** (permanent
+NON-REAL upstream; real Gate 7 always DENY); the consumption branches are
+reached only through a clearly-labelled test-only substitution of the
+upstream provenance predicates against a `tmp_path` store — no
+`ValidatedAuthorityProjection` / approval / runtime capability / positive
+`Gate7Result` / positive `Gate8Result` fabricated, no write to the
+production-resolved `HPAC_PROTECTED_ROOT`. **63 new focused tests**
+(`tests/test_gate9_atomic_authority_consumption_coordinator_integration_3w1r2b1r1_1r14.py`).
+Contracts (RDGO-001 v3.0, RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001 v2.0,
+PBRD-001 v2.0, RPAC-001 v1.0, PBPA-001 / POL-005), `permission_broker_foundation.py`,
+`shell_gate.py`, `runtime_introspection.py`, Gate 5/6/7/8, and the inert
+consumption store all **byte-unchanged** since `c1ea2c8b`
+(`git diff c1ea2c8b HEAD -- src/pcae` = exactly `runtime_dispatch_gate9.py`).
+**V-13-1 — EXTENDED (ten suites):** the authorized single-file addition
+trips point-in-time production-scope / consumer-inventory guards frozen by
+`.1R.8` / `.117` / `.1R.10` / `.1R.11` / `.1R.12` / `.1R.13` / `.1R.13.2` /
+`.1R.13.3` / `.1R.13.4` / `.1R.13.5` — all converted to phase-aware **subset**
+invariants (the subset orientation still fails an unauthorized expansion;
+the `hpac_verifier` consumer asserts stay exact; the Gate-10-consumer
+exact-empty asserts are preserved verbatim; the `_GATE8_RESULTS` owner
+assert stays exact, with `run_gate8_process_containment` split into a
+bounded caller assert). Fixed-SHA A/B (baseline `c1ea2c8b`): CANDIDATE-ONLY
+UNEXPLAINED FUNCTIONAL NONPASSING = 0; UNEXPLAINED ATTRIBUTABLE REGRESSIONS
+= 0 — 17 pre-existing HPAC/runtime-selection contradiction-doc / PB-freeze
+guard failures reproduce identically at baseline; 2 issues attributable to
+this phase (one point-in-time consumer-inventory guard, one flake in this
+phase's own new concurrency test) were **fixed in-phase** (guard converted;
+concurrency-loser disposition hardened to `already_consumed` — commit
+`9fba3251`). **New findings:** none blocking. **V-13-5-1 — SATISFIED at
+Gate 9** for the runtime-dispatch consumption path (the residual frozen
+`.1R.13.1` §11.2/§25 contract-text inconsistency — unenforced
+`gate8_transport_drift` row, no bound cwd/env ref — is a documentation
+cleanup for the contract-clarification phase, not a Gate-9 defect).
+V-2 / V-3 / V-4 / V-13-3-1 / V-13-3-2 / V-13-5-2 carried, re-evaluated at
+actual consumption, **none becomes blocking**. **GATE-9 — IMPLEMENTED,
+INDEPENDENT VERIFICATION PENDING, NOT CLOSED.** Gate 9 is not verified; no
+execution readiness claimed. Implementation commits `9103d9cf`, `9fba3251`.
+**Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.15` — Independent
+Verification of Gate-9** (NOT begun; needs its own explicit human
+authorization). Gate 10 remains unplanned with no ID. `DELEGATED .3
+FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved; governed PCAE
+lifecycle only. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_14_GATE_9_ATOMIC_AUTHORITY_CONSUMPTION_COORDINATOR_INTEGRATION_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.5 — Independent Verification of the
 Gate-8 Process Containment (Shell Gate) Coordinator Integration.
 **GATE-8 — CLOSED. VERIFIED WITH NON-BLOCKING FINDINGS.**
