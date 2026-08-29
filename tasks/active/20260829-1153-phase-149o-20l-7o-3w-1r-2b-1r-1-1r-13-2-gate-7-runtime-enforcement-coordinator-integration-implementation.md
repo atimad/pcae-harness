@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement the Gate-7 Runtime Enforcement production-consumption coordinator (src/pcae/core/runtime_dispatch_gate7.py) per .1R.13.1 sections 4/6/7/8/9/10/13/24; convert the two stale point-in-time V-13-1 scope guards (.1R.10 / .1R.11 suites) to phase-aware invariant tests; no Gate 8/9/10 code, no execution, no contract change.
+Implement the Gate-7 Runtime Enforcement production-consumption coordinator (src/pcae/core/runtime_dispatch_gate7.py) per .1R.13.1 sections 4/6/7/8/9/10/13/24; convert the stale point-in-time production-scope guards (.1R.10 / .1R.11 / .1R.13 suites) that the authorized gate7.py addition trips into phase-aware invariant tests (V-13-1); no Gate 8/9/10 code, no execution, no contract change.
 
 ## Allowed Files
 
@@ -26,6 +26,10 @@ Implement the Gate-7 Runtime Enforcement production-consumption coordinator (src
 - tests/test_gate7_runtime_enforcement_coordinator_integration_3w1r2b1r1_1r13_2.py
 - tests/test_gate5_approval_validation_coordinator_3w1r2b1r1_1r10.py
 - tests/test_gate5_approval_validation_coordinator_integration_independent_verification_3w1r2b1r1_1r11.py
+- tests/test_gate6_permission_broker_production_consumption_3w1r2b1r1_1r12.py
+- tests/test_gate6_permission_broker_production_consumption_integration_independent_verification_3w1r2b1r1_1r13.py
+- tests/test_runtime_authority_production_repair_3w1r2b1r1117.py
+- tests/test_b1_b7_n1_n2_production_authority_repair_independent_verification_3w1r2b1r1_1r8.py
 - docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_13_2_GATE_7_RUNTIME_ENFORCEMENT_COORDINATOR_INTEGRATION_IMPLEMENTATION.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
@@ -74,10 +78,8 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- targeted gate7 + gate5/6 + runtime-dispatch + permission-broker suites pass, fixed-SHA A/B shows 0 candidate-only functional regressions
+- pcae status coherence / health / check pass
+- targeted gate7 + gate5/6 + runtime-dispatch + permission-broker suites pass; fixed-SHA A/B shows 0 candidate-only functional regressions
 
 ## Documentation Requirements
 
