@@ -2,6 +2,104 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13 — Independent Verification of Gate-6
+Permission Broker Production Consumption Integration.
+**VERIFIED WITH NON-BLOCKING FINDINGS — GATE-6 PERMISSION BROKER PRODUCTION
+CONSUMPTION INTEGRATION COMPLETE. GATE-6 — CLOSED** at the Permission Broker
+production-consumption boundary for `runtime_dispatch`. Re-derived every
+Gate-6 requirement from PBRD-001 v2.0 (§4 fact 14, §5, §7, §9, §10, §12,
+§15), RDGO-001 v3.0 §7, PBPA-001, POL-005 (source
+`permission_broker_foundation.ExecutionDisabledRule`), RIHAC-001 v2.0 §16,
+RIASC-001 v3.0, HPAC-001 v2.0, RPAC-001 v1.0 and current source — not
+trusted from the `.1R.12` report, its tests, or symbol names. No defect
+repair; no `src/` change (`git diff --name-only e04ca7af HEAD -- src/pcae`
+empty). Independently confirmed: `run_gate6_permission_broker` is the
+**sole** production Gate-6 owner and the only production caller of the
+`.1R.7` trusted builder (`git grep` inventory; the generic
+`build_permission_broker_request` raises for any `runtime_dispatch`
+action/context — no parallel authority path); the Gate5Result provenance
+boundary is identity-registry membership only (behavioral tests: `None`,
+`object.__new__`, full field reconstruction, `copy`/`deepcopy` (raise),
+duck-typed, bare `validated=true` — all fail closed, `_GATE6_DECISIONS`
+stays empty); exact invocation binding is enforced twice
+(`gate5_result.invocation_id == identity.invocation_id` in Gate 6 +
+`subject_scope_binding_digest` recomputation in the builder); the request
+is built **only** through the trusted builder (AST: no
+`PermissionBrokerRequest(...)`, no `_build_...` call); an untrusted
+projection past the provenance gate is rejected inside the builder; the
+**byte-unmodified** canonical `PermissionBroker` evaluator is called
+**exactly once** (runtime counter) and Gate 6 replicates no policy / POL /
+precedence / reason logic (AST); `DENY > HUMAN_REVIEW > ALLOW` re-derived
+from `_compose` (empty → fail-closed DENY); POL-005 hard-DENYs every
+`simulation_only=False` request and is **not** overridable by (would-be)
+validated human authority (`ExecutionDisabledRule` reads no approval field);
+`Gate6Decision` is ephemeral / non-serializable / identity-only /
+registry-gated — not transferable authority, and a PB ALLOW is never
+capability or execution; **no** Gate-7 / Gate-8 / Gate-9 (0 consumption, no
+`consumption.json`) / Gate-10 path exists (AST forbidden-import scan);
+runtime stays `not_implemented / Observed / observe / unavailable`
+(re-asserted after Gate-6 runs). To close the `.1R.12` coverage gap (no
+`.1R.12` test drives Gate-6 steps 2→5 at runtime — the NON-REAL hard stop
+makes a real `Gate5Result` unobtainable), the `.1R.13` suite installs a
+**clearly-labelled test-boundary substitution of the `is_gate5_result`
+predicate only** (the check a real FIDO2/UI ceremony would satisfy),
+keeping `projection = None`/untrusted so **no authority is manufactured and
+no ALLOW is ever produced** — the deepest reachable outcomes are POL-005
+DENY and POL-004 HUMAN_REVIEW; positive production Gate-6 authority remains
+unreachable. **V-4 adjudication: NON-BLOCKING CONTRACT-ALIGNMENT DEBT** —
+PBRD-001 §4 fact 14's literal 7-field `human_authority_binding`
+(`approval_id`, `approval_digest`, `authority_projection_id`,
+`authority_projection_digest`, `authority_contract_version` const
+`RIHAC-001/2.0`, `proof_validation_digest`, `request_binding_digest`) vs
+the frozen 3-field production `RuntimeDispatchHumanAuthorityBinding`
+(`approval_id`, `approval_record_digest`, `validation_evidence_digest`) is a
+**lossless digest-collapse**: `validation_evidence_digest` =
+`evidence_digest()` over the full 14-key projection payload, which
+cryptographically commits to projection digest, proof-validation verdicts,
+`subject_scope_binding_digest` and `invocation_id`; `authority_projection_id`
+is enforced more strongly by exact-object registry membership;
+`authority_contract_version` is a zero-entropy constant;
+`request_binding_digest` is additionally re-checked by recomputation.
+Collision analysis (the decisive test): two authority contexts the contract
+can distinguish necessarily differ in ≥1 payload key ⇒ different
+`evidence_digest` ⇒ different 3-field binding — **no lost authority
+semantics, no collision** (test-proven for `proof_id` and
+`subject_scope_binding_digest`). `.1R.9` §25 froze the slice as "no change
+to the 14-fact shape"; PBRD-001 is byte-unchanged; the divergence is
+contract-text staleness. **V-2 / V-3** carried non-blocking — the Gate-6
+path imports nothing from `hpac_lifecycle`/`hpac_verifier` and contains no
+`PROOF_VERIFIED_AND_BOUND`/`sequence3` reference; **no Gate-6 impact, no
+amplification**. **New finding V-13-1 (LOW, process transparency,
+non-blocking):** `.1R.12`'s `regression_attribution` claims "no isolation /
+consumer-inventory meta-guard trips" and `fast_green: 699 passed, 0 failed`,
+but `.1R.12`'s legitimate single-file source addition deterministically
+breaks two point-in-time frozen-baseline scope guards
+(`test_gate5_...1r10.py::test_only_expected_production_files_changed_since_baseline`,
+`test_gate5_...1r11.py::test_production_scope_is_exactly_the_three_planned_files`)
+— A/B confirmed (git worktree): both PASS at `70d1e454`, both FAIL at HEAD;
+non-functional, undisclosed. Fixed-SHA regression attribution (baseline
+`70d1e454`, `-p no:randomly`, explicit files, no `xdist`, git-worktree
+A/B): targeted suites **341 passed, 2 failed** (exactly the two V-13-1
+guards); **CANDIDATE-ONLY NONPASSING NODES = 0**; **UNEXPLAINED ATTRIBUTABLE
+FUNCTIONAL REGRESSIONS = 0** (`.1R.13` adds no `src/` file). All 8 normative
+contracts + `permission_broker_foundation.py` + `runtime_authority.py` +
+`runtime_dispatch_gate5.py` + `hpac_lifecycle.py` blob-hash identical
+between `70d1e454` and HEAD. 40 fresh independent `.1R.13` tests, all
+passing (`tests/test_gate6_permission_broker_production_consumption_integration_independent_verification_3w1r2b1r1_1r13.py`).
+`.1R.12` test-quality review: no assertion found false or overstating a
+security property; the gap is coverage (source-substring stand-ins for the
+step-2/3/4 guards), now closed by `.1R.13`. **Next phase:** Gate 6 CLOSED,
+`.1R.14` (Gate-9) **remains BLOCKED** until the Gate-7 / Gate-8 chapters
+exist (no canonical IDs; none invented here) or a separately explicit
+test-path-first scope is human-authorized; `.1R.15` frozen behind `.1R.14`.
+Recommended human-designated next chapter (not begun): a **planning phase
+to define Gate-7 / Gate-8 and assign their IDs**, OR a **contract-
+clarification phase** reconciling V-2 / V-3 / V-4 — each needs its own
+explicit human authorization. `DELEGATED .3 FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED` preserved; governed PCAE lifecycle only.
+
+### Prior phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.12 — Gate-6 Permission Broker Production
 Consumption Integration Implementation.
 **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Implemented
