@@ -2,6 +2,122 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.5 — Independent Verification of the
+Gate-8 Process Containment (Shell Gate) Coordinator Integration.
+**GATE-8 — CLOSED. VERIFIED WITH NON-BLOCKING FINDINGS.**
+Independently re-derived (do not trust) the `.1R.13.4` Gate-8 coordinator
+against RDGO-001 v3.0 §9 / §1 row 8 / §10 / §13 / §15 / §19, `.1R.13.1`
+§5/§11/§12/§16/§17/§25, the mature 88P `shell_gate` classifier **source**,
+PBRD-001 §6/§14, RPAC-001, POL-005 and the verified Gate-5/6/7 boundaries —
+not from the `.1R.13.4` report, its 63 tests, or type/function names. No
+defect repaired; no Gate-9/10 code; no execution enabled. Verification-entry
+SHA `72898361`; immutable pre-`.1R.13.4` baseline `6a9d650f`; the only
+functional `.1R.13.4` commit is `df00c43c` (true range `cda5c2fa..72898361`;
+the phase prompt's reported list omits the two finalization-staging
+commits). **Independently confirmed:** `run_gate8_process_containment` is the
+sole production owner (`git grep` → exactly `runtime_dispatch_gate8.py`);
+Gate-7 **provenance** (`is_gate7_result`, exact object) **and**
+`decision == "ALLOW"` (exact string eq) are **both** required, freshly
+tested against forged / copied / `deepcopy` / `pickle` / bare-`ALLOW`
+objects; a trusted `Gate7Result(decision="DENY")` — driven through the real
+`run_gate7_runtime_enforcement` negative branch — is rejected
+(`gate8_gate7_decision_not_allow`) with `build_shell_gate` call-count **0**
+(spied), before any Shell Gate work; Gate-5 provenance + projection re-trust
++ `revalidate_validated_authority_projection` (re-runs `validate_approval`)
+at Gate 8's own point of use; invocation lineage (`invocation_id` across
+Gate5/Gate7/identity, `attempt_id` across Gate7/identity) and
+`subject_scope_binding_digest` recompute via the shared
+`_expected_subject_scope_binding_digest`; executable identity by `os.stat`
+regular-file gate + streamed SHA-256 **content** hash vs descriptor pin
+(same path + changed bytes → `gate8_executable_identity_mismatch`;
+symlink-to-other-content caught); shell-metacharacter refusal of the
+executable path and every argv token (12-case sweep); the canonical 88P
+`shell_gate.build_shell_gate` consumed read-only, no re-implementation,
+`shell_gate.py` byte-unchanged; **`_call_doctor_test_run` proven
+structurally unreachable from any Gate-8 input** (it fires only for a
+`pytest` / `py.test` / `python -m pytest` program, all of which Gate 8
+refuses on the executable basename **or any argv token** before calling
+`build_shell_gate` — 5-case parametric proof, call-count 0; AST confirms
+`subprocess.run` appears only in `_call_doctor_test_run`); `Gate8Result`
+anti-transfer (identity-only `==`/`hash`, `__reduce__` raises,
+`__init_subclass__` raises, `object.__new__` and field-reconstructed
+lookalikes rejected); `is_gate8_result` membership-only (AST: single
+`return`, no `if`, no `containment_established` in the return expr); a
+`Gate8Result(containment_established=False)` is a registry member but an
+explicit non-progression audit record; Gate 8 consumes nothing
+(`consumption.json` count invariant; no lifecycle / Gate-9 call); no
+Gate-9/10 symbol or effectful import; runtime `Observed / observe /
+unavailable` after every path; production positive Gate-8 path unreachable
+(`full_chain(simulation_only=False)` → `projection is None`). **§16 Gate-8 →
+Gate-9 handoff contract independently re-reviewed** (satisfies `.1R.13.1`
+§17 criterion 8): `Gate8Result` carries exactly the fields a future Gate 9
+re-derives; no consumer / serialization / persisted handoff; the six §16.2
+invariants hold or are correctly deferred to Gate 9's in-boundary
+revalidation. **V-13-1 — REMAINS CLOSED; GATE-8 EXTENSION VERIFIED:** all
+twelve guard extensions inspected guard-by-guard — subset orientation
+(`- AUTHORIZED == set()` / `<= {gate7, gate8}`), `gate9` / `hpac` asserts
+kept exact-equality; orientation actively challenged with a synthetic
+`{gate7, gate8, runtime_adapter}` change-set (every guard rejects it); two
+`.1R.13.2` / `.1R.13.3` guards converted `==` → subset; no functional
+earlier-phase closure weakened. Production diff since `6a9d650f` = **exactly**
+`src/pcae/core/runtime_dispatch_gate8.py`; RDGO-001 / PBRD-001 / RPAC-001 /
+RIHAC-001 / RIASC-001 / HPAC-001 / PBPA-001 / POL-005 / `shell_gate.py` /
+`runtime_dispatch_gate5/gate7/permission.py` / `runtime_introspection.py`
+byte-unchanged. Fixed-SHA A/B (baseline `6a9d650f` isolated worktree vs
+`72898361`, `-p no:randomly -n0`): 8 affected earlier-phase suites 327 pass
+/ **1 fail identical at both SHAs** (`test_gate5_results_registry_stays_empty_on_every_reject`
+— a pre-existing cross-file `_GATE6_DECISIONS` pollution flake, passes in
+isolation, **V-13-5-3**); `test_shell_gate.py` 118/118; wide gate8/shell_gate
+keyword 848/848; wide gate-chain keyword 2967 pass / 13 pre-existing fail
+(5 sampled reproduce identically at baseline). **CANDIDATE-ONLY UNEXPLAINED
+FUNCTIONAL NONPASSING NODES = 0; UNEXPLAINED ATTRIBUTABLE FUNCTIONAL
+REGRESSIONS = 0.** 120 fresh independent tests in
+`tests/test_gate8_process_containment_coordinator_independent_verification_3w1r2b1r1_1r13_5.py`
+(own synthetic provenance substitution, own resolver / effect-plan
+builders). **Non-blocking findings:** **V-13-5-1** (LOW — the frozen
+`.1R.13.1` §11.2 / §25 `gate8_cwd_drift` / `gate8_environment_allowlist_drift`
+/ `gate8_transport_drift` rows are implemented as a repository-scope check
+(`gate8_cwd_outside_repository_scope`), a well-formedness check
+(`gate8_environment_not_allowlisted`), and no check respectively — there is
+**no bound cwd / env reference** in `RuntimeDispatchRequestConstructionInput`
+to diff against, and the frozen plan's own stated mechanism
+(subject/scope digest) does not cover them either; `transport_type` is a
+fixed `local_cli` constant and provider/backend drift is covered by
+`gate8_descriptor_config_drift`. Mitigations: `effect_plan` is
+trusted-coordinator-assembled (frozen §11.1 item 5); cwd / env / full
+profile **are** bound into `containment_evidence_digest`, which frozen §16.2
+invariant 3 requires Gate 9 to recompute and read-back-verify — so a
+replayed `Gate7Result(ALLOW)` + changed cwd/env is caught at the Gate-9
+boundary; the executable identity / hash / argv / descriptor / target /
+network / credential rows **are** independently enforced; Gate 8 is
+structurally unreachable in production. Not a GATE-8 EFFECT-PLAN BINDING or
+DECISION-SEMANTICS DEFECT. Recommend the V-2/V-3/V-4 contract-clarification
+phase add `cwd_ref` / `env_allowlist_ref` to the request model **or** reword
+§11.2/§25 to the implemented establish-attest-digest semantics and strike
+the transport row); **V-13-5-2** (INFO — `Gate5Result` carries no
+`attempt_id` by its frozen `.1R.10` model; Gate 8's `attempt_id` binding is
+transitive via Gate 7, not direct — future Gate-9 handoff spec should say
+so); **V-13-5-3** (INFO — the pre-existing `_GATE6_DECISIONS` pollution
+flake above; not candidate-attributable; recommend an autouse
+registry-clear fixture). V-13-4-1 re-checked (not reproduced); V-13-3-1 /
+V-13-3-2 confirmed **not amplified** (Gate 8 makes no PB-policy-revalidation
+claim and gates on `decision == "ALLOW"` + provenance, never
+`matched_no_go_ids` completeness); V-2 / V-3 / V-4 / F7 unchanged, no Gate-8
+impact (F7 boundary verbatim, threat model NOT broadened). Gate 5 / 6 / 7
+regressions re-confirmed CLOSED (`runtime_dispatch_gate5/gate7/permission.py`
++ POL-005 byte-unchanged). **`.1R.14` PRECONDITIONS SATISFIED on promotion
+of this report** (all eight `.1R.13.1` §17 criteria met) — but `.1R.14` /
+`.1R.15` (Gate-9 impl + verification) **remain frozen, BLOCKED pending their
+own separate explicit human authorization, and NOT renumbered**; this phase
+begins neither and grants no authorization. Alternative non-blocking next
+step: a dedicated V-2 / V-3 / V-4 / V-13-3-1 / V-13-3-2 / **V-13-5-1**
+contract-clarification phase, also requiring its own authorization.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved; governed
+PCAE lifecycle only. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_13_5_INDEPENDENT_VERIFICATION_OF_GATE_8_PROCESS_CONTAINMENT_SHELL_GATE_COORDINATOR_INTEGRATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.4 — Gate-8 Process Containment
 (Shell Gate) Coordinator Integration Implementation.
 **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.**
