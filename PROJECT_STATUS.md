@@ -2,6 +2,99 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.4 — Gate-8 Process Containment
+(Shell Gate) Coordinator Integration Implementation.
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.**
+Implemented the RDGO-001 v3.0 §9 Gate-8 process-containment / Shell-Gate
+production-consumption slice frozen by `.1R.13.1` §5/§11/§12/§16/§25 in one
+new production file, `src/pcae/core/runtime_dispatch_gate8.py`
+(`run_gate8_process_containment`, `Gate8Result`, `is_gate8_result`,
+`_GATE8_RESULTS`, `Gate8EffectPlan`, `ResolvedExecutable`). Phase-entry SHA
+`6a9d650f`; `git diff --name-only 6a9d650f HEAD -- src/pcae` is **exactly**
+`src/pcae/core/runtime_dispatch_gate8.py`; `git diff 6a9d650f HEAD --
+docs/contracts` is **empty**; `shell_gate.py`, `runtime_dispatch_gate7.py`,
+`runtime_dispatch_gate5.py`, `runtime_dispatch_permission.py`,
+`runtime_introspection.py`, `permission_broker_foundation.py` (POL-005)
+byte-unchanged. `run_gate8_process_containment` is the frozen **sole**
+production owner of the RDGO-001 §9 boundary: it consumes a
+registry-provenanced `Gate7Result` **only** via `is_gate7_result` and
+**additionally** requires `decision == "ALLOW"` by exact string equality —
+a trusted **negative** `Gate7Result(decision="DENY")` (what the real Gate-7
+coordinator returns under the current posture) is rejected
+(`gate8_gate7_decision_not_allow`) **before** any Shell Gate evaluation, no
+code path converts a non-`ALLOW` result into a positive containment;
+consumes a registry-provenanced `Gate5Result`, re-trusts + revalidates its
+`ValidatedAuthorityProjection` at Gate 8's own point of use, recomputes the
+`subject_scope_binding_digest` from `identity` + `inputs` and the exact
+invocation lineage (`invocation_id` / `attempt_id` across `Gate5Result` /
+`Gate7Result` / `identity`); resolves the exact executable through a
+trusted coordinator-supplied `descriptor_resolver` (never a caller shell
+string), refuses shell metacharacters in the argv vector, verifies
+executable identity by `os.stat` + SHA-256 read against the descriptor pin,
+re-resolves descriptor/config + runtime-target drift, binds cwd (canonical,
+repository-scoped), env allowlist (names only), child-process/resource/
+time/supervision profile, `network_denied=True`, `credentials_required=False`;
+consumes the mature 88P `shell_gate.build_shell_gate` classifier
+**read-only** for a defensive category cross-check (proven non-effecting
+for the supplied inputs — pytest/tox/nox/unittest programs refused before
+the call, `_call_doctor_test_run` spy fails the test if invoked); and
+returns exactly one ephemeral, identity-only, non-serializable,
+registry-provenanced `Gate8Result` (`containment_established` ∈
+{True, False}) or `(None, reasons)`. **Under the current runtime posture
+Gate 8 is structurally unreachable — every real call fails closed at the
+Gate-7-decision hard stop (Gate 7 is always DENY; the real `run_gate5`
+returns nothing); no positive production Gate-8 success is possible today.**
+The positive containment branch is `# pragma: no cover`; it is exercised
+only through a clearly-labelled test-boundary provenance substitution
+against a real inert executable, manufacturing no `ValidatedAuthorityProjection`,
+approval, runtime capability, or positive `Gate7Result`. `is_gate8_result`
+proves **provenance only**, never `containment_established` — a Gate-8
+regression guard is in the suite. Gate 8 **consumes nothing** (no approval /
+proof / presentation / challenge / nonce / `Gate5Result` / `Gate7Result` /
+Gate-6 decision / lifecycle record created, deleted, or mutated; no durable
+consumption record; no `runtime_invocation_authority_consumption` primitive
+called; both re-resolutions are reads), is idempotently repeatable, and its
+result is expiring / cache-invalid across any drift. It references no
+`Gate6Decision` / `is_gate6_decision` / `run_gate6_permission_broker` /
+`run_gate7_runtime_enforcement` / `resolve_runtime_enforcement_posture`
+symbol at all. No Gate-9 consumption, no Gate-10 effect; AST-guarded
+against `subprocess` / `socket` / `spawn` / `exec` / `pty` / provider SDK /
+HTTP client and any adapter import. Runtime remains `not_implemented /
+Observed / observe / unavailable`; POL-005 unchanged; real execution
+UNAVAILABLE. **V-13-1 — extended, INDEPENDENT VERIFICATION PENDING:** twelve
+point-in-time production-scope / consumer-inventory guards across the
+`.1R.8` / `.1R.10` / `.1R.11` / `.1R.12` / `.1R.13` / `.1R.13.2` /
+`.1R.13.3` / `.1R.117` suites extended to include `runtime_dispatch_gate8.py`,
+preserving the subset orientation (`changed - AUTHORIZED == set()`) and the
+exact-empty `gate9` / `hpac` asserts — not deleted, not xfailed, not
+re-frozen. Fixed-SHA A/B (baseline `6a9d650f` isolated worktree vs HEAD,
+`-p no:randomly -n0`, explicit affected-file list): baseline 363 passed / 0
+failed, HEAD 426 passed / 0 failed (363 + 63 new Gate-8 tests);
+**CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0; UNEXPLAINED
+ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0**. 63 new focused defensive tests in
+`tests/test_gate8_process_containment_coordinator_integration_3w1r2b1r1_1r13_4.py`.
+V-2 / V-3 / V-4 carried unchanged, non-blocking, **no Gate-8 impact** (Gate
+8 imports nothing from `hpac_lifecycle` / `hpac_verifier`, consumes only the
+trusted upstream objects, and reconstructs no disputed 3-field-vs-7-field
+`human_authority_binding`); V-13-3-1 / V-13-3-2 / V-13-3-3 carried, **not
+amplified** (Gate 8 makes no claim it revalidates PB policy and does not
+depend on the completeness of Gate 7's `matched_no_go_ids`); O1–O4 / F2–F4
+carried unchanged; **F7 threat model NOT broadened** (stated verbatim in
+the module docstring). Gate 5 still CLOSED, Gate 6 still CLOSED, Gate 7
+still CLOSED. Gate 9, Gate 10 NOT implemented; `.1R.14` / `.1R.15` remain
+frozen, BLOCKED, and NOT renumbered — they unblock only after
+`.1R.13.2`–`.1R.13.5` all close VERIFIED with no blocking findings
+(`.1R.13.1` §17) and still require their own explicit human authorization.
+Gate 8 is **NOT independently verified** and `.1R.13.4` is **NOT
+self-closed**. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+preserved; governed PCAE lifecycle only. **Recommended next phase
+(requires its own explicit human authorization; not begun):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.13.5` — Independent Verification of the
+Gate-8 Process Containment (Shell Gate) Coordinator Integration. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_13_4_GATE_8_PROCESS_CONTAINMENT_SHELL_GATE_COORDINATOR_INTEGRATION_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.3 — Independent Verification of the
 Gate-7 Runtime Enforcement Coordinator Integration.
 **GATE-7 — CLOSED. VERIFIED WITH NON-BLOCKING FINDINGS. V-13-1 — CLOSED.**
