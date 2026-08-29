@@ -80,8 +80,8 @@
    "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13: expand idle-task allowed-file zone for canonical completion authorship"
   }
  ],
- "origin_main_head": "e04ca7af2dad7276205ab4150669f472ca49cca0",
+ "origin_main_head": "66959fcdbfd2882417b24deffff132e4ceb1c4a8",
  "origin_main_head_count": 0,
- "pushed_status": "nothing_to_push",
+ "pushed_status": "pushed",
  "recommended_next_phase": "No frozen next phase is unblocked. With Gate 6 CLOSED, 149O.20L.7O.3W.1R.2B.1R.1.1R.14 (Gate-9 Atomic Authority Consumption Coordinator Integration) remains BLOCKED until the Gate-7 and Gate-8 chapters exist (no canonical IDs; none invented here) or a separately explicit test-path-first scope is human-authorized; .1R.15 (its verification) remains frozen. Recommended human-designated next chapter (not begun; each needs its own explicit human authorization): (a) a planning phase to define the Gate-7 (Runtime Enforcement consumption) and Gate-8 (Shell Gate consumption) chapters and assign their canonical IDs, or (b) a dedicated contract-clarification phase reconciling V-2 / V-3 (RDGO-001 section 4/6 sequence-3 creation wording vs the verified HPAC-REQ-054 step-10 behavior) and V-4 (PBRD-001 section 4 fact 14 7-field human_authority_binding vs the frozen 3-field RuntimeDispatchHumanAuthorityBinding -- lossless digest-collapse) against PBRD-001 and RDGO-001. Also open: V-13-1 (re-baseline or xfail the two point-in-time scope guards) and the pre-existing O4 tasks/DONE.md hygiene debt."
 }
