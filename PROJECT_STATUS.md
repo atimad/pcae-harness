@@ -2,9 +2,81 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 — Independent Verification of the
+Gate-5 Approval-Validation Coordinator Integration.
+**VERIFIED WITH NON-BLOCKING FINDINGS — GATE-5 APPROVAL-VALIDATION
+COORDINATOR INTEGRATION COMPLETE.** Independently re-derived Gate-5's
+requirements from RDGO-001 v3.0 §4/§6, RIHAC-001 v2.0 §16, HPAC-001 v2.0
+HPAC-REQ-054/097, RIASC-001 v3.0, PBRD-001 v2.0, POL-005, the `.1R.9`
+planning document, and current source — not trusted from the `.1R.10`
+report or its tests. **Gate-5 adjudication: CLOSED** at the
+coordinator-integration boundary (with non-blocking findings): Option-C
+layering matches `.1R.9` §6 / RIHAC-001 §16 order; the current-state
+revalidation matrix (rows 1–23) is re-resolved at run time with none merely
+inherited (proven load-bearing by post-authentication credential
+revocation); HPAC-REQ-054 Step 4 is enforced through the Gate-5 path (a
+fully self-consistent substituted challenge yields no verifier principal);
+NON_REAL cannot produce a `Gate5Result` on the strongest deterministic
+path; `Gate5Result` is not transferable authority (`_seal` guard +
+identity-registry membership + `__reduce__`/`__eq__`/`__init_subclass__`;
+forgery/copy/reconstruction rejected); a valid sequence-3 event alone does
+not substitute for Gate-5 validation; Gate 5 consumes nothing and is
+idempotently non-forking; no downstream gate (6/7/8/9) or external effect
+(10) was introduced. **Sequence-3 adjudication:
+PROOF_VERIFIED_AND_BOUND SUPPORT — CLOSED** (correct writer under the
+lifecycle writer-capability gate; canonical provenance via
+`resolve_canonical_chain`; exact predecessor enforced; Gate-5 confirmation
+semantics; no lifecycle-as-bearer-authority — event present, still
+fails closed at NON_REAL). **IF-1 adjudication: CONFIRMED NON-BLOCKING
+ARCHITECTURAL OBSERVATION** — the sequence-3 event is created by the
+verifier's assurance-independent HPAC-REQ-054 step 10 (wired `.1R.5`,
+verified `.1R.5.2.1`, `hpac_verifier.py` byte-unchanged by `.1R.10`) at
+Gate-3/approval-creation time over the `approval_subject_digest`, and Gate 5
+**confirms** it; every trust property RDGO-001 §6 substantively requires
+holds. **New non-blocking findings:** V-1 — `.1R.10` §14.2 regression
+attribution undercounted the attributable meta-guard failures (true
+candidate-only set is 7 left-red + 4 updated, not 4+4; the 3 undisclosed
+guards are `test_*_zero_preexisting_production_consumers` /
+`test_foundation_has_no_production_consumers_or_gate_wiring` in the
+`.3.2.2.1`/`.3.2.2.2`/`.3.2.2.2.1` files, all the same non-functional
+consumer-inventory class, tripped by `runtime_dispatch_gate5` importing
+`hpac_lifecycle`); corrected and re-baselined here. V-2 — RDGO-001 §4/§6's
+literal "Gate 5 … creates … over the completed approval digest" is not
+satisfied (it is Gate-3/step-10, over the subject digest); non-blocking
+contract-alignment debt, recommend reconciliation in `.1R.12` planning.
+V-3 — the completed RIASC `record_digest` is not bound into or checked
+against the sequence-3 event (subsumed by V-2; `validate_approval` step 4
+covers it via the projection). **`.1R.7`/`.1R.8`/`.3.2.2.x` isolation
+re-baselining (`.1R.9` §29):** 7 meta-guards re-baselined with full
+5-step traceability (old snapshot, new observed consumer, `.1R.9` §6.2
+row 23 / §16.1 authorization, no-unauthorized-path proof, then updated);
+`gate9_callers`/`gate9_consumers` all remain empty; no guard weakened.
+**Fixed-SHA attribution** (deterministic explicit-file A/B, baseline
+`1810c8d8` vs `HEAD`, no `xdist`): candidate-only nonpassing nodes = **0**;
+**UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0**; 44 shared failures
+are the pre-existing contradiction-documentation class. 39 fresh
+independent tests
+(`tests/test_gate5_approval_validation_coordinator_integration_independent_verification_3w1r2b1r1_1r11.py`),
+all passing; do not import the `.1R.10` tests. B1/B7/N1/N2/F1 carried
+closed; O1–O4 and F2/F3/F4/F7 carried unchanged, F7 threat model **not**
+broadened. Contract byte identity: all 7 contracts + POL-005 SHA-256
+unchanged. Runtime: `not_implemented / Observed / observe / unavailable` —
+unchanged. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+preserved. **Final verdict: VERIFIED WITH NON-BLOCKING FINDINGS — GATE-5
+APPROVAL-VALIDATION COORDINATOR INTEGRATION COMPLETE.** Recommended next
+phase (requires separate explicit human authorization; do not begin):
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.12` — Gate-6 Permission Broker Production
+Consumption Integration Implementation** (`.1R.9` §16.1 slice 2). `.1R.13`
+and `.1R.14`/`.1R.15` (Gate-9; `.1R.14` blocked) remain frozen; Gate-7 and
+Gate-8 chapters have no invented ID. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_11_INDEPENDENT_VERIFICATION_GATE5_APPROVAL_VALIDATION_COORDINATOR_INTEGRATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.10 — Gate-5 Approval-Validation
 Coordinator Integration Implementation.
-**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Implemented
+**IMPLEMENTED — INDEPENDENTLY VERIFIED BY `.1R.11` (non-blocking findings
+V-1/V-2/V-3).** Implemented
 only the RDGO-001 v3.0 §6 Gate-5 integration frozen by `.1R.9` §16.1 slice
 1. New `src/pcae/core/runtime_dispatch_gate5.py` — the **Option C (layered)**
 Gate-5 approval-validation coordinator (`run_gate5`): the single owner of
@@ -51,13 +123,12 @@ fast_green failures unchanged. B1/B7/N1/N2 and F1 functional closure intact;
 F2/HPAC-REQ-054 Step 4 preserved and now load-bearing; F3/F4/F7 carried
 unchanged, F7 threat model **not** broadened; O1–O4 carried unchanged, none
 worsened. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
-preserved. Gate 5 is **not** independently verified and `.1R.10` is **not**
-self-closed. Recommended next phase:
-**`149O.20L.7O.3W.1R.2B.1R.1.1R.11` — Independent Verification of Gate-5
-Approval-Validation Coordinator Integration** (do not begin). See
+preserved. Independently verified by `.1R.11` (see above): Gate 5 CLOSED,
+sequence-3 CLOSED, IF-1 non-blocking, non-blocking findings V-1 (attribution
+undercount, corrected) / V-2 / V-3. See
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_10_GATE_5_APPROVAL_VALIDATION_COORDINATOR_INTEGRATION_IMPLEMENTATION.md`.
 
-## Prior Phase
+## Earlier Phases
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9 — Gate-5/Gate-9 Production Authority
 Coordinator Integration Planning.
