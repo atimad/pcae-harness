@@ -2,8 +2,45 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.8) to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9: Gate-5/Gate-9 Production Authority Coordinator Integration Planning; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: Independent Verification of B1/B7/N1/N2 Production Authority Repair Implementation to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.8); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit human authorization for the next independent verification to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8: Independent Verification of B1/B7/N1/N2 Production Authority Repair Implementation; session refreshed and governance continuity revalidated.
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9** — planning only; produced the
+  canonical planning document for Gate-5/Gate-9 Production Authority
+  Coordinator Integration. Re-derived the current coordinator call graph
+  from source: Gate 5 has validation logic but no coordinator and no HPAC
+  lifecycle sequence-3 creation; Gate 6 has a structural `runtime_dispatch`
+  request path but no production consumer; Gate 9's store is inert with zero
+  importers; Gates 7/8 do not exist. Froze Gate-5 ownership (Option C,
+  layered — one coordinator delegating to the RIHAC validator + HPAC
+  verifier + lifecycle writer, no duplicated authority, ephemeral
+  non-transferable output), Gate-9 ownership (one coordinator owning the
+  protected serialization boundary + HPAC-REQ-099 in-boundary revalidation +
+  record build; the existing store owns only the atomic create-only
+  primitive; no second transaction mechanism), the atomic
+  proof+approval+presentation+challenge single-record consumption model,
+  crash-before/after and six-vector replay and one-winner concurrency
+  semantics, and the full pre-Gate-5 → Gate-10 state machine with forbidden
+  transitions. NON-REAL hard stop unchanged and unconditionally active;
+  NON-REAL must not reach production Gate 9. POL-005 hard DENY preserved and
+  untouched; runtime capability independent and unavailable. O1–O4 carried
+  unchanged (none a prerequisite, none repaired here); F2/HPAC-REQ-054 Step 4
+  confirmed a satisfied prerequisite; F3/F4 deferred cosmetic; F7 carried
+  unchanged with the threat model explicitly NOT broadened. No contract
+  blocker; one non-blocking sequencing constraint (Gate 9 needs Gate 6/7/8
+  evidence) and one non-blocking gap (Gate-5 sequence-3 creation, folded into
+  the first implementation slice). PB production consumption is a separate
+  slice after Gate-5 verification and before Gate-9, governed by PBRD-001
+  v2.0. Frozen immediate phase IDs: `.1R.10` (Gate-5 implementation) /
+  `.1R.11` (verification); `.1R.12` / `.1R.13` (Gate-6 PB production
+  consumption + verification); `.1R.14` / `.1R.15` (Gate-9 + verification,
+  `.1R.14` blocked pending the Gate-7/Gate-8 chapters or an explicit
+  test-path-first authorization). Gate 7 and Gate 8 chapters: no ID invented.
+  No production source, contract, store, PB, or coordinator code modified;
+  runtime remains `not_implemented / Observed / observe / unavailable`; the
+  `.3` governance incident remains unauthorized. Each implementation and
+  verification phase requires separate explicit human authorization, which
+  this planning phase does not grant.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8** — independently verified the
   B1/B7/N1/N2 production authority repair. Re-derived every defect from the
   fixed pre-`.1R.7` baseline `b85e903c` and from primary contracts, not from

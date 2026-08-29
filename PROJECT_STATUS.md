@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9 — Gate-5/Gate-9 Production Authority
+Coordinator Integration Planning.
+**PLANNING ONLY — COMPLETE. NO PRODUCTION SOURCE, CONTRACT, STORE, PB, OR
+COORDINATOR CODE MODIFIED. RUNTIME REMAINS not_implemented / Observed /
+observe / unavailable.** Planned the exact safe RDGO-001 v3.0 Gate-5
+(approval validation) and Gate-9 (atomic one-shot authority consumption)
+coordinator integration that would consume the independently verified
+B1/B7/N1/N2 production authority repair. Re-derived the current coordinator
+call graph from source (no name inference): Gate 5 has validation logic
+(`validate_approval`) but no coordinator and does **not** create HPAC
+lifecycle sequence-3 `PROOF_VERIFIED_AND_BOUND`; Gate 6 has a structural
+`runtime_dispatch` request path but no production consumer; Gate 9's store
+(`runtime_invocation_authority_consumption.py`) is inert with zero
+importers; Gates 7 (Runtime Enforcement) and 8 (Shell Gate) do not exist;
+Gate 10 has only mock/dry. **Gate-5 ownership: Option C (layered)** — one
+new coordinator delegating to the RIHAC validator + HPAC verifier + HPAC
+lifecycle writer, no duplicated authority semantics; output is an ephemeral
+non-transferable `ValidatedAuthorityProjection` + identity-only
+non-serializable `Gate5Result`, never a boolean/bearer token/caller-copyable
+seal, consuming nothing. **Gate-9 ownership: one new coordinator** owning
+the protected serialization boundary, the mandatory HPAC-REQ-099
+in-boundary revalidation battery, closed 8-item record construction, and
+outcome; the existing store owns only the atomic create-only filesystem
+primitive — no second transaction mechanism, per-`proof_id` lock scope.
+Froze the atomic proof+approval consumption model (one `consumption.json` ≡
+proof+approval+presentation+challenge consumed together, no mutable
+`consumed` field), crash-before/after semantics, six-vector replay
+rejection, one-winner concurrency, and the
+`UNVALIDATED → GATE5_VALIDATED (repeatable) → PB_EVALUATED → RE_EVALUATED →
+CONTAINMENT_ESTABLISHED → GATE9_CONSUMED (one-shot) → READY_FOR_GATE10`
+state machine with forbidden transitions. **Option-A NON-REAL hard stop
+unchanged and unconditionally active** (`validate_approval:1093`,
+`create_runtime_invocation_approval:457`); NON-REAL must not reach
+production Gate 9. **POL-005 hard DENY preserved and untouched.** Runtime
+capability remains independent and unavailable. **O1–O4 all carried
+unchanged**, none a prerequisite, none repaired in this chapter. **F2
+(HPAC-REQ-054 Step 4) confirmed as a satisfied prerequisite**; F3/F4
+carried/deferred (cosmetic); **F7 carried unchanged — threat model NOT
+broadened** (same-account autonomous-agent assumption; a process-isolation
+chapter remains separate and non-prerequisite). **No contract blocker**;
+one non-blocking sequencing constraint (Gate 9 needs Gate 6/7/8 evidence —
+an ordering consequence RDGO-001 §10 already states) and one non-blocking
+implementation gap (Gate-5 lifecycle sequence-3 creation, folded into
+`.1R.10` as a prerequisite). **PB production consumption is a separate
+slice**, after Gate-5 verification and before Gate-9, governed fully by
+PBRD-001 v2.0. **Frozen immediate phase IDs:**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.10` — Gate-5 Approval-Validation Coordinator
+Integration Implementation; `.1R.11` — its Independent Verification;
+`.1R.12`/`.1R.13` — Gate-6 Permission Broker Production Consumption
+Integration + Verification; `.1R.14`/`.1R.15` — Gate-9 Atomic Authority
+Consumption Coordinator Integration + Verification (`.1R.14` blocked until
+the Gate-7/Gate-8 chapters exist or an explicit test-path-first scope is
+human-authorized). Gate 7 and Gate 8 chapters: no ID invented. Each
+implementation/verification phase requires separate explicit human
+authorization; this planning phase grants none. The `DELEGATED .3
+FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` governance incident is preserved
+unchanged. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_9_GATE_5_GATE_9_PRODUCTION_AUTHORITY_COORDINATOR_INTEGRATION_PLANNING.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.8 — Independent Verification of
 B1/B7/N1/N2 Production Authority Repair Implementation.
 **INDEPENDENTLY VERIFIED — B1/B7/N1/N2 PRODUCTION AUTHORITY REPAIR COMPLETE
