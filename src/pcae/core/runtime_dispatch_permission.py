@@ -1,5 +1,6 @@
 """
-Runtime Dispatch Permission — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7.
+Runtime Dispatch Permission — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7,
+extended by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.12 (Gate-6).
 
 Implements PBRD-001 v1.1's `runtime_dispatch` request architecture
 extension: the trusted construction of a `PermissionBrokerRequest`
@@ -21,6 +22,30 @@ POL-005 (`ExecutionDisabledRule`) is untouched by this module and by
 design: every `runtime_dispatch` request built here with
 `simulation_only=False` is denied by the unmodified existing rule,
 exactly like every other action type (PBRD-001 §12/§24).
+
+Gate 6 (Phase `.1R.12`, `.1R.9` §16.1 slice 2 / §16.2): `run_gate6_permission_broker`
+is the frozen single owner of RDGO-001 v3.0 §7 Permission Broker
+production consumption for `runtime_dispatch`. It consumes an
+independently-verified Gate-5 `Gate5Result` (`runtime_dispatch_gate5.run_gate5`
+success output — never a caller `Gate5Result`, a field-equivalent
+reconstruction, a copy, or a bare `validated=true`), re-binds its
+`ValidatedAuthorityProjection` to the exact canonical invocation through
+the already-verified `.1R.7` trusted builder (which re-checks
+`is_trusted_validated_authority_projection` + `revalidate_validated_authority_projection`
++ the subject/scope digest and performs the B7 dispatch-identity reread at
+its own point of use), evaluates the request through the **unmodified**
+Permission Broker evaluator, and returns exactly one ephemeral,
+non-transferable `Gate6Decision`. Gate 6 authenticates no human, parses no
+FIDO2 assertion, reads no HPAC registry, establishes no approval, creates
+no HPAC / RIHAC authority, consumes no proof or approval, replicates no
+DENY / HUMAN_REVIEW / ALLOW / POL rule, changes no policy, and dispatches
+nothing. `DENY > HUMAN_REVIEW > ALLOW` precedence and the POL-005 hard DENY
+of every `simulation_only=False` request are owned entirely by the PB
+evaluator and are preserved unchanged. This module calls no Gate-7
+(Runtime Enforcement), no Gate-8 (Shell Gate), no Gate-9 atomic-consumption
+primitive, and no Gate-10 adapter / subprocess / provider / network /
+credential / hardware operation; a PB `ALLOW` remains "policy would allow
+this if execution existed", never runtime capability and never execution.
 """
 
 from __future__ import annotations
@@ -34,6 +59,9 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from .permission_broker_foundation import (
+    DECISION_VALUES,
+    PermissionBroker,
+    PermissionBrokerDecision,
     PermissionBrokerRequest,
     RuntimeDispatchAdapterDescriptorBinding,
     RuntimeDispatchFilesystemScopeRef,
@@ -601,3 +629,252 @@ def build_runtime_dispatch_permission_broker_request(
         simulation_only=simulation_only,
         runtime_dispatch_context=facts,
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Gate 6 — Permission Broker production consumption
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.12 (RDGO-001 v3.0 §7 / PBRD-001 v2.0
+# §7, §9, §10, §14 / `.1R.9` §16.1 slice 2, §16.2, §22).
+# ═══════════════════════════════════════════════════════════════════════════
+
+_GATE6_DECISION_CONSTRUCTOR_SEAL = object()
+
+#: The provenance boundary for a Gate-6 decision: exact-object membership,
+#: keyed by identity (`Gate6Decision.__hash__`/`__eq__` are `id(self)` /
+#: `self is other`). The only insertion point is
+#: :func:`run_gate6_permission_broker`'s success return path; nothing
+#: outside this module adds to it.
+_GATE6_DECISIONS: "set[Gate6Decision]" = set()
+
+
+class Gate6Decision:
+    """The ephemeral, non-transferable evidence Gate 6 emits after the
+    Permission Broker evaluates one `runtime_dispatch` request (`.1R.9` §8
+    discipline, applied to the Gate-6 output; PBRD-001 §5/§9).
+
+    It wraps the immutable :class:`PermissionBrokerDecision` returned by the
+    unmodified evaluator and normalises the fields a caller needs
+    (`decision`, `causing_policy_ids`, `matched_no_go_ids`, `requires_human`,
+    `approval_present`). Like ``Gate5Result`` / ``ValidatedAuthorityProjection``
+    / ``AuthenticatedHumanPrincipal`` this type is:
+
+    * **not** caller-constructable — the ``_seal`` guard rejects direct
+      construction, and :func:`is_gate6_decision` checks membership in this
+      module's process-local identity registry, which only
+      :func:`run_gate6_permission_broker`'s own success path populates;
+    * **not** serializable — ``__reduce__`` raises;
+    * identity-only for ``==`` / ``hash`` — a copy, ``deepcopy``, or
+      field-reconstructed lookalike is a different object and is never a
+      registry member, whatever its fields say;
+    * **not** an execution token — an ``ALLOW`` here means only "PB policy
+      would permit this if execution existed" (``implementation_status``
+      stays ``execution_unavailable``). It is not runtime capability, not
+      Runtime Enforcement approval, not process containment, and not
+      dispatch permission (PBRD-001 §10, §11). A later gate consumes it only
+      through its own coordinator path, re-resolving the authority freshly.
+    """
+
+    __slots__ = (
+        "_pb_decision",
+        "decision",
+        "decision_reason",
+        "approval_present",
+        "invocation_id",
+        "attempt_id",
+        "request_id",
+        "causing_policy_ids",
+        "matched_no_go_ids",
+        "requires_human",
+        "simulation_only",
+        "evaluated_at",
+        "_seal",
+    )
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        raise TypeError("Gate6Decision must not be subclassed")
+
+    def __init__(
+        self,
+        *,
+        pb_decision: PermissionBrokerDecision,
+        approval_present: bool,
+        invocation_id: str,
+        attempt_id: str,
+        request_id: str,
+        simulation_only: bool,
+        evaluated_at: str,
+        _seal: object,
+    ) -> None:
+        if _seal is not _GATE6_DECISION_CONSTRUCTOR_SEAL:
+            raise TypeError(
+                "Gate6Decision cannot be caller-constructed; it is producible "
+                "only by runtime_dispatch_permission.run_gate6_permission_broker"
+            )
+        self._pb_decision = pb_decision
+        self.decision = pb_decision.decision
+        self.decision_reason = pb_decision.decision_reason
+        self.approval_present = approval_present
+        self.invocation_id = invocation_id
+        self.attempt_id = attempt_id
+        self.request_id = request_id
+        self.causing_policy_ids = tuple(pb_decision.causing_policy_ids)
+        self.matched_no_go_ids = tuple(pb_decision.matched_no_go_ids)
+        self.requires_human = bool(pb_decision.requires_human)
+        self.simulation_only = simulation_only
+        self.evaluated_at = evaluated_at
+        self._seal = _seal
+
+    @property
+    def pb_decision(self) -> PermissionBrokerDecision:
+        """The immutable evaluator result. Reading it is not authority — a
+        PB ``ALLOW`` never authorises execution (PBRD-001 §10/§11)."""
+        return self._pb_decision
+
+    def __reduce__(self):
+        raise TypeError(
+            "Gate6Decision is ephemeral and non-serializable; the Permission "
+            "Broker must be re-evaluated over a freshly re-resolved Gate-5 "
+            "projection by every consumer (PBRD-001 §7, §10)"
+        )
+
+    def __eq__(self, other: object) -> bool:
+        return self is other
+
+    def __hash__(self) -> int:
+        return id(self)
+
+    def __repr__(self) -> str:  # pragma: no cover - diagnostic only
+        return (
+            f"<Gate6Decision decision={self.decision!r} "
+            f"invocation_id={self.invocation_id!r} identity={id(self):#x}>"
+        )
+
+
+def is_gate6_decision(candidate: object) -> bool:
+    """Return ``True`` only for the literal object a past
+    :func:`run_gate6_permission_broker` call returned on success — never
+    based on ``isinstance``, fields, equality, or any shape property. Fails
+    closed for a forgery, a copy, a reconstruction, or a stale handle."""
+    return isinstance(candidate, Gate6Decision) and candidate in _GATE6_DECISIONS
+
+
+def run_gate6_permission_broker(
+    gate5_result: object,
+    *,
+    identity: RuntimeDispatchIdentity,
+    inputs: RuntimeDispatchRequestConstructionInput,
+    authority_current_time: str,
+    simulation_only: bool = False,
+    broker: PermissionBroker | None = None,
+) -> tuple[Gate6Decision | None, tuple[str, ...]]:
+    """Run RDGO-001 v3.0 Gate 6 (Permission Broker production consumption)
+    for one ``runtime_dispatch`` request.
+
+    Gate 6 consumes already-validated authority and produces a PB decision
+    only. It:
+
+    1. accepts ``gate5_result`` **only** if :func:`runtime_dispatch_gate5.is_gate5_result`
+       vouches for it — the exact identity object a prior successful
+       ``run_gate5`` returned. A caller-built ``Gate5Result``, a
+       field-equivalent reconstruction, a copy, a serialized clone, a bare
+       ``validated=true`` object, or a caller-provided ``ValidatedAuthorityProjection``
+       all fail closed here (RDGO-001 §7; PBRD-001 §7; the B1 defect class);
+    2. re-binds the referenced projection to the exact canonical invocation
+       — ``gate5_result.invocation_id`` must equal ``identity.invocation_id``,
+       and (inside the trusted builder) the projection's
+       ``subject_scope_binding_digest`` must equal the digest recomputed from
+       ``identity`` + ``inputs``. Gate-5 authority for invocation A cannot
+       drive a PB request for invocation B, and no changed permission-relevant
+       field is accepted (PBRD-001 §15; RDGO-001 §7);
+    3. constructs the ``PermissionBrokerRequest`` through the already-verified
+       ``.1R.7`` trusted builder only — never from a caller-supplied request.
+       The builder re-checks ``is_trusted_validated_authority_projection`` and
+       re-runs ``revalidate_validated_authority_projection`` at its own point
+       of use, and performs the B7 durable dispatch-identity reread. A stale,
+       mutated, or untrusted projection yields request-construction failure,
+       reported here as a fail-closed reason (PBRD-001 §7);
+    4. evaluates the request through the **unmodified** Permission Broker
+       evaluator. The evaluator owns every policy semantic — POL-005's hard
+       DENY of each ``simulation_only=False`` request (never overridden by
+       validated human authority), POL-004's HUMAN_REVIEW when no
+       ``approval_present``, and the ``DENY > HUMAN_REVIEW > ALLOW``
+       precedence. Gate 6 replicates none of it and introduces no
+       caller-controlled precedence (PBRD-001 §9, §12; RDGO-001 §7);
+    5. returns exactly one ephemeral, non-transferable :class:`Gate6Decision`
+       on success, or ``(None, reasons)`` on any fail-closed rejection —
+       creating no ``Gate6Decision`` and consuming nothing.
+
+    ``simulation_only`` defaults to ``False`` (a real local-CLI request);
+    with the frozen POL-005 that truthfully produces ``DENY`` (PBRD-001 §4,
+    §12). Passing ``True`` models a policy simulation.
+
+    Gate 6 consumes nothing: no approval, proof, presentation, challenge, or
+    nonce state changes, and no ``consumption.json`` is created (RDGO-001 §7;
+    PBRD-001 §7 "PB evaluation never consumes an approval or HPAC proof").
+    It calls no Gate-7, Gate-8, Gate-9, or Gate-10 primitive.
+    """
+    # 1. Provenance — only the exact object a successful run_gate5 returned.
+    from .runtime_dispatch_gate5 import Gate5Result, is_gate5_result
+
+    if not is_gate5_result(gate5_result):
+        return None, ("gate6_untrusted_gate5_result",)
+    assert isinstance(gate5_result, Gate5Result)
+
+    if type(identity) is not RuntimeDispatchIdentity:
+        return None, ("gate6_untrusted_runtime_dispatch_identity",)
+    if type(inputs) is not RuntimeDispatchRequestConstructionInput:
+        return None, ("gate6_invalid_construction_input",)
+    if not _bounded_string(authority_current_time, 64):
+        return None, ("gate6_invalid_authority_current_time",)
+    if type(simulation_only) is not bool:
+        return None, ("gate6_invalid_simulation_only",)
+
+    # 2. Exact invocation binding (the subject/scope digest is re-checked
+    #    inside the trusted builder; this is the precise invocation-id guard).
+    if gate5_result.invocation_id != identity.invocation_id:
+        return None, ("gate6_invocation_binding_mismatch",)
+
+    # 3. Build the request through the trusted .1R.7 builder ONLY. Authority
+    #    derives from the registry-provenanced projection the Gate-5 result
+    #    references — never from a caller-supplied request or boolean. The
+    #    builder re-resolves is_trusted_validated_authority_projection +
+    #    revalidate_validated_authority_projection + the subject/scope digest
+    #    and performs the B7 dispatch-identity reread at its own point of use.
+    projection = gate5_result.projection
+    try:
+        request = build_runtime_dispatch_permission_broker_request(
+            identity=identity,
+            inputs=inputs,
+            validated_authority=projection,
+            authority_current_time=authority_current_time,
+            simulation_only=simulation_only,
+        )
+    except RuntimeDispatchConstructionError as exc:
+        return None, (f"gate6_request_construction_failed:{exc}",)
+
+    # 4. Evaluate through the UNMODIFIED Permission Broker evaluator. Gate 6
+    #    owns only trusted request construction and the normalised decision
+    #    envelope; all DENY / HUMAN_REVIEW / ALLOW / POL semantics and the
+    #    DENY > HUMAN_REVIEW > ALLOW precedence stay in the evaluator.
+    evaluator = broker if broker is not None else PermissionBroker()
+    if type(evaluator) is not PermissionBroker:
+        return None, ("gate6_untrusted_permission_broker",)
+    pb_decision = evaluator.evaluate(request)
+    if (
+        type(pb_decision) is not PermissionBrokerDecision
+        or pb_decision.decision not in DECISION_VALUES
+    ):
+        return None, ("gate6_invalid_permission_broker_decision",)
+
+    result = Gate6Decision(
+        pb_decision=pb_decision,
+        approval_present=request.approval_present,
+        invocation_id=identity.invocation_id,
+        attempt_id=identity.attempt_id,
+        request_id=request.request_id,
+        simulation_only=request.simulation_only,
+        evaluated_at=authority_current_time,
+        _seal=_GATE6_DECISION_CONSTRUCTOR_SEAL,
+    )
+    _GATE6_DECISIONS.add(result)
+    return result, ()
