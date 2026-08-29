@@ -2,6 +2,85 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.12 — Gate-6 Permission Broker Production
+Consumption Integration Implementation.
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Implemented
+only the Gate-6 production-consumption slice frozen by `.1R.9` §16.1 slice 2
+/ §16.2 and carried forward by `.1R.11`. One production file changed:
+`src/pcae/core/runtime_dispatch_permission.py` — new
+`run_gate6_permission_broker` (the frozen single Gate-6 owner) plus the
+ephemeral, non-transferable `Gate6Decision` / `is_gate6_decision`. It
+consumes an independently-verified Gate-5 `Gate5Result` **only** via
+`runtime_dispatch_gate5.is_gate5_result` (exact identity-registry
+membership — a caller-built, reconstructed, copied, pickled, or duck-typed
+`Gate5Result`, a bare `validated=true`, and `None` all fail closed),
+re-binds its `ValidatedAuthorityProjection` to the exact canonical
+invocation (`gate5_result.invocation_id == identity.invocation_id`, plus
+the builder's `subject_scope_binding_digest` recompute), constructs the
+`PermissionBrokerRequest` **only** through the already-verified `.1R.7`
+trusted builder (which re-checks `is_trusted_validated_authority_projection`
++ `revalidate_validated_authority_projection` + the subject/scope digest
+and performs the B7 durable dispatch-identity reread at its own point of
+use — no caller-supplied request is ever trusted), evaluates through the
+**unmodified** `PermissionBroker` evaluator, and returns exactly one
+`Gate6Decision`. `DENY > HUMAN_REVIEW > ALLOW` precedence and POL-005's
+hard DENY of every `simulation_only=False` request are owned entirely by
+the byte-unchanged evaluator and are preserved — verified human authority
+does not override POL-005 (`ExecutionDisabledRule` ignores
+`approval_present`). Gate 6 replicates no policy / POL / precedence / reason
+logic (AST-asserted). `Gate6Decision` is identity-only, non-serializable,
+process-local — a PB ALLOW stays "policy would allow if execution existed",
+never runtime capability, never execution. Gate 6 authenticates no human,
+establishes no approval, creates no HPAC/RIHAC authority, consumes no proof
+or approval (no `consumption.json` anywhere), and calls no Gate-7
+(Runtime Enforcement), Gate-8 (Shell Gate), Gate-9 atomic consumption, or
+Gate-10 adapter/subprocess/provider/network/credential/hardware operation —
+AST forbidden-import scan passes. The `runtime_dispatch_gate5` import is
+**function-local**, so the module-load import graph is unchanged and **no
+consumer-inventory / isolation meta-guard trips** (contrast `.1R.10`).
+`permission_broker_foundation.py`, `runtime_authority.py`,
+`runtime_dispatch_gate5.py`, `hpac_lifecycle.py`, `runtime_introspection.py`
+and all 8 normative contracts (RDGO-001 v3.0, RIHAC-001 v2.0, RIASC-001
+v3.0, HPAC-001 v2.0, PBRD-001 v2.0, RPAC-001 v1.0, PBPA-001, POL-005) are
+byte-unchanged since the phase-entry baseline `a26b9fe2`. **No positive
+Gate-6 evaluation is exercised** — the NON-REAL hard stop makes a real
+`Gate5Result` unobtainable without real FIDO2/UI (O1); Gate-6's
+anti-transfer / trusted-construction properties are verified at the
+predicate + builder + `Gate6Decision`-discipline levels (`.1R.9` §41,
+prompt §30), exactly as `.1R.8`/`.1R.11` verified B1. **34 new focused
+tests** (`tests/test_gate6_permission_broker_production_consumption_3w1r2b1r1_1r12.py`),
+rejection-only + structural, all passing; the targeted Gate-6 / Gate-5 /
+permission-broker / runtime-authority / runtime-dispatch suites are
+**699 passed, 0 failed**. Fixed-SHA A/B (baseline `a26b9fe2` vs `HEAD`,
+`-p no:randomly`, explicit files, no `xdist`): **CANDIDATE-ONLY NONPASSING
+NODES = 0**; **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0** (the
+pre-existing `test_blocking_reproduction_*` / contradiction-documentation
+failures in the HPAC independent-verification suites reproduce identically
+with the change stashed — `diff` → `IDENTICAL`). Runtime remains
+`not_implemented / Observed / observe / unavailable`. **Contract-alignment
+review:** V-2 / V-3 (from `.1R.11`) **remain non-blocking — no Gate-6
+impact**: PBRD-001 `human_authority_binding` does not depend on the
+disputed HPAC sequence-3 wording (its inputs are the approval reference and
+the RIHAC-001 v2.0 projection digest, both from `validate_approval` step
+4/12), and the Gate-6 path never touches HPAC lifecycle sequence-3. **New
+non-blocking finding V-4:** the `.1R.7`-frozen 3-field
+`RuntimeDispatchHumanAuthorityBinding` shape (`approval_id`,
+`approval_record_digest`, `validation_evidence_digest`) differs from
+PBRD-001 v2.0 §4 fact 14's literal 7-field enumeration; `.1R.9` §25 froze
+this slice as "no change to the 14-fact shape", so the shape is carried
+verbatim and the contract is untouched — PBRD-001 §7's substantive
+non-caller-settable / RIHAC-validation-only property is preserved, so no
+Gate-6 impact. V-2/V-3/V-4 are recorded for a dedicated
+contract-clarification task or `.1R.13`; **not performed here** (not
+separately authorized). `DELEGATED .3 FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED` preserved. Governed PCAE lifecycle only. Recommended next
+(requires separate explicit human authorization; do not begin):
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.13` — Independent Verification of Gate-6
+Permission Broker Production Consumption Integration.** `.1R.14`/`.1R.15`
+(Gate-9 + verification) remain frozen; `.1R.14` stays blocked until the
+Gate-7/Gate-8 chapters exist or an explicit test-path-first scope is
+human-authorized. Gate-7 and Gate-8 chapters have no invented ID.
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 — Independent Verification of the
 Gate-5 Approval-Validation Coordinator Integration.
 **VERIFIED WITH NON-BLOCKING FINDINGS — GATE-5 APPROVAL-VALIDATION
