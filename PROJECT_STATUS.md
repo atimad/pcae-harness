@@ -2,6 +2,105 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.3 — Independent Verification of the
+Gate-7 Runtime Enforcement Coordinator Integration.
+**GATE-7 — CLOSED. VERIFIED WITH NON-BLOCKING FINDINGS. V-13-1 — CLOSED.**
+Independently re-derived the Gate-7 requirements from RDGO-001 v3.0 §8,
+PBRD-001 v2.0 §14, POL-005, the `runtime_enforcement_safety_authorization`
+design-only no-go vocabulary, `docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md`,
+and `.1R.13.1` §4/§6/§7/§10/§13/§24 — not trusted from the `.1R.13.2`
+report, its implementation document, or its 36 tests. No defect repaired,
+no production source written, no `.1R.13.4` / Gate 8 / `.1R.14` / Gate 9 /
+Gate 10 work begun, execution not enabled. Verification-entry SHA
+`9230c10b`; immutable pre-`.1R.13.2` baseline `698fabd9`;
+`git diff --name-only 698fabd9 HEAD -- src/pcae` is **exactly**
+`src/pcae/core/runtime_dispatch_gate7.py`; `git diff 698fabd9 HEAD --
+docs/contracts` and `-- src/pcae/core/permission_broker_foundation.py` are
+**empty**; `runtime_introspection.py`, `runtime_dispatch_gate5.py`,
+`runtime_dispatch_permission.py`,
+`runtime_enforcement_safety_authorization.py` byte-unchanged. Independently
+confirmed: `run_gate7_runtime_enforcement` is the **sole** production owner
+(`git grep` inventory) and `Gate7Result` has **zero** downstream production
+consumers; **dual upstream provenance** enforced (trusted `Gate6Decision`
++ trusted `Gate5Result`; forged / `object.__new__` / copied / mixed pairs
+all fail closed); `decision != "ALLOW"` (exact string equality) is a hard
+stop **before** `resolve_runtime_enforcement_posture()` is even called
+(verified by patching the resolver to raise) — no code path converts
+`DENY` / `HUMAN_REVIEW` / unknown into a positive `Gate7Result`
+(anti-escalation invariant); POL-005 hard `DENY` therefore never reaches a
+successful Gate-7 path; invocation-id / attempt-id substitution rejected;
+`subject_scope_binding_digest` recomputed from `identity` + `inputs` (not
+trusted); projection re-trusted + `revalidate_validated_authority_projection`
+re-runs `validate_approval` at Gate 7's own point of use (revocation /
+expiry / consumption / principal drift all caught); runtime posture
+resolved **internally** from `runtime_introspection` + design-only DEFAULT
+flag tables (no caller `execution_available` field; single coherent
+snapshot per evaluation); the full flag-derived matched no-go set is
+`{RE-NOGO-001..008, RE-NOGO-010, RE-NOGO-011}` (a superset of the
+`.1R.13.2` claim, incl. **RE-NOGO-002** proven under
+`execution_availability = unavailable`); under the current
+`not_implemented / Observed / observe / unavailable` posture Gate 7
+**always** returns `Gate7Result(decision="DENY", ...)` and there are **0
+reachable positive production Gate-7 paths** (positive branch is
+`pragma: no cover`; NON-REAL upstream); a trusted **negative**
+`Gate7Result` is provenance-only and **not** a success signal
+(`is_gate7_result` means provenance, never "Gate 7 allowed" — Gate-8
+regression guard added to the verification suite); `Gate7Result` is
+non-transferable (direct construction / `object.__new__` / `copy` /
+`deepcopy` / `pickle` / field-reconstruction / subclassing all rejected);
+Gate 7 **consumes nothing** (no `consumption.json`, no lifecycle write, no
+Gate-9 primitive); no Gate-8 / Gate-9 / Gate-10 symbol or effectful import;
+runtime state unchanged. **V-13-1 — CLOSED:** the ten point-in-time
+scope / consumer-inventory guards converted by `.1R.13.2` were verified
+guard-by-guard to preserve or strengthen the original security intent
+(subset orientation `changed - AUTHORIZED == set()`, never reversed; an
+unauthorized production-file / projection / Gate-6-symbol / Gate-9
+consumer still fails; `gate9_callers == set()` / `gate9_consumers ==
+set()` / `hpac_consumers == {…}` kept exact); the two guards already red at
+`698fabd9` are green at HEAD. **Fixed-SHA A/B** (baseline `698fabd9` in an
+isolated `git worktree` vs HEAD, `-p no:randomly -n0`, identical
+selection): `CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0`;
+`UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0`; the
+`test_concurrent_conflicting_successors_have_one_canonical_winner`
+concurrency flake reproduces at an identical rate at **both** SHAs
+(pre-existing repo-wide flake, not candidate-attributable — attribution
+corrected as finding V-13-3-3). Fresh independent suite
+`tests/test_gate7_runtime_enforcement_coordinator_independent_verification_3w1r2b1r1_1r13_3.py`
+— **62 tests, all passing**. **Non-blocking findings:** V-13-3-1 (LOW —
+`.1R.13.2`'s "PB-policy drift covered transitively via projection
+revalidation" overstates `revalidate_validated_authority_projection`,
+which does not re-read live PB policy and explicitly tolerates a detected
+`policy_drift_requires_fresh_pb_re_evaluation`; policy re-evaluation is
+Gate 6's responsibility, the reserved reason id
+`gate7_pb_decision_stale_policy_version` correctly marks a future
+`Gate6Decision`-shape concern, and it is not exploitable under the current
+always-DENY posture — reword the claim in a future phase, no production
+change now); V-13-3-2 (LOW — Gate 7's `matched_no_go_ids` is a projection
+of the authorization/safety flag snapshot and omits registry-mandatory
+RE-NOGO-009/013/015/016/017, which is by frozen design and functionally
+harmless since ten other no-gos already force DENY); V-13-3-3 (INFO — the
+concurrency-flake attribution correction above). None blocks closure; none
+requires a repair this phase. V-2 / V-3 / V-4 carried **unchanged /
+non-blocking** — Gate 7 consumes trusted upstream objects and does not
+reconstruct the disputed bindings. O1–O4 / F2–F4 carried unchanged; **F7
+threat model NOT broadened** (arbitrary same-process Python code execution
+remains outside current trust guarantees; the report does not overclaim
+result-registry resistance against arbitrary in-process mutation). Gate 5
+still CLOSED, Gate 6 still CLOSED (both coordinators byte-unchanged, NON-REAL
+hard stop + POL-005 hard DENY intact). `DELEGATED .3 FINALIZATION / COMMIT
+/ PUSH: UNAUTHORIZED` preserved; governed PCAE lifecycle only. **Final
+verdict: VERIFIED WITH NON-BLOCKING FINDINGS — GATE-7 RUNTIME ENFORCEMENT
+COORDINATOR INTEGRATION COMPLETE.** Frozen next phase (requires its own
+explicit human authorization; do not begin):
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.13.4` — Gate-8 Process Containment (Shell
+Gate) Coordinator Integration Implementation.** `.1R.13.5` and
+`.1R.14` / `.1R.15` (Gate 9) remain frozen, BLOCKED, and NOT renumbered.
+A V-2 / V-3 / V-4 (and V-13-3-1 / V-13-3-2) contract-clarification phase is
+an alternative non-blocking next step. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_13_3_INDEPENDENT_VERIFICATION_OF_GATE_7_RUNTIME_ENFORCEMENT_COORDINATOR_INTEGRATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.2 — Gate-7 Runtime Enforcement
 Coordinator Integration Implementation.
 **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Implemented
