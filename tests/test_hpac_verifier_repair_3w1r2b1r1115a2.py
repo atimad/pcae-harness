@@ -361,7 +361,11 @@ def test_runtime_authority_is_the_only_production_consumer_after_integration():
         text = path.read_text(encoding="utf-8")
         if "hpac_verifier" in text:
             consumers.append(str(path.relative_to(_REPO_ROOT)))
-    assert consumers == ["src/pcae/core/runtime_authority.py"]
+    # .1R.10 added the authorized Gate-5 approval-validation coordinator.
+    assert sorted(consumers) == [
+        "src/pcae/core/runtime_authority.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+    ]
 
 
 def test_reverification_is_the_only_added_public_consumption_surface():

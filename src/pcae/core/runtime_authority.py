@@ -904,6 +904,27 @@ def is_trusted_validated_authority_projection(value: object) -> bool:
     )
 
 
+def trusted_projection_gate5_binding(value: object) -> tuple[str, str, str] | None:
+    """Return ``(approval_id, proof_id, invocation_id)`` for a value that is
+    still a trusted ``ValidatedAuthorityProjection`` (Phase
+    149O.20L.7O.3W.1R.2B.1R.1.1R.10, `.1R.9` §6.2 row 23 / §25 minimal
+    hook), else ``None``.
+
+    The Gate-5 approval-validation coordinator (``runtime_dispatch_gate5``)
+    uses this to obtain the exact identity triple it must re-resolve and
+    compare against the HPAC lifecycle sequence-3 binding, without reading
+    projection internals and without trusting a caller-provided binding. It
+    is a read-only accessor gated on
+    :func:`is_trusted_validated_authority_projection`; it emits no authority
+    and mutates nothing. A future Gate-9 coordinator (`.1R.14`) may reuse
+    it for the same purpose.
+    """
+    if not is_trusted_validated_authority_projection(value):
+        return None
+    assert isinstance(value, ValidatedAuthorityProjection)
+    return value.approval_id, value.proof_id, value.invocation_id
+
+
 def validate_approval(
     approval_id: object,
     *,

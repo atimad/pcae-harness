@@ -762,6 +762,33 @@ class HPACLifecycleStore:
             _writer=writer,
         )
 
+    def resolve_gate5_binding_event(
+        self, proof_id: str
+    ) -> Optional[HPACResolvedRecord[LifecycleEvent]]:
+        """Return the canonical, provenance-checked sequence-3
+        ``PROOF_VERIFIED_AND_BOUND`` event for ``proof_id`` iff the chain is
+        currently in that state, else ``None`` (Phase
+        149O.20L.7O.3W.1R.2B.1R.1.1R.10, `.1R.9` §25 minimal support).
+
+        Read-only: it resolves the full canonical chain (re-running every
+        digest, hash-link, no-fork, transition, and writer-provenance check
+        via :meth:`resolve_canonical_chain`), creates nothing, writes
+        nothing, and consumes nothing. The Gate-5 approval-validation
+        coordinator uses it to CONFIRM HPAC-REQ-097's sequence-3 binding
+        after the verifier's HPAC-REQ-054 step 10 has created (or
+        idempotently accepted) the event, and to capture the event digest
+        for its ephemeral result. It never manufactures the event — the
+        create / same-binding-idempotent path remains
+        :meth:`bind_gate5_canonical`, unchanged.
+        """
+        chain = self.resolve_canonical_chain(proof_id)
+        if not chain:
+            return None
+        last = chain[-1]
+        if last.record.state != STATE_PROOF_VERIFIED_AND_BOUND:
+            return None
+        return last
+
     def resolve_chain(self, proof_id: str) -> tuple[LifecycleEvent, ...]:
         """Return validated lifecycle data, without conferring canonical authority."""
         return tuple(self._load_chain(proof_id))

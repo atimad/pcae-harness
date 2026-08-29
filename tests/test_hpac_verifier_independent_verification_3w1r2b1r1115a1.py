@@ -815,8 +815,12 @@ def test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier():
                 for alias in node.names:
                     if "hpac_verifier" in alias.name:
                         consumers.append(str(path))
+    # .1R.10 added the authorized Gate-5 approval-validation coordinator
+    # (the "future Gate 5" per this module's own docstring); it consumes
+    # only `is_verifier_authenticated_principal`.
     assert set(consumers) == {
-        str(src_root / "core" / "runtime_authority.py")
+        str(src_root / "core" / "runtime_authority.py"),
+        str(src_root / "core" / "runtime_dispatch_gate5.py"),
     }
 
 

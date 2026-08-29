@@ -536,7 +536,14 @@ def test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier_modu
         text = path.read_text(encoding="utf-8")
         if "hpac_verifier" in text:
             consumers.append(str(path.relative_to(_REPO_ROOT)))
-    assert consumers == ["src/pcae/core/runtime_authority.py"]
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.10 added the authorized Gate-5
+    # approval-validation coordinator, the "future Gate 5" this module was
+    # designed to serve (.1R.9 §16.1). It consumes only the public
+    # provenance predicate `is_verifier_authenticated_principal`.
+    assert sorted(consumers) == [
+        "src/pcae/core/runtime_authority.py",
+        "src/pcae/core/runtime_dispatch_gate5.py",
+    ]
 
 
 def test_gate9_consumption_store_is_never_referenced_by_the_verifier():

@@ -401,8 +401,12 @@ def test_runtime_authority_is_the_only_production_consumer_outside_verifier():
             elif isinstance(node, ast.ImportFrom) and node.module:
                 if node.module.split(".")[-1] == "hpac_verifier":
                     offenders.append(str(path))
+    # .1R.10 added the authorized Gate-5 approval-validation coordinator
+    # (runtime_dispatch_gate5), which imports only the public provenance
+    # predicate is_verifier_authenticated_principal.
     assert set(offenders) == {
-        str(_repo_root() / "src" / "pcae" / "core" / "runtime_authority.py")
+        str(_repo_root() / "src" / "pcae" / "core" / "runtime_authority.py"),
+        str(_repo_root() / "src" / "pcae" / "core" / "runtime_dispatch_gate5.py"),
     }
 
 
