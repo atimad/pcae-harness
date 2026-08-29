@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.1 — Runtime-Dispatch Contract
+Clarification and Verified-Architecture Normalization Planning.
+**PLANNING / RECONCILIATION COMPLETE. No production source or normative
+contract changed.** Independently adjudicated the accumulated
+contract-alignment, diagnostic-completeness, serialization-model, and
+test-hygiene debt deferred by `.1R.11`–`.1R.15` against the frozen
+contracts (RDGO-001 v3.0, PBRD-001 v2.0, RIHAC-001 v2.0, RIASC-001 v3.0,
+HPAC-001 v2.0, RPAC-001 v1.0, PBPA-001, POL-005) and the verified Gate 5–9
+implementation, read line-by-line — not from phase summaries.
+**Classifications:** V-2 / V-3 / V-4 / V-13-5-1 = **A** (contract/plan text
+stale; verified implementation correct); V-13-3-1 / V-13-3-2 / V-15-2 /
+V-15-3 = **D** (documentation / registry-classification / test hygiene);
+**V-15-1 = C** (both). No finding is class B or E.
+**V-15-1 (highest priority) — answered independently:** the Gate-9
+revalidation battery runs *immediately before* but **not atomic with** the
+create-only linearization (`write_atomic_create_only`; no lock object
+exists); a revocation / lifecycle-invalidation landing in the residual
+T1→T3 window is not caught, so a canonical `HPAC-AUTHORITY-CONSUMPTION/2.0`
+record can be written for authority invalid at the linearization point
+(`test_v15_1_residual_revalidate_to_create_window`). **Must authority be
+valid at the linearization point? YES.** Currently effect-free (Gate 10
+absent; its frozen forward invariant mandates a full re-read + re-validate
++ containment re-establishment) and fail-safe (burns the one-shot
+authority, never escalates), so **non-blocking for Gate-10 planning but
+MUST be resolved before Gate-10 design.** Selected fix: **Option B** —
+capture monotonic authority-generation tokens in the battery, re-check them
+with zero intervening effectful I/O immediately before `create`, fail
+closed on any change; keep the create-only primitive as the single
+transaction mechanism (no second lock). **`.1R.9` §13.5 is internally
+self-contradictory** ("acquire the lock before the §12 battery" vs "do not
+invent a new lock") and RDGO-001 §10 / `.1R.13.1` §16.2-inv-4 "no TOCTOU
+allowance" wording does not match the verified code — normalize after the
+repair.
+**Selected next path: Path C (combined, staged, repair-first).** Frozen
+non-conflicting phase IDs (each needs its own explicit human authorization;
+this phase grants none): `.1R.15.2` Gate-9 Atomic-Consumption
+Serialization-Semantics Repair (+ V-15-2 guard conversion + V-15-3
+test-hygiene fix); `.1R.15.3` Independent Verification of the Gate-9
+Repair; `.1R.15.4` Runtime-Dispatch Contract Normalization Implementation
+(RDGO-001 → v3.1, PBRD-001 → v2.1, RIASC-001 errata, RE No-Go Registry →
+schema 1.1, phase-document errata); `.1R.15.5` Independent Verification of
+the Contract Normalization. **Gate 10 remains without a phase ID** until
+`.1R.15.5` closes and the 10-item Gate-10 prerequisite list (planning doc
+§20) is satisfied; do not invent one.
+Canonical planning artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_15_1_RUNTIME_DISPATCH_CONTRACT_CLARIFICATION_AND_VERIFIED_ARCHITECTURE_NORMALIZATION_PLANNING.md`.
+No `src/pcae`, contract, or test file changed (`git diff --name-only
+e0ddd482 HEAD -- src/pcae docs/contracts` empty). Runtime remains
+`not_implemented / Observed / observe / unavailable`; POL-005 unchanged;
+real execution UNAVAILABLE; deterministic authentication NON_REAL. The
+delegated `.3` finalization / commit / push incident remains UNAUTHORIZED.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15 — Independent Verification of the
 Gate-9 Atomic Authority Consumption Coordinator Integration.
 **GATE-9 — CLOSED. VERIFIED WITH NON-BLOCKING FINDINGS.**
