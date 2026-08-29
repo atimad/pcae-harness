@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.5: Independent Verification of the Gate-8 
 
 ## Status
 
-active
+done
 
 ## Mode
 
