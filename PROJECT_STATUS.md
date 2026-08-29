@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.10 — Gate-5 Approval-Validation
+Coordinator Integration Implementation.
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.** Implemented
+only the RDGO-001 v3.0 §6 Gate-5 integration frozen by `.1R.9` §16.1 slice
+1. New `src/pcae/core/runtime_dispatch_gate5.py` — the **Option C (layered)**
+Gate-5 approval-validation coordinator (`run_gate5`): the single owner of
+"Gate 5 ran", sequencing the already-verified sub-checks in RIHAC-001 v2.0
+§16 order (approval validation → `runtime_authority.validate_approval`;
+principal provenance + full HPAC-REQ-054 reverification incl. Step-4
+independent challenge recomputation → the HPAC verifier via
+`reverify_authenticated_principal`), confirming the HPAC lifecycle
+sequence-3 `PROOF_VERIFIED_AND_BOUND` binding (HPAC-REQ-097), and owning the
+fail-closed envelope. Output is the ephemeral non-transferable
+`ValidatedAuthorityProjection` plus an identity-only, non-serializable,
+constructor-sealed, registry-provenanced `Gate5Result` — never a boolean,
+bearer token, or caller-copyable seal; **consumes nothing** and is
+idempotently repeatable. The **NON-REAL hard stop is inherited, not
+re-implemented** (`validate_approval:1093`): the fully wired coordinator
+returns fail-closed in production for every real request; a complete
+deterministic local HPAC chain still fails on
+`non_real_authenticated_principal_cannot_validate_production_approval` and
+never reaches a `Gate5Result`, PB request, or Gate-9 consumption. Minimal
+wiring: `runtime_authority.trusted_projection_gate5_binding` (read-only
+gated accessor) and `HPACLifecycleStore.resolve_gate5_binding_event`
+(read-only canonical sequence-3 resolver) — no schema, genesis, twelve-step,
+hard-stop, or trust-predicate change. **Finding IF-1:** primary source
+showed the sequence-3 write is already wired through the verifier's
+mandatory HPAC-REQ-054 step 10 (assurance-independent by design, not
+authority — HPAC-REQ-097 §40.2), so the coordinator owns sequence-3 by
+**confirmation**, not a duplicate write; recorded, no STOP triggered, no
+architecture redesigned. **No Gate-6 PB / Gate-7 / Gate-8 / Gate-9
+consumption / Gate-10.** No normative contract modified (`git diff
+docs/contracts` empty). POL-005 hard DENY untouched. Runtime remains
+`not_implemented / Observed / observe / unavailable`; new coordinator
+imports nothing effectful (AST-verified). 29 new focused defensive tests
+(rejection-only + structural — no positive Gate-5 success is manufacturable
+under the permanent NON-REAL mechanism, per `.1R.9` §41); targeted
+Gate-5/HPAC/runtime-authority/B1-B7-N1-N2 suites 358 passed. Regression
+attribution (fixed baseline `1810c8d8`, `git stash -u` A/B): **0 unexplained
+attributable functional regressions**; +15 attributable failures are all
+point-in-time isolation/consumer-inventory snapshot guards from earlier
+phases that any authorized `src/pcae` change trips — 4 `.1R.5.x`/general
+consumer-inventory audits extended to the authorized second consumer, 4
+`.1R.7`/`.1R.8` snapshots left unmodified per §29 and re-baselined by
+`.1R.11`, ~7 unrelated cross-phase "no src touched" guards; 344 pre-existing
+fast_green failures unchanged. B1/B7/N1/N2 and F1 functional closure intact;
+F2/HPAC-REQ-054 Step 4 preserved and now load-bearing; F3/F4/F7 carried
+unchanged, F7 threat model **not** broadened; O1–O4 carried unchanged, none
+worsened. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+preserved. Gate 5 is **not** independently verified and `.1R.10` is **not**
+self-closed. Recommended next phase:
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.11` — Independent Verification of Gate-5
+Approval-Validation Coordinator Integration** (do not begin). See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_10_GATE_5_APPROVAL_VALIDATION_COORDINATOR_INTEGRATION_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.9 — Gate-5/Gate-9 Production Authority
 Coordinator Integration Planning.
 **PLANNING ONLY — COMPLETE. NO PRODUCTION SOURCE, CONTRACT, STORE, PB, OR
