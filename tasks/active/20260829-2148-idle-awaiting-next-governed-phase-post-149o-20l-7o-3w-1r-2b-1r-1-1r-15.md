@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260829-2007-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-15-independent-verification-of-gate-9-atomic-authority-consumption-coordinator-integration
+20260829-2148-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-15
 
 ## Title
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15: Independent Verification of Gate-9 Atomic Authority Consumption Coordinator Integration
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.15)
 
 ## Status
 
@@ -18,17 +18,17 @@ implementation
 
 ## Goal
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15: Independent Verification of Gate-9 Atomic Authority Consumption Coordinator Integration
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.15)
 
 ## Allowed Files
 
-- tests/test_gate9_atomic_authority_consumption_coordinator_independent_verification_3w1r2b1r1_1r15.py
-- docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_15_GATE9_ATOMIC_AUTHORITY_CONSUMPTION_COORDINATOR_INDEPENDENT_VERIFICATION.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- tasks/**
 
 ## Forbidden Files
 
@@ -82,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-29T20:07:50.895436+02:00
+2026-08-29T21:48:53.488818+02:00
