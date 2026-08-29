@@ -391,6 +391,7 @@ def test_only_expected_production_file_changed_since_baseline():
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
     }
 
 

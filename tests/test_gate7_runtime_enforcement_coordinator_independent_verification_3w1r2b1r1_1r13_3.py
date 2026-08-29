@@ -165,17 +165,23 @@ def test_no_downstream_production_consumer_of_gate7_result():
     assert hits <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",  # authorized Gate-9 consumer (.1R.14 §16.2)
     }, f"unexpected Gate7Result consumer: {sorted(hits)}"
 
 
 def test_gate7_is_the_only_new_gate6_decision_consumer():
+    # .1R.14 (V-13-1): the Gate-9 atomic-consumption coordinator is the
+    # second authorized downstream consumer of the Gate-6 decision object
+    # (the .1R.13.1 §16.2 handoff re-derives Gate-6 lineage). Phase-aware
+    # subset invariant.
     hits = set(subprocess.run(
         ["git", "grep", "-l", "-E", r"Gate6Decision|is_gate6_decision", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
-    assert hits == {
+    assert hits <= {
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
-    }
+        "src/pcae/core/runtime_dispatch_gate9.py",
+    }, f"unexpected Gate6Decision consumer: {sorted(hits)}"
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -541,6 +547,7 @@ def test_runtime_introspection_constants_unchanged_since_baseline():
     assert out <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
     }, f"unauthorized production-file expansion since the .1R.13.1 baseline: {sorted(out)}"
     assert "src/pcae/core/runtime_introspection.py" not in out
 
@@ -600,12 +607,18 @@ def test_converted_guards_still_reject_an_unauthorized_extra_production_file():
         assert " - _AUTHORIZED" in src or " <= {" in src or ") <= {" in src or "changed - " in src or " <= _AUTH" in src.replace("_AUTHORIZED", "_AUTH")
 
 
-def test_converted_guards_keep_hpac_and_gate9_exact_empty_asserts():
+def test_converted_guards_keep_hpac_exact_and_gate9_bounded_asserts():
+    # .1R.14 (V-13-1): the Gate-9 store importer / consumer asserts are no
+    # longer exact-empty — the explicitly human-authorized .1R.14 phase adds
+    # exactly one authorized importer (runtime_dispatch_gate9.py). They stay
+    # phase-aware SUBSET asserts (any other importer still fails); the
+    # hpac_verifier consumer asserts remain exact and unweakened.
     src8 = (REPO_ROOT / _CONVERTED_GUARDS[0][0]).read_text()
-    assert "gate9_callers == set()" in src8
+    assert 'gate9_callers <= {"src/pcae/core/runtime_dispatch_gate9.py"}' in src8
     assert "hpac_consumers == {" in src8  # still exact, not weakened
     src117 = (REPO_ROOT / _CONVERTED_GUARDS[5][0]).read_text()
-    assert "gate9_consumers == set()" in src117
+    assert 'gate9_consumers <= {"src/pcae/core/runtime_dispatch_gate9.py"}' in src117
+    assert "hpac_consumers == {" in src117
 
 
 def test_synthetic_unauthorized_file_would_fail_the_subset_invariant():

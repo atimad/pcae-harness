@@ -597,6 +597,7 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
         "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
     }
     unexpected = set(changed) - _authorized_surface
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -685,8 +686,16 @@ def test_consumer_inventory_is_bounded_and_gate9_stays_unwired():
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",
     }, f"unexpected ValidatedAuthorityProjection consumer: {sorted(projection_consumers)}"
-    assert gate9_consumers == set()
+    # .1R.14 (V-13-1): the Gate-9 atomic-consumption coordinator is the
+    # single authorized consumer of the inert Gate-9 store
+    # (`runtime_invocation_authority_consumption`) — the explicitly
+    # human-authorized `.1R.9` §16.1 slice 3 / `.1R.13.1` §16 handoff.
+    # Phase-aware subset invariant: any OTHER importer still fails.
+    assert gate9_consumers <= {"src/pcae/core/runtime_dispatch_gate9.py"}, (
+        f"unexpected Gate-9 store consumer: {sorted(gate9_consumers)}"
+    )
 
 
 def test_repaired_production_modules_have_no_effect_or_real_ceremony_imports():

@@ -728,6 +728,7 @@ def test_isolation_only_three_production_files_changed_since_baseline():
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
         "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
     }
     unexpected = set(changed) - _authorized
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -769,12 +770,20 @@ def test_isolation_no_gate_coordinator_or_gate9_consumption_wiring():
     # a hpac_verifier symbol and neither calls a Gate-9 primitive.
     # Phase-aware invariant: projection consumers subset of the authorized
     # chain; gate9_callers stays empty.
-    assert gate9_callers == set()
+    # .1R.14 (V-13-1): the Gate-9 atomic-consumption coordinator
+    # (`runtime_dispatch_gate9.py`) is the single authorized importer of the
+    # inert Gate-9 store — the explicitly human-authorized `.1R.9` §16.1
+    # slice 3 / `.1R.13.1` §16 handoff. Phase-aware subset invariant: any
+    # OTHER importer still fails this test.
+    assert gate9_callers <= {"src/pcae/core/runtime_dispatch_gate9.py"}, (
+        f"unexpected Gate-9 store importer: {sorted(gate9_callers)}"
+    )
     assert projection_consumers <= {
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",
     }, f"unexpected ValidatedAuthorityProjection consumer: {sorted(projection_consumers)}"
     assert hpac_consumers == {
         "src/pcae/core/runtime_authority.py",

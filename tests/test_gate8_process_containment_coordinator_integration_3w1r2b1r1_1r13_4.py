@@ -758,10 +758,22 @@ def test_runtime_state_unchanged_after_gate8_runs(chain):
 # 13. Sole ownership + consumer inventory + production scope
 # ═══════════════════════════════════════════════════════════════════════
 def test_gate8_is_sole_production_owner_of_containment_boundary():
-    hits = set(subprocess.run(
-        ["git", "grep", "-l", "-E", r"run_gate8_process_containment|_GATE8_RESULTS", "--", "src/pcae"],
+    # `_GATE8_RESULTS` (the provenance registry) is defined only in gate8.
+    # `run_gate8_process_containment` is *called* by the authorized Gate-9
+    # coordinator (.1R.14 §16 handoff — it re-runs Gate 8 to recompute the
+    # containment evidence), but Gate 8 remains the sole owner. Phase-aware
+    # invariant (V-13-1).
+    owner_hits = set(subprocess.run(
+        ["git", "grep", "-l", "-E", r"_GATE8_RESULTS", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
-    assert hits == {"src/pcae/core/runtime_dispatch_gate8.py"}
+    assert owner_hits == {"src/pcae/core/runtime_dispatch_gate8.py"}
+    caller_hits = set(subprocess.run(
+        ["git", "grep", "-l", "-E", r"run_gate8_process_containment", "--", "src/pcae"],
+        cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
+    assert caller_hits <= {
+        "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",
+    }
 
 
 def test_gate8_is_the_only_new_gate7_result_consumer():
@@ -771,6 +783,7 @@ def test_gate8_is_the_only_new_gate7_result_consumer():
     assert hits <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",  # authorized Gate-9 consumer (.1R.14)
     }
 
 
@@ -781,17 +794,30 @@ def test_gate8_never_consumes_a_gate6_decision():
 
 
 def test_gate8result_has_zero_downstream_production_consumers():
+    # .1R.14 (V-13-1): the Gate-9 atomic-consumption coordinator is the
+    # single authorized downstream consumer of Gate8Result / is_gate8_result
+    # (the .1R.13.1 §16 handoff). Phase-aware subset invariant.
     hits = set(subprocess.run(
         ["git", "grep", "-l", "-E", r"Gate8Result|is_gate8_result", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
-    assert hits == {"src/pcae/core/runtime_dispatch_gate8.py"}
+    assert hits <= {
+        "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",
+    }, f"unexpected Gate8Result consumer: {sorted(hits)}"
 
 
 def test_production_scope_since_baseline_is_the_single_new_gate8_file():
+    # .1R.14 (V-13-1): the later explicitly human-authorized Gate-9 phase
+    # adds exactly runtime_dispatch_gate9.py. Phase-aware subset invariant;
+    # gate8.py itself must still be present (the .1R.13.4 functional weight).
     changed = set(subprocess.run(
         ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
-    assert changed == {"src/pcae/core/runtime_dispatch_gate8.py"}
+    assert "src/pcae/core/runtime_dispatch_gate8.py" in changed
+    assert changed <= {
+        "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",
+    }, f"unauthorized production-file expansion: {sorted(changed)}"
 
 
 def test_contracts_and_pol005_bytes_unchanged_since_baseline():

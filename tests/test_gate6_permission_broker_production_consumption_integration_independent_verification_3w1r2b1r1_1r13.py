@@ -160,8 +160,9 @@ def test_no_downstream_production_consumer_of_gate6_symbols():
     )
     assert hits <= {
         "src/pcae/core/runtime_dispatch_permission.py",  # defines them
-        "src/pcae/core/runtime_dispatch_gate7.py",  # sole authorized Gate-7 consumer
-    }, f"unexpected Gate-6 symbol consumer: {sorted(hits - {'src/pcae/core/runtime_dispatch_permission.py', 'src/pcae/core/runtime_dispatch_gate7.py'})}"
+        "src/pcae/core/runtime_dispatch_gate7.py",  # authorized Gate-7 consumer
+        "src/pcae/core/runtime_dispatch_gate9.py",  # authorized Gate-9 consumer (.1R.14 §16.2 handoff)
+    }, f"unexpected Gate-6 symbol consumer: {sorted(hits - {'src/pcae/core/runtime_dispatch_permission.py', 'src/pcae/core/runtime_dispatch_gate7.py', 'src/pcae/core/runtime_dispatch_gate9.py'})}"
     # the Gate-7 module consumes only the two provenance/type symbols, never
     # calls the Gate-6 coordinator entrypoint (it consumes the decision object)
     g7_src = (REPO_ROOT / "src/pcae/core/runtime_dispatch_gate7.py").read_text()
@@ -593,6 +594,7 @@ _AUTHORIZED_POST_1R12_CHAIN_SURFACE = {
     "src/pcae/core/runtime_dispatch_permission.py",  # Gate 6 (.1R.12)
     "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
     "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
+    "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
 }
 
 
@@ -650,6 +652,7 @@ def test_known_pre_existing_point_in_time_scope_guard_failures_are_attributable(
     assert set(_git_names("src/pcae", base=PHASE_1R13_ENTRY, head="HEAD")) <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
     }
     # the guarded tests still exist and still name a frozen past-phase SHA
     t10 = (REPO_ROOT / "tests/test_gate5_approval_validation_coordinator_3w1r2b1r1_1r10.py").read_text()

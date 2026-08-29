@@ -506,6 +506,7 @@ _AUTHORIZED_GATE_CHAIN_SURFACE = {
     "src/pcae/core/runtime_dispatch_permission.py",  # Gate 6 (.1R.12)
     "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
     "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
+    "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
 }
 
 
@@ -608,8 +609,13 @@ def test_runtime_capability_unchanged():
 
 
 def test_no_gate9_consumption_store_wiring_anywhere_new():
-    """runtime_invocation_authority_consumption still has zero production
-    importers (the inert Gate-9 store)."""
+    """The inert Gate-9 consumption store
+    (``runtime_invocation_authority_consumption``) has no production importer
+    OTHER than the authorized Gate-9 atomic-consumption coordinator
+    (``runtime_dispatch_gate9``, added by the explicitly human-authorized
+    .1R.14 phase). Phase-aware invariant (V-13-1 conversion of a
+    point-in-time equality assertion): an unauthorized importer still fails
+    this test."""
     src_root = REPO_ROOT / "src" / "pcae"
     importers = []
     for path in src_root.rglob("*.py"):
@@ -623,7 +629,9 @@ def test_no_gate9_consumption_store_wiring_anywhere_new():
             elif isinstance(node, ast.Import):
                 importers += [str(path) for a in node.names
                               if a.name.endswith("runtime_invocation_authority_consumption")]
-    assert importers == []
+    assert set(importers) <= {
+        str(src_root / "core" / "runtime_dispatch_gate9.py"),
+    }, f"unauthorized Gate-9 store importer: {sorted(importers)}"
 
 
 def test_test_only_fixtures_not_importable_by_the_coordinator():

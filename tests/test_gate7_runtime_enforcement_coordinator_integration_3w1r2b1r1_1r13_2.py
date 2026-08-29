@@ -615,16 +615,20 @@ def test_no_gate8_gate9_gate10_symbol_referenced():
 
 
 def test_gate7_is_sole_production_consumer_of_is_gate6_decision():
-    """Only ``runtime_dispatch_gate7`` consumes ``is_gate6_decision`` /
-    ``Gate6Decision`` as a production Gate-7 path (RDGO-001 §8; plan §29)."""
+    """``is_gate6_decision`` / ``Gate6Decision`` is consumed only by the
+    authorized downstream coordinators: Gate 7 (RDGO-001 §8) and, since the
+    explicitly human-authorized .1R.14 phase, the Gate-9 atomic-consumption
+    coordinator (the .1R.13.1 §16.2 handoff re-derives Gate-6 lineage via
+    ``is_gate6_decision``). Phase-aware invariant (V-13-1 conversion)."""
     hits = subprocess.run(
         ["git", "grep", "-l", "is_gate6_decision", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout.split()
-    assert set(hits) == {
+    assert set(hits) <= {
         "src/pcae/core/runtime_dispatch_permission.py",  # defines it
-        "src/pcae/core/runtime_dispatch_gate7.py",  # sole consumer
-    }
+        "src/pcae/core/runtime_dispatch_gate7.py",  # authorized Gate-7 consumer
+        "src/pcae/core/runtime_dispatch_gate9.py",  # authorized Gate-9 consumer (.1R.14)
+    }, f"unexpected is_gate6_decision consumer: {sorted(hits)}"
 
 
 def test_runtime_state_unchanged_after_gate7_runs(chain):
@@ -654,6 +658,7 @@ def test_production_scope_since_baseline_is_the_single_new_gate7_file():
     assert changed <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
     }, f"unauthorized production-file expansion: {sorted(changed)}"
 
 
