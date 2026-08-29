@@ -2,6 +2,86 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.1 — Gate-7 Runtime Enforcement and
+Gate-8 Shell Gate Consumption Integration Planning.
+**PLANNING COMPLETE — NOT IMPLEMENTED. No production source, no contract,
+no test changed.** Independently derived, from the frozen contracts
+(RDGO-001 v3.0 §8/§9/§14, PBRD-001 v2.0 §14, RPAC-001, RIHAC-001, RIASC-001,
+HPAC-001, PBPA-001, POL-005 source) and current `src/pcae/**`, the exact
+contract responsibilities of RDGO-001 **Gate 7 (Runtime Enforcement)** and
+**Gate 8 (process containment / Shell Gate boundary)** and everything
+`.1R.14` (Gate 9) needs to unblock. **Key findings:** there is **no
+production Runtime Enforcement decision engine** and **no production
+process-containment / adapter-dispatch mechanism** in the repo today —
+"Runtime Enforcement" exists only as design-only constants
+(`runtime_enforcement_safety_authorization.py`: 12 auth flags all `False`,
+5 safety flags all `True`, `RE-NOGO-001..011`), and "Shell Gate" exists
+only as the read-only 88P command classifier (`shell_gate.py`, never
+executes classified text). **Gate 7** = the single independent
+non-consuming "final whether-to-invoke" decision over the full bound
+`runtime_dispatch` request (re-evaluates authority freshness, PB evidence,
+target/capability/posture eligibility, repository/task/prompt/config
+currentness); owner = new `runtime_dispatch_gate7.py` coordinator consuming
+(not reimplementing) the RE no-go vocabulary; output = ephemeral,
+identity-only, non-serializable, registry-provenanced `Gate7Result`
+(`decision ∈ {ALLOW, DENY}`), not an execution token. **Gate 8** = the
+process-containment boundary (re-resolve descriptor/executable/repo/policy
+drift, refuse any caller shell string, construct + attest one exact bounded
+launch environment — executable identity, argv, cwd, env allowlist,
+child-process/resource/time limits, supervision, network denied, no
+credentials); owner = new `runtime_dispatch_gate8.py` coordinator consuming
+the mature `shell_gate.py` classifier; output = registry-provenanced
+`Gate8Result` (`containment_established` + `containment_evidence_digest`),
+not an execution token; **no dispatch, no consumption**. **Gate-6 → Gate-7
+handoff** = the PBRD-001 §14 four-item RE projection (Option C).
+**DENY / HUMAN_REVIEW → Gate 7 unreachable/reject; only literal `"ALLOW"`
+permits Gate-7 evaluation** — anti-escalation invariant frozen; POL-005
+DENY ⇒ no Gate-7 success. **Under the current `Observed / observe /
+unavailable` posture Gate 7 always rejects** (real `Gate6Decision` is
+`DENY` via POL-005; even a hypothetical `ALLOW` matches `RE-NOGO-002` +
+safety no-gos) — **no legitimate positive production Gate-7 success is
+possible today**; mechanics still fully testable (negative path is the
+production path; positive branch via a clearly-labelled test boundary, no
+production bypass). **Gate 7 and Gate 8 consume nothing** — Gate 9 owns
+atomic proof + approval consumption. **Gate-8 → Gate-9 handoff contract
+frozen** (§16): five exact-object-provenanced trusted objects
+(`Gate8Result` / `Gate7Result` / `Gate6Decision` / `Gate5Result` lineage) +
+`RuntimeDispatchIdentity` + `RuntimeDispatchRequestConstructionInput` +
+fresh capability snapshot, in-process only, consumed atomically only at
+Gate 9; six handoff invariants. **Gate-9 unblocking criteria frozen** (§17,
+all 8). **Gate 10 boundary untouched** — no production adapter dispatch
+exists; not created, named, or modified. **Packaging:** four separate
+slices, each with its own independent verification. **Frozen phase IDs
+(each needs separate explicit human authorization):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.13.2` — Gate-7 Runtime Enforcement Coordinator
+Integration Implementation; `.1R.13.3` — its Independent Verification;
+`.1R.13.4` — Gate-8 Process Containment (Shell Gate) Coordinator Integration
+Implementation; `.1R.13.5` — its Independent Verification.
+`149O.20L.7O.3W.1R.2B.1R.1.1R.14` / `.1R.15` (Gate 9 + verification) are
+**unchanged, still frozen, still BLOCKED, NOT renumbered** — they unblock
+only after `.1R.13.2`–`.1R.13.5` close VERIFIED with no blocking findings
+(satisfying §17 and the `.1R.9` §16.2 path-(a) precondition) and still
+require their own explicit human authorization. **V-2 / V-3 / V-4** carried
+NON-BLOCKING — no Gate-7/Gate-8 impact, no sequencing ambiguity, no STOP
+(Gate 7/8 consume only the trusted upstream objects, never the 3-field vs
+7-field `human_authority_binding`, and import nothing from `hpac_lifecycle`
+/ `hpac_verifier`); remain candidates for a dedicated contract-clarification
+phase. **V-13-1:** `.1R.13.2` re-baselines or converts the two stale
+point-in-time scope guards to phase-aware invariant tests and discloses
+every guard its source addition trips. **O1–O4 / F2–F4 / F7** all carried
+unchanged, none silently closed — **F7 threat model NOT broadened**
+(process-isolation is a separate, unscheduled, non-prerequisite topic;
+same-account autonomous-agent assumption). No contract contradiction
+requiring a STOP was found; no contract modified. Runtime remains
+`not_implemented / Observed / observe / unavailable`; POL-005 unchanged;
+real execution UNAVAILABLE. `DELEGATED .3 FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED` preserved; governed PCAE lifecycle only; only the primary
+human-authorized operator holds `.1R.13.1` lifecycle authority.
+Planning document:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_13_1_GATE_7_RUNTIME_ENFORCEMENT_AND_GATE_8_SHELL_GATE_CONSUMPTION_INTEGRATION_PLANNING.md`.
+
+### Prior phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13 — Independent Verification of Gate-6
 Permission Broker Production Consumption Integration.
 **VERIFIED WITH NON-BLOCKING FINDINGS — GATE-6 PERMISSION BROKER PRODUCTION
