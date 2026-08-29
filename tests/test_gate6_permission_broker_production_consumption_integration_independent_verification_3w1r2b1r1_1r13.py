@@ -145,15 +145,35 @@ def test_generic_builder_refuses_runtime_dispatch_requests():
 
 
 def test_no_downstream_production_consumer_of_gate6_symbols():
-    """RDGO-001 §7 / prompt §25: expected downstream execution consumers of
-    ``Gate6Decision`` / ``run_gate6_permission_broker`` / ``is_gate6_decision``
-    outside the defining module = zero."""
-    hits = subprocess.run(
-        ["git", "grep", "-l", "-E",
-         r"run_gate6_permission_broker|Gate6Decision|is_gate6_decision", "--", "src/pcae"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=True,
-    ).stdout.split()
-    assert hits == ["src/pcae/core/runtime_dispatch_permission.py"]
+    """RDGO-001 §7 / §8 / prompt §25 / .1R.13.1 §29: the ONLY authorized
+    downstream production consumer of ``Gate6Decision`` / ``is_gate6_decision``
+    is the Gate-7 coordinator (``runtime_dispatch_gate7``, added by the
+    authorized .1R.13.2 phase). ``run_gate6_permission_broker`` still has no
+    downstream production caller. Phase-aware invariant (V-13-1 conversion of
+    a point-in-time equality assertion)."""
+    hits = set(
+        subprocess.run(
+            ["git", "grep", "-l", "-E",
+             r"run_gate6_permission_broker|Gate6Decision|is_gate6_decision", "--", "src/pcae"],
+            cwd=REPO_ROOT, capture_output=True, text=True, check=True,
+        ).stdout.split()
+    )
+    assert hits <= {
+        "src/pcae/core/runtime_dispatch_permission.py",  # defines them
+        "src/pcae/core/runtime_dispatch_gate7.py",  # sole authorized Gate-7 consumer
+    }, f"unexpected Gate-6 symbol consumer: {sorted(hits - {'src/pcae/core/runtime_dispatch_permission.py', 'src/pcae/core/runtime_dispatch_gate7.py'})}"
+    # the Gate-7 module consumes only the two provenance/type symbols, never
+    # calls the Gate-6 coordinator entrypoint (it consumes the decision object)
+    g7_src = (REPO_ROOT / "src/pcae/core/runtime_dispatch_gate7.py").read_text()
+    g7_tree = ast.parse(g7_src)
+    called = {
+        n.func.id for n in ast.walk(g7_tree)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+    } | {
+        n.func.attr for n in ast.walk(g7_tree)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+    }
+    assert "run_gate6_permission_broker" not in called
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -563,8 +583,23 @@ def test_no_consumption_json_and_runtime_constants_unchanged(tmp_path, monkeypat
 # ═══════════════════════════════════════════════════════════════════════
 # 12. Production-file scope + contract byte-identity (fixed SHA)
 # ═══════════════════════════════════════════════════════════════════════
+# Phase-aware production-scope invariant (converted from a point-in-time
+# equality assertion, Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.2 / V-13-1).
+# The .1R.12 production weight is still exactly runtime_dispatch_permission.py;
+# any additional src/pcae change since PRE_1R12_BASELINE must be a member of
+# the known, individually-authorized runtime-dispatch-gate-chain surface
+# (.1R.13.2 adds runtime_dispatch_gate7.py). An unauthorized expansion fails.
+_AUTHORIZED_POST_1R12_CHAIN_SURFACE = {
+    "src/pcae/core/runtime_dispatch_permission.py",  # Gate 6 (.1R.12)
+    "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
+}
+
+
 def test_1r12_production_diff_is_exactly_one_file():
-    assert _git_names("src/pcae") == ["src/pcae/core/runtime_dispatch_permission.py"]
+    changed = set(_git_names("src/pcae"))
+    assert "src/pcae/core/runtime_dispatch_permission.py" in changed
+    unexpected = changed - _AUTHORIZED_POST_1R12_CHAIN_SURFACE
+    assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
 
 
 def test_no_contract_or_pb_foundation_change_since_pre_1r12():
@@ -607,8 +642,12 @@ def test_known_pre_existing_point_in_time_scope_guard_failures_are_attributable(
       * non-functional (frozen-baseline hygiene assertions),
       * NOT re-triggered or worsened by .1R.13 (which adds no src/ file).
     This test pins that attribution so a future reader is not surprised."""
-    # .1R.13 adds no src file -> candidate-only nonpassing = 0
-    assert _git_names("src/pcae", base=PHASE_1R13_ENTRY, head="HEAD") == []
+    # .1R.13 itself added no src file. The later authorized .1R.13.2 phase
+    # adds exactly runtime_dispatch_gate7.py (Gate 7) — a phase-aware
+    # invariant, not an unbounded expansion (V-13-1 conversion).
+    assert set(_git_names("src/pcae", base=PHASE_1R13_ENTRY, head="HEAD")) <= {
+        "src/pcae/core/runtime_dispatch_gate7.py",
+    }
     # the guarded tests still exist and still name a frozen past-phase SHA
     t10 = (REPO_ROOT / "tests/test_gate5_approval_validation_coordinator_3w1r2b1r1_1r10.py").read_text()
     t11 = (REPO_ROOT / "tests/test_gate5_approval_validation_coordinator_integration_independent_verification_3w1r2b1r1_1r11.py").read_text()

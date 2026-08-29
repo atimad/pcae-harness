@@ -362,16 +362,45 @@ def test_test_only_fixture_not_importable_by_production():
             assert not any("test" in (n or "").lower() for n in names + [mod])
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# Phase-aware production-scope invariant (converted from a point-in-time
+# frozen-diff assertion, Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.2 / V-13-1).
+#
+# The original assertion pinned "exactly / at most these three files changed
+# since the .1R.10 entry SHA". That is deterministically stale the moment
+# any *authorized* later phase in the same runtime-dispatch-gate chain adds
+# its own coordinator file (.1R.12 added runtime_dispatch_permission.py;
+# .1R.13.2 adds runtime_dispatch_gate7.py). Rather than permanently freeze a
+# red diff or delete the assertion, it is converted to an invariant: the
+# production surface touched since the .1R.10 baseline must be a SUBSET of
+# the known, individually-authorized Gate-5..7 runtime-dispatch-chain
+# surface, and NO file outside that authorized set may have changed. An
+# unauthorized production-file expansion still fails this test.
+# ─────────────────────────────────────────────────────────────────────────
+_AUTHORIZED_RUNTIME_DISPATCH_CHAIN_SURFACE = {
+    # Gate 5 (.1R.10) — new coordinator + its two read-only accessors
+    "src/pcae/core/runtime_dispatch_gate5.py",
+    "src/pcae/core/runtime_authority.py",
+    "src/pcae/core/hpac_lifecycle.py",
+    # Gate 6 (.1R.12) — coordinator appended to the trusted builder module
+    "src/pcae/core/runtime_dispatch_permission.py",
+    # Gate 7 (.1R.13.2) — new coordinator module
+    "src/pcae/core/runtime_dispatch_gate7.py",
+}
+
+
 def test_only_expected_production_files_changed_since_baseline():
-    changed = subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=True,
-    ).stdout.split()
-    assert set(changed) <= {
-        "src/pcae/core/runtime_dispatch_gate5.py",
-        "src/pcae/core/runtime_authority.py",
-        "src/pcae/core/hpac_lifecycle.py",
-    }
+    changed = set(
+        subprocess.run(
+            ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
+            cwd=REPO_ROOT, capture_output=True, text=True, check=True,
+        ).stdout.split()
+    )
+    unexpected = changed - _AUTHORIZED_RUNTIME_DISPATCH_CHAIN_SURFACE
+    assert unexpected == set(), (
+        "unauthorized production-file expansion since the .1R.10 baseline: "
+        f"{sorted(unexpected)}"
+    )
 
 
 def test_contracts_and_pol005_bytes_unchanged_since_baseline():

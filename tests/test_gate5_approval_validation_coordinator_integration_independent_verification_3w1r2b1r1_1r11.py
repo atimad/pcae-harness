@@ -490,16 +490,39 @@ def test_n2_lost_registry_membership_fails_closed(tmp_path):
 # ═══════════════════════════════════════════════════════════════════════
 # 9. Authorized consumer expansion + gate/effect isolation (§28, §33-37, §38.26-30)
 # ═══════════════════════════════════════════════════════════════════════
+# Phase-aware production-scope invariant (converted from a point-in-time
+# frozen-diff equality assertion, Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.2 /
+# V-13-1). The original "== exactly these three files" is deterministically
+# stale once an authorized later Gate-6 / Gate-7 chain phase adds its own
+# coordinator file. Converted to: the .1R.10 Gate-5 production surface plus
+# any later change must be a SUBSET of the known, individually-authorized
+# runtime-dispatch-gate-chain surface, with no unexpected file. The .1R.10
+# Gate-5 trio must still all be present in the diff (the .1R.10 functional
+# closure is real), and an unauthorized expansion still fails.
+_AUTHORIZED_GATE_CHAIN_SURFACE = {
+    "src/pcae/core/runtime_dispatch_gate5.py",
+    "src/pcae/core/runtime_authority.py",
+    "src/pcae/core/hpac_lifecycle.py",
+    "src/pcae/core/runtime_dispatch_permission.py",  # Gate 6 (.1R.12)
+    "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
+}
+
+
 def test_production_scope_is_exactly_the_three_planned_files(tmp_path):
-    changed = subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_1R10, "HEAD", "--", "src/pcae"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=True,
-    ).stdout.split()
-    assert set(changed) == {
+    changed = set(
+        subprocess.run(
+            ["git", "diff", "--name-only", PHASE_ENTRY_1R10, "HEAD", "--", "src/pcae"],
+            cwd=REPO_ROOT, capture_output=True, text=True, check=True,
+        ).stdout.split()
+    )
+    assert changed - _AUTHORIZED_GATE_CHAIN_SURFACE == set(), (
+        f"unauthorized production-file expansion: {sorted(changed - _AUTHORIZED_GATE_CHAIN_SURFACE)}"
+    )
+    assert {
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/hpac_lifecycle.py",
-    }
+    } <= changed
 
 
 def test_hpac_verifier_not_modified_since_baseline():
