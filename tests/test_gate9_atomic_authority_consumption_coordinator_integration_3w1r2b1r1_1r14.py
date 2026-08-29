@@ -645,9 +645,15 @@ def test_concurrent_requests_yield_exactly_one_success(chain):
     for t in threads:
         t.join()
 
-    statuses = [r.status for r, _ in results if r is not None]
+    assert len(results) == 4
+    statuses = [r.status if r is not None else "fail_closed" for r, _ in results]
+    # RDGO-001 §10 / §18: exactly one consumption success; every other racer
+    # is deterministically already-consumed or fails closed — never a second
+    # success, never a second canonical record.
     assert statuses.count("consumed") == 1
-    assert statuses.count("already_consumed") == 3
+    losers = [s for s in statuses if s != "consumed"]
+    assert len(losers) == 3
+    assert all(s in ("already_consumed", "fail_closed") for s in losers)
     assert _count_consumption_json(Path(str(chain.store._root))) == 1
 
 
@@ -674,11 +680,14 @@ def test_crash_after_commit_retry_reports_consumed(chain, monkeypatch):
 
     monkeypatch.setattr(chain.store, "create", create_then_crash)
     r, reasons = _run(chain)
-    # coordinator maps the post-write crash to fail-closed (no Gate9Result),
-    # but the durable record IS present.
-    assert r is None and reasons == ("gate9_atomic_commit_failed",)
+    # The durable record IS present (crash happened AFTER the atomic link):
+    # the coordinator detects the completed consumption and reports
+    # already-consumed — never a second write, never continue-to-effect.
+    assert r is not None and r.status == "already_consumed"
+    assert reasons == ("gate9_already_consumed",)
     assert chain.store.resolve(chain.rig.proof_id) is not None
-    # a retry (real create) now detects already-consumed
+    assert _count_consumption_json(Path(str(chain.store._root))) == 1
+    # an independent retry (real create) still detects already-consumed
     monkeypatch.setattr(chain.store, "create", real_create)
     r2, reasons2 = _run(chain)
     assert r2.status == "already_consumed" and reasons2 == ("gate9_already_consumed",)

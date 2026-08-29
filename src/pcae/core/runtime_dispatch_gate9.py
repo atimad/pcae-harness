@@ -833,6 +833,25 @@ def run_gate9_atomic_authority_consumption(
         except RuntimeInvocationAuthorityConsumptionDurabilityUncertainError:
             return None, ("gate9_consumption_state_durability_uncertain",)
         except Exception:
+            # A non-duplicate create error (e.g. a transient contention error
+            # racing another creator for the same fresh proof directory). If
+            # a complete valid record is now durably present, another racer
+            # won → deterministic already-consumed; otherwise nothing was
+            # consumed and we fail closed.
+            try:
+                raced = consumption_store.resolve(proof_id)
+            except RuntimeInvocationAuthorityConsumptionDurabilityUncertainError:
+                return None, ("gate9_consumption_state_durability_uncertain",)
+            if raced is not None:
+                return _already_consumed_result(
+                    proof_id=proof_id,
+                    approval_id=gate5_result.approval_id,
+                    record_digest=raced.record_digest,
+                    invocation_id=identity.invocation_id,
+                    attempt_id=identity.attempt_id,
+                    consumed_at=raced.dispatch_binding.get("consumed_at", consumed_at),
+                    advisory_reasons=advisory,
+                )
             return None, ("gate9_atomic_commit_failed",)
 
         # 17. Read-back verification (RDGO-001 §10 "read-back-verified").

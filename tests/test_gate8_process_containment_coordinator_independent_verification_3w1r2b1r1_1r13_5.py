@@ -1169,16 +1169,22 @@ def test_synthetic_unauthorized_third_production_file_would_fail_the_subset_guar
 
 
 def test_gate7_result_consumer_grep_is_exactly_gate7_and_gate8_today():
+    # .1R.14 (V-13-1): the explicitly human-authorized Gate-9
+    # atomic-consumption coordinator is the third authorized module that
+    # references the Gate-7 result symbols (it re-derives the Gate-7 lineage
+    # via is_gate7_result per the .1R.13.1 §16 handoff). Phase-aware subset
+    # invariant.
     hits = set(
         subprocess.run(
             ["git", "grep", "-l", "-E", r"Gate7Result|is_gate7_result", "--", "src/pcae"],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout.split()
     )
-    assert hits == {
+    assert hits <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
-    }
+        "src/pcae/core/runtime_dispatch_gate9.py",
+    }, f"unexpected Gate7Result consumer: {sorted(hits)}"
 
 
 # ═══ 21. V-13-3-1 / V-13-3-2 — not amplified ═════════════════════════
