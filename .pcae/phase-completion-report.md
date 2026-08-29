@@ -1,198 +1,227 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.13.5 Complete — Independent Verification of the Gate-8 Process Containment (Shell Gate) Coordinator Integration
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.14 Complete — Gate-9 Atomic Authority Consumption Coordinator Integration Implementation
 
-Status: completed. **VERIFIED WITH NON-BLOCKING FINDINGS — GATE-8 — CLOSED**
-at the RDGO-001 v3.0 §9 process-containment / Shell-Gate consumption
-boundary for `runtime_dispatch`.
+Status: completed. **GATE-9 ATOMIC AUTHORITY CONSUMPTION COORDINATOR —
+IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.**
 
-Independent verification (RE-DERIVE, DO NOT TRUST) of the `.1R.13.4` Gate-8
-Process Containment (Shell Gate) coordinator integration
-(`run_gate8_process_containment`), against RDGO-001 v3.0 §9 / §1 row 8 / §10
-/ §13 / §15 / §19, the `.1R.13.1` planning document §5 / §11 / §12 / §16 /
-§17 / §25, the mature 88P `shell_gate` classifier **source**, PBRD-001 v2.0
-§6 / §14, RPAC-001 v1.0, POL-005, and the independently-verified Gate-5 /
-Gate-6 / Gate-7 boundaries — **not** from the `.1R.13.4` report, its
-implementation document, its 63 tests, function/type names,
-result-registry membership, or aggregate counts.
+Implemented the frozen `.1R.9` §16.1 slice-3 Gate-9 atomic one-shot proof +
+approval consumption coordinator in **one new production file**,
+`src/pcae/core/runtime_dispatch_gate9.py`
+(`run_gate9_atomic_authority_consumption` — the frozen **sole** owner of the
+RDGO-001 v3.0 §10 authority-consumption boundary for `runtime_dispatch` —
+plus `Gate9Result`, `is_gate9_result`, `_GATE9_RESULTS`, the
+`GATE9_STATUS_*` constants, and helpers). Re-derived from RDGO-001 §10 / §1
+row 9 / §17 / §19, RIHAC-001 v2.0 §17 / §19, HPAC-REQ-098/099/100/101/102,
+the `.1R.9` planning document §10-§19, and the `.1R.13.1` §16 Gate-8 →
+Gate-9 handoff contract — not from helper names or the `.1R.13.4` /
+`.1R.13.5` reports.
 
-- **Verification-entry SHA:** `72898361` (`.1R.13.4` completion).
-- **Immutable pre-`.1R.13.4` baseline:** `6a9d650f54fb7a5c02652180f0bbcc3a41080198`
-  (`.1R.13.3` completion).
-- **`.1R.13.4` implementation range (independently reconstructed):**
-  `cda5c2fa..72898361`; the **only functional commit** is `df00c43c`
-  (`src/pcae/core/runtime_dispatch_gate8.py` new + the canonical document +
-  the 63-test suite + the twelve V-13-1 guard extensions). The phase
-  prompt's reported list omits the two finalization-staging commits
-  `b77bf4d2` / `72898361`.
-- **No defect repair. No `src/` change** — `git diff --name-only 6a9d650f
-  HEAD -- src/pcae` is **exactly** `src/pcae/core/runtime_dispatch_gate8.py`,
-  unchanged from `.1R.13.4`. **No Gate-9/10 code. No execution enabled.**
-- **`git diff 6a9d650f HEAD -- docs/contracts` is empty.**
+- **Phase-entry SHA:** `c1ea2c8b` (`.1R.13.5` completion — Gate 8 CLOSED,
+  verified).
+- **Unblocked by:** `.1R.13.5` — all eight `.1R.13.1` §17 criteria
+  SATISFIED (Gate 5/6/7/8 CLOSED + verified; §16 handoff frozen +
+  independently re-reviewed; no blocking findings; runtime non-executing).
+  The **test-path-first scope** of `.1R.9` §16.1 row 3 / §29 was explicitly
+  human-authorized.
+- **Production files changed:** exactly
+  `src/pcae/core/runtime_dispatch_gate9.py` (new).
+  `git diff c1ea2c8b HEAD -- src/pcae` = exactly that one file.
+- **`git diff c1ea2c8b HEAD -- docs/contracts` is empty.** No contract,
+  POL-005, Gate 5/6/7/8, `shell_gate.py`, `runtime_introspection.py`,
+  `hpac_lifecycle.py`, `runtime_authority.py`, or the inert
+  `runtime_invocation_authority_consumption.py` store changed.
+- **No Gate-10 code. No execution enabled.** Runtime remains
+  `not_implemented / Observed / observe / unavailable`.
 
 Canonical evidence:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_13_5_INDEPENDENT_VERIFICATION_OF_GATE_8_PROCESS_CONTAINMENT_SHELL_GATE_COORDINATOR_INTEGRATION.md`
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_14_GATE_9_ATOMIC_AUTHORITY_CONSUMPTION_COORDINATOR_INTEGRATION_IMPLEMENTATION.md`
 and
-`tests/test_gate8_process_containment_coordinator_independent_verification_3w1r2b1r1_1r13_5.py`
-(**120 fresh independent tests**, all passing — own synthetic provenance
-substitution, own resolver / effect-plan builders).
+`tests/test_gate9_atomic_authority_consumption_coordinator_integration_3w1r2b1r1_1r14.py`
+(**63 new focused tests**, all passing).
 
-## Independently confirmed
+## What the coordinator does
 
-- **Sole owner:** `git grep -E "run_gate8_process_containment|_GATE8_RESULTS"
-  -- src/pcae` → exactly `runtime_dispatch_gate8.py`; `Gate8Result` /
-  `is_gate8_result` have **zero** downstream production consumers; Gate 8 is
-  the **only** new `Gate7Result` consumer (`git grep` → `{gate7, gate8}`).
-- **Gate-7 provenance (`is_gate7_result`, exact object) AND
-  `decision == "ALLOW"` (exact string equality) are BOTH required** —
-  freshly tested against `None`, `object.__new__` with forged slots,
-  bare-`ALLOW`, `copy` / `deepcopy` (raise), `pickle` (raises); a trusted
-  `Gate7Result(decision="DENY")` — driven through the **real**
-  `run_gate7_runtime_enforcement` negative branch — is rejected
-  (`gate8_gate7_decision_not_allow`) at flow step 3 with `build_shell_gate`
-  call-count **0** (spied), before any Shell Gate / drift / containment
-  work. No permissive normalization.
-- **Current production reachability = NO:** `full_chain(simulation_only=False)`
-  → `projection is None` (permanent NON-REAL hard stop); no `Gate5Result` →
-  no `Gate6Decision` → no `Gate7Result`; a real `Gate7Result` is always
-  `DENY`; positive containment branch is `pragma: no cover`.
-- **Gate-5 provenance + projection re-trust + `revalidate_validated_authority_projection`**
-  (re-runs `validate_approval`) at Gate 8's own point of use; the revalidate
-  receives the Gate-8 `authority_current_time`; trust runs before revalidate.
-- **Invocation lineage** (`invocation_id` across Gate5/Gate7/identity,
-  `attempt_id` across Gate7/identity) and **`subject_scope_binding_digest`
-  recompute** via the shared `_expected_subject_scope_binding_digest`.
-- **Executable identity** by `os.stat` regular-file gate + streamed SHA-256
-  **content** hash vs the descriptor pin — same path + changed bytes →
-  `gate8_executable_identity_mismatch`; a symlink to different-content
-  target → same (proves content hash, not path equality); **never** an
-  execution.
-- **Shell-metacharacter refusal** of the executable path and every argv
-  token (12-case sweep); non-string token refused.
-- **Canonical 88P `shell_gate.build_shell_gate` consumed read-only** — no
-  `_classify_command` / `SGP_CATEGORIES` in the coordinator; `shell_gate.py`
-  byte-unchanged. `_call_doctor_test_run` **proven structurally unreachable
-  from any Gate-8 input** (fires only for a `pytest` program / `-m pytest`,
-  all refused on the executable basename **or any argv token** before
-  `build_shell_gate` — 5-case parametric proof, call-count 0; AST confirms
-  it is `shell_gate.py`'s only `subprocess.run` site). With `subprocess.run`
-  / `.Popen` / `_call_doctor_test_run` all patched to fail, Gate-8 runs
-  spawn nothing.
-- **`Gate8Result` anti-transfer** — identity-only `==` / `hash`,
-  `__reduce__` raises, `__init_subclass__` raises, `object.__new__` and
-  field-reconstructed lookalikes rejected. **`is_gate8_result` is
-  membership-only** (AST: single `return`, no `if`, no
-  `containment_established` in the return expression) — provenance, never
-  containment success. A `Gate8Result(containment_established=False)` is a
-  registry member but an explicit non-progression audit record.
-- **Gate 8 consumes nothing** — `consumption.json` count invariant; no
-  lifecycle / Gate-9 call (AST); no Gate-9/10 symbol or effectful import;
-  runtime `Observed / observe / unavailable` after every path.
-- **§16 Gate-8 → Gate-9 handoff contract independently re-reviewed**
-  (satisfies `.1R.13.1` §17 criterion 8) — `Gate8Result` carries exactly
-  the frozen §16.1 fields; no consumer / serialization / persisted handoff;
-  the six §16.2 invariants hold or are correctly deferred to Gate 9's
-  in-boundary revalidation.
-- **V-13-1 — REMAINS CLOSED; GATE-8 EXTENSION VERIFIED** — all twelve guard
-  extensions inspected guard-by-guard; subset orientation kept
-  (`- AUTHORIZED == set()` / `<= {gate7, gate8}`), `gate9` / `hpac` asserts
-  kept exact-equality, two `.1R.13.2`/`.1R.13.3` guards converted `==` →
-  subset; orientation actively challenged with a synthetic
-  `{gate7, gate8, runtime_adapter}` set (every guard rejects it); no
-  functional earlier-phase closure weakened.
-- **Gate-5 / Gate-6 / Gate-7 regressions re-confirmed CLOSED** —
-  `runtime_dispatch_gate5.py` / `runtime_dispatch_gate7.py` /
-  `runtime_dispatch_permission.py` / `permission_broker_foundation.py`
-  (POL-005) byte-unchanged since `6a9d650f`.
-- **Contract identity** — RDGO-001 / PBRD-001 / RPAC-001 / RIHAC-001 /
-  RIASC-001 / HPAC-001 / PBPA-001 / POL-005 / `shell_gate.py` /
-  `runtime_introspection.py` / `runtime_enforcement_safety_authorization.py`
-  byte-unchanged.
+- Requires a registry-provenanced `Gate8Result` via `is_gate8_result`
+  **AND** `containment_established is True` — a trusted **negative**
+  `Gate8Result` is a hard stop `gate9_gate8_containment_not_established`
+  **before** any lock-side consumption attempt, before proof or approval
+  consumption (provenance ≠ containment success — the B1 class; the store
+  `create` spy shows zero calls).
+- Re-derives the `Gate7Result` (`is_gate7_result` + `decision == "ALLOW"`),
+  the `Gate6Decision` (`is_gate6_decision` + `decision == "ALLOW"`), and the
+  `Gate5Result` (`is_gate5_result`); enforces one consistent invocation
+  (`invocation_id` / `attempt_id` equal across g5/g6/g7/g8/identity,
+  `request_id` across g6/g7/g8); cross-checks
+  `gate8_result.gate7_result_digest == _gate7_result_digest(gate7_result)`.
+- **Independently reconstructs the full containment evidence** by re-running
+  the Gate-8 owner `run_gate8_process_containment` over the *same* trusted
+  upstream objects + a freshly re-resolved descriptor / executable /
+  repository-scoped cwd, and requires
+  `containment_evidence_digest` / `effect_plan_digest` /
+  `live_preflight_digest` / `gate7_result_digest` to match the handed
+  `Gate8Result` — **this closes `.1R.13.5`'s V-13-5-1** for the
+  runtime-dispatch consumption path (no stored digest is
+  self-authenticating).
+- Inside the serialization boundary (the per-`proof_id` create-only atomic
+  primitive itself — `.1R.9` §18, **no second lock**), immediately before
+  compare-and-create: re-trusts + revalidates the
+  `ValidatedAuthorityProjection` (`revalidate_validated_authority_projection`
+  re-runs `validate_approval` → principal / credential / proof / approval
+  currentness, expiry, revocation, prior-consumption), recomputes the
+  subject/scope binding digest, confirms the HPAC lifecycle sequence-3
+  `PROOF_VERIFIED_AND_BOUND` binding **read-only**, requires the exact
+  proof + approval pair of the same lineage, re-reads the runtime
+  capability snapshot (fail closed unless still `unavailable`), and checks
+  the absence of a consumption record.
+- Performs **one** create-only, crash-consistent, read-back-verified
+  `RuntimeInvocationAuthorityConsumptionStore.create` of the closed
+  eight-item `HPAC-AUTHORITY-CONSUMPTION/2.0` record (the inert store is
+  consumed **unchanged**). Proof + approval + presentation + challenge are
+  consumed **together** by this one write (HPAC-REQ-098/100/102); no mutable
+  `consumed` field; the RIHAC repository approval store is never mutated.
 
-## Fixed-SHA A/B regression evidence
+## One-shot / crash / concurrency / restart
 
-- **Baseline** `6a9d650f` (isolated `git worktree`, since removed) vs
-  **candidate** `72898361`; `-p no:randomly -n0`.
-- Two Gate-8 suites: **183 passed, 0 failed** (120 new + 63 `.1R.13.4`).
-- 8 affected earlier-phase suites: **327 passed / 1 failed at BOTH SHAs** —
-  the identical node
-  `test_gate6_permission_broker_production_consumption_3w1r2b1r1_1r12.py::test_gate5_results_registry_stays_empty_on_every_reject`,
-  a **pre-existing cross-file `_GATE6_DECISIONS` pollution flake** that
-  passes in isolation and reproduces byte-identically at `6a9d650f`
-  (finding **V-13-5-3**).
-- `tests/test_shell_gate.py` 118/118 (V-13-4-1 not reproduced).
-- Wide `-k "gate8 or shell_gate or process_containment"` 848/848 at HEAD.
-- Wide gate-chain `-k` 2967 passed / 13 pre-existing fail (HPAC / PB-freeze
-  / contract-wording repo baseline; 5 sampled reproduce identically at
-  `6a9d650f`).
+- First valid consumption succeeds (test path only). Every replay /
+  concurrency loser / crash-after-commit retry → deterministic
+  `already_consumed` (never a second success, never a retriable error,
+  never continue-to-Gate-10). Crash-before-commit leaves both unconsumed.
+  Ambiguous / partial → `...DurabilityUncertainError` → fail closed. The
+  canonical durable record is the authority across a restart.
+- Concurrency (4 threads, same authority): exactly one `"consumed"`,
+  exactly one canonical `consumption.json`, no split-brain — stable over
+  repeated runs after the `9fba3251` concurrency-loser hardening.
 
-```
+## Result model
+
+`Gate9Result` is identity-only (`==` / `hash` are `id`-based),
+non-serializable (`__reduce__` raises), sealed (`_seal`), not subclassable,
+registry-provenanced. `is_gate9_result` is **provenance ≠ success** —
+frozen forward invariant: a future Gate 10 MUST additionally require
+`status == "consumed"` **and** re-read the durable `consumption.json` +
+containment evidence. `Gate9Result` has **zero** downstream production
+consumers (Gate 10 does not exist).
+
+## No effect
+
+`git grep` / AST: the module imports nothing effectful (no `subprocess` /
+`socket` / `pty` / `os.system` / `requests` / `httpx` / `urllib` /
+`asyncio` / `multiprocessing` / `ctypes` / `fcntl` / `ssl` / `selectors` /
+`fido2` / `webauthn` / `ctap` / `runtime_adapter` / `mock_runtime_adapter`);
+no `.dispatch(` / `Popen(` / `os.system(` / `run_gate10` / `Gate10` /
+`DispatchReceipt`. Local canonical consumption-store writes are the expected
+Gate-9 authority-consumption effect and are categorically distinct from
+external runtime effects. Gate 9 ends after durable consumption — no
+continue-to-Gate-10. `runtime_introspection.py` constants re-asserted
+unchanged after Gate-9 runs.
+
+## No positive production Gate-9 path
+
+Permanent NON-REAL upstream (the real `run_gate5` returns no `Gate5Result`)
+and the real Gate-7 coordinator is always `DENY`, so no positive
+`Gate8Result` exists and `full_chain(simulation_only=False)` yields
+`projection is None`. The consumption branches are reached only through a
+clearly-labelled test-only substitution of the upstream provenance
+predicates against a `tmp_path` consumption store — no
+`ValidatedAuthorityProjection` / approval / HPAC proof / runtime capability
+/ positive `Gate7Result` / positive `Gate8Result` fabricated; no write to
+the production-resolved `HPAC_PROTECTED_ROOT`; the HPAC lifecycle
+sequence-3 event is the real one built through the canonical fixture
+writers.
+
+## V-13-1 — EXTENDED (ten guard suites)
+
+The authorized single-file `runtime_dispatch_gate9.py` addition trips
+point-in-time production-scope / consumer-inventory guards frozen by `.1R.8`
+/ `.117` / `.1R.10` / `.1R.11` / `.1R.12` / `.1R.13` / `.1R.13.2` /
+`.1R.13.3` / `.1R.13.4` / `.1R.13.5`. All converted to **phase-aware SUBSET
+invariants** that include `runtime_dispatch_gate9.py` in each authorized set
+and still fail an unauthorized production-file / projection-consumer /
+Gate-symbol-consumer expansion. The `hpac_verifier` consumer-inventory
+asserts stay **exact and unweakened**; the Gate-10-consumer exact-empty
+asserts and the `_GATE8_RESULTS` owner assert stay **exact** (with
+`run_gate8_process_containment` split into a bounded caller assert
+`<= {gate8, gate9}`). Each conversion is disclosed in the canonical
+document §28 with fixed-SHA A/B attribution (baseline `c1ea2c8b` → HEAD).
+
+## Fixed-SHA regression attribution
+
+Deterministic explicit-suite A/B (baseline `c1ea2c8b` via isolated `git
+worktree`, candidate HEAD, `-p no:randomly -n0`, 11 earlier gate-chain
+suites): baseline **518 passed / 0 failed**; candidate **581 passed / 0
+failed** = 518 + 63 new Gate-9 tests. Wide `-k` A/B: every non-passing node
+at HEAD reproduces **identically** at `c1ea2c8b` (17 pre-existing
+HPAC/runtime-selection B7/lifecycle contradiction-documentation +
+point-in-time permission-broker consumer-scope / byte-freeze guard failures
+— the `.1R.8` §26 / `.1R.13.5` V-13-5-3 class, unrelated to any
+`runtime_dispatch_gate9` code path).
+
+```text
 CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0
 UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS       = 0
 ```
 
-## Non-blocking findings
+Two issues that were attributable to this phase were **fixed in-phase** and
+are green at HEAD: (1) `test_gate8_..._1r13_5::test_gate7_result_consumer_grep_is_exactly_gate7_and_gate8_today`
+— a point-in-time consumer-inventory equality guard tripped by
+`runtime_dispatch_gate9.py` legitimately referencing `is_gate7_result` per
+the `.1R.13.1` §16 handoff — converted to a phase-aware subset invariant
+(V-13-1); (2) `test_gate9_...::test_concurrent_requests_yield_exactly_one_success`
+— an intermittent flake in this phase's own new concurrency test where a
+transient proof-directory-creation contention error was surfaced as a
+fail-closed for the loser rather than `already_consumed` — fixed at the
+coordinator (`9fba3251`), now deterministically stable.
 
-- **V-13-5-1 (LOW):** the frozen `.1R.13.1` §11.2 / §25 `gate8_cwd_drift` /
-  `gate8_environment_allowlist_drift` / `gate8_transport_drift` rows are
-  implemented as a repository-scope check
-  (`gate8_cwd_outside_repository_scope`), a well-formedness check
-  (`gate8_environment_not_allowlisted`), and **no** check respectively —
-  there is **no bound cwd / env reference** in
-  `RuntimeDispatchRequestConstructionInput` to diff against (the frozen §12.5
-  `containment_profile` parameter was dropped for the coordinator-assembled
-  `effect_plan`), and the frozen plan's own stated mechanism (the
-  subject/scope digest) does not cover cwd/env either — the inconsistency
-  originates in the frozen `.1R.13.1` plan. `transport_type` is a fixed
-  `local_cli` constant and provider/backend drift is covered by
-  `gate8_descriptor_config_drift`. **Mitigated:** `effect_plan` is
-  trusted-coordinator-assembled (frozen §11.1 item 5); cwd / env / the full
-  containment profile **are** bound into `containment_evidence_digest`,
-  which frozen §16.2 invariant 3 requires the future Gate 9 to recompute and
-  read-back-verify — so a replayed `Gate7Result(ALLOW)` + a changed cwd/env
-  is caught at the Gate-8 → Gate-9 boundary; the executable identity/hash,
-  argv, descriptor digests, runtime-target, effect-plan-executable,
-  `network_denied`, `credentials_required` and repository-scope cwd rows
-  **are** independently enforced; Gate 8 is structurally unreachable in
-  production. **Not** a GATE-8 EFFECT-PLAN BINDING or DECISION-SEMANTICS
-  DEFECT. The `.1R.13.4` §5 table silently substitutes the reason ids and
-  drops the transport row without flagging the deviation (documentation
-  transparency gap, folded here); the `.1R.13.4` tests are honestly named.
-  Recommendation: the separately-authorized V-2 / V-3 / V-4
-  contract-clarification phase should add `cwd_ref` / `env_allowlist_ref`
-  to the request model **or** reword §11.2 / §25 rows 8–9 and strike the
-  transport row.
-- **V-13-5-2 (INFO):** `Gate5Result` carries no `attempt_id` by its frozen
-  `.1R.10` model; Gate 8's `attempt_id` binding is transitive via Gate 7,
-  not direct. No exploitable gap; the future Gate-9 handoff spec should say
-  so.
-- **V-13-5-3 (INFO):** the pre-existing `_GATE6_DECISIONS` cross-file
-  pollution flake above — not candidate-attributable; recommend an autouse
-  registry-clear fixture in a future hygiene pass.
-- **Carried, re-checked:** V-13-4-1 (INFO) not reproduced;
-  V-13-3-1 / V-13-3-2 (LOW) confirmed **not amplified**; V-2 / V-3 / V-4
-  (LOW) no Gate-8 impact; O1–O4 / F2–F4 / F7 unchanged, F7 threat model
-  **NOT broadened** (stated verbatim in `runtime_dispatch_gate8.py`).
+## Contract-alignment debt
 
-## Verdict
+V-2 / V-3 / V-4 / V-13-3-1 / V-13-3-2 / V-13-5-2 re-evaluated at **actual
+authority consumption** — **none becomes blocking.** Gate 9 confirms the
+sequence-3 event read-only and never depends on the disputed "which gate
+creates it" wording; enforces proof-lifecycle currentness through
+`revalidate` (re-runs `validate_approval`); consumes only the trusted
+upstream **objects**, never the raw 3/7-field `human_authority_binding`
+(`RuntimeDispatchHumanAuthorityBinding` not referenced); invents no PB/RE
+policy semantics; preserves the transitive attempt-identity exactly.
+**V-13-5-1 — SATISFIED at Gate 9** for the runtime-dispatch consumption
+path (the residual frozen `.1R.13.1` §11.2/§25 contract-text inconsistency
+is a documentation cleanup for the dedicated contract-clarification phase,
+not a Gate-9 defect). No contradiction found between RDGO-001 / RIHAC-001 /
+RIASC-001 / HPAC-001 / PBRD-001 / RPAC-001 / POL-005 and the Gate-9 wiring;
+no STOP condition met.
 
-> **VERIFIED WITH NON-BLOCKING FINDINGS — GATE-8 PROCESS CONTAINMENT (SHELL
-> GATE) COORDINATOR INTEGRATION COMPLETE.** GATE-8 — CLOSED. No STOP
-> condition met: no Shell Gate path can cause an effect; no executable/
-> effect substitution that matters remains possible; no trusted negative
-> result can progress.
+## Earlier-gate regressions
 
-## Gate-9 unblocking
+Gate 5 — CLOSED / non-consuming / NON-REAL hard stop. Gate 6 — CLOSED /
+permission only / POL-005 preserved. Gate 7 — CLOSED / current posture DENY
+/ no consumption. Gate 8 — CLOSED / containment validation only / no effect
+/ no consumption. Gate 9 weakens no earlier boundary; the Gate-8 re-run
+inside Gate 9 consumes nothing and writes nothing.
 
-All eight `.1R.13.1` §17 criteria are met on promotion of this report.
+## Governance
 
-> **`.1R.14` PRECONDITIONS SATISFIED — STILL REQUIRES SEPARATE EXPLICIT
-> HUMAN AUTHORIZATION.** `.1R.14` (Gate-9 Atomic Authority Consumption
-> Coordinator Integration Implementation) and `.1R.15` (its verification)
-> remain **frozen, BLOCKED pending their own explicit human authorization,
-> and NOT renumbered**. This phase begins neither and grants no
-> authorization. A dedicated V-2 / V-3 / V-4 / V-13-3-1 / V-13-3-2 /
-> **V-13-5-1** contract-clarification phase is an alternative non-blocking
-> next step, also requiring its own explicit authorization.
+`pcae health` healthy; `pcae check` passed; `pcae status coherence`
+coherent; session continuity verified; `pcae doctor task-memory`
+warning-only (pre-existing O4 historical `tasks/DONE.md` omissions).
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved —
+governed `pcae` lifecycle only; no raw `git commit` / `git push`,
+`--no-verify`, force push, history rewrite, or hook bypass; no delegated
+worker committed, finalized, or pushed. No Dell target, third-party system,
+external account, external credential, external network, provider API, or
+physical authenticator accessed.
 
-`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
-Governed PCAE lifecycle only. Runtime remains `not_implemented / Observed /
-observe / unavailable`; POL-005 unchanged; real execution UNAVAILABLE.
+## Disposition and next phase
+
+**GATE-9 — IMPLEMENTED, INDEPENDENT VERIFICATION PENDING, NOT CLOSED.**
+Gate 9 is **not** verified; no execution readiness is claimed.
+
+**Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.15` — Independent
+Verification of Gate-9 Atomic Authority Consumption Coordinator
+Integration.** NOT begun; requires its own separate explicit human
+authorization. Gate 10 remains unimplemented and unplanned with **no
+assigned ID**. A dedicated contract-clarification phase for
+V-2/V-3/V-4/V-13-3-1/V-13-3-2/V-13-5-1 is an alternative non-blocking next
+step, also requiring its own explicit authorization. This phase begins
+neither and grants no authorization.
+
+Implementation commits: `9103d9cf`, `9fba3251`, `2806e3d9`, `e2cc7d9c`.
+Pushed status / `origin/main..HEAD`: reconciled by the governed finalizer
+(`origin/main..HEAD = 0` after the governed push).
