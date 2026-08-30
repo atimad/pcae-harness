@@ -731,6 +731,16 @@ def test_isolation_only_three_production_files_changed_since_baseline():
         "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14; V-15-1 repair .1R.15.2; durable snapshot .1R.15.4)
         "src/pcae/core/runtime_invocation_authority_consumption.py",  # HPAC-AUTHORITY-CONSUMPTION/2.1 durable authority_generation_binding (.1R.15.4)
         "src/pcae/core/runtime_dispatch_gate10_eligibility.py",  # Gate-10 pre-effect eligibility + DispatchEnvelope, Slice A (.1R.17) — non-effecting
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B — dispatch-attempt
+        # durable lifecycle + the two 3S.2.1 MUST-FIX repairs + the
+        # runtime-inspect item-9 repair; `.1R.16` §36.2 / §38). Each entry
+        # is an exact filename, not a wildcard; an unauthorized production
+        # importer still fails this guard's subset invariant.
+        "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",   # Slice B (.1R.19) — non-authoritative mirror, non-effecting
+        "src/pcae/core/runtime_invocation.py",                   # Slice B (.1R.19) — 3S.2.1 MUST-FIX #2 store path containment
+        "src/pcae/core/runtime_adapter.py",                      # Slice B (.1R.19) — 3S.2.1 MUST-FIX #1 malformed-result fail-closed
+        "src/pcae/core/runtime_introspection.py",                # Slice B (.1R.19) — 3S.2.1 item-9 runtime-inspect discoverability repair (observational)
+        "src/pcae/commands/runtime_inspect.py",  # Slice B (.1R.19) -- 3S.2.1 item-9 runtime-inspect CLI section (observational)
     }
     unexpected = set(changed) - _authorized
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"

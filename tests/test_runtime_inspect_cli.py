@@ -420,13 +420,18 @@ def test_module_imports_are_allowlisted(module_imports):
     to `pcae.core.runtime_snapshot`, per 112E objective 3 -- "avoid
     bespoke assembly logic inside the CLI"); `pcae.core.paths` is new,
     needed to resolve the repo root Runtime Snapshot reads real
-    session/task state from."""
+    session/task state from. Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B,
+    3S.2.1 item-9 runtime-inspect discoverability repair) re-adds a direct
+    `pcae.core.runtime_introspection` import for the observational
+    `get_adapter_surfaces()` list -- already a transitive dependency via
+    `runtime_snapshot`, a pure observation-only module."""
     allowed = {
         "__future__",
         "argparse",
         "json",
         "pcae.core.command_path_observation",
         "pcae.core.paths",
+        "pcae.core.runtime_introspection",
         "pcae.core.runtime_registry",
         "pcae.core.runtime_snapshot",
     }

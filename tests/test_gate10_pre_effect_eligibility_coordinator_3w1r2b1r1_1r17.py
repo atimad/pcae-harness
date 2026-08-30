@@ -1050,6 +1050,22 @@ def test_gate9_module_bytes_unchanged_since_baseline():
     assert diff == ""
 
 
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B) is authorized by
+#: `.1R.16` §36.2 / §38 to modify exactly these earlier-phase modules
+#: (the two 3S.2.1 MUST-FIX repairs + the item-9 runtime-inspect
+#: discoverability repair) and to add one new non-authoritative mirror
+#: module. The Slice-A coordinator itself (`runtime_dispatch_gate10_eligibility.py`)
+#: stays byte-unchanged; Gate 5-9 stay byte-unchanged; no contract changes.
+_SLICE_B_AUTHORIZED_SINCE_BASELINE = {
+    "src/pcae/core/runtime_dispatch_gate10_eligibility.py",  # Slice A (this suite's own new file)
+    "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",   # Slice B — new, non-authoritative, non-effecting
+    "src/pcae/core/runtime_invocation.py",                   # Slice B — 3S.2.1 MUST-FIX #2 (store path containment)
+    "src/pcae/core/runtime_adapter.py",                      # Slice B — 3S.2.1 MUST-FIX #1 (malformed-result fail-closed)
+    "src/pcae/core/runtime_introspection.py",                # Slice B — 3S.2.1 item-9 (runtime-inspect discoverability, observational)
+    "src/pcae/commands/runtime_inspect.py",  # Slice B (.1R.19) -- 3S.2.1 item-9 runtime-inspect CLI section (observational)
+}
+
+
 def test_earlier_gates_and_contracts_bytes_unchanged_since_baseline():
     for rel in (
         "docs/contracts/RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md",
@@ -1061,11 +1077,10 @@ def test_earlier_gates_and_contracts_bytes_unchanged_since_baseline():
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
+        "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/runtime_dispatch_permission.py",
-        "src/pcae/core/runtime_introspection.py",
         "src/pcae/core/runtime_invocation_authority_consumption.py",
         "src/pcae/core/runtime_authority.py",
-        "src/pcae/core/runtime_adapter.py",
         "src/pcae/core/runtime_registry.py",
     ):
         diff = subprocess.run(
@@ -1078,7 +1093,12 @@ def test_production_scope_since_baseline_is_the_single_new_file():
     changed = set(subprocess.run(
         ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True).stdout.split())
-    assert changed <= {"src/pcae/core/runtime_dispatch_gate10_eligibility.py"}
+    # Slice A alone: exactly the one new coordinator file. Slice B (.1R.19)
+    # additionally admits the exact `.1R.16`-§38-authorized set below — an
+    # unauthorized production-file expansion still fails this subset check.
+    assert changed <= _SLICE_B_AUTHORIZED_SINCE_BASELINE, sorted(
+        changed - _SLICE_B_AUTHORIZED_SINCE_BASELINE
+    )
 
 
 def test_f7_boundary_stated_verbatim():

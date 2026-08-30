@@ -390,25 +390,34 @@ def test_non_simulation_only_pb_request_is_unconditionally_denied():
 
 
 def test_malformed_adapter_result_never_persists_a_result_document():
-    """A non-conforming `collect()` return value must not produce a
-    persisted `result.json` that a later reader could mistake for a
-    trusted terminal outcome, whatever the exact failure mechanism."""
+    """3S.2.1 MUST-FIX #1 — REPAIRED by Phase
+    149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B). A non-conforming
+    `collect()` return value now fails closed with a clean
+    `FAILURE_MALFORMED_RESULT` `SimulationOutcome` (no uncaught
+    `AttributeError`), and no `result.json` / `intake-handoff.json` is
+    ever persisted."""
+    from pcae.core.runtime_invocation import FAILURE_MALFORMED_RESULT
+
     resolver, request, prompt, approval = _build_request("mock-dry.no-change.v1")
     resolver.register_adapter_instance(MOCK_ADAPTER_ID, MalformedMockAdapter())
     store_root = Path(tempfile.mkdtemp())
     store = RuntimeInvocationStore(store_root)
 
-    with pytest.raises(Exception):
-        simulate_invocation(
-            request=request, prompt_digest=prompt.content_digest, approval=approval,
-            resolver=resolver, store=store, clock=_clock,
-        )
+    outcome = simulate_invocation(
+        request=request, prompt_digest=prompt.content_digest, approval=approval,
+        resolver=resolver, store=store, clock=_clock,
+    )
 
+    assert outcome.accepted is False
+    assert outcome.failure_category == FAILURE_MALFORMED_RESULT
+    assert outcome.result is None
     result_files = list(store_root.rglob("result.json"))
+    handoff_files = list(store_root.rglob("intake-handoff.json"))
     assert result_files == [], (
         "malformed adapter result must never be persisted as a trusted "
         f"result document; found {result_files}"
     )
+    assert handoff_files == []
 
 
 # ── Section 26: duplicate invocation / idempotency (store-level) ───────
@@ -442,9 +451,10 @@ def test_duplicate_invocation_id_conflicting_content_fails_closed():
 def test_production_entry_point_never_lets_caller_choose_invocation_id():
     """Structural proof for Section 24: the only public entry point this
     phase adds accepts no `invocation_id` parameter anywhere, so the
-    store-level lack of path-sanitization on `invocation_id` (see
-    `test_store_invocation_id_lacks_path_confinement_defense_in_depth`)
-    is not reachable through production usage today."""
+    store-level path-sanitization on `invocation_id` (see
+    `test_store_invocation_id_path_confinement_defense_in_depth`, repaired
+    in .1R.19) is defense-in-depth: not reachable through production usage
+    today, where `invocation_id` is always internally generated."""
     import inspect
 
     for fn in (run_production_dry_invocation, resolve_dry_consumer_context):
@@ -452,24 +462,31 @@ def test_production_entry_point_never_lets_caller_choose_invocation_id():
         assert "invocation_id" not in sig.parameters
 
 
-@pytest.mark.xfail(
-    reason=(
-        "MUST-FIX (non-blocking, defense-in-depth): RuntimeInvocationStore "
-        "does not sanitize invocation_id against path traversal at the "
-        "store layer. Not reachable via the current production entry "
-        "point (invocation_id is always internally generated), but "
-        "should be hardened before any future caller could ever supply "
-        "an externally-influenced invocation_id."
-    ),
-    strict=True,
-)
-def test_store_invocation_id_lacks_path_confinement_defense_in_depth():
-    store = RuntimeInvocationStore(Path(tempfile.mkdtemp()))
-    store.create_request_record(
-        _FakeReq("../../../../../../tmp/pcae-3s21-path-confinement-poc", "key")
-    )
-    # If this ever raises/rejects the traversal, the xfail flips to an
-    # unexpected pass, and this test should be promoted out of xfail.
+def test_store_invocation_id_path_confinement_defense_in_depth():
+    """3S.2.1 MUST-FIX #2 — REPAIRED by Phase
+    149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B). `RuntimeInvocationStore`
+    now sanitizes `invocation_id` / `attempt_id` against path traversal at
+    the store layer (`require_safe_relative_id_component` grammar) plus a
+    resolved-path containment assertion. A crafted traversal id fails
+    closed with `InvocationIntegrityError` and writes nothing. Previously
+    an `xfail(strict=True)` gap demonstrator; promoted to a real
+    expected-rejection test."""
+    from pcae.core.runtime_invocation import InvocationIntegrityError
+
+    tmp = Path(tempfile.mkdtemp())
+    store = RuntimeInvocationStore(tmp)
+    sentinel_target = tmp.parent / "pcae-3s21-path-confinement-poc"
+    with pytest.raises(InvocationIntegrityError):
+        store.create_request_record(
+            _FakeReq("../../../../../../tmp/pcae-3s21-path-confinement-poc", "key")
+        )
+    assert not sentinel_target.exists()
+    # An absolute path and a bare `..` component are also rejected.
+    for bad in ("/etc/pcae-poc", "..", "."):
+        with pytest.raises(InvocationIntegrityError):
+            store.create_request_record(_FakeReq(bad, "key"))
+    # A normal generated-shaped id still works unchanged.
+    store.create_request_record(_FakeReq("inv-" + "a" * 32, "key"))
 
 
 # ── Section 35: provenance spoofing ─────────────────────────────────────

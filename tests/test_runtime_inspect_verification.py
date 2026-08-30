@@ -588,9 +588,14 @@ def test_module_import_allowlist_unchanged_from_111c():
     `pcae.core.runtime_snapshot` instead of importing
     `pcae.core.runtime_introspection` directly (112E objective 3), and
     gained `pcae.core.paths` to resolve the repo root Runtime Snapshot
-    reads. Every other 111C-era import remains unchanged -- this test
-    still exists specifically to catch any *other*, undocumented
-    dependency creeping in."""
+    reads. Deliberately updated again by Phase
+    149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B, 3S.2.1 item-9 runtime-inspect
+    discoverability repair): re-adds a direct `pcae.core.runtime_introspection`
+    import for the observational `get_adapter_surfaces()` surface list
+    (already a transitive dependency via `runtime_snapshot`; a pure
+    observation-only module). Every other 111C-era import remains
+    unchanged -- this test still exists specifically to catch any
+    *other*, undocumented dependency creeping in."""
     names = _module_import_names(ri_cli.__file__)
     allowed = {
         "__future__",
@@ -598,6 +603,7 @@ def test_module_import_allowlist_unchanged_from_111c():
         "json",
         "pcae.core.command_path_observation",
         "pcae.core.paths",
+        "pcae.core.runtime_introspection",
         "pcae.core.runtime_registry",
         "pcae.core.runtime_snapshot",
     }

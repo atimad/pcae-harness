@@ -244,12 +244,46 @@ class TestPBAndDryCompatibility:
         assert "runtime_dispatch" not in text
 
     def test_production_dry_source_is_byte_unchanged_from_verification_baseline(self):
+        """Phase-aware invariant (converted from a point-in-time byte
+        equality by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19, Slice B): the
+        `.3V.1` verification baseline froze `runtime_adapter.py`, but Slice
+        B is authorized by `.1R.16` §36.2 / §38 to apply the 3S.2.1 MUST-FIX
+        #1 malformed-adapter-result fail-closed repair to `simulate_invocation`.
+        The frozen dry-path *semantics* remain intact: exactly one
+        `adapter.dispatch(` call site, still `simulation_only`, no new
+        effect primitive — the only change is that a non-conforming
+        `adapter.collect()` return now fails closed with
+        `FAILURE_MALFORMED_RESULT` instead of an uncaught `AttributeError`."""
         relative = DRY_CONSUMER.relative_to(ROOT).as_posix()
         baseline = subprocess.run(
             ["git", "show", f"{VERIFICATION_BASELINE}:{relative}"],
             cwd=ROOT, check=True, capture_output=True,
         ).stdout
-        assert baseline == DRY_CONSUMER.read_bytes()
+        current = DRY_CONSUMER.read_bytes()
+        if baseline == current:
+            return
+        current_text = current.decode("utf-8")
+        # exactly one real adapter dispatch call site, unchanged
+        assert current_text.count("resolved.adapter.dispatch(") == 1
+        # no effect primitive imported / called by module code
+        for banned_import in ("import subprocess", "import socket", "posix_spawn", "subprocess.Popen"):
+            assert banned_import not in current_text, banned_import
+        # the only authorized addition is the 3S.2.1 MUST-FIX #1 repair
+        assert "malformed_adapter_result_reasons" in current_text
+        assert "FAILURE_MALFORMED_RESULT" in current_text
+        diff = subprocess.run(
+            ["git", "diff", VERIFICATION_BASELINE, "--", relative],
+            cwd=ROOT, check=True, capture_output=True, text=True,
+        ).stdout
+        added = [
+            ln[1:].lower() for ln in diff.splitlines()
+            if ln.startswith("+") and not ln.startswith("+++")
+        ]
+        # no added line grants authority / enables execution / registers an adapter
+        for ln in added:
+            for banned in ("execution_allowed", "register_adapter", "real_execution_available = true",
+                           "simulation_only=false", "simulation_only = false"):
+                assert banned not in ln, (banned, ln)
 
     def test_semantic_walls_and_artifact_separation_are_explicit(self):
         walls = [

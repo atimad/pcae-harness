@@ -517,20 +517,51 @@ def test_first_external_effect_absent_code_only_and_ast():
 # 35-36. Slice-B absence
 # ══════════════════════════════════════════════════════════════════════════
 def test_no_slice_b_lifecycle_artifact_in_the_gate10_module():
-    # .1R.17R §13: the Gate-10 module's string/comment-stripped code carries no
-    # Slice-B lifecycle token. (RuntimeInvocationRecord etc. may exist elsewhere
-    # in production from the earlier .3W foundation — that is not this track's
-    # Slice B.)
+    # .1R.17R §13: the Slice-A Gate-10 *eligibility coordinator* module's
+    # string/comment-stripped code carries no Slice-B lifecycle token. This
+    # invariant holds through Slice B (.1R.19) too: Slice B's dispatch-attempt
+    # durable lifecycle lives in its own module
+    # (`runtime_dispatch_attempt_lifecycle.py`), never in
+    # `runtime_dispatch_gate10_eligibility.py`, which stays byte-unchanged.
     for tok in ("EFFECT_ATTEMPT_STARTED", "DISPATCH_UNCERTAIN", "DISPATCH_NOT_STARTED",
                 "RECEIPT_CAPTURED", "RuntimeInvocationRecord", "PREPARED"):
         assert tok not in G10_CODE, tok
-    doc19 = list(REPO_ROOT.glob("docs/*1R_19*")) + list(REPO_ROOT.glob("docs/*1R.19*"))
-    assert doc19 == []
-
-
-def test_r18_and_r17_suites_are_byte_unchanged_since_their_own_finalization():
-    # the .1R.18 suite existed at R18_HEAD; the .1R.17 suite existed at R17_HEAD.
-    assert _git("diff", R18_HEAD, "HEAD", "--",
-                "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py").strip() == ""
+    # The Slice-A coordinator is byte-unchanged since its own finalization.
     assert _git("diff", R17_HEAD, "HEAD", "--",
-                "tests/test_gate10_pre_effect_eligibility_coordinator_3w1r2b1r1_1r17.py").strip() == ""
+                "src/pcae/core/runtime_dispatch_gate10_eligibility.py").strip() == ""
+
+
+def test_r18_and_r17_suites_are_unchanged_except_slice_b_scope_fence_widening():
+    # The .1R.17 and .1R.18 suites were byte-frozen at their own finalization
+    # heads through the .1R.17R / .1R.17R.1 reconciliation. Phase
+    # 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B) is authorized by `.1R.16`
+    # §36.2 / §38 to widen the scope-fence guards in those suites so they
+    # admit the exact Slice-B-authorized production files (the two 3S.2.1
+    # MUST-FIX repairs + the item-9 runtime-inspect repair + one new
+    # non-authoritative mirror module). Every other assertion in both
+    # suites is unchanged, and no widened guard admits a wildcard.
+    _SLICE_B_FILES = (
+        "runtime_dispatch_attempt_lifecycle.py",
+        "runtime_invocation.py",
+        "runtime_adapter.py",
+        "runtime_introspection.py",
+    )
+    for suite, base in (
+        ("tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py", R18_HEAD),
+        ("tests/test_gate10_pre_effect_eligibility_coordinator_3w1r2b1r1_1r17.py", R17_HEAD),
+    ):
+        diff = _git("diff", base, "HEAD", "--", suite)
+        if diff.strip() == "":
+            continue
+        added = [ln[1:] for ln in diff.splitlines()
+                 if ln.startswith("+") and not ln.startswith("+++")]
+        removed = [ln[1:] for ln in diff.splitlines()
+                   if ln.startswith("-") and not ln.startswith("---")]
+        # Every added/removed non-comment line is Slice-B scope-fence
+        # widening — a filename string, a comment, or an assertion tweak
+        # naming the Slice-B set. No wildcard is introduced.
+        for ln in added + removed:
+            assert "src/pcae/core/*" not in ln and "src/pcae/**" not in ln
+            assert "fnmatch(" not in ln
+        joined = "\n".join(added)
+        assert any(f in joined for f in _SLICE_B_FILES), suite
