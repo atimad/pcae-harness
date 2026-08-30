@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260830-2016-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-18-gate-10-slice-a-reconciliation-repair-phase-recommended-before-slice-b
+20260830-2038-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-17r-gate-10-slice-a-scope-fence-and-verification-evidence-reconciliation
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.18); Gate-10 Slice-A reconciliation repair phase recommended before Slice B
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R: Gate-10 Slice-A Scope-Fence and Verification-Evidence Reconciliation
 
 ## Status
 
@@ -18,21 +18,21 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.18); Gate-10 Slice-A reconciliation repair phase recommended before Slice B
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R: Gate-10 Slice-A Scope-Fence and Verification-Evidence Reconciliation
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- tests/**
+- docs/**
+- tasks/**
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/**
-- docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_18_INDEPENDENT_VERIFICATION_OF_THE_GATE_10_PRE_EFFECT_ELIGIBILITY_COORDINATOR.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
-- TBD
-
+- src/pcae/**
 
 ## Allowed Zones
 
@@ -81,4 +81,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-30T20:16:09.512088+02:00
+2026-08-30T20:38:49.780219+02:00
