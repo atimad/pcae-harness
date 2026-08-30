@@ -2,11 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.5 — Independent Verification of the
+Runtime-Dispatch Contract Normalization.
+**INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS — RUNTIME-DISPATCH
+CONTRACT NORMALIZATION COMPLETE.** RE-DERIVED every V-2/V-3/V-4/V-13-3-1/
+V-13-3-2/V-13-5-1/V-15-1 normalization and N-15-3-2 from primary
+sources (production call graph, contract text, and a re-executed
+fixed-SHA A/B) — not accepted from the `.1R.15.4` report. All seven
+findings CLOSED; N-15-3-2 CLOSED (its one coverage gap — the production
+resolver factory was never exercised end-to-end through a real
+consumption in `.1R.15.4`'s own suite — closed by this phase's own added
+test). Durable Gate-10 generation-snapshot representation CLOSED
+(S1-correspondence independently proven via source order, not comments).
+Two non-blocking informational findings: N-15-5-1 (PBRD-001 v2.1 now
+contains two sections both numbered "4a" — a documentation defect, not a
+semantic one) and N-15-5-2 (the `.1R.15.4` suite's resolver-factory
+coverage gap, now closed). Gate-10 prerequisites 1, 8, 10 — the three
+`.1R.15.4` left open — are now **satisfied**; a Gate-10
+architecture/planning phase MAY now be human-designated (item 9 remains
+separately tracked; **no phase ID is assigned by this phase**).
+
+Verification-entry SHA `b3cd0824` (`.1R.15.4` final). Subject range
+`1babaa95`..`b3cd0824`. Governed `pcae` lifecycle only; only the primary
+human-authorized operator holds `.1R.15.5` lifecycle authority; the
+delegated `.3` finalization / commit / push incident remains
+**UNAUTHORIZED**. Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_15_5_INDEPENDENT_VERIFICATION_RUNTIME_DISPATCH_CONTRACT_NORMALIZATION.md`.
+
+**Tests.** New
+`tests/test_runtime_dispatch_contract_normalization_independent_verification_3w1r2b1r1_1r15_5.py`
+— **48/48**, stable over 4 repeated deterministic runs; deliberately does
+not import the `.1R.15.4` suite under test. Fixed-SHA A/B independently
+re-executed via a fresh `git worktree` at `4d480553` (31-file pre-existing
+subset): baseline 1202 passed/36 failed, HEAD 1238 passed/36 failed,
+byte-identical failing node IDs. **CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL
+NONPASSING NODES = 0.**
+
+**Recommended next: none assigned by this phase.** A Gate-10
+architecture/planning phase MAY now be human-designated (requires its own
+separate explicit human authorization); this phase invents no ID and
+performs no Gate-10 design. Do not plan or implement Gate 10. Do not
+enable execution.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 Complete
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 — Runtime-Dispatch Contract
 Normalization Implementation.
 **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING** (×3: contract
 normalization; durable Gate-10 generation-snapshot representation;
-N-15-3-2 approval-generation completeness). No self-close.
+N-15-3-2 approval-generation completeness). No self-close. Superseded by
+`.1R.15.5` above — **INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS**.
 
 Phase-entry SHA `1babaa95`; immutable A/B baseline `4d480553` (`.1R.15.3`
 final). Governed `pcae` lifecycle only; only the primary human-authorized
