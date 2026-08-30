@@ -202,6 +202,11 @@ def test_sole_production_owner_of_gate8_boundary():
     assert caller_hits <= {
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: the non-effecting Gate-10 pre-effect eligibility coordinator
+        # re-runs run_gate8_process_containment over freshly re-resolved inputs
+        # (RDGO-001 v3.1 §11 item 5 / §16; .1R.16 §16). Gate 8 stays the sole
+        # owner of _GATE8_RESULTS (asserted above); every other caller still fails.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
 
 
@@ -1041,6 +1046,10 @@ def test_no_gate9_consumer_of_gate8result_exists_yet():
     assert hits <= {
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer — the
+        # non-effecting Slice-A coordinator re-validates the handed Gate8Result
+        # (RDGO-001 v3.1 §11 item 4 lineage + §16). Every other importer still fails.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }, f"unexpected Gate8Result consumer: {sorted(hits)}"
 
 
@@ -1189,6 +1198,9 @@ def test_gate7_result_consumer_grep_is_exactly_gate7_and_gate8_today():
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer — re-derives
+        # the Gate-7 lineage (RDGO-001 v3.1 §11 item 4). Every other importer still fails.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }, f"unexpected Gate7Result consumer: {sorted(hits)}"
 
 

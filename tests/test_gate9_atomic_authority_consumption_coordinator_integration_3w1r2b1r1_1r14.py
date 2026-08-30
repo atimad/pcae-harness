@@ -33,8 +33,11 @@ from __future__ import annotations
 import ast
 import copy
 import hashlib
+import io
 import pickle
+import re
 import subprocess
+import tokenize
 import threading
 from pathlib import Path
 
@@ -905,10 +908,38 @@ def test_planted_foreign_record_outside_writer_is_not_authoritative(chain):
 # ═══════════════════════════════════════════════════════════════════════
 # 41 / 43-45 / 47. Sole ownership + consumer inventory + production scope
 # ═══════════════════════════════════════════════════════════════════════
-def test_gate9_is_sole_production_owner_of_consumption_boundary():
+def _code_only_source(path: str) -> str:
+    """*path*'s source with string literals and comments stripped, so a grep over
+    the result reflects code/import semantics and not docstring prose (.1R.17R —
+    the Gate-10 pre-effect eligibility module names
+    ``run_gate9_atomic_authority_consumption`` only in its module docstring)."""
+    src = (REPO_ROOT / path).read_text()
+    pieces: list[str] = []
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(src).readline):
+            if tok.type in (tokenize.STRING, tokenize.COMMENT):
+                continue
+            if tok.type == getattr(tokenize, "FSTRING_MIDDLE", -1):
+                continue
+            pieces.append(tok.string)
+    except (tokenize.TokenError, IndentationError):
+        return src
+    return "\n".join(pieces)
+
+
+def _git_grep_l_code(pattern: str) -> set[str]:
     hits = set(subprocess.run(
-        ["git", "grep", "-l", "-E", r"run_gate9_atomic_authority_consumption|_GATE9_RESULTS", "--", "src/pcae"],
+        ["git", "grep", "-l", "-E", pattern, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
+    return {p for p in hits if re.search(pattern, _code_only_source(p))}
+
+
+def test_gate9_is_sole_production_owner_of_consumption_boundary():
+    # .1R.17R: code-only grep — the non-effecting Gate-10 pre-effect eligibility
+    # module names ``run_gate9_atomic_authority_consumption`` only in its module
+    # docstring and never references _GATE9_RESULTS. Gate 9 stays the sole
+    # production owner of the atomic-consumption boundary.
+    hits = _git_grep_l_code(r"run_gate9_atomic_authority_consumption|_GATE9_RESULTS")
     assert hits == {"src/pcae/core/runtime_dispatch_gate9.py"}
 
 
@@ -919,16 +950,25 @@ def test_gate9_is_the_only_new_gate8_result_consumer():
     assert hits <= {
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer — re-validates
+        # the handed Gate8Result (RDGO-001 v3.1 §11 item 4 + §16). Every other importer still fails.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
     assert "src/pcae/core/runtime_dispatch_gate9.py" in hits
 
 
 def test_gate9result_has_zero_downstream_production_consumers():
-    # Gate 10 does not exist.
+    # .1R.17R: the authorized non-effecting Gate-10 pre-effect eligibility
+    # coordinator re-validates the handed Gate9Result (RDGO-001 v3.1 §11 items
+    # 1-2). No first-effect Gate-10 module exists (see the .1R.17R reconciliation
+    # suite). Every other importer still fails this guard.
     hits = set(subprocess.run(
         ["git", "grep", "-l", "-E", r"Gate9Result|is_gate9_result", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
-    assert hits == {"src/pcae/core/runtime_dispatch_gate9.py"}
+    assert hits == {
+        "src/pcae/core/runtime_dispatch_gate9.py",
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
+    }
 
 
 def test_production_scope_since_baseline_is_the_single_new_gate9_file():

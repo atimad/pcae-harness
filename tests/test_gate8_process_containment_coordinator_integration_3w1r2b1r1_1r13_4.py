@@ -774,6 +774,10 @@ def test_gate8_is_sole_production_owner_of_containment_boundary():
     assert caller_hits <= {
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: the non-effecting Gate-10 pre-effect eligibility coordinator
+        # re-runs run_gate8_process_containment (RDGO-001 v3.1 §11 item 5 / §16;
+        # .1R.16 §16). Every other caller still fails this guard.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
 
 
@@ -785,6 +789,9 @@ def test_gate8_is_the_only_new_gate7_result_consumer():
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",  # authorized Gate-9 consumer (.1R.14)
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer — re-derives
+        # the Gate-7 lineage (RDGO-001 v3.1 §11 item 4). Every other importer still fails.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
 
 
@@ -804,6 +811,9 @@ def test_gate8result_has_zero_downstream_production_consumers():
     assert hits <= {
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer — re-validates
+        # the handed Gate8Result (RDGO-001 v3.1 §11 item 4 + §16). Every other importer still fails.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }, f"unexpected Gate8Result consumer: {sorted(hits)}"
 
 

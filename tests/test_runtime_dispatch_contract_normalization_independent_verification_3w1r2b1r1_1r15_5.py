@@ -570,6 +570,11 @@ def test_gate_5_6_7_8_production_modules_byte_unchanged_since_baseline():
     allowed = {
         "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/runtime_invocation_authority_consumption.py",
+        # .1R.17R: the single new non-effecting Slice-A file added by .1R.17
+        # (RDGO-001 v3.1 §11 Gate-10 front half + RPAC-REQ-029 DispatchEnvelope).
+        # Gate 5 / permission / Gate 7 / Gate 8 remain byte-unchanged (asserted
+        # via `forbidden` above); this only widens the observed-delta allowlist.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
     assert changed <= allowed, changed - allowed
 

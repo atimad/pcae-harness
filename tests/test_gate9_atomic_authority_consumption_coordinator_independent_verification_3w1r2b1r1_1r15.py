@@ -31,6 +31,7 @@ import hashlib
 import inspect
 import json
 import pickle
+import re
 import subprocess
 import threading
 from pathlib import Path
@@ -303,28 +304,77 @@ def _git_grep_l(pattern: str) -> set[str]:
     return set(out.split())
 
 
+def _code_only_source(path: str) -> str:
+    """Return *path*'s source with every string literal and comment removed, so a
+    grep over the result reflects executable/import semantics and not docstring
+    or comment prose (.1R.17R — repairs a docstring-grep false positive; the
+    ``runtime_dispatch_gate10_eligibility`` module names
+    ``run_gate9_atomic_authority_consumption`` once, in its module docstring,
+    when explaining why the Gate-10 coordinator is structurally unreachable)."""
+    import io
+    import tokenize
+
+    src = (REPO_ROOT / path).read_text()
+    pieces: list[str] = []
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(src).readline):
+            if tok.type in (tokenize.STRING, tokenize.COMMENT):
+                continue
+            if tok.type == getattr(tokenize, "FSTRING_MIDDLE", -1):
+                continue  # literal text inside an f-string (names in {..} are kept)
+            pieces.append(tok.string)
+    except (tokenize.TokenError, IndentationError):
+        return src  # fail open — never hide a real consumer behind a parse error
+    return "\n".join(pieces)
+
+
+def _git_grep_l_code(pattern: str) -> set[str]:
+    """:func:`_git_grep_l` filtered to files where *pattern* matches actual code
+    (string literals and comments stripped)."""
+    return {
+        p for p in _git_grep_l(pattern)
+        if re.search(pattern, _code_only_source(p))
+    }
+
+
 def test_sole_semantic_owner_of_gate9_consumption_boundary():
-    assert _git_grep_l(r"run_gate9_atomic_authority_consumption") == {
+    # .1R.17R: code-only grep — the Gate-10 pre-effect eligibility module names
+    # ``run_gate9_atomic_authority_consumption`` only in its module docstring
+    # (explaining why the Gate-10 coordinator is structurally unreachable in
+    # production); it never calls it and never references _GATE9_RESULTS. Gate 9
+    # remains the sole semantic owner of the consumption entry point.
+    assert _git_grep_l_code(r"run_gate9_atomic_authority_consumption") == {
         "src/pcae/core/runtime_dispatch_gate9.py"
     }
-    assert _git_grep_l(r"_GATE9_RESULTS|_GATE9_RESULT_CONSTRUCTOR_SEAL") == {
+    assert _git_grep_l_code(r"_GATE9_RESULTS|_GATE9_RESULT_CONSTRUCTOR_SEAL") == {
         "src/pcae/core/runtime_dispatch_gate9.py"
     }
 
 
 def test_no_alternate_consumption_store_create_caller_in_production():
     callers = _git_grep_l(r"RuntimeInvocationAuthorityConsumptionStore")
-    # only the inert store module (defn) and the Gate-9 coordinator (sole user)
+    # the inert store module (defn), the Gate-9 coordinator (creates the record),
+    # and — since .1R.17R — the non-effecting Gate-10 pre-effect eligibility
+    # coordinator, which only performs an exact-type guard and a read-back
+    # ``consumption_store.resolve(proof_id)`` (RDGO-001 v3.1 §11 item 3). It
+    # instantiates no store and writes nothing. Every other importer still fails.
     assert callers == {
         "src/pcae/core/runtime_invocation_authority_consumption.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
+    g10_src = _code_only_source("src/pcae/core/runtime_dispatch_gate10_eligibility.py")
+    assert "RuntimeInvocationAuthorityConsumptionStore(" not in g10_src
 
 
 def test_gate9result_has_zero_downstream_production_consumers_and_no_gate10():
-    # Gate9Result / is_gate9_result appear only in the coordinator itself.
+    # .1R.17R: the authorized non-effecting Gate-10 pre-effect eligibility
+    # coordinator re-validates the handed Gate9Result (RDGO-001 v3.1 §11 items
+    # 1-2). No first-effect Gate-10 module (run_gate10 / Gate10Result / .dispatch)
+    # exists — asserted below. Every other importer still fails this guard.
     assert _git_grep_l(r"Gate9Result|is_gate9_result") == {
-        "src/pcae/core/runtime_dispatch_gate9.py"
+        "src/pcae/core/runtime_dispatch_gate9.py",
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
     # No Gate-10 symbol / wiring: gate9.py references no dispatch transport.
     for sym in ("run_gate10", "Gate10", "adapter_dispatch", "DispatchReceipt",
@@ -341,6 +391,9 @@ def test_gate8result_new_consumer_is_only_gate9():
     assert hits <= {
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer — re-validates
+        # the handed Gate8Result (RDGO-001 v3.1 §11 item 4 + §16). Every other importer still fails.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
     assert "src/pcae/core/runtime_dispatch_gate9.py" in hits
 

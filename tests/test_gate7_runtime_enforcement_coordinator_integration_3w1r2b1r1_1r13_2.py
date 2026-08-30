@@ -629,6 +629,10 @@ def test_gate7_is_sole_production_consumer_of_is_gate6_decision():
         "src/pcae/core/runtime_dispatch_permission.py",  # defines it
         "src/pcae/core/runtime_dispatch_gate7.py",  # authorized Gate-7 consumer
         "src/pcae/core/runtime_dispatch_gate9.py",  # authorized Gate-9 consumer (.1R.14)
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer —
+        # re-derives the Gate-6 lineage (RDGO-001 v3.1 §11 item 4). Non-effecting
+        # Slice-A module; every other importer still fails this guard.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }, f"unexpected is_gate6_decision consumer: {sorted(hits)}"
 
 

@@ -167,6 +167,11 @@ def test_no_downstream_production_consumer_of_gate7_result():
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",  # authorized Gate-9 consumer (.1R.14 §16.2)
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer —
+        # runtime_dispatch_gate10_eligibility.py re-derives the Gate-7 lineage
+        # (RDGO-001 v3.1 §11 item 4) and re-runs Gate-8 containment (.1R.16 §16).
+        # Non-effecting Slice-A module; every other importer still fails this guard.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }, f"unexpected Gate7Result consumer: {sorted(hits)}"
 
 
@@ -182,6 +187,11 @@ def test_gate7_is_the_only_new_gate6_decision_consumer():
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17R: authorized Gate-10 pre-effect eligibility consumer —
+        # runtime_dispatch_gate10_eligibility.py re-derives the Gate-6 lineage
+        # (RDGO-001 v3.1 §11 item 4). Non-effecting Slice-A module; every other
+        # importer still fails this guard.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }, f"unexpected Gate6Decision consumer: {sorted(hits)}"
 
 
