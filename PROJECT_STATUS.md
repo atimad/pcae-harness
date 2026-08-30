@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R — Gate-10 Slice-A Scope-Fence and
+Verification-Evidence Reconciliation. **STATUS: RECONCILIATION IMPLEMENTED —
+INDEPENDENT VERIFICATION PENDING (`.1R.17R.1`); `.1R.17` VERIFICATION-EVIDENCE
+ERRATUM ISSUED — ORIGINAL HISTORICAL RECORD PRESERVED.** Repairs only the
+governance/evidence and stale-guard-maintenance defects `.1R.18` discovered —
+**no production source and no normative contract changed** (`git diff
+c618134a HEAD -- src/pcae/core/runtime_dispatch_gate10_eligibility.py` empty;
+`git diff 1f8b9c76 HEAD -- docs/contracts` empty). The **17**
+`.1R.17`-attributable pre-existing scope-fence / consumer-inventory guard
+failures are reconciled: **14** stale consumer-inventory allowlists
+(`.1R.13.2` / `.1R.13.3` / `.1R.13.4` / `.1R.13.5` / `.1R.14` / `.1R.15`)
+widened to admit the authorized non-effecting Gate-10 pre-effect eligibility
+module (RDGO-001 v3.1 §11 item 4 lineage + §16 containment re-run + §11 item 3
+durable read-back) — **each guard still rejects any other importer**; **1**
+`.1R.15.5` `git diff` byte-scope `allowed` set widened for the single new
+Slice-A file (Gate 5 / permission / Gate 7 / Gate 8 still asserted
+byte-unchanged); **2** docstring-grep false positives
+(`test_sole_semantic_owner_of_gate9_consumption_boundary` and
+`test_gate9_is_sole_production_owner_of_consumption_boundary` — both tripped
+only by the module docstring's single mention of
+`run_gate9_atomic_authority_consumption`) repaired to scan string/comment-
+stripped code (`.1R.18` recorded "16 + 1"; independent re-derivation here
+found "15 + 2" — the same 17 nodes, one reclassified from "widen" to "fix the
+scan"). A dedicated reconciliation suite
+(`tests/test_gate10_slice_a_scope_fence_reconciliation_3w1r2b1r1_1r17r.py`,
+**42 tests, all passing**) adds active adversarial challenges that an invented
+first-effect `runtime_dispatch_gate10.py`, an invented effect-bearing adapter
+consumer, and an arbitrary module each still fail every reconciled guard. **No
+test removed, skipped, or wildcarded**; two guards strengthened. **Fixed-SHA
+A/B:** historical reproduction `1f8b9c76` → `.1R.17` head `c618134a` = 29 → 46
+(**17 added, 0 removed** — proves the erratum truthful); repaired-tree
+acceptance `1f8b9c76` → `.1R.17R` HEAD = 29 → 29 (**0 added, 0 removed**). The
+`.1R.18` 111-test IV suite and the `.1R.17` 65-test suite re-run **byte-
+unchanged, all green**; the 7 reconciled guard suites in full = 468 passed, 0
+failed. **`.1R.17` historical artifact preserved:** sections 1–14 + No-Go
+Confirmations byte-unchanged, the correction is an **appended** `## ERRATUM`
+section; the immutable `.pcae/phase-reports/*1R.17*` /
+`.pcae/finalization-transactions/*1R.17*` snapshots are untouched. **N-18-2**
+corrected in reconciliation prose (`GATE10_ELIGIBILITY_REASON_IDS` = 39, not
+38; taxonomy unchanged). **N-18-3 preserved** — production code was **not**
+modified to suppress `DispatchEnvelope` minting under an `unavailable`
+runtime; the no-effect guarantee is structural. **`.1R.18` lifecycle /
+regression blocker: REPAIRED — IV pending `.1R.17R.1`.** No Slice B
+(`.1R.19`) / first-effect / Slice C work begun; runtime remains
+`not_implemented / Observed / observe / unavailable`; POL-005 hard DENY;
+`pcae runtime inspect` byte-identical. Governed `pcae` lifecycle only; the
+delegated `.3` finalization / commit / push incident remains **UNAUTHORIZED**
+(this erratum licenses no rewrite of historical governance records — strictly
+additive). Not self-verified. **Recommended next phase (not begun):
+`149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1` — Independent Verification of the Gate-10
+Slice-A Reconciliation.** Phase-entry SHA `3aef3b79`; immutable baseline
+`1f8b9c76`; original `.1R.17` head `c618134a`. Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_17R_GATE_10_SLICE_A_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 — Independent Verification of the
 Gate-10 Pre-Effect Eligibility Coordinator (`.1R.17`). **STATUS: BLOCKED
 INDEPENDENT-VERIFICATION RESULT — FINALIZED (Option B).** Substantive
