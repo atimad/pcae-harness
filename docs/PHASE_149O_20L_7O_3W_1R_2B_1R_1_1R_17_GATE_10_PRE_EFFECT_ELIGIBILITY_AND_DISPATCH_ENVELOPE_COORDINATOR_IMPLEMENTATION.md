@@ -687,3 +687,167 @@ regression).
 
 ---
 *Canonical artifact — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17.*
+
+---
+
+## ERRATUM — issued by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R (2026-08-30)
+
+**This section is an append-only, provenance-preserving correction.** Nothing
+above this line has been altered. Sections 1–14 and the No-Go Confirmations
+stand as the historical `.1R.17` record, *including* the statements this
+erratum corrects — they are retained deliberately so the defect and its
+timeline remain inspectable.
+
+**Issued by:** Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.17R` — Gate-10 Slice-A
+Scope-Fence and Verification-Evidence Reconciliation.
+**Trigger:** Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.18` (Independent Verification
+of the Gate-10 Pre-Effect Eligibility Coordinator) — **BLOCKED
+independent-verification result (Option B)**, canonical artifact
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_18_INDEPENDENT_VERIFICATION_OF_THE_GATE_10_PRE_EFFECT_ELIGIBILITY_COORDINATOR.md`.
+**Fixed SHAs (unchanged):** immutable pre-`.1R.17` baseline `1f8b9c76` (parent
+of the `.1R.17` production commit `302f5aba`); `.1R.17` finalize head
+`c618134a`.
+
+### E-1. What §10 / §14 claimed
+
+> "**A (baseline — `.1R.17` files moved aside):** 29 failing nodes.
+> **B (with `.1R.17`):** 29 failing nodes — the **identical set**.
+> **ADDED failures (in B, not A): 0.** **REMOVED (in A, not B): 0.**"
+> … "**Fixed-SHA A/B.** baseline `1f8b9c76`; A = B = 29 pre-existing failures;
+> **0 added, 0 removed**"
+> … "eight scope-fence / consumer-inventory guards updated … **no test
+> weakened, removed, or skipped**".
+
+The `.1R.17` phase-completion report, its `.pcae/phase-completion-metadata.json`
+snapshot, and the Telegram notification dispatched at finalization all carried
+"ADDED failures = 0" for this A/B.
+
+### E-2. The corrected result (independently re-derived — `.1R.18` §2.2, re-run in `.1R.17R`)
+
+Deterministic selection `-p no:randomly`, **no xdist**, `-k "gate5 or gate7 or
+gate8 or gate9 or introspection or runtime_dispatch or authority_consumption or
+gate10 or hpac or runtime_authority or serialization"`, dedicated `git
+worktree`:
+
+| Run | Failing nodes |
+|---|---|
+| **A** — baseline `1f8b9c76` | **29** (stable; one order-dependent flake — `test_phase_126e_…::test_pretty_and_compact_serialization_both_valid_json` — toggles this to 30 in some runs) |
+| **B** — `.1R.17` head `c618134a` | **46** |
+| **ADDED in B (not in A)** | **17** |
+| **REMOVED (in A, not B)** | **0** |
+| candidate-only (the `.1R.17` / `.1R.18` suites) among the 17 | **0** |
+
+The original "0 added" claim is **disproved**. The true `.1R.17`-head result is
+**17 added, 0 removed**, every one of the 17 attributable to and explained by
+`.1R.17`.
+
+### E-3. Classification of the 17 (verified in `.1R.17R`)
+
+* **15 legitimate stale allowlist / scope-fence guards.** The non-effecting
+  Gate-10 pre-effect eligibility coordinator
+  (`src/pcae/core/runtime_dispatch_gate10_eligibility.py`) references, **in
+  code**, `Gate7Result` / `is_gate7_result`, `Gate8Result` /
+  `is_gate8_result`, `Gate9Result` / `is_gate9_result`, `Gate6Decision` /
+  `is_gate6_decision`, `run_gate8_process_containment`, and
+  `RuntimeInvocationAuthorityConsumptionStore` — exactly the RDGO-001 v3.1 §11
+  item 4 lineage re-derivation + §16 containment re-run, and the §11 item 3
+  durable-record read-back. 14 are consumer-inventory allowlists in
+  `.1R.13.2` / `.1R.13.3` / `.1R.13.4` / `.1R.13.5` / `.1R.14` / `.1R.15`;
+  1 is the `.1R.15.5` `git diff` byte-scope `allowed` set. `.1R.17` handled
+  the identical situation for **8 other** guards by the established
+  "allowlist-widening" precedent — it simply **missed these** and did not
+  disclose the gap.
+* **2 docstring-grep false positives.** `.1R.18` recorded "1"; `.1R.17R`'s
+  independent re-derivation found **2**:
+  `test_sole_semantic_owner_of_gate9_consumption_boundary` (`.1R.15`) **and**
+  `test_gate9_is_sole_production_owner_of_consumption_boundary` (`.1R.14`).
+  Both match the Gate-10 module **only** because its module docstring names
+  `run_gate9_atomic_authority_consumption` once (explaining why the
+  coordinator is structurally unreachable in production). The module never
+  calls it and never references `_GATE9_RESULTS`. `.1R.17R` repairs both by
+  scanning string/comment-stripped code, **not** by widening an allowlist —
+  the correct fix, since the Gate-10 module is *not* a semantic consumer of
+  the Gate-9 consumption entry point.
+
+`16 + 1` (`.1R.18`) and `15 + 2` (`.1R.17R`) describe the same 17 nodes; the
+difference is that one node moves from "widen the allowlist" to "the grep was
+prose-tripped". Neither classification contains an "OTHER" (substantive
+trust-boundary) case.
+
+### E-4. Impact
+
+* **Production Slice-A impact: none.** No production source or normative
+  contract defect. Each of the 17 guards still **fails for any other
+  importer**; Gate 10 is an *authorized* consumer per RDGO-001 v3.1 §11 /
+  `.1R.16` §16; no trust boundary is weakened. `runtime_dispatch_gate9.py`
+  and the Gate 5–8 modules remain byte-unchanged since `1f8b9c76`.
+* **Governance / evidence impact: material completeness defect in the `.1R.17`
+  regression evidence.** The finalized/pushed/notified A/B figure was wrong
+  (0 vs. the true 17), and the "eight prior scope-fence guards widened … each
+  still fails for any other importer" statement was **incomplete** — six
+  further guards needed the same treatment and were not identified.
+
+### E-5. N-18-2 (prose-only, corrected here)
+
+§5.8 states `GATE10_ELIGIBILITY_REASON_IDS` "enumerates all **38** stable
+fail-closed reason stems". The actual module `frozenset` carries **39**
+members. The taxonomy is closed and correctly a `frozenset`; only the §5.8
+prose count is off by one. **Corrected count: 39.** The reason taxonomy itself
+is unchanged (no production edit).
+
+### E-6. N-18-3 (preserved — do not "fix" production to match the prompt)
+
+The `.1R.17` phase prompt carried an **incorrect expectation** that a canonical
+`Observed / observe / unavailable` capability snapshot must **suppress**
+`DispatchEnvelope` minting. That is not the authoritative architecture. The
+`.1R.16` design (§13 F-G10-7) deliberately allows a **non-authoritative**
+`DispatchEnvelope` to exist **while execution remains unavailable**. The real
+invariants are:
+
+> `DispatchEnvelope != runtime capability != permission to dispatch`
+> `execution unavailable -> no external effect`
+
+Both hold in `.1R.17`: the envelope authorizes nothing, `is_dispatch_envelope`
+is process-local provenance only, and the no-effect guarantee is **structural**
+(no `adapter.dispatch()` call site; zero effect-boundary calls). **Production
+code MUST NOT be modified to satisfy the erroneous prompt wording.** `.1R.17R`
+made **no** production change.
+
+### E-7. Repair
+
+Performed in `.1R.17R` — test/guard maintenance and governance evidence only:
+
+1. the 14 stale consumer-inventory allowlists widened to admit
+   `runtime_dispatch_gate10_eligibility.py` (each still rejecting every other
+   importer);
+2. the `.1R.15.5` byte-scope `allowed` set widened for the single new Slice-A
+   file (Gate 5 / permission / Gate 7 / Gate 8 still asserted byte-unchanged
+   via the guard's `forbidden` set);
+3. the 2 docstring-grep guards repaired to scan string/comment-stripped code;
+4. a dedicated reconciliation suite
+   (`tests/test_gate10_slice_a_scope_fence_reconciliation_3w1r2b1r1_1r17r.py`)
+   added, including active adversarial challenges that an invented
+   `runtime_dispatch_gate10.py`, an invented effect-bearing adapter consumer,
+   and an arbitrary module each still fail every reconciled guard;
+5. the fixed-SHA A/B re-run: baseline `1f8b9c76` → repaired `.1R.17R` HEAD =
+   **0 added, 0 removed** (the two pre-existing order-dependent flakes noted
+   in E-2 aside);
+6. this erratum and the canonical `.1R.17R` reconciliation document
+   (`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_17R_GATE_10_SLICE_A_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md`).
+
+The original `.1R.17` A/B claim above is **preserved as historical evidence**
+and is **not** rewritten to say "0 added was correct". The historical timeline
+is: `.1R.17` recorded 0 (wrong) → `.1R.18` disproved it (17) → `.1R.17R`
+reconciled the guards so the *repaired* tree is 0/0, while the erratum records
+that the *original `.1R.17` head* had 17.
+
+### E-8. Governance
+
+`.1R.17R` used the governed `pcae` lifecycle only. The historical delegated
+`.3` finalization / commit / push incident remains **UNAUTHORIZED**; this
+erratum does not license any rewrite of historical governance records — it is
+strictly additive. Only the primary human-authorized operator holds `.1R.17R`
+lifecycle authority.
+
+*Erratum appended by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R — Gate-10 Slice-A
+Scope-Fence and Verification-Evidence Reconciliation.*
