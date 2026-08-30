@@ -45,6 +45,16 @@ from test_gate9_atomic_authority_consumption_coordinator_integration_3w1r2b1r1_1
 G9_SRC = (REPO_ROOT / "src/pcae/core/runtime_dispatch_gate9.py").read_text()
 BASELINE_SHA = "d78d9676"  # .1R.15.2 phase-entry (pre-repair gate9.py)
 
+# A structurally valid AuthorityGenerationSnapshot (`.1R.15.4`) for
+# _build_consumption_record calls that do not exercise the snapshot content.
+_SNAP = {
+    "principal_generation": "p" * 64,
+    "credential_generation": "c" * 64,
+    "approval_generation": "a" * 64,
+    "lifecycle_generation": "l" * 64,
+    "consumption_generation": ("absent",),
+}
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Independent helpers
@@ -373,17 +383,25 @@ def test_durability_uncertain_consumption_token_propagates(chain, monkeypatch):
 #    (independent finding N-15-3-2)
 # ═══════════════════════════════════════════════════════════════════════
 def test_approval_generation_is_resolver_delegated(chain):
-    """The coordinator does not itself read an approval revocation store; the
-    ``approval_generation`` token is whatever the trusted resolver returns.
-    Documented so `.1R.15.4`'s production resolver wiring MUST fold
-    approval-revocation-store state into ``approval_generation`` (an
-    immutable RIASC ``record_digest`` alone would not move on a revocation —
-    HPAC-REQ-102 keeps revocation in a separate store)."""
-    src = inspect.getsource(g9._capture_authority_generation_snapshot)
-    assert 'resolved["approval_generation"]' in src
-    # the coordinator imports no approval-store symbol
-    assert "runtime_invocation_approval_store" not in G9_SRC
-    assert "approval_store" not in G9_SRC
+    """The *coordinator* still delegates ``approval_generation`` to the
+    trusted resolver — its own body reads no approval store. N-15-3-2 is
+    resolved in `.1R.15.4` by a dedicated production resolver *factory*
+    (``build_production_authority_generation_resolver``) whose
+    ``approval_generation`` folds the current approval-store resolvability
+    and record digest (RIHAC-001 v2.0 §14: no separate approval-revocation
+    store exists; approval revocation is transitively principal/credential/
+    lifecycle/expiry, and the factory additionally commits the current
+    resolved approval digest + a forward hook for a future §14 artifact)."""
+    coordinator_src = inspect.getsource(g9.run_gate9_atomic_authority_consumption)
+    capture_src = inspect.getsource(g9._capture_authority_generation_snapshot)
+    assert 'resolved["approval_generation"]' in capture_src
+    # the coordinator body itself reads no approval store
+    assert "approval_store" not in coordinator_src
+    assert "runtime_invocation_approval_store" not in coordinator_src
+    # but the .1R.15.4 production factory does (N-15-3-2)
+    factory_src = inspect.getsource(g9.build_production_authority_generation_resolver)
+    assert "approval_store.load" in factory_src
+    assert "approval_record_digest" in factory_src
 
 
 def test_approval_drift_is_detected_when_the_resolver_surfaces_it(chain):
@@ -478,7 +496,7 @@ def test_consumption_appearing_before_s2_is_already_consumed_not_drift(chain, mo
         gate6_decision=chain.g6, gate7_result=chain.g7, fresh_gate8=chain.g8,
         projection=chain.projection, proof_id=chain.rig.proof_id,
         executable_identity_digest="0" * 64, genesis_binding=event.record.binding,
-        registry_state_digest="1" * 64, consumed_at=NOW,
+        registry_state_digest="1" * 64, authority_generation_snapshot=_SNAP, consumed_at=NOW,
     )
     _inject_between_s1_and_s2(
         monkeypatch, chain,
@@ -654,8 +672,12 @@ def test_no_thirteenth_authority_binding_field_can_be_created(chain):
         gate6_decision=chain.g6, gate7_result=chain.g7, fresh_gate8=chain.g8,
         projection=chain.projection, proof_id=chain.rig.proof_id,
         executable_identity_digest="0" * 64, genesis_binding=event.record.binding,
-        registry_state_digest="1" * 64, consumed_at=NOW,
+        registry_state_digest="1" * 64, authority_generation_snapshot=_SNAP, consumed_at=NOW,
     )
+    # `.1R.15.4`: authority_binding is still the closed 12-field set (the
+    # durable generation snapshot lives in the separate sibling object
+    # authority_generation_binding). A 13th authority_binding field is
+    # still rejected.
     tampered = dict(good.authority_binding)
     tampered["authority_generation_snapshot"] = {"principal_generation": "x"}
     with pytest.raises(ric.HPACMalformedError):
@@ -665,6 +687,7 @@ def test_no_thirteenth_authority_binding_field_can_be_created(chain):
             target_binding=good.target_binding,
             prompt_binding=good.prompt_binding,
             authority_binding=tampered,
+            authority_generation_binding=good.authority_generation_binding,
             pb_binding=good.pb_binding,
             runtime_enforcement_binding=good.runtime_enforcement_binding,
             dispatch_binding=good.dispatch_binding,
@@ -682,12 +705,13 @@ def test_registry_state_digest_computation_is_unchanged_from_1r14():
     assert "sequence3_event_digest" in block
     assert "gate8_containment_evidence_digest" in block
     assert "principal_generation" not in block
-    diff = subprocess.run(
-        ["git", "diff", BASELINE_SHA, "--", "src/pcae/core/runtime_dispatch_gate9.py"],
-        cwd=REPO_ROOT, capture_output=True, text=True,
-    ).stdout
-    # the diff hunk must not touch the _authority_binding_fields helper body
-    assert "def _authority_binding_fields" not in diff or "registry_state_digest: str" not in diff.split("def _authority_binding_fields")[1][:200]
+    # `.1R.15.4` adds a sibling helper (_authority_generation_binding_fields)
+    # and a param to _build_consumption_record, but the _authority_binding_fields
+    # helper body and the registry_state_digest preimage are byte-unchanged.
+    abf = inspect.getsource(g9._authority_binding_fields)
+    assert '"approval_digest": projection.record_digest' in abf
+    assert '"registry_state_digest": registry_state_digest' in abf
+    assert "generation" not in abf
 
 
 # ═══════════════════════════════════════════════════════════════════════

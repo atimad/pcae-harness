@@ -241,6 +241,14 @@ def _inert_gate9_record():
             "containment_evidence_ref": {"id": "e", "digest": "e" * 64},
             "state": "dispatch_attempted", "consumed_at": "2026-08-28T10:04:00Z",
         },
+        authority_generation_binding={
+            "snapshot_schema_version": "HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0",
+            "principal_generation": "ag0" + "0" * 61,
+            "credential_generation": "ag1" + "1" * 61,
+            "approval_generation": "ag2" + "2" * 61,
+            "lifecycle_generation": "ag3" + "3" * 61,
+            "consumption_generation": "absent",
+        },
     )
 
 

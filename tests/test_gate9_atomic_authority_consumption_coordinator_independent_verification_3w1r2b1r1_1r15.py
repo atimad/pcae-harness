@@ -28,6 +28,7 @@ from __future__ import annotations
 import ast
 import copy
 import hashlib
+import inspect
 import json
 import pickle
 import subprocess
@@ -775,17 +776,20 @@ def test_capability_reread_is_inside_not_only_before(chain):
 # ══════════════════════════════════════════════════════════════════════
 # §41-§44  8-item record schema; one atomic record; no RIHAC mutation
 # ══════════════════════════════════════════════════════════════════════
-def test_consumption_record_is_the_closed_8_item_schema(chain):
+def test_consumption_record_is_the_closed_9_item_schema(chain):
+    # `.1R.15.4`: HPAC-AUTHORITY-CONSUMPTION/2.1 — one new closed binding
+    # object, authority_generation_binding; the eight prior binding objects
+    # and the closed 12-field authority_binding are byte-unchanged.
     r, _ = _run(chain)
     rec = chain.store.resolve(chain.rig.proof_id)
     assert rec is not None
     doc = rec.to_document(include_digest=True)
-    assert doc["consumption_schema_version"] == "HPAC-AUTHORITY-CONSUMPTION/2.0"
+    assert doc["consumption_schema_version"] == "HPAC-AUTHORITY-CONSUMPTION/2.1"
     assert set(doc) == {
         "consumption_schema_version", "record_digest", "request_identity",
         "repository_task_binding", "target_binding", "prompt_binding",
-        "authority_binding", "pb_binding", "runtime_enforcement_binding",
-        "dispatch_binding",
+        "authority_binding", "authority_generation_binding", "pb_binding",
+        "runtime_enforcement_binding", "dispatch_binding",
     }
     assert set(rec.request_identity) == {"invocation_id", "attempt_id", "idempotency_key"}
     assert set(rec.authority_binding) == {
@@ -794,6 +798,14 @@ def test_consumption_record_is_the_closed_8_item_schema(chain):
         "proof_digest", "proof_validation_digest", "registry_state_digest",
         "approval_subject_digest", "trusted_presentation_ref", "challenge_digest",
     }
+    assert set(rec.authority_generation_binding) == {
+        "snapshot_schema_version", "principal_generation", "credential_generation",
+        "approval_generation", "lifecycle_generation", "consumption_generation",
+    }
+    assert (
+        rec.authority_generation_binding["snapshot_schema_version"]
+        == "HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0"
+    )
     assert rec.authority_binding["authority_contract_version"] == "RIHAC-001/2.0"
     assert rec.dispatch_binding["state"] == "dispatch_attempted"
 
@@ -809,8 +821,17 @@ def test_proof_and_approval_consumed_by_one_write_no_mutable_flag(chain):
 
 
 def test_no_rihac_approval_store_import_or_mutation(chain):
-    assert "runtime_invocation_approval_store" not in G9_SRC
-    assert "approval_store" not in G9_SRC
+    # `.1R.15.4` / N-15-3-2: the coordinator body still reads no approval
+    # store; the production authority-generation resolver *factory* only
+    # *reads* the approval store (`.load`), never mutates it (HPAC-REQ-102 —
+    # the RIHAC approval store is not mutated by Gate 9).
+    coordinator_src = inspect.getsource(g9.run_gate9_atomic_authority_consumption)
+    assert "approval_store" not in coordinator_src
+    assert "runtime_invocation_approval_store" not in coordinator_src
+    factory_src = inspect.getsource(g9.build_production_authority_generation_resolver)
+    assert "approval_store.load" in factory_src
+    for mutator in (".create(", "revoke_approval", "approval_store.write"):
+        assert mutator not in factory_src
     # only reads lifecycle store, never writes it
     assert ".create(" in G9_SRC  # the consumption create
     for writer in ("record_verified", "record_assertion", "open_challenge", "fixture_"):

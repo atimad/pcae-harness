@@ -123,6 +123,13 @@ def _prebuilt_consumption_record(chain):
         executable_identity_digest="0" * 64,
         genesis_binding=event.record.binding,
         registry_state_digest="1" * 64,
+        authority_generation_snapshot={
+            "principal_generation": "p" * 64,
+            "credential_generation": "c" * 64,
+            "approval_generation": "a" * 64,
+            "lifecycle_generation": "l" * 64,
+            "consumption_generation": ("absent",),
+        },
         consumed_at=NOW,
     )
 
@@ -450,11 +457,20 @@ def test_consumption_record_schema_is_unchanged_by_this_phase():
     )
 
 
+# Historical-window assertions: the `.1R.15.2` repair (d78d9676 -> 735674f7,
+# its final governed commit) touched exactly one production file and made no
+# consumption-store edit. `.1R.15.4` (Runtime-Dispatch Contract Normalization)
+# subsequently and deliberately evolves the consumption store to
+# HPAC-AUTHORITY-CONSUMPTION/2.1 — that is a *different* authorized phase, so
+# the diff range is pinned to `.1R.15.2`'s own end SHA.
+_1R15_2_END_SHA = "735674f7"
+
+
 def test_store_module_has_no_1r15_2_edits():
     import subprocess
 
     diff = subprocess.run(
-        ["git", "diff", "--name-only", "d78d9676", "--",
+        ["git", "diff", "--name-only", "d78d9676", _1R15_2_END_SHA, "--",
          "src/pcae/core/runtime_invocation_authority_consumption.py"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
@@ -465,7 +481,7 @@ def test_only_production_file_touched_is_gate9():
     import subprocess
 
     diff = subprocess.run(
-        ["git", "diff", "--name-only", "d78d9676", "--", "src/pcae"],
+        ["git", "diff", "--name-only", "d78d9676", _1R15_2_END_SHA, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
     changed = [line for line in diff.stdout.splitlines() if line.strip()]
@@ -592,8 +608,17 @@ def test_earlier_gate_modules_unchanged(module):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Durable-snapshot deferral is explicit, not silently satisfied
+# Durable snapshot — deferred by `.1R.15.2`, IMPLEMENTED by `.1R.15.4`
 # ═══════════════════════════════════════════════════════════════════════
-def test_durable_snapshot_deferral_is_documented_in_source():
-    assert "DEFERRED to `.1R.15.4`" in G9_SRC or "DEFERRED to the `.1R.15.4`" in G9_SRC
-    assert "authority_binding` is a closed" in G9_SRC or "closed 12-field set" in G9_SRC
+def test_durable_snapshot_is_implemented_by_1r15_4():
+    # `.1R.15.2` deferred the durable representation to `.1R.15.4`; that
+    # phase added the closed `authority_generation_binding` object to
+    # HPAC-AUTHORITY-CONSUMPTION/2.1 and embeds the exact S1 snapshot.
+    assert "DEFERRED to `.1R.15.4`" not in G9_SRC
+    assert "authority_generation_binding" in G9_SRC
+    assert "_authority_generation_binding_fields" in G9_SRC
+    src = inspect.getsource(g9._build_consumption_record)
+    assert "authority_generation_binding=_authority_generation_binding_fields(" in src
+    # the exact S1 is embedded, never rebuilt from post-S2 state
+    coord = inspect.getsource(g9.run_gate9_atomic_authority_consumption)
+    assert "authority_generation_snapshot=s1," in coord

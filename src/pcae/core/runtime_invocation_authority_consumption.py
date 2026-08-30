@@ -1,5 +1,5 @@
 """
-HPAC-001 v2.0 §41 — `RuntimeInvocationAuthorityConsumption` inert
+HPAC-001 v2.1 §41 — `RuntimeInvocationAuthorityConsumption` inert
 model/store primitives (Gate-9).
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3 (Layer 1-2 foundation). Implements
@@ -11,6 +11,20 @@ test code constructing its own inert records. A future phase (not this
 one) wires an actual Gate 9 caller that populates and creates these
 records as part of real dispatch; that wiring is explicitly out of this
 phase's scope (phase instruction §31/§32).
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 (Runtime-Dispatch Contract
+Normalization). The consumption record schema evolves to
+``HPAC-AUTHORITY-CONSUMPTION/2.1``: one new closed top-level binding
+object, ``authority_generation_binding``, durably commits the
+V-15-1 authority-generation snapshot ``S1`` that Gate 9 verified
+unchanged at ``S2`` immediately before the create-only linearization
+(HPAC-001 v2.1 HPAC-REQ-098/099; RDGO-001 v3.1 §10). It is verification
+evidence, not a bearer token: it grants no capability and Gate 10 MUST
+re-read current canonical state and compare against it (RDGO-001 v3.1
+§10; ``.1R.15.1`` §22). The eight prior closed binding objects and the
+closed 12-field ``authority_binding`` are byte-unchanged; ``/2.0`` records
+remain readable historical/test data but are Gate-10-ineligible (§18 of
+the phase prompt).
 """
 
 from __future__ import annotations
@@ -29,7 +43,22 @@ from pcae.core.hpac_foundation import (
     write_atomic_create_only,
 )
 
-CONSUMPTION_SCHEMA_VERSION = "HPAC-AUTHORITY-CONSUMPTION/2.0"
+#: Current canonical consumption-record schema identity (HPAC-001 v2.1
+#: HPAC-REQ-098). Every record Gate 9 creates after `.1R.15.4` carries
+#: this constant; it is a required, future-Gate-10-eligible record.
+CONSUMPTION_SCHEMA_VERSION = "HPAC-AUTHORITY-CONSUMPTION/2.1"
+
+#: The pre-`.1R.15.4` schema identity. `resolve` still parses a well-formed
+#: `/2.0` record as historical/test data (its closed field set had no
+#: `authority_generation_binding`), but such a record is NOT future-Gate-10
+#: eligible — the durable authority-generation snapshot RDGO-001 v3.1 §10
+#: requires is absent. Gate 9 never writes `/2.0` after `.1R.15.4`.
+CONSUMPTION_SCHEMA_VERSION_LEGACY_2_0 = "HPAC-AUTHORITY-CONSUMPTION/2.0"
+
+#: Schema identity of the durable authority-generation snapshot embedded in
+#: `authority_generation_binding` (HPAC-001 v2.1 §41). A closed field set;
+#: additive-only future evolution requires a new MINOR.
+AUTHORITY_GENERATION_SNAPSHOT_SCHEMA_VERSION = "HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0"
 
 _TOP_ALLOWED_FIELDS = frozenset(
     {
@@ -40,11 +69,16 @@ _TOP_ALLOWED_FIELDS = frozenset(
         "target_binding",
         "prompt_binding",
         "authority_binding",
+        "authority_generation_binding",
         "pb_binding",
         "runtime_enforcement_binding",
         "dispatch_binding",
     }
 )
+
+#: The closed top-level field set of a pre-`.1R.15.4` `/2.0` record —
+#: identical to `_TOP_ALLOWED_FIELDS` minus `authority_generation_binding`.
+_TOP_ALLOWED_FIELDS_LEGACY_2_0 = _TOP_ALLOWED_FIELDS - {"authority_generation_binding"}
 
 _BINDING_FIELD_SETS: dict[str, frozenset[str]] = {
     "request_identity": frozenset({"invocation_id", "attempt_id", "idempotency_key"}),
@@ -69,6 +103,22 @@ _BINDING_FIELD_SETS: dict[str, frozenset[str]] = {
             "approval_subject_digest",
             "trusted_presentation_ref",
             "challenge_digest",
+        }
+    ),
+    # HPAC-001 v2.1 §41 (`.1R.15.4`, V-15-1 durable representation). Closed
+    # 6-field snapshot of every mutable authority-generation source at the
+    # Gate-9 linearization point. Each `*_generation` value is a non-empty
+    # bounded canonical digest/marker string over durable state, restart-
+    # reconstructible, carrying no wall-clock/nonce/process identity. This
+    # object is data (verification evidence), never execution authority.
+    "authority_generation_binding": frozenset(
+        {
+            "snapshot_schema_version",
+            "principal_generation",
+            "credential_generation",
+            "approval_generation",
+            "lifecycle_generation",
+            "consumption_generation",
         }
     ),
     "pb_binding": frozenset({"request_digest", "decision_digest", "decision", "policy_version", "causing_policy_ids", "matched_no_go_ids"}),
@@ -99,6 +149,9 @@ class RuntimeInvocationAuthorityConsumption:
     pb_binding: dict
     runtime_enforcement_binding: dict
     dispatch_binding: dict
+    #: Present (a closed 6-field dict) on every `/2.1` record; ``None`` only
+    #: on a historical `/2.0` record parsed by `resolve` (Gate-10-ineligible).
+    authority_generation_binding: Optional[dict] = None
 
     def to_document(self, *, include_digest: bool) -> dict:
         doc = {
@@ -112,6 +165,8 @@ class RuntimeInvocationAuthorityConsumption:
             "runtime_enforcement_binding": self.runtime_enforcement_binding,
             "dispatch_binding": self.dispatch_binding,
         }
+        if self.authority_generation_binding is not None:
+            doc["authority_generation_binding"] = self.authority_generation_binding
         if include_digest:
             doc["record_digest"] = self.record_digest
         return doc
@@ -124,16 +179,22 @@ def new_inert_consumption_record(
     target_binding: dict,
     prompt_binding: dict,
     authority_binding: dict,
+    authority_generation_binding: dict,
     pb_binding: dict,
     runtime_enforcement_binding: dict,
     dispatch_binding: dict,
 ) -> RuntimeInvocationAuthorityConsumption:
-    """Constructs an inert (schema-only, non-authoritative) record for
-    test/fixture use. This function performs no gate-9 revalidation,
-    consumes no real approval, and is not reachable from any dispatch
-    code path -- it exists only so Phase 1 can prove the store's
-    create-only/duplicate/atomicity behavior against a structurally
-    correct payload shape."""
+    """Constructs an inert (schema-only, non-authoritative)
+    ``HPAC-AUTHORITY-CONSUMPTION/2.1`` record for test/fixture use. This
+    function performs no gate-9 revalidation, consumes no real approval,
+    and is not reachable from any dispatch code path -- it exists only so
+    the store's create-only/duplicate/atomicity behavior can be proven
+    against a structurally correct payload shape.
+
+    ``authority_generation_binding`` (`.1R.15.4`) is the closed 6-field
+    durable authority-generation snapshot; its ``snapshot_schema_version``
+    MUST be ``AUTHORITY_GENERATION_SNAPSHOT_SCHEMA_VERSION`` and each
+    ``*_generation`` value a non-empty bounded string."""
 
     bindings = {
         "request_identity": request_identity,
@@ -141,6 +202,7 @@ def new_inert_consumption_record(
         "target_binding": target_binding,
         "prompt_binding": prompt_binding,
         "authority_binding": authority_binding,
+        "authority_generation_binding": authority_generation_binding,
         "pb_binding": pb_binding,
         "runtime_enforcement_binding": runtime_enforcement_binding,
         "dispatch_binding": dispatch_binding,
@@ -149,9 +211,43 @@ def new_inert_consumption_record(
         expected_fields = _BINDING_FIELD_SETS[name]
         if not isinstance(value, dict) or set(value.keys()) != expected_fields:
             raise HPACMalformedError(f"{name} has an incorrect closed field set; expected {sorted(expected_fields)}")
+    _validate_authority_generation_binding(authority_generation_binding)
     body_without_digest = {"consumption_schema_version": CONSUMPTION_SCHEMA_VERSION, **bindings}
     digest = canonical_digest(body_without_digest)
     return RuntimeInvocationAuthorityConsumption(record_digest=digest, **body_without_digest)
+
+
+def _validate_authority_generation_binding(binding: object) -> None:
+    """Value-level checks on the durable authority-generation snapshot
+    beyond the closed field set (HPAC-001 v2.1 §41): the schema-version
+    constant, and each ``*_generation`` value a non-empty, bounded,
+    stripped string. Never a bearer token — no capability field, no
+    identity claim, purely digest/marker evidence."""
+
+    if not isinstance(binding, dict):
+        raise HPACMalformedError("authority_generation_binding is not an object")
+    if set(binding.keys()) != _BINDING_FIELD_SETS["authority_generation_binding"]:
+        raise HPACMalformedError(
+            "authority_generation_binding has an incorrect closed field set; expected "
+            f"{sorted(_BINDING_FIELD_SETS['authority_generation_binding'])}"
+        )
+    if binding.get("snapshot_schema_version") != AUTHORITY_GENERATION_SNAPSHOT_SCHEMA_VERSION:
+        raise HPACMalformedError(
+            "authority_generation_binding.snapshot_schema_version must be "
+            f"{AUTHORITY_GENERATION_SNAPSHOT_SCHEMA_VERSION!r}"
+        )
+    for key in (
+        "principal_generation",
+        "credential_generation",
+        "approval_generation",
+        "lifecycle_generation",
+        "consumption_generation",
+    ):
+        value = binding.get(key)
+        if not isinstance(value, str) or not (1 <= len(value) <= 256) or value != value.strip():
+            raise HPACMalformedError(
+                f"authority_generation_binding.{key} must be a non-empty bounded stripped string"
+            )
 
 
 class RuntimeInvocationAuthorityConsumptionStore:
@@ -200,8 +296,22 @@ class RuntimeInvocationAuthorityConsumptionStore:
             raise RuntimeInvocationAuthorityConsumptionDurabilityUncertainError(str(exc)) from exc
         if not isinstance(document, dict):
             raise RuntimeInvocationAuthorityConsumptionDurabilityUncertainError("consumption record is not an object")
-        unknown = set(document.keys()) - _TOP_ALLOWED_FIELDS
-        missing = _TOP_ALLOWED_FIELDS - set(document.keys())
+        # Version-aware closed top-level field set. `/2.1` (current) requires
+        # `authority_generation_binding`; a well-formed `/2.0` record is
+        # accepted as historical/test data without it (Gate-10-ineligible —
+        # RDGO-001 v3.1 §10 / phase-prompt §18). Any other version, or a
+        # field-set that matches neither, is durability-uncertain.
+        schema_version = document.get("consumption_schema_version")
+        if schema_version == CONSUMPTION_SCHEMA_VERSION:
+            allowed = _TOP_ALLOWED_FIELDS
+        elif schema_version == CONSUMPTION_SCHEMA_VERSION_LEGACY_2_0:
+            allowed = _TOP_ALLOWED_FIELDS_LEGACY_2_0
+        else:
+            raise RuntimeInvocationAuthorityConsumptionDurabilityUncertainError(
+                f"consumption record has an unknown schema version {schema_version!r}"
+            )
+        unknown = set(document.keys()) - allowed
+        missing = allowed - set(document.keys())
         if unknown or missing:
             raise RuntimeInvocationAuthorityConsumptionDurabilityUncertainError(
                 f"consumption record has incorrect fields (unknown={sorted(unknown)}, missing={sorted(missing)})"
@@ -211,4 +321,12 @@ class RuntimeInvocationAuthorityConsumptionStore:
         recomputed = canonical_digest(without_digest)
         if recomputed != stored_digest:
             raise RuntimeInvocationAuthorityConsumptionDurabilityUncertainError("stored record_digest does not match canonical bytes")
+        # A `/2.0` record round-trips with `authority_generation_binding is
+        # None` (Gate-10-ineligible: RDGO-001 v3.1 §10's durable snapshot is
+        # absent). A `/2.1` record carries the closed 6-field object.
+        if schema_version == CONSUMPTION_SCHEMA_VERSION:
+            try:
+                _validate_authority_generation_binding(without_digest.get("authority_generation_binding"))
+            except HPACMalformedError as exc:
+                raise RuntimeInvocationAuthorityConsumptionDurabilityUncertainError(str(exc)) from exc
         return RuntimeInvocationAuthorityConsumption(record_digest=stored_digest, **without_digest)

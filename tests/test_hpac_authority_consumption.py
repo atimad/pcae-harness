@@ -70,6 +70,14 @@ def _record(**overrides) -> RuntimeInvocationAuthorityConsumption:
             "state": "dispatch_attempted",
             "consumed_at": "2026-08-28T00:00:00Z",
         },
+        authority_generation_binding={
+            "snapshot_schema_version": "HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0",
+            "principal_generation": "t" * 64,
+            "credential_generation": "u" * 64,
+            "approval_generation": "v" * 64,
+            "lifecycle_generation": "w" * 64,
+            "consumption_generation": "absent",
+        },
     )
     kwargs.update(overrides)
     return new_inert_consumption_record(**kwargs)
