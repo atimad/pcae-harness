@@ -1,257 +1,171 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17 Complete — Gate-10 Pre-Effect Eligibility and Dispatch-Envelope Coordinator Implementation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 Complete — Independent Verification of the Gate-10 Pre-Effect Eligibility Coordinator (BLOCKED independent-verification result — Option B)
 
-**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.17
-**Type:** implementation — Slice A of the `.1R.16` Gate-10 plan
-**Status:** GATE-10 PRE-EFFECT ELIGIBILITY COORDINATOR: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING (`.1R.18`). DISPATCH ENVELOPE: IMPLEMENTED AS NON-AUTHORITATIVE PRE-EFFECT BINDING — IV PENDING. FIRST EXTERNAL EFFECT: ABSENT.
-**Production source changed:** one new file — `src/pcae/core/runtime_dispatch_gate10_eligibility.py` (`git diff --name-only 1f8b9c76 HEAD -- src/pcae` = that single file)
-**Normative contracts changed:** none (`docs/contracts/**` byte-unchanged)
+**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.18
+**Type:** independent verification of `.1R.17` (Slice A of the `.1R.16` Gate-10 plan)
+**Status:** BLOCKED INDEPENDENT-VERIFICATION RESULT (Option B). GATE-10 PRE-EFFECT ELIGIBILITY COORDINATOR: SUBSTANTIVELY VERIFIED / CLOSED-WORTHY. DISPATCH ENVELOPE PRE-EFFECT BINDING: SUBSTANTIVELY VERIFIED / CLOSED-WORTHY. N-16-1: SUBSTANTIVELY VERIFIED / CLOSED-WORTHY. FIRST EXTERNAL EFFECT: ABSENT. LIFECYCLE / REGRESSION ACCEPTANCE: BLOCKED — referred to `.1R.17R`.
+**Production source changed:** none (`git diff --name-only 1f8b9c76 HEAD -- src/pcae` = only the single `.1R.17` file `src/pcae/core/runtime_dispatch_gate10_eligibility.py`)
+**Normative contracts changed:** none (`docs/contracts/**` + `docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md` byte-unchanged)
+**Scope-fence guards changed:** none — the 17 `.1R.17`-attributable guard failures are NOT repaired inside `.1R.18` (operator instruction, Option B); referred to `.1R.17R`
 **Runtime:** `not_implemented / Observed / observe / unavailable`; POL-005 unchanged and still hard DENY; 0 plugins / 0 capabilities; real execution UNAVAILABLE; deterministic authentication NON_REAL — byte-identical at entry and finalization
-**Phase-entry SHA:** `1f8b9c76` (`origin/main` synced; `origin/main..HEAD = 0` at entry)
+**Verification-entry SHA:** `c618134a` (`.1R.17` finalize head; `origin/main..HEAD = 0` at entry)
+**Immutable pre-`.1R.17` baseline:** `1f8b9c76` (verified: parent of the `.1R.17` implementation commit `302f5aba`)
 
 ## Summary
 
-Implemented **Slice A only** of the `.1R.16` plan: the non-effecting
-Gate-10 pre-effect eligibility / read-back coordinator, the RPAC-REQ-029
-`DispatchEnvelope`, and the N-16-1 production resolver factories — in one
-new production file, `src/pcae/core/runtime_dispatch_gate10_eligibility.py`.
+Independent verification of `.1R.17`, RE-DERIVED from the primary contracts
+(RDGO-001 v3.1 §10 / §11 items 1–6 / §15 / §16 / §17 / §19; RPAC-001 v1.0 §7
+RPAC-REQ-029; HPAC-001 v2.1 §41; PBRD-001 v2.1 / POL-005; RE No-Go Registry
+1.1), the `.1R.16` planning document F-G10-1 … F-G10-18, and current
+production source read line-by-line — **not** from the `.1R.17` report, test
+names, or helper names. Fresh independent suite
+`tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py`
+— **111 passed, 0 failed**; `.1R.18`-attributable regressions **0**.
 
-**`run_gate10_pre_effect_eligibility(gate9_result, *, gate8_result,
-gate7_result, gate6_decision, gate5_result, identity, inputs,
-authority_current_time, repo_root, effect_plan, descriptor_resolver,
-lifecycle_store, consumption_store, capability_snapshot_resolver,
-authority_generation_resolver, validated_authority_projection=None) ->
-tuple[Optional[DispatchEnvelope], tuple[str, ...]]`** runs RDGO-001 v3.1
-§11 items 1–6 + §15/§16/§17 read-back against the durable
-`consumption.json` re-read from disk:
+**Substantive verdict — all VERIFIED CLEAN:** F-G10-1 trusted `Gate9Result`
++ `status == "consumed"` (provenance ≠ success; `already_consumed`
+rejected); durable `/2.1` re-read from disk (not `Gate9Result` fields) with
+`/2.0` / snapshot-absent / malformed hard rejection and no fallback; exact
+`record_digest` + `invocation_id` / `attempt_id` / `idempotency_key` /
+`proof_id` / `approval_id` lineage across durable record ↔ `Gate9Result` ↔
+upstream gates ↔ live request; principal / credential / approval / lifecycle
+generation drift → fail closed with `consumption.json` byte-unchanged;
+**N-16-1** `build_gate10_authority_generation_resolver` composes (calls) the
+**byte-unchanged** Gate-9 factory `build_production_authority_generation_resolver`
++ reused `_lifecycle_generation_token` / `_consumption_generation_token` —
+five markers, canonical durable state only, restart-reconstructible
+(independent A==B rebuild), no wall clock / mtime / nonce / `uuid` /
+`getpid` / `os.urandom`, fail-closed on unreadable principal / credential /
+approval; **N-16-1** `build_gate10_capability_snapshot_resolver` reads the
+canonical `runtime_introspection` constants only and mutates nothing;
+runtime-capability semantic wall (`consumed human authority != runtime
+capability`) — any snapshot that is not exactly `Observed / observe /
+unavailable` → `gate10_runtime_capability_not_unavailable`; PB
+(`decision == "ALLOW"`) and RE (`verdict == "ALLOW"` + not expired) lineage
+trusted, **not** re-run (`evaluate_pb_policy` / `run_gate6` / `run_gate7` /
+`PermissionBroker(` absent from source); POL-005 hard DENY intact; Gate-8
+containment re-run + four-digest equality; executable re-`stat` +
+re-`sha256`; envelope mint occurs strictly after every authoritative check
+and `_DISPATCH_ENVELOPES` is unchanged on every negative path (no leaked
+mint); `DispatchEnvelope` immutable / identity-only / non-serializable
+(`__reduce__` + `deepcopy` + `pickle` all raise) / non-subclassable /
+non-caller-constructable / `is_dispatch_envelope` = exact-object registry
+membership only (copy / `object.__new__` / `to_reference_document()` dict →
+`False`), documented and named as **process-local provenance, explicitly not
+effect authority**; **zero** effect-bearing consumers (`git grep` under
+`src/pcae` = exactly the one module; `SimulationDispatchEnvelope` is a
+distinct un-wired type); AST shows **no `.dispatch()` Call node** and no
+effect primitive in code after string-stripping; a dynamic monkeypatch trap
+on `os.system` / `posix_spawn` / `popen` / `fork` / `execv*` /
+`subprocess.{Popen,run,call,check_output}` / `socket.socket` recorded
+**zero** effect-boundary calls on the positive path and every negative
+branch; no positive production path (Gate-7 DENY blocks independently of the
+capability stop); `runtime_dispatch_gate9.py` and Gate 5–8 /
+`runtime_introspection` / `runtime_authority` / `runtime_adapter` /
+`runtime_registry` / `permission_broker_foundation` / `shell_gate` / all
+named contracts + the RE No-Go Registry **byte-unchanged since `1f8b9c76`**
+(`git diff` empty); production scope since baseline = **exactly one new
+file** (the `.1R.17` module); `RuntimeRegistry` still empty; F7 threat model
+stated verbatim and not broadened.
 
-1. `is_gate9_result(gate9_result)` **and** `status == "consumed"` (not
-   `already_consumed`, not provenance alone) — F-G10-1;
-2. upstream `Gate8Result` (`containment_established is True`) / `Gate7Result`
-   (ALLOW) / `Gate6Decision` (ALLOW) / `Gate5Result` exact-object registry
-   members; single consistent invocation across every link + `identity`
-   (RDGO §10a);
-3. `_validate_construction_inputs(inputs)` canonical re-check;
-   `gate8_result.gate7_result_digest == _gate7_result_digest(gate7_result)`;
-4. fresh `consumption_store.resolve(gate9_result.proof_id)` — present, not
-   `DurabilityUncertain`; schema **exactly** `/2.1` with a present,
-   `_validate_authority_generation_binding`-valid
-   `authority_generation_binding` whose `snapshot_schema_version` is exact
-   and whose `consumption_generation` is `"absent"` (a `/2.0` record or
-   missing binding → `gate10_consumption_record_generation_snapshot_absent`
-   — **no compatibility fallback**);
-5. exact `record_digest` + `invocation_id` / `attempt_id` /
-   `idempotency_key` / `proof_id` / `approval_id` lineage across the durable
-   record ↔ `Gate9Result` ↔ `Gate5Result` ↔ `identity`, plus
-   `runtime_target_id` / `task_id` / `prompt_hash` against the live
-   `inputs`, plus `dispatch_binding.state == "dispatch_attempted"`;
-6. durable Gate-6 `pb_binding.decision == "ALLOW"` — trust the durable
-   lineage; **no PB policy re-run** (Gate 6 owns it exclusively; POL-005
-   remains hard DENY and trusted consumed authority does not override it)
-   — F-G10-12;
-7. durable Gate-7 `runtime_enforcement_binding.verdict == "ALLOW"` and
-   `expires_at` strictly after `authority_current_time` (RE single-attempt,
-   expiring; `matched_no_go_ids` **not** consulted as authority) — F-G10-13;
-8. fresh `capability_snapshot_resolver()` **exactly** `Observed / observe /
-   unavailable` via `runtime_dispatch_gate9._runtime_execution_unavailable`
-   (the exact same predicate and dict shape Gate 9 checks) — any drift →
-   `gate10_runtime_capability_not_unavailable`; **`consumed human authority
-   != runtime capability`**, nothing overrides `execution_availability` —
-   F-G10-6 / F-G10-7;
-9. `authority_generation_resolver()` returns exactly the 5 markers (bounded
-   strings); principal / credential / approval / lifecycle generation ==
-   the durable `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0` snapshot (first
-   mismatch → `gate10_authority_generation_drift:<source>`);
-   `consumption_generation` has transitioned `"absent" -> "present:<this
-   record's digest>"` (expected, not drift; anything else →
-   `gate10_consumption_state_inconsistent`) — F-G10-4 / F-G10-5;
-10. when a trusted `validated_authority_projection` is supplied —
-    `is_trusted_validated_authority_projection` **and**
-    `revalidate_validated_authority_projection` at
-    `authority_current_time` (post-Gate-9 revocation / wall-clock expiry /
-    lifecycle invalidation fail closed);
-11. executable identity: re-`stat` + re-`sha256`
-    `descriptor_resolver(inputs).path`; require `== resolved.sha256` and
-    `_executable_identity_digest(resolved) ==
-    record.target_binding.executable_identity_digest` (symlink / absent /
-    permission change / drift → `gate10_executable_identity_drift`) —
-    F-G10-11;
-12. re-run `run_gate8_process_containment(gate7_result, gate5_result=…, …)`
-    over freshly re-resolved inputs — require `containment_established is
-    True` and every recomputed digest (`containment_evidence_digest` /
-    `effect_plan_digest` / `live_preflight_digest` / `gate7_result_digest`)
-    == both the handed `Gate8Result` **and** the durable
-    `dispatch_binding.containment_evidence_ref` (mirrors
-    `runtime_dispatch_gate9.py` step 8 exactly; **not** a Gate-8 policy
-    re-decision; never trusts the ephemeral handed `Gate8Result`'s stored
-    digests) — F-G10-10;
-13. `effect_plan.credentials_required is False` (F-G10-17) and
-    `network_denied is True`.
+## The blocker (recorded exactly — Option B)
 
-**All pass →** mint an immutable (custom `__setattr__` guard), identity-only
-(`__eq__` / `__hash__` are `id`), **non-serializable** (`__reduce__`
-raises), non-subclassable, non-caller-constructable (`_seal` guard),
-registry-provenanced (`_DISPATCH_ENVELOPES` id-set;
-`is_dispatch_envelope` proves **process-local provenance only**,
-deliberately separate from any notion of "effect authorized")
-`DispatchEnvelope` (RPAC-REQ-029; schema `RPAC-DISPATCH-ENVELOPE/1.0`, a
-closed field set — RPAC-REQ-029 already names every field, **no normative
-contract change**): invocation / attempt / idempotency / proof / approval
-identity; `runtime_target_id` / `adapter_id` / `descriptor_digest` /
-`target_config_digest`; `consumption_record_digest` +
-`durable_record_reference` (`proofs/v2/<proof_id>/consumption.json`);
-`authority_projection_digest` / `approval_digest` /
-`authority_generation_snapshot_digest`; `pb_request_digest` /
-`pb_decision_digest` / `re_decision_digest` / `re_expires_at`;
-`effect_plan_digest` / `containment_evidence_digest` /
-`live_preflight_digest` / `executable_identity_digest`;
-`runtime_capability_snapshot_digest` / `target_status_digest`;
-`contract_versions`; `minted_at`; `expires_at` (= `re_expires_at` — the
-envelope MUST NOT outlive the RE decision); `envelope_digest`.
+* **`.1R.17` introduced 17 attributable failures** in pre-existing
+  scope-fence / consumer-inventory guards (`.1R.13.2` / `.1R.13.4` /
+  `.1R.13.5` / `.1R.14` / `.1R.15` / `.1R.15.5`).
+* **16 are legitimate stale allowlist / consumer-inventory guards** caused
+  by the new Slice-A references — `runtime_dispatch_gate10_eligibility.py`
+  legitimately names `Gate7Result` / `Gate8Result` / `Gate9Result` /
+  `Gate6Decision` / `run_gate8_process_containment` /
+  `RuntimeInvocationAuthorityConsumptionStore` **in code**, exactly the
+  RDGO-001 v3.1 §11 item 4 lineage + `.1R.16` §16 containment re-run.
+* **1 is a docstring-grep false positive**
+  (`test_sole_semantic_owner_of_gate9_consumption_boundary`).
+* **`.1R.17`'s finalized phase-completion report's fixed-SHA A/B claim of
+  "ADDED failures in B = 0" is contradicted by independent evidence** — the
+  true result is **17 added, 0 removed**, all attributable to and explained
+  by `.1R.17`, **0** attributable to `.1R.18`.
+* **This is a governance / evidence and guard-maintenance defect — NOT a
+  production Slice-A implementation defect.** Each of the 17 guards still
+  fails for any *other* importer; Gate 10 is an *authorized* consumer per
+  RDGO §11 / `.1R.16`; no trust boundary is weakened.
 
-**Otherwise** `(None, (reason_id,))` from the 38-stem
-`GATE10_ELIGIBILITY_REASON_IDS` taxonomy — **no external effect**, and the
-immutable `consumption.json` is **byte-unchanged** (a rejection does not
-un-consume Gate-9 authority; any new attempt needs a fresh `invocation_id`
-/ `attempt_id` / approval / proof).
+**Operator decision: Option B.** `.1R.18` is **not** expanded to repair the
+defects it discovered; the 17 failures are **not** repaired inside `.1R.18`;
+the `.1R.17` historical report is **preserved unchanged**. The formal
+erratum and the guard widening are deferred to the recommended repair phase.
 
-**Semantic walls.** `DispatchEnvelope != permission != human approval != PB
-ALLOW != Runtime Enforcement capability != consumed authority != permission
-to call adapter.dispatch()`. `consumed human authority != runtime
-capability`. `dispatch attempted (Gate 9) != effect succeeded` — this
-module attempts nothing.
+## Non-blocking observations
 
-**N-16-1 production resolver factories (both IMPLEMENTED — IV PENDING).**
-`build_gate10_capability_snapshot_resolver` reads the canonical
-`runtime_introspection` constants (`CURRENT_RUNTIME_STATE` /
-`CURRENT_MAXIMUM_PLUGIN_CAPABILITY` / `EXECUTION_AVAILABILITY`) — same
-source and dict shape Gate 9 checks, mutates nothing.
-`build_gate10_authority_generation_resolver` is **composed from** the
-frozen Gate-9 factory
-`runtime_dispatch_gate9.build_production_authority_generation_resolver`
-(`principal` / `credential` / `approval` generation — byte-for-byte the
-same tokens, **no Gate-9 behaviour change, no Gate-9 refactor** — the
-optional shared-factory refactor was **declined**;
-`runtime_dispatch_gate9.py` is byte-unchanged) plus
-`_lifecycle_generation_token` + `_consumption_generation_token` (both
-reused from `runtime_dispatch_gate9`).
+* **N-18-2 (INFO).** `GATE10_ELIGIBILITY_REASON_IDS` is a closed `frozenset`
+  carrying **39** members; the `.1R.17` prose says "38 stems". Prose count
+  off by one.
+* **N-18-3 (INFO — preserved by operator instruction).** The `.1R.17` phase
+  prompt (and this phase's §23) carried an **incorrect expectation**: that a
+  canonical `Observed / observe / unavailable` capability snapshot must
+  **suppress `DispatchEnvelope` minting**. The authoritative `.1R.16` §13
+  F-G10-7 design deliberately allows a **non-authoritative** `DispatchEnvelope`
+  to exist **while execution remains unavailable** (step 12 requires the
+  snapshot to attest `unavailable` **to proceed**, mirroring
+  `runtime_dispatch_gate9`'s own posture). The real invariants are
+  `DispatchEnvelope != runtime capability != permission to dispatch` and
+  `execution unavailable -> no external effect`. **Production code MUST NOT
+  be modified to satisfy the erroneous prompt wording** — the no-effect
+  guarantee is structural (no `adapter.dispatch()` call site; zero
+  effect-boundary calls).
 
-**Hard no-effect source invariant.** The module contains **no
-`adapter.dispatch()` call site at all** (a stronger property than
-"unreachable" — structurally absent); imports/calls **no** `subprocess` /
-process spawn / `os.system` / `os.popen` / `exec*` / `spawn*` /
-`posix_spawn` / `socket` / `ssl` / `selectors` / `pty` / `ctypes` /
-`fcntl` / provider SDK / HTTP client / credential resolver / FIDO2 /
-WebAuthn / CTAP / smartcard / USB; writes **nothing** durable. The only
-I/O is `consumption_store.resolve()` (a read), the Gate-8 containment
-re-establishment mechanism, and an `open(path, "rb")` read for `sha256`
-hashing (identical to `runtime_dispatch_gate8._hash_file`). No
-`runtime_dispatch_gate10.py`; no `Gate10Result` / `_GATE10_RESULTS`; no
-`DispatchReceipt`; no adapter registered, implemented, or called;
-`RuntimeRegistry` functionally unchanged.
+## Test Results
 
-**No positive production Gate-10 path.** `run_gate10_pre_effect_eligibility`
-is **structurally unreachable in production** — its mandatory input is a
-`Gate9Result(status == "consumed")`, and no such object can be produced
-(six independent blockers: NON_REAL HPAC, real Gate 7 DENY, capability
-unavailable, no real adapter, POL-005 hard DENY, no protected UI / real
-FIDO2). The positive branches are exercised **only** through the same
-clearly-labelled test-boundary substitution the `.1R.14` Gate-9 suite uses
-(`monkeypatch` on the upstream provenance predicates only + a `tmp_path`
-store; no fabricated authority / capability / positive `Gate7Result`; the
-`.1R.17` `chain` fixture runs the **real** Gate-8 and Gate-9 coordinators
-under that substitution to produce a genuine consumed `consumption.json` +
-`Gate9Result`, then feeds Gate 10). A NON_REAL lineage is blocked at five
-independent points (`.1R.16` §30.1), of which this phase implements point 4
-and point 5.
-
-## Tests
-
-Fresh `.1R.17` suite
-`tests/test_gate10_pre_effect_eligibility_coordinator_3w1r2b1r1_1r17.py` —
-**65 tests, all passing** (deterministic `-p no:randomly`). Covers phase
-prompt §42's 36-item minimum plus the `DispatchEnvelope` model
-(non-serializable / identity-only / non-subclassable / immutable /
-structural-copy-is-non-authoritative / provenance-≠-effect), the full drift
-battery, `Gate9Result` forgery rejection, NON_REAL unreachability, restart
-safety, an AST no-effect scan, a runtime monkeypatch-boundaries zero-effect
-test, and Gate 5–9 / contracts byte-unchanged assertions.
-
-**Fixed-SHA A/B** against the immutable phase-entry baseline `1f8b9c76`
-(deterministic `-p no:randomly`, no xdist workers), selection `-k "gate5 or
-gate7 or gate8 or gate9 or introspection or runtime_dispatch or
-authority_consumption or gate10 or hpac or runtime_authority or
-serialization"` (2412 selected — the new Slice-A suite + all Gate-9 suites
-+ all Gate-5/6/7/8 suites + runtime-introspection + authority-generation /
-consumption-store + RPAC/HPAC contract tests): **A = 29 failing nodes; B =
-the identical 29 failing nodes. 0 added, 0 removed.**
-
-```
-CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0
-UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS       = 0
-```
-
-The 29 baseline failures are pre-existing on `main` and unrelated to the
-runtime-dispatch gate chain (HATP / HPAC contract-freeze text asserts,
-HATP proof-model serialization scope checks) — reproduced identically with
-`.1R.17` removed. Eight prior scope-fence / consumer-inventory guards were
-widened by the established allowlist-widening precedent (`.1R.8`, `.1R.11`,
-`.1R.117`, hpac-foundation `31`/`32`/`321`, the `.1R.15.2` guard source,
-the `.1R.13.3`/`.1R.13.5` meta-guards, and `test_phase_149o_1g`) — each
-still fails for any **other** unexpected importer; **no test weakened,
-removed, or skipped**. `runtime_dispatch_gate9.py` byte-unchanged.
-Concurrency (`.1R.14` / `.1R.15.2`) pass with `.1R.17` in place;
-`test_hpac_trust_root_repair_..._321::test_concurrent_conflicting_successors_have_one_canonical_winner`
-is a pre-existing order-dependent flake unrelated to the gate chain.
-
-## Disposition of findings
-
-* **GATE-10 PRE-EFFECT ELIGIBILITY COORDINATOR: IMPLEMENTED — IV PENDING.**
-* **DISPATCH ENVELOPE: IMPLEMENTED AS NON-AUTHORITATIVE PRE-EFFECT BINDING
-  — IV PENDING.**
-* **FIRST EXTERNAL EFFECT: ABSENT.**
-* **N-16-1: IMPLEMENTED — IV PENDING** (both factories; the Gate-9
-  shared-resolver refactor was **declined**).
-* **Item 9: NOT SATISFIED / DEFERRED TO SLICE B (`.1R.19`)** — unchanged.
-* **N-16-2 → Slice B; N-16-3..7 → Slice C prerequisites** — unchanged.
-* **N-15-5-1 (PBRD §4a duplicate numbering):** carried non-blocking; the
-  renumber was **deferred** (phase prompt §39).
-* No new blocking findings. No self-close. No STOP / BLOCKED condition
-  reached.
-
-**FINAL VERDICT: GATE-10 PRE-EFFECT ELIGIBILITY COORDINATOR: IMPLEMENTED —
-INDEPENDENT VERIFICATION PENDING. DISPATCH ENVELOPE: IMPLEMENTED AS
-NON-AUTHORITATIVE PRE-EFFECT BINDING — IV PENDING. FIRST EXTERNAL EFFECT:
-ABSENT. N-16-1: IMPLEMENTED — IV PENDING.**
+- **fast_green:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 evidence. 111 passed, 0 failed (new `.1R.18` independent-verification suite, deterministic `-p no:randomly`). Fixed-SHA A/B vs the immutable pre-`.1R.17` baseline `1f8b9c76` (dedicated worktree, deterministic, NO xdist), selection `-k 'gate5 or gate7 or gate8 or gate9 or introspection or runtime_dispatch or authority_consumption or gate10 or hpac or runtime_authority or serialization'`: A (baseline) = 29 failing nodes; B (`c618134a` + this phase's non-production commits) = 46 failing nodes. **ADDED in B = 17; REMOVED = 0. `.1R.18`-ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.** The 17 ADDED are ALL attributable to and explained by `.1R.17` (16 stale scope-fence / consumer-inventory guards not widened by `.1R.17` + 1 docstring-grep false positive); each still fails for any other importer. This CONTRADICTS the `.1R.17` finalized report's A/B claim of "ADDED failures in B = 0" — recorded as the `.1R.18` blocker (BLOCKED lifecycle/regression acceptance) and referred to `.1R.17R`. The 29 baseline failures are pre-existing on `main` and unrelated (HATP / HPAC contract-freeze text asserts, HATP proof-model serialization scope, `test_runtime_authority_pb_verification` registry text assert), reproduced identically in A and B.
+- **gate9_regression:** `runtime_dispatch_gate9.py` byte-unchanged since `1f8b9c76`. Independent spot-checks with `.1R.17` present: provenance, one-shot (`already_consumed`), non-serializable. 0 `.1R.18`-attributable failures.
+- **gate5_to_8_regression:** Gate 5 / 7 / 8 / permission / shell_gate byte-unchanged since `1f8b9c76`; all remain CLOSED. 0 `.1R.18`-attributable failures.
+- **runtime_introspection_regression:** `runtime_introspection.py` byte-unchanged; N-16-1 capability resolver reads the constants and mutates nothing; `pcae runtime inspect` byte-identical; `RuntimeRegistry` empty.
+- **pol_005_regression:** `permission_broker_foundation.py` byte-unchanged; POL-005 hard DENY unchanged; Gate 10 trusts the durable Gate-6 `pb_binding` and does not re-run PB policy.
+- **fixed_sha_attribution:** baseline `1f8b9c76`, dedicated worktree, deterministic, NO xdist. A = 29 / B = 46. 17 ADDED, 0 REMOVED. `.1R.18`-attributable = 0. All 17 ADDED attributable to `.1R.17` — documented as the `.1R.18` blocker and referred to `.1R.17R`.
+- **report_notification_tests:** not_applicable_this_phase — this phase adds no report/notification code path; the `.1R.18` suite is coordinator + envelope + resolver-factory + no-effect + scope-fence-review re-derivation. Report-notification behaviour is unchanged and covered by its own dedicated suites (`test_phase_report_notification*`), not modified.
+- **bootstrap_session_reporting_tests:** not_applicable_this_phase — no session/bootstrap/handoff code path changed; the dedicated bootstrap-session-reporting suites are unmodified and out of scope. `pcae status coherence`, `health`, and `check` passed; session continuity verified.
 
 ## No-Go Confirmations
 
-- No `src/pcae` file changed beyond the single new module `src/pcae/core/runtime_dispatch_gate10_eligibility.py`; Gate 5/6/7/8/9 production modules, `runtime_introspection.py`, `runtime_authority.py`, `runtime_adapter.py`, `runtime_registry.py`, `permission_broker_foundation.py`, and `shell_gate.py` are byte-unchanged since phase-entry `1f8b9c76`.
-- No `adapter.dispatch()` call site exists anywhere in the new module (a stronger property than unreachable — structurally absent); no `.dispatch()` Call node; no `posix_spawn` / `Popen` / `os.system` / `os.popen` / `exec*` / `spawn*` / `subprocess` / `socket` / `ssl` / `pty` / `ctypes` / `fcntl` / provider SDK / HTTP client / credential resolver / FIDO2 / WebAuthn / CTAP import or call.
-- No `runtime_dispatch_gate10.py`, no `Gate10Result`, no `_GATE10_RESULTS` registry, no `DispatchReceipt`, and no first-effect boundary module was created.
-- No adapter (mock or real) was registered, implemented, activated, or called; `RuntimeRegistry` remains empty and functionally unchanged.
-- No execution was enabled; runtime remains `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; POL-005 unchanged and still hard DENY; `pcae runtime inspect` byte-identical at entry and finalization.
-- No runtime capability was elevated or promoted; no `Observed -> Approved / Executable` transition; the capability resolver reads canonical constants and mutates nothing; no `CURRENT_RUNTIME_STATE` / `EXECUTION_AVAILABILITY` assignment and no `register` / `enable` / `activate` / `promote` / `elevate` call in source.
-- No normative contract file was edited (RDGO / PBRD / HPAC / RIHAC / RIASC / RPAC / PBPA / POL-005 / RE registry all byte-unchanged); the N-15-5-1 PBRD §4a renumber was deferred; RPAC-REQ-029 already carries the full `DispatchEnvelope` field list.
-- No closed gate boundary (Gate 5 / 6 / 7 / 8 / 9) was reopened; the optional Gate-9 shared-resolver refactor was declined and `runtime_dispatch_gate9.py` is byte-unchanged.
-- No "Gate 9.5" or other new validation-only gate was invented; the Gate-10 pre-effect battery is RDGO-001 v3.1 §11 items 1–6 verbatim, inside Gate 10.
-- No `consumption.json` was written by the new module; it performs reads and digest comparisons only; a pre-effect rejection leaves the immutable `consumption.json` byte-unchanged and does not un-consume Gate-9 authority.
-- No dispatch-attempt lifecycle / mirror `RuntimeInvocationRecord` / `EFFECT_ATTEMPT_STARTED` / `DISPATCH_UNCERTAIN` (Slice B) was implemented; no first concrete effect adapter (Slice C) was implemented; `.1R.18` was not begun.
-- No real FIDO2 / WebAuthn / CTAP was implemented; no protected human-approval UI was implemented; deterministic authentication remains NON_REAL.
-- No credential was accessed, resolved, embedded, or referenced; no secret resolver was created.
-- No approval / proof / presentation / challenge / nonce was consumed on any production path; the positive branches were exercised only through a clearly-labelled test-boundary substitution + `tmp_path` stores.
-- No third-party system, unrelated account, external credential, provider API, external network, or deployment target was accessed or mutated; no other machine was contacted.
-- No test was removed, weakened, or skipped; eight prior scope-fence guards were widened by the established allowlist-widening precedent and each still fails for any other unexpected importer.
-- No raw `git commit` / `git push`, no `--no-verify`, no force push, no history rewrite, no hook bypass — governed `pcae` lifecycle only.
-- No delegated worker committed, finalized, or pushed; only the primary human-authorized operator holds `.1R.17` lifecycle authority; the historical delegated `.3` finalization / commit / push remains UNAUTHORIZED.
-- No authorization was granted for `.1R.18`, `.1R.19`, `.1R.20`, or the Slice-C / Slice-D phases; each requires its own separate explicit human authorization.
-- No MAJOR or MINOR contract version was bumped, forced, or overridden.
-- No STOP / BLOCKED condition was reached; every valid early-STOP clause of the phase prompt was checked and none applies.
-- No self-close of any finding; the coordinator, the `DispatchEnvelope`, and N-16-1 are IMPLEMENTED — INDEPENDENT VERIFICATION PENDING (`.1R.18`).
+- No production source file was created, modified, or deleted by `.1R.18` (`git diff --name-only 1f8b9c76 HEAD -- src/pcae` = only the single `.1R.17` file).
+No normative contract file was edited by `.1R.18` (RDGO / PBRD / HPAC / RIHAC / RIASC / RPAC / PBPA / POL-005 / RE No-Go Registry all byte-unchanged).
+No scope-fence guard was widened, weakened, skipped, or repaired by `.1R.18`; the 17 `.1R.17`-attributable guard failures were NOT fixed inside `.1R.18` (operator instruction, Option B) and are referred to `.1R.17R`.
+No production code was modified to satisfy the erroneous phase-prompt wording about `DispatchEnvelope` suppression (N-18-3 preserved); the no-effect guarantee is structural.
+No rewrite, deletion, or silent correction of the `.1R.17` historical phase-completion report or metadata; it is preserved unchanged and the formal erratum is deferred to `.1R.17R`.
+No self-close of the `.1R.18` verdict; the substantive findings are offered as evidence and the blocker is referred out, not adjudicated away.
+No `.1R.19` / Slice B / dispatch-attempt durable lifecycle / mirror `RuntimeInvocationRecord` / `EFFECT_ATTEMPT_STARTED` / `DISPATCH_UNCERTAIN` work was begun.
+No Slice C / first concrete effect adapter integration / `adapter.dispatch()` call site was created, and no Slice C or Slice D phase ID was assigned.
+No adapter (mock or real) was registered, implemented, activated, or called; `RuntimeRegistry` remains empty and functionally unchanged.
+No execution was enabled; runtime remains `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; POL-005 unchanged and still hard DENY; `pcae runtime inspect` byte-identical at entry and finalization.
+No runtime capability was elevated or promoted; no `Observed -> Approved / Executable` transition occurred or was made to occur.
+No credential was accessed, resolved, embedded, or referenced; no secret resolver was created.
+No real FIDO2 / WebAuthn / CTAP was implemented; no protected human-approval UI was implemented; deterministic authentication remains NON_REAL.
+No approval / proof / presentation / challenge / nonce was consumed on any production path; the `.1R.18` positive-path tests use only the clearly-labelled test-boundary substitution + `tmp_path` stores.
+No third-party system, unrelated account, external credential, provider API, external network, or deployment target was accessed or mutated; no other machine was contacted.
+No test was removed, weakened, or skipped by `.1R.18`; the `.1R.18` suite adds 111 new passing tests and 0 attributable regressions.
+No MAJOR or MINOR contract version was bumped, forced, or overridden.
+No raw `git commit` / `git push`, no `--no-verify`, no force push, no history rewrite, no hook bypass — governed `pcae` lifecycle only.
+No delegated worker committed, finalized, or pushed; only the primary human-authorized operator holds `.1R.18` lifecycle authority; the historical delegated `.3` finalization / commit / push remains UNAUTHORIZED.
+No claim that the `.1R.17` fixed-SHA A/B figure was correct; `.1R.18` records the true result (17 added, 0 removed) and refers the correction to `.1R.17R`.
+No STOP was taken before the substantive verification ran to a definitive verdict; the phase is BLOCKED on lifecycle/regression acceptance only, with the blocker recorded exactly and referred out.
 
-**Recommended next phase:** `149O.20L.7O.3W.1R.2B.1R.1.1R.18` — Independent
-Verification of the Gate-10 Pre-Effect Eligibility Coordinator (recommended,
-not reserved; requires its own separate explicit human authorization). Do
-not implement Gate 10's effect. Do not enable execution.
+## Recommended Next Phase
 
-**Canonical artifact:**
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_17_GATE_10_PRE_EFFECT_ELIGIBILITY_AND_DISPATCH_ENVELOPE_COORDINATOR_IMPLEMENTATION.md`
+`149O.20L.7O.3W.1R.2B.1R.1.1R.17R` — Gate-10 Slice-A Scope-Fence and
+Verification-Evidence Reconciliation (requires its own separate explicit
+human authorization). Widen the 16 legitimate stale consumer-inventory /
+allowlist guards (`.1R.13.2` / `.1R.13.4` / `.1R.13.5` / `.1R.14` /
+`.1R.15`) to admit `runtime_dispatch_gate10_eligibility.py` as the
+authorized RDGO-001 v3.1 §11 item 4 / `.1R.16` §16 consumer (each still
+rejecting any other importer); repair the 1 docstring-grep guard; extend the
+`.1R.15.5` byte-scope `allowed` set; attach a preserved-original erratum to
+the `.1R.17` canonical doc and correct the `.1R.17` completion metadata /
+report A/B figure to the true "17 added (all explained), 0 removed" under a
+governed amendment; re-run the fixed-SHA A/B to confirm 0 added / 0 removed.
+No production source or normative contract change; no Slice B work. Then
+`149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1` — Independent Verification of the
+Gate-10 Slice-A Reconciliation. After `.1R.17R.1` closes, the Slice-A track
+resumes at `149O.20L.7O.3W.1R.2B.1R.1.1R.19` (Slice B). Slice C / D keep no
+phase ID. `.1R.19` is NOT begun.
+
+---
+*Canonical staging header — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 — BLOCKED independent-verification result (Option B).*
