@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260830-2144-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-17r-1-slice-b-1r-19-recommended-next
+20260830-2303-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-19-slice-b-independent-verification-1r-20-recommended-next
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1); Slice B (.1R.19) recommended next
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.19); Slice B independent verification (.1R.20) recommended next
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1); Slice B (.1R.19) recommended next
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.19); Slice B independent verification (.1R.20) recommended next
 
 ## Allowed Files
 
@@ -27,6 +27,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1); Sl
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/**
+- tests/**
 
 ## Forbidden Files
 
@@ -80,4 +81,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-30T21:44:56.078053+02:00
+2026-08-30T23:03:06.147013+02:00
