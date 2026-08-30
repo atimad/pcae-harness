@@ -1,19 +1,41 @@
 # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 — Independent Verification of the Gate-10 Pre-Effect Eligibility Coordinator
 
 **Type:** independent verification of `.1R.17` (Slice A of the `.1R.16` Gate-10 plan).
-**Status:** **BLOCKED — human decision required.** See §2.
+**Status:** **BLOCKED INDEPENDENT-VERIFICATION RESULT — finalized (Option B).**
+Substantive verification passed; lifecycle / regression acceptance is BLOCKED and
+referred to a dedicated repair phase (`.1R.17R`). See §2 and §4.
 **Verification-entry SHA:** `c618134a` (`.1R.17` finalize head; `origin/main..HEAD = 0` at entry).
 **Immutable pre-`.1R.17` baseline:** `1f8b9c76` (verified: parent of the `.1R.17`
 production implementation commit `302f5aba`).
 **Production source modified by this phase:** none.
 **Normative contracts modified by this phase:** none.
+**Scope-fence guards modified by this phase:** none — the 17 discovered guard
+failures are **NOT repaired inside `.1R.18`** (operator instruction); they are
+referred to `.1R.17R`.
 **Execution:** not enabled. Runtime `not_implemented / Observed / observe / unavailable`;
 POL-005 hard DENY unchanged; 0 plugins / 0 capabilities; `pcae runtime inspect`
 byte-identical.
 **Governance:** governed `pcae` lifecycle only. The delegated `.3` finalization /
 commit / push incident remains **UNAUTHORIZED**. Only the primary
 human-authorized operator holds `.1R.18` lifecycle authority. This phase is
-**not finalized** and **not self-closed**.
+**not self-closed** — the substantive verdict below is offered as evidence; the
+blocker is referred out, not adjudicated away.
+
+## Verdict summary (operator-directed, Option B)
+
+| Component | Verdict |
+|---|---|
+| Gate-10 pre-effect eligibility coordinator | **substantively verified / closed-worthy** |
+| `DispatchEnvelope` pre-effect binding | **substantively verified / closed-worthy** |
+| N-16-1 production resolver factories | **substantively verified / closed-worthy** |
+| First external effect | **absent** (verified) |
+| Lifecycle / regression acceptance | **BLOCKED** — 17 `.1R.17`-attributable scope-fence guard failures + an inaccurate `.1R.17` A/B record; referred to `.1R.17R` |
+
+**The `.1R.17` historical phase-completion report is preserved unchanged.** It is
+**not** rewritten as though it had always been correct. This document and the
+`.1R.18` completion record are the corrective governance layer; the `.1R.17`
+record stands as the historical artifact, and `.1R.17R` will carry the formal
+erratum.
 
 ---
 
@@ -62,31 +84,56 @@ or its helper names.
   `GATE10_ELIGIBILITY_REASON_IDS` `frozenset` carries **39** members. The
   taxonomy is closed and correctly a `frozenset`; only the prose count is
   off by one. Non-blocking.
-* **N-18-3 (INFO).** Phase prompt §23 expects "with the current production
-  capability resolver: **NO `DispatchEnvelope`** because execution remains
-  unavailable." The verified Slice-A design (`.1R.16` §13 F-G10-7) is the
-  **opposite polarity**: step 12 requires the snapshot to attest
-  `unavailable` **to proceed** (mirroring `runtime_dispatch_gate9`'s own
-  "never consume authority into a runtime that could act"), so an envelope
-  **is** minted under the canonical non-executing posture. The decisive
-  no-effect guarantee is **structural** — the module has no
-  `adapter.dispatch()` call site (§44) and zero effect-boundary calls on any
-  path (§46) — not envelope suppression. The §24 semantic wall
-  (`consumed human authority != runtime capability`) holds. This is a
-  designed, `.1R.16`-documented choice; Slice C is where the polarity for a
-  genuinely-available runtime is (re)decided. Non-blocking.
+* **N-18-3 (INFO — preserved by operator instruction).** The `.1R.17` phase
+  prompt (and, following it, phase-prompt §23 of *this* phase) carried an
+  **incorrect expectation**: that a canonical `Observed / observe /
+  unavailable` capability snapshot must **suppress `DispatchEnvelope`
+  minting**. That expectation is not the authoritative architecture. The
+  authoritative `.1R.16` design (§13 F-G10-7) deliberately allows a
+  **non-authoritative** `DispatchEnvelope` to exist **while execution
+  remains unavailable** — step 12 requires the snapshot to attest
+  `unavailable` **to proceed**, mirroring `runtime_dispatch_gate9`'s own
+  "never consume authority into a runtime that could act on it". The real
+  invariants are:
+
+  > `DispatchEnvelope != runtime capability != permission to dispatch`
+
+  and
+
+  > `execution unavailable -> no external effect`
+
+  Both hold in `.1R.17`: the envelope authorizes nothing, `is_dispatch_envelope`
+  is process-local provenance only, and the no-effect guarantee is
+  **structural** — the module has no `adapter.dispatch()` call site (§44) and
+  makes zero effect-boundary calls on the positive path or any negative
+  branch (§46). **Production code MUST NOT be modified to satisfy the
+  erroneous prompt wording.** Non-blocking; recorded so a future reader does
+  not "fix" a correct implementation to match a wrong prompt.
 
 ---
 
 ## 2. THE BLOCKER
 
-### 2.1 Statement
+### 2.1 Statement (recorded exactly, operator instruction)
 
-**`.1R.17` shipped 17 test regressions in pre-existing scope-fence /
-consumer-inventory guards that it did not widen and did not disclose, and
-`.1R.17`'s finalized, pushed, Telegram-notified phase-completion report
-records a fixed-SHA A/B result — "ADDED failures in B = 0; REMOVED = 0" —
-that is contradicted by primary evidence.**
+* **`.1R.17` introduced 17 attributable failures in pre-existing scope-fence
+  / consumer-inventory guards.**
+* **16 are legitimate stale allowlist / consumer-inventory guards** caused by
+  the new Slice-A references (`runtime_dispatch_gate10_eligibility.py`
+  legitimately names `Gate7Result` / `Gate8Result` / `Gate9Result` /
+  `Gate6Decision` / `run_gate8_process_containment` /
+  `RuntimeInvocationAuthorityConsumptionStore` **in code**, exactly the
+  RDGO-001 v3.1 §11 item 4 lineage + `.1R.16` §16 containment re-run).
+* **1 is a docstring-grep false positive**
+  (`test_sole_semantic_owner_of_gate9_consumption_boundary` matches the
+  module docstring's single mention of `run_gate9_atomic_authority_consumption`).
+* **`.1R.17`'s finalized phase-completion report's A/B claim of "ADDED
+  failures = 0" is contradicted by independent evidence** (true: 17 added, 0
+  removed).
+* **This is a governance / evidence and guard-maintenance defect — NOT a
+  production Slice-A implementation defect.** Each of the 17 guards still
+  fails for any *other* importer; Gate 10 is an *authorized* consumer per
+  RDGO §11 / `.1R.16`; no trust boundary is weakened.
 
 ### 2.2 Primary-source evidence
 
@@ -199,71 +246,72 @@ scope-fence coverage plus an inaccurate governance-record A/B figure**.
    governed `pcae phase complete` for `.1R.18` would have to record a
    non-clean test state or a scope expansion that was never authorized.
 
-### 2.5 What was NOT modified
+### 2.5 What was NOT modified — and the operator's directive
 
 * **No production source** changed (`git diff 1f8b9c76 HEAD -- src/pcae` =
   the single `.1R.17` file only).
 * **No normative contract** changed.
 * **No scope-fence guard** was widened by this phase.
-* **No `pcae phase complete`** was run; `.1R.18` is not finalized, not
-  self-closed, and the recommended-next-phase pointer is unchanged.
+* **Production code was NOT modified to satisfy the erroneous phase-prompt
+  wording** (see N-18-3).
+* **The 17 failures are NOT repaired inside `.1R.18`** — by explicit operator
+  instruction (Option B). They are referred to `.1R.17R`.
+* **The `.1R.17` historical report is preserved unchanged** — not rewritten.
 
 ---
 
-## 3. Repository / governance state at BLOCK
+## 3. Repository / governance state at finalization
 
 | Fact | Value |
 |---|---|
 | Working tree | clean |
 | `pcae health` / `check` / `status coherence` | healthy / passed / coherent |
 | `pcae doctor task-memory` | warning-only (pre-existing O4 `tasks/DONE.md` omissions) |
-| `pcae runtime inspect` | `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; PB `execution_unavailable` |
-| Active task | `Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18: Independent Verification …` (open, not closed) |
-| `origin/main..HEAD` | **3** (all `.1R.18` governed infrastructure; no production / contract change) |
-| Unpushed commits | `e6c1b7cd` open governed phase task · `8ab50a8c` independent-verification suite (111 tests, green in isolation) · `5860dabd` remove superseded idle active-task file |
-| Pushed | **no** (`pcae push` not run) |
-| Telegram | not dispatched (no `pcae phase complete`) |
+| `pcae runtime inspect` | `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; PB `execution_unavailable` — byte-identical to entry |
+| `.1R.18` own suite | `tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py` — **111 passed, 0 failed** |
+| `.1R.18`-attributable regressions | **0** |
+| `.1R.17`-attributable pre-existing regressions carried in the tree | **17** (documented §2; referred to `.1R.17R`) |
+| Production scope since `1f8b9c76` | exactly one new file (the `.1R.17` module) |
 | `.3` governance incident | `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved |
 
 ---
 
-## 4. Exact human decision required
+## 4. Operator decision — Option B (recorded)
 
-Choose the remediation path for the 17 `.1R.17`-attributable guard
-regressions and the inaccurate `.1R.17` A/B record, and authorize the
-corresponding scope:
+The operator selected **Option B**: `.1R.18` is **not** expanded to repair
+the defects it discovered. `.1R.18` is finalized as a **BLOCKED
+independent-verification result** that preserves the substantive findings
+(§1 / Verdict summary), records the blocker exactly (§2), and preserves
+N-18-3 (§1.2). The `.1R.17` historical report is left intact.
 
-**Option A — fold the fix into `.1R.18`.** Authorize `.1R.18` to (i) widen
-the 16 genuine consumer-inventory guards with the established allowlist
-precedent (each still rejecting any other importer), (ii) repair the 1
-docstring-grep guard, (iii) extend the `.1R.15.5` byte-scope `allowed` set,
-(iv) add a preserved-original erratum to the `.1R.17` canonical doc noting
-the true count was **17 added (all explained)**, and (v) then complete
-`.1R.18` finalization with the corrected fixed-SHA A/B. Fastest; expands
-`.1R.18` scope to re-authoring six earlier IV suites.
+## 5. Recommended next phases (not begun)
 
-**Option B — dedicated `.1R.17R` reconciliation phase.** Close `.1R.18` now
-as **INDEPENDENTLY VERIFIED WITH A BLOCKING FINDING** (substantive properties
-all clean per §1; the guard/A-B finding referred out), then run a separate
-governed `.1R.17R` to complete the scope-fence widening and correct the
-`.1R.17` record, followed by its own IV. Cleanest governance separation;
-one extra phase.
+1. **`149O.20L.7O.3W.1R.2B.1R.1.1R.17R` — Gate-10 Slice-A Scope-Fence and
+   Verification-Evidence Reconciliation.** Scope: (a) widen the 16 legitimate
+   stale consumer-inventory / allowlist guards (`.1R.13.2`, `.1R.13.4`,
+   `.1R.13.5`, `.1R.14`, `.1R.15`) to admit
+   `runtime_dispatch_gate10_eligibility.py` as the authorized RDGO-001 v3.1
+   §11 item 4 / `.1R.16` §16 consumer — each guard still rejecting any other
+   importer; (b) repair the 1 docstring-grep guard
+   (`test_sole_semantic_owner_of_gate9_consumption_boundary`) so docstring
+   prose is not mistaken for a production consumer; (c) extend the `.1R.15.5`
+   byte-scope `allowed` set (Gate 5–8 remain byte-unchanged); (d) attach a
+   **preserved-original erratum** to the `.1R.17` canonical doc and, as a
+   governed amendment, correct the `.1R.17` completion metadata / report A/B
+   figure to the true **"17 added (all explained), 0 removed"**; (e) re-run
+   the fixed-SHA A/B to confirm **0 added / 0 removed** after the widening.
+   No production source or normative contract change. No Slice B work.
+2. **`149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1` — Independent Verification of the
+   Gate-10 Slice-A Reconciliation.** RE-DERIVE that every widened guard is
+   still tight (rejects any other importer), that the `.1R.17` erratum is
+   accurate and its original text preserved, and that the corrected A/B
+   holds; confirm no production / contract / Gate 5–9 drift.
 
-**Option C — re-issue `.1R.17`'s completion record.** Treat the inaccurate
-A/B figure as a governance-record defect and correct `.1R.17`'s
-`phase-completion-report.md` / metadata under a governed amendment before
-`.1R.18` proceeds.
-
-`.1R.18` will resume on your instruction. No `.1R.19` / Slice B / Slice C
-work is begun. Execution is not enabled.
-
----
-
-## 5. Recommended next phase (unchanged; not begun)
-
-`149O.20L.7O.3W.1R.2B.1R.1.1R.19` — Dispatch-Attempt Durable Lifecycle,
-Idempotency, and 3S.2.1 Prerequisite Repairs (Slice B) — remains the
-recommendation **after** `.1R.18` closes. Slice C / D keep no phase ID.
+**After `.1R.17R.1` closes**, the Slice-A track resumes at
+`149O.20L.7O.3W.1R.2B.1R.1.1R.19` (Slice B — Dispatch-Attempt Durable
+Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs). Slice C / D keep no
+phase ID. **`.1R.19` is NOT begun.**
 
 ---
-*Canonical artifact — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 (BLOCKED).*
+*Canonical artifact — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 — BLOCKED
+independent-verification result (Option B).*

@@ -3,8 +3,13 @@
 ## Current Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18 — Independent Verification of the
-Gate-10 Pre-Effect Eligibility Coordinator (`.1R.17`). **STATUS: BLOCKED —
-HUMAN DECISION REQUIRED.** All substantive properties of the `.1R.17`
+Gate-10 Pre-Effect Eligibility Coordinator (`.1R.17`). **STATUS: BLOCKED
+INDEPENDENT-VERIFICATION RESULT — FINALIZED (Option B).** Substantive
+verdict — **Gate-10 pre-effect eligibility coordinator: substantively
+verified / closed-worthy; `DispatchEnvelope` pre-effect binding:
+substantively verified / closed-worthy; N-16-1: substantively verified /
+closed-worthy; first external effect: absent; lifecycle / regression
+acceptance: BLOCKED.** All substantive properties of the `.1R.17`
 coordinator, the `DispatchEnvelope` non-bearer model, the N-16-1 production
 resolver factories, the no-effect guarantee (no `adapter.dispatch()` call
 site — AST + a dynamic zero-effect boundary trap; 0 effect-bearing
@@ -14,36 +19,41 @@ positive production path were **RE-DERIVED from the primary contracts
 (RDGO-001 v3.1 §11 items 1–6 / §15 / §16 / §17, RPAC-REQ-029, HPAC-001 v2.1
 §41) and independently VERIFIED CLEAN** — fresh suite
 `tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py`,
-**111 tests, all passing**; `runtime_dispatch_gate9.py` and Gate 5–8 /
-`runtime_introspection` / contracts / POL-005 all **byte-unchanged since
-`1f8b9c76`**. **Blocker:** the fixed-SHA A/B (baseline `1f8b9c76`,
-deterministic, no xdist) shows **17 added failing nodes** in pre-existing
-scope-fence / consumer-inventory guards (`.1R.13.2` / `.1R.13.4` / `.1R.13.5`
-/ `.1R.14` / `.1R.15` / `.1R.15.5`) that `.1R.17` **did not widen and did not
-disclose** — 16 are genuine new-authorized-consumer facts (Gate 10
-legitimately references `Gate7Result` / `Gate8Result` / `Gate9Result` /
-`Gate6Decision` / `run_gate8_process_containment` /
-`RuntimeInvocationAuthorityConsumptionStore` in code, exactly the RDGO §11
-item 4 + `.1R.16` §16 lineage / containment re-run), 1 is a docstring-grep
-false positive; each guard still fails for any *other* importer, so this is
-**incomplete coverage, not a trust-boundary violation**. Additionally,
-`.1R.17`'s finalized, pushed, Telegram-notified phase-completion report
-records "ADDED failures in B = 0" for the same A/B, which primary evidence
-contradicts. Correcting a completed/published governance record and
-re-authoring six earlier IV suites' guards exceeds delegated `.1R.18`
-verification-only authority (phase prompt §70 / §71). `.1R.18` is **not
-finalized, not self-closed**; the recommended-next-phase pointer is
-unchanged; no `.1R.19` / Slice B / Slice C work begun; execution not
-enabled. **Exact human decision required:** choose the remediation path —
-Option A (fold the guard widening + `.1R.17` doc erratum into `.1R.18` and
-finalize with the corrected A/B), Option B (close `.1R.18` with a blocking
-finding referred out, then a dedicated `.1R.17R` reconciliation phase +
-its IV), or Option C (governed amendment of `.1R.17`'s completion record
-first). Non-blocking observations: N-18-2 (the reason taxonomy has 39
-members, not the "38" the `.1R.17` prose states) and N-18-3 (phase-prompt
-§23's "no envelope under the production capability resolver" expectation is
-the opposite polarity of the verified `.1R.16` §13 F-G10-7 design — the
-no-effect guarantee is structural, not envelope suppression). Verification-
+**111 tests, all passing**, `.1R.18`-attributable regressions **0**;
+`runtime_dispatch_gate9.py` and Gate 5–8 / `runtime_introspection` /
+contracts / POL-005 all **byte-unchanged since `1f8b9c76`**. **Blocker
+(recorded exactly):** `.1R.17` introduced **17 attributable failures** in
+pre-existing scope-fence / consumer-inventory guards (`.1R.13.2` /
+`.1R.13.4` / `.1R.13.5` / `.1R.14` / `.1R.15` / `.1R.15.5`) — 16 are
+legitimate stale allowlist / consumer-inventory guards caused by the new
+Slice-A references (Gate 10 legitimately names `Gate7Result` /
+`Gate8Result` / `Gate9Result` / `Gate6Decision` /
+`run_gate8_process_containment` /
+`RuntimeInvocationAuthorityConsumptionStore` in code, per RDGO §11 item 4 +
+`.1R.16` §16), 1 is a docstring-grep false positive; each guard still fails
+for any *other* importer — **incomplete coverage, not a trust-boundary
+violation**. `.1R.17`'s finalized A/B claim of "ADDED failures = 0" is
+**contradicted by independent evidence** (true: 17 added, 0 removed). This
+is a **governance/evidence and guard-maintenance defect, not a production
+Slice-A implementation defect.** **Operator decision: Option B** — `.1R.18`
+is **not** expanded to repair the defects it discovered; the 17 failures
+are **not** repaired inside `.1R.18`; the `.1R.17` historical report is
+**preserved unchanged**. Recommended repair phases (not begun):
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.17R` — Gate-10 Slice-A Scope-Fence and
+Verification-Evidence Reconciliation**, then **`.1R.17R.1` — Independent
+Verification of the Gate-10 Slice-A Reconciliation**; the Slice-A track then
+resumes at `.1R.19` (Slice B). No `.1R.19` / Slice B / Slice C work begun;
+execution not enabled. Non-blocking: N-18-2 (`GATE10_ELIGIBILITY_REASON_IDS`
+has 39 members, not the "38" the `.1R.17` prose states); **N-18-3
+(preserved)** — the `.1R.17` phase prompt (and this phase's §23) carried an
+**incorrect expectation** that canonical `Observed / observe / unavailable`
+must suppress `DispatchEnvelope` minting; the authoritative `.1R.16`
+architecture allows a non-authoritative `DispatchEnvelope` to exist while
+execution remains unavailable. The real invariants are
+`DispatchEnvelope != runtime capability != permission to dispatch` and
+`execution unavailable -> no external effect`; **production code MUST NOT be
+modified to satisfy the erroneous prompt wording** (the no-effect guarantee
+is structural — no call site, zero effect-boundary calls). Verification-
 entry SHA `c618134a`; immutable baseline `1f8b9c76`. Governed `pcae`
 lifecycle only; the delegated `.3` finalization / commit / push incident
 remains **UNAUTHORIZED**. Canonical artifact:
