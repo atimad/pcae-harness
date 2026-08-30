@@ -2,6 +2,88 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 — Dispatch-Attempt Durable Lifecycle,
+Idempotency, and 3S.2.1 Prerequisite Repairs (Slice B of the `.1R.16` Gate-10
+plan). **STATUS: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING (`.1R.20`).
+FIRST EXTERNAL EFFECT ABSENT; EXECUTION NOT ENABLED.** Phase-entry SHA
+`a2b679fe`. Implements the non-authoritative append-only repository-side
+mirror `RuntimeInvocationRecord` (`src/pcae/core/runtime_dispatch_attempt_lifecycle.py`,
+new): the state machine `PREPARED → EFFECT_ATTEMPT_STARTED → {RECEIPT_CAPTURED
+| DISPATCH_UNCERTAIN | DISPATCH_NOT_STARTED}` (exactly 5 ALLOW transition
+edges; `RECEIPT_CAPTURED` / `DISPATCH_UNCERTAIN` / `DISPATCH_NOT_STARTED`
+terminal), the **write-before-effect at-most-once dispatch-attempt guard**
+(`begin_effect_attempt` → `DispatchAttemptAlreadyStartedError` on a second
+start; `O_CREAT|O_EXCL` + `os.link` → exactly one concurrent winner), the
+crash/restart determination from **durable state only** (`resolve_disposition`:
+no record → `not_started`; `PREPARED` → `DISPATCH_NOT_STARTED_AFTER_ATTEMPT_MARKER`
+with `external_effect_possible=False`; unresolved `EFFECT_ATTEMPT_STARTED` →
+`DISPATCH_UNCERTAIN` with `automatic_retry_permitted=False`), and the
+deterministic restart-stable identity `derive_dispatch_attempt_record_id =
+"dar-"+sha256({invocation_id,attempt_id})[:32]` (no wall clock / mtime /
+nonce / PID). **Semantic wall:** `RuntimeInvocationRecord != permission !=
+human approval != PB ALLOW != runtime capability != authorization to
+dispatch` — no `approve`/`authorize`/`permit`/`grant`/`consume` method, no
+`execution_allowed`/`permission`/`authorized` field, `GRANTS_NO_EFFECT_AUTHORITY`
+permanent, `record_grants_no_effect_authority()` always `True`; a copied /
+reconstructed record grants nothing. Guarantee is **at-most-once dispatch
+attempt with fail-closed uncertainty**, never generic exactly-once (RDGO-001
+v3.1 §17). The module imports and calls **no** effect primitive (AST +
+code-only token scan; dynamic effect-trap: 0 effect calls); there is **no**
+`adapter.dispatch()` call site. **N-16-2: IMPLEMENTED — IV PENDING** ("wired"
+= durable, restart-readable, identity-bounded, consumed by nothing that
+grants effect authority; NOT effect dispatch). **3S.2.1 MUST-FIX #1**
+(`runtime_adapter.py`): `simulate_invocation` validates the `adapter.collect()`
+return (`malformed_adapter_result_reasons`) and the `dispatch()` receipt and
+fails closed with `FAILURE_MALFORMED_RESULT` **before** any state write —
+never an uncaught `AttributeError`, never a persisted `result.json`; still
+exactly one `resolved.adapter.dispatch(` call site, still simulation-only.
+**3S.2.1 MUST-FIX #2** (`runtime_invocation.py`): `RuntimeInvocationStore`
+sanitizes `invocation_id` / `attempt_id` via `require_safe_relative_id_component`
+(rejects `.`/`..`/`/`/`\` before the join) + a resolved-path
+`_assert_within_root` containment check on every create; the existing
+`xfail(strict=True)` gap demonstrator was **promoted** to a passing
+expected-rejection test. **3S.2.1 item-9 runtime-inspect repair**
+(`runtime_introspection.py` + `runtime_inspect.py`): additive observational
+`RUNTIME_ADAPTER_SURFACES` / `get_adapter_surfaces()` (static data — no
+registry read, no instantiation, no mutation; every surface
+`effecting=False` / `authoritative=False` / `execution_availability="unavailable"`)
+surfaced in the human `pcae runtime inspect` view (one-line summary + a
+`--verbose` section); **`--json` output and `runtime_snapshot.py` are
+byte-unchanged** (the 112F 9-key JSON contract is untouched — the repair is
+human-output only). **ITEM 9: IMPLEMENTED — IV PENDING `.1R.20`** (all three
+parts done; not CLOSED before `.1R.20`). **No drift:**
+`runtime_dispatch_gate10_eligibility.py` (Slice A) byte-unchanged since
+`a2b679fe`; Gate 5–9 + `runtime_invocation_authority_consumption.py`
+byte-unchanged; `docs/contracts/**` byte-unchanged (no normative contract
+change — the lifecycle is fully expressible under RPAC-001 v1.0 / RDGO-001
+v3.1); `RuntimeRegistry` empty; POL-005 byte-unchanged and re-verified hard
+DENY for a non-simulation request; runtime `not_implemented / Observed /
+observe / unavailable`. **Fixed-SHA A/B** (baseline `a2b679fe`, 59 test
+files): 62 pre-existing failing nodes unchanged; **2 new failing nodes, both
+non-functional working-tree / unpushed-state artifacts**
+(`.1R.17R::test_no_working_tree_production_or_contract_diff`,
+`.7D.4::test_no_production_source_modified_this_phase`) that pass after
+`pcae commit` + `pcae push`; **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL
+REGRESSIONS = 0; CANDIDATE-ONLY UNEXPLAINED = 0**. Nine earlier-phase
+point-in-time scope-fence / consumer-inventory / import-allowlist guards
+(`.1R.8`, `.117`, `.1R.17` ×2, `.3V.1`, `.1R.17R.1` ×2, both inspect
+import-allowlists) reconciled per the `.1R.13.2` / `.1R.17R` precedent —
+each widened minimally with exact filenames, no wildcard, still rejecting an
+unauthorized importer; 0 tests removed / skipped / xfailed / wildcarded.
+New `.1R.19` RE-DERIVE suite
+`tests/test_dispatch_attempt_durable_lifecycle_3w1r2b1r1_1r19.py` (55 tests)
+covering the phase-prompt §42 case list. Governed `pcae` lifecycle only; the
+delegated `.3` finalization / commit / push incident remains **UNAUTHORIZED**.
+**Recommended next phase (not begun): `149O.20L.7O.3W.1R.2B.1R.1.1R.20` —
+Independent Verification of the Dispatch-Attempt Durable Lifecycle.** Slice C
+/ D keep no phase ID; N-16-3..7 remain hard prerequisites for the first
+external effect. Canonical artifact
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_19_DISPATCH_ATTEMPT_DURABLE_LIFECYCLE_IDEMPOTENCY_AND_3S_2_1_PREREQUISITE_REPAIRS.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1 — Independent Verification of the
 Gate-10 Slice-A Reconciliation. **STATUS: INDEPENDENTLY VERIFIED WITH
 NON-BLOCKING FINDINGS — GATE-10 SLICE-A RECONCILIATION COMPLETE.** RE-DERIVE,
