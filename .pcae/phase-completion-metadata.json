@@ -91,9 +91,9 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R: close phase task, transition to idle; expand idle-task allowed-file zone for canonical completion authorship"
     }
   ],
-  "origin_main_head": "pending_push",
+  "origin_main_head": "8f38a97a37a0ae79224ab54acd9c8c2da51e4b43",
   "origin_main_head_count": 0,
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "Independent verification required next: 149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1 -- Independent Verification of the Gate-10 Slice-A Reconciliation. RE-DERIVE that every widened guard is still tight (rejects any other importer), that the two docstring-grep guards now track code semantics, that the .1R.15.5 byte-scope fence still forbids a Gate 5-8 byte change, that the .1R.17 erratum is accurate and its original text preserved verbatim, that the corrected fixed-SHA A/B holds (0 added / 0 removed), and that no production / contract / Gate 5-9 drift occurred. .1R.19 (Slice B) is NOT recommended to run next -- Slice-A lifecycle acceptance must first be independently reconciled by .1R.17R.1. After .1R.17R.1 closes, the Slice-A track resumes at 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B -- Dispatch-Attempt Durable Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs). Slice C / D keep no phase ID. Do not implement Gate 10 effect. Do not enable execution.",
-  "report_consistency": "canonical reconciliation report staged pending governed push"
+  "report_consistency": "canonical reconciliation report promoted after governed push"
 }
