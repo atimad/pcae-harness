@@ -2,132 +2,154 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.3 — Independent Verification of the
-Gate-9 Atomic-Consumption Serialization-Semantics Repair.
-**INDEPENDENTLY VERIFIED — GATE-9 SERIALIZATION-SEMANTICS REPAIR COMPLETE**,
-with the explicit qualification **DURABLE GATE-10 GENERATION-SNAPSHOT
-REPRESENTATION: DEFERRED TO `.1R.15.4` CONTRACT NORMALIZATION.**
-**V-15-1 — CLOSED FOR THE GATE-9 SERIALIZATION WINDOW. V-15-2 — CLOSED.
-V-15-3 — CLOSED.** RE-DERIVE, DO NOT TRUST: no `.1R.15.2` report / test /
-helper-name / pass-count was accepted; every conclusion re-derived from
-RDGO-001 v3.0 §10/§15/§17, HPAC-REQ-095/098/099/100/101, `.1R.9` §12/§18,
-`.1R.15.1` §14/§17/§19/§20, and current production source.
-Verification-entry SHA `735674f7`; immutable pre-repair baseline `d78d9676`
-(`.1R.15.2` functional commit `b32619e5` only; `git diff --name-only
-d78d9676 735674f7 -- src/` = `runtime_dispatch_gate9.py`).
-Independently established: exactly one `consumption_store.create` call site
-and **no** lock primitive (`ast`); S1 captured only after the full
-HPAC-REQ-099 battery (steps 9–14) — proven by source order **and**
-call-order instrumentation; S2 re-read immediately before the create-only
-linearization with **zero effectful I/O** between the `S2==S1` decision and
-`create` (independent source slice: one `return`, no `resolve(` /
-`resolver(` / `run_gate8` / `descriptor_resolver` / `subprocess` / `open(`).
-Token inventory re-derived: 5 tokens over 4 mutable authority sources —
-`principal_generation` / `credential_generation` (whole-record canonical
-digests; move on **real** `revoke_principal` / `revoke_credential`),
-`lifecycle_generation` (digest over every `(sequence, state, event_digest)`
-of the full hash-chained lifecycle — **proof-state subsumption proven from
-HPAC-REQ-094/095**: every proof-authority-relevant mutation is an event in
-that chain), `approval_generation` (**resolver-delegated — finding
-N-15-3-2**: an immutable RIASC `record_digest` alone would not move on an
-approval revocation because HPAC-REQ-102 keeps revocation in a separate
-store; the production `authority_generation_resolver` wiring in `.1R.15.4`
-MUST fold approval-revocation currentness into this token — non-blocking now
-because there is no production caller and pre-S1 approval revocation is
-caught by the step-9 `validate_approval` re-run), `consumption_generation`
-(`("absent",)` / `("present", digest)` / durability-uncertain propagates
-fail-closed). All tokens are pure functions of durable state (restart-
-reconstructible; no mtime / wall clock / nonce / process identity —
-`ast`-verified). Drift injection (real-store and resolver-flip, fired from
-inside `_build_consumption_record` — step 15, strictly after S1 / before
-S2): principal / credential / lifecycle / approval / multi-drift each →
-`gate9_authority_generation_drift:*`, fail closed, **0** `consumption.json`;
-consumption record appearing → deterministic `already_consumed` (not a
-drift rejection), no second create; stable → exactly one `consumed`.
-Concurrency: 6 barrier-synced contenders → exactly one winner, one record
-(8/8 stress); a real `revoke_principal` straddling a contender's S1→S2
-window → that contender rejects, 0 records. Crash before S1 / after S1 /
-after S2-pre-create → unconsumed; crash after create → deterministic
-`already_consumed` (durable record controls restart, incl. fresh-store
-retry). **Practical-limit characterization (honest):** the repair narrows
-the window from "one racer's step-9→step-16 duration" to the pure
-S2-reads→`create` span; a residual instruction-level micro-window remains
-(no lock spans S2→`create` — `.1R.9` §18 forbids a second lock); it is the
-practical limit without extending the create primitive to a
-conditional-create (Option D, out of scope), produces **no external
-effect** (Gate 10 absent; its `.1R.15.1` §22 forward invariant
-re-validates), and is fully closed for the consumption race itself
-(`O_EXCL` → `HPACDuplicateError` → `already_consumed`). `.1R.15.4` must
-normalize RDGO-001 §10 / `.1R.13.1` §16.2-inv-4 / `.1R.9` §12/§18 to the
-single create-only-linearization + zero-I/O-token-recheck model.
-**Durable-snapshot deferral — independently re-derived and CONFIRMED
-CORRECT:** HPAC-REQ-098 `authority_binding` is a closed 12-field set with no
-extension clause (a 13th field → `HPACMalformedError`, exercised);
-`registry_state_digest` is normatively a flat registry/configuration digest
-(HPAC-REQ-095 state table; HPAC-REQ-099 "registry/configuration state
-digest") enumerated **separately** from principal/credential/proof/approval
-currentness — folding the generation vector into its preimage broadens its
-contractual meaning, a permission **not provable** from the frozen
-contracts; its production computation is byte-unchanged from `.1R.14`. **No
-schema-safe representation that `.1R.15.2` missed.** The Gate-9 window
-closes **without** the durable snapshot; **Gate 10 still must not be
-planned/implemented** until `.1R.15.4`/`.1R.15.5` normalize and verify the
-durable semantics and the 10-item `.1R.15.1` §20 prerequisite list holds.
-**V-15-2 — CLOSED:** the three `_3w1r2b1r111r31/32/321` guards are now
-phase-aware SUBSET invariants (`set(consumers) - AUTHORIZED_CONSUMERS ==
-set()`, explicit 4-tuple enumeration matching the actual production
-imports, no `startswith`/wildcard; a synthetic unauthorized
-`runtime_dispatch_gate10.py` consumer still trips the guard; verifier
-trust-root + `_GATE9_RESULTS` owner + Gate-10 exact-empty asserts kept
-EXACT); fixed-SHA A/B `-n0`: FAIL@`d78d9676` (16 failed / 110 passed) →
-PASS@`735674f7` (13 failed / 113 passed), the 13 a strict subset of the 16.
-**V-15-3 — CLOSED:** all three raw `_g5mod.is_gate5_result = lambda …`
-assignments replaced with scoped `monkeypatch.setattr`; `is_gate5_result`
-is the original callable after the file; no cross-test pollution across the
-`.1R.14` / `.1R.15` / `.1R.15.2` / `.1R.15.3` suites (239 passed in one
-process). **Fresh independent suite:**
-`tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py`
-— 56 tests, 0 failed (own `_Recorder` call-order instrumentation, own
-source-slice analyzer, own real-store mutators). **Fixed-SHA A/B**
-(baseline `d78d9676`, deterministic `-p no:randomly -n0`, dedicated
-`git worktree`, no xdist for primary attribution): Gate 5/6/7/8 +
-consumption-store production modules **and** their test files byte-identical
-→ 430 passed identical at both SHAs; `.1R.14` 63/63 and `.1R.15` 76/76
-unchanged; the only functional delta is **+3 intended V-15-2 guard passes**
-plus **+100 new passing tests**. **CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL
-NONPASSING NODES = 0; UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.**
-(One wide `-n auto` candidate —
-`test_gate6…::test_gate5_results_registry_stays_empty_on_every_reject` —
-investigated and dismissed: passes deterministically `-n0` isolated / in
-its file / after this suite; the Gate-6 module + test file are
-byte-identical since baseline; a known `_GATE5_RESULTS`/`_GATE6_DECISIONS`
-xdist cross-file-pollution flake, per `.1R.15` §26.) Concurrency stress:
-8/8 one-winner. Runtime zero-effect: 0 subprocess / adapter / provider /
-credential / hardware / Gate-10 effect; `pcae runtime inspect`
-`not_implemented / Observed / observe / unavailable` unchanged.
-**No production source changed in this phase** (verification only — one new
-test file); no normative contract changed; `.1R.15.4` not begun; Gate 10
-not planned and keeps no phase ID; execution not enabled.
-**New findings:** N-15-3-1 (INFO — `.1R.15.2`'s
-`test_snapshot_has_exactly_the_six_generation_tokens` body asserts five
-tokens, not six; harmless name overstatement); N-15-3-2 (INFO / carried to
-`.1R.15.4` — `approval_generation` resolver-delegation, above); N-15-2-1 /
-N-15-2-2 carried from `.1R.15.2` and confirmed correct. No new blocking
-findings; no finding reopens a closed gate boundary; no finding is class E.
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 — Runtime-Dispatch Contract
+Normalization Implementation.
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING** (×3: contract
+normalization; durable Gate-10 generation-snapshot representation;
+N-15-3-2 approval-generation completeness). No self-close.
+
+Phase-entry SHA `1babaa95`; immutable A/B baseline `4d480553` (`.1R.15.3`
+final). Governed `pcae` lifecycle only; only the primary human-authorized
+operator holds `.1R.15.4` lifecycle authority; the delegated `.3`
+finalization / commit / push incident remains **UNAUTHORIZED**.
+
+**Contract normalization.** RDGO-001 **v3.0 → v3.1 (MINOR)** — V-2/V-3
+sequence-3 *creation* narration corrected to the verified architecture (the
+HPAC-001 v2.1 verifier's HPAC-REQ-054 step 10 creates the event at gate 3;
+gate 5 read-only re-confirms); V-13-3-1 §8 (gate 6 owns PB policy; gates
+7/9 revalidate authority currentness + posture only); V-13-5-1 §9
+three-layer Gate-8 containment model; V-15-1 §10 create-only-linearization
++ zero-effectful-I/O `S1`/`S2` authority-generation-token re-check model +
+item 9 durable representation; §11 gate-10 forward read-back prerequisite
+(semantics only — no gate-10 design, no phase ID); durable items 8 → 9.
+PBRD-001 **v2.0 → v2.1 (MINOR)** — §4a `human_authority_binding`
+representation-equivalence clause (V-4: the 7 logical fields + precedence
+unchanged; the verified lossless 3-tuple is a permitted equivalent).
+HPAC-001 **v2.0 → v2.1 (MINOR)** — §41 HPAC-REQ-098 nine closed binding
+objects; new HPAC-REQ-098a `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`;
+HPAC-REQ-099 rewritten to the repaired linearization model; HPAC-REQ-097
+sequence-3 cross-reference. RIASC-001 **v3.0 + §9 errata note** (V-3 —
+`record_digest` vs `HPAC-APPROVAL-SUBJECT/2.0` digest are distinct; no
+bump). RE No-Go Registry **schema 1.0 → 1.1** (V-13-3-2 — per-decision /
+environmental-readiness / advisory classification of all 17 entries;
+`Gate7Result.matched_no_go_ids` projects only the per-decision subset).
+RIHAC-001 — sibling version cross-refs refreshed; §14 append-only
+revocation-artifact boundary confirmed unamended. Both `.1R.15.1`
+MAJOR-candidate judgment calls (RDGO sequence-3-creation narration; PBRD
+closed-shape) adjudicated **MINOR** with primary-source justification.
+
+**Durable authority-generation snapshot.** `HPAC-AUTHORITY-CONSUMPTION/2.1`
+adds the closed 6-field `authority_generation_binding` object — gate 9
+durably commits the exact `S1` snapshot it verified unchanged at `S2`
+immediately before the create-only linearization (RDGO-001 v3.1 §10;
+V-15-1). It is **verification evidence for gate 10's mandatory re-read, not
+a bearer token** — no capability field, grants nothing on possession. A
+`/2.0` record (no `authority_generation_binding`) is readable
+historical/test data but **gate-10-ineligible**; gate 9 writes only `/2.1`;
+an unknown schema version is durability-uncertain → fail closed. No `/2.0`
+durable record exists in the repository.
+
+**N-15-3-2.** `build_production_authority_generation_resolver` (new,
+exported from `runtime_dispatch_gate9`) folds the current resolved
+immutable approval `record_digest` + a RIHAC-001 v2.0 §14 forward hook
+(`revocation_artifact_digest: None`) into `approval_generation`, and fails
+closed on an absent/unreadable principal / credential / approval. RIHAC-001
+v2.0 §14 (frozen, **NOT amended**): there is no separate approval-revocation
+store; approval revocation is transitively principal / credential /
+lifecycle / expiry (all own tokens). Not invoked on any production path
+(no production Gate-9 caller); the coordinator body reads no approval store
+(HPAC-REQ-102). Resolver completeness matrix (`.1R.15.4` §5.3): every
+authority-relevant mutable source moves a token or fails closed —
+**not blocking**.
+
+**Production diff.** `src/pcae/core/runtime_invocation_authority_consumption.py`
+(`/2.1` schema + `authority_generation_binding` + version-aware `resolve`)
+and `src/pcae/core/runtime_dispatch_gate9.py` (durable embed + N-15-3-2
+factory + docstrings) **only**. **Gate 5 / 6 / 7 / 8 production modules
+byte-unchanged** (forbidden files). No second lock. No Gate-10 symbol,
+`DispatchReceipt`, adapter, subprocess, provider/network, credential, or
+hardware path. POL-005 byte-unchanged.
+
+**Phase-document errata** (clearly-labelled, originals preserved,
+historical verdicts intact): `.1R.9` §12/§13.5 (the "acquire a lock before
+the §12 battery" bullet is internally contradicted by "do not invent a new
+lock" — the latter + §18 are the frozen model), `.1R.13.1` §11.2 (strike
+`gate8_transport_drift`, reword cwd/env rows) / §13/§19.1 ("sole source" →
+"sole source *for the per-decision projection*") / §16.2-inv-4 (no held
+lock), `.1R.13.2` prose (transitive-PB-policy overstatement — V-13-3-1),
+`.1R.14`/`.1R.15` top-of-doc (v3.0→v3.1, `/2.0`→`/2.1`, serialization
+wording).
+
+**Tests.** New `tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py`
+— **36/36** (contract traceability for every finding, `/2.1` durable schema
+closed-field / malformed / `/2.0` compat, N-15-3-2 resolver completeness,
+durable write / restart / read-back / reconstruction, post-consumption
+drift, no-bearer, Gate9Result forward semantics). `.1R.15.3` §35 critical
+properties re-run unchanged (56/56); Gate-9 `.1R.14`/`.1R.15`/`.1R.15.2`
+and Gate 5–8 integration + verification suites all green.
+
+**Fixed-SHA A/B** (baseline `4d480553`, deterministic `-p no:randomly`, **no
+xdist**, 36-file targeted set): 1339 passed / 60 pre-existing failed
+**identical at baseline and HEAD** (the `3V.1`/`3V.1R.1`/`3V.1R` suites pin
+RDGO v2.0 / PBRD v1.1 / RIHAC v1.0 — stale since the `.1R` v3/v2 freeze;
+HPAC-foundation `blocking_reproduction_*` fixtures; a HATP contract-byte
+test; `_GATE5_RESULTS`/`_GATE6_DECISIONS` xdist-pollution flakes). +36 new
+passing. **CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0;
+UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.** 24 byte-identity /
+production-scope scope-fence assertions from `.1R.10` → `.1R.15.3` were
+repinned to the fixed `.1R.15.3` end SHA `4d480553` (intended contract-byte
+test changes, classified per phase-prompt §42); cardinality tests updated
+to **nine** durable items; cross-contract version-graph and contract-hash
+pins refreshed.
+
+**Gate-10 prerequisites (`.1R.15.1` §20).** Items 2–7 satisfied /
+strengthened; items 1, 8, 10 **NOT satisfied** until `.1R.15.5` closes
+VERIFIED. **Gate 10 keeps NO phase ID.** Do not invent one.
+
+**Runtime.** `not_implemented / Observed / observe / unavailable`; 0
+plugins / capabilities; PB `execution_unavailable`; non-executing —
+unchanged. POL-005 unchanged; real execution UNAVAILABLE; deterministic
+authentication NON_REAL.
+
+**New findings.** No new blocking. N-15-4-1 (INFO — the `/2.0` read
+tolerance is defence-in-depth, exercised only by one test). N-15-2-2
+(durable snapshot needs a schema change) — **RESOLVED**. N-15-2-1 /
+N-15-3-1 carried, confirmed correct.
+
 **Recommended next (not begun; requires its own separate explicit human
-authorization): `149O.20L.7O.3W.1R.2B.1R.1.1R.15.4` — Runtime-Dispatch
-Contract Normalization Implementation** (the `.1R.15.1` §7–§18 deltas — RDGO
-v3.1 / PBRD v2.1 / RIASC errata / RE-registry schema 1.1 / phase-doc errata
-— **plus** the durable generation-snapshot representation and the N-15-3-2
-resolver-completeness requirement). Do not begin it. Do not plan or
-implement Gate 10. Canonical artifact:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_15_3_INDEPENDENT_VERIFICATION_GATE_9_SERIALIZATION_SEMANTICS_REPAIR.md`.
-Runtime remains `not_implemented / Observed / observe / unavailable`;
-POL-005 unchanged; real execution UNAVAILABLE; deterministic authentication
-NON_REAL. The delegated `.3` finalization / commit / push incident remains
+authorization): `149O.20L.7O.3W.1R.2B.1R.1.1R.15.5` — Independent
+Verification of the Runtime-Dispatch Contract Normalization.** RE-DERIVE
+every published delta against the verified implementation and the other
+contracts; confirm each clarification codifies verified behaviour and
+introduces no new contradiction; re-run the `.1R.15.1` §18 consistency
+checks; confirm the §20 Gate-10 prerequisite list (items 1–8). Its verdict
+gates whether Gate 10 may be assigned an ID. Do not begin it. Do not plan
+or implement Gate 10; it keeps no phase ID. Do not enable execution.
+Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_15_4_RUNTIME_DISPATCH_CONTRACT_NORMALIZATION_IMPLEMENTATION.md`.
+The delegated `.3` finalization / commit / push incident remains
 UNAUTHORIZED; governed PCAE lifecycle only.
 
 ## Previous Phase
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.3 — Independent Verification of the
+Gate-9 Atomic-Consumption Serialization-Semantics Repair.
+**INDEPENDENTLY VERIFIED — GATE-9 SERIALIZATION-SEMANTICS REPAIR COMPLETE**
+(V-15-1 CLOSED for the Gate-9 serialization window; V-15-2 / V-15-3
+CLOSED). The durable Gate-10 generation-snapshot representation it deferred
+is now IMPLEMENTED by `.1R.15.4` (above). Verification-entry SHA
+`735674f7`; immutable pre-repair baseline `d78d9676`. Independently
+established: exactly one `consumption_store.create` call site and **no**
+lock primitive (`ast`); S1 captured only after the full HPAC-REQ-099
+battery; S2 re-read with zero effectful I/O before the create-only
+linearization; 5 tokens over 4 mutable authority sources; drift injection
+(real-store + resolver-flip) → `gate9_authority_generation_drift:*`, 0
+`consumption.json`; concurrency one-winner; crash-before/after; restart.
+Practical-limit residual instruction-level micro-window disclosed. Finding
+N-15-3-2 (`approval_generation` resolver-delegation) carried to `.1R.15.4`
+and now IMPLEMENTED. Fresh 56-test independent suite; fixed-SHA A/B
+`-n0`: 0 candidate-only nonpassing / 0 regressions; no self-close.
+## Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.2 — Gate-9 Atomic-Consumption
 Serialization-Semantics Repair.

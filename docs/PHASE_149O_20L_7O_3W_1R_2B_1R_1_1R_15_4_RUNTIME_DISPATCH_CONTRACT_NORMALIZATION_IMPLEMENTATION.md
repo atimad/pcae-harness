@@ -330,7 +330,153 @@ byte-unchanged.
 
 ## 14. `.3` governance incident
 
-`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved unchanged. No delegated worker committed, finalized, or pushed in this phase.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved unchanged. No delegated worker committed, finalized, or pushed in this phase. Only the primary human-authorized operator holds `.1R.15.4` lifecycle authority.
+
+## 15. Gate-10 prerequisite re-evaluation (phase prompt §48; `.1R.15.1` §20)
+
+| # | Prerequisite | Status after `.1R.15.4` |
+|---|---|---|
+| 1 | Contract model internally consistent — RDGO v3.1 + PBRD v2.1 + RIASC errata + RE-registry 1.1 published **and independently verified** | RDGO v3.1 / PBRD v2.1 / HPAC v2.1 / RIASC errata / RE 1.1 **published**; the `.1R.15.4` §7/§9 self-consistency check ("one clarification does not create another contradiction") passes; **independent verification (`.1R.15.5`) NOT yet done → NOT satisfied** |
+| 2 | V-15-1 resolved (`.1R.15.2` + `.1R.15.3` closed VERIFIED) | **satisfied** (`.1R.15.3` closed VERIFIED) + durable representation now added |
+| 3 | Gate-9 semantics normalized (RDGO §10 / `.1R.13.1` §16.2 / `.1R.9` §12/§13.5) | **satisfied** (RDGO v3.1 §10 + the three errata) |
+| 4 | Runtime-capability model frozen (`not_implemented / Observed / observe / unavailable`; the snapshot shape Gate 9 checks == the one Gate 10 must re-check) | **satisfied / unchanged** — RDGO v3.1 §11 item 5 states it |
+| 5 | Real human-authority status accurately NON_REAL (no FIDO2/WebAuthn/CTAP, no protected UI) | **satisfied / unchanged** — no contract implies otherwise |
+| 6 | `Gate9Result` success semantics frozen (`is_gate9_result` = provenance; `status=="consumed"` = success) | **satisfied** — RDGO v3.1 §11 item 2; `.1R.15.4` suite §34 |
+| 7 | Durable consumption read-back + re-validation forward invariant frozen | **satisfied** — RDGO v3.1 §11 (six items) + item 9 durable snapshot; `.1R.15.1` §22 carried in |
+| 8 | No unresolved blocking findings from `.1R.15.2`–`.1R.15.5` | `.1R.15.2`/`.1R.15.3` = none; `.1R.15.4` = none (this phase); **`.1R.15.5` NOT yet run → NOT satisfied** |
+| 9 | The two 3S.2.1 prerequisite repairs at their required reachability point | tracked separately (PBRD-001 §12 items 9–10); **not this phase's scope**; unchanged |
+| 10 | Independent verification of the contract normalization (`.1R.15.5`) | **NOT satisfied** — `.1R.15.5` not begun |
+
+Items 1, 8, 10 are **not** satisfied until `.1R.15.5` closes VERIFIED. **Gate 10 keeps NO phase ID.** Do not invent one.
+
+## 16. Historical finding disposition (phase prompt §27) — see §13
+
+## 17. New findings
+
+- **No new blocking findings.**
+- **N-15-4-1 (INFO).** `runtime_invocation_authority_consumption.RuntimeInvocationAuthorityConsumption.authority_generation_binding` is an `Optional[dict]` defaulting to `None`, populated on every `/2.1` record and `None` only for a parsed legacy `/2.0` record. No `/2.0` durable record exists anywhere in the repository (the only consumption-store caller is the test-only Gate-9 coordinator), so the `/2.0` read path is defence-in-depth, exercised only by `test_legacy_2_0_record_is_readable_but_gate10_ineligible`. A future phase MAY drop `/2.0` read tolerance once `.1R.15.5` confirms nothing depends on it; not a prerequisite.
+- **N-15-2-1 / N-15-2-2** (carried from `.1R.15.2`): N-15-2-1 (shared principal/credential registry document → `principal_generation` also moves on a pure credential revocation; fail-safe) — confirmed still correct. N-15-2-2 (durable snapshot needs a schema change) — **RESOLVED by this phase**.
+- **N-15-3-1** (INFO, from `.1R.15.3`) — `.1R.15.2`'s `test_snapshot_has_exactly_the_six_generation_tokens` name overstates its five-token body; unchanged, harmless.
+
+## 18. Implementation verdict (phase prompt §47)
+
+**RUNTIME-DISPATCH CONTRACT NORMALIZATION: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING.**
+**DURABLE GATE-10 GENERATION-SNAPSHOT REPRESENTATION: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING.**
+**N-15-3-2 APPROVAL-GENERATION COMPLETENESS: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING.**
+
+No self-close. V-2 / V-3 / V-4 / V-13-3-1 / V-13-3-2 / V-13-5-1 / V-15-1 are NORMALIZED and N-15-3-2 IMPLEMENTED subject to `.1R.15.5` independent verification. V-15-2 / V-15-3 remain independently CLOSED (`.1R.15.3`); no further work; history preserved.
+
+## 19. Recommended next phase (phase prompt §49)
+
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.15.5` — Independent Verification of the Runtime-Dispatch Contract Normalization.** Not begun. Requires its own separate explicit human authorization; this phase grants none. It must RE-DERIVE every published delta against the verified implementation and the other contracts, confirm each clarification codifies verified behaviour and introduces no new contradiction, re-run the `.1R.15.1` §18 consistency checks, and confirm the `.1R.15.1` §20 Gate-10 prerequisite list (items 1–8). Its verdict gates whether Gate 10 may be assigned an ID. **Do not begin `.1R.15.5`. Do not plan or implement Gate 10. Do not enable execution.**
 
 ---
-*Canonical artifact — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4. Authored incrementally.*
+
+## 20. REQUIRED FINAL REPORT (phase prompt §54)
+
+**Phase ID / title.** 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 — Runtime-Dispatch Contract Normalization Implementation.
+
+**Phase-entry SHA.** `1babaa95` (governed task-open commit). Immutable A/B baseline `4d480553` (`.1R.15.3` final).
+
+**Sources / contracts inspected.** RDGO-001 v3.0, PBRD-001 v2.0, RIHAC-001 v2.0, RIASC-001 v3.0, HPAC-001 v2.0, RE No-Go Registry schema 1.0 — read in full at their frozen text. Phase docs `.1R.15.1` (blueprint, 1469 lines), `.1R.15.2`, `.1R.15.3`, `.1R.9` §12/§13.5/§18, `.1R.13.1` §11.2/§13/§16.2, `.1R.14`, `.1R.15`. Production source line-by-line: `runtime_dispatch_gate9.py`, `runtime_invocation_authority_consumption.py`, `runtime_dispatch_gate5.py`, `hpac_verifier.py` (`bind_gate5_canonical`), `runtime_invocation_approval_store.py`, `human_principal_registry.py`.
+
+**Versioning adjudication.** RDGO-001 **v3.0 → v3.1 (MINOR)**; PBRD-001 **v2.0 → v2.1 (MINOR)**; HPAC-001 **v2.0 → v2.1 (MINOR)**; `HPAC-AUTHORITY-CONSUMPTION` **/2.0 → /2.1**; `HPAC-AUTHORITY-GENERATION-SNAPSHOT` **/1.0 (new)**; RIASC-001 **v3.0 + §9 errata (no bump)**; RE No-Go Registry **schema 1.0 → 1.1**; RIHAC-001 **v2.0 (unchanged; cross-refs refreshed)**. Both `.1R.15.1` MAJOR-candidate judgment calls — RDGO sequence-3-creation narration, PBRD closed-shape — adjudicated **MINOR** (§3): neither alters external trust semantics, the required authority shape, or consumption-record compatibility fundamentally.
+
+**RDGO old/new version.** v3.0 → **v3.1**. **PBRD old/new version.** v2.0 → **v2.1**. **HPAC schema/version adjudication.** HPAC-001 v2.0 → **v2.1** (additive verification-evidence binding object, no authority widened — §37 MINOR bar met); `HPAC-AUTHORITY-CONSUMPTION/2.1`; `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0` new. **RIASC errata.** §9 non-normative note (V-3), no version change. **RE No-Go schema change.** 1.0 → **1.1** — additive "Enforcement class" column + scoping paragraph; no ID / verdict / canonical statement changed.
+
+**V-2 normalization.** RDGO-001 v3.1 §4/§6/§16 — the HPAC-001 v2.1 verifier's HPAC-REQ-054 step 10 creates sequence 3 at gate 3; gate 5 read-only re-confirms; assurance decision stays gate 5's; HPAC-REQ-097 cross-reference note added.
+
+**V-3 normalization.** RDGO-001 v3.1 §4 — sequence 3 binds the `HPAC-APPROVAL-SUBJECT/2.0` subject digest, not the completed approval `record_digest`; RIASC-001 §9 errata note distinguishing the two commitments.
+
+**V-4 normalization.** PBRD-001 v2.1 §4a representation-equivalence clause — the 7 logical `human_authority_binding` fields remain the semantic requirement; the closed 3-tuple `(approval_id, approval_record_digest, validation_evidence_digest)` is a permitted equivalent under three provisos; no distinguishable collision.
+
+**V-13-3-1 normalization.** RDGO-001 v3.1 §8 "PB policy ownership" paragraph — gate 6 owns PB policy; gates 7/9 revalidate authority currentness + posture only; stale `policy_version` → re-enter gate 6; `.1R.13.2` prose erratum.
+
+**V-13-3-2 normalization.** RE No-Go Registry schema 1.1 — per-decision (001–008, 010, 011) / environmental-readiness (009, 013, 015, 016, 017) / advisory (012, 014); `matched_no_go_ids` projects only the per-decision subset; `.1R.13.1` §13 erratum.
+
+**V-13-5-1 normalization.** RDGO-001 v3.1 §9 three-layer model — (a) direct validation, (b) canonical commitment of the complete launch environment into `containment_evidence_digest`, (c) gate-9 recomputation; effect plan is coordinator-assembled so no caller cwd/env/transport reference to diff; `.1R.13.1` §11.2 erratum (strike `gate8_transport_drift`, reword cwd/env rows).
+
+**V-15-1 normalization.** RDGO-001 v3.1 §10 create-only-linearization + zero-effectful-I/O `S1`/`S2` authority-generation-token re-check model; no held lock; residual instruction-level micro-window disclosed; item 8 → 9; HPAC-001 v2.1 HPAC-REQ-098/098a/099; `.1R.9` §12/§13.5 + `.1R.13.1` §16.2 errata.
+
+**Selected durable generation-snapshot architecture (§4).** Option A's "dedicated typed/closed object", placed as a **new top-level closed binding object `authority_generation_binding`** (a ninth sibling of the existing eight) — not nested in `authority_binding`, not a reference. Rationale: the store's established pattern is flat sibling closed binding objects; a *reference* does not fit (the snapshot is computed at gate 9 and has nowhere else to live); keeping it out of `authority_binding` preserves the V-4 analysis; it is a distinct concern (mutable-generation state vs authority identity).
+
+**Exact durable schema.** `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`, closed 6 fields: `snapshot_schema_version` (const) + `principal_generation` / `credential_generation` / `approval_generation` / `lifecycle_generation` / `consumption_generation` (each a non-empty ≤256-char stripped digest/marker over durable state; `consumption_generation == "absent"` on the create path). The committed object is the exact `S1` verified unchanged at `S2`, built at step 15 from the step-14a capture, never rebuilt from post-`S2` state.
+
+**Backward-compatibility policy (§18).** Gate 9 writes only `/2.1`. `resolve` parses a well-formed `/2.0` record as historical/test data with `authority_generation_binding is None` — **gate-10-ineligible**. An unknown schema version, or a field set matching neither closed set, is durability-uncertain → fail closed. No `/2.0` durable record exists in the repository; the `/2.0` read path is defence-in-depth.
+
+**N-15-3-2 production resolver implementation (§5).** `build_production_authority_generation_resolver(*, principal_registry, principal_id, credential_id, approval_store, approval_id)` (new, exported from `runtime_dispatch_gate9`). `principal_generation` / `credential_generation` = `resolve_canonical_{principal,credential}(...).record_digest`; `approval_generation` = `compute_canonical_digest({approval_id, approval_record_digest, revocation_artifact_digest: None})` — folds the current resolved immutable approval digest (catches replacement/tamper), fails closed on absent/unreadable, carries a `null` forward hook for a future RIHAC-001 v2.0 §14 append-only revocation artifact. RIHAC-001 v2.0 §14 (frozen; **NOT amended**): no separate approval-revocation store; approval revocation is transitively principal/credential/lifecycle/expiry. Not invoked on any production path (no production Gate-9 caller); the coordinator body itself reads no approval store (HPAC-REQ-102).
+
+**Resolver completeness matrix.** §5.3 — principal / credential / lifecycle-proof / approval / consumption; every authority-relevant mutation moves a token or fails closed; **not blocking**.
+
+**Gate-9 S1/S2 regression.** `.1R.15.3` §35 critical properties re-run unchanged (56/56): S1 after the full battery; S2 the last authority read before create; zero effectful I/O between the `S2 == S1` decision and `create`; drift injection (principal / credential / lifecycle / approval / multi) → `gate9_authority_generation_drift:*`, 0 `consumption.json`; consumption record appearing → deterministic `already_consumed`; stable → exactly one `consumed`; concurrency one-winner; crash-before/after; restart.
+
+**Durable write / read-back test.** `test_gate9_consumption_durably_commits_the_exact_s1_snapshot` + `test_restart_reconstructs_the_snapshot_purely_from_the_durable_record` — a bounded synthetic gate-9 consumption writes a `/2.1` record whose four `*_generation` markers equal the resolver+store `S1`; a fresh store object over the same tree reconstructs it and it round-trips to the same `record_digest`.
+
+**Post-consumption drift tests.** `test_post_consumption_authority_mutation_leaves_the_record_intact` — after consumption, `revoke_principal` leaves the durable record byte-identical while the current principal generation now differs from the persisted snapshot (the future Gate-10 prerequisite semantics, no dispatch).
+
+**Gate9Result forward semantics.** Unchanged — `is_gate9_result` provenance-only; `status == "consumed"` is the success signal; `__reduce__` raises; RDGO-001 v3.1 §11 enumerates six additional gate-10 requirements (necessary-not-sufficient).
+
+**Gate-10 prerequisite wording.** RDGO-001 v3.1 §11 — prerequisite semantics only; no gate-10 module / symbol / plan / phase ID.
+
+**Phase-document errata.** §8 — `.1R.9` §12/§13.5, `.1R.13.1` §11.2/§13/§16.2, `.1R.13.2`, `.1R.14`, `.1R.15`. Originals preserved; historical verdicts intact.
+
+**Cross-reference updates.** §7 last paragraph + §9 manifest. Active contract set updated; historical phase docs citing the version-at-the-time NOT rewritten.
+
+**Contract evolution manifest.** §9.
+
+**Production files changed.** `src/pcae/core/runtime_invocation_authority_consumption.py` (`/2.1` schema + `authority_generation_binding` + `_validate_authority_generation_binding` + version-aware `resolve`); `src/pcae/core/runtime_dispatch_gate9.py` (`_authority_generation_binding_fields` / `_serialize_consumption_generation`; `_build_consumption_record` embeds the exact `S1`; `build_production_authority_generation_resolver` + `_AuthorityGenerationResolverError`; docstrings). `git diff --name-only 1babaa95 HEAD -- src/pcae` = exactly these two. **No Gate 5 / 6 / 7 / 8 production module changed** (forbidden files; byte-unchanged). No second lock. No Gate-10 symbol. No runtime-adapter / effect code. POL-005 byte-unchanged.
+
+**Contract files changed.** `RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md`, `PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md`, `HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md`, `RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md`, `RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md`, `docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md`. No unplanned contract file changed.
+
+**Contract / reference tests.** New suite `test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py` — 36/36.
+
+**Gate-5/6/7/8 regressions.** All CLOSED / green — `.1R.10`–`.1R.13.5` integration + verification suites, 337 + 262 passed in the confirmation runs; their production modules byte-unchanged (contract-reference constants required no in-module change).
+
+**Gate-9 regressions.** `.1R.14` (63) / `.1R.15` (76) / `.1R.15.2` (44) / `.1R.15.3` (56) all green after the schema evolution.
+
+**Fixed-SHA A/B.** §11 — baseline `4d480553`, no xdist, 36-file targeted set: **0 new failures**; 60 pre-existing = at baseline and HEAD; +36 new passing.
+
+**Candidate-only regression count.** **CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0; UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.** 24 intended contract-byte / production-scope test changes classified and repinned (§11).
+
+**Runtime / no-effect proof.** §12 — 0 subprocess / adapter / provider / network / credential / hardware / Gate-10 effect (test git subprocesses disclosed).
+
+**Runtime state.** `not_implemented / Observed / observe / unavailable` — unchanged.
+
+**Gate 10 still absent.** No module, symbol, plan, phase ID. §15 items 1, 8, 10 NOT satisfied until `.1R.15.5`.
+
+**All new findings.** §17 — no new blocking; N-15-4-1 (INFO, `/2.0` read tolerance); N-15-2-2 RESOLVED; N-15-2-1 / N-15-3-1 carried, confirmed.
+
+**Implementation verdict.** §18 — IMPLEMENTED — INDEPENDENT VERIFICATION PENDING (×3). No self-close.
+
+**`.3` governance incident status.** `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved unchanged.
+
+**Commits.** `1babaa95` (task open), `8232a164` (`/2.1` schema + N-15-3-2 factory + gate9 tests), `145ab1dd` (contract normalization), `f1135ad4` (phase-document errata + traceability suite + scope-fence repins), plus the governed finalization commits.
+
+**Pushed status / `origin/main..HEAD`.** Recorded in `.pcae/phase-completion-metadata.json` `phase_commits` after governed finalization; `pushed_status: pushed`; `origin/main..HEAD = 0` after the governed push.
+
+**Exact `.1R.15.5` recommendation.** §19 — `149O.20L.7O.3W.1R.2B.1R.1.1R.15.5` — Independent Verification of the Runtime-Dispatch Contract Normalization. Not begun. Requires its own separate explicit human authorization.
+
+---
+
+## No-Go Confirmations
+
+- No `src/pcae` file changed beyond `runtime_dispatch_gate9.py` + `runtime_invocation_authority_consumption.py`; Gate 5/6/7/8 production modules byte-unchanged; no runtime-adapter / effect / Gate-10 code.
+- No second global lock, advisory-lock object, or transaction system; the per-`proof_id` create-only primitive remains the sole linearization point.
+- No Gate-10 module, symbol, `DispatchReceipt`, adapter dispatch, subprocess, provider/network, credential, or hardware path; Gate 10 keeps no phase ID.
+- No execution enabled; runtime remains `not_implemented / Observed / observe / unavailable`; no capability/plugin registered; POL-005 byte-unchanged.
+- No real FIDO2 / WebAuthn / CTAP / protected approval UI / physical authenticator access; deterministic authentication remains NON_REAL.
+- No approval / proof / presentation / challenge / nonce consumed on any production path; no `consumption.json` created outside disposable `tmp_path` test stores.
+- No third-party system, unrelated account, external credential, provider API, external network, or deployment target accessed.
+- No test weakened to pass; the concurrency-loser / drift-rejection / one-shot guarantees are intact; expected contract-byte test changes are classified explicitly (§11).
+- No raw `git commit` / `git push`, no `--no-verify`, no force push, no history rewrite, no hook bypass — governed `pcae` lifecycle only.
+- No delegated worker committed, finalized, or pushed; only the primary human-authorized operator holds `.1R.15.4` lifecycle authority.
+- No begin of `.1R.15.5`; it requires its own separate explicit human authorization.
+- No MAJOR contract version forced; both `.1R.15.1` MAJOR-candidate calls adjudicated MINOR with primary-source justification.
+- No unplanned contract file changed; RPAC-001, PBPA-001, POL-005 byte-unchanged.
+- No reopening of a closed gate boundary (Gate 5 / 6 / 7 / 8 / 9); their production modules are byte-unchanged.
+- No self-close of any finding; V-2 / V-3 / V-4 / V-13-3-1 / V-13-3-2 / V-13-5-1 / V-15-1 NORMALIZED and N-15-3-2 IMPLEMENTED subject to `.1R.15.5`.
+- No authorization of the historical delegated `.3` finalization, commit, or push; it remains UNAUTHORIZED.
+- No Gate-10 design beyond the RDGO-001 v3.1 §11 prerequisite-only wording and the `.1R.15.1` §22 forward invariant.
+
+---
+*Canonical artifact — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4.*
