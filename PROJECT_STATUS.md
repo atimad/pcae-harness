@@ -2,6 +2,83 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17 — Gate-10 Pre-Effect Eligibility and
+Dispatch-Envelope Coordinator Implementation (Slice A of the `.1R.16` plan).
+**GATE-10 PRE-EFFECT ELIGIBILITY COORDINATOR: IMPLEMENTED — INDEPENDENT
+VERIFICATION PENDING (`.1R.18`). DISPATCH ENVELOPE: IMPLEMENTED AS
+NON-AUTHORITATIVE PRE-EFFECT BINDING — IV PENDING. FIRST EXTERNAL EFFECT:
+ABSENT.** One new production file only —
+`src/pcae/core/runtime_dispatch_gate10_eligibility.py`
+(`run_gate10_pre_effect_eligibility` + `DispatchEnvelope` +
+`build_gate10_authority_generation_resolver` /
+`build_gate10_capability_snapshot_resolver`, N-16-1). **No
+`adapter.dispatch()` call site exists in the module** (a stronger property
+than "unreachable"); no `runtime_dispatch_gate10.py`; no
+`Gate10Result` / `_GATE10_RESULTS`; no adapter registered / implemented /
+called; no normative contract change; no Gate 5–9 / `runtime_introspection`
+/ `runtime_authority` / `permission_broker_foundation` / `docs/contracts`
+byte change (verified vs phase-entry `1f8b9c76`). Runtime remains
+`not_implemented / Observed / observe / unavailable`; POL-005 unchanged and
+still hard DENY; 0 plugins / 0 capabilities; `pcae runtime inspect`
+byte-identical at entry and finalization.
+
+The coordinator runs RDGO-001 v3.1 §11 items 1–6 + §15/§16/§17 read-back
+against the durable `consumption.json` re-read from disk: trusted
+`Gate9Result` + `status == "consumed"`; fresh `/2.1` re-read (`/2.0` /
+snapshot-absent / malformed → fail closed); exact digest + lineage binding
+(durable ↔ `Gate9Result` ↔ upstream gates ↔ live request); durable Gate-6
+`decision == "ALLOW"` and Gate-7 `verdict == "ALLOW"` + RE `expires_at`
+not-expired (no PB/RE policy re-run); fresh runtime-capability snapshot
+**exactly** `Observed / observe / unavailable` (any drift → fail closed;
+`consumed human authority != runtime capability`); current
+authority-generation vector (principal / credential / approval / lifecycle)
+== durable `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0` snapshot,
+`consumption_generation` `"absent" → "present:<record digest>"` (expected);
+optional trusted-projection `revalidate_validated_authority_projection`;
+Gate-8 containment re-establishment recompute + four-digest equality;
+executable re-`stat`+re-`sha256`; `credentials_required is False`. All pass
+→ mint an immutable, identity-only, **non-serializable**,
+registry-provenanced `DispatchEnvelope` (RPAC-REQ-029; schema
+`RPAC-DISPATCH-ENVELOPE/1.0`; a *description*, never permission / approval /
+PB ALLOW / RE capability / consumed authority / a licence to call
+`adapter.dispatch()` — `is_dispatch_envelope` is process-local provenance
+only). Otherwise `(None, (reason_id,))` from the 38-stem
+`GATE10_ELIGIBILITY_REASON_IDS` taxonomy — no external effect, and the
+immutable `consumption.json` is byte-unchanged.
+
+`run_gate10_pre_effect_eligibility` is **structurally unreachable in
+production** (no obtainable `Gate9Result(status="consumed")` — six
+independent blockers, §7 of the phase doc); the positive branches are
+exercised only through the same labelled test-boundary substitution the
+`.1R.14` Gate-9 suite uses. Fresh `.1R.17` suite: **65 tests, all passing**.
+Fixed-SHA A/B vs `1f8b9c76` across the Gate 5–9 / introspection /
+consumption-store / RPAC / HPAC surface: **0 added failures, 0 removed** (29
+pre-existing `main` failures, unrelated, reproduced identically with
+`.1R.17` removed). Eight prior scope-fence guards widened by the
+established allowlist-widening precedent (each still fails for any other
+unexpected importer; no test weakened/removed/skipped). The optional Gate-9
+shared-resolver refactor was **declined** (`runtime_dispatch_gate9.py`
+byte-unchanged); the N-15-5-1 PBRD §4a renumber was **deferred**.
+
+**N-16-1: IMPLEMENTED — IV PENDING.** Item 9 (two 3S.2.1 MUST-FIX repairs +
+runtime-inspect repair): **NOT SATISFIED / DEFERRED TO SLICE B (`.1R.19`)**
+— unchanged. N-16-2 → Slice B; N-16-3..7 → Slice C prerequisites —
+unchanged. Slice B (`.1R.19`), the dispatch-attempt durable lifecycle, and
+Slice C / D (first concrete effect adapter; no phase ID) are **not begun**.
+`.1R.18` (Independent Verification of the Gate-10 Pre-Effect Eligibility
+Coordinator) is the recommended next phase — **not begun**; needs its own
+explicit human authorization.
+
+Phase-entry SHA `1f8b9c76`. Governed `pcae` lifecycle only; only the
+primary human-authorized operator holds `.1R.17` lifecycle authority; the
+delegated `.3` finalization / commit / push incident remains
+**UNAUTHORIZED**. Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_17_GATE_10_PRE_EFFECT_ELIGIBILITY_AND_DISPATCH_ENVELOPE_COORDINATOR_IMPLEMENTATION.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.16 — Gate-10 First External Effect
 Architecture and Implementation Planning.
 **GATE-10 FIRST EXTERNAL EFFECT ARCHITECTURE COMPLETE — PLANNING ONLY —
