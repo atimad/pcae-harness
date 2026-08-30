@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1 — Independent Verification of the
+Gate-10 Slice-A Reconciliation. **STATUS: INDEPENDENTLY VERIFIED WITH
+NON-BLOCKING FINDINGS — GATE-10 SLICE-A RECONCILIATION COMPLETE.** RE-DERIVE,
+DO NOT TRUST: every `.1R.17R` claim re-checked from git history, source read
+line-by-line, and freshly reproduced fixed-SHA A/B — not accepted from any
+report. **Fixed-SHA A/B re-run** (dedicated worktrees, `-p no:randomly`, no
+xdist, identical `-k` selection): historical `1f8b9c76` → `c618134a` = **29 →
+47** (17 `.1R.17`-attributable nodes + 1 **disclosed** pre-existing HPAC
+concurrency flake — `.1R.17R` §4/§12; N-17R1-1), **0 removed**; repaired-tree
+`1f8b9c76` → `ab36dc97` = **29 → 29 with the failing-node sets byte-identical
+(0 added / 0 removed / 0 candidate-only)** — the closure gate holds. The **17**
+attributable nodes map **one-to-one** onto the `.1R.17R` §5 table (14 CI + 1
+BS + 2 DG). **Reclassified node** (`.1R.14
+::test_gate9_is_sole_production_owner_of_consumption_boundary`, stale → 2nd
+docstring-grep FP): **source-supported** — both DG guards grep the identical
+regex and `run_gate9_atomic_authority_consumption` is docstring-only (line 39;
+`ast.get_docstring` confirms), `_GATE9_RESULTS` absent; `.1R.18` was imprecise,
+not `.1R.17R` misclassifying. **Every widened allowlist** stays explicit /
+finite, grew by exactly `runtime_dispatch_gate10_eligibility.py`, kept `==` as
+`==` / `<=` as `<=` (no equality→subset downgrade), and **rejects** an invented
+first-effect `runtime_dispatch_gate10.py`, an effect-bearing adapter, and an
+arbitrary module; two guards strengthened. **`.1R.15.5` byte-scope fence:** its
+`forbidden = {gate5,permission,gate7,gate8}` set is asserted **separately** from
+the widened `allowed` set and is untouched — a Gate-5→8 byte change still
+fails. **Both docstring-grep repairs** track code semantics (real import+call
+detected; docstring/comment prose ignored; f-string `{names}` kept); one
+non-blocking limitation (N-17R1-2: a string-literal-only `getattr`-by-name
+reference would be stripped — independently confirmed no such reference exists
+for any guarded symbol). **Original `.1R.17` doc** is a strict-prefix append
+(`## ERRATUM` absent from `c618134a`); sections 1–14 byte-unchanged; the
+original incorrect "ADDED failures = 0" still visible as history; immutable
+`.pcae/phase-reports/*1R.17*` / `.pcae/finalization-transactions/*1R.17*`
+`git diff` empty. **Erratum** provenance / truthfulness / chronology verified
+(commit `b4f36d2f` 20:53 later than `c618134a` 17:05; "disproved", not
+rewritten). **N-18-2:** `GATE10_ELIGIBILITY_REASON_IDS` a `frozenset` of **39**
+(taxonomy unchanged — `git diff c618134a HEAD -- src/pcae` empty). **N-18-3
+preserved** (envelope still minted; no production suppression). **No production
+/ contract / Gate 5–9 drift.** Suites: `.1R.17R` 42/42, `.1R.18` 111/111
+(byte-unchanged), `.1R.17` 65/65 (byte-unchanged), 7 reconciled guard suites
+468/468, **new `.1R.17R.1` IV suite 48/48**. Runtime `not_implemented /
+Observed / observe / unavailable`; 0 plugins / 0 capabilities; first external
+effect **ABSENT** (code-only + AST); Slice-B **ABSENT**. **Adjudications:
+`.1R.18` LIFECYCLE/REGRESSION BLOCKER — CLOSED; GATE-10 SLICE-A SCOPE-FENCE
+RECONCILIATION — CLOSED; `.1R.17` VERIFICATION-EVIDENCE ERRATUM — CLOSED;
+SLICE-A LIFECYCLE ACCEPTANCE — CLOSED.** `.1R.18` remains historically the
+BLOCKED IV that discovered the defect (not retroactively rewritten). Coordinator
+/ DispatchEnvelope / N-16-1 VERIFIED; item 9 NOT SATISFIED / DEFERRED TO Slice
+B; N-16-2 → Slice B, N-16-3..7 → Slice C. Governed `pcae` lifecycle only; the
+delegated `.3` finalization / commit / push incident remains **UNAUTHORIZED**.
+**Recommended next phase (not begun): `149O.20L.7O.3W.1R.2B.1R.1.1R.19` —
+Dispatch-Attempt Durable Lifecycle, Idempotency, and 3S.2.1 Prerequisite
+Repairs (Slice B).** Verification-entry SHA `ab36dc97`; immutable baseline
+`1f8b9c76`; original `.1R.17` head `c618134a`; reconciliation range
+`d04a2830..ab36dc97`. Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_17R_1_INDEPENDENT_VERIFICATION_OF_THE_GATE_10_SLICE_A_RECONCILIATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R — Gate-10 Slice-A Scope-Fence and
 Verification-Evidence Reconciliation. **STATUS: RECONCILIATION IMPLEMENTED —
 INDEPENDENT VERIFICATION PENDING (`.1R.17R.1`); `.1R.17` VERIFICATION-EVIDENCE
