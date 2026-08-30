@@ -14,7 +14,9 @@
     "independent_verification_suite": "tests/test_runtime_dispatch_contract_normalization_independent_verification_3w1r2b1r1_1r15_5.py: 48 passed, stable over 4 repeated deterministic runs.",
     "gate9_and_gate5_to_8_regression": "Re-run as part of the combined 32-file targeted set (1286 passed / 36 pre-existing-and-unrelated failed); this phase did not re-instrument the .1R.15.3 56-test critical-property suite from scratch (out of this single verification pass's decisive-item budget) but confirmed it is included and green in the combined targeted run.",
     "fixed_sha_attribution": "Independently re-executed (not read from .1R.15.4's report). Fresh git worktree at 4d480553 (immutable .1R.15.3-final baseline), deterministic -p no:randomly, no xdist. 31-file pre-existing subset: baseline 1202 passed/36 failed == HEAD 1238 passed/36 failed by node ID, delta 0. Worktree removed after use, no residue.",
-    "no_effect_proof": "Zero runtime subprocess (other than disclosed git calls inside scope-fence assertions), zero adapter/provider/network/credential/hardware/Gate-10 effect. All consumption-store writes in this phase's own tests are tmp_path-scoped; zero consumption.json under the tracked repository tree."
+    "no_effect_proof": "Zero runtime subprocess (other than disclosed git calls inside scope-fence assertions), zero adapter/provider/network/credential/hardware/Gate-10 effect. All consumption-store writes in this phase's own tests are tmp_path-scoped; zero consumption.json under the tracked repository tree.",
+    "report_notification_tests": "not_applicable_this_phase -- this phase adds no report/notification code path; the .1R.15.5 suite is contract-text + call-graph + durable-schema + resolver-end-to-end assertions. Report-notification and bootstrap-session-reporting behaviour is unchanged and covered by its own dedicated suites, which are not in this phase's scope and were not modified.",
+    "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no session/bootstrap/handoff code path changed; the dedicated bootstrap-session-reporting suites are unmodified and out of scope."
   },
   "validation_results": {
     "fast_green": "48 passed, 0 failed (new .1R.15.5 suite). Combined targeted set 1286 passed / 36 pre-existing-and-unrelated failed (reproducible). Fixed-SHA A/B re-executed independently: baseline 1202/36 == HEAD 1238/36 by node ID, 0 delta.",
@@ -26,14 +28,16 @@
     "gate_5_6_7_8_production_byte_identity": "Independently re-confirmed via git diff --name-only 4d480553 HEAD -- src/pcae/core: exactly runtime_dispatch_gate9.py and runtime_invocation_authority_consumption.py present; runtime_dispatch_gate5.py, runtime_dispatch_permission.py, runtime_dispatch_gate7.py, runtime_dispatch_gate8.py absent from the changed set.",
     "gate_10_absence": "No src/pcae/core/runtime_dispatch_gate10.py; no Gate10/gate_10/DispatchReceipt/run_gate10 symbol in runtime_dispatch_gate9.py source (grep-confirmed). pcae runtime inspect: not_implemented / Observed / observe / unavailable -- unchanged.",
     "gate_10_prerequisites": ".1R.15.1 section 20 items 1, 8, 10 -- the three .1R.15.4 left open pending this phase -- are now SATISFIED. Item 9 remains separately tracked, out of this phase's scope. A Gate-10 architecture/planning phase MAY now be human-designated; this phase assigns no phase ID and performs no Gate-10 design.",
-    "new_findings": "N-15-5-1 (INFO, non-blocking): PBRD-001 v2.1 contains two sections both numbered 4a (### 4a. human_authority_binding representation equivalence, new; and the pre-existing ## 4a. Attempt/idempotency ownership) -- a documentation-numbering defect introduced by .1R.15.4, content unaffected; .1R.15.4's own test relies on a fragile positional string-slice between the two identical headings. N-15-5-2 (INFO, non-blocking): .1R.15.4's own suite never exercised build_production_authority_generation_resolver end-to-end through a real consumption -- closed by this phase's own added test. No new blocking findings."
+    "new_findings": "N-15-5-1 (INFO, non-blocking): PBRD-001 v2.1 contains two sections both numbered 4a (### 4a. human_authority_binding representation equivalence, new; and the pre-existing ## 4a. Attempt/idempotency ownership) -- a documentation-numbering defect introduced by .1R.15.4, content unaffected; .1R.15.4's own test relies on a fragile positional string-slice between the two identical headings. N-15-5-2 (INFO, non-blocking): .1R.15.4's own suite never exercised build_production_authority_generation_resolver end-to-end through a real consumption -- closed by this phase's own added test. No new blocking findings.",
+    "report_notification_tests": "not_applicable_this_phase -- no report/notification code path added or changed; covered by their own dedicated suites, out of this phase's scope, unmodified.",
+    "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no session/bootstrap/handoff code path changed; the dedicated suites are unmodified and out of scope."
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing, unrelated to this phase)",
-    "pcae_push_check": "nothing_to_push (pre-commit); reconciled after governed commit/push",
+    "pcae_push_check": "ready_to_push (post-commit; reconciled after governed push)",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities; Permission Broker status execution_unavailable; governance posture non-executing -- re-asserted at phase entry and finalization",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -53,9 +57,22 @@
     ".pcae/phase-completion-report.md"
   ],
   "files_changed_count": 7,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "ba54b2da8e204a16216eb84b0bcee348b5d5321d",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.5: independently verify the Runtime-Dispatch Contract Normalization"
+    },
+    {
+      "hash": "c9b6f7368aa35bd882c3b916b774ac8efe22da19",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.5: record independent verification in project status and changelog"
+    },
+    {
+      "hash": "b5b0e5fe2e2f531b24654f48a87f8133b614b139",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.5: close phase task, transition to idle; stage canonical completion metadata"
+    }
+  ],
   "origin_main_head": "b3cd0824",
   "origin_main_head_count": "0",
-  "pushed_status": "pushed",
+  "pushed_status": "not_pushed",
   "recommended_next_phase": "None assigned by this phase. A Gate-10 architecture/planning phase MAY now be human-designated (Gate-10 prerequisites 1, 8, 10 satisfied; item 9 separately tracked); requires its own separate explicit human authorization and phase ID."
 }
