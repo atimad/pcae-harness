@@ -37,7 +37,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing, unrelated to this phase)",
-    "pcae_push_check": "ready_to_push (post-commit; reconciled after governed push)",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities; Permission Broker status execution_unavailable; governance posture non-executing -- re-asserted at phase entry and finalization",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
