@@ -1,5 +1,18 @@
 # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15 — Independent Verification of the Gate-9 Atomic Authority Consumption Coordinator Integration
 
+> **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4.** This verification
+> is against RDGO-001 **v3.0** and `HPAC-AUTHORITY-CONSUMPTION/**2.0**`, and
+> its non-blocking findings V-15-1 / V-15-2 / V-15-3 were carried forward.
+> V-15-2 and V-15-3 were independently CLOSED by `.1R.15.3`. V-15-1 (the
+> revalidation battery being adjacent to, not atomic with, the create-only
+> linearization) was repaired by `.1R.15.2`, independently verified by
+> `.1R.15.3`, and normalized by `.1R.15.4`: no held lock; battery + a
+> zero-effectful-I/O `S1`/`S2` authority-generation-token re-check
+> immediately before the create; the exact `S1` durably committed as the
+> ninth binding object `authority_generation_binding` of
+> `HPAC-AUTHORITY-CONSUMPTION/**2.1**` (RDGO-001 v3.1 §10; HPAC-001 v2.1
+> HPAC-REQ-098/098a/099). The GATE-9 CLOSED verdict stands.
+
 Status: **GATE-9 — CLOSED. VERIFIED WITH NON-BLOCKING FINDINGS.**
 
 Final verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — GATE-9 ATOMIC

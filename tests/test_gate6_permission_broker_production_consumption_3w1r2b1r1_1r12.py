@@ -43,6 +43,7 @@ from _rdw3w_helpers import (
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PHASE_ENTRY_BASELINE = "a26b9fe25c0830eaa1d2217edc6fe66c5718784a"
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 NOW = "2026-08-27T00:30:00Z"
 
 
@@ -376,7 +377,7 @@ def test_no_consumption_records_created_anywhere(tmp_path):
 # ═══════════════════════════════════════════════════════════════════════
 def _git_names(*args):
     return subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", *args],
+        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", *args],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout.split()
 

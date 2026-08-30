@@ -290,10 +290,13 @@ class TestCardinalitiesAndIndependentBlockingFindings:
         assert [n for n, _ in rows[:11]] == [str(n) for n in range(1, 12)]
         assert rows[9][1].strip() == "Adapter dispatch"
 
-    def test_exact_eight_durable_items_and_seven_toctou_facts(self):
+    def test_exact_nine_durable_items_and_seven_toctou_facts(self):
+        # RDGO-001 v3.1 (.1R.15.4 — V-15-1): durable-before-effect items go
+        # 8 -> 9 (item 9 = the authority_generation_binding snapshot; items
+        # 1-8 byte-unchanged). TOCTOU facts remain seven.
         text = _text(RDGO)
-        durable = text[text.index("The exact eight items are:"):text.index("## 11. Gate 10")]
-        assert re.findall(r"^(\d+)\. \*\*", durable, re.MULTILINE) == [str(n) for n in range(1, 9)]
+        durable = text[text.index("The exact nine items are"):text.index("## 11. Gate 10")]
+        assert re.findall(r"^(\d+)\. \*\*", durable, re.MULTILINE) == [str(n) for n in range(1, 10)]
         toctou = text[text.index("## 15. TOCTOU contract"):text.index("## 16. Cross-contract identifiers")]
         names = re.findall(r"^\| ([^|]+?) \|", toctou, re.MULTILINE)[1:]
         assert names == [

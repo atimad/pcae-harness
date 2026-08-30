@@ -42,6 +42,7 @@ from _rdw3w_helpers import dispatch_inputs, new_dispatch_identity
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PHASE_ENTRY_BASELINE = "698fabd9182fe90a74a0fef96cc978409fd8e1b0"
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 NOW = "2026-08-29T00:30:00Z"
 G7_SRC = (REPO_ROOT / "src/pcae/core/runtime_dispatch_gate7.py").read_text()
 
@@ -542,7 +543,7 @@ def test_runtime_introspection_constants_unchanged_since_baseline():
     # set since the .1R.13.1 baseline is a SUBSET of {gate7, gate8}, and
     # runtime_introspection.py in particular is untouched.
     out = set(subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
+        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
     assert out <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
@@ -554,7 +555,7 @@ def test_runtime_introspection_constants_unchanged_since_baseline():
 
 def test_contracts_and_pol005_bytes_unchanged_since_baseline():
     out = subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--",
+        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--",
          "docs/contracts", "src/pcae/core/permission_broker_foundation.py"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.strip()
     assert out == ""
@@ -635,7 +636,7 @@ def test_synthetic_unauthorized_file_would_fail_the_subset_invariant():
 # ═══════════════════════════════════════════════════════════════════════
 def test_gate5_gate6_coordinators_byte_unchanged_since_baseline():
     out = subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--",
+        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--",
          "src/pcae/core/runtime_dispatch_gate5.py",
          "src/pcae/core/runtime_dispatch_permission.py"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.strip()

@@ -65,7 +65,7 @@ NOW = "2026-08-27T00:30:00Z"
 # ═══════════════════════════════════════════════════════════════════════
 # Helpers
 # ═══════════════════════════════════════════════════════════════════════
-def _git_names(*args, base=PRE_1R12_BASELINE, head="HEAD"):
+def _git_names(*args, base=PRE_1R12_BASELINE, head="4d480553"):  # .1R.15.4 is the later authorized change
     return subprocess.run(
         ["git", "diff", "--name-only", base, head, "--", *args],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
@@ -629,7 +629,7 @@ def test_contract_blob_hashes_identical_baseline_and_head():
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "src/pcae/core/permission_broker_foundation.py",
     ):
-        assert _blob(PRE_1R12_BASELINE, rel) == _blob("HEAD", rel), rel
+        assert _blob(PRE_1R12_BASELINE, rel) == _blob("4d480553", rel), rel
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -649,7 +649,7 @@ def test_known_pre_existing_point_in_time_scope_guard_failures_are_attributable(
     # phases add exactly runtime_dispatch_gate7.py (Gate 7) and
     # runtime_dispatch_gate8.py (Gate 8) — a phase-aware invariant, not an
     # unbounded expansion (V-13-1 conversion).
-    assert set(_git_names("src/pcae", base=PHASE_1R13_ENTRY, head="HEAD")) <= {
+    assert set(_git_names("src/pcae", base=PHASE_1R13_ENTRY, head="4d480553")) <= {
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)

@@ -1128,10 +1128,10 @@ be persisted; failure to record the observation never preserves authority.
 
 - **HPAC-REQ-098.** The one canonical consumption artifact is
   `RuntimeInvocationAuthorityConsumption`, schema identity
-  `HPAC-AUTHORITY-CONSUMPTION/2.1` (v2.1; `/2.0` records without
-  `authority_generation_binding` remain readable historical/test data and
-  are gate-10-ineligible — RDGO-001 v3.1 §10 — but gate 9 writes only
-  `/2.1`), stored exactly at
+  `HPAC-AUTHORITY-CONSUMPTION/2.1` (v2.1; a `HPAC-AUTHORITY-CONSUMPTION/2.0`
+  record without `authority_generation_binding` remains readable
+  historical/test data and is gate-10-ineligible — RDGO-001 v3.1 §10 — but
+  gate 9 writes only `/2.1`), stored exactly at
   `<HPAC_PROTECTED_ROOT>/proofs/v2/<proof_id>/consumption.json`. It has
   exactly these closed top-level fields: `consumption_schema_version`
   (const), `record_digest` (self-excluding SHA-256), `request_identity`,
@@ -1207,9 +1207,9 @@ or cross-file sequence of consumption writes exists.
   each other to the practical limit; a residual instruction-level
   micro-window between the `S2 == S1` decision and the create is the
   acknowledged limit and produces no external effect (gate 10 absent; its
-  mandatory re-read re-closes it). Revocation, expiry, invalidation, or
-  drift after gate 5 but before the atomic create fails closed. Gate-5
-  validation is never a substitute for this gate-9 revalidation.
+  mandatory re-read re-closes it).
+  Revocation, expiry, invalidation, or drift after gate 5 but before the atomic create fails closed.
+  Gate-5 validation is never a substitute for this gate-9 revalidation.
 
 - **HPAC-REQ-100.** The create is an atomic, create-only, same-filesystem
   durable commit: write canonical bytes to a protected temporary sibling,

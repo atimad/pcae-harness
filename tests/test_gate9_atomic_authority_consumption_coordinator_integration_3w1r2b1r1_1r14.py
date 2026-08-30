@@ -59,6 +59,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 G9_PATH = REPO_ROOT / "src/pcae/core/runtime_dispatch_gate9.py"
 G9_SRC = G9_PATH.read_text()
 PHASE_ENTRY_BASELINE = "c1ea2c8b"
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 _ECHO = "/bin/echo"
 
 _GOOD_SNAPSHOT = {
@@ -932,7 +933,7 @@ def test_gate9result_has_zero_downstream_production_consumers():
 
 def test_production_scope_since_baseline_is_the_single_new_gate9_file():
     changed = set(subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
+        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
     assert changed == {"src/pcae/core/runtime_dispatch_gate9.py"}
 
@@ -958,7 +959,7 @@ def test_contracts_and_earlier_gates_bytes_unchanged_since_baseline():
         "src/pcae/core/runtime_authority.py",
     ):
         diff = subprocess.run(
-            ["git", "diff", PHASE_ENTRY_BASELINE, "HEAD", "--", rel],
+            ["git", "diff", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout
         assert diff == "", f"{rel} changed since baseline"
 

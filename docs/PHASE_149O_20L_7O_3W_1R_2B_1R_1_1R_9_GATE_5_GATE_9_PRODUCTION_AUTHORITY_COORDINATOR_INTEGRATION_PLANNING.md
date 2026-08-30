@@ -666,6 +666,15 @@ invalidation, or drift after Gate 5 but before the atomic create fails
 closed with **no** TOCTOU allowance (RDGO-001 §10; RIHAC-001 §17;
 HPAC-REQ-099).
 
+> **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4.** "Inside the
+> protected Gate-9 serialization boundary" here means: inside the window
+> whose linearization point is the per-`proof_id` create-only atomic
+> primitive (there is no separate held lock — see the §13.5 erratum). The
+> battery re-runs immediately before the create; the `.1R.15.2` V-15-1
+> repair adds a final zero-effectful-I/O authority-generation-token re-check
+> (`S1`/`S2`) between the battery and the create. RDGO-001 v3.1 §10 /
+> HPAC-001 v2.1 HPAC-REQ-099 are the normalized statement.
+
 ---
 
 ## 13. Findings and blockers discovered during planning
@@ -972,6 +981,25 @@ contention optimizer. This is frozen: the Gate-9 implementation slice
 SHALL reuse `RuntimeInvocationAuthorityConsumptionStore` +
 `hpac_foundation` primitives and SHALL NOT introduce a second transaction
 mechanism.
+
+> **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 (V-15-1
+> normalization).** §13.5's "**Lock scope** … **Lock ordering:** single
+> lock per Gate-9 invocation, acquired … before the §12 battery; released
+> after `create`" language is **internally contradicted** by the immediately
+> following "**Do not invent a new lock** — the protected create-only commit
+> is itself the atomic transaction … SHALL NOT introduce a second
+> transaction mechanism." Finding V-15-1 (`.1R.15.1` §12) recorded this. The
+> `.1R.15.2` / `.1R.15.3` independently verified implementation, and RDGO-001
+> **v3.1** §10 / HPAC-001 **v2.1** HPAC-REQ-099, resolve it to the
+> **create-only-linearization** model: there is **no** held lock. The
+> per-`proof_id` create-only atomic primitive (`write_atomic_create_only`)
+> IS the serialization boundary and the sole transaction mechanism. The §12
+> revalidation battery runs immediately before it, followed by a monotonic
+> authority-generation snapshot `S1` re-read as `S2` with zero intervening
+> effectful I/O; any `S2 != S1` fails closed. This is the "no TOCTOU
+> allowance" guarantee to the practical limit without a second lock. The
+> "Lock scope / Lock ordering" bullet is superseded; the "Do not invent a
+> new lock" bullet and §18 are the correct, frozen model.
 
 ---
 

@@ -728,6 +728,28 @@ exactly as Gate 6 does, plus a fresh executable-hash comparison against the
 descriptor pin (RDGO-001 §9, §15 "Adapter executable identity … Yes, exact
 hash before spawn").
 
+> **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 (V-13-5-1
+> normalization; `.1R.15.1` §11).** Three rows of this matrix ask Gate 8 to
+> diff against a **bound reference the frozen `RuntimeDispatchRequestConstructionInput`
+> shape does not contain**:
+> - `changed provider/backend / transport → gate8_transport_drift`:
+>   **STRUCK.** `transport_type` is the contract-fixed const `local_cli`
+>   (PBRD-001 fact 11); there is no drift-able bound transport reference.
+> - `changed cwd → gate8_cwd_drift` and `changed environment allowlist →
+>   gate8_environment_allowlist_drift`: **reworded.** The verified Gate-8
+>   behaviour is *repository-scope containment* of the working directory
+>   (`gate8_cwd_outside_repository_scope`) + *name well-formedness* of the
+>   environment allowlist, both **committed** into `containment_evidence_digest`
+>   and **recomputed** by Gate 9 (RDGO-001 v3.1 §9 three-layer model). The
+>   effect plan is trusted-coordinator-assembled, never caller input, so
+>   there is no caller cwd/env "reference" to diff; substitution is caught
+>   by Gate 9's full containment-evidence recomputation.
+>
+> The other six rows (effect-plan / invocation binding, runtime-target
+> drift, executable identity/hash, descriptor/config digest,
+> caller-shell-string rejection) are enforced as written and were confirmed
+> by `.1R.13.5`. `.1R.15` closed V-13-5-1 for the consumption path.
+
 ---
 
 ## 12. Gate-8 ownership, input/output/provenance, Shell Gate model, no-effect guarantee
@@ -986,6 +1008,14 @@ Gate 9 input from the Gate-7/Gate-8 chain =
    boundary** (RDGO-001 §10 last ¶). A `Gate7Result` / `Gate8Result` that
    was valid moments earlier but is now expired/stale fails closed with no
    `consumption.json`.
+   > **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 (V-15-1).** "while
+   > holding the protected serialization boundary" is normalized: there is
+   > **no held lock** (see `.1R.9` §13.5 erratum). The per-`proof_id`
+   > create-only atomic primitive is the linearization point; the
+   > revalidation battery plus a final zero-effectful-I/O
+   > authority-generation-token re-check (`S1`/`S2`) run immediately before
+   > the create; any change fails closed. RDGO-001 v3.1 §10 / HPAC-001 v2.1
+   > HPAC-REQ-099 are the normalized statement.
 5. **Consumption happens only at Gate 9.** Neither the `Gate7Result` nor
    the `Gate8Result` is consumed by being handed to Gate 9; the atomic
    `dispatch_attempted` write is the single consumption point (RDGO-001
@@ -1071,7 +1101,20 @@ The existing `runtime_enforcement_safety_authorization.py` provides the
 `SAFETY_FLAG_NAMES`, `AUTH_FLAG_TO_NO_GO`, `SAFETY_FLAG_TO_NO_GO`,
 `RE-NOGO-001..011`) and the pure violation-lister helpers. The Gate-7
 coordinator **consumes** these constants; it does not reimplement or
-replace them. No verified logic is duplicated because there is no verified
+replace them.
+
+> **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 (V-13-3-2;
+> RE No-Go Registry schema 1.1).** Where §13 / this section describe the
+> shared flag→no-go map as *the* Gate-7 no-go source, read it as **the sole
+> source for the per-decision projection** (`Gate7Result.matched_no_go_ids`).
+> The RE No-Go Registry (schema 1.1) classifies its 17 entries as
+> per-decision (001–008, 010, 011), environmental-readiness (009, 013, 015,
+> 016, 017 — enforced by the execution-enablement readiness process), and
+> advisory (012, 014). `matched_no_go_ids` deliberately projects only the
+> per-decision subset; Gate-7 progression depends on the authoritative
+> Gate-7 decision, not on that projection's completeness. This is not a
+> functional bypass — ten independent flag-mapped no-gos already force
+> `DENY` under the current posture. No verified logic is duplicated because there is no verified
 RE *decision* logic today — only the vocabulary, which is reused verbatim.
 The Phase 89 `enforcement_*` simulation models are a different enforcement
 domain (source-mutation) and are **not** touched.

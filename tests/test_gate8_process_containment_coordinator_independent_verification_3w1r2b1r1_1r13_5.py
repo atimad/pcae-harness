@@ -42,6 +42,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 G8_PATH = REPO_ROOT / "src/pcae/core/runtime_dispatch_gate8.py"
 G8_SRC = G8_PATH.read_text()
 BASELINE = "6a9d650f54fb7a5c02652180f0bbcc3a41080198"  # .1R.13.3 completion
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 NOW = "2026-08-29T12:00:00Z"
 ECHO = "/bin/echo"
 
@@ -1079,7 +1080,7 @@ def test_gate9_unblocking_criteria_status():
         "docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md",
     ):
         diff = subprocess.run(
-            ["git", "diff", BASELINE, "HEAD", "--", rel],
+            ["git", "diff", BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout
         assert diff == ""
@@ -1228,7 +1229,7 @@ def test_gate5_still_non_real_and_consumes_nothing():
 
 def test_gate7_still_denies_and_gate7_module_byte_unchanged():
     diff = subprocess.run(
-        ["git", "diff", BASELINE, "HEAD", "--", "src/pcae/core/runtime_dispatch_gate7.py"],
+        ["git", "diff", BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae/core/runtime_dispatch_gate7.py"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout
     assert diff == ""
@@ -1241,7 +1242,7 @@ def test_gate6_and_pol005_byte_unchanged_since_baseline():
         "src/pcae/core/permission_broker_foundation.py",
     ):
         diff = subprocess.run(
-            ["git", "diff", BASELINE, "HEAD", "--", rel],
+            ["git", "diff", BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout
         assert diff == ""
@@ -1254,7 +1255,7 @@ def test_production_diff_since_baseline_is_exactly_one_new_file():
     # gate8.py (the .1R.13.4 functional weight) must still be present.
     changed = set(
         subprocess.run(
-            ["git", "diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae"],
+            ["git", "diff", "--name-only", BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae"],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout.split()
     )
@@ -1280,7 +1281,7 @@ def test_all_frozen_contracts_and_shell_gate_byte_unchanged():
         "src/pcae/core/runtime_enforcement_safety_authorization.py",
     ):
         diff = subprocess.run(
-            ["git", "diff", BASELINE, "HEAD", "--", rel],
+            ["git", "diff", BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout
         assert diff == "", f"{rel} changed since baseline"

@@ -870,6 +870,14 @@ def test_runtime_capability_check_unchanged(chain):
     assert reasons == ("gate9_runtime_execution_available_unexpected",)
 
 
+# The `.1R.15.2`/`.1R.15.3` window is `d78d9676 .. 4d480553`. The later
+# authorized Phase `.1R.15.4` (Runtime-Dispatch Contract Normalization)
+# evolves the contracts + `runtime_invocation_authority_consumption.py`;
+# the scope-fence endpoint is pinned so these remain permanent
+# `.1R.15.2`/`.1R.15.3`-window checks.
+_1R15_3_SCOPE_END = "4d480553"
+
+
 @pytest.mark.parametrize(
     "module",
     [
@@ -882,7 +890,7 @@ def test_runtime_capability_check_unchanged(chain):
 )
 def test_earlier_gate_and_store_modules_byte_identical_since_baseline(module):
     out = subprocess.run(
-        ["git", "diff", "--stat", BASELINE_SHA, "HEAD", "--", f"src/pcae/core/{module}"],
+        ["git", "diff", "--stat", BASELINE_SHA, _1R15_3_SCOPE_END, "--", f"src/pcae/core/{module}"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
     assert out.stdout.strip() == "", out.stdout
@@ -890,7 +898,7 @@ def test_earlier_gate_and_store_modules_byte_identical_since_baseline(module):
 
 def test_only_gate9_py_changed_in_src_since_baseline():
     out = subprocess.run(
-        ["git", "diff", "--name-only", BASELINE_SHA, "HEAD", "--", "src/"],
+        ["git", "diff", "--name-only", BASELINE_SHA, _1R15_3_SCOPE_END, "--", "src/"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
     assert out.stdout.split() == ["src/pcae/core/runtime_dispatch_gate9.py"]
@@ -898,7 +906,7 @@ def test_only_gate9_py_changed_in_src_since_baseline():
 
 def test_no_normative_contract_changed_since_baseline():
     out = subprocess.run(
-        ["git", "diff", "--name-only", BASELINE_SHA, "HEAD", "--", "docs/contracts", "schemas"],
+        ["git", "diff", "--name-only", BASELINE_SHA, _1R15_3_SCOPE_END, "--", "docs/contracts", "schemas"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
     assert out.stdout.strip() == ""

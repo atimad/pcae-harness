@@ -359,6 +359,19 @@ drifted projection is rejected as `gate7_stale_validated_authority_projection`.
 The reserved reason id is documented for a future `Gate6Decision` that
 carries the field; `.1R.13.3` should confirm this transitive coverage.
 
+> **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 (V-13-3-1).** "PB-policy
+> drift is covered transitively via projection revalidation" **overstates**
+> `revalidate_validated_authority_projection`: it does **not** re-read live
+> PB policy. `context.policy_version` is frozen at Gate-5 validation time,
+> and a detected `policy_drift_requires_fresh_pb_re_evaluation` is
+> **explicitly tolerated** (the function returns `True` and surfaces the
+> string as an advisory reason). PB policy evaluation is owned exclusively
+> by Gate 6; a stale PB `policy_version` detected after Gate 6 is resolved
+> by **re-entering Gate 6**, never by Gate 7 or Gate 9. Gate 7/9 revalidate
+> only *authority currentness and runtime-enforcement posture*. RDGO-001
+> v3.1 §8 states this. `.1R.13.3` §27 already recorded this as V-13-3-1;
+> `.1R.15` carried it; it is now normalized.
+
 ---
 
 ## 13. Gate-7 → Gate-8 handoff (not implemented — documented only)

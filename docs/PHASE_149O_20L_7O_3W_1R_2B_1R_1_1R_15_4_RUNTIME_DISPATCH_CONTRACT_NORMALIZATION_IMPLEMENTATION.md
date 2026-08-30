@@ -141,27 +141,178 @@ No authority-relevant mutable state is uncovered: every mutation moves some toke
 
 ## 7. Contract normalization (phase prompt §6–§13, §25)
 
-(authored below as each contract edit lands)
+| Finding | Contract | Edit |
+|---|---|---|
+| V-2 | RDGO-001 §4 | "Gate 5, not gate 3, creates the final `PROOF_VERIFIED_AND_BOUND` … over the completed approval digest" → a **Sequence-3 creation (v3.1 normalization)** paragraph: the HPAC-001 v2.1 verifier's assurance-independent HPAC-REQ-054 step 10 (`bind_gate5_canonical`) creates it **at gate 3** over the `HPAC-APPROVAL-SUBJECT/2.0` digest; gate 5 does **not** create it, gate 5 read-only **re-confirms** and fails closed on divergence; the assurance decision stays gate 5's. |
+| V-2 | RDGO-001 §6 | "It atomically creates HPAC lifecycle sequence 3 … but does not consume …" → "It re-confirms (read-only) the current HPAC lifecycle sequence 3 … created by … HPAC-REQ-054 step 10 (§4) … and does not consume …". |
+| V-2/V-3 | RDGO-001 §16 | "Approval" row prose: sequence-3 is **created** at gate 3 (verifier step 10), **re-confirmed** at gate 5, **consumed** at gate 9; new "Authority-generation snapshot (v3.1)" row → item 9. |
+| V-3 | RDGO-001 §4 | sequence-3 binds the `HPAC-APPROVAL-SUBJECT/2.0` subject digest, **not** the completed RIASC-001 v3.0 approval `record_digest` (which is carried in the RIHAC-001 v2.0 projection and consumed at gate 9). |
+| V-3 | RIASC-001 §9 | non-normative errata note (no version change): `record_digest` and the `HPAC-APPROVAL-SUBJECT/2.0` digest are distinct commitments; sequence 3 does not bind `record_digest`; RDGO-001 v3.1 §4 is corrected. |
+| V-3 | HPAC-001 HPAC-REQ-097 | added a cross-reference note: in the verified flow the event is created by the **first** HPAC-REQ-054 run (verifier step 10 at gate 3); gate 5's rerun takes the idempotent-accept path; step 10's wording already covers both. |
+| V-4 | PBRD-001 §4 fact 14 + new §4a | the row now points to §4a; §4a adds the normative representation-equivalence clause: the 7 *logical* fields remain the semantic requirement; the closed 3-tuple `(approval_id, approval_record_digest, validation_evidence_digest)` is a permitted equivalent, provided (1) the ID and approval-record digest are direct, (2) every other logical field is committed inside `validation_evidence_digest` OR structurally enforced OR a zero-entropy constant, (3) the request binding is re-enforced by recomputation; two contexts differing in any logical field MUST NOT collapse. |
+| V-13-3-1 | RDGO-001 §8 | added a "PB policy ownership (v3.1)" paragraph: PB policy is owned exclusively by gate 6; gates 7/9 revalidate authority currentness + posture only; a stale `policy_version` is resolved by re-entering gate 6; `policy_drift_requires_fresh_pb_re_evaluation` is advisory only; `gate7_pb_decision_stale_policy_version` is a reserved future-shape concern, not a prerequisite. |
+| V-13-5-1 | RDGO-001 §9 | added the "Three-layer containment model (v3.1)" paragraph: (a) direct validation, (b) canonical commitment of the complete launch environment (incl. cwd/env bytes, `transport_type=local_cli`) into `containment_evidence_digest`, (c) gate-9 recomputation. The effect plan is coordinator-assembled → no caller cwd/env/transport reference to diff, and none is required. |
+| V-15-1 | RDGO-001 §10 | added item 9 (`HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`); replaced the "Immediately before compare-and-create … while holding the protected evidence-store serialization boundary … without a TOCTOU allowance" paragraph with the "Gate-9 linearization semantics (v3.1)" model: the per-`proof_id` create-only primitive **is** the linearization point and sole transaction mechanism (no second lock); revalidation battery → `S1` → record build → `S2` re-read with zero effectful I/O → `S2 != S1` fails closed; a residual instruction-level micro-window is the acknowledged practical limit, no external effect. §10's "eight items" → "nine items"; `/2.0` → `/2.1`; `/2.0` records readable historical/test data but gate-10-ineligible. |
+| V-15-1 | RDGO-001 §11 | added "Gate-10 forward read-back prerequisite (v3.1 — prerequisite semantics only; no gate-10 design, no phase ID)": the six-item list (`is_gate9_result` + `status=="consumed"` + durable `consumption.json`/`HPAC-AUTHORITY-CONSUMPTION/2.1` re-read with `authority_generation_binding` present/valid + exact lineage + runtime capability eligible + re-validation of all mutable authority *and* re-derivation of the current generation vector vs the durable snapshot). "data, not a bearer token." |
+| V-15-1 | RDGO-001 §21 | added the "v3.1 normalization … MINOR" verdict paragraph + "Durable-before-effect items: 9 (v3.1)". Header supersedes v3.0-narration of sequence-3 creation. |
+| V-15-1 / durable | HPAC-001 §41 | HPAC-REQ-098: `HPAC-AUTHORITY-CONSUMPTION/2.1`, nine closed binding objects (eight `/2.0` byte-unchanged + `authority_generation_binding`); new HPAC-REQ-098a defines the closed 6-field `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0` (schema-version const + 5 markers over durable state), the exact `S1` verified at `S2`, restart-reconstructible, verification evidence not authority; HPAC-REQ-099 rewritten to the create-only-linearization + zero-I/O `S1`/`S2` model with the residual-micro-window disclosure. §37 + §44: v2.1 MINOR verdict. |
+| V-13-3-2 | RE No-Go Registry | schema 1.0 → 1.1: additive "Enforcement class" column classifying all 17 entries (per-decision 001–008/010/011; environmental-readiness 009/013/015/016/017; advisory 012/014) + a scoping paragraph (`matched_no_go_ids` projects only the per-decision subset; gate-7 progression depends on the authoritative decision, not projection completeness; "sole source" → "sole source *for the per-decision projection*"). |
+| cross-refs | RIHAC-001 | "Related contracts" line and the §16 step-7 reference refreshed to RDGO-001 v3.1 / PBRD-001 v2.1 / HPAC-001 v2.1; §23 freeze-verdict note added (no semantic change, no bump; §14 append-only revocation-artifact boundary confirmed — the gate-9 `approval_generation` marker carries only a `null` forward hook for it, N-15-3-2). |
+| cross-refs | RDGO/PBRD | remaining in-contract `RDGO-001 v3.0` / `HPAC-001 v2.0` prose references in §4/§12/§14 refreshed to v3.1 / v2.1. |
+
+**Repository-wide cross-reference scope (phase prompt §25, §43).** The
+active contract set (RDGO / PBRD / HPAC / RIASC / RIHAC / RE-registry) is
+updated. Historical phase documents that cite `RDGO-001 v3.0` etc. **as the
+version-at-the-time** are accurate historical records and are **not**
+rewritten (phase prompt §26); only the five phase documents `.1R.15.1` §11
+named receive errata annotations (§8). `git grep 'RDGO-001 v3.0'` /
+`'HPAC-AUTHORITY-CONSUMPTION/2.0'` across `docs/` returns only historical
+verdict prose and the deliberate `/2.0` legacy-compat references.
 
 ## 8. Phase-document errata (phase prompt §26)
 
-(authored below)
+Added as clearly-labelled `> **Erratum — Phase …1R.15.4 …**` blocks
+(original text preserved; historical verdicts intact):
+
+- **`.1R.9` §12** — "Inside the protected Gate-9 serialization boundary" = the create-only-primitive window; no held lock.
+- **`.1R.9` §13.5** — the "Lock scope / Lock ordering: single lock … acquired before the §12 battery" bullet is **internally contradicted** by the "Do not invent a new lock … SHALL NOT introduce a second transaction mechanism" bullet; V-15-1; the second bullet + §18 are the correct frozen model; RDGO-001 v3.1 §10 / HPAC-001 v2.1 HPAC-REQ-099 are the normalized statement.
+- **`.1R.13.1` §11.2** — the `gate8_transport_drift` row is **STRUCK** (transport is a fixed const); the `gate8_cwd_drift` / `gate8_environment_allowlist_drift` rows are **reworded** to repo-scope containment + digest commitment + gate-9 recomputation (RDGO-001 v3.1 §9); the other six rows stand.
+- **`.1R.13.1` §13 / §19.1** — "sole" Gate-7 no-go source → "sole source *for the per-decision projection*" (RE-registry schema 1.1).
+- **`.1R.13.1` §16.2 invariant 4** — "while holding the protected serialization boundary" normalized: no held lock; battery + zero-I/O `S1`/`S2` re-check before the create.
+- **`.1R.13.2`** — "PB-policy drift is covered transitively via projection revalidation" **overstates** `revalidate_validated_authority_projection` (it does not re-read live PB policy; policy drift is advisory-only and resolved by re-entering gate 6). V-13-3-1.
+- **`.1R.14` / `.1R.15`** — top-of-document errata: RDGO-001 v3.0 → v3.1, `HPAC-AUTHORITY-CONSUMPTION/2.0` (eight objects) → `/2.1` (nine objects), "while holding the protected serialization boundary" → create-only-linearization + zero-I/O `S1`/`S2`. Both phase verdicts (IMPLEMENTED; GATE-9 CLOSED) stand.
 
 ## 9. Contract evolution manifest (phase prompt §41)
 
-(authored below)
+| Artifact | Old version / identity | New version / identity | Finding(s) | Semantic or errata | Dependent references updated |
+|---|---|---|---|---|---|
+| `RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md` (RDGO-001) | v3.0 | **v3.1** | V-2, V-3, V-13-3-1, V-13-5-1, V-15-1 | clarification (MINOR) — re-states verified behaviour; item 8→9; no gate reorder / boundary move / merge | PBRD-001, HPAC-001, RIASC-001, RIHAC-001; `.1R.9` / `.1R.13.1` / `.1R.13.2` / `.1R.14` / `.1R.15` errata |
+| `PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md` (PBRD-001) | v2.0 | **v2.1** | V-4 | additive representation-equivalence clause (MINOR) — 7 logical fields + precedence unchanged | RIHAC-001 (projection payload); RDGO-001 §16 |
+| `HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` (HPAC-001) | v2.0 | **v2.1** | V-15-1, durable snapshot | additive verification-evidence binding object (MINOR) — no authority widened | RDGO-001; RIASC-001; RIHAC-001 |
+| `HPAC-AUTHORITY-CONSUMPTION` record schema | `/2.0` | **`/2.1`** | V-15-1 | additive closed binding object; `/2.0` readable historical/test data, gate-10-ineligible | `runtime_invocation_authority_consumption.py`; `runtime_dispatch_gate9.py`; test suites |
+| `HPAC-AUTHORITY-GENERATION-SNAPSHOT` schema | — | **`/1.0`** (new) | V-15-1 | new closed 6-field schema (verification evidence) | HPAC-001 §41 |
+| `RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md` (RIASC-001) | v3.0 | **v3.0 + §9 errata note** | V-3 | non-normative cross-reference clarification (no bump) | HPAC-001 cross-refs → v2.1 |
+| `RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md` | schema 1.0 | **schema 1.1** | V-13-3-2 | additive classification column + scoping paragraph (no ID / verdict / statement changed) | `.1R.13.1` §13 errata |
+| `RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md` (RIHAC-001) | v2.0 | **v2.0** (unchanged) | N-15-3-2 boundary | cross-reference refresh + §23 note; §14 boundary confirmed, not amended | RDGO-001 v3.1 / PBRD-001 v2.1 / HPAC-001 v2.1 |
+
+**Contract identity after normalization (phase prompt §44).** Final canonical
+`sha256` digests are recorded in the fixed-SHA-pinned byte-identity test
+suites (`test_runtime_authority_production_repair_3w1r2b1r1117.py`,
+`test_gate5_…_1r11.py`, `test_trusted_approval_…_111r.py`). No unplanned
+contract file changed: `git diff --name-only 1babaa95 HEAD -- docs/contracts
+docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md` = exactly the five contracts +
+the registry above.
 
 ## 10. Tests (phase prompt §28–§34)
 
-(authored below)
+New suite `tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py`
+— **36 tests, 0 failed**:
+
+- **§28 contract traceability** — the normalized RDGO/PBRD/HPAC/RIASC/RE-registry
+  wording matches the verified architecture for V-2/V-3/V-4/V-13-3-1/V-13-3-2/V-13-5-1/V-15-1,
+  and the phase-document errata are present; the coordinator's `S1`→build→`S2`→create
+  source order matches HPAC-REQ-099.
+- **§29 durable schema** — `CONSUMPTION_SCHEMA_VERSION == /2.1`; the record has nine
+  binding objects; `authority_generation_binding` is the closed 6-field set; malformed
+  schema-version / blank / oversized / non-string / extra / missing-field values are
+  rejected (`HPACMalformedError`); `record_digest` covers the object; `/2.0` record is
+  readable with `authority_generation_binding is None` (gate-10-ineligible); an unknown
+  schema version is durability-uncertain.
+- **§30 N-15-3-2 resolver completeness** — `build_production_authority_generation_resolver`
+  returns the three keys from canonical registry/approval state; `approval_generation`
+  moves on approval-record replacement; the resolver fails closed on an absent/unreadable
+  principal/credential/approval; no wall clock / mtime / nonce / uuid in the `_resolve`
+  body; the RIHAC-001 §14 forward hook (`revocation_artifact_digest`) is present and the
+  §14 boundary is confirmed unamended; a real `revoke_principal` moves `principal_generation`.
+- **§20 completeness matrix** — the phase-doc §5.3 matrix covers all five generation
+  tokens; the coordinator's snapshot = 3 resolver keys + lifecycle + consumption.
+- **§31 durable write / restart / read-back** — a bounded synthetic gate-9 consumption
+  writes a `/2.1` record whose `authority_generation_binding` equals the `S1` the resolver
+  + stores produced (four tokens; `consumption_generation == "absent"`); a fresh store
+  object over the same on-disk tree reconstructs the record and it round-trips to the same
+  `record_digest`.
+- **§32 post-consumption drift** — after consumption, revoking the principal leaves the
+  durable record byte-identical while the current principal generation now differs from
+  the persisted snapshot.
+- **§33 not a bearer token** — no capability/authority field name in the object; a
+  deep-copied snapshot dict and a fabricated record carrying it are rejected by
+  `is_gate9_result`; the contracts say "verification evidence, not execution authority" /
+  "data, not a bearer token".
+- **§34 Gate9Result forward semantics** — `is_gate9_result` provenance-only (`status ==
+  "consumed"` is the success signal); `__reduce__` raises; a copy is not provenanced;
+  RDGO-001 v3.1 §11 enumerates six additional gate-10 requirements (necessary-not-sufficient).
+
+Existing gate9 + consumption suites (`.1R.14` / `.1R.15` / `.1R.15.2` / `.1R.15.3` /
+`test_hpac_authority_consumption`) updated for the schema evolution — **all green** — with
+the `.1R.15.3` phase-scoped no-change assertions superseded (approval-generation is now
+resolver-*wired*; the durable snapshot is now *implemented*) and the `.1R.15.2`/`.1R.15.3`
+scope-fence tests pinned to the `.1R.15.3` end SHA `4d480553` so they remain permanent
+window checks. `.1R.15.3` §35 critical properties (S1/S2 ordering, drift rejection,
+one-shot, replay, concurrency, crash-before/after, restart, V-13-5-1 containment read-back)
+re-run unchanged (56/56).
 
 ## 11. Fixed-SHA A/B regression attribution (phase prompt §42)
 
-(authored below)
+**Immutable baseline:** `4d480553` (`.1R.15.3` final; pre-`.1R.15.4`). **Method:**
+dedicated `git worktree` at `4d480553`; deterministic `-p no:randomly`; **no xdist**.
+**Targeted set** (36 files): the new `.1R.15.4` suite + Gate-9 `.1R.14` / `.1R.15` /
+`.1R.15.2` / `.1R.15.3` + consumption store + HPAC verifier / lifecycle / foundation +
+Gate 5–8 integration & verification + B1/B7/N1/N2 + runtime-authority/PB + the `3V.1` /
+`3V.1R.1` / `3V.1R` contract-verification suites + the two cross-contract freeze
+verification suites + attempt-idempotency.
+
+| | baseline `4d480553` | HEAD | delta |
+|---|---|---|---|
+| targeted set (35 pre-existing files) | 1339 passed / **60 failed** | 1339 passed / **60 failed** | **0** |
+| new `.1R.15.4` suite | — | 36 passed | +36 (new) |
+
+**CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0.**
+**UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.**
+
+The 60 baseline=HEAD failures are all pre-existing and unrelated to `.1R.15.4`:
+the `3V.1` / `3V.1R.1` / `3V.1R` suites pin RDGO to v2.0 / PBRD to v1.1 / RIHAC to
+v1.0 (stale since the `.1R` v3/v2 freeze, many phases before this one); HPAC-foundation
+`blocking_reproduction_*` fixtures; a HATP contract-byte identity test; and the
+`_GATE5_RESULTS` / `_GATE6_DECISIONS` xdist cross-file-pollution flakes documented by
+`.1R.15` §26 / `.1R.15.2` §10.
+
+**Intended contract-byte / production-scope test changes (phase prompt §42 —
+classified explicitly).** 24 byte-identity / "only file X changed since baseline"
+assertions from `.1R.10` → `.1R.15.3` would trip on the authorized `.1R.15.4`
+contract normalization + `runtime_invocation_authority_consumption.py` schema
+evolution. Each is a `git diff <that phase's baseline> HEAD -- docs/contracts src/pcae`
+scope-fence; each was **repinned to the fixed end SHA `4d480553`** (the end of the
+`.1R.15.3` window — a permanent historical fact) so it remains a live guard against
+*unauthorized* drift within its own window. Files touched (test-only, one-line endpoint
+pins + phase-authorization comments): `test_gate5_…_1r10`, `test_gate5_…_1r11`,
+`test_gate6_…_1r12`, `test_gate6_…_1r13`, `test_gate7_…_1r13_2`, `test_gate7_…_1r13_3`,
+`test_gate8_…_1r13_4`, `test_gate8_…_1r13_5`, `test_gate9_…_1r14`, `test_gate9_…_1r15`,
+`test_gate9_…_1r15_3`, `test_b1_b7_n1_n2_…_1r8`, `test_runtime_authority_production_repair_3w1r2b1r1117`,
+`test_trusted_approval_…_111r`, `test_trusted_approval_…_111r1`. The `3V.1` /
+`3V.1R.1` cardinality tests (`…_eight_durable_items…` / `…durable_items_still_eight`)
+were updated to expect **nine** (item 9 added). The two cross-contract freeze suites'
+version-graph tests were updated to `v3.1` / `v2.1` / `v2.1`. Contract-hash pins in
+`_1117` / `_1r11` / `_111r` were recomputed to the normalized bytes.
 
 ## 12. Runtime zero-effect proof (phase prompt §46)
 
-(authored below)
+Over the `.1R.15.4` + Gate-9 suites at completion:
+
+```
+canonical local test-store writes = expected (tmp_path stores only; 0 under the repo tree)
+runtime subprocess    = 0   (test infrastructure: git subprocess in scope-fence assertions, disclosed)
+adapter invocation    = 0
+provider / network    = 0
+credential operations = 0
+hardware operations   = 0
+Gate-10 effects       = 0
+```
+
+`pcae runtime inspect` at finalization: `not_implemented / Observed / observe /
+unavailable`; 0 plugins / 0 capabilities; PB `execution_unavailable`; non-executing —
+unchanged. No `runtime_dispatch_gate10.py`; no `DispatchReceipt`, adapter, subprocess,
+socket, provider, credential, or hardware symbol in `runtime_dispatch_gate9.py`. POL-005
+byte-unchanged.
 
 ## 13. Historical finding disposition (phase prompt §27)
 

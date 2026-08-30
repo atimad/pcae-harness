@@ -53,6 +53,7 @@ from _rdw3w_helpers import dispatch_inputs, new_dispatch_identity
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PHASE_ENTRY_BASELINE = "698fabd9182fe90a74a0fef96cc978409fd8e1b0"
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 NOW = "2026-08-29T00:30:00Z"
 
 
@@ -651,7 +652,7 @@ def test_production_scope_since_baseline_is_the_single_new_gate7_file():
     # set since the .1R.13.1 baseline is a SUBSET of {gate7, gate8}; gate7
     # itself must still be present (the .1R.13.2 functional weight).
     changed = set(subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
+        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout.split())
     assert "src/pcae/core/runtime_dispatch_gate7.py" in changed
@@ -673,12 +674,12 @@ def test_contracts_and_pol005_bytes_unchanged_since_baseline():
         "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
     ):
         diff = subprocess.run(
-            ["git", "diff", PHASE_ENTRY_BASELINE, "HEAD", "--", rel],
+            ["git", "diff", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout
         assert diff == "", f"{rel} changed since baseline"
     pbf_diff = subprocess.run(
-        ["git", "diff", PHASE_ENTRY_BASELINE, "HEAD", "--",
+        ["git", "diff", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--",
          "src/pcae/core/permission_broker_foundation.py"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout
@@ -694,7 +695,7 @@ def test_gate5_gate6_coordinators_unchanged_since_baseline():
         "src/pcae/core/policy.py",
     ):
         diff = subprocess.run(
-            ["git", "diff", PHASE_ENTRY_BASELINE, "HEAD", "--", rel],
+            ["git", "diff", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout
         assert diff == "", f"{rel} changed since baseline"

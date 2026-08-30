@@ -55,6 +55,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 G9_PATH = REPO_ROOT / "src/pcae/core/runtime_dispatch_gate9.py"
 G9_SRC = G9_PATH.read_text()
 BASELINE = "c1ea2c8b"
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 _ECHO = "/bin/echo"
 
 _OK_SNAPSHOT = {
@@ -1208,7 +1209,7 @@ def test_only_effect_is_the_local_canonical_consumption_store_write(chain):
 # ══════════════════════════════════════════════════════════════════════
 def test_production_scope_since_baseline_is_exactly_gate9_file():
     changed = subprocess.run(
-        ["git", "diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae"],
+        ["git", "diff", "--name-only", BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split()
     assert changed == ["src/pcae/core/runtime_dispatch_gate9.py"]
 
@@ -1235,7 +1236,7 @@ def test_frozen_contracts_and_adjacent_modules_byte_unchanged():
         "src/pcae/core/hpac_verifier.py",
         "src/pcae/core/hpac_foundation.py",
     ):
-        diff = subprocess.run(["git", "diff", BASELINE, "HEAD", "--", rel],
+        diff = subprocess.run(["git", "diff", BASELINE, _1R15_4_SCOPE_END, "--", rel],
                               cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout
         assert diff == "", rel
 

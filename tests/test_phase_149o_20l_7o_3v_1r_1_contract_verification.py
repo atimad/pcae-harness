@@ -284,12 +284,14 @@ class TestRIHACRIASCUnchangedButVerified:
 # ---------------------------------------------------------------------------
 
 class TestCardinalitySweep:
-    def test_rdgo_durable_items_still_eight(self):
+    def test_rdgo_durable_items_are_nine_after_1r15_4(self):
+        # RDGO-001 v3.1 (.1R.15.4 — V-15-1): 8 -> 9 durable items (item 9 =
+        # the authority-generation snapshot; items 1-8 byte-unchanged).
         rdgo = _text(RDGO)
-        assert "Durable-before-effect items: 8 (unchanged" in rdgo
+        assert "Durable-before-effect items: 9 (v3.1" in rdgo
         section = rdgo.split("## 10. Gate 9")[1].split("## 11.")[0]
         items = re.findall(r"^\d+\.\s+\*\*", section, re.MULTILINE)
-        assert len(items) == 8
+        assert len(items) == 9
 
     def test_rdgo_toctou_facts_still_seven(self):
         rdgo = _text(RDGO)

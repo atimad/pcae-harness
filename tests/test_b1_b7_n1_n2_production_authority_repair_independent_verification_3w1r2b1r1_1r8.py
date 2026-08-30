@@ -728,7 +728,8 @@ def test_isolation_only_three_production_files_changed_since_baseline():
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
         "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
-        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14; V-15-1 repair .1R.15.2; durable snapshot .1R.15.4)
+        "src/pcae/core/runtime_invocation_authority_consumption.py",  # HPAC-AUTHORITY-CONSUMPTION/2.1 durable authority_generation_binding (.1R.15.4)
     }
     unexpected = set(changed) - _authorized
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -821,6 +822,14 @@ def test_isolation_pol005_denies_any_execution_claim(tmp_path):
 
 
 def test_isolation_contract_and_pol005_bytes_unchanged_since_baseline():
+    # Historical assertion: from the pre-.1R.7 baseline through .1R.15.3
+    # (SHA 4d480553) these contracts and POL-005 were byte-unchanged — the
+    # B1/B7/N1/N2 production-authority repair (.1R.8's scope) touched none of
+    # them. Phase .1R.15.4 (Runtime-Dispatch Contract Normalization) is the
+    # later authorized phase that evolves RDGO-001 -> v3.1, PBRD-001 -> v2.1,
+    # HPAC-001 -> v2.1 and adds a RIASC-001 errata; the endpoint is pinned so
+    # this remains a permanent historical check.
+    end_sha = "4d480553"
     for rel in (
         "docs/contracts/RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md",
         "docs/contracts/RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md",
@@ -835,7 +844,10 @@ def test_isolation_contract_and_pol005_bytes_unchanged_since_baseline():
             ["git", "show", f"{PRE_1R7_BASELINE}:{rel}"],
             cwd=REPO_ROOT, capture_output=True, check=True,
         ).stdout
-        cur = (REPO_ROOT / rel).read_bytes()
+        cur = subprocess.run(
+            ["git", "show", f"{end_sha}:{rel}"],
+            cwd=REPO_ROOT, capture_output=True, check=True,
+        ).stdout
         assert hashlib.sha256(old).hexdigest() == hashlib.sha256(cur).hexdigest(), rel
 
 

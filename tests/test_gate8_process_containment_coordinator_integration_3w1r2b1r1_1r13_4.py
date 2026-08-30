@@ -55,6 +55,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 G8_PATH = REPO_ROOT / "src/pcae/core/runtime_dispatch_gate8.py"
 G8_SRC = G8_PATH.read_text()
 PHASE_ENTRY_BASELINE = "6a9d650f54fb7a5c02652180f0bbcc3a41080198"
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 NOW = "2026-08-29T00:30:00Z"
 
 _ECHO = "/bin/echo"
@@ -811,7 +812,7 @@ def test_production_scope_since_baseline_is_the_single_new_gate8_file():
     # adds exactly runtime_dispatch_gate9.py. Phase-aware subset invariant;
     # gate8.py itself must still be present (the .1R.13.4 functional weight).
     changed = set(subprocess.run(
-        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
+        ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
     assert "src/pcae/core/runtime_dispatch_gate8.py" in changed
     assert changed <= {
@@ -837,7 +838,7 @@ def test_contracts_and_pol005_bytes_unchanged_since_baseline():
         "src/pcae/core/runtime_introspection.py",
     ):
         diff = subprocess.run(
-            ["git", "diff", PHASE_ENTRY_BASELINE, "HEAD", "--", rel],
+            ["git", "diff", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout
         assert diff == "", f"{rel} changed since baseline"
 

@@ -597,7 +597,8 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
         "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
-        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14)
+        "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14; V-15-1 .1R.15.2; durable snapshot .1R.15.4)
+        "src/pcae/core/runtime_invocation_authority_consumption.py",  # HPAC-AUTHORITY-CONSUMPTION/2.1 (.1R.15.4)
     }
     unexpected = set(changed) - _authorized_surface
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -608,23 +609,23 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
     [
         (
             "docs/contracts/RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md",
-            "38d98e9b6bfee3d1097628b73f7fdcd70ca932a9dfda9007e764c0e9e90a04d0",
+            "7cdcb801fab9aeb32971fe0b0ac597f6ec319d60c3e555cbb1d6224dc94c7762",
         ),
         (
             "docs/contracts/RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md",
-            "a47869ba315a55b829982d03989c755aa753af9fef52667d7775ead31a95f608",
+            "837f14fb79c2593ebb3bb7ad4dc8443094774f9d8f4be38c299acf3a4a5e36a6",
         ),
         (
             "docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md",
-            "24fd6fac04ea174d5387c4c945f5055896b77c466c149cd8d13dd3353db0567b",
+            "1140f96913f547c8d0f6196b8bdd8784e9be1aa501df809623218d4d441f8e08",
         ),
         (
             "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
-            "e0799d464af603b4be559c6be4607d2519635eea933ffd1cdde0e02d0e77ffef",
+            "b889073a78c10c1e9b62bb36c082176387d6d690ba9b1b23f94ecd291d9fa119",
         ),
         (
             "docs/contracts/RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md",
-            "24e1eefaedf4c63bc221e6460fecf3c055b88d9d7ba230a76d3ec113f511f5ab",
+            "a3c9abdd0a76954cc0e1babb075e42d0bd0c2ff4266297f19253a2fa41d2f12f",
         ),
         (
             "docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md",

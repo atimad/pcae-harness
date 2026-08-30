@@ -1,5 +1,21 @@
 # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.14 — Gate-9 Atomic Authority Consumption Coordinator Integration Implementation
 
+> **Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4.** This document
+> describes the `.1R.14` Gate-9 coordinator against RDGO-001 **v3.0** and
+> `HPAC-AUTHORITY-CONSUMPTION/**2.0**` (eight binding objects), with the
+> in-boundary revalidation "while holding the protected serialization
+> boundary". Superseded wording, per the independently verified
+> `.1R.15.2` / `.1R.15.3` repair and the `.1R.15.4` normalization:
+> (1) there is **no held lock** — the per-`proof_id` create-only atomic
+> primitive is the linearization point; the battery plus a zero-effectful-I/O
+> `S1`/`S2` authority-generation-token re-check run immediately before the
+> create (V-15-1; RDGO-001 v3.1 §10 / HPAC-001 v2.1 HPAC-REQ-099);
+> (2) the consumption record is now `HPAC-AUTHORITY-CONSUMPTION/**2.1**`
+> with **nine** binding objects — the ninth, `authority_generation_binding`
+> (`HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`), durably commits the exact `S1`
+> snapshot. The `.1R.14` verdict (IMPLEMENTED; Gate-9 later CLOSED by
+> `.1R.15`) stands.
+
 Status: **IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — NOT CLOSED.**
 
 Gate-9 Atomic Authority Consumption Coordinator: **IMPLEMENTED**. Not

@@ -44,21 +44,27 @@ def test_primary_evidence_contains_exact_open_findings() -> None:
     assert "OPEN ORIGINAL BLOCKING: B-3, B-4" in VERIFY
 
 
-def test_active_contract_versions_remain_exact() -> None:
-    assert HPAC.startswith("# HPAC-001 v2.0")
+def test_active_contract_versions_after_1r15_4_normalization() -> None:
+    # `.1R` left these at v2.0/v3.0; `.1R.15.4` normalized RDGO->v3.1,
+    # PBRD->v2.1, HPAC->v2.1 (all MINOR). RIHAC v2.0, RIASC v3.0, RPAC v1.0
+    # unchanged.
+    assert HPAC.startswith("# HPAC-001 v2.1")
     assert RIHAC.startswith("# RIHAC-001 v2.0")
     assert RIASC_PATH.read_text().startswith("# RIASC-001 v3.0")
-    assert PBRD_PATH.read_text().startswith("# PBRD-001 v2.0")
-    assert RDGO.startswith("# RDGO-001 v3.0")
+    assert PBRD_PATH.read_text().startswith("# PBRD-001 v2.1")
+    assert RDGO.startswith("# RDGO-001 v3.1")
     rpac = RPAC_PATH.read_text()
     assert "**Contract:** RPAC-001" in rpac
     assert "**Version:** 1.0" in rpac
 
 
-def test_unchanged_companion_contracts_are_byte_identical() -> None:
-    assert sha256(RIASC_PATH) == "a47869ba315a55b829982d03989c755aa753af9fef52667d7775ead31a95f608"
-    assert sha256(PBRD_PATH) == "e0799d464af603b4be559c6be4607d2519635eea933ffd1cdde0e02d0e77ffef"
+def test_rpac_companion_contract_is_byte_identical_and_riasc_pbrd_only_normalized() -> None:
+    # RPAC-001 is untouched by `.1R` and by `.1R.15.4`. RIASC-001 / PBRD-001
+    # carry only the authorized `.1R.15.4` normalization (RIASC §9 errata,
+    # PBRD §4a representation-equivalence clause + v2.1 header).
     assert sha256(RPAC_PATH) == "395f6b9d3f1779fb312f66e06819176417db6380193d1f5fee52668d43260c89"
+    assert PBRD_PATH.read_text().startswith("# PBRD-001 v2.1")
+    assert "Errata note (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 — V-3" in RIASC_PATH.read_text()
 
 
 def test_hpac_requirement_declarations_are_unique_and_gapless() -> None:
@@ -210,9 +216,13 @@ def test_gate9_consumption_binds_all_authority_and_attempt_identities() -> None:
 def test_gate9_revalidation_closes_revocation_expiry_toctou() -> None:
     assert "Revocation, expiry, invalidation, or drift after gate 5 but before" in HPAC
     gate9 = RDGO[RDGO.index("## 10. Gate 9"):RDGO.index("## 11. Gate 10")]
-    assert "Immediately before compare-and-create" in gate9
-    assert "revocation" in gate9
-    assert "TOCTOU" in gate9
+    # RDGO-001 v3.1 (.1R.15.4 — V-15-1): the "Immediately before
+    # compare-and-create ... while holding the serialization boundary"
+    # wording is normalized to the create-only-linearization + zero-I/O
+    # S1/S2 authority-generation-token re-check model.
+    assert "Immediately before that create" in gate9
+    assert "revalidation battery" in gate9
+    assert "no TOCTOU allowance" in gate9
 
 
 def test_crash_and_retry_outcomes_are_deterministic() -> None:

@@ -35,6 +35,7 @@ from test_hpac_verifier import NOW, _Rig
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PHASE_ENTRY_BASELINE = "1810c8d8d1d10ad5dc3cb0743dc0c20c71180ca5"
+_1R15_4_SCOPE_END = "4d480553"  # end of .1R.15.3; .1R.15.4 (Contract Normalization) is the later authorized change
 NON_REAL_STOP = "non_real_authenticated_principal_cannot_validate_production_approval"
 
 
@@ -396,7 +397,7 @@ _AUTHORIZED_RUNTIME_DISPATCH_CHAIN_SURFACE = {
 def test_only_expected_production_files_changed_since_baseline():
     changed = set(
         subprocess.run(
-            ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae"],
+            ["git", "diff", "--name-only", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", "src/pcae"],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout.split()
     )
@@ -417,7 +418,7 @@ def test_contracts_and_pol005_bytes_unchanged_since_baseline():
         "docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md",
     ):
         diff = subprocess.run(
-            ["git", "diff", PHASE_ENTRY_BASELINE, "HEAD", "--", rel],
+            ["git", "diff", PHASE_ENTRY_BASELINE, _1R15_4_SCOPE_END, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout
         assert diff == "", f"{rel} changed since baseline"

@@ -56,16 +56,21 @@ def _git_show(rev_path: str) -> str:
 
 
 def test_riasc_pbrd_rpac_byte_identical_to_pre_repair_commit() -> None:
-    """RIASC/PBRD/RPAC must be byte-identical to their pre-repair content,
-    verified against git history directly rather than a hardcoded hash."""
+    """RIASC/PBRD/RPAC were byte-identical to their pre-repair content
+    through the end of `.1R.15.3` (SHA 4d480553) — the `.1R` blocking
+    repair touched none of them. `.1R.15.4` (the later authorized
+    Runtime-Dispatch Contract Normalization) evolves PBRD-001 -> v2.1 and
+    adds a RIASC-001 errata; RPAC-001 stays unchanged. The endpoint is
+    pinned so this remains a permanent historical `.1R` check."""
+    end_sha = "4d480553"
     for rel in (
         "docs/contracts/RUNTIME_INVOCATION_APPROVAL_SCHEMA_CONTRACT.md",
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md",
     ):
         pre = _git_show(f"{PRE_REPAIR_SHA}:{rel}")
-        current = (ROOT / rel).read_text()
-        assert pre == current, f"{rel} drifted from pre-repair commit"
+        at_end = _git_show(f"{end_sha}:{rel}")
+        assert pre == at_end, f"{rel} drifted before .1R.15.4"
 
 
 def test_hpac_rihac_rdgo_changed_since_pre_repair_commit() -> None:
@@ -82,12 +87,15 @@ def test_hpac_rihac_rdgo_changed_since_pre_repair_commit() -> None:
         assert pre != current, f"{rel} unexpectedly unchanged"
 
 
-def test_versions_unchanged_headers() -> None:
-    assert HPAC.startswith("# HPAC-001 v2.0")
+def test_versions_after_1r15_4_normalization() -> None:
+    # `.1R` left these at v2.0/v3.0; `.1R.15.4` normalized RDGO->v3.1,
+    # PBRD->v2.1, HPAC->v2.1 (all MINOR). RIHAC v2.0, RIASC v3.0, RPAC v1.0
+    # unchanged.
+    assert HPAC.startswith("# HPAC-001 v2.1")
     assert RIHAC.startswith("# RIHAC-001 v2.0")
     assert RIASC.startswith("# RIASC-001 v3.0")
-    assert PBRD.startswith("# PBRD-001 v2.0")
-    assert RDGO.startswith("# RDGO-001 v3.0")
+    assert PBRD.startswith("# PBRD-001 v2.1")
+    assert RDGO.startswith("# RDGO-001 v3.1")
     assert "**Contract:** RPAC-001" in RPAC and "**Version:** 1.0" in RPAC
 
 
@@ -153,8 +161,11 @@ def test_lifecycle_rejects_forks_and_gaps() -> None:
 
 def test_gate5_does_not_consume() -> None:
     assert "does not consume the nonce/proof" in HPAC_FLAT
-    assert "but does not consume the" in RDGO_FLAT
+    # RDGO-001 v3.1 §6 (.1R.15.4 — V-2): gate 5 "re-confirms (read-only) ...
+    # and does not consume the approval, nonce, presentation, or proof".
+    assert "does not consume the" in RDGO_FLAT
     assert "approval, nonce, presentation, or proof" in RDGO_FLAT
+    assert "re-confirms (read-only) the current HPAC lifecycle sequence 3" in RDGO_FLAT
 
 
 def test_gate9_single_atomic_consumption_record() -> None:
