@@ -2,6 +2,74 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.2 — Gate-9 Atomic-Consumption
+Serialization-Semantics Repair.
+**IMPLEMENTED — INDEPENDENT VERIFICATION PENDING — V-15-1 NOT YET CLOSED.**
+Narrow V-15-1 repair (frozen `.1R.15.1` §14 Option B), in-memory only:
+`run_gate9_atomic_authority_consumption` now captures a monotonic
+`AuthorityGenerationSnapshot` **S1** the instant the full HPAC-REQ-099
+in-boundary revalidation battery succeeds (step 14a), re-reads it as **S2**
+immediately before the create-only linearization with **zero intervening
+effectful I/O** (step 15a), and fails closed on any change — a principal /
+credential revocation or disablement, an eligibility change, a canonical
+record replacement, a lifecycle invalidation, or a consumption record
+appearing between S1 and S2 yields no `consumption.json`. Tokens:
+`principal_generation` / `credential_generation` / `approval_generation`
+(canonical record digests via a new trusted `authority_generation_resolver`
+DI param), `lifecycle_generation` (digest over the full provenance-checked
+proof lifecycle chain — subsumes proof-state), `consumption_generation`
+(absent / present / durability-uncertain-fail-closed). The per-`proof_id`
+create-only primitive remains the **sole** linearization point — no second
+lock, no transaction system, no bearer object. New fail-closed reasons:
+`gate9_authority_generation_drift:<token>`,
+`gate9_invalid_authority_generation_resolver`,
+`gate9_authority_generation_snapshot_incomplete`.
+**Contract-embedding decision (surfaced to and adjudicated by the primary
+operator):** HPAC-REQ-098 defines `authority_binding` as a closed 12-field
+set with no extensibility clause, and `registry_state_digest` normatively
+denotes the registry/configuration digest (HPAC-REQ-095/099), **not** the
+full mutable-authority-generation vector — that semantic permission is not
+provable from the frozen contracts. Therefore the persisted consumption
+record is **left unchanged** (`runtime_invocation_authority_consumption.py`
+byte-unchanged) and **durable / re-readable generation-state commitment for
+Gate 10's second line of defense is DEFERRED TO `.1R.15.4` contract
+normalization** — not silently satisfied. Disposition distinguishes
+**V-15-1 production race window: REPAIRED — independent verification
+pending** from **durable Gate-10 generation-snapshot representation:
+DEFERRED TO `.1R.15.4`**.
+**Bundled hygiene:** V-15-2 — the three `_3w1r2b1r111r31/32/321`
+HPAC-foundation zero-consumer guards converted to phase-aware SUBSET
+invariants (`observed - AUTHORIZED_CONSUMERS == set()`, explicit
+enumeration incl. gate9's three authorized imports, no wildcard,
+unauthorized future consumers still fail; fixed-SHA A/B: FAIL@`d78d9676` ->
+PASS@HEAD). V-15-3 — the three `.1R.14` raw
+`is_gate5_result` assignments replaced with `monkeypatch.setattr`. Both
+**REPAIRED — INDEPENDENT VERIFICATION PENDING**.
+**Production diff: `src/pcae/core/runtime_dispatch_gate9.py` only.** New
+focused suite `test_gate9_serialization_semantics_repair_3w1r2b1r1_1r15_2.py`
+(44 tests). Fixed-SHA A/B (`d78d9676`): `.1R.14` 63/63, `.1R.15` 76/76,
+adjacent Gate 5-8 + B1/B7/N1/N2 + runtime-authority 383/383, consumption
+store 127/127; the 3 V-15-2 guards FAIL@baseline -> PASS@HEAD; the ~13
+remaining HPAC-foundation-reproduction / HATP-contract-byte failures are
+pre-existing and identical at baseline.
+**CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0. UNEXPLAINED
+ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.**
+**Recommended next (not begun; needs its own explicit human
+authorization): `149O.20L.7O.3W.1R.2B.1R.1.1R.15.3` — Independent
+Verification of the Gate-9 Serialization-Semantics Repair.** Do not begin
+`.1R.15.4`. Do not plan or implement Gate 10. Gate 10 keeps no phase ID.
+Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_15_2_GATE_9_ATOMIC_CONSUMPTION_SERIALIZATION_SEMANTICS_REPAIR.md`.
+A standalone task-memory hygiene commit (`07ba5f99`, pushed) preceded phase
+entry, reconciling one stale `active` idle task (post-`.1R.12`) into
+`tasks/done/` + `tasks/DONE.md`.
+Runtime remains `not_implemented / Observed / observe / unavailable`;
+POL-005 unchanged; real execution UNAVAILABLE; deterministic authentication
+NON_REAL. The delegated `.3` finalization / commit / push incident remains
+UNAUTHORIZED.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.1 — Runtime-Dispatch Contract
 Clarification and Verified-Architecture Normalization Planning.
 **PLANNING / RECONCILIATION COMPLETE. No production source or normative

@@ -26,6 +26,7 @@ Implement the narrow V-15-1 Gate-9 serialization-semantics repair frozen by .1R.
 - src/pcae/core/runtime_invocation_authority_consumption.py
 - tests/test_gate9_serialization_semantics_repair_3w1r2b1r1_1r15_2.py
 - tests/test_gate9_atomic_authority_consumption_coordinator_integration_3w1r2b1r1_1r14.py
+- tests/test_gate9_atomic_authority_consumption_coordinator_independent_verification_3w1r2b1r1_1r15.py
 - tests/test_hpac_foundation_independent_verification_3w1r2b1r111r31.py
 - tests/test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py
 - tests/test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py
