@@ -373,7 +373,17 @@ def test_no_unpushed_divergence_at_verification_entry():
     # origin/main..HEAD is re-checked at finalization by pcae push; here we
     # only assert the working tree carries no production/contract drift.
     prod = _git("diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae", "docs/contracts")
-    assert set(prod.split()) <= {"src/pcae/core/runtime_dispatch_gate10_eligibility.py"}
+    # Slice A: the one new coordinator. Slice B (.1R.19): + the exact
+    # `.1R.16`-§38 authorized set (no docs/contracts change either way).
+    _slice_a_plus_b = {
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
+        "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
+        "src/pcae/core/runtime_invocation.py",
+        "src/pcae/core/runtime_adapter.py",
+        "src/pcae/core/runtime_introspection.py",
+        "src/pcae/commands/runtime_inspect.py",
+    }
+    assert set(prod.split()) <= _slice_a_plus_b, set(prod.split()) - _slice_a_plus_b
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -1242,11 +1252,16 @@ _UNCHANGED_SINCE_BASELINE = [
     "src/pcae/core/runtime_dispatch_gate9.py",
     "src/pcae/core/runtime_dispatch_permission.py",
     "src/pcae/core/runtime_invocation_authority_consumption.py",
-    "src/pcae/core/runtime_introspection.py",
     "src/pcae/core/runtime_authority.py",
-    "src/pcae/core/runtime_adapter.py",
     "src/pcae/core/runtime_registry.py",
     "src/pcae/core/mock_runtime_adapter.py",
+    # `runtime_introspection.py` / `runtime_adapter.py` were byte-frozen
+    # for Slice A but are authorized Slice-B (.1R.19) targets by `.1R.16`
+    # §36.2 / §38 (3S.2.1 MUST-FIX #1 + the item-9 runtime-inspect repair);
+    # they are removed from this Slice-A byte-freeze list. The Slice-A
+    # coordinator itself (runtime_dispatch_gate10_eligibility.py) stays
+    # byte-unchanged through Slice B — asserted by
+    # test_production_scope_since_baseline_is_exactly_one_new_file below.
     "src/pcae/core/permission_broker_foundation.py",
     "src/pcae/core/shell_gate.py",
     "docs/contracts/RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md",
@@ -1268,6 +1283,20 @@ def test_file_byte_unchanged_since_phase_entry_baseline(rel):
     assert diff == "", f"{rel} changed since {PHASE_ENTRY_BASELINE}"
 
 
+#: Slice A alone: exactly one new file. Slice B (.1R.19) additionally
+#: admits the exact `.1R.16`-§38-authorized set (the two 3S.2.1 MUST-FIX
+#: repairs + the item-9 runtime-inspect repair + one new non-authoritative
+#: mirror module). An unauthorized production-file expansion still fails.
+_SLICE_A_PLUS_B_SCOPE = {
+    "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
+    "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
+    "src/pcae/core/runtime_invocation.py",
+    "src/pcae/core/runtime_adapter.py",
+    "src/pcae/core/runtime_introspection.py",
+    "src/pcae/commands/runtime_inspect.py",
+}
+
+
 def test_production_scope_since_baseline_is_exactly_one_new_file():
     changed = set(
         subprocess.run(
@@ -1275,7 +1304,14 @@ def test_production_scope_since_baseline_is_exactly_one_new_file():
             cwd=REPO_ROOT, capture_output=True, text=True,
         ).stdout.split()
     )
-    assert changed == {"src/pcae/core/runtime_dispatch_gate10_eligibility.py"}
+    assert changed <= _SLICE_A_PLUS_B_SCOPE, sorted(changed - _SLICE_A_PLUS_B_SCOPE)
+    # the Slice-A coordinator is byte-unchanged since its own creation
+    r17_head = "c618134a"
+    assert subprocess.run(
+        ["git", "diff", r17_head, "HEAD", "--",
+         "src/pcae/core/runtime_dispatch_gate10_eligibility.py"],
+        cwd=REPO_ROOT, capture_output=True, text=True, check=True,
+    ).stdout == ""
 
 
 def test_runtime_registry_still_empty():

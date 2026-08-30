@@ -112,6 +112,17 @@ _G7 = "src/pcae/core/runtime_dispatch_gate7.py"
 _G8 = "src/pcae/core/runtime_dispatch_gate8.py"
 _G9 = "src/pcae/core/runtime_dispatch_gate9.py"
 _STORE = "src/pcae/core/runtime_invocation_authority_consumption.py"
+
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B) production files,
+#: authorized by `.1R.16` §36.2 / §38. Exact filenames; an unauthorized
+#: production-file expansion still fails every subset check below.
+_SLICE_B = {
+    "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
+    "src/pcae/core/runtime_invocation.py",
+    "src/pcae/core/runtime_adapter.py",
+    "src/pcae/core/runtime_introspection.py",
+    "src/pcae/commands/runtime_inspect.py",
+}
 _GATE10 = G10_MODULE
 
 # The 17 nodes .1R.18 §2.2 discovered, with the .1R.17R §5 classification.
@@ -307,7 +318,8 @@ def test_r155_byte_scope_fence_forbidden_set_is_asserted_separately():
 def test_gate_5_perm_7_8_are_byte_unchanged_since_r153_baseline():
     changed = set(_git("diff", "--name-only", R153_BASELINE, "HEAD", "--", "src/pcae/core").split())
     assert not (changed & {_G5, _PERM, _G7, _G8}), changed & {_G5, _PERM, _G7, _G8}
-    assert changed <= {_G9, _STORE, _GATE10}, changed - {_G9, _STORE, _GATE10}
+    allowed = {_G9, _STORE, _GATE10} | _SLICE_B
+    assert changed <= allowed, changed - allowed
 
 
 def test_a_synthetic_gate5_change_would_still_trip_the_fence():
@@ -441,13 +453,20 @@ def test_repaired_tree_is_still_not_rewritten_to_say_zero_added_was_correct():
 # ══════════════════════════════════════════════════════════════════════════
 # 26-31. No production / contract / Gate 5-9 drift
 # ══════════════════════════════════════════════════════════════════════════
-def test_no_production_source_changed_since_the_r17_head():
-    assert _git("diff", R17_HEAD, "HEAD", "--", "src/pcae").strip() == ""
+def test_no_production_source_changed_since_the_r17_head_except_authorized_slice_b():
+    # .1R.17R froze src/pcae at R17_HEAD; Slice B (.1R.19) is authorized by
+    # `.1R.16` §36.2 / §38 to change exactly _SLICE_B (+ the new mirror
+    # module) and the Slice-A coordinator stays byte-unchanged.
+    changed = set(_git("diff", "--name-only", R17_HEAD, "HEAD", "--", "src/pcae").split())
+    assert changed <= _SLICE_B, changed - _SLICE_B
+    assert _git("diff", R17_HEAD, "HEAD", "--", G10_MODULE).strip() == ""
 
 
-def test_production_scope_since_baseline_is_exactly_the_one_r17_file():
-    names = _git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split()
-    assert names == [G10_MODULE]
+def test_production_scope_since_baseline_is_the_one_r17_file_plus_authorized_slice_b():
+    names = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split())
+    allowed = {G10_MODULE} | _SLICE_B
+    assert names <= allowed, names - allowed
+    assert G10_MODULE in names
 
 
 def test_no_normative_contract_changed_since_baseline():
@@ -456,10 +475,12 @@ def test_no_normative_contract_changed_since_baseline():
 
 
 def test_gate_5_to_9_and_neighbour_modules_byte_identical_since_baseline():
+    # runtime_introspection.py / runtime_adapter.py are authorized Slice-B
+    # (.1R.19) targets and are intentionally not in this Slice-A byte list.
     for m in ("runtime_dispatch_gate5.py", "runtime_dispatch_permission.py",
               "runtime_dispatch_gate7.py", "runtime_dispatch_gate8.py",
-              "runtime_dispatch_gate9.py", "runtime_introspection.py",
-              "runtime_authority.py", "runtime_adapter.py", "runtime_registry.py",
+              "runtime_dispatch_gate9.py",
+              "runtime_authority.py", "runtime_registry.py",
               "permission_broker_foundation.py"):
         assert _git("diff", BASELINE, "HEAD", "--", f"src/pcae/core/{m}").strip() == "", m
 

@@ -509,6 +509,14 @@ _AUTHORIZED_GATE_CHAIN_SURFACE = {
     "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14; V-15-1 .1R.15.2; durable snapshot .1R.15.4)
     "src/pcae/core/runtime_invocation_authority_consumption.py",  # HPAC-AUTHORITY-CONSUMPTION/2.1 (.1R.15.4)
     "src/pcae/core/runtime_dispatch_gate10_eligibility.py",  # Gate-10 pre-effect eligibility, Slice A (.1R.17) — non-effecting
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B — dispatch-attempt
+    # durable lifecycle + the two 3S.2.1 MUST-FIX repairs + the item-9
+    # runtime-inspect repair; `.1R.16` §36.2 / §38). Exact filenames.
+    "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
+    "src/pcae/core/runtime_invocation.py",
+    "src/pcae/core/runtime_adapter.py",
+    "src/pcae/core/runtime_introspection.py",
+    "src/pcae/commands/runtime_inspect.py",
 }
 
 

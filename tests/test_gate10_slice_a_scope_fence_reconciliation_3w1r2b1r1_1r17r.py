@@ -145,6 +145,18 @@ _G9 = "src/pcae/core/runtime_dispatch_gate9.py"
 _PERM = "src/pcae/core/runtime_dispatch_permission.py"
 _STORE = "src/pcae/core/runtime_invocation_authority_consumption.py"
 
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B) production files,
+#: authorized by `.1R.16` §36.2 / §38 (dispatch-attempt durable lifecycle +
+#: the two 3S.2.1 MUST-FIX repairs + the item-9 runtime-inspect repair).
+#: Exact filenames; an unauthorized production-file expansion still fails.
+_SLICE_B = {
+    "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
+    "src/pcae/core/runtime_invocation.py",
+    "src/pcae/core/runtime_adapter.py",
+    "src/pcae/core/runtime_introspection.py",
+    "src/pcae/commands/runtime_inspect.py",
+}
+
 RECONCILED_ALLOWLISTS = {
     "Gate7Result|is_gate7_result": {_G7, _G8, _G9, _GATE10},
     "Gate8Result|is_gate8_result": {_G8, _G9, _GATE10},
@@ -257,8 +269,11 @@ def test_gate5_permission_gate7_gate8_still_byte_unchanged_since_r153():
     )
     forbidden = {_G5, _PERM, _G7, _G8}
     assert not (changed & forbidden), changed & forbidden
-    # only the two Gate-9-era files plus the single new Slice-A module moved.
-    assert changed <= {_G9, _STORE, _GATE10}, changed - {_G9, _STORE, _GATE10}
+    # the two Gate-9-era files + the new Slice-A module + the .1R.16-§38
+    # authorized Slice-B set; Gate 5 / permission / Gate 7 / Gate 8 stay
+    # forbidden (asserted above).
+    allowed = {_G9, _STORE, _GATE10} | _SLICE_B
+    assert changed <= allowed, changed - allowed
 
 
 def test_scope_fence_would_still_flag_an_unauthorized_gate_change():
@@ -346,7 +361,11 @@ def test_r17_doc_carries_an_appended_erratum_section_only():
 # ══════════════════════════════════════════════════════════════════════════
 def test_no_production_source_changed_since_baseline_except_the_one_r17_file():
     changed = set(_git("diff", "--name-only", IMMUTABLE_BASELINE, "HEAD", "--", "src/pcae").split())
-    assert changed == {G10_MODULE}, changed
+    # Slice A: exactly the one new coordinator. Slice B (.1R.19) adds the
+    # exact `.1R.16`-§38 authorized set — subset check, not equality.
+    allowed = {G10_MODULE} | _SLICE_B
+    assert changed <= allowed, changed - allowed
+    assert G10_MODULE in changed
 
 
 def test_no_working_tree_production_or_contract_diff():

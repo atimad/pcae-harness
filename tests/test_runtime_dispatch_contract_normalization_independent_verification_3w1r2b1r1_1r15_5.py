@@ -575,6 +575,14 @@ def test_gate_5_6_7_8_production_modules_byte_unchanged_since_baseline():
         # Gate 5 / permission / Gate 7 / Gate 8 remain byte-unchanged (asserted
         # via `forbidden` above); this only widens the observed-delta allowlist.
         "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B — dispatch-attempt
+        # durable lifecycle + the two 3S.2.1 MUST-FIX repairs + the item-9
+        # runtime-inspect repair; `.1R.16` §36.2 / §38). Gate 5 / permission
+        # / Gate 7 / Gate 8 remain byte-unchanged (asserted via `forbidden`).
+        "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
+        "src/pcae/core/runtime_invocation.py",
+        "src/pcae/core/runtime_adapter.py",
+        "src/pcae/core/runtime_introspection.py",
     }
     assert changed <= allowed, changed - allowed
 
