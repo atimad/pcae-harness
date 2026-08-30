@@ -77,9 +77,9 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1: close phase task, transition to idle; expand idle-task allowed-file zone for canonical completion authorship"
     }
   ],
-  "origin_main_head": "pending_push",
+  "origin_main_head": "be7e08f9e0a5d38448b196db81e4491ef7b98f81",
   "origin_main_head_count": 0,
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.19 -- Dispatch-Attempt Durable Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs (Slice B). Slice-A lifecycle acceptance is now independently reconciled (.1R.18 blocker CLOSED, scope-fence reconciliation CLOSED, .1R.17 erratum CLOSED). Slice C / D keep no phase ID. Do not implement the Gate-10 effect. Do not enable execution.",
   "report_consistency": "canonical verification report staged pending governed push"
 }
