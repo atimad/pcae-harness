@@ -56,6 +56,7 @@ import json
 
 from pcae.core.command_path_observation import INTEGRATION_REGISTRY
 from pcae.core.paths import HarnessPath
+from pcae.core.runtime_introspection import get_adapter_surfaces
 from pcae.core.runtime_registry import RuntimeRegistry
 from pcae.core.runtime_snapshot import build_runtime_snapshot, snapshot_to_dict
 
@@ -94,7 +95,34 @@ def _format_human(snapshot: dict, verbose: bool) -> str:
         f"Runtime principles:        {len(principles)} frozen ({', '.join(principles)})",
     ]
 
+    # 3S.2.1 item-9 runtime-inspect discoverability repair (Slice B): an
+    # observational, non-mutating one-line pointer that other,
+    # RuntimeRegistry-independent runtime-adapter-shaped surfaces coexist
+    # in this repository, so "Plugin count: 0 / Registry status: empty"
+    # above is not over-read as "nothing runtime-adapter-shaped exists".
+    # Every surface is non-effecting and execution remains unavailable;
+    # this implies NO adapter readiness. Full detail in `--verbose`.
+    adapter_surfaces = get_adapter_surfaces()
+    if adapter_surfaces:
+        lines.append(
+            f"Runtime-adapter surfaces:  {len(adapter_surfaces)} coexisting, "
+            f"all non-effecting, execution {health['execution_availability']} "
+            f"(observational; use --verbose)"
+        )
+
     if verbose:
+        lines.append("")
+        lines.append(
+            "Runtime-adapter surfaces (observational — no adapter enabled, execution unavailable):"
+        )
+        for s in adapter_surfaces:
+            lines.append(
+                f"  - {s.surface_id} ({s.kind}): effecting={s.effecting} "
+                f"authoritative={s.authoritative} execution={s.execution_availability}"
+            )
+            lines.append(f"      {s.description}")
+            lines.append(f"      reachable via: {s.reachable_via}")
+
         lines.append("")
         lines.append("Plugin metadata:")
         if snapshot["plugins"]:

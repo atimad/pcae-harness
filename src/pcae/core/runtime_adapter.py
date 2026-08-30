@@ -485,15 +485,40 @@ def simulate_invocation(
     store.append_event(request.invocation_id, request.attempt_id, observation)
     trace.append(SIM_DISPATCH_INTENT)
 
-    receipt = resolved.adapter.dispatch(envelope)
+    try:
+        receipt = resolved.adapter.dispatch(envelope)
+    except Exception as exc:  # noqa: BLE001 - adapter is untrusted; fail closed
+        return _fail(
+            trace, adapter_calls, FAILURE_MALFORMED_RESULT,
+            (f"dispatch_raised:{type(exc).__name__}",), observation.state,
+        )
     adapter_calls += 1
-    if not receipt.accepted:
-        return _fail(trace, adapter_calls, FAILURE_MALFORMED_RESULT, ("dispatch_not_accepted",), observation.state)
+    if not isinstance(receipt, DispatchReceipt) or not getattr(receipt, "accepted", False):
+        return _fail(
+            trace, adapter_calls, FAILURE_MALFORMED_RESULT, ("dispatch_not_accepted",), observation.state
+        )
     observation = next_state_observation(observation, SIM_DISPATCHED, clock())
     store.append_event(request.invocation_id, request.attempt_id, observation)
     trace.append(SIM_DISPATCHED)
 
-    result = resolved.adapter.collect(request.attempt_id)
+    try:
+        result = resolved.adapter.collect(request.attempt_id)
+    except Exception as exc:  # noqa: BLE001 - adapter is untrusted; fail closed
+        return _fail(
+            trace, adapter_calls, FAILURE_MALFORMED_RESULT,
+            (f"collect_raised:{type(exc).__name__}",), observation.state,
+        )
+    malformed_reasons = malformed_adapter_result_reasons(result, request)
+    if malformed_reasons:
+        # 3S.2.1 MUST-FIX #1: a non-conforming adapter.collect() return
+        # (e.g. a plain dict, wrong ids, wrong effect, an exception) fails
+        # closed with a clean FAILURE_MALFORMED_RESULT SimulationOutcome
+        # BEFORE any state transition or store.write_result() -- never an
+        # uncaught AttributeError inside the store, and never a persisted
+        # result.json / intake-handoff.json.
+        return _fail(
+            trace, adapter_calls, FAILURE_MALFORMED_RESULT, malformed_reasons, observation.state
+        )
     observation = next_state_observation(observation, SIM_COMPLETED, clock())
     store.append_event(request.invocation_id, request.attempt_id, observation)
     trace.append(SIM_COMPLETED)
@@ -557,6 +582,58 @@ def build_intake_handoff(
         summary=str(result.structured_payload.get("message", "")),
         adapter_version=f"{result.adapter_id}/1.0",
     )
+
+
+#: The terminal outcomes a conforming mock-v1 `RuntimeInvocationResult`
+#: may carry (`accepted`/`terminal_outcome` are distinct axes -- a
+#: `failure` content outcome is still a well-formed, accepted simulation).
+_KNOWN_TERMINAL_OUTCOMES: frozenset[str] = frozenset({"success", "failure"})
+
+
+def malformed_adapter_result_reasons(
+    result: object, request: InvocationRequest
+) -> tuple[str, ...]:
+    """3S.2.1 MUST-FIX #1 — strict, fail-closed validation of an
+    `adapter.collect()` return before `store.write_result()` is ever
+    reached (RPAC-REQ-035/036/037; RDGO-001 v3.1 §12 "Malformed output
+    fails closed and must never be persisted as a successful result").
+
+    Returns an empty tuple for a conforming `RuntimeInvocationResult`
+    bound to exactly this request, or a tuple of stable reason stems
+    otherwise. Never raises. Acceptance is NOT loosened to preserve an
+    old test: a plain `dict`, a wrong-id result, a non-simulation result,
+    an effecting result, an unknown terminal outcome, or a structurally
+    incomplete result all fail closed here."""
+    reasons: list[str] = []
+    if not isinstance(result, RuntimeInvocationResult):
+        return (f"not_a_runtime_invocation_result:{type(result).__name__}",)
+    if result.invocation_id != request.invocation_id:
+        reasons.append("invocation_id_mismatch")
+    if result.attempt_id != request.attempt_id:
+        reasons.append("attempt_id_mismatch")
+    if result.idempotency_key != request.idempotency_key:
+        reasons.append("idempotency_key_mismatch")
+    if result.contract_version != request.contract_version:
+        reasons.append("contract_version_mismatch")
+    if result.runtime_target_id != request.runtime_target_id:
+        reasons.append("runtime_target_id_mismatch")
+    if result.simulation_only is not True:
+        reasons.append("not_simulation_only")
+    if result.execution_effect != "none":
+        reasons.append("execution_effect_not_none")
+    if result.untrusted is not True:
+        reasons.append("result_not_untrusted")
+    if result.terminal_outcome not in _KNOWN_TERMINAL_OUTCOMES:
+        reasons.append("unknown_terminal_outcome")
+    if not isinstance(result.result_digest, str) or not result.result_digest:
+        reasons.append("missing_result_digest")
+    if not isinstance(result.payload_digest, str) or not result.payload_digest:
+        reasons.append("missing_payload_digest")
+    if not isinstance(result.structured_payload, Mapping):
+        reasons.append("structured_payload_not_mapping")
+    if not isinstance(result.changed_files, tuple):
+        reasons.append("changed_files_not_tuple")
+    return tuple(reasons)
 
 
 def _fail(

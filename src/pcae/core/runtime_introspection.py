@@ -156,6 +156,93 @@ EXECUTION_AVAILABILITY: str = "unavailable"
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# Runtime-adapter surface discoverability (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19,
+# Slice B — 3S.2.1 item-9 runtime-inspect repair)
+# ═══════════════════════════════════════════════════════════════════════
+#
+# 3S.2.1 §44/§61 recorded a TRUTHFUL_WITH_LIMITATION discoverability gap:
+# the RegistryInfo `pcae runtime inspect` reports is the long-lived
+# `RuntimeRegistry` (empty), but a *separate*, transient, per-call RPAC-001
+# mock/dry runtime-adapter surface exists in production (reachable via
+# `pcae session bootstrap --dry-runtime`) and a plain "Plugin count: 0 /
+# Capability count: 0 / Registry status: empty" is easy for an operator to
+# over-read as "nothing runtime-adapter-shaped exists in this repo".
+#
+# This repair adds an OBSERVATIONAL, NON-MUTATING surface list: static,
+# frozen facts, no registry read, no adapter instantiation, no `simulate_*`
+# call, no capability enablement. Every entry is truthful about being
+# simulation-only / non-authoritative and about execution remaining
+# `unavailable`. It implies NO adapter readiness and NO execution
+# enablement (phase prompt §35 / §37).
+
+
+@dataclass(frozen=True)
+class RuntimeAdapterSurfaceInfo:
+    """One coexisting runtime-adapter-shaped surface in this repository,
+    described by static frozen facts. `effecting` is `False` for every
+    surface today; `execution_availability` restates the global
+    `unavailable` posture so no entry can be over-read as a readiness
+    claim."""
+
+    surface_id: str
+    kind: str
+    description: str
+    reachable_via: str
+    effecting: bool
+    authoritative: bool
+    execution_availability: str
+
+
+#: The frozen, non-executing runtime-adapter surface inventory. Static
+#: data — this tuple is the whole implementation; nothing is computed,
+#: instantiated, or invoked to produce it.
+RUNTIME_ADAPTER_SURFACES: tuple[RuntimeAdapterSurfaceInfo, ...] = (
+    RuntimeAdapterSurfaceInfo(
+        surface_id="rpac-mock-v1-dry-consumption",
+        kind="simulation",
+        description=(
+            "RPAC-001 v1.0 mock/dry runtime-adapter simulation coordinator "
+            "(runtime_adapter.simulate_invocation) — fixed local fixtures, "
+            "no process spawn, no network, execution_effect=none. Not "
+            "wired to the RDGO Gate 5-11 chain."
+        ),
+        reachable_via="pcae session bootstrap --dry-runtime --runtime-target <fixture-id>",
+        effecting=False,
+        authoritative=False,
+        execution_availability=EXECUTION_AVAILABILITY,
+    ),
+    RuntimeAdapterSurfaceInfo(
+        surface_id="gate10-pre-effect-eligibility",
+        kind="pre_effect_eligibility",
+        description=(
+            "Gate-10 pre-effect eligibility + DispatchEnvelope coordinator "
+            "(runtime_dispatch_gate10_eligibility, Slice A) — control-plane "
+            "read-back battery only, contains no adapter.dispatch() call site."
+        ),
+        reachable_via="no production-reachable positive path (RDGO gate chain: real Gate 7 DENY, POL-005 hard DENY, execution unavailable)",
+        effecting=False,
+        authoritative=False,
+        execution_availability=EXECUTION_AVAILABILITY,
+    ),
+    RuntimeAdapterSurfaceInfo(
+        surface_id="dispatch-attempt-durable-lifecycle",
+        kind="durable_mirror",
+        description=(
+            "Non-authoritative append-only dispatch-attempt mirror record "
+            "(runtime_dispatch_attempt_lifecycle, Slice B) — PREPARED / "
+            "EFFECT_ATTEMPT_STARTED / RECEIPT_CAPTURED / DISPATCH_UNCERTAIN / "
+            "DISPATCH_NOT_STARTED. Evidence/coordination state only; "
+            "authorizes no effect."
+        ),
+        reachable_via="written only by a trusted Gate-10 caller; no positive production path exists",
+        effecting=False,
+        authoritative=False,
+        execution_availability=EXECUTION_AVAILABILITY,
+    ),
+)
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # Introspection objects — inert data records, mirroring 111A §4
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -329,6 +416,15 @@ def get_governance() -> GovernanceInfo:
         observed_command_paths=len(INTEGRATION_REGISTRY),
         execution_capability=EXECUTION_AVAILABILITY,
     )
+
+
+def get_adapter_surfaces() -> tuple[RuntimeAdapterSurfaceInfo, ...]:
+    """The coexisting non-executing runtime-adapter surfaces (Slice B
+    3S.2.1 item-9 runtime-inspect repair). Returns the frozen static
+    :data:`RUNTIME_ADAPTER_SURFACES` tuple verbatim — reads no registry,
+    instantiates no adapter, invokes nothing, mutates nothing, and never
+    changes execution availability."""
+    return RUNTIME_ADAPTER_SURFACES
 
 
 def get_state() -> RuntimeStateInfo:

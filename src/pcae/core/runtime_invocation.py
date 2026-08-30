@@ -34,6 +34,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Mapping
 
+from pcae.core.hpac_foundation import (
+    HPACMalformedError,
+    require_safe_relative_id_component,
+)
+
 Clock = Callable[[], str]
 """An injected clock: a zero-argument callable returning a fixed,
 deterministic ISO-8601 UTC timestamp string. No function in this module
@@ -849,6 +854,24 @@ class InvocationIntegrityError(Exception):
     redispatch."""
 
 
+def _require_safe_store_component(value: object, *, context: str) -> str:
+    """3S.2.1 MUST-FIX #2 (defense-in-depth path containment). Require an
+    identifier that will be joined onto the store root to be exactly one
+    safe filesystem path segment -- rejecting `.`, `..`, and any path
+    separator *before* the join, using the repository's canonical
+    `require_safe_relative_id_component` grammar (the same helper the
+    canonical HPAC consumption store uses). A crafted `invocation_id` /
+    `attempt_id` such as `../../../../tmp/x` therefore can never select a
+    location outside `.pcae/runtime-invocations/mock-v1/`. Production
+    callers always pass `new_invocation_id()` / `new_attempt_id()` values,
+    which satisfy this grammar unchanged; this guard only matters for any
+    future caller that relays the field from less-trusted input."""
+    try:
+        return require_safe_relative_id_component(value, context=context)
+    except HPACMalformedError as exc:
+        raise InvocationIntegrityError(f"unsafe_path_component:{context}:{exc}") from exc
+
+
 class RuntimeInvocationStore:
     """Append-only, create-only, repository-local persistence for mock-v1
     invocation records (RPAC-REQ-067). Every document under its root is
@@ -859,12 +882,26 @@ class RuntimeInvocationStore:
         self._invocations_root = Path(root) / STORE_ROOT
 
     def _invocation_dir(self, invocation_id: str) -> Path:
-        return self._invocations_root / invocation_id
+        safe = _require_safe_store_component(invocation_id, context="invocation_id")
+        return self._invocations_root / safe
 
     def _attempt_dir(self, invocation_id: str, attempt_id: str) -> Path:
-        return self._invocation_dir(invocation_id) / "attempts" / attempt_id
+        safe_attempt = _require_safe_store_component(attempt_id, context="attempt_id")
+        return self._invocation_dir(invocation_id) / "attempts" / safe_attempt
+
+    def _assert_within_root(self, path: Path) -> None:
+        """Post-join containment check on the *resolved* path (not a string
+        prefix): every persisted document SHALL live strictly beneath the
+        store root even if a component check is ever bypassed or a symlink
+        is involved."""
+        root = self._invocations_root.resolve(strict=False)
+        try:
+            path.resolve(strict=False).relative_to(root)
+        except ValueError as exc:
+            raise InvocationIntegrityError(f"path_escapes_store_root:{path}") from exc
 
     def _write_create_only(self, path: Path, document: Mapping[str, object]) -> None:
+        self._assert_within_root(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         if path.exists():
             raise InvocationIntegrityError(f"record_already_exists:{path}")
