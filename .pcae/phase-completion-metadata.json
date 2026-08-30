@@ -42,7 +42,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing O4 hygiene debt); no current-phase error",
-    "pcae_push_check": "pending_push",
+    "pcae_push_check": "ready_to_push (post-commit; reconciled after governed push)",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins/capabilities; Permission Broker status execution_unavailable; governance posture non-executing -- re-asserted at phase entry and finalization; byte-identical",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -88,8 +88,9 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.18: open dedicated governed phase task (independent verification of the Gate-10 pre-effect eligibility coordinator)"
     }
   ],
-  "origin_main_head": "pending_push",
-  "origin_main_head_count": "pending_push",
-  "pushed_status": "pending",
-  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.17R -- Gate-10 Slice-A Scope-Fence and Verification-Evidence Reconciliation (requires its own separate explicit human authorization). Scope: (a) widen the 16 legitimate stale consumer-inventory / allowlist guards (.1R.13.2 / .1R.13.4 / .1R.13.5 / .1R.14 / .1R.15) to admit runtime_dispatch_gate10_eligibility.py as the authorized RDGO-001 v3.1 section 11 item 4 / .1R.16 section 16 consumer -- each guard still rejecting any other importer; (b) repair the 1 docstring-grep guard (test_sole_semantic_owner_of_gate9_consumption_boundary); (c) extend the .1R.15.5 byte-scope allowed set (Gate 5-8 remain byte-unchanged); (d) attach a preserved-original erratum to the .1R.17 canonical doc and, as a governed amendment, correct the .1R.17 completion metadata / report A/B figure to the true '17 added (all explained), 0 removed'; (e) re-run the fixed-SHA A/B to confirm 0 added / 0 removed after the widening. No production source or normative contract change. No Slice B work. Then -> 149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1 -- Independent Verification of the Gate-10 Slice-A Reconciliation. After .1R.17R.1 closes, the Slice-A track resumes at 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B -- Dispatch-Attempt Durable Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs). Slice C / D keep no phase ID. Do not implement Gate 10's effect. Do not enable execution."
+  "origin_main_head": "c618134af9d9fc6e663ae9490f2922ef9c86f1d1",
+  "origin_main_head_count": "0",
+  "pushed_status": "not_pushed",
+  "recommended_next_phase": "Repair phase required first (own explicit human authorization): 149O.20L.7O.3W.1R.2B.1R.1.1R.17R -- Gate-10 Slice-A Scope-Fence and Verification-Evidence Reconciliation (widen the 16 legitimate stale consumer-inventory / allowlist guards .1R.13.2 / .1R.13.4 / .1R.13.5 / .1R.14 / .1R.15 to admit runtime_dispatch_gate10_eligibility.py as the authorized RDGO-001 v3.1 section 11 item 4 / .1R.16 section 16 consumer -- each guard still rejecting any other importer; repair the 1 docstring-grep guard; extend the .1R.15.5 byte-scope allowed set; attach a preserved-original erratum to the .1R.17 canonical doc and correct the .1R.17 completion metadata / report A/B figure to the true 17-added-0-removed under a governed amendment; re-run the fixed-SHA A/B to confirm 0 added / 0 removed; no production or contract change; no Slice B work), then 149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1 -- Independent Verification of the Gate-10 Slice-A Reconciliation. After 149O.20L.7O.3W.1R.2B.1R.1.1R.17R.1 closes, the Slice-A track resumes at 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B -- Dispatch-Attempt Durable Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs). Slice C / D keep no phase ID. Do not implement Gate 10 effect. Do not enable execution.",
+  "report_consistency": "canonical BLOCKED report promoted on the final pcae phase complete after governed push"
 }

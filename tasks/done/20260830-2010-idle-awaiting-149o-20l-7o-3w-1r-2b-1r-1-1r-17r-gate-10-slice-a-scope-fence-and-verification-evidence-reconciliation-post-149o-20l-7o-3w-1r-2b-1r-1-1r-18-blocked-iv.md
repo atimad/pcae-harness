@@ -10,7 +10,7 @@ Idle: awaiting 149O.20L.7O.3W.1R.2B.1R.1.1R.17R (Gate-10 Slice-A scope-fence and
 
 ## Status
 
-active
+done
 
 ## Mode
 

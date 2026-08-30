@@ -150,9 +150,9 @@ No STOP was taken before the substantive verification ran to a definitive verdic
 
 ## Recommended Next Phase
 
+Repair phase required first (own explicit human authorization):
 `149O.20L.7O.3W.1R.2B.1R.1.1R.17R` — Gate-10 Slice-A Scope-Fence and
-Verification-Evidence Reconciliation (requires its own separate explicit
-human authorization). Widen the 16 legitimate stale consumer-inventory /
+Verification-Evidence Reconciliation. Widen the 16 legitimate stale consumer-inventory /
 allowlist guards (`.1R.13.2` / `.1R.13.4` / `.1R.13.5` / `.1R.14` /
 `.1R.15`) to admit `runtime_dispatch_gate10_eligibility.py` as the
 authorized RDGO-001 v3.1 §11 item 4 / `.1R.16` §16 consumer (each still
