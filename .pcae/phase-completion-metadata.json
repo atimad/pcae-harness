@@ -72,8 +72,8 @@
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.3: close phase task, transition to idle"
     }
   ],
-  "origin_main_head": "pending_push",
+  "origin_main_head": "6ed86a04660b7ad4b985a8b3bc4c45b1f064aad5",
   "origin_main_head_count": 0,
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 -- Runtime-Dispatch Contract Normalization Implementation. Apply the .1R.15.1 section 7-18 proposed deltas: RDGO-001 -> v3.1 (V-2 / V-3 / V-13-3-1 / V-13-5-1 / V-15-1); PBRD-001 -> v2.1 (V-4); RIASC-001 errata note (V-3); RE No-Go Registry -> schema 1.1 (V-13-3-2); phase-document errata (.1R.9 section 13.5, .1R.13.1 section 11.2 / section 13 / section 16.2, .1R.13.2 prose). PLUS the durable generation-snapshot representation deferred from .1R.15.2 (a new authority_binding field or a new binding object -- a normative schema change, HPAC-001 errata / RDGO-001 v3.1). PLUS the N-15-3-2 production authority_generation_resolver completeness requirement (the production resolver wiring MUST fold approval-revocation-store currentness into approval_generation). No src/pcae change beyond wiring the resolver if that is done here rather than in a later slice. Requires its own separate explicit human authorization to begin; this verification phase grants none. Followed by .1R.15.5 (Independent Verification of the Contract Normalization). Gate 10 remains WITHOUT a phase ID until .1R.15.5 closes VERIFIED and the 10-item .1R.15.1 section 20 prerequisite list is satisfied; do not invent one."
 }
