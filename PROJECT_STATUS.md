@@ -2,6 +2,89 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.16 — Gate-10 First External Effect
+Architecture and Implementation Planning.
+**GATE-10 FIRST EXTERNAL EFFECT ARCHITECTURE COMPLETE — PLANNING ONLY —
+GATE 10 NOT IMPLEMENTED, NO EFFECT ENABLED.** Architecture/planning only:
+no `src/pcae` change, no normative contract change, no `runtime_dispatch_gate10*`
+module, no `run_gate10*` symbol, no `DispatchEnvelope` mint, no adapter
+call. Runtime remains `not_implemented / Observed / observe / unavailable`;
+POL-005 unchanged and still hard DENY; 0 plugins / 0 capabilities.
+
+**Gate-10 contract responsibility (RDGO-001 v3.1 §11)** re-derived: the
+six-item pre-effect read-back battery (trusted `Gate9Result` +
+`status == "consumed"` + fresh durable `consumption.json` byte-verified
+re-read + exact lineage match + runtime-capability-eligible check +
+re-validation of all mutable authority AND re-derivation of the current
+authority-generation vector vs the durable `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`)
++ final containment / executable-identity read-back + `DispatchEnvelope`
+mint + exactly one `adapter.dispatch()` call + receipt/uncertainty
+observation + no-retry semantics. Gate 10 owns **neither** a second
+authority record **nor** a second PB/RE policy evaluation.
+
+**First-effect boundary:** the single `adapter.dispatch(envelope)` call
+site inside the future Gate-10 coordinator, invoking a real (non-mock)
+`RuntimeAdapter` with `execution_effect == "local_process"`. No such
+adapter exists, is registered, or is reachable today. **No positive
+production Gate-10 path exists today** — seven independent blockers
+(NON_REAL HPAC, real Gate 7 DENY, capability unavailable, no real adapter,
+POL-005, no protected UI, no real FIDO2).
+
+**Dispatch-attempt / crash model:** at-most-once dispatch attempt with
+fail-closed uncertainty (exactly-once effect is NOT achievable
+generically). **Model A (write-before-effect) + Model C (two-state
+lifecycle)** on a non-authoritative, append-only repository-side mirror
+`RuntimeInvocationRecord` (RPAC-REQ-067); the authoritative one-shot truth
+stays `consumption.json` (create-only, immutable). Crash-during / crash-
+after-effect-before-record → `DISPATCH_UNCERTAIN`, no auto-retry, human
+decision required. Consumed authority stays consumed after any Gate-10
+rejection; a fresh `invocation_id` / `attempt_id` / approval / proof is
+required for any new attempt.
+
+**Prerequisite item 9 (the two 3S.2.1 MUST-FIX repairs + runtime-inspect
+repair):** **NOT SATISFIED / DEFERRED** — non-blocking for this planning
+phase and for Slices A/B; folded into Slice B (`.1R.19`); hard
+prerequisite for Slice C (first concrete effect adapter). New findings:
+N-16-1 (no production Gate-10 `authority_generation` / `capability_snapshot`
+resolver factory — Slice A scope), N-16-2 (no Gate-5–11-wired mirror
+record — Slice B scope), N-16-3..7 (POL-005 eligibility rule + IV, real
+positive RE gate, real FIDO2 + protected UI, RPAC-REQ-095 adapter,
+capability enablement — Slice C prerequisites).
+
+**FIDO2 / UI sequencing:** Option A + Option C — a structural, non-effecting
+Gate-10 eligibility coordinator (Slice A) and the dispatch-attempt
+lifecycle (Slice B) MAY be built now (same risk-controlled pattern as
+Gates 5–9; positive production path remains unreachable); the actual
+effect (Slice C) is split into a separate, human-authority-gated phase. A
+NON_REAL lineage is blocked at five independent points.
+
+**Recommended implementation packaging / frozen precursor phase IDs**
+(recommended, not reserved; each needs its own separate explicit human
+authorization): `.1R.17` Gate-10 Pre-Effect Eligibility and
+Dispatch-Envelope Coordinator Implementation (Slice A, non-effecting) →
+`.1R.18` its independent verification → `.1R.19` Dispatch-Attempt Durable
+Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs (Slice B) →
+`.1R.20` its independent verification. Slice C (first concrete effect
+adapter) and Slice D (end-to-end IV) keep **no phase ID** until N-16-3..7
+are satisfied.
+
+Phase-entry SHA `c7a50c10`. Governed `pcae` lifecycle only; only the
+primary human-authorized operator holds `.1R.16` lifecycle authority; the
+delegated `.3` finalization / commit / push incident remains
+**UNAUTHORIZED**. Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_16_GATE_10_FIRST_EXTERNAL_EFFECT_ARCHITECTURE_AND_IMPLEMENTATION_PLANNING.md`.
+
+**Tests.** None — planning-only phase; no test file added or changed;
+`git diff --name-only <entry> HEAD -- src/pcae` empty; `pcae runtime
+inspect` unchanged (`not_implemented / Observed / observe / unavailable`).
+
+**Recommended next: none assigned by this phase.** Slices A and B
+(`.1R.17`–`.1R.20`) are ready for separate explicit human authorization;
+the first external effect (Slice C) remains blocked. Do not implement
+Gate 10. Do not enable execution.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.5 Complete
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.5 — Independent Verification of the
 Runtime-Dispatch Contract Normalization.
 **INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS — RUNTIME-DISPATCH
