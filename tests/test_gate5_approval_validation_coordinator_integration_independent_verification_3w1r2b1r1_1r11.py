@@ -508,6 +508,7 @@ _AUTHORIZED_GATE_CHAIN_SURFACE = {
     "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
     "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14; V-15-1 .1R.15.2; durable snapshot .1R.15.4)
     "src/pcae/core/runtime_invocation_authority_consumption.py",  # HPAC-AUTHORITY-CONSUMPTION/2.1 (.1R.15.4)
+    "src/pcae/core/runtime_dispatch_gate10_eligibility.py",  # Gate-10 pre-effect eligibility, Slice A (.1R.17) — non-effecting
 }
 
 
@@ -632,6 +633,9 @@ def test_no_gate9_consumption_store_wiring_anywhere_new():
                               if a.name.endswith("runtime_invocation_authority_consumption")]
     assert set(importers) <= {
         str(src_root / "core" / "runtime_dispatch_gate9.py"),
+        # .1R.17 (Slice A): Gate-10 pre-effect eligibility re-reads the
+        # durable consumption.json (RDGO-001 v3.1 §11 item 3). Non-effecting.
+        str(src_root / "core" / "runtime_dispatch_gate10_eligibility.py"),
     }, f"unauthorized Gate-9 store importer: {sorted(importers)}"
 
 

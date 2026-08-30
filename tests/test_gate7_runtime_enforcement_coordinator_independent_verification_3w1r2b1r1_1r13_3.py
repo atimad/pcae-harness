@@ -614,11 +614,19 @@ def test_converted_guards_keep_hpac_exact_and_gate9_bounded_asserts():
     # exactly one authorized importer (runtime_dispatch_gate9.py). They stay
     # phase-aware SUBSET asserts (any other importer still fails); the
     # hpac_verifier consumer asserts remain exact and unweakened.
+    # .1R.17 (Slice A): the non-effecting Gate-10 pre-effect eligibility
+    # coordinator is added as a second authorized importer (it re-reads the
+    # durable consumption.json — RDGO-001 v3.1 §11 item 3). The asserts stay
+    # phase-aware SUBSET asserts; any OTHER importer still fails.
     src8 = (REPO_ROOT / _CONVERTED_GUARDS[0][0]).read_text()
-    assert 'gate9_callers <= {"src/pcae/core/runtime_dispatch_gate9.py"}' in src8
+    assert "gate9_callers <= {" in src8
+    assert '"src/pcae/core/runtime_dispatch_gate9.py"' in src8
+    assert '"src/pcae/core/runtime_dispatch_gate10_eligibility.py"' in src8
     assert "hpac_consumers == {" in src8  # still exact, not weakened
     src117 = (REPO_ROOT / _CONVERTED_GUARDS[5][0]).read_text()
-    assert 'gate9_consumers <= {"src/pcae/core/runtime_dispatch_gate9.py"}' in src117
+    assert "gate9_consumers <= {" in src117
+    assert '"src/pcae/core/runtime_dispatch_gate9.py"' in src117
+    assert '"src/pcae/core/runtime_dispatch_gate10_eligibility.py"' in src117
     assert "hpac_consumers == {" in src117
 
 

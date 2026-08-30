@@ -323,6 +323,12 @@ def test_only_expected_production_files_changed() -> None:
         # this semantic allowlist is updated, not treated as tripped, by
         # an intentional new HATP module.
         "src/pcae/core/hatp_signing_ceremony.py",
+        # 149O.20L.7O.3W.1R.2B.1R.1.1R.17, Slice A: non-effecting Gate-10
+        # pre-effect eligibility + DispatchEnvelope coordinator (new module,
+        # RDGO-001 v3.1 §11 items 1-6). Same allowed-file-widening precedent:
+        # this semantic allowlist is updated, not treated as tripped, by an
+        # intentional new runtime-dispatch-gate-chain module.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     }
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "src/pcae/"],

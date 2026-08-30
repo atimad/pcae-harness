@@ -599,6 +599,7 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
         "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14; V-15-1 .1R.15.2; durable snapshot .1R.15.4)
         "src/pcae/core/runtime_invocation_authority_consumption.py",  # HPAC-AUTHORITY-CONSUMPTION/2.1 (.1R.15.4)
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",  # Gate-10 pre-effect eligibility, Slice A (.1R.17) -- non-effecting
     }
     unexpected = set(changed) - _authorized_surface
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -694,9 +695,12 @@ def test_consumer_inventory_is_bounded_and_gate9_stays_unwired():
     # (`runtime_invocation_authority_consumption`) — the explicitly
     # human-authorized `.1R.9` §16.1 slice 3 / `.1R.13.1` §16 handoff.
     # Phase-aware subset invariant: any OTHER importer still fails.
-    assert gate9_consumers <= {"src/pcae/core/runtime_dispatch_gate9.py"}, (
-        f"unexpected Gate-9 store consumer: {sorted(gate9_consumers)}"
-    )
+    assert gate9_consumers <= {
+        "src/pcae/core/runtime_dispatch_gate9.py",
+        # .1R.17 (Slice A): Gate-10 pre-effect eligibility re-reads the
+        # durable consumption.json (RDGO-001 v3.1 §11 item 3). Non-effecting.
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
+    }, f"unexpected Gate-9 store consumer: {sorted(gate9_consumers)}"
 
 
 def test_repaired_production_modules_have_no_effect_or_real_ceremony_imports():

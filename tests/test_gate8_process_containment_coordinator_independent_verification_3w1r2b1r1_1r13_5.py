@@ -1148,8 +1148,12 @@ def test_gate9_and_hpac_asserts_stay_exact_after_extension():
         "tests/test_b1_b7_n1_n2_production_authority_repair_independent_verification_3w1r2b1r1_1r8.py",
     ):
         src = (REPO_ROOT / rel).read_text()
-        assert 'gate9_consumers <= {"src/pcae/core/runtime_dispatch_gate9.py"}' in src \
-            or 'gate9_callers <= {"src/pcae/core/runtime_dispatch_gate9.py"}' in src
+        # .1R.17 (Slice A): a second authorized importer — the non-effecting
+        # Gate-10 pre-effect eligibility coordinator — is admitted; the
+        # asserts stay phase-aware SUBSET asserts (any OTHER importer fails).
+        assert "gate9_consumers <= {" in src or "gate9_callers <= {" in src
+        assert '"src/pcae/core/runtime_dispatch_gate9.py"' in src
+        assert '"src/pcae/core/runtime_dispatch_gate10_eligibility.py"' in src
         assert "hpac_consumers == {" in src  # unweakened
 
 

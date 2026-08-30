@@ -562,6 +562,9 @@ def test_v15_2_unauthorized_future_consumer_still_fails():
         ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
         ("runtime_dispatch_gate9.py", "pcae.core.hpac_lifecycle"),
         ("runtime_dispatch_gate9.py", "pcae.core.runtime_invocation_authority_consumption"),
+        # .1R.17 (Slice A): Gate-10 pre-effect eligibility re-reads the durable
+        # consumption.json (RDGO-001 v3.1 §11 item 3); non-effecting, writes nothing.
+        ("runtime_dispatch_gate10_eligibility.py", "pcae.core.runtime_invocation_authority_consumption"),
     }
     observed = authorized | {("runtime_dispatch_gate10.py", "pcae.core.hpac_foundation")}
     assert observed - authorized == {("runtime_dispatch_gate10.py", "pcae.core.hpac_foundation")}

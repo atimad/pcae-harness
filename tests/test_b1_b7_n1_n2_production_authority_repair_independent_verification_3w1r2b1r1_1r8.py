@@ -730,6 +730,7 @@ def test_isolation_only_three_production_files_changed_since_baseline():
         "src/pcae/core/runtime_dispatch_gate8.py",  # Gate 8 (.1R.13.4)
         "src/pcae/core/runtime_dispatch_gate9.py",  # Gate 9 (.1R.14; V-15-1 repair .1R.15.2; durable snapshot .1R.15.4)
         "src/pcae/core/runtime_invocation_authority_consumption.py",  # HPAC-AUTHORITY-CONSUMPTION/2.1 durable authority_generation_binding (.1R.15.4)
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",  # Gate-10 pre-effect eligibility + DispatchEnvelope, Slice A (.1R.17) — non-effecting
     }
     unexpected = set(changed) - _authorized
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -776,9 +777,15 @@ def test_isolation_no_gate_coordinator_or_gate9_consumption_wiring():
     # inert Gate-9 store — the explicitly human-authorized `.1R.9` §16.1
     # slice 3 / `.1R.13.1` §16 handoff. Phase-aware subset invariant: any
     # OTHER importer still fails this test.
-    assert gate9_callers <= {"src/pcae/core/runtime_dispatch_gate9.py"}, (
-        f"unexpected Gate-9 store importer: {sorted(gate9_callers)}"
-    )
+    # .1R.17 (Slice A): the non-effecting Gate-10 pre-effect eligibility
+    # coordinator (`runtime_dispatch_gate10_eligibility.py`) re-reads the
+    # canonical `consumption.json` — RDGO-001 v3.1 §11 item 3, its explicit
+    # mandate. It writes nothing and crosses no effect boundary. Phase-aware
+    # subset invariant: any OTHER importer still fails.
+    assert gate9_callers <= {
+        "src/pcae/core/runtime_dispatch_gate9.py",
+        "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
+    }, f"unexpected Gate-9 store importer: {sorted(gate9_callers)}"
     assert projection_consumers <= {
         "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
