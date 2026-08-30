@@ -61,10 +61,18 @@
     {
       "hash": "0ba0c4df5f14246d4a7c9c0be4a8025115410d8e",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.16: record Gate-10 first-external-effect architecture and implementation planning in project status and changelog"
+    },
+    {
+      "hash": "c4e6d5df200e21aa69a52e102b184cb29630b399",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.16: stage canonical completion metadata and report"
+    },
+    {
+      "hash": "ce7372d544e40bbc5034347ed4d573d5e74d7581",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.16: close phase task, transition to idle; finalize task-lifecycle artifacts"
     }
   ],
-  "origin_main_head": "pending_push",
+  "origin_main_head": "ce7372d544e40bbc5034347ed4d573d5e74d7581",
   "origin_main_head_count": 0,
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "None assigned by this phase. Slices A and B are ready for separate explicit human authorization; the first external effect (Slice C) remains blocked on N-16-3..7 and item 9 and keeps no phase ID. Recommended precursor phase IDs (recommended, NOT reserved; each requires its own separate explicit human authorization): 149O.20L.7O.3W.1R.2B.1R.1.1R.17 -- Gate-10 Pre-Effect Eligibility and Dispatch-Envelope Coordinator Implementation (Slice A). Scope: implement run_gate10_pre_effect_eligibility performing RDGO-001 v3.1 section 11 items 1-6 + the section 16/17 containment and executable-identity read-back + minting the DispatchEnvelope (RPAC-REQ-029) and returning it or a structured negative -- with NO adapter.dispatch() call site anywhere in the module (a stronger property than unreachable). Wire a production build_gate10_authority_generation_resolver (5-marker: principal/credential/approval/lifecycle/consumption) + build_gate10_capability_snapshot_resolver reading the canonical runtime_introspection constants (N-16-1); optionally re-express the Gate-9 authority_generation_resolver in terms of the shared factory (contract-neutral; confirm no Gate-9 behaviour change in the Slice A IV). Anticipated production surface: src/pcae/core/runtime_dispatch_gate10_eligibility.py (new), possibly src/pcae/core/runtime_dispatch_gate9.py (contract-neutral resolver refactor); tests only otherwise. Optionally fold in the N-15-5-1 PBRD-001 v2.1 duplicate-section-4a renumber if the phase's allowed-file zone includes docs/contracts. NO Gate-10 module named as the first-effect boundary, NO adapter call, NO execution enablement. -> .1R.18 Independent Verification of the Gate-10 Pre-Effect Eligibility Coordinator (RE-DERIVE the F-G10-1..13 battery against RDGO-001 v3.1 sections 11/15/17 and current source; prove no effect, no positive production path, no Gate9Result trust bypass; fixed-SHA A/B; confirm no Gate 5-9 regression). -> .1R.19 Dispatch-Attempt Durable Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs (Slice B). Scope: the non-authoritative append-only repository-side mirror RuntimeInvocationRecord (RPAC-REQ-067/068/069/070) with the PREPARED -> EFFECT_ATTEMPT_STARTED -> {RECEIPT_CAPTURED | DISPATCH_UNCERTAIN | DISPATCH_NOT_STARTED} state machine, crash/restart determination, the EFFECT_ATTEMPT_STARTED write-before-effect duplicate guard, and idempotency (RPAC-REQ-065/069/070); PLUS the two 3S.2.1 MUST-FIX repairs (malformed adapter-result fail-closed in simulate_invocation; RuntimeInvocationStore invocation_id path-traversal sanitisation) + the runtime-inspect discoverability repair (item 9). -> .1R.20 Independent Verification of the Dispatch-Attempt Durable Lifecycle. Slice C (First Concrete Effect Adapter Integration -- the first external effect) and Slice D (Independent End-to-End Verification of the First External Effect) keep NO phase ID until N-16-3 (PBRD-001 section 12 POL-005 narrow-eligibility rule + IV), N-16-4 (real positive single-attempt Runtime Enforcement gate), N-16-5 (real FIDO2 + protected approval UI), N-16-6 (RPAC-REQ-095 fixed-argv external-executable adapter + supply-chain admission), and N-16-7 (runtime capability enablement) are all satisfied. Gate 10's effect keeps no phase ID. Do not implement Gate 10. Do not enable execution."
 }
