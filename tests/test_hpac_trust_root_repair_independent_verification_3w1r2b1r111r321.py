@@ -924,15 +924,31 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         for imported in _module_imports(path):
             if imported in module_names:
                 consumers.append((path.name, imported))
-    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: the `.1R.10`
-    # authorized Gate-5 coordinator (`runtime_dispatch_gate5.py`, `.1R.9`
-    # §6.2 row 23 / §16.1 slice 1) imports `hpac_lifecycle` for its
-    # read-only `resolve_gate5_binding_event` resolver + the
-    # `STATE_PROOF_VERIFIED_AND_BOUND` constant only -- no writer, no gate
-    # wiring, no PB/Gate-9 consumption (`.1R.11`-verified).
-    assert sorted(consumers) == [
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.2 (V-15-2) re-baseline: a
+    # phase-aware SUBSET invariant. Only the explicitly enumerated,
+    # phase-authorized gate coordinators consume the HPAC Layer-1/2
+    # foundation; any other production file still fails
+    # (`observed - AUTHORIZED == set()`), and an unbuilt gate module is not
+    # pre-authorized.
+    #   * gate5 -> hpac_lifecycle: `.1R.10` impl / `.1R.11` verified
+    #     (read-only `resolve_gate5_binding_event` +
+    #     `STATE_PROOF_VERIFIED_AND_BOUND`; no writer, no consumption).
+    #   * gate9 -> hpac_foundation / hpac_lifecycle /
+    #     runtime_invocation_authority_consumption: `.1R.14` impl /
+    #     `.1R.15` verified (Gate-9 atomic authority consumption
+    #     coordinator: create-only atomic primitive, read-only sequence-3
+    #     confirm, closed consumption record).
+    AUTHORIZED_CONSUMERS = {
         ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
-    ]
+        ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
+        ("runtime_dispatch_gate9.py", "pcae.core.hpac_lifecycle"),
+        ("runtime_dispatch_gate9.py", "pcae.core.runtime_invocation_authority_consumption"),
+    }
+    unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
+    assert unauthorized == set(), (
+        f"unauthorized production consumer(s) of the HPAC Layer-1/2 foundation: "
+        f"{sorted(unauthorized)}"
+    )
 
 
 def test_foundation_implements_no_real_auth_ui_network_hardware_or_process_path():

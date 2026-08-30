@@ -247,6 +247,26 @@ def chain(tmp_path, monkeypatch):
     return c
 
 
+def _authority_generation_resolver(chain):
+    """Default trusted authority-generation resolver (`.1R.15.2` V-15-1):
+    stable canonical principal / credential registry digests + the
+    projection record digest. Stable across S1/S2 unless a test injects a
+    canonical-state mutation."""
+
+    def _resolve():
+        return {
+            "principal_generation": chain.rig.registry.resolve_canonical_principal(
+                chain.rig.principal_id
+            ).record_digest,
+            "credential_generation": chain.rig.registry.resolve_canonical_credential(
+                chain.rig.credential_id
+            ).record_digest,
+            "approval_generation": chain.projection.record_digest,
+        }
+
+    return _resolve
+
+
 def _run(chain, **ov):
     g8_result = ov.pop("gate8_result", chain.g8)
     kw = dict(
@@ -262,6 +282,9 @@ def _run(chain, **ov):
         lifecycle_store=ov.pop("lifecycle_store", chain.rig.lifecycle_store),
         consumption_store=ov.pop("consumption_store", chain.store),
         capability_snapshot_resolver=ov.pop("capability_snapshot_resolver", _snapshot),
+        authority_generation_resolver=ov.pop(
+            "authority_generation_resolver", _authority_generation_resolver(chain)
+        ),
     )
     kw.update(ov)
     return g9.run_gate9_atomic_authority_consumption(g8_result, **kw)
@@ -937,7 +960,12 @@ def test_concurrency_repeated_no_second_record_ever(chain, tmp_path):
                 inputs=inputs, authority_current_time=NOW, repo_root=REPO_ROOT,
                 effect_plan=_effect_plan(), descriptor_resolver=_resolver(),
                 lifecycle_store=rig.lifecycle_store, consumption_store=store,
-                capability_snapshot_resolver=_snapshot))
+                capability_snapshot_resolver=_snapshot,
+                authority_generation_resolver=lambda rg=rig: {
+                    "principal_generation": rg.registry.resolve_canonical_principal(rg.principal_id).record_digest,
+                    "credential_generation": rg.registry.resolve_canonical_credential(rg.credential_id).record_digest,
+                    "approval_generation": "a" * 64,
+                }))
 
         ts = [threading.Thread(target=w) for _ in range(6)]
         for t in ts:
@@ -1089,6 +1117,7 @@ def test_production_predicates_make_gate9_unreachable_without_substitution():
         identity=object(), inputs=object(), authority_current_time=NOW,
         repo_root=REPO_ROOT, effect_plan=object(), descriptor_resolver=lambda i: None,
         lifecycle_store=None, consumption_store=None, capability_snapshot_resolver=_snapshot,
+        authority_generation_resolver=lambda: {},
     )
     assert r is None and reasons == ("gate9_untrusted_gate8_result",)
 

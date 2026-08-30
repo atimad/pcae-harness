@@ -765,18 +765,34 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
                 for alias in node.names:
                     if alias.name in new_modules:
                         consumers.append((path.name, alias.name))
-    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: the `.1R.10`
-    # authorized Gate-5 approval-validation coordinator
-    # (`runtime_dispatch_gate5.py`, `.1R.9` §6.2 row 23 / §16.1 slice 1)
-    # imports `hpac_lifecycle` for the read-only, provenance-checked
-    # `resolve_gate5_binding_event` resolver and the
-    # `STATE_PROOF_VERIFIED_AND_BOUND` constant only -- no writer capability,
-    # no consumption primitive, no PB. Independently re-derived and
-    # re-confirmed by `.1R.11` (`test_coordinator_is_the_only_authorized_new_
-    # consumer_and_is_bounded`).
-    assert sorted(consumers) == [
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.2 (V-15-2) re-baseline: this is
+    # a phase-aware SUBSET invariant, not a frozen point-in-time snapshot.
+    # The planned Layer-1/2 foundation is consumed only by the explicitly
+    # enumerated, phase-authorized gate coordinators below; any *other*
+    # production file importing the foundation still fails this guard
+    # (`observed - AUTHORIZED == set()`), and a not-yet-built gate module
+    # name is not pre-authorized.
+    #
+    #   * `runtime_dispatch_gate5.py` -> `hpac_lifecycle` — `.1R.10` impl /
+    #     `.1R.11` verified: read-only `resolve_gate5_binding_event` +
+    #     `STATE_PROOF_VERIFIED_AND_BOUND` only; no writer capability.
+    #   * `runtime_dispatch_gate9.py` -> `hpac_foundation` /
+    #     `hpac_lifecycle` / `runtime_invocation_authority_consumption` —
+    #     `.1R.14` impl / `.1R.15` verified (Gate-9 atomic authority
+    #     consumption coordinator): the create-only atomic primitive
+    #     (`write_atomic_create_only`, `HPACDuplicateError`), the read-only
+    #     lifecycle sequence-3 confirm, and the closed consumption record.
+    AUTHORIZED_CONSUMERS = {
         ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
-    ]
+        ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
+        ("runtime_dispatch_gate9.py", "pcae.core.hpac_lifecycle"),
+        ("runtime_dispatch_gate9.py", "pcae.core.runtime_invocation_authority_consumption"),
+    }
+    unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
+    assert unauthorized == set(), (
+        f"unauthorized production consumer(s) of the HPAC Layer-1/2 foundation: "
+        f"{sorted(unauthorized)}"
+    )
 
 
 def test_gate9_module_has_no_pb_runtime_dispatch_or_external_effect_imports():

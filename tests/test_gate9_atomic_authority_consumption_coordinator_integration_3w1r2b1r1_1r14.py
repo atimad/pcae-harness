@@ -264,6 +264,28 @@ def chain(tmp_path, monkeypatch):
     return c
 
 
+def _authority_generation_resolver(chain):
+    """Default trusted authority-generation resolver for the `.1R.14` suite:
+    stable canonical-record digests derived from the rig's real principal /
+    credential registry records plus the projection record digest. The
+    `.1R.15.2` suite injects real canonical-state drift; here the tokens are
+    intentionally stable so the pre-existing behaviour is exercised
+    unchanged."""
+
+    def _resolve():
+        return {
+            "principal_generation": chain.rig.registry.resolve_canonical_principal(
+                chain.rig.principal_id
+            ).record_digest,
+            "credential_generation": chain.rig.registry.resolve_canonical_credential(
+                chain.rig.credential_id
+            ).record_digest,
+            "approval_generation": chain.projection.record_digest,
+        }
+
+    return _resolve
+
+
 def _run(chain, **overrides):
     g8_result = overrides.pop("gate8_result", chain.g8)
     kw = dict(
@@ -279,6 +301,9 @@ def _run(chain, **overrides):
         lifecycle_store=overrides.pop("lifecycle_store", chain.rig.lifecycle_store),
         consumption_store=overrides.pop("consumption_store", chain.store),
         capability_snapshot_resolver=overrides.pop("capability_snapshot_resolver", _snapshot),
+        authority_generation_resolver=overrides.pop(
+            "authority_generation_resolver", _authority_generation_resolver(chain)
+        ),
     )
     kw.update(overrides)
     return g9.run_gate9_atomic_authority_consumption(g8_result, **kw)
@@ -490,7 +515,7 @@ def test_sequence3_absent_rejected(chain):
     assert r is None and reasons == ("gate9_invalid_lifecycle_store",)
 
 
-def test_sequence3_cross_binding_rejected(chain):
+def test_sequence3_cross_binding_rejected(chain, monkeypatch):
     chain.projection.approval_id = "ria-" + "9" * 32
     chain.g5 = _synthetic_gate5_result(
         invocation_id=chain.identity.invocation_id,
@@ -499,13 +524,10 @@ def test_sequence3_cross_binding_rejected(chain):
         seq3_digest=chain.event.record.event_digest,
         projection=chain.projection,
     )
-    # rebind the is_gate5_result monkeypatch target
-    import pcae.core.runtime_dispatch_gate5 as _g5mod
-    _g5mod.is_gate5_result = lambda c: c is chain.g5
-    try:
-        r, reasons = _run(chain)
-    finally:
-        pass
+    # rebind the is_gate5_result provenance predicate for the reassigned g5
+    # (V-15-3: scoped monkeypatch, deterministic ordered teardown)
+    monkeypatch.setattr(gate5, "is_gate5_result", lambda c: c is chain.g5)
+    r, reasons = _run(chain)
     assert r is None and reasons == ("gate9_sequence3_cross_binding",)
 
 
@@ -607,7 +629,7 @@ def test_replayed_stale_gate8_result_second_attempt_never_a_second_success(chain
     assert r.status == "already_consumed" and reasons == ("gate9_already_consumed",)
 
 
-def test_different_proof_same_consumed_approval_is_rejected(chain):
+def test_different_proof_same_consumed_approval_is_rejected(chain, monkeypatch):
     _run(chain)
     # A fresh proof_id with the already-consumed approval: the sequence-3
     # event will not resolve for the new proof_id → fail closed, no second
@@ -620,8 +642,7 @@ def test_different_proof_same_consumed_approval_is_rejected(chain):
         seq3_digest=chain.event.record.event_digest,
         projection=chain.projection,
     )
-    import pcae.core.runtime_dispatch_gate5 as _g5mod
-    _g5mod.is_gate5_result = lambda c: c is chain.g5
+    monkeypatch.setattr(gate5, "is_gate5_result", lambda c: c is chain.g5)  # V-15-3
     r, reasons = _run(chain)
     assert r is None
     assert reasons == ("gate9_sequence3_proof_verified_and_bound_absent",)
@@ -825,6 +846,7 @@ def test_real_predicates_make_production_gate9_unreachable():
         lifecycle_store=None,
         consumption_store=None,
         capability_snapshot_resolver=_snapshot,
+        authority_generation_resolver=lambda: {},
     )
     assert r is None and reasons == ("gate9_untrusted_gate8_result",)
 
@@ -856,14 +878,13 @@ def test_non_real_gate5_never_yields_gate5result_for_gate9(tmp_path):
 # ═══════════════════════════════════════════════════════════════════════
 # 40-42. Canonical store containment + durable-record + write authority
 # ═══════════════════════════════════════════════════════════════════════
-def test_consumption_store_rejects_traversal_proof_id(chain):
+def test_consumption_store_rejects_traversal_proof_id(chain, monkeypatch):
     chain.projection.proof_id = "../escape"
     chain.g5 = _synthetic_gate5_result(
         invocation_id=chain.identity.invocation_id, approval_id=chain.rig.approval_id,
         proof_id="../escape", seq3_digest=chain.event.record.event_digest, projection=chain.projection,
     )
-    import pcae.core.runtime_dispatch_gate5 as _g5mod
-    _g5mod.is_gate5_result = lambda c: c is chain.g5
+    monkeypatch.setattr(gate5, "is_gate5_result", lambda c: c is chain.g5)  # V-15-3
     r, reasons = _run(chain)
     assert r is None
     # sequence-3 lookup for a bogus proof id fails closed before any write

@@ -67,6 +67,14 @@ owner of the RDGO-001 §10 Gate-9 boundary for ``runtime_dispatch``. It:
   ``capability_snapshot_resolver`` and fails closed if runtime execution is
   anything other than ``unavailable`` (RDGO-001 §10 last ¶; the production
   path is unreachable regardless — see below);
+* captures a monotonic ``AuthorityGenerationSnapshot`` (``S1``) once the
+  full battery has succeeded, from canonical durable state only — the
+  trusted, caller-supplied ``authority_generation_resolver`` (current
+  principal / credential / approval canonical record digests), the entire
+  provenance-checked proof lifecycle chain, and the consumption-record
+  absence — and re-reads it (``S2``) with **zero intervening effectful
+  I/O** immediately before the create-only linearization; any change fails
+  closed (V-15-1; see the serialization-semantics repair note below);
 * performs one create-only, crash-consistent, read-back-verified atomic
   commit of the closed eight-item ``HPAC-AUTHORITY-CONSUMPTION/2.0`` record
   at ``<root>/proofs/v2/<proof_id>/consumption.json`` by delegating to the
@@ -93,6 +101,27 @@ link-if-absent) is itself the serialization boundary; exactly one racer
 installs the final record, the loser gets ``HPACDuplicateError`` mapped to
 ``already_consumed``. No split-brain, no two canonical records, no partial
 proof/approval state (§18).
+
+**V-15-1 serialization-semantics repair (Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.15.2; `.1R.15.1` §14 Option B).** The
+HPAC-REQ-099 revalidation battery is captured as a monotonic
+``AuthorityGenerationSnapshot`` (``S1``) the instant it succeeds, then
+re-read (``S2``) with **zero intervening effectful I/O** immediately before
+the create-only linearization. Any token change — a principal / credential
+revocation or disablement, an eligibility change, a canonical record
+replacement, a lifecycle invalidation, or a consumption record appearing —
+between ``S1`` and ``S2`` fails closed with **no** ``consumption.json``.
+The per-``proof_id`` create-only primitive remains the **sole**
+linearization point (no second global lock; `.1R.9` §18). This realizes
+RDGO-001 §10 "revalidate … without a TOCTOU allowance" to the practical
+limit. **Durable / re-readable embedding of the snapshot into the
+consumption record's ``authority_binding`` for Gate 10's second line of
+defense is DEFERRED to the `.1R.15.4` contract normalization**: HPAC-REQ-098
+defines ``authority_binding`` as a closed 12-field set with no extensibility
+clause, and ``registry_state_digest`` normatively denotes the
+registry/configuration digest (HPAC-REQ-095/099), not the full
+mutable-authority-generation vector — adding a field or broadening an
+existing field's grammar in this phase would be normative schema drift.
 
 **Crash semantics (HPAC-REQ-100/101; §17).** Crash *before* the atomic
 commit: the final artifact is absent → ``resolve(proof_id)`` returns
@@ -357,6 +386,143 @@ def _bounded_string(value: object, maximum: int = 128) -> bool:
     return isinstance(value, str) and 1 <= len(value) <= maximum and value == value.strip()
 
 
+# ═══════════════════════════════════════════════════════════════════════
+# V-15-1 repair — authority-generation snapshot (Option B, `.1R.15.1` §14)
+#
+# A monotonic snapshot of every mutable authority source, captured once
+# (``S1``) *after* the full in-boundary revalidation battery has succeeded
+# and re-read once (``S2``) immediately before the create-only
+# linearization, with **zero intervening effectful I/O**. Any ``S2 != S1``
+# fails closed with no ``consumption.json`` — this makes the validity check
+# and the atomic consumption serialized with respect to each other
+# (RDGO-001 §10 / HPAC-REQ-099 "no TOCTOU allowance") without inventing a
+# second lock: the per-``proof_id`` create-only primitive remains the sole
+# linearization point (`.1R.9` §18).
+#
+# Every token is a digest / tuple over *canonical durable state* and is
+# reconstructible after a restart (`.1R.15.2` §40). None uses a wall-clock
+# timestamp, mtime, a process-local nonce, or an incomplete selected-field
+# digest (§7).
+#
+# Durable/re-readable embedding of the snapshot into the consumption
+# record's ``authority_binding`` is **NOT** performed here: HPAC-REQ-098
+# defines ``authority_binding`` as a closed 12-field set with no
+# extensibility clause, and ``registry_state_digest`` normatively denotes
+# the registry/configuration digest (HPAC-REQ-095/099), not the full
+# mutable-authority-generation vector. Adding a field or broadening an
+# existing field's grammar would be normative schema drift, forbidden in
+# this phase. The durable Gate-10 second-line-of-defense representation is
+# DEFERRED TO `.1R.15.4` contract normalization (`.1R.15.1` §17/§23).
+# ═══════════════════════════════════════════════════════════════════════
+
+#: Keys a trusted ``authority_generation_resolver`` MUST return, each a
+#: non-empty canonical digest string over the current authoritative record
+#: bytes of that mutable source. Whole-record digests, not selected-field
+#: digests: any authority-relevant mutation (revocation, disablement,
+#: eligibility change, record replacement, binding change) necessarily
+#: changes the corresponding record's canonical bytes and therefore the
+#: token (`.1R.15.2` §7–§10, §13).
+_AUTHORITY_GENERATION_KEYS: frozenset[str] = frozenset(
+    {"principal_generation", "credential_generation", "approval_generation"}
+)
+
+
+def _lifecycle_generation_token(lifecycle_store: object, proof_id: str) -> str:
+    """Digest over the ordered ``(sequence, state, event_digest)`` triples of
+    the *entire* canonical, provenance-checked proof lifecycle chain
+    (`.1R.15.2` §11/§12).
+
+    A new successor event, a terminal ``EXPIRED`` / ``REVOKED`` / ``REJECTED``
+    append, a fork (``resolve_canonical_chain`` raises → fail closed), or any
+    transition changes the tuple and therefore the token. This single
+    canonical read covers both the lifecycle-head semantic (§11) and the
+    proof-state semantic (§12); the proof-state projection adds no coverage
+    beyond it (deduplication proven — the chain digest is a superset
+    commitment over every event, including proof lifecycle status, expiry,
+    revocation, and canonical identity).
+    """
+    chain = lifecycle_store.resolve_canonical_chain(proof_id)
+    return compute_canonical_digest(
+        [
+            {
+                "sequence": resolved.record.sequence,
+                "state": resolved.record.state,
+                "event_digest": resolved.record.event_digest,
+            }
+            for resolved in chain
+        ]
+    )
+
+
+def _consumption_generation_token(consumption_store: object, proof_id: str) -> tuple[str, ...]:
+    """Current canonical consumption-record state for ``proof_id``
+    (`.1R.15.2` §14): ``("absent",)`` when genuinely absent,
+    ``("present", <record_digest>)`` when one complete valid record exists.
+
+    A ``RuntimeInvocationAuthorityConsumptionDurabilityUncertainError`` is
+    **not** caught here — it propagates so the caller fails closed
+    (``gate9_consumption_state_durability_uncertain``); an ambiguous /
+    corrupt record is never interpreted as either absent or present.
+    """
+    existing = consumption_store.resolve(proof_id)
+    if existing is None:
+        return ("absent",)
+    return ("present", existing.record_digest)
+
+
+def _capture_authority_generation_snapshot(
+    *,
+    authority_generation_resolver: Callable[[], object],
+    lifecycle_store: object,
+    consumption_store: object,
+    proof_id: str,
+) -> tuple[dict, tuple[str, ...]]:
+    """Build one immutable ``AuthorityGenerationSnapshot`` (`.1R.15.2` §15)
+    from canonical current state only.
+
+    Returns ``(snapshot, ())`` on success or ``({}, (reason,))`` when the
+    trusted resolver returns a malformed shape. The consumption token may
+    raise ``RuntimeInvocationAuthorityConsumptionDurabilityUncertainError``;
+    that is intentionally not caught here.
+    """
+    resolved = authority_generation_resolver()
+    if not isinstance(resolved, dict) or set(resolved) != _AUTHORITY_GENERATION_KEYS:
+        return {}, ("gate9_authority_generation_snapshot_incomplete",)
+    for key in _AUTHORITY_GENERATION_KEYS:
+        if not _bounded_string(resolved[key], 256):
+            return {}, ("gate9_authority_generation_snapshot_incomplete",)
+    snapshot = {
+        "principal_generation": resolved["principal_generation"],
+        "credential_generation": resolved["credential_generation"],
+        "approval_generation": resolved["approval_generation"],
+        "lifecycle_generation": _lifecycle_generation_token(lifecycle_store, proof_id),
+        "consumption_generation": _consumption_generation_token(consumption_store, proof_id),
+    }
+    return snapshot, ()
+
+
+#: The exact order tokens are compared in — the first differing token is
+#: named in the fail-closed reason id (`.1R.15.2` §32). ``consumption_generation``
+#: is compared by the caller (a present record → deterministic
+#: ``already_consumed``, not a drift rejection — §14/§31), so it is not in
+#: this list.
+_AUTHORITY_GENERATION_DRIFT_ORDER: tuple[str, ...] = (
+    "principal_generation",
+    "credential_generation",
+    "approval_generation",
+    "lifecycle_generation",
+)
+
+
+def _first_authority_generation_drift(s1: dict, s2: dict) -> Optional[str]:
+    """Return the first token name whose value differs between ``S1`` and
+    ``S2`` (excluding ``consumption_generation``), else ``None``."""
+    for key in _AUTHORITY_GENERATION_DRIFT_ORDER:
+        if s1.get(key) != s2.get(key):
+            return key
+    return None
+
+
 def _runtime_execution_unavailable(snapshot: object) -> bool:
     """The caller-supplied capability snapshot must attest the runtime is
     still non-executing (RDGO-001 §10 last ¶; ``.1R.9`` §24). Anything else
@@ -497,6 +663,7 @@ def run_gate9_atomic_authority_consumption(
     lifecycle_store: object,
     consumption_store: object,
     capability_snapshot_resolver: Callable[[], object],
+    authority_generation_resolver: Callable[[], object],
 ) -> tuple[Optional["Gate9Result"], tuple[str, ...]]:
     """Run RDGO-001 v3.0 Gate 9 (atomic one-shot authority consumption) for
     one ``runtime_dispatch`` request.
@@ -546,6 +713,18 @@ def run_gate9_atomic_authority_consumption(
       not the exact pair for the same invocation/authority lineage;
     * ``gate9_runtime_execution_available_unexpected`` — the in-boundary
       capability snapshot no longer attests a non-executing runtime;
+    * ``gate9_invalid_authority_generation_resolver`` — the trusted
+      authority-generation resolver is not callable (structural guard);
+    * ``gate9_authority_generation_snapshot_incomplete`` — the resolver
+      returned a value that is not a mapping of exactly
+      ``{principal_generation, credential_generation, approval_generation}``
+      to non-empty canonical digest strings;
+    * ``gate9_authority_generation_drift:<source>`` — V-15-1 repair: a
+      monotonic authority-generation token (``principal_generation`` /
+      ``credential_generation`` / ``approval_generation`` /
+      ``lifecycle_generation``) changed between the post-battery snapshot
+      ``S1`` and the pre-``create`` re-read ``S2``; fail closed, no
+      ``consumption.json``, no Gate 10;
     * ``gate9_consumption_state_durability_uncertain`` — a partial / corrupt
       record was found; fail closed, never replay;
     * ``gate9_already_consumed`` — accompanies a ``Gate9Result`` with
@@ -622,6 +801,8 @@ def run_gate9_atomic_authority_consumption(
             return None, ("gate9_invalid_consumption_store",)
         if not callable(capability_snapshot_resolver):
             return None, ("gate9_invalid_capability_snapshot_resolver",)
+        if not callable(authority_generation_resolver):
+            return None, ("gate9_invalid_authority_generation_resolver",)
 
         # 5. Single consistent invocation across every link (RDGO-001 §10a).
         if (
@@ -695,9 +876,21 @@ def run_gate9_atomic_authority_consumption(
         # ── SERIALIZATION BOUNDARY ──────────────────────────────────────
         # The per-proof_id create-only primitive (write_atomic_create_only:
         # O_EXCL temp sibling + atomic link-if-absent) IS the serialization
-        # boundary (`.1R.9` §18 "do not invent a new lock"). Every check
-        # from here to the atomic create is the HPAC-REQ-099 in-boundary
-        # revalidation battery, run immediately before compare-and-create.
+        # boundary and the sole linearization point (`.1R.9` §18 "do not
+        # invent a new lock"). Every check from here to the atomic create is
+        # the HPAC-REQ-099 in-boundary revalidation battery, run immediately
+        # before compare-and-create.
+        #
+        # V-15-1 repair (`.1R.15.2`, `.1R.15.1` §14 Option B): the battery
+        # (steps 9–14) is followed by an authority-generation snapshot S1
+        # (step 14a); S1 is re-read as S2 (step 15a) with ZERO intervening
+        # effectful I/O immediately before ``consumption_store.create``, and
+        # any S2 != S1 fails closed. This makes the validity check and the
+        # atomic consumption serialized with respect to each other —
+        # RDGO-001 §10 "no TOCTOU allowance" — without a second lock. The
+        # durable/re-readable embedding of the snapshot into the consumption
+        # record is DEFERRED to `.1R.15.4` (HPAC-REQ-098 ``authority_binding``
+        # is a closed field set with no extensibility clause).
 
         # 9. Re-trust + revalidate the projection at Gate 9's own point of
         #    use, INSIDE the boundary. revalidate re-runs validate_approval →
@@ -772,6 +965,26 @@ def run_gate9_atomic_authority_consumption(
                 advisory_reasons=advisory,
             )
 
+        # 14a. V-15-1 repair — capture the authority-generation snapshot S1
+        #      (`.1R.15.2` §16). The full in-boundary revalidation battery
+        #      (steps 9–14) has now succeeded; S1 is a monotonic snapshot of
+        #      every mutable authority source (principal / credential /
+        #      approval canonical record digests via the trusted resolver;
+        #      the full proof lifecycle chain; consumption-record absence).
+        #      It is captured ONLY after the battery, never before
+        #      current-state validation.
+        try:
+            s1, s1_reasons = _capture_authority_generation_snapshot(
+                authority_generation_resolver=authority_generation_resolver,
+                lifecycle_store=lifecycle_store,
+                consumption_store=consumption_store,
+                proof_id=proof_id,
+            )
+        except RuntimeInvocationAuthorityConsumptionDurabilityUncertainError:
+            return None, ("gate9_consumption_state_durability_uncertain",)
+        if s1_reasons:
+            return None, s1_reasons
+
         # 15. Build the closed eight-item record from the five trusted
         #     objects + identity + inputs + freshly-recomputed containment
         #     evidence.
@@ -805,6 +1018,49 @@ def run_gate9_atomic_authority_consumption(
             registry_state_digest=registry_state_digest,
             consumed_at=consumed_at,
         )
+
+        # 15a. V-15-1 repair — re-read the authority-generation snapshot S2
+        #      IMMEDIATELY before the create-only linearization, with ZERO
+        #      intervening effectful I/O (`.1R.15.2` §18–§20). Record
+        #      preparation (step 15) is complete and performed no write; the
+        #      only operations between this comparison and
+        #      ``consumption_store.create`` are the S2 == S1 check itself and
+        #      the create call.
+        #
+        #      * consumption_generation now "present" → another racer /
+        #        operator installed a valid canonical record after S1;
+        #        deterministic ``already_consumed`` (§14/§31), never a second
+        #        create, never a drift rejection.
+        #      * consumption_generation durability-uncertain → fail closed.
+        #      * any principal / credential / approval / lifecycle token
+        #        changed → a revocation, disablement, eligibility change,
+        #        record replacement, or lifecycle invalidation landed in the
+        #        S1→S2 window; FAIL CLOSED, NO CONSUMPTION, NO GATE 10.
+        try:
+            s2, s2_reasons = _capture_authority_generation_snapshot(
+                authority_generation_resolver=authority_generation_resolver,
+                lifecycle_store=lifecycle_store,
+                consumption_store=consumption_store,
+                proof_id=proof_id,
+            )
+        except RuntimeInvocationAuthorityConsumptionDurabilityUncertainError:
+            return None, ("gate9_consumption_state_durability_uncertain",)
+        if s2_reasons:
+            return None, s2_reasons
+        if s2["consumption_generation"] != ("absent",):
+            _kind, s2_record_digest = s2["consumption_generation"]
+            return _already_consumed_result(
+                proof_id=proof_id,
+                approval_id=gate5_result.approval_id,
+                record_digest=s2_record_digest,
+                invocation_id=identity.invocation_id,
+                attempt_id=identity.attempt_id,
+                consumed_at=consumed_at,
+                advisory_reasons=advisory,
+            )
+        drift = _first_authority_generation_drift(s1, s2)
+        if drift is not None:
+            return None, (f"gate9_authority_generation_drift:{drift}",)
 
         # 16. The one atomic, create-only, crash-consistent commit
         #     (HPAC-REQ-100). Proof + approval + presentation + challenge are

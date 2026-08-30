@@ -800,14 +800,28 @@ def test_hpac_repair_has_zero_preexisting_production_consumers():
                 consumers.append((path.name, node.module))
             elif isinstance(node, ast.Import):
                 consumers.extend((path.name, alias.name) for alias in node.names if alias.name in modules)
-    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.11 re-baseline: the `.1R.10`
-    # authorized Gate-5 coordinator (`runtime_dispatch_gate5.py`, `.1R.9`
-    # §6.2 row 23 / §16.1 slice 1) reads `hpac_lifecycle`'s read-only
-    # `resolve_gate5_binding_event` + `STATE_PROOF_VERIFIED_AND_BOUND` only.
-    # No writer, no consumption, no PB/Gate-9 path (`.1R.11`-verified).
-    assert sorted(consumers) == [
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.2 (V-15-2) re-baseline: a
+    # phase-aware SUBSET invariant. Only the explicitly enumerated,
+    # phase-authorized gate coordinators may consume the HPAC Layer-1/2
+    # foundation; any other production file still fails
+    # (`observed - AUTHORIZED == set()`), and an unbuilt gate module name
+    # is not pre-authorized. See the identical rationale in
+    # test_hpac_foundation_independent_verification_3w1r2b1r111r31.py.
+    #   * gate5 -> hpac_lifecycle: `.1R.10` impl / `.1R.11` verified.
+    #   * gate9 -> hpac_foundation / hpac_lifecycle /
+    #     runtime_invocation_authority_consumption: `.1R.14` impl /
+    #     `.1R.15` verified (Gate-9 atomic authority consumption).
+    AUTHORIZED_CONSUMERS = {
         ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
-    ]
+        ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
+        ("runtime_dispatch_gate9.py", "pcae.core.hpac_lifecycle"),
+        ("runtime_dispatch_gate9.py", "pcae.core.runtime_invocation_authority_consumption"),
+    }
+    unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
+    assert unauthorized == set(), (
+        f"unauthorized production consumer(s) of the HPAC Layer-1/2 foundation: "
+        f"{sorted(unauthorized)}"
+    )
 
 
 def test_no_real_mechanism_ui_hardware_network_or_process_implementation_added():
