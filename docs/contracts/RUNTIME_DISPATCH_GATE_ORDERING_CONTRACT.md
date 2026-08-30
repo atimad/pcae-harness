@@ -1,9 +1,9 @@
-# RDGO-001 v3.0 — Runtime Dispatch Gate Ordering Contract
+# RDGO-001 v3.1 — Runtime Dispatch Gate Ordering Contract
 
 ## Contract identity and status
 
 **Contract:** RDGO-001
-**Version:** 3.0
+**Version:** 3.1
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
 Invocation Human-Principal Authentication Freeze Repair
@@ -12,13 +12,28 @@ Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle
 Canonicalization Blocking Repair. V3.0 is retained because the eleven gates,
 their order, and bind-at-5/consume-at-9 state machine are unchanged; this
 correction supplies the canonical records those gates already required (§21).
-**Supersedes:** RDGO-001 v1.0 and v2.0. V2 proof verification/consumption
-lifecycle is incompatible with v3 and has no migration. V1's gate 3/gate 4
-relative order was independently found to contradict RPAC-REQ-042 by Phase
-149O.20L.7O.3V.1 (Finding B-149O.20L.7O.3V.1-1).
+**Normalized to v3.1 by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 —
+Runtime-Dispatch Contract Normalization Implementation. **v3.1 is a MINOR
+clarification** (§21): it re-states verified behaviour and does not reorder
+a gate, move the first-effect boundary, merge authority/permission/
+enforcement/containment, weaken freshness, or widen effect scope. It
+normalizes §4/§6/§16 sequence-3 *creation* narration to the verified
+architecture (the HPAC-001 verifier's assurance-independent HPAC-REQ-054
+step 10 creates the event at Gate 3; Gate 5 re-confirms it read-only —
+finding V-2/V-3), adds the §8 Gate-6-owns-PB-policy clarifying sentence
+(V-13-3-1), the §9 three-layer Gate-8 containment model (V-13-5-1), and the
+§10 Gate-9 create-only-linearization + zero-I/O authority-generation-token
+re-check model with its durable `HPAC-AUTHORITY-CONSUMPTION/2.1`
+`authority_generation_binding` representation (V-15-1, after the
+independently verified `.1R.15.2`/`.1R.15.3` Gate-9 repair).
+**Supersedes:** RDGO-001 v1.0, v2.0, and v3.0-narration of sequence-3
+creation. V2 proof verification/consumption lifecycle is incompatible with
+v3 and has no migration. V1's gate 3/gate 4 relative order was
+independently found to contradict RPAC-REQ-042 by Phase 149O.20L.7O.3V.1
+(Finding B-149O.20L.7O.3V.1-1).
 **Scope:** Future one-attempt local-CLI real-runtime dispatch ordering only.
 **Related contracts:** RPAC-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0,
-HPAC-001 v2.0, PBRD-001 v2.0, Runtime Enforcement contracts, Phase 99 Execution Attempt
+HPAC-001 v2.1, PBRD-001 v2.1, Runtime Enforcement contracts, Phase 99 Execution Attempt
 Boundary.
 
 RDGO-001 freezes the gate sequence and cross-gate evidence contract. It
@@ -101,16 +116,32 @@ mint a unique request-identity triple, stops the flow.
 
 Gate 3 resolves canonical repository/task/invocation/prompt/target/effect/
 scope/expiry/one-shot facts, presents their human-usable representation
-through HPAC-001 v2.0's protected channel, persists and verifies exact
+through HPAC-001 v2.1's protected channel, persists and verifies exact
 `HPAC-PRESENTATION-EVIDENCE/2.0`, and cryptographically binds its digest and
 the identical `HPAC-APPROVAL-SUBJECT/2.0` digest into a fresh v2 challenge.
 The trusted coordinator reserves approval/proof identities before the
 ceremony. A distinct, non-defaultable act with mandatory UP and UV produces
 an assertion; successful preliminary verification creates canonical
 `HPAC-PROOF/2.0` plus lifecycle sequence 2 `PROOF_VERIFIED`. Only then may
-the coordinator create the immutable RIASC-001 v3.0 approval. Gate 5, not
-gate 3, creates the final `PROOF_VERIFIED_AND_BOUND` event over the completed
-approval digest. Agent-controlled stdout/stdin, caller-created evidence, and
+the coordinator create the immutable RIASC-001 v3.0 approval.
+
+**Sequence-3 creation (v3.1 normalization — V-2/V-3).** The HPAC-001 v2.1
+verifier's assurance-independent HPAC-REQ-054 step 10 (`bind_gate5_canonical`)
+creates HPAC lifecycle sequence 3 `PROOF_VERIFIED_AND_BOUND` at gate 3
+(approval creation) time, binding the `HPAC-APPROVAL-SUBJECT/2.0` digest to
+the proof/presentation/challenge. Gate 5 does **not** create this event;
+gate 5 freshly **re-confirms** the current, byte-exact sequence-3 event
+read-only (state, genesis binding triple, bound invocation, event digest)
+and fails closed on any divergence (HPAC-REQ-097 — an already-present
+byte-identical same-binding event is accepted idempotently). The
+*assurance* decision — whether this authenticated principal may validate a
+production approval — is gate 5's and gate 5's alone. The sequence-3 event
+binds the `HPAC-APPROVAL-SUBJECT/2.0` subject digest fixed at gate 3, **not**
+the completed RIASC-001 v3.0 approval `record_digest`; that record digest is
+a separate commitment carried in the RIHAC-001 v2.0 validated-authority
+projection and consumed at gate 9 (§10 item 5).
+
+Agent-controlled stdout/stdin, caller-created evidence, and
 blind touch are insufficient.
 
 The artifact creates human authority only. It does not create PB permission,
@@ -164,9 +195,10 @@ validated-authority projection containing:
 - consumption-state verdict; and
 - validation timestamp/version.
 
-It atomically creates HPAC lifecycle sequence 3
-`PROOF_VERIFIED_AND_BOUND`, binding exact approval/proof/presentation/
-challenge/subject/invocation/attempt bytes, but does not consume the
+It re-confirms (read-only) the current HPAC lifecycle sequence 3
+`PROOF_VERIFIED_AND_BOUND` event created by the HPAC-001 v2.1 verifier's
+HPAC-REQ-054 step 10 (§4), checking exact approval/proof/presentation/
+challenge/subject/invocation binding, and does not consume the
 approval, nonce, presentation, or proof. Repeating gate 5 before gate 9 is
 permitted only when sequence 3 is byte-identical to the same binding and
 repeats cryptographic/current-registry/descriptor/presentation/revocation/
@@ -199,6 +231,20 @@ It independently evaluates the complete bound request. It SHALL NOT infer
 approval from PB ALLOW, permission from approval, capability from the target
 name, or containment from a planned profile.
 
+**PB policy ownership (v3.1 clarification — V-13-3-1).** PB policy
+evaluation is owned exclusively by gate 6. Gate 7 (and gate 9) revalidate
+*authority currentness and runtime-enforcement posture* — principal /
+credential / proof / approval revocation, expiry, consumption state;
+execution-availability and safety flags — using the PB decision, policy
+IDs, policy version, and decision digest of item 2 as **inputs**. Neither
+gate 7 nor gate 9 re-runs PB policy. A stale PB `policy_version` detected
+after gate 6 is resolved by **re-entering gate 6**, not by any later gate;
+a later gate MAY surface `policy_drift_requires_fresh_pb_re_evaluation` as
+an **advisory reason only** — never a licence to skip a check and never a
+basis for a positive decision. The reserved reason id
+`gate7_pb_decision_stale_policy_version` marks a future-`Gate6Decision`-shape
+concern and is not a prerequisite for any gate.
+
 Its positive decision is single-attempt, expiring, and invalid across any
 relevant input or policy change. A denial, failure, stale input, unavailable
 target, or unresolved no-go stops the flow. No real process has been launched
@@ -227,10 +273,37 @@ No dispatch occurs unless containment is successfully established. A live
 preflight check is an observation of readiness, never authority or
 permission.
 
+**Three-layer containment model (v3.1 normalization — V-13-5-1).** Gate 8's
+containment establishment is layered:
+
+(a) *direct validation* of executable identity/hash, argv, descriptor/config
+digest, runtime target, repository-scope of the working directory,
+environment-allowlist name well-formedness, the containment profile
+(child-process policy, bounded resource/time/supervision references, network
+denied, no credentials), and refusal of any caller-supplied shell/command
+string;
+
+(b) *canonical commitment* of the complete established launch environment —
+including working-directory and environment-value bytes and the
+contract-fixed `transport_type=local_cli` — into a single
+`containment_evidence_digest` bound to the invocation;
+
+(c) *gate-9 recomputation* — gate 9 independently re-derives the entire
+containment evidence over freshly re-resolved inputs and fails closed on
+any digest mismatch before consumption.
+
+The effect plan handed to gate 8 is assembled by the trusted invocation
+coordinator from the descriptor/config and never from caller input; there
+is therefore no separate caller-supplied cwd / environment / transport
+"reference" to diff against, and none is required. Working-directory and
+environment substitution are caught by layer (c)'s full recomputation, not
+by a direct reference diff.
+
 ## 10. Gate 9 — durable pre-dispatch record
 
 Gate 9 atomically persists the minimum effect-bound evidence before process
-creation. The exact eight items are:
+creation. The exact nine items are (v3.1 — item 9 added; items 1–8
+unchanged):
 
 1. **Invocation identity:** `invocation_id`, this attempt's mandatory unique
    `attempt_id`, and the request's canonical `idempotency_key` — all three
@@ -251,22 +324,58 @@ creation. The exact eight items are:
    evaluated-input digest.
 8. **Dispatch intent/state:** exact containment evidence reference plus the
    durable state marker `dispatch_attempted` and its timestamp.
+9. **Authority-generation binding (v3.1 — V-15-1):** the closed
+   `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0` object (HPAC-001 v2.1
+   HPAC-REQ-098) — the monotonic principal / credential / approval /
+   lifecycle / consumption generation tokens that gate 9 captured after the
+   in-boundary revalidation battery (`S1`) and verified unchanged at the
+   final zero-effectful-I/O re-read (`S2`) immediately before the atomic
+   create. Each token is a digest/marker over durable state, restart-
+   reconstructible, carrying no wall clock / nonce / process identity. It is
+   **verification evidence, not execution authority** — possession or
+   reconstruction grants nothing; a future gate 10 MUST re-read current
+   canonical generation state and compare it against this durable snapshot
+   (§10 last ¶; §11).
 
 References and digests SHALL be used instead of duplicating the full
-approval/PB/RE artifacts. These exact eight items are the closed objects of
-HPAC-001 §41's `HPAC-AUTHORITY-CONSUMPTION/2.0`, canonically stored at the
-bound proof's protected `consumption.json` path. It is one create-only,
-crash-consistent, read-back-verified commit completed before gate 10; a
-repository-side invocation record is a non-authoritative mirror/reference.
-If the protected write cannot be proven durable and internally consistent,
-no dispatch occurs.
+approval/PB/RE artifacts. These exact nine items are the closed objects of
+HPAC-001 v2.1 §41's `HPAC-AUTHORITY-CONSUMPTION/2.1` (nine closed binding
+objects; the eight of `/2.0` byte-unchanged plus `authority_generation_binding`),
+canonically stored at the bound proof's protected `consumption.json` path.
+A `/2.0` record (no `authority_generation_binding`) remains readable
+historical/test data but is **not** eligible for a future gate 10; gate 9
+writes only `/2.1`. It is one create-only, crash-consistent,
+read-back-verified commit completed before gate 10; a repository-side
+invocation record is a non-authoritative mirror/reference. If the protected
+write cannot be proven durable and internally consistent, no dispatch
+occurs.
 
-Immediately before compare-and-create, gate 9 revalidates current registry,
-credential, descriptor/configuration, presentation, proof/lifecycle,
-approval/expiry, PB, Runtime Enforcement, and containment state while holding
-the protected evidence-store serialization boundary. Thus revocation,
-presentation invalidation, or expiry after gate 5 fails closed without a
-TOCTOU allowance.
+**Gate-9 linearization semantics (v3.1 normalization — V-15-1).** The
+per-`proof_id` create-only atomic primitive (`O_EXCL` temporary sibling +
+atomic link-if-absent) **is** the linearization point and the single
+transaction mechanism; there is no second global lock, advisory-lock
+object, or transaction system (`.1R.9` §18). Immediately before that create:
+
+- gate 9 re-runs the full revalidation battery — current registry,
+  credential, descriptor/configuration, presentation, proof/lifecycle,
+  approval/expiry, exact gate-5 sequence-3 binding, PB, Runtime Enforcement,
+  and containment state (recomputed) — and fails closed on any divergence;
+- gate 9 then captures a monotonic authority-generation snapshot `S1` (item
+  9), and re-reads it as `S2` with **zero intervening effectful I/O**
+  immediately before the create;
+- any `S2 != S1` — a principal/credential revocation, a lifecycle
+  invalidation, an approval-record change, or a consumption record appearing
+  — fails closed with **no** `consumption.json` written.
+
+This makes the validity check and the atomic consumption serialized with
+respect to each other — the "no TOCTOU allowance" guarantee — to the
+practical limit, without a second lock. A residual instruction-level
+micro-window between the `S2 == S1` decision and the create is the
+acknowledged practical limit; it produces no external effect (gate 10
+absent; gate 10's mandatory re-read and re-validation re-close it — §11),
+and the consumption race itself is fully closed (`O_EXCL` → duplicate →
+deterministic `already_consumed`). Gate-5 validation is never a substitute
+for this gate-9 revalidation.
 
 `dispatch_attempted` is the single atomic presentation/challenge/proof/
 approval consumption point and at-most-once guard. PB evaluation does not
@@ -285,6 +394,33 @@ The adapter cannot authorize itself, choose a fallback target, alter the
 invocation identity, or reinterpret the dispatch envelope. A dispatch call or
 receipt does not prove completion. Any ambiguity after entry to this gate is
 `DISPATCH_UNCERTAIN` until stronger evidence exists.
+
+**Gate-10 forward read-back prerequisite (v3.1 — prerequisite semantics
+only; no gate-10 design, no phase ID).** `is_gate9_result(x) == True` is
+**insufficient**. A future gate 10 MUST at minimum require, all together:
+
+1. a trusted `Gate9Result` (`is_gate9_result`);
+2. `x.status == "consumed"` (not `already_consumed`, not provenance alone);
+3. a fresh re-read of the durable canonical `consumption.json`
+   (`HPAC-AUTHORITY-CONSUMPTION/2.1`) + containment evidence, byte-verified
+   against `x.record_digest`, with `authority_generation_binding` present
+   and valid;
+4. exact lineage / binding: `invocation_id` / `attempt_id` /
+   `idempotency_key` / `proof_id` / `approval_id` match the durable record
+   and the live request;
+5. runtime capability eligible (execution availability, adapter
+   registration, containment re-established) at gate-10 entry;
+6. re-validation of all mutable authority (principal / credential / proof /
+   approval / lifecycle) as-of gate-10 entry, **and** re-derivation of the
+   current authority-generation vector and comparison against the durable
+   `authority_generation_binding` snapshot — the V-15-1 second line of
+   defence. Later principal / credential / approval / lifecycle changes do
+   not erase the historical gate-9 consumption record, but they DO
+   invalidate gate-10 eligibility and are detected here.
+
+The durable authority-generation snapshot is data, not a bearer token:
+possessing or reconstructing it grants no capability; gate 10 must re-read
+current canonical state and compare.
 
 ## 12. Gate 11 — result capture and intake
 
@@ -439,9 +575,14 @@ repository/task/HEAD, prompt, configuration, executable, or policy change.
 | PB request/decision | Not authority | request/decision digests | Gates 6/7/9 | item 6 |
 | RE decision | Not authority | Projected evidence only | Gates 7/9 | item 7 |
 | Dispatch state | Consumption rule | Not PB permission | Gates 9/10 | item 8 + events |
+| Authority-generation snapshot (v3.1) | Not authority — verification evidence | Not a PB fact | Gate 9 captures + commits; Gate 10 re-reads + compares | item 9 |
 
-The "Approval" row's gate references change from v1.0 (`Gates 4/5/9`) to
-`Gates 3/5/9` because approval creation is now gate 3, not gate 4. The
+The "Approval" row's `Gates 3/5/9` references mean: sequence-3
+`PROOF_VERIFIED_AND_BOUND` is **created** at gate 3 by the HPAC-001 v2.1
+verifier's HPAC-REQ-054 step 10 (§4), **re-confirmed read-only** at gate 5,
+and **consumed** at gate 9 (v3.1 — V-2/V-3). The gate references change from
+v1.0 (`Gates 4/5/9`) to `Gates 3/5/9` because approval creation is now gate
+3, not gate 4. The
 "Invocation" row's gate reference changes from v1.0 (`Gates 4–11`) to
 `Gates 2–11` because `invocation_id` is minted at gate 2 alongside
 `attempt_id`/`idempotency_key`, consistent with RPAC-REQ-025's canonical
@@ -539,8 +680,33 @@ artifact migration or compatible predecessor to preserve. Retaining v3.0 is
 the repository-correct repair of the rejected candidate rather than a new
 state machine.
 
-**RDGO-001 v3.0: CORRECTIVELY COMPLETED AND FROZEN; v2 proof-lifecycle
-semantics have no migration.**
-**Gate count: 11 (unchanged). Durable-before-effect items: 8 (unchanged;
-item 1 enriched, see §10a). TOCTOU facts: 7 (unchanged).**
+**v3.1 normalization (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4) — MINOR.**
+v3.1 does not add, remove, reorder, or reassign a gate, does not move the
+first-effect boundary, does not merge authority/permission/enforcement/
+containment, does not weaken freshness, and does not widen effect scope.
+It re-states verified behaviour: §4/§6/§16 sequence-3 *creation* narration
+(the verifier's HPAC-REQ-054 step 10 creates the event at gate 3, gate 5
+re-confirms — V-2/V-3; the state machine and event bytes are unchanged,
+HPAC-001 v2.1 HPAC-REQ-095/097 already accommodate the idempotent-accept
+path); the §8 Gate-6-owns-PB-policy sentence (V-13-3-1 — a restatement of
+the existing §7/§15 division); the §9 three-layer Gate-8 containment model
+(V-13-5-1 — codifies verified repo-scope + digest-commitment + gate-9
+recomputation); and the §10 Gate-9 create-only-linearization + zero-I/O
+authority-generation-token re-check model with its durable
+`HPAC-AUTHORITY-CONSUMPTION/2.1` item-9 representation (V-15-1 — a
+*strengthening* that matches the independently verified `.1R.15.2`/`.1R.15.3`
+repaired code, not a weakening). Durable-before-effect items go 8 → 9
+(item 9 added; items 1–8 byte-unchanged). No conforming pre-normalization
+consumption artifact carrying the old sequence-3-creation narration or a
+`/2.0` record with a durable generation snapshot ever existed, so there is
+nothing to migrate; a `/2.0` record without `authority_generation_binding`
+is readable historical/test data and gate-10-ineligible. A change that
+alters external trust semantics, the required authority shape
+incompatibly, or consumption-record compatibility fundamentally still
+requires a new MAJOR.
+
+**RDGO-001 v3.1: NORMALIZED AND FROZEN; v2 proof-lifecycle semantics and
+v3.0 sequence-3-creation narration have no migration.**
+**Gate count: 11 (unchanged). Durable-before-effect items: 9 (v3.1 — item
+9 added; item 1 enriched, see §10a). TOCTOU facts: 7 (unchanged).**
 **Real execution: UNAVAILABLE.**

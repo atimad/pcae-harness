@@ -1,12 +1,22 @@
-# PBRD-001 v2.0 — Permission Broker Runtime Dispatch Extension Contract
+# PBRD-001 v2.1 — Permission Broker Runtime Dispatch Extension Contract
 
 ## Contract identity and status
 
 **Contract:** PBRD-001  
-**Version:** 2.0
+**Version:** 2.1
 **Status:** FROZEN  
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
 Invocation Human-Principal Authentication Freeze Repair
+**Normalized to v2.1 by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 —
+Runtime-Dispatch Contract Normalization Implementation. **v2.1 is a MINOR
+clarification** (§16): the fourteen facts, their meanings, the action
+behaviour, and the `DENY > HUMAN_REVIEW > ALLOW` precedence are unchanged.
+It adds a normative *representation-equivalence* clause to §4 fact 14
+(`human_authority_binding`): the seven *logical* fields remain the semantic
+requirement, and a documented equivalent compact 3-tuple representation
+(`approval_id`, `approval_record_digest`, `validation_evidence_digest`) is
+permitted — the verified lossless production form (finding V-4). No
+production change; no request field added or removed.
 **Supersedes:** PBRD-001 v1.0 and v1.1. V1.x human-authority binding semantics
 are not valid for v2 requests and have no migration. The original v1.0 twelve-fact request
 was independently found incomplete against RPAC-REQ-025/044/064–068 by
@@ -16,7 +26,7 @@ Phase 149O.20L.7O.3V.1 (Finding B-149O.20L.7O.3V.1-2): it lacked mandatory
 real local-CLI runtime dispatch.  
 **Related contracts:** Permission Broker Foundation, PBPA-001 v1.0,
 PBPC-001 v1.2, RPAC-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0,
-HPAC-001 v2.0, RDGO-001 v3.0.
+HPAC-001 v2.1, RDGO-001 v3.1.
 
 PBRD-001 freezes a future PB request/action contract. It does not add source
 constants, policies, request fields, a production consumer, or execution.
@@ -128,11 +138,42 @@ trust owner changed.
 | 11 | `transport_type` | Contract-fixed integration point | const `local_cli` | Yes | PBRD-001 integration | Excludes API/provider transports |
 | 12 | `network_requirement` | Target descriptor + static preflight | const `false` | Yes | Registry/preflight owner | Declared lack of network need; grants none |
 | 13 | `filesystem_scope_ref` | Governed isolated-worktree/scope owner | immutable ID/digest reference | Yes | Filesystem-scope owner | Declared scope for audit/containment; grants no mutation |
-| 14 | `human_authority_binding` | RIHAC-001 v2 validator | closed object containing exactly `approval_id`, `approval_digest`, `authority_projection_id`, `authority_projection_digest`, `authority_contract_version` const `RIHAC-001/2.0`, `proof_validation_digest`, and `request_binding_digest` | Yes | Human-authority validator | Canonical approval plus freshly validated authority projection; not raw proof, caller claim, seal, or boolean |
+| 14 | `human_authority_binding` | RIHAC-001 v2 validator | closed object; the seven *logical* fields are `approval_id`, `approval_digest`, `authority_projection_id`, `authority_projection_digest`, `authority_contract_version` const `RIHAC-001/2.0`, `proof_validation_digest`, and `request_binding_digest`. **v2.1 (V-4):** a normative equivalent compact representation is permitted — see §4a. | Yes | Human-authority validator | Canonical approval plus freshly validated authority projection; not raw proof, caller claim, seal, or boolean |
 
 `lifecycle_context` and `human_authority_binding` are each one immutable
 binding fact despite their closed subfields, exactly as in v1.0. This
 preserves that convention while honestly recounting the total as fourteen.
+
+### 4a. `human_authority_binding` representation equivalence (v2.1 — V-4)
+
+The **logical** requirement is unchanged: `human_authority_binding` commits
+approval provenance, the authority projection identity and digest, the
+`RIHAC-001/2.0` contract version, the proof-validation semantics, and the
+request binding. The *permitted canonical representation* is normalized:
+
+> The production `human_authority_binding` MAY be represented as the closed
+> 3-tuple `(approval_id, approval_record_digest, validation_evidence_digest)`
+> where `validation_evidence_digest` is a single collision-resistant SHA-256
+> commitment over the complete RIHAC-001 v2.0 validated-authority projection
+> payload, PROVIDED that: (1) `approval_id` and the approval record digest
+> are carried directly; (2) every other logical field is deterministically
+> committed inside `validation_evidence_digest`, OR structurally enforced
+> more strongly than a string (exact-object registry membership for the
+> projection identity — `is_trusted_validated_authority_projection`), OR a
+> zero-entropy constant (`authority_contract_version` — the RIHAC v2.0 path
+> is the only code path); and (3) the request-binding semantic is
+> independently re-enforced by recomputation at request-construction time
+> (`_expected_subject_scope_binding_digest` + `invocation_id` equality).
+> Two authority contexts that differ in any logical field MUST NOT collapse
+> to the same 3-tuple — the projection payload keys guarantee this (a
+> difference in any logical semantic necessarily changes ≥1 payload key and
+> therefore `validation_evidence_digest`).
+
+The logical seven-field security meaning is NOT weakened by production
+using a compact representation. The substantive §7 property
+(`approval_present=true` set only by successful RIHAC-001 v2.0 validation,
+never caller-settable) is preserved: the digest-collapsed form has a single
+population path.
 
 ## 4a. Attempt/idempotency ownership and construction point
 
@@ -199,7 +240,7 @@ evidence yields `approval_present=false` or request-construction failure and
 can never produce dispatch.
 
 PB evaluation never consumes an approval or HPAC proof. Consumption remains
-the RDGO-001 v3.0 gate-9 atomic dispatch-attempt transition; a PB decision is
+the RDGO-001 v3.1 gate-9 atomic dispatch-attempt transition; a PB decision is
 permission evidence only and is invalidated when its authority projection is
 revoked or fails current revalidation.
 
@@ -283,12 +324,12 @@ of the following are separately implemented and independently verified:
 1. the `runtime_dispatch` action and the exact `adapter` classification;
 2. trusted construction and digest binding of all fourteen request facts,
    including `attempt_id` and `idempotency_key`;
-3. RIHAC-001 v2.0 / RIASC-001 v3.0 / HPAC-001 v2.0 approval creation,
+3. RIHAC-001 v2.0 / RIASC-001 v3.0 / HPAC-001 v2.1 approval creation,
    protected proof/registry resolution, validation, expiry, and
    one-shot consumption;
 4. current-policy PB evaluation with no precedence weakening;
 5. a real, positive, single-attempt Runtime Enforcement gate over the full
-   RDGO-001 v3.0 projection;
+   RDGO-001 v3.1 projection;
 6. local executable supply-chain identity and live preflight;
 7. Shell Gate/equivalent process containment with network denied;
 8. atomic durable-before-effect state and uncertainty recovery;
@@ -359,17 +400,31 @@ complete projection; it does not rubber-stamp PB or approval.
 
 ## 16. Versioning
 
-PBRD-001 uses contract `MAJOR.MINOR`. Additive request evidence may increment
-MINOR only when existing meanings, action behavior, and precedence remain
-unchanged. V2 changes the mandatory meaning and closed shape of the existing
+PBRD-001 uses contract `MAJOR.MINOR`. Additive request evidence or an
+additive representation-equivalence clarification may increment MINOR only
+when existing meanings, action behavior, and precedence remain unchanged.
+V2 changed the mandatory meaning and closed shape of the existing
 `human_authority_binding`: a v1.1 request could carry a pre-HPAC RIHAC v1.0
 validation digest, whereas v2 requires a freshly resolved RIHAC-001 v2.0
 authority projection with proof/request binding. Because an old valid request
-is no longer valid under the new required meaning, this is a MAJOR, not an
-additive minor. Widening action semantics, weakening a required
-fact, changing the execution class, weakening POL-005 eligibility, or
-altering precedence remains incompatible and requires a new MAJOR plus
-explicit migration and independent verification.
+is no longer valid under the new required meaning, that was a MAJOR, not an
+additive minor.
+
+**v2.1 (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4) — MINOR.** §4a adds a
+normative representation-equivalence clause: the seven *logical*
+`human_authority_binding` fields, their meanings, the `runtime_dispatch`
+action behaviour, and `DENY > HUMAN_REVIEW > ALLOW` precedence are
+unchanged; only a documented equivalent compact 3-tuple representation is
+newly permitted (the independently verified lossless production form —
+finding V-4). No request fact is added, removed, or re-typed; no old valid
+request becomes invalid; the closed *shape* argument is not load-bearing
+because §4a proves the compact form commits every logical semantic without
+a distinguishable collision. This is not a "closed shape" MAJOR.
+
+Widening action semantics, weakening a required fact, changing the
+execution class, weakening POL-005 eligibility, or altering precedence
+remains incompatible and requires a new MAJOR plus explicit migration and
+independent verification.
 
 Unknown contract/request versions fail closed. Existing actions are never
 retrospectively reclassified by a PBRD revision.
@@ -381,6 +436,6 @@ Enforcement, adapters, runtime inspect, session/bootstrap, schema packages,
 or version/build configuration. It does not launch a process, invoke an
 external runtime, access credentials, or enable network/execution.
 
-**PBRD-001 v2.0: FROZEN; v1.x authority bindings have no migration.**
+**PBRD-001 v2.1: NORMALIZED AND FROZEN; v1.x authority bindings have no migration.**
 **POL-005 production behavior: UNCHANGED.**  
 **Real execution: UNAVAILABLE.**

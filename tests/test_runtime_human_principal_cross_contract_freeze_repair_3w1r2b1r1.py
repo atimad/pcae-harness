@@ -174,9 +174,12 @@ def test_rdgo_keeps_eleven_gates_and_first_effect_at_ten() -> None:
 
 
 def test_cross_contract_headers_close_active_version_graph() -> None:
+    # Version graph after the `.1R.15.4` normalization: RDGO-001 v3.1,
+    # PBRD-001 v2.1, HPAC-001 v2.1; RIHAC-001 v2.0 and RIASC-001 v3.0
+    # unchanged.
     assert "RIHAC-001 v2.0" in text(PBRD).split("## 0.", 1)[0]
     rdgo_header = text(RDGO).split("## 0.", 1)[0]
-    for marker in ("RIHAC-001 v2.0", "RIASC-001 v3.0", "HPAC-001 v2.0", "PBRD-001 v2.0"):
+    for marker in ("RIHAC-001 v2.0", "RIASC-001 v3.0", "HPAC-001 v2.1", "PBRD-001 v2.1"):
         assert marker in rdgo_header
 
 

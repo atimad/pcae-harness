@@ -18,8 +18,8 @@ silent upgrade exists.
 **Scope:** One future, explicitly human-authorized, bounded local-CLI
 runtime invocation attempt.  
 **Schema companion:** RIASC-001 v3.0
-**Related contracts:** RPAC-001 v1.0, PBRD-001 v2.0, RDGO-001 v3.0, HPAC-001
-v2.0 (governs the `HumanAuthenticator`
+**Related contracts:** RPAC-001 v1.0, PBRD-001 v2.1, RDGO-001 v3.1, HPAC-001
+v2.1 (governs the `HumanAuthenticator`
 mechanism, `HumanPrincipalRegistry`, and `HumanAuthenticationProof` this
 amendment now requires §3/§12/§16 to verify against).  
 **Reference note (149O.20L.7O.3V.1R):** PBRD-001 and RDGO-001 were repaired
@@ -339,7 +339,7 @@ V2 trust is the conjunction of:
 4. canonical-storage lookup rather than a caller-supplied arbitrary path;
 5. record-digest recomputation and exact comparison;
 6. current freshness and consumption-state validation; and
-7. successful HPAC-001 v2.0 proof verification against current protected
+7. successful HPAC-001 v2.1 proof verification against current protected
    registry/proof state, including exact domain, subject, trusted-presentation,
    mechanism attestation, UP, UV, nonce/hash-chained lifecycle, signature,
    revocation, and absence of HPAC-001 §41 consumption checks; and
@@ -596,5 +596,11 @@ not implement `HumanAuthenticator`, touch hardware, or write to
 ## 23. Freeze verdict
 
 **RIHAC-001 v2.0: CORRECTIVELY COMPLETED AND FROZEN; v1.x is not
-authority-compatible.**
+authority-compatible. Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 refreshed
+sibling-contract version cross-references (RDGO-001 v3.1, PBRD-001 v2.1,
+HPAC-001 v2.1) and confirmed §14's "separate append-only, digest-bound
+early-revocation artifact requires its own governed contract amendment"
+boundary — no such artifact is created here; the RDGO-001 v3.1 gate-9
+`approval_generation` marker carries only a `null` forward hook for it
+(finding N-15-3-2). No RIHAC-001 semantic change; no version bump.**
 **Real execution: UNAVAILABLE.**

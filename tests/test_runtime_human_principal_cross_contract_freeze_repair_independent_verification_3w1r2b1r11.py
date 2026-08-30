@@ -56,7 +56,10 @@ def test_exact_primary_nine_finding_inventory() -> None:
 
 
 def test_active_versions_and_supersession_are_exact() -> None:
-    expected = [(RIHAC, "RIHAC-001", "2.0"), (RIASC, "RIASC-001", "3.0"), (HPAC, "HPAC-001", "2.0"), (PBRD, "PBRD-001", "2.0"), (RDGO, "RDGO-001", "3.0"), (RPAC, "RPAC-001", "1.0")]
+    # `.1R.15.4` normalization bumped RDGO-001 -> v3.1, PBRD-001 -> v2.1,
+    # HPAC-001 -> v2.1 (all MINOR). RIHAC-001 v2.0, RIASC-001 v3.0,
+    # RPAC-001 v1.0 unchanged.
+    expected = [(RIHAC, "RIHAC-001", "2.0"), (RIASC, "RIASC-001", "3.0"), (HPAC, "HPAC-001", "2.1"), (PBRD, "PBRD-001", "2.1"), (RDGO, "RDGO-001", "3.1"), (RPAC, "RPAC-001", "1.0")]
     for text, contract, version in expected:
         assert f"**Contract:** {contract}" in text
         assert f"**Version:** {version}" in text
@@ -204,7 +207,7 @@ def test_authenticated_principal_object_shape_has_no_authority() -> None:
 
 
 def test_rihac_validation_conjunction_and_canonical_approval_provenance() -> None:
-    for requirement in ["strict RIASC-001 schema validation", "canonical-storage lookup", "current freshness and consumption-state validation", "successful HPAC-001 v2.0 proof verification", "trusted-construction-only validated-authority projection"]:
+    for requirement in ["strict RIASC-001 schema validation", "canonical-storage lookup", "current freshness and consumption-state validation", "successful HPAC-001 v2.1 proof verification", "trusted-construction-only validated-authority projection"]:
         assert requirement in RIHAC
     assert "validator resolves it by `approval_id`; callers SHALL NOT supply an arbitrary\npath" in RIHAC
     assert "never a caller-copyable\n    seal, boolean, or public digest" in RIHAC
@@ -254,8 +257,9 @@ def test_rpac_is_byte_identical_and_semantically_compatible() -> None:
 
 
 def test_cross_contract_version_pins_are_current_except_historical_text() -> None:
-    assert "RIHAC-001 v2.0, RIASC-001 v3.0,\nHPAC-001 v2.0, RDGO-001 v3.0" in PBRD
-    assert "RIHAC-001 v2.0, RIASC-001 v3.0,\nHPAC-001 v2.0, PBRD-001 v2.0" in RDGO
+    # `.1R.15.4` normalization: RDGO-001 v3.1, PBRD-001 v2.1, HPAC-001 v2.1.
+    assert "RIHAC-001 v2.0, RIASC-001 v3.0,\nHPAC-001 v2.1, RDGO-001 v3.1" in PBRD
+    assert "RIHAC-001 v2.0, RIASC-001 v3.0,\nHPAC-001 v2.1, PBRD-001 v2.1" in RDGO
     assert "Schema companion:** RIASC-001 v3.0" in RIHAC
     assert "Semantic authority:** RIHAC-001 v2.0" in RIASC
 

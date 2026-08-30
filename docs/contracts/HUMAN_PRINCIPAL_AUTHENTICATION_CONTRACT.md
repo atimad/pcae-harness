@@ -1,9 +1,9 @@
-# HPAC-001 v2.0 — Human Principal Authentication Contract
+# HPAC-001 v2.1 — Human Principal Authentication Contract
 
 ## Contract identity and status
 
 **Contract:** HPAC-001
-**Version:** 2.0
+**Version:** 2.1
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
 Invocation Human-Principal Authentication Freeze Repair
@@ -13,6 +13,21 @@ Canonicalization Blocking Repair. This completion retains v2.0 for the
 reason frozen in §38: it defines previously absent companion records without
 changing the challenge or proof wire schemas and without making any v2.0
 artifact newly authority-valid by migration.
+**Normalized to v2.1 by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 —
+Runtime-Dispatch Contract Normalization Implementation. **v2.1 is a MINOR
+addition of optional verification evidence** (§37): §41's
+`RuntimeInvocationAuthorityConsumption` evolves to schema
+`HPAC-AUTHORITY-CONSUMPTION/2.1` with one additional closed binding object,
+`authority_generation_binding` (the new `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`),
+durably committing the monotonic authority-generation snapshot gate 9
+verified unchanged immediately before the create-only linearization
+(finding V-15-1; RDGO-001 v3.1 §10). It grants **no** authority — it is
+historical/verification evidence that a future gate 10 re-reads and
+compares against current canonical state. The challenge, proof, principal,
+credential, presentation, lifecycle-event, and pre-existing consumption
+binding schemas are byte-unchanged; a `/2.0` consumption record is
+readable historical/test data (gate-10-ineligible). See HPAC-REQ-098,
+HPAC-REQ-098a, HPAC-REQ-099, and §37.
 **Supersedes:** HPAC-001 v1.0. V1 proof, registry, enrollment, assurance, and
 presentation semantics are not authority-compatible with v2 and SHALL NOT be
 silently upgraded.
@@ -865,6 +880,19 @@ independent verification. Unknown versions fail closed. No future version
 may retrospectively widen an already-issued proof or an already-enrolled
 principal's granted assurance.
 
+**v2.1 (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4) — MINOR.** v2.1 adds one
+closed binding object (`authority_generation_binding`, schema
+`HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`) to the §41
+`HPAC-AUTHORITY-CONSUMPTION` record, bumping it to `/2.1`. It **widens no
+authority**: the object is verification evidence a future gate 10 re-reads
+and compares against current canonical state — it carries no capability
+field, grants nothing on possession, and does not make any previously
+invalid consumption newly valid. No field is removed or re-typed; no
+existing binding object changes; the challenge/proof/principal/credential/
+presentation/lifecycle schemas are byte-unchanged. A `/2.0` record without
+the new object remains readable historical/test data and is
+gate-10-ineligible. This meets the MINOR bar.
+
 ## 38. Corrective version treatment and canonical approval subject
 
 - **HPAC-REQ-088.** This phase is a corrective completion of the
@@ -1083,7 +1111,14 @@ be persisted; failure to record the observation never preserves authority.
   sequence 3 with the exact final `approval_digest`. If a byte-identical
   sequence-3 event already exists, same-binding revalidation is idempotent
   after all current checks rerun; no event is rewritten and no authority is
-  consumed. A different approval digest, proof digest, presentation,
+  consumed. **Cross-reference (RDGO-001 v3.1 §4 — V-2):** in the verified
+  runtime-dispatch flow the sequence-3 event is created by the **first**
+  HPAC-REQ-054 run — the verifier's assurance-independent step 10 at gate 3
+  (approval creation) time — so gate 5's rerun takes the idempotent-accept
+  path and its coordinator performs a read-only re-confirmation. HPAC-REQ-054
+  step 10's "atomically create … or accept an already-present byte-identical
+  same-binding event idempotently" wording already covers both; RDGO-001
+  v3.1 narration is aligned to this. A different approval digest, proof digest, presentation,
   challenge, subject, invocation, attempt, principal, credential, or
   mechanism is cross-binding and fails closed. Gate 5 emits only an
   ephemeral `AuthenticatedHumanPrincipal` and RIHAC projection; persisted
@@ -1093,15 +1128,20 @@ be persisted; failure to record the observation never preserves authority.
 
 - **HPAC-REQ-098.** The one canonical consumption artifact is
   `RuntimeInvocationAuthorityConsumption`, schema identity
-  `HPAC-AUTHORITY-CONSUMPTION/2.0`, stored exactly at
+  `HPAC-AUTHORITY-CONSUMPTION/2.1` (v2.1; `/2.0` records without
+  `authority_generation_binding` remain readable historical/test data and
+  are gate-10-ineligible — RDGO-001 v3.1 §10 — but gate 9 writes only
+  `/2.1`), stored exactly at
   `<HPAC_PROTECTED_ROOT>/proofs/v2/<proof_id>/consumption.json`. It has
   exactly these closed top-level fields: `consumption_schema_version`
   (const), `record_digest` (self-excluding SHA-256), `request_identity`,
   `repository_task_binding`, `target_binding`, `prompt_binding`,
-  `authority_binding`, `pb_binding`, `runtime_enforcement_binding`, and
-  `dispatch_binding`.
+  `authority_binding`, `authority_generation_binding`, `pb_binding`,
+  `runtime_enforcement_binding`, and `dispatch_binding`.
 
-The eight closed binding objects contain exactly:
+The nine closed binding objects contain exactly (v2.1 — `authority_generation_binding`
+added; the eight `/2.0` objects and the closed 12-field `authority_binding`
+are byte-unchanged):
 
 | Object | Exact fields |
 |---|---|
@@ -1110,6 +1150,7 @@ The eight closed binding objects contain exactly:
 | `target_binding` | `runtime_target_id`, `adapter_id`, `descriptor_version`, `descriptor_digest`, `target_config_digest`, `executable_identity_digest` |
 | `prompt_binding` | `prompt_hash`, `prompt_hash_profile` const `pcae.prompt-semantic.v1` |
 | `authority_binding` | `approval_id`, `approval_digest`, `authority_projection_id`, `authority_projection_digest`, `authority_contract_version` const `RIHAC-001/2.0`, `proof_id`, `proof_digest`, `proof_validation_digest`, `registry_state_digest`, `approval_subject_digest`, `trusted_presentation_ref`, `challenge_digest` |
+| `authority_generation_binding` (v2.1) | `snapshot_schema_version` const `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`, `principal_generation`, `credential_generation`, `approval_generation`, `lifecycle_generation`, `consumption_generation` — see HPAC-REQ-098a |
 | `pb_binding` | `request_digest`, `decision_digest`, `decision`, `policy_version`, `causing_policy_ids`, `matched_no_go_ids` |
 | `runtime_enforcement_binding` | `decision_id`, `decision_digest`, `verdict`, `expires_at`, `evaluated_input_digest` |
 | `dispatch_binding` | `containment_evidence_ref` (closed ID/digest pair), `state` const `dispatch_attempted`, `consumed_at` |
@@ -1120,16 +1161,55 @@ authoritative fact that the named approval, presentation, challenge, proof,
 and attempt were consumed together; no separate mutable `consumed` fields
 or cross-file sequence of consumption writes exists.
 
-- **HPAC-REQ-099.** Immediately before create, gate 9, while holding the
-  protected evidence-store transaction/serialization boundary, reruns
+- **HPAC-REQ-098a (v2.1 — V-15-1 durable authority-generation snapshot).**
+  `authority_generation_binding` is a closed object, schema identity
+  `HPAC-AUTHORITY-GENERATION-SNAPSHOT/1.0`, with exactly these fields:
+  `snapshot_schema_version` (const), and the five markers
+  `principal_generation`, `credential_generation`, `approval_generation`,
+  `lifecycle_generation`, `consumption_generation` — each a non-empty
+  bounded (≤256 char) stripped string that is a digest or fixed marker over
+  **durable canonical state only**:
+
+  | Marker | Committed value |
+  |---|---|
+  | `principal_generation` | whole-record canonical digest of the current principal registry record (moves on `revoke_principal`, disablement, eligibility change, record replacement) |
+  | `credential_generation` | whole-record canonical digest of the current credential registry record (moves on `revoke_credential`, replacement, mechanism/key/binding change) |
+  | `approval_generation` | canonical digest folding the current resolved immutable RIASC-001 v3.0 approval `record_digest` + `approval_id` + a forward hook for a future RIHAC-001 v2.0 §14 append-only, digest-bound early-revocation artifact (`null` until that separate governed amendment). Absent/unreadable approval → the resolver fails closed. Approval revocation is otherwise transitive via `principal_generation` / `credential_generation` / `lifecycle_generation` / wall-clock expiry |
+  | `lifecycle_generation` | digest over every `(sequence, state, event_digest)` triple of the full hash-chained proof lifecycle chain (moves on any successor, a terminal `EXPIRED`/`REVOKED`/`REJECTED` event, any transition, or a fork → fail closed) |
+  | `consumption_generation` | consumption-record state observed at the linearization point — `"absent"` on the create path (a present or durability-uncertain record short-circuits before the create) |
+
+  The committed object is the exact snapshot `S1` that gate 9 captured
+  after the HPAC-REQ-099 in-boundary revalidation battery and verified
+  unchanged at the final zero-effectful-I/O re-read `S2` immediately before
+  the create; it is **never** rebuilt from post-`S2` state. No field uses a
+  wall clock, mtime, nonce, or process identity, so every marker is
+  reconstructible from durable state after a restart. This object is
+  **verification evidence, not execution authority**: it carries no
+  capability field and no identity claim beyond digests; possession or
+  reconstruction grants nothing; a future gate 10 MUST re-read current
+  canonical generation state and compare it against this durable snapshot
+  (RDGO-001 v3.1 §10/§11).
+
+- **HPAC-REQ-099.** Immediately before create, gate 9 reruns
   current principal/credential/descriptor status, presentation attestation
   and expiry, challenge/proof/lifecycle chain, approval freshness/expiry,
   exact gate-5 binding, PB/Runtime Enforcement freshness, and absence of a
-  consumption record. It compare-and-creates `consumption.json` against the
+  consumption record. It then captures the HPAC-REQ-098a authority-generation
+  snapshot `S1` and re-reads it as `S2` with **zero intervening effectful
+  I/O** immediately before the create; any `S2 != S1` fails closed with no
+  `consumption.json`. It compare-and-creates `consumption.json` against the
   exact current registry/configuration state digest and sequence-3 event.
-  Revocation, expiry, invalidation, or drift after gate 5 but before the
-  atomic create fails closed. Gate-5 validation is never a substitute for
-  this gate-9 revalidation.
+  The per-`proof_id` create-only atomic primitive (HPAC-REQ-100) **is** the
+  serialization boundary and the sole transaction mechanism — there is no
+  separate held lock or transaction object (RDGO-001 v3.1 §10; `.1R.9`
+  §18). The revalidation battery plus the zero-I/O `S1`/`S2` re-check make
+  the validity check and the atomic consumption serialized with respect to
+  each other to the practical limit; a residual instruction-level
+  micro-window between the `S2 == S1` decision and the create is the
+  acknowledged limit and produces no external effect (gate 10 absent; its
+  mandatory re-read re-closes it). Revocation, expiry, invalidation, or
+  drift after gate 5 but before the atomic create fails closed. Gate-5
+  validation is never a substitute for this gate-9 revalidation.
 
 - **HPAC-REQ-100.** The create is an atomic, create-only, same-filesystem
   durable commit: write canonical bytes to a protected temporary sibling,
@@ -1192,8 +1272,10 @@ or cross-file sequence of consumption writes exists.
 
 ## 44. Freeze verdict
 
-**HPAC-001 v2.0: CORRECTIVELY COMPLETED AND FROZEN; supersedes v1.0 with no
-authority migration. B-3 and B-4 canonical evidence gaps are closed.**
+**HPAC-001 v2.1: NORMALIZED AND FROZEN; supersedes v1.0 with no
+authority migration. B-3 and B-4 canonical evidence gaps are closed. v2.1
+adds the §41 `authority_generation_binding` verification-evidence object
+(`HPAC-AUTHORITY-CONSUMPTION/2.1`) — MINOR, no authority widening.**
 **`HumanAuthenticator` implementation: NOT BUILT / NOT AUTHORIZED.**
 **`HumanPrincipalRegistry`: NOT CREATED.**
 **Hardware: NOT TOUCHED.**

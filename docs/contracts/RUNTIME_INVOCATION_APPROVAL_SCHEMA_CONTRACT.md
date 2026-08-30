@@ -176,7 +176,7 @@ three carry forward unchanged in meaning (`approval_mechanism`,
 | `approval_preview_digest` | Unchanged — still the exact rendered approval-preview digest. |
 | `producer_component` | Unchanged — still the const `pcae.trusted_runtime_approval_coordinator`. |
 | `principal_id` | **New.** Non-empty string, resolved against `HumanPrincipalRegistry`; HPAC-001 §7's grammar and immutability rules apply. |
-| `authentication_mechanism_id` | Non-empty string naming one HPAC-001 v2.0 §10 mechanism descriptor (the primary v2 hardware-FIDO2 mechanism is in §14). |
+| `authentication_mechanism_id` | Non-empty string naming one HPAC-001 v2.1 §10 mechanism descriptor (the primary v2 hardware-FIDO2 mechanism is in §14). |
 | `credential_id` | **New.** Non-empty string; the exact enrolled credential (HPAC-001 §9) used to produce the proof, distinct from `principal_id` (a principal MAY own more than one credential, HPAC-001 §9). |
 | `authentication_proof_ref` | Exact closed pair (`proof_id`, `proof_digest`) pointing to HPAC-PROOF/2.0 protected canonical storage. It is not the generic `artifact_ref` and never contains a path. |
 
@@ -214,6 +214,20 @@ One-shot scope is frozen by `attempt_limit=1` and
 `approval_scope.dispatch_limit=1`; actual consumption is the separately
 durable gate-9 `dispatch_attempted` record linked by approval ID/digest.
 Explicit revocation is deferred as RIHAC-001 specifies.
+
+**Errata note (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 — V-3;
+non-normative, no version change).** The completed-record `record_digest`
+(this contract, §2 item 6 / §8) and the `HPAC-APPROVAL-SUBJECT/2.0` digest
+(HPAC-001 v2.1 §38 `HPAC-REQ-089`) are **distinct commitments** and are not
+interchangeable. The `HPAC-APPROVAL-SUBJECT/2.0` digest is the *subject*
+commitment fixed into the v2 challenge at RDGO-001 gate 3 and bound by HPAC
+lifecycle sequence 3 `PROOF_VERIFIED_AND_BOUND`. The completed-record
+`record_digest` is a separate commitment over the finished
+`RuntimeInvocationApproval` and is carried in the RIHAC-001 v2.0
+validated-authority projection and consumed at RDGO-001 gate 9 (RDGO-001
+v3.1 §10 item 5). HPAC lifecycle sequence 3 does **not** bind
+`record_digest`; RDGO-001 v3.1 §4 is corrected accordingly (it previously
+read "over the completed approval digest").
 
 ## 10. Normative Draft 2020-12 shape
 
@@ -436,7 +450,7 @@ SHALL additionally enforce:
 - approval-preview digest correspondence to the protected human-visible
   presentation and canonical challenge subject;
 - producer identity distinct from approving human identity; and
-- HPAC-001 v2.0 principal/credential/proof verification
+- HPAC-001 v2.1 principal/credential/proof verification
   (RIHAC-001 v2.0 §16 step 4): `principal_id` resolves to an `active`
   `HumanPrincipalRegistry` record; `credential_id` resolves to that
   principal's `active`, non-revoked credential; `authentication_mechanism_id`
@@ -476,6 +490,10 @@ independent verification before production consumption.
 
 ## 14. Freeze verdict
 
-**RIASC-001 v3.0 schema contract: FROZEN; v1/v2 have no authority migration.**
+**RIASC-001 v3.0 schema contract: FROZEN; v1/v2 have no authority migration.
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 added a non-normative §9 errata note
+(V-3: `record_digest` vs `HPAC-APPROVAL-SUBJECT/2.0` digest are distinct) and
+refreshed two HPAC cross-references to v2.1; no version change, no schema
+change.**
 **Executable production schema: NOT IMPLEMENTED / NOT AUTHORIZED.**  
 **Real execution: UNAVAILABLE.**
