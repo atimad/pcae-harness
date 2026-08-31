@@ -420,8 +420,15 @@ def test_repaired_tree_has_no_attributable_added_regression_marker_in_doc():
 # ═══════════════════════════════════════════════════════════════════════
 
 def test_no_contract_change_since_r20_head():
-    assert _git("diff", "--stat", R20_HEAD, "HEAD", "--", "docs/contracts",
-                "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").strip() == ""
+    changed = set(_git("diff", "--name-only", R20_HEAD, "HEAD", "--", "docs/contracts",
+                       "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").split())
+    # Phase ...1R.22 (N-16-3) authorizedly evolves the PB policy contracts.
+    _r122_contracts = {
+        "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+    }
+    assert changed <= _r122_contracts, changed - _r122_contracts
 
 
 def test_no_slice_a_or_gate_5_9_drift_since_baseline():

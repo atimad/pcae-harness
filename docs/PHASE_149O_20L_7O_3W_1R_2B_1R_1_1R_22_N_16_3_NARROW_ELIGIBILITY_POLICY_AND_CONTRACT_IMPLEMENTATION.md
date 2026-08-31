@@ -514,10 +514,29 @@ downstream.
 ## 10. Defensive policy test matrix (25+ cases)
 
 New suite `tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py`
-(`.1R.23` re-derives). Every case asserts **no external effect**. Cases 1–25
-follow `.1R.21` §37 exactly; the suite adds the phase-prompt §50/§53/§54
-static and forgery challenges and the §63 contract-production equivalence
-map. See §12 for the byte count and A/B classification.
+— **43 test functions** (`.1R.23` re-derives). Every case asserts **no
+external effect** (runtime posture unchanged; the `.1R.22` `src/pcae` diff is
+exactly the two authorized files and adds no `adapter.dispatch(` line; no
+`runtime_dispatch_gate10.py`). Cases 1–25 follow `.1R.21` §37; 26–33 add the
+human-authority wall / other-DENY-dominance / HUMAN_REVIEW-dominance /
+caller-reconstruction / digest-mutation / old-caller-equivalence cases; the
+suite adds the phase-prompt §50 static-never-ALLOW AST scan (every `evaluate`
+return is `_not_triggered` or a `DECISION_DENY` `PolicyResult`), the §53/§54
+seal / reconstruction / provenance challenges, and the §63
+contract-production equivalence map (every PBNDE-001 predicate id → a
+production symbol; PBRD v3.0 header + §12a + migration text; NG-025 in the
+correct file and absent from the RE-NOGO registry; the classification
+deriver referenced only by the trusted builder; the production N-16-6
+resolver admits nothing; no effect-primitive import in either touched
+module). **Structurally-complete-profile cases** build the sealed request
+directly (there is no test or production path to a trusted
+`ValidatedAuthorityProjection` — `validate_approval` deliberately rejects
+caller-supplied objects — so `approval_present=True` on a builder-produced
+request is unreachable in the test environment; the direct-construction path
+exercises the POL-005 / POL-013 evaluation logic, which is what the matrix
+verifies). Case 24b confirms that even a synthetic admitting N-16-6 resolver
+does not yield a classified request through the trusted builder, because
+`approval_present` stays `False`.
 
 | # | Case | Expected |
 |---:|---|---|

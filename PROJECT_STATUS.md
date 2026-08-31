@@ -83,9 +83,12 @@ non-positive. N-16-5 independently keeps it unsatisfiable (`validate_approval`
 NON_REAL hard-stop).
 
 **Defensive test matrix:** new `tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py`
-(the `.1R.21` §37 25 cases + the phase-prompt §50/§53/§54 static/forgery
-challenges + the §63 contract-production equivalence map; every case asserts
-no external effect). **Scope-fence guard reconciliation:** ~20 assertions
+— **43 test functions** (the `.1R.21` §37 25 cases + cases 26–33 + the
+phase-prompt §50 static-never-ALLOW AST scan + §53/§54 seal / reconstruction
+/ provenance challenges + the §63 contract-production equivalence map; every
+case asserts no external effect — runtime posture unchanged, the `.1R.22`
+`src/pcae` diff is exactly the two authorized files and adds no
+`adapter.dispatch(` line). **Scope-fence guard reconciliation:** ~20 assertions
 across `.1R.8` / `.1R.11` / `.1R.15.2` / `.1R.15.5` / `.1R.17` / `.1R.17R` /
 `.1R.17R.1` / `.1R.18` / `.1R.19` / `.1R.19R` / `.1R.19R.1` / `.1R.20` plus
 the PBPC/PBPA/composition-hardening count assertions — subset checks over the

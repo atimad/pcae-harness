@@ -242,14 +242,16 @@ def test_push_module_does_not_reference_authority_evaluation_or_aesic():
 
 
 def test_pbpa_contract_file_is_still_version_1_0():
-    """Independently confirms PBPA-001 was not touched by 148C.9 or this
-    phase -- version header must still read 1.0."""
+    """PBPA-001 was not touched by 148C.9. Phase ...1R.22 (N-16-3) amended it
+    to v1.1 additively (PBPA-REQ-089 — the POL-013 applicability row); no
+    existing PBPA clause changed."""
     import pathlib
 
     contract_text = pathlib.Path(
         "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md"
     ).read_text(encoding="utf-8")
-    assert "**Version:** 1.0" in contract_text
+    assert "**Version:** 1.1" in contract_text
+    assert "POL-013" in contract_text and "PBPA-REQ-089" in contract_text
 
 
 def test_pbpc_contract_file_is_now_version_1_2():
