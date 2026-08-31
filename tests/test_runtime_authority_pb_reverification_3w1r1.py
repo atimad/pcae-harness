@@ -749,7 +749,7 @@ def test_strongest_valid_request_is_denied_only_by_pol005(tmp_path):
     )
     decision = pb.PermissionBroker().evaluate(request)
     assert decision.decision == pb.DECISION_DENY
-    assert decision.causing_policy_ids == ("POL-005",)
+    assert decision.causing_policy_ids == ("POL-005", "POL-013")
     assert decision.decision_reason == "execution_boundary_unavailable"
     assert "POL-004" in decision.triggered_policy_ids
 
@@ -774,7 +774,7 @@ def test_pb_precedence_remains_deny_over_human_review(tmp_path):
     assert decision.decision == pb.DECISION_DENY
     assert "POL-004" in decision.triggered_policy_ids
     assert "POL-005" in decision.triggered_policy_ids
-    assert decision.causing_policy_ids == ("POL-005",)
+    assert decision.causing_policy_ids == ("POL-005", "POL-013")
 
 
 def test_attempt_and_idempotency_identifier_semantics(tmp_path):
@@ -823,12 +823,15 @@ def test_option_b_has_exact_fourteen_facts_and_non_runtime_compatibility(tmp_pat
     )
     facts = request.runtime_dispatch_context
     assert facts is not None
+    # The fourteen logical PBRD-001 binding facts plus `profile_classification`
+    # (PBRD-001 v3.0 §12a, Phase ...1R.22, N-16-3) — a derived, non-caller
+    # marker over the other facts, not a fifteenth logical fact.
     assert {field.name for field in dataclasses.fields(facts)} == {
         "invocation_id", "attempt_id", "idempotency_key", "repository_identity",
         "task_id", "lifecycle_context", "runtime_target_id",
         "adapter_descriptor_binding", "prompt_hash", "requested_capability",
         "transport_type", "network_requirement", "filesystem_scope_ref",
-        "human_authority_binding",
+        "human_authority_binding", "profile_classification",
     }
     ordinary = pb.build_permission_broker_request(
         action_type="push",

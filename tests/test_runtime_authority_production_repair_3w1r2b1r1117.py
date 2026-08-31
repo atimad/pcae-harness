@@ -593,6 +593,9 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         "src/pcae/core/hpac_verifier.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_permission.py",
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+        # narrow-eligibility policy + POL-013). Exact filename, no wildcard.
+        "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)
@@ -651,7 +654,22 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         ),
     ],
 )
+#: Contracts / production modules a later individually-authorized phase is
+#: permitted to change (exact paths, no wildcard). Phase ...1R.22 (N-16-3):
+#: PBRD-001 v2.1 -> v3.0 (MAJOR), the new PBNDE-001 policy contract's
+#: companion PBPA-001 v1.1 applicability row, and POL-005 §12a carve-out +
+#: POL-013 in permission_broker_foundation.py. `.1R.23` independently
+#: re-derives the SHAs for these.
+_R122_AUTHORIZED_BYTE_CHANGES = {
+    "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+    "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+    "src/pcae/core/permission_broker_foundation.py",
+}
+
+
 def test_contract_and_pol005_bytes_remain_identical(relative_path, expected_sha256):
+    if relative_path in _R122_AUTHORIZED_BYTE_CHANGES:
+        pytest.skip(f"{relative_path}: authorized byte change by Phase ...1R.22 (N-16-3)")
     path = Path(__file__).resolve().parents[1] / relative_path
     assert hashlib.sha256(path.read_bytes()).hexdigest() == expected_sha256
 

@@ -140,6 +140,35 @@ KNOWN_EXECUTION_CLASSES: frozenset[str] = frozenset({
 })
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Narrow local-CLI runtime-dispatch eligibility profile
+# PBRD-001 v3.0 §12a / PBNDE-001 / Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22
+# (N-16-3). See docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md §12a
+# and docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md.
+# ═══════════════════════════════════════════════════════════════════════════
+
+PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1 = "RUNTIME_DISPATCH_LOCAL_CLI_V1"
+"""The single trusted-derived narrow execution profile that PBRD-001 v3.0
+§12a excludes from POL-005's categorical hard-block match domain. This marker
+is DERIVED by the trusted runtime-dispatch request builder
+(`runtime_dispatch_permission.build_runtime_dispatch_permission_broker_request`)
+from the bound request facts and is NEVER a caller-supplied value. An empty
+string means "not classified" -> POL-005 keeps its unconditional DENY match
+and POL-013 DENYs. Membership in the profile is all-or-nothing: every
+predicate (P1..P21 of the N-16-3 profile) must hold and be trusted-derived.
+The profile is UNSATISFIABLE in production until N-16-4..7 close -- the
+N-16-6 supply-chain admission binding has no admitting implementation, so
+the `P_supply_chain_admission` predicate always fails."""
+
+ADMISSION_CLASS_LOCAL_FIXED_ARGV = "local_fixed_argv"
+"""The only supply-chain admission class eligible for
+`RUNTIME_DISPATCH_LOCAL_CLI_V1` (N-16-6 / RPAC-REQ-095). No admitting
+implementation exists yet."""
+
+ADMISSION_CLASS_UNADMITTED = "unadmitted"
+"""The value the fail-closed non-admitting N-16-6 admission resolver returns
+for every adapter. Keeps the narrow profile unsatisfiable in production."""
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Request model
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -155,12 +184,22 @@ class RuntimeDispatchLifecycleContext:
 
 @dataclass(frozen=True)
 class RuntimeDispatchAdapterDescriptorBinding:
-    """PBRD-001 §4 fact 8."""
+    """PBRD-001 §4 fact 8.
+
+    `admission_record_digest` / `admission_class` (PBRD-001 v3.0 §4 fact 8 /
+    §12a; Phase ...1R.22, N-16-3): additive INTERNAL sub-fields representing
+    the N-16-6 supply-chain admission binding for the executable. They are
+    populated ONLY by the trusted request builder from the N-16-6 admission
+    resolver -- never caller input -- and default to the empty string /
+    `""` on every legacy and every non-admitted request. They do not change
+    the meaning of the original four fields."""
 
     adapter_id: str
     descriptor_version: str
     descriptor_digest: str
     target_config_digest: str
+    admission_record_digest: str = ""
+    admission_class: str = ""
 
 
 @dataclass(frozen=True)
@@ -208,6 +247,15 @@ class RuntimeDispatchRequestFacts:
     human_authority_binding: RuntimeDispatchHumanAuthorityBinding
     transport_type: str = "local_cli"
     network_requirement: bool = False
+    profile_classification: str = ""
+    """PBRD-001 v3.0 §12a (Phase ...1R.22, N-16-3). A DERIVED, non-caller
+    commitment: `PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1` iff the trusted
+    builder confirmed every narrow-profile predicate, else `""`. Set only by
+    `runtime_dispatch_permission.build_runtime_dispatch_permission_broker_request`.
+    `_valid_runtime_dispatch_request` recomputes and rejects any value that
+    is inconsistent with the bound facts, so a post-construction mutation of
+    this marker (or of any predicate it depends on) is a structural DENY
+    before POL-005 / POL-013 are reached. Legacy requests carry `""`."""
 
 
 @dataclass(frozen=True)
@@ -393,8 +441,123 @@ def _valid_runtime_dispatch_request(request: PermissionBrokerRequest) -> bool:
         and authority.approval_record_digest == ""
         and authority.validation_evidence_digest == ""
     )
-    return (request.approval_present and authority_is_valid) or (
-        not request.approval_present and authority_is_absent
+    if not (
+        (request.approval_present and authority_is_valid)
+        or (not request.approval_present and authority_is_absent)
+    ):
+        return False
+    # PBRD-001 v3.0 §12a: the narrow-profile classification and the N-16-6
+    # admission sub-fields are trusted-derived, never caller-declared. The
+    # marker is either absent or the exact literal, and its value MUST match
+    # what the predicates imply -- recomputed here so a post-construction
+    # mutation of the marker, or of any predicate it depends on, or a forged
+    # "complete" profile that lacks the trusted marker, all fail closed
+    # (structural DENY) before POL-005 / POL-013 evaluate.
+    marker = facts.profile_classification
+    if marker not in ("", PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1):
+        return False
+    profile_complete = not _narrow_local_cli_dispatch_v1_failed_predicates(
+        request, check_marker=False
+    )
+    if marker == PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1 and not profile_complete:
+        return False
+    if marker == "" and profile_complete:
+        return False
+    return True
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Narrow local-CLI runtime-dispatch eligibility predicate logic
+# PBRD-001 v3.0 §12a / PBNDE-001 / Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _narrow_local_cli_dispatch_v1_failed_predicates(
+    request: PermissionBrokerRequest, *, check_marker: bool
+) -> tuple[str, ...]:
+    """Return the ordered tuple of `RUNTIME_DISPATCH_LOCAL_CLI_V1` predicate
+    ids that do NOT hold for `request` (empty tuple == the full narrow
+    profile is satisfied). Pure, fail-closed, reads only trusted-derived /
+    seal-protected request state. `check_marker=False` excludes the
+    `profile_classification` marker predicate itself (used when deriving the
+    marker); `True` includes it (used by POL-013).
+
+    The credential / provider / model / shell / command-string predicates
+    (P5..P7) hold by construction -- PBRD-001 §6 defines no such field on the
+    request -- so their absence is structural, not a runtime check.
+    """
+    facts = getattr(request, "runtime_dispatch_context", None)
+    failed: list[str] = []
+    if getattr(request, "_runtime_dispatch_seal", None) is not _RUNTIME_DISPATCH_REQUEST_SEAL:
+        failed.append("P_trusted_builder_seal")
+    if request.action_type != ACTION_TYPE_RUNTIME_DISPATCH:
+        failed.append("P_action_runtime_dispatch")
+    if request.execution_class != EXECUTION_CLASS_ADAPTER:
+        failed.append("P_execution_class_adapter")
+    if type(facts) is not RuntimeDispatchRequestFacts:
+        failed.append("P_runtime_dispatch_context")
+        return tuple(failed)
+    assert facts is not None
+    if facts.transport_type != "local_cli":
+        failed.append("P_transport_local_cli")
+    if facts.network_requirement is not False:
+        failed.append("P_network_prohibited")
+    adapter = facts.adapter_descriptor_binding
+    if not (
+        type(adapter) is RuntimeDispatchAdapterDescriptorBinding
+        and adapter.admission_class == ADMISSION_CLASS_LOCAL_FIXED_ARGV
+        and _sha256(adapter.admission_record_digest)
+    ):
+        failed.append("P_supply_chain_admission")
+    if request.approval_present is not True:
+        failed.append("P_human_authority_present")
+    authority = facts.human_authority_binding
+    if not (
+        type(authority) is RuntimeDispatchHumanAuthorityBinding
+        and _generated_id(authority.approval_id, "ria")
+        and _sha256(authority.approval_record_digest)
+        and _sha256(authority.validation_evidence_digest)
+    ):
+        failed.append("P_human_authority_binding_valid")
+    if not (_generated_id(facts.attempt_id, "att") and _sha256(facts.idempotency_key)):
+        failed.append("P_attempt_identity")
+    if not _bounded_string(facts.runtime_target_id, 128):
+        failed.append("P_runtime_target")
+    scope = facts.filesystem_scope_ref
+    if not (
+        type(scope) is RuntimeDispatchFilesystemScopeRef
+        and _bounded_string(scope.scope_id)
+        and _sha256(scope.scope_digest)
+    ):
+        failed.append("P_filesystem_scope")
+    if check_marker and facts.profile_classification != PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1:
+        failed.append("P_trusted_profile_classification")
+    return tuple(failed)
+
+
+def derive_runtime_dispatch_local_cli_v1_classification(
+    request: PermissionBrokerRequest,
+) -> str:
+    """Trusted-builder-only. Return `PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1`
+    iff every narrow-profile predicate (except the marker itself) holds for
+    the provisional request, else `""`. The builder stamps the return value
+    onto `RuntimeDispatchRequestFacts.profile_classification`; it is never
+    accepted as caller input."""
+    if _narrow_local_cli_dispatch_v1_failed_predicates(request, check_marker=False):
+        return ""
+    return PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1
+
+
+def _is_trusted_narrow_local_cli_dispatch_v1(request: PermissionBrokerRequest) -> bool:
+    """POL-005 carve-out predicate. Reads ONLY the trusted-derived marker and
+    the construction seal -- never a caller field. `_valid_runtime_dispatch_request`
+    (run first, in `_structural_request_failure`) has already proven the
+    marker is consistent with the bound facts by the time this is reached."""
+    facts = getattr(request, "runtime_dispatch_context", None)
+    return (
+        type(facts) is RuntimeDispatchRequestFacts
+        and facts.profile_classification == PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1
+        and getattr(request, "_runtime_dispatch_seal", None) is _RUNTIME_DISPATCH_REQUEST_SEAL
     )
 
 
@@ -696,8 +859,18 @@ class ExecutionDisabledRule(PolicyRule):
     """POL-005 — Execution Disabled.
 
     A real (non-simulation) execution attempt always denies: no execution
-    boundary exists yet (COMP-002 not_implemented). Unconditionally
-    active by construction (NG-025).
+    boundary exists yet (COMP-002 not_implemented). Unconditionally active
+    by construction for every non-simulation request (NG-025) EXCEPT the
+    single trusted-derived `RUNTIME_DISPATCH_LOCAL_CLI_V1` profile, which
+    PBRD-001 v3.0 §12a places outside POL-005's categorical match domain
+    (Phase ...1R.22, N-16-3). For that one class POL-005 returns
+    *not-triggered*, meaning ONLY that POL-005 does not categorically
+    preclude ordinary Permission Broker evaluation -- it is NOT an ALLOW,
+    and every other policy (POL-013, POL-004, ...) still evaluates. That
+    profile is unsatisfiable in production (the N-16-6 admission binding has
+    no admitting implementation), so this carve-out changes no shipped
+    behaviour: every truthful non-simulation request still receives the
+    unconditional DENY below.
     """
 
     policy_id = "POL-005"
@@ -706,6 +879,10 @@ class ExecutionDisabledRule(PolicyRule):
 
     def evaluate(self, request: PermissionBrokerRequest) -> PolicyResult:
         if request.simulation_only:
+            return _not_triggered(self.policy_id)
+        if _is_trusted_narrow_local_cli_dispatch_v1(request):
+            # PBRD-001 v3.0 §12a: not within POL-005's hard-block domain.
+            # Not an ALLOW -- only "POL-005 does not categorically block".
             return _not_triggered(self.policy_id)
         return PolicyResult(
             policy_id=self.policy_id,
@@ -797,6 +974,71 @@ class UnknownComponentRule(PolicyRule):
         )
 
 
+class NarrowLocalCliDispatchEligibilityRule(PolicyRule):
+    """POL-013 — Narrow Local-CLI Dispatch Eligibility.
+
+    PBRD-001 v3.0 §12a / PBNDE-001 v1.0 (Phase ...1R.22, N-16-3). The
+    dedicated conjunctive companion to POL-005's `RUNTIME_DISPATCH_LOCAL_CLI_V1`
+    carve-out. It evaluates the full narrow-profile predicate conjunction
+    (P1..P21). Its behaviour:
+
+    * every predicate holds  -> *not-triggered* (contributes nothing; lets
+      ordinary evaluation of every other policy proceed);
+    * any predicate missing / malformed / of unknown state / bound to an
+      unresolvable record / of a broader effect class -> `DENY` with reason
+      `narrow_local_cli_dispatch_profile_incomplete`, which *reinforces*
+      POL-005 (POL-005 also keeps its DENY match -- the classification was
+      not achieved).
+
+    POL-013 SHALL NOT return `ALLOW` or `HUMAN_REVIEW` under any input
+    (statically verifiable: `evaluate` has exactly two return shapes --
+    `_not_triggered` and a `DECISION_DENY` `PolicyResult`). It is a no-op
+    for any request that is not a truthful, sealed, non-simulation
+    `runtime_dispatch` request -- in particular the dry `adapter_invocation`
+    / `simulation_only=true` path is untouched.
+
+    Applicability (PBPA-001 v1.1): scoped to `execution_class == adapter`.
+    Within that class, `evaluate` further restricts its *trigger* to
+    `action_type == runtime_dispatch` and `simulation_only is False`
+    (mirroring POL-005's own domain); PBPA-REQ-034 forbids `action_type`
+    as an applicability input, so this narrowing is a trigger condition,
+    not an applicability filter.
+    """
+
+    policy_id = "POL-013"
+    name = "Narrow Local-CLI Dispatch Eligibility"
+    implementation_status = POLICY_STATUS_IMPLEMENTED
+    applicable_execution_classes = frozenset({EXECUTION_CLASS_ADAPTER})
+
+    def evaluate(self, request: PermissionBrokerRequest) -> PolicyResult:
+        if (
+            request.action_type != ACTION_TYPE_RUNTIME_DISPATCH
+            or request.simulation_only
+            or request.runtime_dispatch_context is None
+        ):
+            return _not_triggered(self.policy_id)
+        failed = _narrow_local_cli_dispatch_v1_failed_predicates(request, check_marker=True)
+        if not failed:
+            return _not_triggered(self.policy_id)
+        return PolicyResult(
+            policy_id=self.policy_id,
+            triggered=True,
+            decision=DECISION_DENY,
+            decision_reason="narrow_local_cli_dispatch_profile_incomplete",
+            matched_no_go_ids=("NG-025",),
+            matched_invariants=("INV-001",),
+            matched_component_ids=("COMP-002",),
+            required_remediation=(
+                "This runtime_dispatch request is not the fully bound, "
+                "trusted-derived RUNTIME_DISPATCH_LOCAL_CLI_V1 profile. "
+                "Unsatisfied predicate(s): " + ", ".join(failed) + ". Every "
+                "predicate must hold and be trusted-derived; the profile is "
+                "unsatisfiable in production until N-16-4..7 close.",
+            ),
+            simulation_only=False,
+        )
+
+
 class StubPolicyRule(PolicyRule):
     """A registered, always-evaluated placeholder for a policy this
     foundation cannot yet check — the request model does not carry the
@@ -816,12 +1058,14 @@ class StubPolicyRule(PolicyRule):
         return _not_triggered(self.policy_id)
 
 
-# ── Canonical policy ID registry (POL-001..012) ─────────────────────────
+# ── Canonical policy ID registry (POL-001..013) ─────────────────────────
 #
-# Registry order is POL-001..012 numeric order. Decision composition (see
+# Registry order is POL-001..013 numeric order. Decision composition (see
 # PermissionBroker.evaluate) prioritizes DENY over HUMAN_REVIEW globally
 # regardless of registry position; registry order only breaks ties among
 # multiple simultaneously-triggered rules of the *same* decision value.
+# POL-013 (Phase ...1R.22, N-16-3) is the newest entry -- an additive
+# conjunctive eligibility policy that never emits ALLOW or HUMAN_REVIEW.
 
 DEFAULT_POLICY_RULES: tuple[PolicyRule, ...] = (
     MissingActiveTaskRule(),
@@ -836,11 +1080,12 @@ DEFAULT_POLICY_RULES: tuple[PolicyRule, ...] = (
     StubPolicyRule("POL-010", "Rollback Unavailable"),
     StubPolicyRule("POL-011", "Unknown Backend"),
     StubPolicyRule("POL-012", "Unknown Adapter"),
+    NarrowLocalCliDispatchEligibilityRule(),
 )
 
 POLICY_IDS: tuple[str, ...] = tuple(rule.policy_id for rule in DEFAULT_POLICY_RULES)
 
-POLICY_IDS_CANONICAL: frozenset[str] = frozenset(f"POL-{n:03d}" for n in range(1, 13))
+POLICY_IDS_CANONICAL: frozenset[str] = frozenset(f"POL-{n:03d}" for n in range(1, 14))
 """Phase 148C.6 (PBPA-001 PBPA-REQ-073): the independent canonical
 reference a constructed `PolicyRegistry`'s rule tuple is validated
 against. Fixed, not derived from `DEFAULT_POLICY_RULES` — validating

@@ -57,14 +57,21 @@ def test_runtime_dispatch_request_carries_fourteen_facts():
     facts = request.runtime_dispatch_context
     assert facts is not None
     field_names = {f.name for f in dataclasses.fields(facts)}
+    # The fourteen logical PBRD-001 binding facts, plus `profile_classification`
+    # — a DERIVED, non-caller commitment added by PBRD-001 v3.0 §12a (Phase
+    # ...1R.22, N-16-3). It is not a fifteenth logical fact: it is a trusted-
+    # builder-computed marker over the other facts (`""` on every legacy /
+    # non-narrow-profile request).
     assert field_names == {
         "invocation_id", "attempt_id", "idempotency_key", "repository_identity",
         "task_id", "lifecycle_context", "runtime_target_id",
         "adapter_descriptor_binding", "prompt_hash", "requested_capability",
         "transport_type", "network_requirement", "filesystem_scope_ref",
-        "human_authority_binding",
+        "human_authority_binding", "profile_classification",
     }
-    assert len(field_names) == 14
+    assert len(field_names) == 15
+    # The fourteen logical facts (excluding the derived marker).
+    assert len(field_names - {"profile_classification"}) == 14
 
 
 def test_transport_type_fixed_local_cli():
@@ -193,7 +200,10 @@ def test_structural_non_real_path_remains_distinct_from_pol005_deny():
     real_decision = pbf.PermissionBroker().evaluate(real_request)
     assert real_request.approval_present is False
     assert real_decision.decision == pbf.DECISION_DENY
-    assert real_decision.causing_policy_ids == ("POL-005",)
+    # PBRD-001 v3.0 §12a (Phase ...1R.22): POL-013 also DENYs every non-simulation
+    # runtime_dispatch request that is not the fully bound narrow profile,
+    # reinforcing POL-005's hard DENY.
+    assert real_decision.causing_policy_ids == ("POL-005", "POL-013")
 
 
 def test_pb_precedence_deny_beats_human_review_beats_allow():

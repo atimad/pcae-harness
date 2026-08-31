@@ -67,7 +67,9 @@ def test_canonical_pbpc_push_request_reaches_allow():
     re-executed (not cited from 148C.9's own table)."""
     decision = _broker().evaluate(_push_request())
     assert decision.decision == DECISION_ALLOW
-    assert decision.non_applicable_policy_ids == ("POL-004",)
+    # POL-013 (Phase ...1R.22, adapter-scoped) is non-applicable to this
+    # mutation-class push request; it never affects the push decision.
+    assert decision.non_applicable_policy_ids == ("POL-004", "POL-013")
     assert decision.causing_policy_ids == ()
 
 
@@ -80,7 +82,7 @@ def test_canonical_request_approval_present_true_does_not_change_applicability()
     allow_true = _broker().evaluate(_push_request(approval_present=True))
     assert allow_false.decision == DECISION_ALLOW
     assert allow_true.decision == DECISION_ALLOW
-    assert allow_false.non_applicable_policy_ids == allow_true.non_applicable_policy_ids == ("POL-004",)
+    assert allow_false.non_applicable_policy_ids == allow_true.non_applicable_policy_ids == ("POL-004", "POL-013")
 
 
 # --- POL-004 in-scope control: reconciliation did not weaken POL-004 -------
@@ -265,9 +267,11 @@ def test_pbpc_contract_file_is_now_version_1_2():
 # --- Registry completeness / no regression to 12-policy canon --------------
 
 
-def test_registry_still_has_exactly_twelve_canonical_policies():
+def test_registry_has_exactly_the_canonical_policy_set():
+    # Phase ...1R.22 (N-16-3) adds exactly one canonical policy: POL-013
+    # (Narrow Local-CLI Dispatch Eligibility). No existing policy changed.
     registry = PolicyRegistry()
-    assert len(registry.policy_ids) == 12
+    assert len(registry.policy_ids) == 13
     assert set(registry.policy_ids) == pbf.POLICY_IDS_CANONICAL
 
 

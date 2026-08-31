@@ -135,7 +135,11 @@ def test_allow_only_when_no_deny_or_human_review_triggers():
 def test_deterministic_ordering_of_evaluated_and_triggered_policies(_iteration):
     broker = PermissionBroker()
     decision = broker.evaluate(_valid_request(execution_class="shell", task_id=None, action_type="bogus"))
-    assert decision.evaluated_policy_ids == tuple(r.policy_id for r in DEFAULT_POLICY_RULES)
+    # POL-013 (Phase ...1R.22, N-16-3) is scoped to execution_class=adapter, so
+    # it is non-applicable for this shell request and absent from evaluated ids.
+    assert decision.evaluated_policy_ids == tuple(
+        r.policy_id for r in DEFAULT_POLICY_RULES if r.policy_id != "POL-013"
+    )
     assert decision.triggered_policy_ids == ("POL-001", "POL-006")
 
 
@@ -374,12 +378,16 @@ def test_policy_rule_implementations_remain_independent():
 
 
 def test_registry_accepts_additional_rules_without_modifying_broker():
-    extra = DEFAULT_POLICY_RULES + (_DenyRule("POL-013", name="Extra Rule"),)
+    # POL-013 is now a canonical policy (Phase ...1R.22); use POL-014 for the
+    # synthetic extra rule this test injects.
+    extra = DEFAULT_POLICY_RULES + (_DenyRule("POL-014", name="Extra Rule"),)
     registry = PolicyRegistry(rules=extra)
     broker = PermissionBroker(registry=registry)
     decision = broker.evaluate(_valid_request(execution_class="shell"))
     assert decision.decision == DECISION_DENY
-    assert decision.causing_policy_id == "POL-013"
+    assert decision.causing_policy_id == "POL-014"
+    # execution_class=shell: 12 canonical (POL-013 is adapter-scoped, non-
+    # applicable) + the universal synthetic POL-014 = 13 evaluated.
     assert len(decision.evaluated_policy_ids) == 13
 
 

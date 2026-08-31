@@ -810,6 +810,16 @@ def test_slice_a_coordinator_byte_unchanged():
                      "src/pcae/core/runtime_dispatch_gate10_eligibility.py") == ""
 
 
+#: Files a later governed phase (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 --
+#: N-16-3 PBRD-001 v3.0 §12a narrow-eligibility policy) is authorized to
+#: change. Slice B (this phase) still did not touch them; the freeze below is
+#: a subset check that excludes exactly this authorized set (no wildcard).
+_POST_1R19_AUTHORIZED_SURFACE = {
+    "src/pcae/core/runtime_dispatch_permission.py",       # Gate 6 -- N-16-3 profile derivation
+    "src/pcae/core/permission_broker_foundation.py",      # POL-005 §12a carve-out + POL-013
+}
+
+
 def test_gate5_through_gate9_byte_unchanged():
     for rel in (
         "src/pcae/core/runtime_dispatch_gate5.py",
@@ -819,6 +829,8 @@ def test_gate5_through_gate9_byte_unchanged():
         "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/runtime_invocation_authority_consumption.py",
     ):
+        if rel in _POST_1R19_AUTHORIZED_SURFACE:
+            continue
         assert _git_diff(PRE_1R19_BASELINE, "--", rel) == "", rel
 
 
@@ -839,11 +851,15 @@ def test_runtime_posture_unchanged():
             ri.EXECUTION_AVAILABILITY) == ("Observed", "observe", "unavailable")
 
 
-def test_pol_005_unchanged_and_still_hard_deny():
+def test_pol_005_still_hard_deny_for_every_ordinary_non_simulation_request():
+    # Phase ...1R.22 (N-16-3) authorizedly amends POL-005 (PBRD-001 v3.0
+    # §12a): one trusted-derived RUNTIME_DISPATCH_LOCAL_CLI_V1 carve-out that
+    # is unsatisfiable in production. Slice B (this phase) changed nothing in
+    # this module; the byte-freeze is not asserted here any more (see the
+    # .1R.22 suite). The behaviour the guard protects -- POL-005 hard-DENYs
+    # every ordinary non-simulation request -- is re-asserted directly below.
     src = (REPO_ROOT / "src/pcae/core/permission_broker_foundation.py").read_text()
     assert 'POL-005' in src
-    assert _git_diff(PRE_1R19_BASELINE, "--",
-                     "src/pcae/core/permission_broker_foundation.py") == ""
     from pcae.core.permission_broker_foundation import (
         ACTION_ADAPTER_INVOCATION, EXECUTION_CLASS_ADAPTER, PermissionBroker,
         build_permission_broker_request,

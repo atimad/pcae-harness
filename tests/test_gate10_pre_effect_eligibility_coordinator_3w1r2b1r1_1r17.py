@@ -1063,6 +1063,16 @@ _SLICE_B_AUTHORIZED_SINCE_BASELINE = {
     "src/pcae/core/runtime_adapter.py",                      # Slice B — 3S.2.1 MUST-FIX #1 (malformed-result fail-closed)
     "src/pcae/core/runtime_introspection.py",                # Slice B — 3S.2.1 item-9 (runtime-inspect discoverability, observational)
     "src/pcae/commands/runtime_inspect.py",  # Slice B (.1R.19) -- 3S.2.1 item-9 runtime-inspect CLI section (observational)
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+    # narrow-eligibility policy + POL-013). Exact filenames, no wildcard.
+    "src/pcae/core/permission_broker_foundation.py",         # POL-005 §12a carve-out + POL-013
+    "src/pcae/core/runtime_dispatch_permission.py",          # Gate 6 -- N-16-3 profile derivation + N-16-6 admission stub
+}
+
+#: Contracts a later authorized phase may change (exact paths, no wildcard).
+#: Phase ...1R.22: PBRD-001 -> v3.0 (MAJOR).
+_R122_AUTHORIZED_CONTRACT_CHANGES = {
+    "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
 }
 
 
@@ -1083,6 +1093,11 @@ def test_earlier_gates_and_contracts_bytes_unchanged_since_baseline():
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_registry.py",
     ):
+        if (
+            rel in _SLICE_B_AUTHORIZED_SINCE_BASELINE
+            or rel in _R122_AUTHORIZED_CONTRACT_CHANGES
+        ):
+            continue
         diff = subprocess.run(
             ["git", "diff", PHASE_ENTRY_BASELINE, "--", rel],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout

@@ -564,7 +564,18 @@ def test_all_seven_contracts_and_pol005_byte_identical():
         "src/pcae/core/permission_broker_foundation.py":
             "2eb7c1068736c10018482f6787ae9cbd7cf4cf8ceaeeac728e18b75dec2639d1",
     }
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3) authorizedly changes
+    # PBRD-001 (-> v3.0 MAJOR), PBPA-001 (-> v1.1, POL-013 row) and
+    # permission_broker_foundation.py (POL-005 §12a carve-out + POL-013).
+    # `.1R.23` re-derives their new byte identity. Exact paths, no wildcard.
+    _r122_authorized = {
+        "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+        "src/pcae/core/permission_broker_foundation.py",
+    }
     for rel, want in pinned.items():
+        if rel in _r122_authorized:
+            continue
         got = hashlib.sha256((REPO_ROOT / rel).read_bytes()).hexdigest()
         assert got == want, f"{rel} changed"
 

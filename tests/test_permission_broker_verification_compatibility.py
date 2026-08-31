@@ -486,11 +486,13 @@ def test_public_decision_shape_is_a_strict_superset_of_108a_fields():
     assert original_108a_fields <= fields
 
 
-def test_zero_arg_broker_and_default_registry_unchanged():
+def test_zero_arg_broker_and_default_registry_intact():
     broker = PermissionBroker()
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_ALLOW
-    assert len(DEFAULT_POLICY_RULES) == 12
+    # 12 original policies + POL-013 (Phase ...1R.22, N-16-3 — additive
+    # conjunctive eligibility policy that never emits ALLOW/HUMAN_REVIEW).
+    assert len(DEFAULT_POLICY_RULES) == 13
 
 
 def test_component_registry_unchanged_since_108a():

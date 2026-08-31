@@ -59,6 +59,7 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from .permission_broker_foundation import (
+    ADMISSION_CLASS_UNADMITTED,
     DECISION_VALUES,
     PermissionBroker,
     PermissionBrokerDecision,
@@ -69,6 +70,7 @@ from .permission_broker_foundation import (
     RuntimeDispatchLifecycleContext,
     RuntimeDispatchRequestFacts,
     _build_runtime_dispatch_permission_broker_request,
+    derive_runtime_dispatch_local_cli_v1_classification,
 )
 from .runtime_authority import (
     ValidatedAuthorityProjection,
@@ -87,6 +89,85 @@ from .runtime_invocation import (
 #: registry entry `runtime_dispatch` is mediated through (matches
 #: PBRD-001 §1's "existing adapter execution class").
 REQUESTED_COMPONENT_ADAPTER_BOUNDARY = "COMP-006"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# N-16-6 supply-chain admission binding — INTERFACE + fail-closed stub
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3). PBRD-001 v3.0 §12a /
+# PBNDE-001. N-16-6 (RPAC-REQ-054 / -086 / -095) will later supply the real
+# canonical supply-chain admission store and at least one admitted
+# `local_fixed_argv` executable. Until then the ONLY production implementation
+# is the non-admitting stub below: it admits NOTHING, so the
+# `RUNTIME_DISPATCH_LOCAL_CLI_V1` narrow profile stays UNSATISFIABLE in
+# production (POL-013 DENYs on `P_supply_chain_admission`; POL-005 keeps its
+# hard-DENY match). No public production parameter can flip this -- the
+# resolver is a module-private default and the only override is the
+# clearly-marked TEST-BOUNDARY `_supply_chain_admission_resolver` argument.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True)
+class SupplyChainAdmissionResult:
+    """The outcome of resolving one adapter id against the (future) N-16-6
+    canonical supply-chain admission store. `admitted=False` -> the request
+    carries no admission binding and cannot classify as the narrow profile."""
+
+    admitted: bool
+    admission_record_digest: str
+    admission_class: str
+
+
+class SupplyChainAdmissionResolver:
+    """N-16-6 INTERFACE. `resolve(adapter_id)` maps an adapter id to its
+    canonical supply-chain admission record. The sole production
+    implementation is :class:`_NonAdmittingSupplyChainAdmissionResolver`."""
+
+    def resolve(self, adapter_id: str) -> SupplyChainAdmissionResult:  # pragma: no cover - interface
+        raise NotImplementedError("n16_6_supply_chain_admission_resolver_not_implemented")
+
+
+class _NonAdmittingSupplyChainAdmissionResolver(SupplyChainAdmissionResolver):
+    """Fail-closed. Admits NOTHING for any adapter id. N-16-6's real
+    admission store is not implemented; every adapter is `unadmitted`."""
+
+    def resolve(self, adapter_id: str) -> SupplyChainAdmissionResult:
+        return SupplyChainAdmissionResult(
+            admitted=False,
+            admission_record_digest="",
+            admission_class=ADMISSION_CLASS_UNADMITTED,
+        )
+
+
+#: The single production N-16-6 resolver. Non-admitting by construction.
+_PRODUCTION_SUPPLY_CHAIN_ADMISSION_RESOLVER: SupplyChainAdmissionResolver = (
+    _NonAdmittingSupplyChainAdmissionResolver()
+)
+
+
+def _resolve_supply_chain_admission(
+    adapter_id: str, resolver: SupplyChainAdmissionResolver | None
+) -> SupplyChainAdmissionResult:
+    """Resolve the admission binding for `adapter_id`. `resolver` is a
+    TEST-BOUNDARY substitution only -- `None` (the sole production value)
+    uses the fail-closed non-admitting resolver. A non-`SupplyChainAdmissionResolver`
+    or a resolver returning a malformed / admitting-but-wrong-class result
+    fails closed to `unadmitted`."""
+    active = resolver if resolver is not None else _PRODUCTION_SUPPLY_CHAIN_ADMISSION_RESOLVER
+    if not isinstance(active, SupplyChainAdmissionResolver):
+        return SupplyChainAdmissionResult(False, "", ADMISSION_CLASS_UNADMITTED)
+    try:
+        result = active.resolve(adapter_id)
+    except Exception:
+        return SupplyChainAdmissionResult(False, "", ADMISSION_CLASS_UNADMITTED)
+    if type(result) is not SupplyChainAdmissionResult or not result.admitted:
+        return SupplyChainAdmissionResult(False, "", ADMISSION_CLASS_UNADMITTED)
+    if not (
+        _digest_string(result.admission_record_digest)
+        and isinstance(result.admission_class, str)
+        and result.admission_class != ""
+    ):
+        return SupplyChainAdmissionResult(False, "", ADMISSION_CLASS_UNADMITTED)
+    return result
 
 
 class RuntimeDispatchConstructionError(Exception):
@@ -136,6 +217,11 @@ def _validate_construction_inputs(inputs: object) -> None:
         and _bounded_string(adapter.descriptor_version, 128)
         and _digest_string(adapter.descriptor_digest)
         and _digest_string(adapter.target_config_digest)
+        # PBRD-001 v3.0 §12a: the N-16-6 admission sub-fields are populated
+        # ONLY by this module's trusted builder from the admission resolver.
+        # A caller that pre-sets them on the construction input is rejected.
+        and adapter.admission_record_digest == ""
+        and adapter.admission_class == ""
         and _digest_string(inputs.prompt_hash)
         and _bounded_string(inputs.requested_capability, 128)
         and _valid_ref(inputs.filesystem_scope_ref)
@@ -175,7 +261,10 @@ class RuntimeDispatchRequestConstructionInput:
 
 
 def canonical_runtime_dispatch_projection(
-    inputs: RuntimeDispatchRequestConstructionInput, *, invocation_id: str
+    inputs: RuntimeDispatchRequestConstructionInput,
+    *,
+    invocation_id: str,
+    _supply_chain_admission_resolver: SupplyChainAdmissionResolver | None = None,
 ) -> dict:
     """RDGO-001 §10a / RPAC-REQ-065's canonical-content projection for the
     real-dispatch idempotency key: excludes `attempt_id` and any
@@ -202,6 +291,15 @@ def canonical_runtime_dispatch_projection(
             "descriptor_version": inputs.adapter_descriptor_binding.descriptor_version,
             "descriptor_digest": inputs.adapter_descriptor_binding.descriptor_digest,
             "target_config_digest": inputs.adapter_descriptor_binding.target_config_digest,
+            # PBRD-001 v3.0 §12a: the resolved N-16-6 admission binding is part
+            # of the canonical request content. Deterministic per adapter id
+            # (the production resolver admits nothing).
+            "admission_record_digest": _resolve_supply_chain_admission(
+                inputs.adapter_descriptor_binding.adapter_id, _supply_chain_admission_resolver
+            ).admission_record_digest,
+            "admission_class": _resolve_supply_chain_admission(
+                inputs.adapter_descriptor_binding.adapter_id, _supply_chain_admission_resolver
+            ).admission_class,
         },
         "prompt_hash": inputs.prompt_hash,
         "requested_capability": inputs.requested_capability,
@@ -295,6 +393,7 @@ def new_runtime_dispatch_identity(
     *,
     identity_tracker: RuntimeDispatchIdentityTracker,
     invocation_id: str | None = None,
+    _supply_chain_admission_resolver: SupplyChainAdmissionResolver | None = None,
 ) -> RuntimeDispatchIdentity:
     """Mint (or, for a genuine same-logical-request retry, reuse) the
     identity triple at gate 2. Passing an existing `invocation_id` models
@@ -313,7 +412,11 @@ def new_runtime_dispatch_identity(
         invocation_id=resolved_invocation_id,
         attempt_id=new_attempt_id(),
         idempotency_key=compute_runtime_dispatch_idempotency_key(
-            canonical_runtime_dispatch_projection(inputs, invocation_id=resolved_invocation_id)
+            canonical_runtime_dispatch_projection(
+                inputs,
+                invocation_id=resolved_invocation_id,
+                _supply_chain_admission_resolver=_supply_chain_admission_resolver,
+            )
         ),
         _identity_seal=_RUNTIME_DISPATCH_IDENTITY_SEAL,
         _identity_tracker=identity_tracker,
@@ -555,6 +658,7 @@ def build_runtime_dispatch_permission_broker_request(
     validated_authority: ValidatedAuthorityProjection | None,
     authority_current_time: str | None = None,
     simulation_only: bool = True,
+    _supply_chain_admission_resolver: SupplyChainAdmissionResolver | None = None,
 ) -> PermissionBrokerRequest:
     """The trusted, contract-fixed PCAE integration point for
     `runtime_dispatch` requests (PBRD-001 §5). Only this function may
@@ -565,8 +669,15 @@ def build_runtime_dispatch_permission_broker_request(
 
     `simulation_only` defaults to `True` (policy-evaluable without a real
     dispatch attempt). Passing `False` models a real, non-simulation
-    request -- POL-005 (unmodified) always denies it (proved by
-    `test_runtime_dispatch_permission.py`'s POL-005 regression case).
+    request -- POL-005 (PBRD-001 v3.0 §12a) still denies it unless it is the
+    fully bound, trusted-derived `RUNTIME_DISPATCH_LOCAL_CLI_V1` profile,
+    which is unsatisfiable in production.
+
+    `_supply_chain_admission_resolver` is a TEST-BOUNDARY substitution ONLY.
+    Its sole production value is `None` -> the fail-closed non-admitting
+    N-16-6 resolver. No public parameter can flip an adapter to `admitted`;
+    this argument is underscore-private, documented as test-only, and is the
+    exact isolation boundary PBNDE-001 §7 requires.
     """
     _validate_construction_inputs(inputs)
     if (
@@ -583,7 +694,11 @@ def build_runtime_dispatch_permission_broker_request(
         raise RuntimeDispatchConstructionError(f"invalid_attempt_id:{identity.attempt_id!r}")
 
     expected_key = compute_runtime_dispatch_idempotency_key(
-        canonical_runtime_dispatch_projection(inputs, invocation_id=identity.invocation_id)
+        canonical_runtime_dispatch_projection(
+            inputs,
+            invocation_id=identity.invocation_id,
+            _supply_chain_admission_resolver=_supply_chain_admission_resolver,
+        )
     )
     if identity.idempotency_key != expected_key:
         raise RuntimeDispatchConstructionError(
@@ -602,6 +717,20 @@ def build_runtime_dispatch_permission_broker_request(
         current_time=authority_current_time,
     )
 
+    # PBRD-001 v3.0 §12a: resolve the N-16-6 supply-chain admission binding
+    # for the executable and stamp it onto the adapter descriptor binding.
+    # Caller-supplied admission fields were already rejected by
+    # `_validate_construction_inputs`; the resolved values are the trusted
+    # ones. The production resolver admits nothing.
+    admission = _resolve_supply_chain_admission(
+        inputs.adapter_descriptor_binding.adapter_id, _supply_chain_admission_resolver
+    )
+    admitted_adapter_binding = replace(
+        inputs.adapter_descriptor_binding,
+        admission_record_digest=admission.admission_record_digest,
+        admission_class=admission.admission_class,
+    )
+
     facts = RuntimeDispatchRequestFacts(
         invocation_id=identity.invocation_id,
         attempt_id=identity.attempt_id,
@@ -610,7 +739,7 @@ def build_runtime_dispatch_permission_broker_request(
         task_id=inputs.task_id,
         lifecycle_context=inputs.lifecycle_context,
         runtime_target_id=inputs.runtime_target_id,
-        adapter_descriptor_binding=inputs.adapter_descriptor_binding,
+        adapter_descriptor_binding=admitted_adapter_binding,
         prompt_hash=inputs.prompt_hash,
         requested_capability=inputs.requested_capability,
         filesystem_scope_ref=inputs.filesystem_scope_ref,
@@ -618,17 +747,26 @@ def build_runtime_dispatch_permission_broker_request(
         network_requirement=inputs.network_requirement,
     )
 
-    return _build_runtime_dispatch_permission_broker_request(
-        requested_component=REQUESTED_COMPONENT_ADAPTER_BOUNDARY,
-        requested_capability=inputs.requested_capability,
-        task_id=inputs.task_id,
-        phase_id=inputs.lifecycle_context.phase_id,
-        requested_resource=None,
-        evidence_available=True,
-        approval_present=approval_present,
-        simulation_only=simulation_only,
-        runtime_dispatch_context=facts,
-    )
+    def _assemble(context: RuntimeDispatchRequestFacts) -> PermissionBrokerRequest:
+        return _build_runtime_dispatch_permission_broker_request(
+            requested_component=REQUESTED_COMPONENT_ADAPTER_BOUNDARY,
+            requested_capability=inputs.requested_capability,
+            task_id=inputs.task_id,
+            phase_id=inputs.lifecycle_context.phase_id,
+            requested_resource=None,
+            evidence_available=True,
+            approval_present=approval_present,
+            simulation_only=simulation_only,
+            runtime_dispatch_context=context,
+        )
+
+    # PBRD-001 v3.0 §12a: derive the narrow-profile classification LAST, from
+    # the fully bound provisional request. Never accepted as caller input.
+    provisional = _assemble(facts)
+    marker = derive_runtime_dispatch_local_cli_v1_classification(provisional)
+    if not marker:
+        return provisional
+    return _assemble(replace(facts, profile_classification=marker))
 
 
 # ═══════════════════════════════════════════════════════════════════════════

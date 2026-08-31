@@ -724,6 +724,10 @@ def test_isolation_only_three_production_files_changed_since_baseline():
         "src/pcae/core/hpac_verifier.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_permission.py",
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+        # narrow-eligibility policy + POL-013). Exact filename, no wildcard;
+        # an unauthorized production-file expansion still fails this subset.
+        "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/hpac_lifecycle.py",
         "src/pcae/core/runtime_dispatch_gate7.py",  # Gate 7 (.1R.13.2)

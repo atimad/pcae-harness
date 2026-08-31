@@ -356,7 +356,17 @@ def test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap():
         for line in diff.splitlines()
         if line.startswith("diff --git ")
     }
-    assert changed == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
+    # Later governed phases are authorized to touch other src/pcae files;
+    # this guard only asserts that .1R.19R's own repair was confined to the
+    # lifecycle module. Phase ...1R.22 (N-16-3, PBRD-001 v3.0 §12a)
+    # authorizedly changes permission_broker_foundation.py + runtime_dispatch_permission.py.
+    _POST_1R19R_AUTHORIZED = {
+        "src/pcae/core/permission_broker_foundation.py",
+        "src/pcae/core/runtime_dispatch_permission.py",
+    }
+    assert changed - _POST_1R19R_AUTHORIZED == {
+        "src/pcae/core/runtime_dispatch_attempt_lifecycle.py"
+    }, changed
     # the only added logic is the transition-error remap
     added = [l for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
     assert any("DispatchAttemptTransitionError" in l for l in added)

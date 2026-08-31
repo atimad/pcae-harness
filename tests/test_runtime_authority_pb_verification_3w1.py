@@ -669,7 +669,7 @@ def test_pol004_and_pol005_rule_specific_behavior_and_precedence():
     assert "POL-004" in decision.triggered_policy_ids
     assert "POL-005" in decision.triggered_policy_ids
     assert decision.decision == pbf.DECISION_DENY
-    assert decision.causing_policy_ids == ("POL-005",)
+    assert decision.causing_policy_ids == ("POL-005", "POL-013")
 
 
 def test_valid_approval_and_valid_real_request_still_denied_by_pol005():
@@ -677,7 +677,7 @@ def test_valid_approval_and_valid_real_request_still_denied_by_pol005():
     decision = pbf.PermissionBroker().evaluate(request)
     assert request.approval_present is False
     assert decision.decision == pbf.DECISION_DENY
-    assert decision.causing_policy_ids == ("POL-005",)
+    assert decision.causing_policy_ids == ("POL-005", "POL-013")
 
 
 def test_existing_action_remains_context_free_and_compatible():

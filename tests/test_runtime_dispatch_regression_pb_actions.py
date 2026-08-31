@@ -103,11 +103,14 @@ def test_real_non_simulation_request_still_denied_for_every_pre_existing_action(
         assert "POL-005" in decision.causing_policy_ids
 
 
-def test_policy_registry_still_exactly_twelve_canonical_policies():
-    """The extension adds zero new `PolicyRule` subclasses -- POL-004/
-    POL-005/POL-006 already generically cover `runtime_dispatch` via
-    `execution_class=adapter` (3V.2 §18/§23/§24)."""
-    assert len(pbf.POLICY_IDS) == 12
+def test_policy_registry_is_exactly_the_canonical_policy_set():
+    """Phase ...1R.22 (N-16-3) adds exactly one canonical policy, POL-013
+    (Narrow Local-CLI Dispatch Eligibility). The generic POL-004 / POL-005 /
+    POL-006 coverage of `runtime_dispatch` via `execution_class=adapter` is
+    unchanged; POL-013 is an additive conjunctive companion that never emits
+    ALLOW or HUMAN_REVIEW."""
+    assert len(pbf.POLICY_IDS) == 13
+    assert pbf.POLICY_IDS[-1] == "POL-013"
     assert set(pbf.POLICY_IDS) == pbf.POLICY_IDS_CANONICAL
 
 

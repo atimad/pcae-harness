@@ -261,7 +261,7 @@ def test_registry_accepts_superset_with_extra_non_canonical_rule():
     requirement, not an exact-match requirement."""
 
     class ExtraRule(PolicyRule):
-        policy_id = "POL-013"
+        policy_id = "POL-014"  # POL-013 is now canonical (Phase ...1R.22)
         name = "Extra"
         implementation_status = POLICY_STATUS_IMPLEMENTED
 
@@ -269,7 +269,7 @@ def test_registry_accepts_superset_with_extra_non_canonical_rule():
             return PolicyResult(policy_id=self.policy_id, triggered=False)
 
     registry = PolicyRegistry(rules=DEFAULT_POLICY_RULES + (ExtraRule(),))
-    assert len(registry.policy_ids) == 13
+    assert len(registry.policy_ids) == 14
 
 
 def test_no_valid_allow_when_required_policy_missing():
@@ -393,10 +393,12 @@ def test_explainability_deterministic_across_repeated_identical_requests():
 def test_applicable_non_applicable_preserve_registry_order():
     broker = PermissionBroker()
     decision = broker.evaluate(_valid_request(execution_class="none"))
+    # POL-004 and POL-013 are both scoped away from execution_class=none
+    # (POL-013 added Phase ...1R.22, N-16-3 — adapter-scoped).
     assert decision.applicable_policy_ids == tuple(
-        p for p in POLICY_IDS if p != "POL-004"
+        p for p in POLICY_IDS if p not in ("POL-004", "POL-013")
     )
-    assert decision.non_applicable_policy_ids == ("POL-004",)
+    assert decision.non_applicable_policy_ids == ("POL-004", "POL-013")
 
 
 def test_not_applicable_never_treated_as_allow():
