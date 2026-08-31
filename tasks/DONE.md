@@ -2458,3 +2458,6 @@
 - 2026-08-27: 20260827-1254-phase-149o-20l-7o-3v-1r-1-independent-verification-of-repaired-local-cli-runtime-dispatch-authority-and-permission-contracts
 - 2026-08-27: 20260827-1712-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-1
 - 2026-08-30: 20260830-1302-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-15-5-independent-verification-of-the-runtime-dispatch-contract-normalization
+- 2026-08-31: 20260831-1442-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-21-n-16-3-local-cli-narrow-eligibility-policy-and-contract-planning
+- 2026-08-31: 20260831-1454-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-21
+- 2026-08-31: 20260831-1526-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-22-n-16-3-narrow-eligibility-policy-and-contract-implementation
