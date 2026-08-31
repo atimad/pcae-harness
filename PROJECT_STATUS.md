@@ -2,6 +2,96 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.20 — Independent Verification of the
+Dispatch-Attempt Durable Lifecycle (Slice B IV of the `.1R.16` Gate-10 plan).
+**STATUS: BLOCKED INDEPENDENT-VERIFICATION RESULT — finalized (Option B).
+FIRST EXTERNAL EFFECT ABSENT; EXECUTION NOT ENABLED.** Verification-entry SHA
+`738e8209`; immutable pre-`.1R.19` baseline `a2b679fe`
+(`git rev-parse bb646972^`). No production source or normative contract
+modified by this phase; no scope-fence guard repaired.
+
+**Substantive verdicts — independently RE-DERIVED from RDGO-001 v3.1 §17/§18,
+RPAC-REQ-064..072, `.1R.16` §22.3/§25.1/§31/§36, and line-by-line source
+(not the `.1R.19` report / names / comments):** dispatch-attempt durable
+lifecycle (exact transition matrix `None→PREPARED→{EFFECT_ATTEMPT_STARTED,
+DISPATCH_NOT_STARTED}`; `EFFECT_ATTEMPT_STARTED→{RECEIPT_CAPTURED,
+DISPATCH_UNCERTAIN}`; 3 terminal; no backwards / no terminal-mutation / no
+skip; append-only digest-chained), crash/restart determination
+(`resolve_disposition` from durable state only; `PREPARED`→not-started-after-
+marker `external_effect_possible=False`; unresolved `EFFECT_ATTEMPT_STARTED`→
+`DISPATCH_UNCERTAIN` `external_effect_possible=True`, no auto-retry path;
+RDGO §18 no automatic retry — `automatic_retry_permitted` hard-`False` every
+state), at-most-once dispatch-attempt guard (exactly one durable
+`EFFECT_ATTEMPT_STARTED`, one concurrent winner across 4/8/16/32 contenders,
+every loser fails closed), deterministic idempotency identity (AST scan: no
+clock/mtime/nonce/PID/uuid/random), `RuntimeInvocationRecord` non-authority
+(no authority method/field; `record_grants_no_effect_authority` body is a
+single `return True`; nothing consults a record for authority), **3S.2.1
+MUST-FIX #1** (malformed `adapter.collect()` return + `dispatch`/`collect`
+exceptions fail closed with `FAILURE_MALFORMED_RESULT` before any
+`store.write_result()`; source-order verified; still one simulation
+`adapter.dispatch(` call site), **3S.2.1 MUST-FIX #2** (`invocation_id` /
+`attempt_id` grammar check + resolved-path `_assert_within_root`; xfail→pass
+promotion is a real defect closure; valid generated IDs unaffected),
+**item-9** (additive observational `RUNTIME_ADAPTER_SURFACES` /
+`get_adapter_surfaces()` — static data, no registry read, no mutation;
+`--json` + `runtime_snapshot.py` byte-unchanged; posture still
+`not_implemented / Observed / observe / unavailable`), **N-16-2 CLOSED
+(Slice-B scope; interpretation A)** — the durable mirror infrastructure is
+complete and correct; `git grep` confirms **zero production importers** (one
+descriptive string literal in `runtime_introspection.py`, not an import);
+production Gate-10-caller wiring is Slice C, gated behind N-16-3..7. **First
+external effect ABSENT** (no `runtime_dispatch_gate10.py`; no `.dispatch(`
+call node in the Slice-B module; no effect primitive; dynamic effect-trap 0
+calls). Slice-A coordinator + Gate 5–9 + `runtime_invocation_authority_consumption.py`
++ `runtime_snapshot.py` byte-unchanged since `a2b679fe`; `docs/contracts/**`
+byte-unchanged; POL-005 byte-unchanged. Fresh 67-test RE-DERIVE suite
+`tests/test_dispatch_attempt_durable_lifecycle_iv_3w1r2b1r1_1r20.py` (67
+passed, 0 failed, deterministic).
+
+**BLOCKER (Option B — NOT repaired inside `.1R.20`; referred to `.1R.19R`):**
+`.1R.19` added `from pcae.core.hpac_foundation import (...)` to two production
+modules (`runtime_dispatch_attempt_lifecycle.py` new,
+`runtime_invocation.py` MUST-FIX #2) — a legitimate reuse of the canonical
+path-safety / digest helpers — **without widening or disclosing** the HPAC
+Layer-1/2 consumer-inventory guard family. **N-20-1:** 3 guards pass at
+`a2b679fe` and FAIL at HEAD
+(`test_hpac_foundation_trust_root_repair_3w1r2b1r111r32::test_hpac_repair_has_zero_preexisting_production_consumers`,
+`test_hpac_foundation_independent_verification_3w1r2b1r111r31::test_new_hpac_modules_have_zero_preexisting_production_consumers`,
+`test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321::test_foundation_has_no_production_consumers_or_gate_wiring`)
+— each still rejects any other importer; a guard-maintenance / verification-
+evidence defect, not a production Slice-B implementation defect. **N-20-2:**
+the `.1R.19` finalized fixed-SHA A/B record ("0 unexplained attributable
+regressions"; "every widened scope-fence guard keeps explicit finite
+enumeration") is materially inaccurate — the same defect class that BLOCKED
+`.1R.18`. **N-20-3:** `.1R.19`'s own meta-guard
+`test_gate10_..._1r18::test_widened_guard_module_passes_at_head[...r111r32]`
+(and the `.1R.15.3` meta-guard `test_v15_2_guards_pass_at_head`) fail at HEAD
+as a direct consequence — `.1R.19` shipped a self-contradicting test.
+Independent broad fixed-SHA A/B (deterministic, no xdist): A=`a2b679fe` 38
+failing → B/C=`738e8209` 43 failing; **5 ADDED attributable to `.1R.19` (root
+cause N-20-1)**, 1 ADDED non-attributable pre-existing flake
+(`r111r321::test_concurrent_conflicting_successors_have_one_canonical_winner`),
+1 REMOVED environmental; **`.1R.20`-attributable functional regressions = 0**.
+**N-20-4 (non-blocking):** concurrent `begin_effect_attempt` losers don't all
+map to `DispatchAttemptAlreadyStartedError` (~1/3 leak
+`DispatchAttemptTransitionError`); fail-closed and at-most-once still hold;
+folded into the `.1R.19R` repair.
+
+**Recommended repair phase (own authorization required):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.19R` — Slice-B Scope-Fence and Verification-
+Evidence Reconciliation (widen the 3 guards by exactly the 2 Slice-B entries,
+no wildcard; provenance-preserving `.1R.19` A/B erratum; normalize N-20-4;
+re-run A/B), then `.1R.19R.1` — its Independent Verification. After
+`.1R.19R.1` closes, the Slice-B track is complete; the next work is the
+Slice-C prerequisite set N-16-3..7 (each its own authorized phase). Slice C /
+D keep no phase ID. Canonical artifact
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_20_INDEPENDENT_VERIFICATION_OF_THE_DISPATCH_ATTEMPT_DURABLE_LIFECYCLE.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 — Dispatch-Attempt Durable Lifecycle,
 Idempotency, and 3S.2.1 Prerequisite Repairs (Slice B of the `.1R.16` Gate-10
 plan). **STATUS: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING (`.1R.20`).
