@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260831-0213-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-20-independent-verification-of-the-dispatch-attempt-durable-lifecycle
+20260831-0235-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-20-slice-b-scope-fence-and-verification-evidence-reconciliation-repair-recommended-next-own-authorization-required
 
 ## Title
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.20: Independent Verification of the Dispatch-Attempt Durable Lifecycle
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.20); Slice-B scope-fence and verification-evidence reconciliation/repair recommended next (own authorization required)
 
 ## Status
 
@@ -18,16 +18,14 @@ implementation
 
 ## Goal
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.20: Independent Verification of the Dispatch-Attempt Durable Lifecycle
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.20); Slice-B scope-fence and verification-evidence reconciliation/repair recommended next (own authorization required)
 
 ## Allowed Files
 
-- tests/test_dispatch_attempt_durable_lifecycle_iv_3w1r2b1r1_1r20.py
-- docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_20_INDEPENDENT_VERIFICATION_OF_THE_DISPATCH_ATTEMPT_DURABLE_LIFECYCLE.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - tasks/**
 
 ## Forbidden Files
@@ -82,4 +80,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-31T02:13:56.718602+02:00
+2026-08-31T02:35:29.317630+02:00
