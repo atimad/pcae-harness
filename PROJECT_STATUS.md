@@ -2,11 +2,137 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19R.1 — Independent Verification of the
+Slice-B Reconciliation. **STATUS: INDEPENDENTLY VERIFIED WITH NON-BLOCKING
+FINDINGS — SLICE-B RECONCILIATION COMPLETE. FIRST EXTERNAL EFFECT ABSENT;
+EXECUTION NOT ENABLED.** Verification-entry SHA `59af5abd` (`.1R.19R` finalize
+head; `origin/main..HEAD = 0` at entry); immutable pre-`.1R.19` baseline
+`a2b679fe`; original `.1R.19` head `738e8209`; `.1R.20` head `e05f0ea3`.
+
+RE-DERIVE, DO NOT TRUST. Every `.1R.19R` claim was re-derived from git history,
+current source, live concurrency, the immutable `.1R.19` / `.1R.20` artifacts,
+and freshly executed fixed-SHA A/B in dedicated detached worktrees — not from
+`.1R.19R`'s report, tests, comments, error names, or erratum prose.
+
+- **N-20-1 — CLOSED.** Reconstructing each guard's `AUTHORIZED_CONSUMERS` from
+  `git show e05f0ea3:<path>` vs current source: all three HPAC Layer-1/2
+  consumer-inventory guards (`r111r31` / `r111r32` / `r111r321`) grew from the
+  identical 5-tuple set to the identical 7-tuple set — `new − old` is **exactly**
+  `{("runtime_dispatch_attempt_lifecycle.py", "pcae.core.hpac_foundation"),
+  ("runtime_invocation.py", "pcae.core.hpac_foundation")}` and `old − new` is
+  empty. No `"*"` / `fnmatch` / `.startswith(` / package-glob in any literal; the
+  `observed − AUTHORIZED == set()` subset check and the AST scan are unchanged.
+  Both added tuples match real **absolute** `from pcae.core.hpac_foundation
+  import` statements (`runtime_dispatch_attempt_lifecycle.py:73`,
+  `runtime_invocation.py:37`) importing only path-safety / digest utilities +
+  exception classes. Active challenge: each guard still fails closed for a
+  `runtime_dispatch_gate10.py` effect-module importer, a `runtime_adapter.py`
+  importer, an arbitrary module, and an authorized file importing a *different*
+  Layer-1/2 module (tuple-exact, not filename-wildcard). Semantic wall
+  (`consumer ≠ authority owner ≠ effect authority`) intact —
+  `record_grants_no_effect_authority()` body is one statement, `return True`.
+- **N-20-3 — CLOSED.** Both consequential meta-guards
+  (`.1R.19`'s `test_widened_guard_module_passes_at_head[...r111r32]`,
+  `.1R.15.3`'s `test_v15_2_guards_pass_at_head`) pass at HEAD and are
+  byte-unchanged since `e05f0ea3`. Causal proof: at the `.1R.19R` head with
+  **only** the three guard test files reverted to `e05f0ea3`, both meta-guards
+  **fail again** (`2 failed, 4 passed`); restoring the widenings makes them pass
+  — transitive recovery, no meta-guard edit / skip / xfail / allowlist.
+- **N-20-2 — CLOSED.** The `.1R.19` canonical doc diff since `e05f0ea3` is
+  **+103 / −0** — strictly append-only; the `## ERRATUM` begins after the
+  original close line; the inaccurate original §15 lines remain in the body as
+  history. Immutable `.1R.19` completion artifacts not rewritten
+  (`git cat-file -t 88e716b1:… / 738e8209:…` → `blob`; `738e8209^ == 88e716b1`).
+  Chronology intact (`git log --reverse`): `.1R.19` → `.1R.20` → `.1R.19R`. The
+  erratum's "5 attributable added / 0 removed" is independently reproduced.
+- **N-20-4 — CLOSED.** `git diff 738e8209 HEAD -- src/` is **one file, one hunk,
+  +19 / −0** in `begin_effect_attempt`: a `DispatchAttemptTransitionError`
+  handler gated on **string equality** with the exact
+  `invalid_transition:EFFECT_ATTEMPT_STARTED->EFFECT_ATTEMPT_STARTED` message
+  (built from module constants); every other transition error is re-raised.
+  Independent stress — **285 races** across `{2,4,8,16,32}` contenders, **2115
+  losing contenders → all `DispatchAttemptAlreadyStartedError`**; exactly one
+  winner and one durable `EFFECT_ATTEMPT_STARTED` every run (pre-repair the same
+  harness leaked `DispatchAttemptTransitionError` on 283/2115). Restart
+  duplicate-start → same error; invalid-transition-from-terminal → still
+  `DispatchAttemptTransitionError`; real chain-digest corruption → still
+  `DispatchAttemptIntegrityError`. Winner-selection primitive
+  (`O_CREAT|O_EXCL` + `os.link`), `DISPATCH_ATTEMPT_TRANSITIONS`, and fail-closed
+  `DISPATCH_UNCERTAIN` (`automatic_retry_permitted=False`) block-identical to
+  `738e8209`.
+
+**Repaired-tree fixed-SHA A/B** (`a2b679fe` → `.1R.19R` HEAD `59af5abd`,
+deterministic, no xdist, `.1R.20` `-k` selection): **30 → 30 failing nodes,
+failing set byte-identical, 0 attributable added / 0 removed / 0 unexplained
+functional regressions.** Historical A/B (`a2b679fe` → `738e8209`): **30 → 35,
+5 attributable added (exactly the 3 direct guards + 2 meta-guards, root cause
+N-20-1), 0 removed** — matches the erratum. Push-state B (`59af5abd` local) == C
+(`origin/main`).
+
+**No production / contract / Slice-A / Gate 5–9 / item-9 drift.** This IV phase
+modified no production source, no normative contract, no scope-fence guard.
+`git diff --name-only 738e8209 HEAD -- src/` → only
+`runtime_dispatch_attempt_lifecycle.py`. Slice-A coordinator, Gate 5–9,
+`permission_broker_foundation.py` (POL-005), `runtime_adapter.py`,
+`runtime_introspection.py`, `runtime_snapshot.py`, `commands/runtime_inspect.py`
+byte-unchanged since `738e8209`; `docs/contracts/**` + No-Go Registry
+byte-unchanged since `a2b679fe`. Runtime `not_implemented / Observed / observe /
+unavailable`, 0 plugins / 0 capabilities, POL-005 hard DENY. First external
+effect **ABSENT** (AST: no effect primitive in either Slice-B module; no
+`runtime_dispatch_gate10.py`; no `adapter.dispatch(` addition; dynamic exercises
+made zero real effect calls). item-9 (`substantively verified / closed-worthy`)
+and N-16-2 (`CLOSED — Slice-B scope, interpretation A`; zero production
+importers) carried unchanged.
+
+**Adjudication:** `N-20-1 / N-20-2 / N-20-3 / N-20-4 — CLOSED`;
+`.1R.20 SLICE-B LIFECYCLE / REGRESSION BLOCKER — CLOSED`;
+`SLICE-B LIFECYCLE ACCEPTANCE — CLOSED` (dispatch-attempt durable lifecycle
+verified; at-most-once / fail-closed uncertainty verified — N-20-4 now also
+makes the loser error type deterministic; item 9 closed; N-16-2 closed for
+Slice-B scope; first external effect absent); `SLICE-B PRODUCTION
+IMPLEMENTATION — SUBSTANTIVELY VERIFIED`. The historical `.1R.20` BLOCKED
+verdict is preserved (its canonical doc + completion artifacts unchanged).
+
+**Non-blocking findings.** *N-19R1-1* — the three consumer-inventory guards'
+AST scan matches only absolute imports, so `runtime_authority.py`'s pre-existing
+lazy relative `from .hpac_foundation import HPACAuthorityClass` is invisible to
+them; not introduced or worsened by `.1R.19R` (its two importers are absolute
+and were correctly caught); same class as `.1R.20`'s N-17R1-2. *N-19R1-2* — the
+`.1R.19R` prose says the `.1R.20` `finding_n20_*` tests were made
+reconciliation-aware "as `.1R.20` instructed inline"; `.1R.20` framed them as
+regression proof handed to the repair phase, not an explicit transform
+instruction — the transformation is correct (historical BLOCKED verdict
+preserved), only the attribution phrasing is generous. Neither weakens a guard
+or alters an adjudication.
+
+New 64-test suite
+`tests/test_slice_b_reconciliation_iv_3w1r2b1r1_1r19r1.py`. Canonical artifact
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_19R_1_INDEPENDENT_VERIFICATION_OF_THE_SLICE_B_RECONCILIATION.md`.
+
+**Recommended next (requires its own explicit human authorization):** the
+Slice-B track is complete; the earliest unresolved Slice-C prerequisite is
+**N-16-3 — PBRD-001 §12 POL-005 narrow-eligibility rule for the exact local-CLI
+`runtime_dispatch` profile + its independent verification** (item 4 of the
+eleven; gates the POL-005 relaxation every later prerequisite depends on).
+Then N-16-4 (real positive single-attempt Runtime Enforcement gate), N-16-5
+(real FIDO2 / WebAuthn / CTAP + protected human-approval UI), N-16-6
+(RPAC-REQ-095 generic fixed-argv external-executable adapter + supply-chain
+admission), N-16-7 (runtime capability enablement `Observed → Approved/Executable`)
+— each its own explicitly authorized implementation + IV pair. **Slice C / D
+keep no phase ID** until N-16-3 … N-16-7 all close. Do not implement Gate 10's
+effect. Do not enable execution.
+
+Governed `pcae` lifecycle only; the delegated `.3` finalization / commit / push
+incident remains **UNAUTHORIZED — preserved**.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19R — Slice-B Scope-Fence and
-Verification-Evidence Reconciliation. **STATUS: COMPLETE — INDEPENDENT
-VERIFICATION PENDING (`.1R.19R.1`). FIRST EXTERNAL EFFECT ABSENT; EXECUTION
-NOT ENABLED.** Phase-entry SHA `e05f0ea3` (`.1R.20` finalize head); immutable
-pre-`.1R.19` baseline `a2b679fe`; original `.1R.19` head `738e8209`.
+Verification-Evidence Reconciliation. **STATUS: COMPLETE — INDEPENDENTLY
+VERIFIED BY `.1R.19R.1` (N-20-1 … N-20-4 all CLOSED). FIRST EXTERNAL EFFECT
+ABSENT; EXECUTION NOT ENABLED.** Phase-entry SHA `e05f0ea3` (`.1R.20` finalize
+head); immutable pre-`.1R.19` baseline `a2b679fe`; original `.1R.19` head
+`738e8209`.
 
 A governed reconciliation/repair phase clearing exactly the four defects
 `.1R.20` (the BLOCKED IV of `.1R.19`) discovered — no Slice-B redesign, no
