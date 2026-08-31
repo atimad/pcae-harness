@@ -26,6 +26,7 @@ Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.19R.1); Sl
 - .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tests/test_slice_b_reconciliation_iv_3w1r2b1r1_1r19r1.py
 - tasks/**
 
 ## Forbidden Files
