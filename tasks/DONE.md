@@ -83,6 +83,7 @@
 
 ## Completed
 
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R: N-16-3 scope-fence reconciliation (20260831-1753-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-22r-n-16-3-scope-fence-reconciliation)
 - Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.23) (20260831-1724-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-23)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.23: IV of N-16-3 Narrow-Eligibility Policy (20260831-1703-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-23-iv-of-n-16-3-narrow-eligibility-policy)
 - Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.22) (20260831-1631-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-22)
