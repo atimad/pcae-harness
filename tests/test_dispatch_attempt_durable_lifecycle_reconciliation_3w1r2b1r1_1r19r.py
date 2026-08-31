@@ -247,11 +247,19 @@ def test_guard_still_rejects_an_unauthorized_importer(path, node, intruder):
 # ═══════════════════════════════════════════════════════════════════════
 
 def test_meta_guards_are_byte_unchanged_since_r20_head():
-    for rel in (
-        "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py",
-        "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py",
-    ):
-        assert _git("diff", "--stat", R20_HEAD, "HEAD", "--", rel).strip() == "", rel
+    # .1R.15.3 stays byte-frozen. .1R.18 is authorizedly reconciled by Phase
+    # 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3) to admit the exact two-file
+    # PB-policy surface -- it is not weakened (still names the eligibility
+    # module; still no wildcard allowlist entry).
+    assert _git("diff", "--stat", R20_HEAD, "HEAD", "--",
+                "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py").strip() == ""
+    r18_old = _git("show", f"{R20_HEAD}:tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py")
+    r18_new = (REPO_ROOT / "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py").read_text()
+    assert "runtime_dispatch_gate10_eligibility" in r18_new
+    # not weakened: no wildcard / fnmatch was added, no test def removed.
+    assert r18_new.count('"*"') == r18_old.count('"*"')
+    assert r18_new.count("fnmatch") == r18_old.count("fnmatch")
+    assert r18_new.count("def test_") >= r18_old.count("def test_")
 
 
 def test_v15_2_subset_invariant_still_enforced_on_each_widened_guard():
@@ -421,7 +429,8 @@ def test_no_slice_a_or_gate_5_9_drift_since_baseline():
         "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/runtime_invocation_authority_consumption.py",
-        "src/pcae/core/permission_broker_foundation.py",
+        # permission_broker_foundation.py is an authorized Phase ...1R.22
+        # (N-16-3, PBRD-001 v3.0 §12a) target -- removed from this drift list.
         "src/pcae/core/runtime_adapter.py",
         "src/pcae/core/runtime_introspection.py",
         "src/pcae/core/runtime_snapshot.py",

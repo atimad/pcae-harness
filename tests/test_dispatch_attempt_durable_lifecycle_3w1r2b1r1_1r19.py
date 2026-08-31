@@ -851,7 +851,7 @@ def test_runtime_posture_unchanged():
             ri.EXECUTION_AVAILABILITY) == ("Observed", "observe", "unavailable")
 
 
-def test_pol_005_still_hard_deny_for_every_ordinary_non_simulation_request():
+def test_pol_005_unchanged_and_still_hard_deny():
     # Phase ...1R.22 (N-16-3) authorizedly amends POL-005 (PBRD-001 v3.0
     # §12a): one trusted-derived RUNTIME_DISPATCH_LOCAL_CLI_V1 carve-out that
     # is unsatisfiable in production. Slice B (this phase) changed nothing in

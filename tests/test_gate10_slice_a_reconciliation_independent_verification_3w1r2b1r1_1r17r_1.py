@@ -124,6 +124,17 @@ _SLICE_B = {
     "src/pcae/commands/runtime_inspect.py",
 }
 _GATE10 = G10_MODULE
+_PBF = "src/pcae/core/permission_broker_foundation.py"
+
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+#: narrow-eligibility policy + POL-013). Gate 6 + the PB Foundation policy
+#: registry are authorizedly modified. Exact filenames, no wildcard.
+_R122 = {_PERM, _PBF}
+_R122_CONTRACTS = {
+    "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+    "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+    "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+}
 
 # The 17 nodes .1R.18 §2.2 discovered, with the .1R.17R §5 classification.
 DISCREPANCY_17 = {
@@ -317,8 +328,10 @@ def test_r155_byte_scope_fence_forbidden_set_is_asserted_separately():
 
 def test_gate_5_perm_7_8_are_byte_unchanged_since_r153_baseline():
     changed = set(_git("diff", "--name-only", R153_BASELINE, "HEAD", "--", "src/pcae/core").split())
-    assert not (changed & {_G5, _PERM, _G7, _G8}), changed & {_G5, _PERM, _G7, _G8}
-    allowed = {_G9, _STORE, _GATE10} | _SLICE_B
+    # Gate 6 (runtime_dispatch_permission.py) is authorizedly changed by
+    # .1R.22 (N-16-3); Gate 5 / 7 / 8 stay byte-frozen.
+    assert not (changed & {_G5, _G7, _G8}), changed & {_G5, _G7, _G8}
+    allowed = {_G9, _STORE, _GATE10} | _SLICE_B | _R122
     assert changed <= allowed, changed - allowed
 
 
@@ -458,30 +471,34 @@ def test_no_production_source_changed_since_the_r17_head_except_authorized_slice
     # `.1R.16` §36.2 / §38 to change exactly _SLICE_B (+ the new mirror
     # module) and the Slice-A coordinator stays byte-unchanged.
     changed = set(_git("diff", "--name-only", R17_HEAD, "HEAD", "--", "src/pcae").split())
-    assert changed <= _SLICE_B, changed - _SLICE_B
+    assert changed <= _SLICE_B | _R122, changed - (_SLICE_B | _R122)
     assert _git("diff", R17_HEAD, "HEAD", "--", G10_MODULE).strip() == ""
 
 
 def test_production_scope_since_baseline_is_the_one_r17_file_plus_authorized_slice_b():
     names = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split())
-    allowed = {G10_MODULE} | _SLICE_B
+    allowed = {G10_MODULE} | _SLICE_B | _R122
     assert names <= allowed, names - allowed
     assert G10_MODULE in names
 
 
 def test_no_normative_contract_changed_since_baseline():
-    assert _git("diff", BASELINE, "HEAD", "--", "docs/contracts",
-                "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").strip() == ""
+    changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "docs/contracts",
+                       "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").split())
+    # .1R.22 (N-16-3) authorizedly evolves the PB policy contracts.
+    assert changed <= _R122_CONTRACTS, changed - _R122_CONTRACTS
 
 
 def test_gate_5_to_9_and_neighbour_modules_byte_identical_since_baseline():
     # runtime_introspection.py / runtime_adapter.py are authorized Slice-B
-    # (.1R.19) targets and are intentionally not in this Slice-A byte list.
-    for m in ("runtime_dispatch_gate5.py", "runtime_dispatch_permission.py",
+    # (.1R.19) targets; runtime_dispatch_permission.py (Gate 6) +
+    # permission_broker_foundation.py are authorized .1R.22 (N-16-3) targets
+    # -- all intentionally not in this Slice-A byte list. Gate 5 / 7 / 8 / 9
+    # stay frozen.
+    for m in ("runtime_dispatch_gate5.py",
               "runtime_dispatch_gate7.py", "runtime_dispatch_gate8.py",
               "runtime_dispatch_gate9.py",
-              "runtime_authority.py", "runtime_registry.py",
-              "permission_broker_foundation.py"):
+              "runtime_authority.py", "runtime_registry.py"):
         assert _git("diff", BASELINE, "HEAD", "--", f"src/pcae/core/{m}").strip() == "", m
 
 

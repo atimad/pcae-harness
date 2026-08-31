@@ -144,6 +144,21 @@ _G8 = "src/pcae/core/runtime_dispatch_gate8.py"
 _G9 = "src/pcae/core/runtime_dispatch_gate9.py"
 _PERM = "src/pcae/core/runtime_dispatch_permission.py"
 _STORE = "src/pcae/core/runtime_invocation_authority_consumption.py"
+_PBF = "src/pcae/core/permission_broker_foundation.py"
+
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+#: narrow local-CLI dispatch eligibility policy + POL-013). Gate 6
+#: (runtime_dispatch_permission.py) + the Permission Broker Foundation
+#: policy registry are authorizedly modified. Exact filenames, no wildcard;
+#: Gate 5 / 7 / 8 stay byte-frozen (`forbidden`).
+_R122 = {_PERM, _PBF}
+#: Contracts a later authorized phase may change (Phase ...1R.22:
+#: PBRD-001 -> v3.0 MAJOR, PBPA-001 -> v1.1, new PBNDE-001).
+_R122_CONTRACTS = {
+    "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+    "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+    "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+}
 
 #: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 (Slice B) production files,
 #: authorized by `.1R.16` §36.2 / §38 (dispatch-attempt durable lifecycle +
@@ -267,12 +282,12 @@ def test_gate5_permission_gate7_gate8_still_byte_unchanged_since_r153():
     changed = set(
         _git("diff", "--name-only", R153_BASELINE, "HEAD", "--", "src/pcae/core").split()
     )
-    forbidden = {_G5, _PERM, _G7, _G8}
+    forbidden = {_G5, _G7, _G8}
     assert not (changed & forbidden), changed & forbidden
     # the two Gate-9-era files + the new Slice-A module + the .1R.16-§38
-    # authorized Slice-B set; Gate 5 / permission / Gate 7 / Gate 8 stay
-    # forbidden (asserted above).
-    allowed = {_G9, _STORE, _GATE10} | _SLICE_B
+    # authorized Slice-B set + the .1R.22 (N-16-3) authorized set; Gate 5 /
+    # Gate 7 / Gate 8 stay forbidden (asserted above).
+    allowed = {_G9, _STORE, _GATE10} | _SLICE_B | _R122
     assert changed <= allowed, changed - allowed
 
 
@@ -362,8 +377,9 @@ def test_r17_doc_carries_an_appended_erratum_section_only():
 def test_no_production_source_changed_since_baseline_except_the_one_r17_file():
     changed = set(_git("diff", "--name-only", IMMUTABLE_BASELINE, "HEAD", "--", "src/pcae").split())
     # Slice A: exactly the one new coordinator. Slice B (.1R.19) adds the
-    # exact `.1R.16`-§38 authorized set — subset check, not equality.
-    allowed = {G10_MODULE} | _SLICE_B
+    # exact `.1R.16`-§38 authorized set; Phase .1R.22 (N-16-3) adds _R122 —
+    # subset check, not equality.
+    allowed = {G10_MODULE} | _SLICE_B | _R122
     assert changed <= allowed, changed - allowed
     assert G10_MODULE in changed
 
@@ -374,11 +390,12 @@ def test_no_working_tree_production_or_contract_diff():
 
 
 def test_no_contract_file_changed_since_baseline():
-    changed = _git(
+    changed = set(_git(
         "diff", "--name-only", IMMUTABLE_BASELINE, "HEAD",
         "--", "docs/contracts", "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md",
-    ).strip()
-    assert changed == "", changed
+    ).split())
+    # Phase .1R.22 (N-16-3) authorizedly evolves the PB policy contracts.
+    assert changed <= _R122_CONTRACTS, changed - _R122_CONTRACTS
 
 
 # ══════════════════════════════════════════════════════════════════════════

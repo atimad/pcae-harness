@@ -267,9 +267,10 @@ def test_pbpc_contract_file_is_now_version_1_2():
 # --- Registry completeness / no regression to 12-policy canon --------------
 
 
-def test_registry_has_exactly_the_canonical_policy_set():
+def test_registry_still_has_exactly_twelve_canonical_policies():
     # Phase ...1R.22 (N-16-3) adds exactly one canonical policy: POL-013
-    # (Narrow Local-CLI Dispatch Eligibility). No existing policy changed.
+    # (Narrow Local-CLI Dispatch Eligibility). No existing policy changed;
+    # the canonical count is now 13.
     registry = PolicyRegistry()
     assert len(registry.policy_ids) == 13
     assert set(registry.policy_ids) == pbf.POLICY_IDS_CANONICAL

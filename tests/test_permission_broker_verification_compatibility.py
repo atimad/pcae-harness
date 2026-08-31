@@ -486,7 +486,7 @@ def test_public_decision_shape_is_a_strict_superset_of_108a_fields():
     assert original_108a_fields <= fields
 
 
-def test_zero_arg_broker_and_default_registry_intact():
+def test_zero_arg_broker_and_default_registry_unchanged():
     broker = PermissionBroker()
     decision = broker.evaluate(_valid_request())
     assert decision.decision == DECISION_ALLOW

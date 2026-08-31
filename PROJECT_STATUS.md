@@ -2,6 +2,120 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 — N-16-3 Narrow-Eligibility Policy and
+Contract Implementation. **STATUS: N-16-3 IMPLEMENTED — INDEPENDENT
+VERIFICATION PENDING `.1R.23`. `RUNTIME_DISPATCH_LOCAL_CLI_V1` IMPLEMENTED AS
+A TRUSTED-DERIVED PROFILE — PRODUCTIONALLY UNSATISFIABLE. POL-013 IMPLEMENTED
+— NEVER EMITS ALLOW OR HUMAN_REVIEW. PBRD-001 v2.1 → v3.0 (MAJOR) WITH
+EXPLICIT MIGRATION. FIRST EXTERNAL EFFECT ABSENT; EXECUTION NOT ENABLED.**
+Phase-entry SHA `8603fe6a` (`origin/main..HEAD = 0` at entry).
+
+**Versioning adjudication (human-authorized correction to `.1R.21`).**
+`.1R.21` planned the PBRD change as v2.2 (MINOR); PBRD-001 v2.1 §16 lists
+"weakening POL-005 eligibility" as a MAJOR trigger, and §12a is exactly that
+clause. The phase was BLOCKED at primary-source review (no repository
+mutation) and the human operator adjudicated **PBRD-001 v3.0 (MAJOR)** with
+inline explicit migration semantics (§16) and independent verification in
+`.1R.23`; repository convention (RDGO v2→v3.0, PBRD v1.1→v2.0) carries a
+contract MAJOR inline in its implementing phase, so no separate migration
+phase was required. `.1R.21` §38's NG-025 annotation target
+(`RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md`) is a planning-document location
+error — NG-025 is owned by `docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md`,
+which is where the additive canonical-statement annotation was applied.
+
+**Frozen Option C + D architecture, implemented unchanged.** A trusted-derived
+`RUNTIME_DISPATCH_LOCAL_CLI_V1` profile lies outside POL-005's categorical
+hard-block match domain (POL-005 §12a carve-out — `_not_triggered`, **not** an
+ALLOW); a dedicated conjunctive **POL-013** ("Narrow Local-CLI Dispatch
+Eligibility", `execution_class=adapter`-scoped, trigger narrowed to
+`action_type=runtime_dispatch` + `simulation_only=False`) checks the full
+P1–P21 predicate conjunction and **never emits ALLOW or HUMAN_REVIEW** — all
+predicates hold → not-triggered; any gap → `DENY`
+(`narrow_local_cli_dispatch_profile_incomplete`) which **reinforces** POL-005
+(both DENY). `_compose`'s `DENY > HUMAN_REVIEW > ALLOW` precedence is
+byte-unchanged; no tier / weight / override. Human approval is one predicate
+among fourteen checked, never a policy override.
+
+**Production changes (exact, no wildcard):**
+`src/pcae/core/permission_broker_foundation.py` (constants
+`PROFILE_RUNTIME_DISPATCH_LOCAL_CLI_V1` / `ADMISSION_CLASS_*`; derived
+non-caller `RuntimeDispatchRequestFacts.profile_classification`; additive
+internal `RuntimeDispatchAdapterDescriptorBinding.admission_record_digest` /
+`admission_class`; `_narrow_local_cli_dispatch_v1_failed_predicates` +
+`derive_runtime_dispatch_local_cli_v1_classification` +
+`_is_trusted_narrow_local_cli_dispatch_v1`; POL-005 `evaluate` carve-out;
+`NarrowLocalCliDispatchEligibilityRule` (POL-013); `_valid_runtime_dispatch_request`
+classification-consistency + complete-without-marker-forgery checks;
+`POLICY_IDS_CANONICAL` → POL-001..013) and
+`src/pcae/core/runtime_dispatch_permission.py` (N-16-6 supply-chain admission
+**interface** + fail-closed **non-admitting** stub `_NonAdmittingSupplyChainAdmissionResolver`
+/ `_PRODUCTION_SUPPLY_CHAIN_ADMISSION_RESOLVER` / `_resolve_supply_chain_admission`;
+`_validate_construction_inputs` rejects caller-preset admission fields;
+`canonical_runtime_dispatch_projection` + `new_runtime_dispatch_identity` +
+`build_runtime_dispatch_permission_broker_request` gain the test-boundary-only
+`_supply_chain_admission_resolver` kwarg; the builder resolves admission and
+derives `profile_classification` **last**, from the fully bound provisional
+request). No `adapter.dispatch(` call site; no runtime capability change; no
+N-16-6 store; no execution enablement.
+
+**Contract changes:** `PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md` PBRD-001
+**v2.1 → v3.0 (MAJOR)** — new §12a narrow-eligibility rule + §16 inline
+migration semantics (v2.x request shapes remain parseable but categorically
+DENIED; no silent auto-upgrade; cross-references move to v3.0; `.1R.23` IV
+mandatory); new `PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md`
+(**PBNDE-001 v1.0** — the POL-005 v2 canonical-statement amendment (ID
+retained), POL-013 definition, `…_V1` profile, N-16-6 interface + test-
+boundary isolation rule); `PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md`
+**PBPA-001 v1.0 → v1.1** (additive POL-013 applicability row; PBPA-REQ-062
+count → 2 scoped implemented policies; first exercise of PBPA-REQ-087);
+`V0_2_EXECUTION_READINESS_NO_GO_GATES.md` NG-025 canonical-statement
+annotation (schema / verdict / override unchanged). PBRD version-string
+cross-references updated in `RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md` /
+`RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md`. RDGO-001 normative semantics
+unchanged; RIHAC / RIASC / HPAC / RPAC unchanged; N-15-5-1 hygiene deferred.
+
+**Production narrow profile is unsatisfiable.** The only production N-16-6
+resolver admits nothing → `P_supply_chain_admission` always fails →
+`profile_classification == ""` on every production path → POL-005 keeps its
+hard-DENY match and POL-013 DENYs. No production PB `ALLOW` for the
+first-effect local-CLI profile is reachable; Gate 6 itself remains
+non-positive. N-16-5 independently keeps it unsatisfiable (`validate_approval`
+NON_REAL hard-stop).
+
+**Defensive test matrix:** new `tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py`
+(the `.1R.21` §37 25 cases + the phase-prompt §50/§53/§54 static/forgery
+challenges + the §63 contract-production equivalence map; every case asserts
+no external effect). **Scope-fence guard reconciliation:** ~20 assertions
+across `.1R.8` / `.1R.11` / `.1R.15.2` / `.1R.15.5` / `.1R.17` / `.1R.17R` /
+`.1R.17R.1` / `.1R.18` / `.1R.19` / `.1R.19R` / `.1R.19R.1` / `.1R.20` plus
+the PBPC/PBPA/composition-hardening count assertions — subset checks over the
+exact authorized filename set, no wildcard; Gate 5 / 7 / 8 / 9 + Slice-A
+freezes + every adversarial companion preserved; the two `.1R.19R` /
+`.1R.19R.1` meta-guards kept non-weakened (no test renamed, no assertion
+decorator removed). **Fixed-SHA A/B** baseline `8603fe6a`: 0 candidate-only
+unexplained functional nonpassing nodes; 0 unexplained attributable functional
+regressions (4 pre-existing failures reproduce identically with `.1R.22`
+changes stashed — documented in the canonical artifact §12).
+
+**New findings:** N-16-3-1 (`.1R.21` versioning error — PBRD change is
+§16-MAJOR; corrected to v3.0); N-16-3-2 (`.1R.21` §38 NG-025 target location
+error — corrected to `V0_2_EXECUTION_READINESS_NO_GO_GATES.md`).
+
+Runtime remains `not_implemented / Observed / observe / unavailable`; 0
+plugins / 0 capabilities; `RuntimeRegistry` empty; `pcae runtime inspect`
+byte-identical at entry and finalization. **N-16-3: IMPLEMENTED — IV PENDING
+`.1R.23` (NOT CLOSED). N-16-4 / N-16-5 / N-16-6 / N-16-7: OPEN.** First
+external effect ABSENT; Slice C / D keep no phase ID. Governed `pcae`
+lifecycle only; the delegated `.3` finalization / commit / push incident
+remains **UNAUTHORIZED — preserved**. **Recommended next (own authorization
+required):** `149O.20L.7O.3W.1R.2B.1R.1.1R.23` — Independent Verification of
+the N-16-3 Narrow-Eligibility Policy. Do not begin `.1R.23`; do not proceed to
+N-16-4..7; do not implement Slice C; do not call the first external effect; do
+not enable execution. Canonical artifact
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_22_N_16_3_NARROW_ELIGIBILITY_POLICY_AND_CONTRACT_IMPLEMENTATION.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.21 — N-16-3 Local-CLI Narrow-Eligibility
 Policy and Contract Planning. **STATUS: N-16-3 ARCHITECTURE / CONTRACT PLAN
 COMPLETE — IMPLEMENTATION NOT BEGUN. POL-005 NARROW-ELIGIBILITY MODEL FROZEN

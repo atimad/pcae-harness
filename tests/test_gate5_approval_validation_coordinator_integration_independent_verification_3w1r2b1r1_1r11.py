@@ -517,6 +517,9 @@ _AUTHORIZED_GATE_CHAIN_SURFACE = {
     "src/pcae/core/runtime_adapter.py",
     "src/pcae/core/runtime_introspection.py",
     "src/pcae/commands/runtime_inspect.py",
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+    # narrow-eligibility policy + POL-013). Exact filename, no wildcard.
+    "src/pcae/core/permission_broker_foundation.py",
 }
 
 

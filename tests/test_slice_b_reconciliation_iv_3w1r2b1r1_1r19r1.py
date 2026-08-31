@@ -65,6 +65,19 @@ LIFECYCLE_PATH = CORE / "runtime_dispatch_attempt_lifecycle.py"
 BASELINE = "a2b679fe"          # pre-.1R.19 baseline (git rev-parse bb646972^)
 R19_HEAD = "738e8209"          # original .1R.19 finalize head
 R20_HEAD = "e05f0ea3"          # .1R.20 finalize head == .1R.19R entry
+
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+#: narrow-eligibility policy + POL-013) authorized production surface.
+#: Exact filenames, no wildcard.
+_R122 = {
+    "src/pcae/core/permission_broker_foundation.py",
+    "src/pcae/core/runtime_dispatch_permission.py",
+}
+_R122_CONTRACTS = {
+    "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+    "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+    "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+}
 R19R_HEAD = "59af5abd"         # .1R.19R finalize head
 
 DIRECT_GUARDS = (
@@ -287,11 +300,19 @@ def test_meta_guard_passes_at_head(node):
 
 
 def test_meta_guards_byte_unchanged_since_r20_head():
-    for rel in (
-        "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py",
-        "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py",
-    ):
-        assert _git("diff", "--stat", R20_HEAD, "HEAD", "--", rel).strip() == "", rel
+    # .1R.15.3 stays byte-frozen. .1R.18 is authorizedly reconciled by Phase
+    # 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3) to admit the exact two-file
+    # PB-policy surface -- not weakened (still names the eligibility module;
+    # still no wildcard allowlist entry).
+    assert _git("diff", "--stat", R20_HEAD, "HEAD", "--",
+                "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py").strip() == ""
+    r18_old = _git("show", f"{R20_HEAD}:tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py")
+    r18_new = (REPO_ROOT / "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py").read_text()
+    assert "runtime_dispatch_gate10_eligibility" in r18_new
+    # not weakened: no wildcard / fnmatch added, no test def removed.
+    assert r18_new.count('"*"') == r18_old.count('"*"')
+    assert r18_new.count("fnmatch") == r18_old.count("fnmatch")
+    assert r18_new.count("def test_") >= r18_old.count("def test_")
 
 
 def test_meta_guard_causal_dependency_on_the_guard_widenings():
@@ -326,7 +347,8 @@ def test_n20_4_repair_is_confined_to_the_started_started_edge_in_source():
 
 
 def test_n20_4_lifecycle_diff_since_r20_head_is_only_the_remap():
-    diff = _git("diff", R20_HEAD, "HEAD", "--", "src/pcae")
+    diff = _git("diff", R20_HEAD, "HEAD", "--", "src/pcae",
+                *(f":(exclude){p}" for p in _R122))
     changed = {
         ln.split(" b/")[-1] for ln in diff.splitlines() if ln.startswith("diff --git ")
     }
@@ -486,13 +508,17 @@ def test_1r20_historical_blocked_verdict_preserved():
 # ── 36-49. no drift / posture / no-effect ───────────────────────────
 
 def test_no_normative_contract_change_since_baseline():
-    assert _git("diff", "--stat", BASELINE, "HEAD", "--",
-                "docs/contracts", "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").strip() == ""
+    changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--",
+                       "docs/contracts", "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").split())
+    # Phase ...1R.22 (N-16-3) authorizedly evolves the PB policy contracts.
+    assert changed <= _R122_CONTRACTS, changed - _R122_CONTRACTS
 
 
 def test_production_diff_since_r19_head_is_exactly_the_n20_4_remap():
-    changed = _git("diff", "--name-only", R19_HEAD, "HEAD", "--", "src/").split()
-    assert changed == ["src/pcae/core/runtime_dispatch_attempt_lifecycle.py"], changed
+    changed = set(_git("diff", "--name-only", R19_HEAD, "HEAD", "--", "src/").split())
+    # Phase ...1R.22 (N-16-3) authorizedly changes _R122; the .1R.19R repair
+    # itself was confined to the lifecycle module.
+    assert changed - _R122 == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
 
 
 @pytest.mark.parametrize("rel", [
@@ -502,7 +528,8 @@ def test_production_diff_since_r19_head_is_exactly_the_n20_4_remap():
     "src/pcae/core/runtime_dispatch_gate7.py",
     "src/pcae/core/runtime_dispatch_gate8.py",
     "src/pcae/core/runtime_dispatch_gate9.py",
-    "src/pcae/core/permission_broker_foundation.py",          # POL-005
+    # permission_broker_foundation.py is an authorized Phase ...1R.22
+    # (N-16-3, PBRD-001 v3.0 §12a) target -- removed from this drift list.
     "src/pcae/core/runtime_adapter.py",
     "src/pcae/core/runtime_introspection.py",                 # item-9
     "src/pcae/core/runtime_snapshot.py",                      # --json contract
@@ -571,10 +598,22 @@ def test_n16_2_zero_production_importers_of_the_lifecycle_module():
 
 
 def test_pol_005_hard_deny_still_present():
+    # Phase ...1R.22 (N-16-3, PBRD-001 v3.0 §12a) authorizedly amends this
+    # module; the Slice-B track changed nothing here. POL-005's hard DENY of
+    # every ordinary non-simulation request is re-asserted behaviorally.
     src = (CORE / "permission_broker_foundation.py").read_text()
     assert "ExecutionDisabledRule" in src
-    assert _git("diff", "--stat", BASELINE, "HEAD", "--",
-                "src/pcae/core/permission_broker_foundation.py").strip() == ""
+    from pcae.core.permission_broker_foundation import (
+        ACTION_ADAPTER_INVOCATION, EXECUTION_CLASS_ADAPTER, PermissionBroker,
+        build_permission_broker_request,
+    )
+    req = build_permission_broker_request(
+        action_type=ACTION_ADAPTER_INVOCATION, execution_class=EXECUTION_CLASS_ADAPTER,
+        requested_component="COMP-006", requested_capability="c",
+        task_id="t", phase_id=None, evidence_available=True, approval_present=True,
+        simulation_only=False,
+    )
+    assert PermissionBroker().evaluate(req).decision == "DENY"
 
 
 # ── 50. test-weakening audit over the whole .1R.19R diff ─────────────

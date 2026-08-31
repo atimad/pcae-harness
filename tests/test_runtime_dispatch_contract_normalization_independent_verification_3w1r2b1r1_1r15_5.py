@@ -562,7 +562,6 @@ def test_gate_5_6_7_8_production_modules_byte_unchanged_since_baseline():
     changed = set(out)
     forbidden = {
         "src/pcae/core/runtime_dispatch_gate5.py",
-        "src/pcae/core/runtime_dispatch_permission.py",
         "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
     }
@@ -570,6 +569,11 @@ def test_gate_5_6_7_8_production_modules_byte_unchanged_since_baseline():
     allowed = {
         "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/runtime_invocation_authority_consumption.py",
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+        # narrow-eligibility policy + POL-013). Gate 6 (runtime_dispatch_permission.py)
+        # is authorizedly modified here; Gate 5 / 7 / 8 stay in `forbidden`.
+        "src/pcae/core/runtime_dispatch_permission.py",
+        "src/pcae/core/permission_broker_foundation.py",
         # .1R.17R: the single new non-effecting Slice-A file added by .1R.17
         # (RDGO-001 v3.1 §11 Gate-10 front half + RPAC-REQ-029 DispatchEnvelope).
         # Gate 5 / permission / Gate 7 / Gate 8 remain byte-unchanged (asserted
@@ -620,4 +624,13 @@ def test_no_unplanned_contract_file_changed_since_task_open():
         "docs/contracts/RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md",
         "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md",
     }
-    assert set(out) == expected
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3): PBRD-001 -> v3.0 (MAJOR),
+    # PBPA-001 -> v1.1 (POL-013 row), new PBNDE-001 policy contract, and the
+    # NG-025 canonical-statement annotation in V0_2_EXECUTION_READINESS_NO_GO_GATES.md.
+    # Exact paths, no wildcard.
+    _r122_authorized_contract_delta = {
+        "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+        "docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md",
+    }
+    assert set(out) - _r122_authorized_contract_delta == expected

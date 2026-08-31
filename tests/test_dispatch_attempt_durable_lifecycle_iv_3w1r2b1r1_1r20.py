@@ -140,13 +140,24 @@ def test_pre_1r19_baseline_is_the_parent_of_the_impl_commit():
     assert _git("rev-parse", "--short=8", "bb646972^") == PRE_1R19_BASELINE
 
 
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+#: narrow-eligibility policy + POL-013). Authorizedly modified after the
+#: Slice-B track. Exact filenames, no wildcard.
+_R122_AUTHORIZED = {
+    "src/pcae/core/permission_broker_foundation.py",
+    "src/pcae/core/runtime_dispatch_permission.py",
+}
+
+
 def test_slice_b_production_scope_since_baseline_is_exactly_the_authorized_set():
     changed = {
         p
         for p in _git("diff", "--name-only", PRE_1R19_BASELINE, "HEAD").splitlines()
         if p.startswith("src/")
     }
-    assert changed == set(SLICE_B_PRODUCTION_FILES), changed ^ set(SLICE_B_PRODUCTION_FILES)
+    assert changed - _R122_AUTHORIZED == set(SLICE_B_PRODUCTION_FILES), (
+        (changed - _R122_AUTHORIZED) ^ set(SLICE_B_PRODUCTION_FILES)
+    )
 
 
 def test_slice_a_and_closed_gate_modules_are_byte_unchanged_since_baseline():
@@ -163,8 +174,15 @@ def test_slice_a_and_closed_gate_modules_are_byte_unchanged_since_baseline():
 
 
 def test_no_normative_contract_changed_since_baseline():
-    out = _git("diff", "--stat", PRE_1R19_BASELINE, "HEAD", "--", "docs/contracts/")
-    assert out == "", out
+    changed = set(_git("diff", "--name-only", PRE_1R19_BASELINE, "HEAD", "--", "docs/contracts/").split())
+    # Phase ...1R.22 (N-16-3) authorizedly evolves the PB policy contracts
+    # (PBRD-001 -> v3.0 MAJOR, PBPA-001 -> v1.1, new PBNDE-001). Exact paths.
+    _r122_contracts = {
+        "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+    }
+    assert changed <= _r122_contracts, changed - _r122_contracts
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -904,8 +922,21 @@ def test_runtime_posture_unchanged():
 
 
 def test_pol_005_module_byte_unchanged_since_baseline():
-    assert _git("diff", "--stat", PRE_1R19_BASELINE, "HEAD", "--",
-                "src/pcae/core/permission_broker_foundation.py") == ""
+    # Phase ...1R.22 (N-16-3, PBRD-001 v3.0 §12a) authorizedly amends this
+    # module (POL-005 one-profile carve-out + POL-013). The Slice-B track
+    # (this IV) changed nothing here; POL-005's hard DENY of every ordinary
+    # non-simulation request is re-asserted behaviorally instead of by bytes.
+    from pcae.core.permission_broker_foundation import (
+        ACTION_ADAPTER_INVOCATION, EXECUTION_CLASS_ADAPTER, PermissionBroker,
+        build_permission_broker_request,
+    )
+    req = build_permission_broker_request(
+        action_type=ACTION_ADAPTER_INVOCATION, execution_class=EXECUTION_CLASS_ADAPTER,
+        requested_component="COMP-006", requested_capability="c",
+        task_id="t", phase_id=None, evidence_available=True, approval_present=True,
+        simulation_only=False,
+    )
+    assert PermissionBroker().evaluate(req).decision == "DENY"
 
 
 def test_no_first_external_effect_primitive_anywhere_in_slice_b():

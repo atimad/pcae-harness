@@ -374,16 +374,22 @@ def test_no_unpushed_divergence_at_verification_entry():
     # only assert the working tree carries no production/contract drift.
     prod = _git("diff", "--name-only", PHASE_ENTRY_BASELINE, "HEAD", "--", "src/pcae", "docs/contracts")
     # Slice A: the one new coordinator. Slice B (.1R.19): + the exact
-    # `.1R.16`-§38 authorized set (no docs/contracts change either way).
-    _slice_a_plus_b = {
+    # `.1R.16`-§38 authorized set. Phase .1R.22 (N-16-3): + Gate 6 / PB
+    # Foundation + the PB policy contracts (PBRD-001 v3.0 MAJOR).
+    _authorized = {
         "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
         "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
         "src/pcae/core/runtime_invocation.py",
         "src/pcae/core/runtime_adapter.py",
         "src/pcae/core/runtime_introspection.py",
         "src/pcae/commands/runtime_inspect.py",
+        "src/pcae/core/permission_broker_foundation.py",
+        "src/pcae/core/runtime_dispatch_permission.py",
+        "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
     }
-    assert set(prod.split()) <= _slice_a_plus_b, set(prod.split()) - _slice_a_plus_b
+    assert set(prod.split()) <= _authorized, set(prod.split()) - _authorized
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -1250,7 +1256,10 @@ _UNCHANGED_SINCE_BASELINE = [
     "src/pcae/core/runtime_dispatch_gate7.py",
     "src/pcae/core/runtime_dispatch_gate8.py",
     "src/pcae/core/runtime_dispatch_gate9.py",
-    "src/pcae/core/runtime_dispatch_permission.py",
+    # runtime_dispatch_permission.py (Gate 6) + permission_broker_foundation.py
+    # + PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md are authorized Phase
+    # ...1R.22 (N-16-3, PBRD-001 v3.0 §12a) targets -- removed from this
+    # Slice-A byte-freeze list. Gate 5 / 7 / 8 / 9 stay frozen.
     "src/pcae/core/runtime_invocation_authority_consumption.py",
     "src/pcae/core/runtime_authority.py",
     "src/pcae/core/runtime_registry.py",
@@ -1262,10 +1271,8 @@ _UNCHANGED_SINCE_BASELINE = [
     # coordinator itself (runtime_dispatch_gate10_eligibility.py) stays
     # byte-unchanged through Slice B — asserted by
     # test_production_scope_since_baseline_is_exactly_one_new_file below.
-    "src/pcae/core/permission_broker_foundation.py",
     "src/pcae/core/shell_gate.py",
     "docs/contracts/RUNTIME_DISPATCH_GATE_ORDERING_CONTRACT.md",
-    "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
     "docs/contracts/RUNTIME_PROVIDER_ADAPTER_CONTRACT.md",
     "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
     "docs/contracts/RUNTIME_INVOCATION_HUMAN_AUTHORITY_CONTRACT.md",
@@ -1294,6 +1301,10 @@ _SLICE_A_PLUS_B_SCOPE = {
     "src/pcae/core/runtime_adapter.py",
     "src/pcae/core/runtime_introspection.py",
     "src/pcae/commands/runtime_inspect.py",
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
+    # narrow-eligibility policy + POL-013). Exact filenames, no wildcard.
+    "src/pcae/core/permission_broker_foundation.py",
+    "src/pcae/core/runtime_dispatch_permission.py",
 }
 
 
