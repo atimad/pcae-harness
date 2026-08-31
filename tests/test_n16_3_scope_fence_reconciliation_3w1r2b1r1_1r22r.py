@@ -525,22 +525,33 @@ def test_r22r_recommends_only_its_iv_phase():
 
 # ═══════════ 34. test-weakening audit ════════════════════════════════
 
+def _added_code(lines):
+    """Added diff lines that are real code — not '+++' headers and not
+    added comment lines (which may legitimately quote marker names as prose).
+    """
+    out = []
+    for l in lines:
+        if not l.startswith("+") or l.startswith("+++"):
+            continue
+        body = l[1:].strip()
+        if body.startswith("#"):
+            continue
+        out.append(l)
+    return out
+
+
 def test_no_test_weakening_in_the_r22r_diff():
     diff = _git("diff", R22R_ENTRY, "HEAD", "--", "tests/")
     lines = diff.splitlines()
     removed_defs = [l for l in lines if l.startswith("-")
                     and l.lstrip("-").strip().startswith(("def test_", "async def test_"))]
     assert removed_defs == []
-    added_xfail = [l for l in lines if l.startswith("+")
-                   and (".mark.xf" + "ail" in l or "pytest.xf" + "ail(" in l)]
-    assert added_xfail == []
-    added_skip = [l for l in lines if l.startswith("+") and "pytest.sk" + "ip(" in l]
-    assert added_skip == []
-    # no wildcard / broad-glob scope entry introduced
-    added = [l for l in lines if l.startswith("+") and not l.startswith("+++")]
-    for l in added:
-        assert 'fnmatch(' not in l
-        assert '.startswith("docs/contracts")' not in l
+    xf = "xf" + "ail"
+    banned = [".mark." + xf, "pytest." + xf + "(", "pytest.sk" + "ip(",
+              "fn" + "match(", '.startswith("docs/' + 'contracts")']
+    offenders = [l for l in _added_code(lines)
+                 if any(b in l for b in banned)]
+    assert offenders == [], offenders
 
 
 def test_repaired_tree_ab_zero_attributable_added_or_removed():

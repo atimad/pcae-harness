@@ -3491,3 +3491,52 @@
   `.3` delegated finalization/commit/push incident `UNAUTHORIZED`. N-16-3 is
   IMPLEMENTED but NOT CLOSED pending the separately authorized `.1R.23`
   independent verification.
+
+# 2026-08-31 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R — N-16-3 Scope-Fence / Verification-Evidence Reconciliation and Repair
+
+- **Scope.** Repair the `.1R.23` BLOCKER **N-23-3** only: the stale
+  point-in-time guard-freeze failures and the incomplete `.1R.22` fixed-SHA
+  A/B / guard-inventory evidence. No production source change; no normative
+  contract change; N-23-1 preserved; N-23-2 deferred.
+- **Attributable set = 18, not 16.** Independently re-derived the fixed-SHA
+  A/B (baseline `8603fe6a` in a `git worktree`, HEAD `15aeb269`): 18 guard
+  nodes pass at `8603fe6a` and fail at `15aeb269`, attributable to the two
+  authorized `.1R.22` changes (POL-013 → registry 12→13; PBPA-001 v1.0→v1.1;
+  PBRD-001 v2.1→v3.0 + POL-005 §12a). `.1R.23` §12 enumerated 16; it
+  under-counted by 2 (N-22R-1, non-blocking). 0 attributable removals. All 18
+  are non-behavioural stale text/count/byte freezes.
+- **Repair discipline.** Every widening is to an exact finite set / exact
+  sha256 / exact semantic property — no wildcard, no broad prefix, no
+  "contains-expected" downgrade. Registry-cardinality guards assert exactly
+  13 and the exact canonical id set POL-001..POL-013. PBPA byte-freezes
+  repinned to the exact current sha256 plus a v1.1/POL-013 semantic anchor
+  (any further byte change still fails; PBPC-001 / RWMPC-001 keep their `==
+  ""` assertions). PBRD/POL-005 text-freezes rewritten to the v3.0 canonical
+  security property (POL-005 hard unconditional DENY for every non-eligible
+  non-simulation request; the one carve-out unsatisfiable in production;
+  POL-013 never ALLOW/HUMAN_REVIEW; MAJOR migration + no-silent-auto-upgrade
+  preserved). The brittle 1200-char text-window guard for
+  `test_pol_005_denies_unconditionally_when_simulation_only_false` was
+  rewritten to an AST-anchored method-body slice.
+- **`.1R.23` IV suite.** Four tests made reconciliation-aware in place
+  (historical finding kept in docstrings, repaired state asserted; the
+  `.1R.23` canonical BLOCKED verdict is untouched — `.1R.19R` precedent for
+  `.1R.20`'s finding tests). Two pre-existing `.1R.23`-suite bugs corrected:
+  a stale `BASELINE..HEAD == 9` count (only true at the `.1R.23`
+  verification-entry SHA) rescoped to the immutable `BASELINE..R22_HEAD`; and
+  a scanner that self-matched its own quoted `pytest.mark.xfail` string
+  (the class `.1R.19R.1` fixed for its own suite in `dfbb79ca`) rescoped to
+  the immutable `.1R.22` test diff.
+- **Erratum mechanics.** Append-only `## ERRATUM` on the `.1R.22` canonical
+  doc after its original trailer (original §§1–20 are a byte-prefix of the
+  new file); the immutable `.pcae/phase-reports/*1R.22*` artifacts are NOT
+  rewritten; a matching `› ERRATUM` note added to the `.1R.22` section of
+  `PROJECT_STATUS.md` with the original claim preserved verbatim. No
+  amendment to the historical completion-metadata JSON itself — the
+  superseding record is the erratum + the new `.1R.22R` canonical doc +
+  metadata (the `.1R.17R` / `.1R.19R` precedent).
+- **Dispositions.** N-23-3 REPAIRED — IV pending `.1R.22R.1` (not
+  self-closed); `.1R.23` remains historically BLOCKED; N-16-3 policy model
+  SUBSTANTIVELY VERIFIED (not reopened); N-16-3 lifecycle acceptance REPAIR
+  IMPLEMENTED — IV pending `.1R.22R.1` (not CLOSED). N-16-4..7 OPEN. `.3`
+  incident remains UNAUTHORIZED.
