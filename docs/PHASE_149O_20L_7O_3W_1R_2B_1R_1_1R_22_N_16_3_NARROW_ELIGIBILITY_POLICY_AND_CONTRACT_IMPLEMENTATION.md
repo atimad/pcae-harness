@@ -872,3 +872,107 @@ rewrite, no hook bypass — governed `pcae` lifecycle only.
 ---
 
 *Canonical artifact — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22.*
+
+---
+
+## ERRATUM — issued by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R (N-16-3 Scope-Fence / Verification-Evidence Reconciliation)
+
+**Status:** append-only correction. Sections 1–20 above, and the immutable
+`.1R.22` phase-completion metadata / report / `pcae` phase-report artifacts
+(`.pcae/phase-reports/20260831-1438*-149O.20L.7O.3W.1R.2B.1R.1.1R.22.*`), are
+**preserved verbatim** and are **not** rewritten. This section records what
+the later `.1R.23` independent verification, and this `.1R.22R`
+reconciliation, established.
+
+### E-1. What the original `.1R.22` record claimed
+
+- §11 ("Scope-fence guard reconciliation"): *"Each was widened to a subset
+  check over the exact authorized filename set (no wildcard), committed under
+  this phase identity, **and is listed here**."*
+- §11.1: the guard-impact inventory table (≈20 guard families).
+- §12 / §20 and the finalized `.1R.22` completion metadata + `PROJECT_STATUS.md`
+  §`.1R.22`: *"CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0;
+  **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0**"* and *"**0
+  unexplained attributable functional regressions** (4 pre-existing failures
+  reproduce identically …)"*.
+- The `.1R.22` fixed-SHA A/B was run over **42 curated test files**:
+  `CANDIDATE (HEAD) = 3` failing / `BASELINE (8603fe6a) = 5` failing;
+  `NEW attributable = 0`.
+
+### E-2. What was actually true (`.1R.23` discovery, `.1R.22R` re-derivation)
+
+The `.1R.22` A/B **file-selection was incomplete**. A deterministic,
+no-xdist fixed-SHA A/B over the full set of guard/contract-freeze suites
+(baseline `8603fe6a` in a dedicated `git worktree`, HEAD `15aeb269`) finds:
+
+> **EIGHTEEN functional guard-test nodes that PASS at `8603fe6a` and FAIL at
+> `15aeb269`, attributable to the two authorized `.1R.22` changes** (add
+> POL-013 → canonical registry 12→13; PBPA-001 v1.0→v1.1 byte change;
+> PBRD-001 v2.1→v3.0 header/body + POL-005 §12a wording).
+> **0 attributable removals.**
+
+`.1R.23` §12 enumerated **16** of these; its own enumeration under-counted by
+**2** (`test_phase_149d_rwmpc_contract_independent_verification.py::TestNoProductionModification::test_existing_contract_text_not_amended_by_phase_149d`
+and
+`test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization`)
+— same self-similar guard-freeze class. `.1R.22R` reconciled all **18**.
+
+### E-3. Corrected historical result
+
+| Field | Original `.1R.22` claim | Corrected (`.1R.23` / `.1R.22R`) |
+|---|---|---|
+| Fixed-SHA A/B scope | 42 curated files | full guard/contract-freeze suite set |
+| Attributable added guard failures `8603fe6a → 15aeb269` | **0** | **18** |
+| Attributable removed | 0 | 0 |
+| Classification | n/a | **non-behavioural** stale current-state point-in-time freezes |
+| Guard classes | n/a | (A) policy-registry cardinality 12→13; (B) PBPA-001 v1.1 byte-freeze; (C) PBRD-001 v3.0 / POL-005 §12a text-freeze |
+| §11 "and is listed here" | asserted complete | **incomplete** — the 18 basenames do not appear in §11.1 or §12 |
+| Production N-16-3 policy-model impact | — | **none** — no policy-model defect; the policy model is substantively verified (`.1R.23` §3, §17) |
+| Governance / evidence impact | — | **material completeness defect** in the `.1R.22` guard inventory and fixed-SHA A/B evidence |
+| Repair | — | `149O.20L.7O.3W.1R.2B.1R.1.1R.22R` (IV pending `.1R.22R.1`) |
+
+### E-4. The 18 attributable point-in-time guard-freeze nodes
+
+Guard class **A — policy-registry cardinality (12 → 13; POL-013 added):**
+
+1. `tests/test_permission_broker_policy_rule_framework.py::test_registry_has_twelve_policies`
+2. `tests/test_permission_broker_policy_rule_framework.py::test_policy_ids_are_stable_and_ordered`
+3. `tests/test_permission_broker_policy_rule_framework.py::test_broker_evaluated_policy_ids_equal_applicable_policy_set`
+4. `tests/test_permission_broker_policy_rule_framework.py::test_registry_evaluates_all_rules_even_when_one_triggers`
+5. `tests/test_permission_broker_policy_rule_framework.py::test_registry_evaluates_all_rules_every_time`
+6. `tests/test_permission_broker_observation_verification.py::test_broker_default_policy_rule_count_unchanged`
+
+Guard class **B — PBPA-001 v1.0 byte-freeze (authorized v1.1 additive amendment):**
+
+7. `tests/test_phase_149d_rwmpc_contract_independent_verification.py::TestContractsUnamended::test_pbpc_and_pbpa_contract_files_unchanged_since_before_chapter_149`
+8. `tests/test_phase_149d_rwmpc_contract_independent_verification.py::TestNoProductionModification::test_existing_contract_text_not_amended_by_phase_149d` *(not in `.1R.23` §12)*
+9. `tests/test_phase_149o_18c_ag3_mandatory_consumption_integration.py::TestContractByteIdentity::test_contract_byte_unchanged[PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md]`
+10. `tests/test_phase_149o_18d_ag5_mandatory_consumption_integration.py::TestContractByteIdentity::test_contract_byte_unchanged[PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md]`
+11. `tests/test_phase_149o_18e_cli_legacy_authority_migration_integration.py::TestContractByteIdentity::test_contract_byte_unchanged[PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md]`
+12. `tests/test_phase_149o_19_3r_hmic_frozen_file_set_contract_repair.py::test_upstream_contract_byte_unchanged_by_this_repair[PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md]`
+
+Guard class **C — PBRD-001 v2.1 / POL-005 text-freeze (authorized v3.0 MAJOR + §12a):**
+
+13. `tests/test_phase_149o_16_hatp_mandatory_consumption_contract_independent_verification.py::TestMC14EffectTruthfulnessAgainstCurrentSource::test_pol_005_denies_unconditionally_when_simulation_only_false`
+14. `tests/test_phase_149o_20l_7o_3v_1r_1_contract_verification.py::TestBoundariesUnchanged::test_pol_005_unchanged_claim_present`
+15. `tests/test_phase_149o_20l_7o_3v_1r_contract_repair.py::TestNoNewContradictions::test_no_go_statements_preserved`
+16. `tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_pbrd_remains_projection_only_and_pol005_remains_hard_deny`
+17. `tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_rpac_companion_contract_is_byte_identical_and_riasc_pbrd_only_normalized`
+18. `tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization` *(not in `.1R.23` §12)*
+
+### E-5. Provenance
+
+- Immutable pre-`.1R.22` baseline: `8603fe6a` (`.1R.21` push-reconcile head; parent of `1dadeb21`).
+- `.1R.22` finalize head: `15aeb269` (`8603fe6a..15aeb269` = 9 commits, every subject carries the `…1R.1.1R.22` token).
+- `.1R.23` finalize head: `2338e7c7` (BLOCKED independent-verification result, Option B — N-23-3).
+- `.1R.22R` phase-entry: `2338e7c7`.
+- `.1R.23` canonical artifact: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_23_INDEPENDENT_VERIFICATION_OF_THE_N_16_3_NARROW_ELIGIBILITY_POLICY.md` (§12, §15 N-23-3).
+- `.1R.22R` canonical artifact: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_22R_N_16_3_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md`.
+
+### E-6. What is NOT changed by this erratum
+
+- No production source change (`git diff 8603fe6a HEAD -- src/pcae` remains exactly the two `.1R.22`-authorized files).
+- No normative-contract change by `.1R.22R` (`git diff <.1R.22R entry> HEAD -- docs/contracts` is empty).
+- The N-16-3 **policy model** verdict is unchanged: substantively INDEPENDENTLY VERIFIED / closed-worthy (`.1R.23` §3, §17). `.1R.22R` does not reopen it.
+- The `.1R.23` **BLOCKED** independent-verification verdict is preserved; `.1R.22R` repairs the blocker, IV pending `149O.20L.7O.3W.1R.2B.1R.1.1R.22R.1`.
+- The historical delegated `.3` finalization / commit / push incident remains **UNAUTHORIZED**.

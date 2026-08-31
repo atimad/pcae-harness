@@ -81,8 +81,15 @@ def test_default_registry_constructs_with_no_args():
 
 
 def test_registry_has_twelve_policies():
-    assert len(DEFAULT_POLICY_RULES) == 12
-    assert len(POLICY_IDS) == 12
+    # Phase ...1R.22 (N-16-3) added POL-013 (Narrow Local-CLI Dispatch
+    # Eligibility, NarrowLocalCliDispatchEligibilityRule) as the thirteenth
+    # canonical policy — the conjunctive companion to POL-005's
+    # RUNTIME_DISPATCH_LOCAL_CLI_V1 carve-out (PBNDE-001 v1.0 §4, PBPA-001
+    # v1.1). No policy was removed or renumbered; POL-001..012 are byte-stable.
+    # This is an exact freeze at the current canonical cardinality, not a
+    # permissive minimum — see .1R.22R reconciliation.
+    assert len(DEFAULT_POLICY_RULES) == 13
+    assert len(POLICY_IDS) == 13
 
 
 @pytest.mark.parametrize("policy_id,name", list(EXPECTED_POLICY_NAMES.items()))
@@ -92,7 +99,16 @@ def test_policy_id_registered_with_expected_name(policy_id, name):
 
 
 def test_policy_ids_are_stable_and_ordered():
-    assert POLICY_IDS == tuple(f"POL-{n:03d}" for n in range(1, 13))
+    # Exact canonical identifier set POL-001..POL-013 (POL-013 added by
+    # Phase ...1R.22, N-16-3). Range end is 14 == 13 canonical ids + 1.
+    assert POLICY_IDS == tuple(f"POL-{n:03d}" for n in range(1, 14))
+    # No duplicate, no gap, POL-013 is the last and is the narrow-dispatch
+    # eligibility rule.
+    assert len(set(POLICY_IDS)) == len(POLICY_IDS)
+    assert POLICY_IDS[-1] == "POL-013"
+    pol_013 = next(r for r in DEFAULT_POLICY_RULES if r.policy_id == "POL-013")
+    assert pol_013.name == "Narrow Local-CLI Dispatch Eligibility"
+    assert type(pol_013).__name__ == "NarrowLocalCliDispatchEligibilityRule"
 
 
 # --- policy interface -----------------------------------------------------------
@@ -185,16 +201,18 @@ def test_rules_do_not_know_about_one_another():
 def test_registry_evaluates_all_rules_every_time():
     registry = PolicyRegistry()
     results = registry.evaluate_all(_valid_request())
-    assert len(results) == 12
+    # 13 since Phase ...1R.22 (POL-013 added). evaluate_all is unfiltered —
+    # it runs every registered rule regardless of applicability.
+    assert len(results) == 13
     assert {r.policy_id for r in results} == set(POLICY_IDS)
 
 
 def test_registry_evaluates_all_rules_even_when_one_triggers():
     """Rules are never short-circuited: even when POL-001 triggers, all
-    12 policies still evaluate."""
+    13 policies still evaluate (POL-013 added by Phase ...1R.22)."""
     registry = PolicyRegistry()
     results = registry.evaluate_all(_valid_request(task_id=None))
-    assert len(results) == 12
+    assert len(results) == 13
     triggered = [r for r in results if r.triggered]
     assert len(triggered) == 1
     assert triggered[0].policy_id == "POL-001"
@@ -205,8 +223,14 @@ def test_broker_evaluated_policy_ids_equal_applicable_policy_set():
     updated. `evaluated_policy_ids` is redefined by this contract to mean
     "every policy actually passed to evaluate()" — i.e. exactly the
     applicable set for this request's execution_class, not
-    unconditionally all twelve. At an in-scope class (POL-004 applicable)
-    all twelve are evaluated; at an out-of-scope class, eleven."""
+    unconditionally the whole registry.
+
+    Phase ...1R.22 (N-16-3) added POL-013, scoped to
+    ``frozenset({EXECUTION_CLASS_ADAPTER})`` (PBPA-001 v1.1), so POL-013 is
+    non-applicable for the ``shell`` and ``none`` classes exercised here:
+    the expected evaluated set for ``shell`` is POLICY_IDS minus POL-013,
+    and for ``none`` it is POLICY_IDS minus {POL-004, POL-013}. The exact
+    finite exclusion is asserted (no wildcard) — see .1R.22R."""
     broker = PermissionBroker()
     for overrides in [
         {"execution_class": "shell"},
@@ -215,12 +239,18 @@ def test_broker_evaluated_policy_ids_equal_applicable_policy_set():
         {"execution_class": "shell", "simulation_only": False},
     ]:
         decision = broker.evaluate(_valid_request(**overrides))
-        assert decision.evaluated_policy_ids == POLICY_IDS
+        assert decision.evaluated_policy_ids == tuple(
+            p for p in POLICY_IDS if p != "POL-013"
+        )
+        assert "POL-013" in decision.non_applicable_policy_ids
 
     for overrides in [{}, {"task_id": None}, {"approval_present": False}, {"simulation_only": False}]:
         decision = broker.evaluate(_valid_request(**overrides))
-        assert decision.evaluated_policy_ids == tuple(p for p in POLICY_IDS if p != "POL-004")
+        assert decision.evaluated_policy_ids == tuple(
+            p for p in POLICY_IDS if p not in ("POL-004", "POL-013")
+        )
         assert "POL-004" in decision.non_applicable_policy_ids
+        assert "POL-013" in decision.non_applicable_policy_ids
 
 
 def test_broker_evaluated_policy_ids_partition_matches_applicable_non_applicable():

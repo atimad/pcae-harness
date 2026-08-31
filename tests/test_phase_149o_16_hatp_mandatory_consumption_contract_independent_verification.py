@@ -263,18 +263,37 @@ class TestMC14EffectTruthfulnessAgainstCurrentSource:
         src = (_SRC / "core" / "permission_broker_foundation.py").read_text(
             encoding="utf-8"
         )
-        idx = src.index("class ExecutionDisabledRule")
-        snippet = src[idx : idx + 1200]
-        assert 'policy_id = "POL-005"' in snippet
-        assert "if request.simulation_only:" in snippet
-        assert "DECISION_DENY" in snippet
-        assert "execution_boundary_unavailable" in snippet
-        # POL-005 must not branch on action_type/execution_class -- its
-        # applicability is universal, which is exactly what lets
-        # HMRC-001 generalize the pcae-push-specific PBPC-REQ-037A
-        # finding to rollback requests without redefining PBPC-001.
-        assert "action_type" not in snippet
-        assert "execution_class" not in snippet
+        cls_idx = src.index("class ExecutionDisabledRule")
+        assert 'policy_id = "POL-005"' in src[cls_idx : cls_idx + 2400]
+        # Slice the evaluate() method body exactly (from its ``def`` to the
+        # next top-level ``    def `` or the next ``class``). Phase ...1R.22
+        # (N-16-3) grew the class docstring, so a fixed character window no
+        # longer reaches evaluate() — anchor on the method instead. .1R.22R.
+        ev_idx = src.index("def evaluate(", cls_idx)
+        after = src[ev_idx + 1 :]
+        nxt = min(
+            (p for p in (after.find("\n    def "), after.find("\nclass ")) if p != -1),
+            default=len(after),
+        )
+        body = src[ev_idx : ev_idx + 1 + nxt]
+        assert "if request.simulation_only:" in body
+        assert "DECISION_DENY" in body
+        assert "execution_boundary_unavailable" in body
+        # The ONLY carve-out beyond simulation_only is the exact
+        # trusted-derived RUNTIME_DISPATCH_LOCAL_CLI_V1 profile
+        # (PBRD-001 v3.0 §12a / PBNDE-001 v1.0). POL-005 still does not
+        # branch on action_type / execution_class for its DENY — its
+        # applicability stays universal, which is what lets HMRC-001
+        # generalize the pcae-push-specific PBPC-REQ-037A finding to
+        # rollback requests without redefining PBPC-001.
+        assert "_is_trusted_narrow_local_cli_dispatch_v1(request)" in body
+        assert "request.action_type" not in body
+        assert "request.execution_class" not in body
+        # The unconditional DENY is the tail return, not itself guarded by
+        # the narrow carve-out: after the narrow-profile check returns
+        # _not_triggered, the very next statement is the DENY PolicyResult.
+        carve = body.index("_is_trusted_narrow_local_cli_dispatch_v1(request)")
+        assert "return PolicyResult(" in body[carve:]
 
     def test_no_comp_002_module_or_execution_boundary_exists(self) -> None:
         src = (_SRC / "core" / "permission_broker_foundation.py").read_text(

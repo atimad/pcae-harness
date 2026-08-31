@@ -196,8 +196,13 @@ def test_local_governance_hooks_still_present_and_unchanged():
 
 
 def test_broker_default_policy_rule_count_unchanged():
-    from pcae.core.permission_broker_foundation import DEFAULT_POLICY_RULES
-    assert len(DEFAULT_POLICY_RULES) == 12
+    from pcae.core.permission_broker_foundation import DEFAULT_POLICY_RULES, POLICY_IDS
+    # Phase ...1R.22 (N-16-3) added POL-013 (Narrow Local-CLI Dispatch
+    # Eligibility) as the thirteenth canonical policy; POL-001..012 are
+    # byte-stable, none removed. Exact freeze at the current cardinality
+    # (not a minimum) — .1R.22R reconciliation.
+    assert len(DEFAULT_POLICY_RULES) == 13
+    assert POLICY_IDS == tuple(f"POL-{n:03d}" for n in range(1, 14))
 
 
 def test_component_registry_unchanged():

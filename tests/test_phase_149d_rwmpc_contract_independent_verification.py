@@ -29,6 +29,45 @@ import pytest
 from pcae.core import permission_broker_foundation as pbf
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3) amended PBPA-001 v1.0 -> v1.1
+# (additive only: the POL-013 "Narrow Local-CLI Dispatch Eligibility" row +
+# PBPA-REQ-089; PBNDE-001 v1.0 §4 / PBRD-001 v3.0 §16). That is the sole
+# authorized post-hoc change to the contract set these guards freeze. The
+# current file bytes are pinned by sha256 so that any *further* change to
+# PBPA — and any change at all to the other contracts — still fails.
+# Reconciled by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R (N-23-3).
+_AUTHORIZED_POST_HOC_CONTRACT_SHA256 = {
+    "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md":
+        "13fc441a6e3688d1ea1b8e62a2b0ea3fafc6a293340f6907b05b7dccf8a16660",
+}
+
+
+def _assert_unchanged_except_authorized_r122(baseline: str, rel_paths) -> None:
+    import hashlib
+    import subprocess
+
+    result = subprocess.run(
+        ["git", "diff", "--name-only", f"{baseline}..HEAD", "--", *rel_paths],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    changed = [line for line in result.stdout.split() if line]
+    for path in changed:
+        assert path in _AUTHORIZED_POST_HOC_CONTRACT_SHA256, (
+            f"unauthorized contract change since {baseline}: {path}"
+        )
+        actual = hashlib.sha256((REPO_ROOT / path).read_bytes()).hexdigest()
+        assert actual == _AUTHORIZED_POST_HOC_CONTRACT_SHA256[path], (
+            f"{path} changed beyond the authorized .1R.22 v1.1 amendment"
+        )
+    # Semantic anchor: the authorized PBPA change is exactly the v1.1
+    # POL-013 additive amendment, nothing else.
+    pbpa = (REPO_ROOT / "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md").read_text()
+    assert "**Version:** 1.1" in pbpa
+    assert "POL-013" in pbpa
 PUSH_PY = REPO_ROOT / "src" / "pcae" / "commands" / "push.py"
 AGENT_PY = REPO_ROOT / "src" / "pcae" / "core" / "agent.py"
 TASK_PY = REPO_ROOT / "src" / "pcae" / "commands" / "task.py"
@@ -366,24 +405,15 @@ class TestPOL004ApplicabilityIndependentReconfirmation:
 
 class TestContractsUnamended:
     def test_pbpc_and_pbpa_contract_files_unchanged_since_before_chapter_149(self):
-        import subprocess
-
-        result = subprocess.run(
+        # PBPC-001 unchanged; PBPA-001 carries only the authorized
+        # .1R.22 v1.1 additive amendment (pinned by sha256). See .1R.22R.
+        _assert_unchanged_except_authorized_r122(
+            "45e32236",
             [
-                "git",
-                "diff",
-                "--name-only",
-                "45e32236..HEAD",
-                "--",
                 "docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md",
                 "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
             ],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
         )
-        assert result.returncode == 0
-        assert result.stdout.strip() == ""
 
 
 # ── 9. No production modification by this verification phase ───────────
@@ -405,22 +435,14 @@ class TestNoProductionModification:
         assert result.stdout.strip() == ""
 
     def test_existing_contract_text_not_amended_by_phase_149d(self):
-        import subprocess
-
-        result = subprocess.run(
+        # 149D amended none of these. The only post-149D change to the set
+        # is the authorized .1R.22 PBPA-001 v1.1 additive amendment (pinned
+        # by sha256); RWMPC-001 and PBPC-001 remain byte-unchanged. .1R.22R.
+        _assert_unchanged_except_authorized_r122(
+            "93a70b14",
             [
-                "git",
-                "diff",
-                "--name-only",
-                "93a70b14..HEAD",
-                "--",
                 "docs/contracts/REPOSITORY_WIDE_MUTATION_PERMISSION_COVERAGE_CONTRACT.md",
                 "docs/contracts/PERMISSION_BROKER_PRODUCTION_CONSUMPTION_CONTRACT.md",
                 "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
             ],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
         )
-        assert result.returncode == 0
-        assert result.stdout.strip() == ""

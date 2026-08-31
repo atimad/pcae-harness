@@ -2,6 +2,86 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R — N-16-3 Scope-Fence /
+Verification-Evidence Reconciliation and Repair. **STATUS: RECONCILIATION
+COMPLETE — INDEPENDENT VERIFICATION PENDING
+`149O.20L.7O.3W.1R.2B.1R.1.1R.22R.1`.** This phase repairs the `.1R.23`
+BLOCKER **N-23-3** only. **No production source change**
+(`git diff 8603fe6a HEAD -- src/pcae` remains exactly the two
+`.1R.22`-authorized files); **no normative-contract change**
+(`git diff <phase-entry> HEAD -- docs/contracts` empty). Runtime
+`not_implemented / Observed / observe / unavailable`; POL-005 hard DENY
+unchanged for every non-eligible non-simulation request; POL-013 never emits
+ALLOW / HUMAN_REVIEW; FIRST EXTERNAL EFFECT ABSENT; execution not enabled.
+Phase-entry SHA `2338e7c7`. Immutable pre-`.1R.22` baseline `8603fe6a`;
+`.1R.22` finalize head `15aeb269` (`8603fe6a..15aeb269` = 9 commits).
+
+**Historical 16/18-node reproduction.** Independent deterministic no-xdist
+fixed-SHA A/B (baseline `8603fe6a` in a `git worktree`, HEAD `15aeb269`)
+reproduces **18** functional guard-test nodes that PASS at `8603fe6a` and
+FAIL at `15aeb269`, attributable to the two authorized `.1R.22` changes (add
+POL-013 → canonical registry 12→13; PBPA-001 v1.0→v1.1 byte change; PBRD-001
+v2.1→v3.0 + POL-005 §12a wording). **0 attributable removals.** `.1R.23` §12
+enumerated **16**; its own enumeration under-counted by **2**
+(`test_phase_149d_rwmpc_…::test_existing_contract_text_not_amended_by_phase_149d`,
+`test_trusted_approval_presentation_…3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization`)
+— same self-similar guard-freeze class. All 18 are stale point-in-time
+**text/count/byte freeze** guards, **not behavioural** Permission-Broker
+regressions.
+
+**What `.1R.22R` did.** All 18 guards widened to the **exact authorized
+change set** (POL-013 / PBPA-001 v1.1 / PBRD-001 v3.0 / POL-005 §12a), **no
+wildcard, no broad prefix, no loosened invariant** — each still rejects an
+unauthorized change: (A) registry-cardinality guards now assert exactly 13
+and the exact canonical id set POL-001..POL-013 (no gap, no dupe, POL-013
+identity); (B) PBPA byte-freezes repinned to the exact current sha256 (any
+further PBPA byte change still fails) + a semantic anchor (v1.1 + POL-013
+row); (C) PBRD/POL-005 text-freezes rewritten to the v3.0 canonical security
+property — POL-005 remains a hard unconditional DENY for every non-eligible
+non-simulation request, the one `RUNTIME_DISPATCH_LOCAL_CLI_V1` carve-out is
+unsatisfiable in production, POL-013 never ALLOW/HUMAN_REVIEW, MAJOR migration
+text preserved, no silent auto-upgrade, old callers stay in POL-005's
+hard-DENY domain. Provenance-preserving **`## ERRATUM`** appended to the
+`.1R.22` canonical doc (original §§1–20 and the immutable `.pcae` phase-report
+artifacts preserved verbatim) correcting *"0 unexplained attributable
+functional regressions"* / *"each was widened … and is listed here"* to the
+true **"18 attributable, non-behavioural point-in-time guard-freeze failures,
+0 removals, referred to `.1R.22R`"**. New reconciliation suite
+`tests/test_n16_3_scope_fence_reconciliation_3w1r2b1r1_1r22r.py`. Four
+`.1R.23` IV tests made reconciliation-aware in place (historical finding kept
+in docstrings, repaired state asserted; the `.1R.23` canonical BLOCKED
+verdict is untouched); two pre-existing self-referential `.1R.23` suite bugs
+(`test_baseline_and_range_reconstructed_independently` stale HEAD-relative
+count; `test_no_test_weakening_in_the_r122_diff` self-matching its own quoted
+`pytest.mark.xfail` string — the class `.1R.19R.1` fixed for its own suite in
+`dfbb79ca`) scoped to the immutable `.1R.22` range.
+
+**Repaired-tree A/B.** Baseline `8603fe6a` → repaired HEAD: **0 attributable
+added, 0 attributable removed**; N-23-3-attributable guard failures remaining
+= **0**; candidate-only unexplained functional nonpassing nodes = **0**. The
+`.1R.22` 43-test policy suite: green. The `.1R.23` 55-test IV suite: green.
+
+**Dispositions.** N-23-3 — **REPAIRED — INDEPENDENT VERIFICATION PENDING
+`.1R.22R.1`** (not self-closed). `.1R.23` verification-evidence / regression
+blocker — **REPAIRED — IV PENDING `.1R.22R.1`**; `.1R.23` remains
+historically BLOCKED. N-16-3 policy model — **SUBSTANTIVELY VERIFIED**
+(unchanged; not reopened). N-16-3 lifecycle acceptance — **REPAIR
+IMPLEMENTED — IV PENDING `.1R.22R.1`**; **not CLOSED**. N-23-1 — preserved
+(informational; synthetic complete profile → bounded non-executable INV-008
+ALLOW; production profile remains unsatisfiable). N-23-2 — **NON-BLOCKING
+CONTRACT-WORDING DEBT, DEFERRED** to a later normalization pass (no contract
+edit here). N-16-4 / N-16-5 / N-16-6 / N-16-7 — **OPEN**, untouched. `.3`
+delegated finalization / commit / push — remains **UNAUTHORIZED**.
+
+**Recommended next (needs explicit human authorization).**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.22R.1` — Independent Verification of the N-16-3
+Reconciliation. **Do not skip to N-16-4.** Do not implement Slice C, the
+first external effect, or execution enablement.
+
+See `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_22R_N_16_3_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md`.
+
+---
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.23 — Independent Verification of the N-16-3
 Narrow-Eligibility Policy. **STATUS: BLOCKED INDEPENDENT-VERIFICATION RESULT
 (Option B). The N-16-3 policy model is SUBSTANTIVELY INDEPENDENTLY VERIFIED /
@@ -190,6 +270,18 @@ decorator removed). **Fixed-SHA A/B** baseline `8603fe6a`: 0 candidate-only
 unexplained functional nonpassing nodes; 0 unexplained attributable functional
 regressions (4 pre-existing failures reproduce identically with `.1R.22`
 changes stashed — documented in the canonical artifact §12).
+
+> **› ERRATUM (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R).** The two claims
+> above — *"0 unexplained attributable functional regressions"* and *"subset
+> checks … no wildcard … every adversarial companion preserved"* as a
+> **complete** inventory — were **incomplete**. `.1R.23` and `.1R.22R`
+> independently re-derived the fixed-SHA A/B over the full guard-freeze suite
+> set and found **18 attributable, non-behavioural point-in-time
+> guard-freeze failures** (`8603fe6a` pass / `15aeb269` fail), **0
+> removals**, that the `.1R.22` §11.1 inventory never named. No N-16-3
+> policy-model defect. Repaired by `.1R.22R` (see this file's Current Phase
+> section and the `.1R.22` canonical doc `## ERRATUM`). Original text
+> preserved above verbatim.
 
 **New findings:** N-16-3-1 (`.1R.21` versioning error — PBRD change is
 §16-MAJOR; corrected to v3.0); N-16-3-2 (`.1R.21` §38 NG-025 target location

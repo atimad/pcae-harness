@@ -350,9 +350,21 @@ class TestVersionMatrixAndProvenance:
 
 class TestBoundariesUnchanged:
     def test_pol_005_unchanged_claim_present(self):
+        # Phase ...1R.22 (N-16-3) took PBRD-001 v2.1 -> v3.0 (MAJOR) and
+        # reworded the trailer. The security property this guard exists to
+        # protect is unchanged and still asserted verbatim from v3.0: POL-005
+        # remains a hard, unconditional DENY for every non-eligible
+        # non-simulation request; the one RUNTIME_DISPATCH_LOCAL_CLI_V1
+        # carve-out is unsatisfiable in production; POL-013 never emits
+        # ALLOW/HUMAN_REVIEW. Reconciled by .1R.22R (N-23-3).
         pbrd = _text(PBRD)
         assert "POL-005 (`ExecutionDisabledRule`) is unchanged in production" in pbrd
-        assert "**POL-005 production behavior: UNCHANGED.**" in pbrd
+        assert (
+            "POL-005 production behaviour for every non-eligible non-simulation request:\n"
+            "UNCHANGED (unconditional `DENY`). The single `RUNTIME_DISPATCH_LOCAL_CLI_V1`\n"
+            "carve-out is unsatisfiable in production." in pbrd
+        )
+        assert "`POL-013` never emits `ALLOW` or `HUMAN_REVIEW`" in pbrd
 
     def test_dry_path_not_required_to_carry_new_facts(self):
         pbrd = _text(PBRD)

@@ -383,6 +383,23 @@ def _diff_since_entry(pathspec: str) -> str:
     ],
 )
 def test_upstream_contract_byte_unchanged_by_this_repair(existing_contract):
+    if existing_contract == "PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md":
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3) — long after this
+        # narrow repair phase — amended PBPA-001 v1.0 -> v1.1 (additive
+        # only: the POL-013 row + PBPA-REQ-089; PBNDE-001 v1.0 / PBRD-001
+        # v3.0). That is the sole authorized change to PBPA since this
+        # phase's entry. Pinned to the exact current bytes so any *further*
+        # PBPA change still fails. Reconciled by .1R.22R (N-23-3).
+        import hashlib
+
+        path = Path(__file__).resolve().parents[1] / "docs" / "contracts" / existing_contract
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        assert actual == "13fc441a6e3688d1ea1b8e62a2b0ea3fafc6a293340f6907b05b7dccf8a16660", (
+            "PBPA-001 changed beyond the authorized .1R.22 v1.1 amendment"
+        )
+        text = path.read_text()
+        assert "**Version:** 1.1" in text and "POL-013" in text
+        return
     diff = _diff_since_entry(f"docs/contracts/{existing_contract}")
     assert existing_contract not in diff, f"{existing_contract} was modified by this narrow repair phase"
 

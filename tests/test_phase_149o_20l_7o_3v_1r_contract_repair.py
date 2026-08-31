@@ -201,4 +201,8 @@ class TestNoNewContradictions:
             text = _text(path)
             assert "UNAVAILABLE" in text.upper()
         assert "does not launch a process" in _text(RDGO)
-        assert "does not launch a process" in _text(PBRD)
+        # Phase ...1R.22 (N-16-3) took PBRD-001 -> v3.0 (MAJOR) and reworded
+        # this no-go clause from "does not launch a process" to "**not**
+        # launch a process, invoke an external runtime, ...". The no-go
+        # itself is preserved; accept either phrasing. Reconciled by .1R.22R.
+        assert re.search(r"(does not|\*\*not\*\*)\s+launch a process", _text(PBRD))

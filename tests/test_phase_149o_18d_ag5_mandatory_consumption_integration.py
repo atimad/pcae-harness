@@ -128,9 +128,28 @@ class TestProductionFileAllowlist:
 
 
 class TestContractByteIdentity:
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3) amended PBPA-001
+    # v1.0 -> v1.1 (additive only: POL-013 row + PBPA-REQ-089; PBNDE-001
+    # v1.0 / PBRD-001 v3.0). Sole authorized post-entry change; current
+    # bytes pinned by sha256 so any further PBPA change still fails.
+    # Reconciled by .1R.22R (N-23-3).
+    _R122_AUTHORIZED_PBPA_SHA256 = (
+        "13fc441a6e3688d1ea1b8e62a2b0ea3fafc6a293340f6907b05b7dccf8a16660"
+    )
+
     @pytest.mark.parametrize("contract_path", _UPSTREAM_CONTRACTS, ids=lambda p: p.name)
     def test_contract_byte_unchanged(self, contract_path: Path) -> None:
         rel = contract_path.relative_to(_REPO_ROOT).as_posix()
+        if rel.endswith("PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md"):
+            import hashlib
+
+            actual = hashlib.sha256(contract_path.read_bytes()).hexdigest()
+            assert actual == self._R122_AUTHORIZED_PBPA_SHA256, (
+                "PBPA-001 changed beyond the authorized .1R.22 v1.1 amendment"
+            )
+            text = contract_path.read_text()
+            assert "**Version:** 1.1" in text and "POL-013" in text
+            return
         diff = _git("diff", "--stat", f"{_PHASE_ENTRY_COMMIT}", "--", rel)
         assert diff.strip() == ""
 

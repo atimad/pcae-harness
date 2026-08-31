@@ -48,10 +48,13 @@ def test_active_contract_versions_after_1r15_4_normalization() -> None:
     # `.1R` left these at v2.0/v3.0; `.1R.15.4` normalized RDGO->v3.1,
     # PBRD->v2.1, HPAC->v2.1 (all MINOR). RIHAC v2.0, RIASC v3.0, RPAC v1.0
     # unchanged.
+    # Phase ...1R.22 (N-16-3) then took PBRD-001 v2.1 -> v3.0 (MAJOR) —
+    # PBRD-001 §16 lists "weakening POL-005 eligibility" as a MAJOR trigger,
+    # and §12a is exactly that clause. Reconciled by .1R.22R (N-23-3).
     assert HPAC.startswith("# HPAC-001 v2.1")
     assert RIHAC.startswith("# RIHAC-001 v2.0")
     assert RIASC_PATH.read_text().startswith("# RIASC-001 v3.0")
-    assert PBRD_PATH.read_text().startswith("# PBRD-001 v2.1")
+    assert PBRD_PATH.read_text().startswith("# PBRD-001 v3.0")
     assert RDGO.startswith("# RDGO-001 v3.1")
     rpac = RPAC_PATH.read_text()
     assert "**Contract:** RPAC-001" in rpac
@@ -59,11 +62,17 @@ def test_active_contract_versions_after_1r15_4_normalization() -> None:
 
 
 def test_rpac_companion_contract_is_byte_identical_and_riasc_pbrd_only_normalized() -> None:
-    # RPAC-001 is untouched by `.1R` and by `.1R.15.4`. RIASC-001 / PBRD-001
-    # carry only the authorized `.1R.15.4` normalization (RIASC §9 errata,
-    # PBRD §4a representation-equivalence clause + v2.1 header).
+    # RPAC-001 is untouched by `.1R` and by `.1R.15.4` (still byte-identical).
+    # RIASC-001 carries only the authorized `.1R.15.4` normalization (RIASC §9
+    # errata). PBRD-001 carries the `.1R.15.4` normalization (§4a
+    # representation-equivalence) AND the authorized Phase ...1R.22 (N-16-3)
+    # v2.1 -> v3.0 MAJOR (§12a narrow-eligibility rule + §16 migration) —
+    # both authorized, nothing else. Reconciled by .1R.22R (N-23-3).
     assert sha256(RPAC_PATH) == "395f6b9d3f1779fb312f66e06819176417db6380193d1f5fee52668d43260c89"
-    assert PBRD_PATH.read_text().startswith("# PBRD-001 v2.1")
+    pbrd = PBRD_PATH.read_text()
+    assert pbrd.startswith("# PBRD-001 v3.0")
+    assert "**v3.0 (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22) — MAJOR.**" in pbrd
+    assert "§4a" in pbrd  # the .1R.15.4 representation-equivalence clause is retained
     assert "Errata note (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 — V-3" in RIASC_PATH.read_text()
 
 
@@ -252,10 +261,20 @@ def test_no_authority_shortcut_or_cross_domain_substitution() -> None:
 
 
 def test_pbrd_remains_projection_only_and_pol005_remains_hard_deny() -> None:
+    # Phase ...1R.22 (N-16-3) took PBRD-001 -> v3.0 (MAJOR) and reworded the
+    # trailer. The two properties this guard protects are unchanged and still
+    # asserted from the v3.0 text: PB remains projection-only (it does not
+    # authenticate humans; RIHAC owns authority validation) and POL-005
+    # remains a hard, unconditional DENY for every non-eligible non-simulation
+    # request. Reconciled by .1R.22R (N-23-3).
     pbrd = PBRD_PATH.read_text()
     assert "PB SHALL NOT authenticate humans" in pbrd
     assert "RIHAC owns fresh authority validation" in pbrd
-    assert "POL-005 production behavior: UNCHANGED" in pbrd
+    assert (
+        "POL-005 production behaviour for every non-eligible non-simulation request:\n"
+        "UNCHANGED (unconditional `DENY`)." in pbrd
+    )
+    assert "`POL-013` never emits `ALLOW` or `HUMAN_REVIEW`" in pbrd
 
 
 def test_contract_only_no_implementation_claim() -> None:

@@ -59,6 +59,15 @@ from _rdw3w_helpers import dispatch_inputs, full_chain, new_dispatch_identity
 
 REPO = Path(__file__).resolve().parents[1]
 BASELINE = "8603fe6a"
+# .1R.22 finalize head (verification-entry SHA for this IV phase). The
+# historical .1R.22 range BASELINE..R22_HEAD is exactly 9 commits and is
+# immutable. Phase .1R.22R (N-16-3 Scope-Fence / Verification-Evidence
+# Reconciliation) later repaired the N-23-3 blocker below — several tests in
+# this file are intentionally sensitive to that reconciliation and are marked
+# "reconciliation-aware" where they now assert the repaired current state
+# while documenting the historical .1R.23 finding. The .1R.23 canonical
+# artifact's BLOCKED verdict is preserved unchanged.
+R22_HEAD = "15aeb269"
 H = "a" * 64
 HB, HC, HD, HE = "b" * 64, "c" * 64, "d" * 64, "e" * 64
 ADM = "9" * 64
@@ -147,15 +156,22 @@ class _AdmittingResolver(rdp.SupplyChainAdmissionResolver):
 # ═══════════════ 1. range / baseline reconstruction ═══════════════════════
 
 def test_baseline_and_range_reconstructed_independently():
+    # Reconciliation-aware (.1R.22R): the original body asserted
+    # BASELINE..HEAD == 9, which was only true at the .1R.23
+    # verification-entry SHA; .1R.23's own finalization commits (and later
+    # .1R.22R) grow HEAD. The immutable, stable fact is the historical
+    # .1R.22 range BASELINE..R22_HEAD.
     assert subprocess.run(
         ["git", "merge-base", "--is-ancestor", BASELINE, "origin/main"], cwd=REPO
     ).returncode == 0
-    rng = _git("rev-list", "--count", f"{BASELINE}..HEAD").strip()
+    assert subprocess.run(
+        ["git", "merge-base", "--is-ancestor", R22_HEAD, "origin/main"], cwd=REPO
+    ).returncode == 0
+    rng = _git("rev-list", "--count", f"{BASELINE}..{R22_HEAD}").strip()
     assert rng == "9"
-    subjects = [l for l in _git("log", "--format=%s", f"{BASELINE}..HEAD").splitlines() if l]
+    subjects = [l for l in _git("log", "--format=%s", f"{BASELINE}..{R22_HEAD}").splitlines() if l]
     assert len(subjects) == 9
     assert all("1R.1.1R.22" in s for s in subjects)
-    assert _git("rev-list", "--count", "origin/main..HEAD").strip() == "0"
 
 
 def test_only_two_production_files_changed_since_baseline():
@@ -749,7 +765,15 @@ def test_no_first_effect_primitive_added_in_touched_modules():
 
 
 def test_no_test_weakening_in_the_r122_diff():
-    diff = _git("diff", BASELINE, "HEAD", "--", "tests/")
+    # Reconciliation-aware (.1R.22R): scoped to the historical .1R.22 range
+    # BASELINE..R22_HEAD ("the r122 diff"), which is what this guard means
+    # and is immutable. The original body scanned BASELINE..HEAD, which
+    # (a) grew to include .1R.23's own suite — whose source quotes
+    # "pytest.mark.xfail" as string data, self-matching the scanner (the
+    # same class of bug .1R.19R.1 fixed for its own suite, commit dfbb79ca)
+    # — and (b) will later include .1R.22R's authorized guard reconciliation.
+    # The .1R.22 test diff is the correct, stable scope for this assertion.
+    diff = _git("diff", BASELINE, R22_HEAD, "--", "tests/")
     removed_defs = [l for l in diff.splitlines()
                     if l.startswith("-") and l.lstrip("-").strip().startswith(("def test_", "async def test_"))]
     assert removed_defs == []
@@ -791,21 +815,50 @@ R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS = (
 )
 
 
+# .1R.22R independently re-derived the fixed-SHA A/B (8603fe6a -> 15aeb269)
+# and found the true attributable set is EIGHTEEN, not sixteen: the .1R.23
+# enumeration above under-counted by two (same self-similar guard-freeze
+# class), both of which .1R.22R also reconciled.
+R122R_ADDITIONALLY_ENUMERATED = (
+    "test_phase_149d_rwmpc_contract_independent_verification.py::TestNoProductionModification::test_existing_contract_text_not_amended_by_phase_149d",
+    "test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization",
+)
+R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS = (
+    R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS + R122R_ADDITIONALLY_ENUMERATED
+)
+
+
 def test_r122_artifact_does_not_disclose_these_regressions():
+    # Reconciliation-aware (.1R.22R). Historically true at .1R.23: neither
+    # the .1R.22 canonical doc's original body nor PROJECT_STATUS disclosed
+    # these attributable guard regressions, and the record claimed "0
+    # unexplained attributable functional regressions". .1R.22R issued a
+    # provenance-preserving erratum. Assert BOTH: the original claim is
+    # still present verbatim (historical record preserved), AND an erratum
+    # now names the regression set and records the true count.
     doc = next(REPO.glob("docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_22_*.md")).read_text()
     status = (REPO / "PROJECT_STATUS.md").read_text()
-    # none of the 16 failing test files are named in the §11.1 inventory
-    for node in R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS:
-        base = node.split("::")[0].replace(".py", "")
-        assert base not in doc, f"unexpectedly disclosed: {base}"
-    # and the canonical record claims zero
-    assert "0 unexplained attributable functional\nregressions" in status \
-        or "0 unexplained attributable functional regressions" in " ".join(status.split())
+    flat_status = " ".join(status.split())
+    # Original inaccurate claim preserved as historical evidence:
+    assert "0 unexplained attributable functional regressions" in flat_status
+    # Erratum issued by .1R.22R, appended after the original canonical trailer:
+    assert "## ERRATUM" in doc and "149O.20L.7O.3W.1R.2B.1R.1.1R.22R" in doc
+    assert "18" in doc  # the corrected attributable count
+    for node in R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS:
+        base = node.split("::")[0]
+        assert base in doc, f"erratum omits attributable guard: {base}"
+    # PROJECT_STATUS now records the .1R.22R reconciliation:
+    assert "1R.22R" in status
 
 
 def test_count_is_sixteen_and_all_are_registry_or_contract_freeze_guards():
+    # The .1R.23 enumeration was sixteen; .1R.22R's independent re-derivation
+    # found two more of the same class (total eighteen). Both figures are
+    # asserted so the historical .1R.23 count stays on record.
     assert len(R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS) == 16
     assert len(set(R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS)) == 16
+    assert len(R122R_ADDITIONALLY_ENUMERATED) == 2
+    assert len(set(R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS)) == 18
 
 
 @pytest.mark.skipif(
@@ -813,16 +866,19 @@ def test_count_is_sixteen_and_all_are_registry_or_contract_freeze_guards():
     reason="baseline not in local history",
 )
 def test_ab_delta_is_exactly_these_sixteen_when_a_baseline_worktree_is_available():
-    # Documents the reproduction recipe; the worktree A/B was run out-of-band
-    # during .1R.23 verification (see the canonical artifact §12). This test
-    # asserts the HEAD side only: every listed node currently fails at HEAD.
+    # Reconciliation-aware (.1R.22R). At .1R.23 every listed node FAILED at
+    # HEAD — that was the N-23-3 blocker. .1R.22R widened each stale
+    # point-in-time guard to the exact authorized change set (POL-013 /
+    # PBPA-001 v1.1 / PBRD-001 v3.0 / POL-005 §12a), no wildcard. Assert the
+    # repaired current state: every attributable node now PASSES at HEAD.
     import subprocess
     r = subprocess.run(
         ["python", "-m", "pytest", "-q", "-o", "addopts=", "--no-header",
-         *[f"tests/{n}" for n in R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS]],
+         *[f"tests/{n}" for n in R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS]],
         cwd=REPO, capture_output=True, text=True,
     )
-    assert "16 failed" in r.stdout, r.stdout[-2000:]
+    assert " failed" not in r.stdout, r.stdout[-3000:]
+    assert "18 passed" in r.stdout, r.stdout[-3000:]
 
 
 def test_policy_registry_integrity_no_dupes_no_gaps():
