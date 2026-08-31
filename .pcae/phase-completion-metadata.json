@@ -64,9 +64,11 @@
     "0f2bd4b5",
     "a6c1afdd",
     "ff96f7b1",
-    "39d5c94f"
+    "39d5c94f",
+    "67525b62",
+    "2377a230"
   ],
-  "files_changed_count": 6,
+  "files_changed_count": 8,
   "phase_commits": [
     {
       "hash": "1dadeb21",
@@ -91,11 +93,19 @@
     {
       "hash": "39d5c94f",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22: reconcile stale active idle task (post-.1R.21) and the superseded active phase-task file into tasks/done/ and DONE.md (task-memory hygiene)"
+    },
+    {
+      "hash": "67525b62",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22: stage canonical completion metadata and report ahead of governed push"
+    },
+    {
+      "hash": "2377a230",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22: set the reconciled post-.1R.21 idle task file status to done (task-memory hygiene)"
     }
   ],
-  "origin_main_head": "pending_push",
+  "origin_main_head": "2377a230c74a5b3004156a06389516fe805b5a93",
   "origin_main_head_count": 0,
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.23 -- Independent Verification of the N-16-3 Narrow-Eligibility Policy. RE-DERIVE against PBRD-001 v3.0 \u00a7\u00a712/12a/16, PBNDE-001 v1.0, PBPA-001 v1.1, _compose, and current source: old callers still DENY; no human-approval override; the classification is trusted-derived at every predicate; default-deny outside the exact profile; DENY > HUMAN_REVIEW > ALLOW intact; POL-013 statically never ALLOW; all broader effect classes still blocked; POL-005 still hard DENY for everything else; no ALLOW reachable in production because the profile is unsatisfiable; the PBRD-001 v3.0 MAJOR and its explicit migration semantics are \u00a716-consistent; no execution / runtime / contract-semantics drift beyond the approved N-16-3 change; fixed-SHA A/B. Then proceed to the next unresolved first-effect prerequisite N-16-4 (real positive single-attempt Runtime Enforcement gate over the full RDGO v3.1 projection), then N-16-5 (real FIDO2 / WebAuthn / CTAP + protected human-approval UI), then N-16-6 (RPAC-REQ-095 fixed-argv external-executable adapter + supply-chain admission store), then N-16-7 (runtime capability enablement Observed -> Approved/Executable -- strictly last). N-16-4 is adjudicated before N-16-5. Each of N-16-4..7 is its own explicitly authorized implementation + independent-verification pair. Slice C and Slice D keep no phase ID. Do not begin .1R.23. Do not proceed directly to N-16-4. Do not implement Slice C. Do not implement or call the first external effect. Do not enable execution.",
-  "report_consistency": "canonical implementation report staged pending governed push; promoted to complete after push"
+  "report_consistency": "canonical implementation report promoted to complete after governed push"
 }
