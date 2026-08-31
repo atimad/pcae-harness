@@ -27,10 +27,17 @@ fixed-SHA A/B record ("0 unexplained attributable regressions") is
 inaccurate — the same defect class that BLOCKED ``.1R.18``. Referred to a
 dedicated repair phase ``149O.20L.7O.3W.1R.2B.1R.1.1R.19R``.
 
-The tests below that carry ``finding_n20_`` in their name **encode the
-blocker as executable evidence** (they PASS by asserting the current, real,
-defective state — they are the regression proof this phase hands to the
-repair phase, not a weakening of any guard).
+The tests below that carry ``finding_n20_`` in their name encoded the
+blocker as executable evidence for the ``.1R.19R`` repair phase. That repair
+phase has since landed: N-20-1 (three guards widened by exactly the two
+authorized Slice-B importer tuples, no wildcard), N-20-2 (provenance-
+preserving ``.1R.19`` erratum, original text preserved), N-20-3 (both
+consequential meta-guards recover transitively), and N-20-4 (concurrent
+loser errors normalised to ``DispatchAttemptAlreadyStartedError``). The
+``finding_n20_`` tests are now **reconciliation-aware**: each carries the
+historical finding in its docstring and asserts the repaired state at HEAD.
+The historical BLOCKED verdict of *this* phase (``.1R.20``) is unchanged and
+is preserved in the canonical ``.1R.20`` document and git history.
 """
 
 from __future__ import annotations
@@ -333,20 +340,25 @@ def test_concurrent_start_has_exactly_one_durable_winner_all_losers_fail_closed(
 
 
 def test_finding_n20_4_concurrent_losers_do_not_all_map_to_already_started_error(tmp_path):
-    """FINDING N-20-4 (non-blocking). ``begin_effect_attempt`` guarantees the
-    safety property (exactly one durable ``EFFECT_ATTEMPT_STARTED``; every
-    loser fails closed) but NOT the deterministic *error type* the module
-    docstring promises ("every loser gets the same error") and phase-prompt
-    §14 requires ("losing contenders map deterministically to duplicate-start
-    failure"). A fraction of losers escape with a raw
-    ``DispatchAttemptTransitionError`` (``invalid_transition:
-    EFFECT_ATTEMPT_STARTED->EFFECT_ATTEMPT_STARTED``) raised by
-    ``_append_transition`` in the window between the durability pre-check and
-    the create-only link, which the ``except DispatchAttemptIntegrityError``
-    remap in ``begin_effect_attempt`` does not cover. Fail-closed and
-    at-most-once still hold. Recommended for the ``.1R.19R`` repair: normalise
-    every losing contender to ``DispatchAttemptAlreadyStartedError``.
-    This test asserts the CURRENT behaviour as regression evidence."""
+    """FINDING N-20-4 — REPAIRED by ``.1R.19R``.
+
+    HISTORICAL (at the ``.1R.20`` blocked-IV entry, ``738e8209``):
+    ``begin_effect_attempt`` guaranteed the safety property (exactly one
+    durable ``EFFECT_ATTEMPT_STARTED``; every loser fails closed) but NOT the
+    deterministic *error type* the module docstring promises and phase-prompt
+    §14 requires — a fraction of losers escaped with a raw
+    ``DispatchAttemptTransitionError``
+    (``invalid_transition:EFFECT_ATTEMPT_STARTED->EFFECT_ATTEMPT_STARTED``)
+    raised by ``_append_transition`` in the window between the durability
+    pre-check and the create-only link, which the
+    ``except DispatchAttemptIntegrityError`` remap did not cover.
+
+    REPAIR (``.1R.19R``): ``begin_effect_attempt`` now also catches
+    ``DispatchAttemptTransitionError`` and normalises the
+    ``EFFECT_ATTEMPT_STARTED -> EFFECT_ATTEMPT_STARTED`` edge (only that edge)
+    to ``DispatchAttemptAlreadyStartedError``. Every other invalid transition
+    keeps its own fail-closed semantics; the winner-selection primitive is
+    unchanged. This test now REQUIRES uniform ``DispatchAttemptAlreadyStartedError``."""
     store, rid = _prepared_record(tmp_path)
     seen: list[str] = []
 
@@ -361,13 +373,9 @@ def test_finding_n20_4_concurrent_losers_do_not_all_map_to_already_started_error
         for r in ex.map(race, range(24)):
             if r:
                 seen.append(r)
-    # Every loser fails closed (subclass of the base lifecycle error)…
     assert seen, "expected losing contenders"
-    # …but the type is not uniform today (this is the finding).
-    assert "DispatchAttemptTransitionError" in set(seen), (
-        "N-20-4 no longer reproduces — repaired? then flip this to require "
-        "uniform DispatchAttemptAlreadyStartedError"
-    )
+    # Repaired: every loser maps deterministically to the duplicate-start error.
+    assert set(seen) == {"DispatchAttemptAlreadyStartedError"}, seen
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -784,62 +792,98 @@ def test_finding_n20_1_slice_b_added_two_unlisted_hpac_foundation_importers():
 
 @pytest.mark.parametrize("path,node", _HPAC_CONSUMER_GUARDS,
                          ids=[p.split("/")[-1].split("_3w1r")[0] for p, _ in _HPAC_CONSUMER_GUARDS])
-def test_finding_n20_1_hpac_consumer_guard_fails_at_head(path, node):
-    """BLOCKING FINDING N-20-1 (regression evidence). Each of these three
-    pre-existing guards PASSES at the pre-``.1R.19`` baseline ``a2b679fe`` and
-    FAILS at HEAD, attributable to and explained by ``.1R.19``, and was never
-    disclosed or widened by ``.1R.19``. Same defect class that BLOCKED
-    ``.1R.18``. This test asserts the current failing state as evidence the
-    ``.1R.19R`` repair phase will clear (by widening each allowlist to admit
-    the two authorized Slice-B importers — each still rejecting any other)."""
+def test_finding_n20_1_hpac_consumer_guard_is_repaired_at_head(path, node):
+    """FINDING N-20-1 — REPAIRED by ``.1R.19R``.
+
+    HISTORICAL (at the ``.1R.20`` blocked-IV entry, ``738e8209``): each of
+    these three pre-existing HPAC Layer-1/2 consumer-inventory guards PASSED
+    at the pre-``.1R.19`` baseline ``a2b679fe`` and FAILED at that HEAD,
+    attributable to and explained by ``.1R.19`` (which added
+    ``from pcae.core.hpac_foundation import ...`` to
+    ``runtime_dispatch_attempt_lifecycle.py`` and ``runtime_invocation.py``
+    without widening or disclosing this guard family) — same defect class
+    that BLOCKED ``.1R.18``. Preserved as the ``.1R.20`` blocked verdict in
+    ``docs/PHASE_..._1R_20_...md`` and git history (``fdfd46e5`` / ``e05f0ea3``).
+
+    REPAIR (``.1R.19R``): each ``AUTHORIZED_CONSUMERS`` set is widened by
+    exactly the two authorized Slice-B importer tuples
+    ``("runtime_dispatch_attempt_lifecycle.py", "pcae.core.hpac_foundation")``
+    and ``("runtime_invocation.py", "pcae.core.hpac_foundation")`` — no
+    wildcard; each guard still rejects any other importer. This test now
+    REQUIRES the guard green at HEAD and the widening narrow."""
     result = subprocess.run(
         ["python", "-m", "pytest", f"{path}::{node}", "-p", "no:randomly",
          "-p", "no:xdist", "-o", "addopts=", "-q"],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
-    assert result.returncode != 0, (
-        f"{path}::{node} now PASSES — N-20-1 repaired? then remove this "
-        f"evidence test and require the guard green in .1R.19R.1"
-    )
-    assert "hpac_foundation" in (result.stdout + result.stderr)
+    assert result.returncode == 0, result.stdout[-3000:] + result.stderr[-2000:]
+    src = (REPO_ROOT / path).read_text()
+    seg = src[src.index("def " + node):]
+    seg = seg[:seg.index("\n\ndef ")]
+    for tup in (
+        '("runtime_dispatch_attempt_lifecycle.py", "pcae.core.hpac_foundation")',
+        '("runtime_invocation.py", "pcae.core.hpac_foundation")',
+        '("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation")',
+    ):
+        assert tup in seg, (path, tup)
+    authorized_literal = seg.split("AUTHORIZED_CONSUMERS")[1].split("unauthorized")[0]
+    for bad in ('"*"', "'*'", "fnmatch", ".startswith(", "pcae.core.*", "src/pcae/core/*"):
+        assert bad not in authorized_literal, (path, bad)
 
 
-def test_finding_n20_2_1r19_finalized_ab_record_claim_is_inaccurate():
-    """BLOCKING FINDING N-20-2. The ``.1R.19`` finalized phase-completion
-    report / metadata asserts '0 unexplained attributable regressions' and
-    that 'every widened scope-fence guard keeps explicit finite enumeration
-    and still rejects an unauthorized importer'. Three guards
-    (``r111r31`` / ``r111r32`` / ``r111r321``) were never widened at all and
-    now fail — so the finalized A/B record is materially inaccurate, exactly
-    as ``.1R.17``'s was when it BLOCKED ``.1R.18``. Recorded here; the
-    provenance-preserving erratum is issued by ``.1R.19R``."""
-    report = (REPO_ROOT / ".pcae/phase-completion-report.md").read_text() if (
-        REPO_ROOT / ".pcae/phase-completion-report.md"
-    ).exists() else ""
-    # The .1R.19 report has been superseded by the .1R.20 staging header by
-    # the time this runs in finalization; the durable evidence is the commit.
-    show = subprocess.run(
-        ["git", "log", "--all", "--format=%H %s", "-n", "400"],
-        cwd=REPO_ROOT, capture_output=True, text=True,
-    ).stdout
-    assert "1R.19" in show  # the phase exists in history; blocker documented in the .1R.20 doc
+def test_finding_n20_2_1r19_ab_record_erratum_is_issued():
+    """FINDING N-20-2 — ERRATUM ISSUED by ``.1R.19R`` (original preserved).
+
+    HISTORICAL: the ``.1R.19`` finalized phase-completion report / metadata
+    asserted '0 unexplained attributable regressions' and that 'every widened
+    scope-fence guard keeps explicit finite enumeration and still rejects an
+    unauthorized importer'. Three guards (``r111r31`` / ``r111r32`` /
+    ``r111r321``) were never widened at all and failed — so the finalized A/B
+    record was materially inaccurate, exactly as ``.1R.17``'s was when it
+    BLOCKED ``.1R.18``.
+
+    REPAIR (``.1R.19R``): a provenance-preserving erratum is appended to the
+    ``.1R.19`` canonical doc — original text preserved verbatim, the A/B
+    figure corrected to the true '5 added (all explained by ``.1R.19``, root
+    cause N-20-1), 0 removed; 1 pre-existing flake disclosed'."""
+    doc = (
+        REPO_ROOT
+        / "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_19_DISPATCH_ATTEMPT_DURABLE_LIFECYCLE_IDEMPOTENCY_AND_3S_2_1_PREREQUISITE_REPAIRS.md"
+    ).read_text()
+    assert "ERRATUM" in doc.upper()
+    assert ".1R.19R" in doc
+    assert "The 5 added nodes:" in doc
+    assert "REMOVED                                                            : 0" in doc
+    # the original section is preserved, not rewritten
+    assert "NEW attributable failing nodes                         : 2" in doc
 
 
-def test_finding_n20_3_1r19_own_meta_guard_is_self_contradicting():
-    """BLOCKING FINDING N-20-3. ``.1R.19`` shipped a meta-guard —
+def test_finding_n20_3_1r19_own_meta_guard_recovers_at_head():
+    """FINDING N-20-3 — REPAIRED TRANSITIVELY by ``.1R.19R``.
+
+    HISTORICAL: ``.1R.19`` shipped a meta-guard —
     ``tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py::
     test_widened_guard_module_passes_at_head[test_hpac_foundation_trust_root_repair_3w1r2b1r111r32]``
-    — that runs the ``r111r32`` guard and asserts it passes at HEAD. It does
-    not. ``.1R.19`` therefore committed a test that contradicts its own
-    disclosed guard set."""
-    result = subprocess.run(
-        ["python", "-m", "pytest",
-         "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py"
-         "::test_widened_guard_module_passes_at_head",
-         "-p", "no:randomly", "-p", "no:xdist", "-o", "addopts=", "-q"],
-        cwd=REPO_ROOT, capture_output=True, text=True,
-    )
-    assert result.returncode != 0
+    — that runs the ``r111r32`` guard and asserts it passes at HEAD; it did
+    not, so ``.1R.19`` committed a test that contradicted its own disclosed
+    guard set. ``.1R.15.3``'s ``test_v15_2_guards_pass_at_head`` failed for
+    the same single root cause.
+
+    REPAIR (``.1R.19R``): both meta-guards recover because the three
+    underlying ``r111r3x`` guards are corrected — no meta-guard was weakened,
+    skipped, xfailed, or broadly allowlisted."""
+    for node in (
+        "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py"
+        "::test_widened_guard_module_passes_at_head[test_hpac_foundation_trust_root_repair_3w1r2b1r111r32]",
+        "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py"
+        "::test_v15_2_guards_pass_at_head",
+    ):
+        result = subprocess.run(
+            ["python", "-m", "pytest", node,
+             "-p", "no:randomly", "-p", "no:xdist", "-o", "addopts=", "-q"],
+            cwd=REPO_ROOT, capture_output=True, text=True,
+        )
+        assert result.returncode == 0, node + "\n" + result.stdout[-3000:]
 
 
 # ═══════════════════════════════════════════════════════════════════════

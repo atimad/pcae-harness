@@ -798,6 +798,19 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
         # .1R.17 (Slice A): Gate-10 pre-effect eligibility re-reads the durable
         # consumption.json (RDGO-001 v3.1 §11 item 3); non-effecting, writes nothing.
         ("runtime_dispatch_gate10_eligibility.py", "pcae.core.runtime_invocation_authority_consumption"),
+        # .1R.19 (Slice B) reconciled by .1R.19R (.1R.20 IV finding N-20-1):
+        # the dispatch-attempt durable lifecycle mirror and the 3S.2.1 MUST-FIX
+        # #2 path-containment repair reuse the canonical Layer-1 path-safety /
+        # digest *utilities* only -- `require_safe_relative_id_component`,
+        # `canonical_digest`, `reject_symlink`, `read_canonical_json_document`,
+        # `HPACMalformedError`. Neither module writes an HPAC principal,
+        # presentation, proof, lifecycle event, or consumption record; the
+        # non-authoritative `RuntimeInvocationRecord` grants no effect authority
+        # (`GRANTS_NO_EFFECT_AUTHORITY`). `.1R.16` §36.1 / §38 authorizes the
+        # Slice-B production-file set. Any *other* importer of the foundation
+        # still trips this guard (`observed - AUTHORIZED == set()`).
+        ("runtime_dispatch_attempt_lifecycle.py", "pcae.core.hpac_foundation"),
+        ("runtime_invocation.py", "pcae.core.hpac_foundation"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

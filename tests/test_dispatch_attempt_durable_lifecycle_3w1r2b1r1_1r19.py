@@ -72,6 +72,7 @@ from pcae.core.runtime_dispatch_attempt_lifecycle import (
     DispatchAttemptAlreadyStartedError,
     DispatchAttemptDisposition,
     DispatchAttemptIntegrityError,
+    DispatchAttemptLifecycleError,
     DispatchAttemptTransitionError,
     RuntimeInvocationRecord,
     RuntimeInvocationRecordBinding,
@@ -219,7 +220,7 @@ def test_concurrent_contenders_exactly_one_winner(tmp_path):
         try:
             s.begin_effect_attempt(rid, observed_at=f"2026-08-30T00:00:{10 + i:02d}Z")
             return "won"
-        except (DispatchAttemptAlreadyStartedError, DispatchAttemptTransitionError):
+        except DispatchAttemptAlreadyStartedError:
             return "lost"
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
@@ -228,6 +229,60 @@ def test_concurrent_contenders_exactly_one_winner(tmp_path):
     assert results.count("lost") == 7
     started = [t for t in store.list_transitions(rid) if t["state"] == EFFECT_ATTEMPT_STARTED]
     assert len(started) == 1
+
+
+@pytest.mark.parametrize("contenders", [2, 4, 8, 16, 32])
+def test_n20_4_every_concurrent_loser_maps_to_already_started_error(tmp_path, contenders):
+    """N-20-4 (.1R.19R): every losing contender racing the same already-started
+    attempt raises ``DispatchAttemptAlreadyStartedError`` — never a raw
+    ``DispatchAttemptTransitionError`` leaked from ``_append_transition`` in the
+    window between the durability pre-check and the create-only link. Exactly
+    one winner; exactly one durable ``EFFECT_ATTEMPT_STARTED``; fail-closed and
+    at-most-once unchanged."""
+    store = _store(tmp_path)
+    rid = _open_prepared(store)
+    seen: list[str] = []
+
+    def contend(i):
+        s = RuntimeInvocationRecordStore(tmp_path)
+        try:
+            s.begin_effect_attempt(rid, observed_at=f"2026-08-30T01:{i // 60:02d}:{i % 60:02d}Z")
+            return None
+        except DispatchAttemptLifecycleError as exc:
+            return type(exc).__name__
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=contenders) as ex:
+        results = list(ex.map(contend, range(contenders)))
+    winners = [r for r in results if r is None]
+    losers = [r for r in results if r is not None]
+    assert len(winners) == 1
+    assert len(losers) == contenders - 1
+    assert set(losers) == {"DispatchAttemptAlreadyStartedError"}, sorted(set(losers))
+    started = [t for t in store.list_transitions(rid) if t["state"] == EFFECT_ATTEMPT_STARTED]
+    assert len(started) == 1
+
+
+def test_n20_4_restart_duplicate_start_raises_same_error(tmp_path):
+    """After the winning start is durable, a fresh store observes the marker
+    and refuses with the same deterministic duplicate-start error."""
+    store = _store(tmp_path)
+    rid = _open_prepared(store)
+    store.begin_effect_attempt(rid, observed_at="t2")
+    fresh = RuntimeInvocationRecordStore(tmp_path)
+    with pytest.raises(DispatchAttemptAlreadyStartedError):
+        fresh.begin_effect_attempt(rid, observed_at="t3")
+
+
+def test_n20_4_real_invalid_transition_is_not_mislabeled_duplicate_start(tmp_path):
+    """Only the EFFECT_ATTEMPT_STARTED -> EFFECT_ATTEMPT_STARTED edge normalises
+    to the duplicate-start error. A genuinely invalid transition from a
+    terminal state still raises ``DispatchAttemptTransitionError``."""
+    store = _store(tmp_path)
+    rid = _open_prepared(store)
+    store.begin_effect_attempt(rid, observed_at="t2")
+    store.record_dispatch_uncertain(rid, observed_at="t3")
+    with pytest.raises(DispatchAttemptTransitionError):
+        store._append_transition(rid, EFFECT_ATTEMPT_STARTED, "t4", None)
 
 
 def test_effect_attempt_started_survives_restart(tmp_path):

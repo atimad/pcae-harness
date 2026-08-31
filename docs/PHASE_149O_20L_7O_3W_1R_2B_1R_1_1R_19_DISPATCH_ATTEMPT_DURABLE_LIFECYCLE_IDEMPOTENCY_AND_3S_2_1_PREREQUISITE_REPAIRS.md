@@ -272,3 +272,106 @@ Recorded after the governed `pcae` commit / push / `pcae phase complete`:
 
 ---
 *Canonical artifact — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19.*
+
+---
+
+## ERRATUM — issued by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19R (Slice-B Scope-Fence and Verification-Evidence Reconciliation)
+
+**Append-only. Every section above this line, including §15 (Fixed-SHA A/B) and
+the No-Go Confirmations, is preserved verbatim as the original historical
+record. This erratum corrects the verification-evidence claim; it does not
+rewrite it.** The original immutable `.1R.19` phase-report / completion-metadata
+artifacts (commits `88e716b1` / `738e8209`) are preserved unchanged.
+
+### What was wrong
+
+* **§15 (Fixed-SHA A/B)** recorded *"NEW attributable failing nodes : 2"* and
+  *"UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS : 0"*, and **§15.1** stated
+  *"every widened scope-fence guard keeps explicit finite enumeration and still
+  rejects an unauthorized importer."* The **No-Go Confirmations** repeated
+  *"every widened scope-fence guard … still rejects an unauthorized importer."*
+* `.1R.19` added `from pcae.core.hpac_foundation import (…)` to **two** production
+  modules — `src/pcae/core/runtime_dispatch_attempt_lifecycle.py` (new) and
+  `src/pcae/core/runtime_invocation.py` (3S.2.1 MUST-FIX #2) — a legitimate
+  reuse of the canonical Layer-1 path-safety / digest **utilities**
+  (`require_safe_relative_id_component`, `canonical_digest`, `reject_symlink`,
+  `read_canonical_json_document`, `HPACMalformedError`). Neither module writes
+  an HPAC principal, presentation, proof, lifecycle event, or consumption
+  record; the non-authoritative `RuntimeInvocationRecord` grants no effect
+  authority.
+* **But `.1R.19` never widened and never disclosed** the HPAC Layer-1/2
+  consumer-inventory guard family. `.1R.20` (Independent Verification, BLOCKED
+  result) found it.
+
+### Correct historical result
+
+Independently re-executed by `.1R.19R` in dedicated detached worktrees
+(`a2b679fe` → `738e8209`), `-p no:randomly`, no xdist, the effective `.1R.20`
+selection:
+
+```
+pre-.1R.19 baseline a2b679fe   : 30 failing nodes
+original .1R.19 head 738e8209  : 35 failing nodes
+
+ADDED, attributable to and explained by .1R.19 (root cause N-20-1) : 5
+REMOVED                                                            : 0
+```
+
+The 5 added nodes:
+
+| # | Node | Class |
+|---|---|---|
+| 1 | `test_hpac_foundation_independent_verification_3w1r2b1r111r31.py::test_new_hpac_modules_have_zero_preexisting_production_consumers` | direct HPAC consumer-inventory guard |
+| 2 | `test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py::test_hpac_repair_has_zero_preexisting_production_consumers` | direct HPAC consumer-inventory guard |
+| 3 | `test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py::test_foundation_has_no_production_consumers_or_gate_wiring` | direct HPAC consumer-inventory guard |
+| 4 | `test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py::test_widened_guard_module_passes_at_head[test_hpac_foundation_trust_root_repair_3w1r2b1r111r32]` | consequential meta-guard (runs #2) |
+| 5 | `test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py::test_v15_2_guards_pass_at_head` | consequential meta-guard (runs #1–#3) |
+
+**Additional disclosed noise (not a regression):** `.1R.20` §2 disclosed one
+non-deterministic pre-existing flake,
+`test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py::test_concurrent_conflicting_successors_have_one_canonical_winner`
+(observed pass/fail/fail on consecutive HEAD runs; also fails intermittently at
+the baseline). It did not surface in the `.1R.19R` deterministic single-process
+re-run. Disclosed, not attributable, not counted.
+
+The **original §15 count of "2"** referred only to the two working-tree /
+unpushed-state artifact nodes that `.1R.19` did resolve post-push; it did not
+capture the five undisclosed guard/meta-guard nodes above.
+
+### Production impact
+
+**None.** `.1R.20` independently RE-DERIVED the dispatch-attempt durable
+lifecycle, at-most-once semantics, crash/restart determination, idempotency
+identity, `RuntimeInvocationRecord` non-authority, both 3S.2.1 repairs, item-9,
+and N-16-2 (Slice-B scope, interpretation A) as **substantively verified /
+closed-worthy**, and confirmed the first external effect is **absent**. No
+substantive Slice-B lifecycle defect was identified.
+
+### Governance / evidence impact
+
+A **material completeness defect** in the `.1R.19` fixed-SHA A/B evidence — the
+same defect class that BLOCKED `.1R.18`.
+
+### Repair
+
+**`.1R.19R`** widened the three `AUTHORIZED_CONSUMERS` sets by **exactly** the
+two authorized Slice-B importer tuples
+`("runtime_dispatch_attempt_lifecycle.py", "pcae.core.hpac_foundation")` and
+`("runtime_invocation.py", "pcae.core.hpac_foundation")` — no wildcard; each
+guard still rejects any other importer. The two consequential meta-guards
+recover transitively (no meta-guard weakened). After the widening the repaired
+tree records **0 attributable added / 0 attributable removed** vs `a2b679fe`.
+See `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_19R_SLICE_B_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md`.
+
+### N-20-4 (separate, non-blocking production-quality repair)
+
+`.1R.20` §9 also recorded a non-blocking finding: concurrent losing contenders
+of `begin_effect_attempt` did not all map to the same error type (a fraction
+leaked `DispatchAttemptTransitionError`). `.1R.19R` normalised this — the
+`EFFECT_ATTEMPT_STARTED → EFFECT_ATTEMPT_STARTED` edge (only that edge) is
+remapped to `DispatchAttemptAlreadyStartedError`; the winner-selection
+primitive, the state machine, and every other fail-closed error path are
+unchanged. This is a production-quality repair, not a lifecycle or normative
+contract change.
+
+*Erratum — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19R.*

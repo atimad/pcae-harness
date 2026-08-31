@@ -741,6 +741,25 @@ class RuntimeInvocationRecordStore:
             return self._append_transition(
                 record_id, EFFECT_ATTEMPT_STARTED, observed_at, detail
             )
+        except DispatchAttemptTransitionError as exc:
+            # N-20-4 (.1R.19R): a concurrent contender persisted
+            # EFFECT_ATTEMPT_STARTED in the window between our
+            # ``_effect_attempt_started_is_durable`` pre-check and our own
+            # transition derivation, so ``next_dispatch_attempt_transition``
+            # now sees EFFECT_ATTEMPT_STARTED as the prior state and rejects a
+            # second start. That is semantically identical to the durability
+            # guard above — this exact attempt has already crossed
+            # EFFECT_ATTEMPT_STARTED — so normalise it to the duplicate-start
+            # error. Only the EFFECT_ATTEMPT_STARTED -> EFFECT_ATTEMPT_STARTED
+            # edge is remapped; every other invalid transition keeps its own
+            # fail-closed semantics.
+            if str(exc) == (
+                f"invalid_transition:{EFFECT_ATTEMPT_STARTED}->{EFFECT_ATTEMPT_STARTED}"
+            ):
+                raise DispatchAttemptAlreadyStartedError(
+                    f"effect_attempt_already_started:{record_id}"
+                ) from exc
+            raise
         except DispatchAttemptIntegrityError as exc:
             # A concurrent contender created the transition file between the
             # durability check and our create — the guard still holds.
