@@ -1,150 +1,70 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 Complete — N-16-3 Narrow-Eligibility Policy and Contract Implementation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.23 Complete — Independent Verification of the N-16-3 Narrow-Eligibility Policy (BLOCKED independent-verification result — Option B)
 
-**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.22
-**Type:** implementation (policy + MAJOR contract evolution)
-**Status:** IMPLEMENTED — INDEPENDENT VERIFICATION PENDING (the recommended IV phase)
-**Phase-entry SHA:** `8603fe6a` (`.1R.21` finalize head; `origin/main..HEAD = 0` at entry)
-**First external effect:** ABSENT — the `src/pcae` diff since `8603fe6a` is exactly the two authorized files and adds no `adapter.dispatch(` line; no `runtime_dispatch_gate10.py`; no real adapter; no subprocess / socket / provider / credential path
-**Execution:** not enabled — runtime `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; `RuntimeRegistry` empty; `pcae runtime inspect` byte-identical at entry and finalization; POL-005 hard-DENYs every ordinary non-simulation request (re-verified live)
-**Production source changed:** `src/pcae/core/permission_broker_foundation.py` (POL-005 §12a one-profile carve-out + POL-013 + the two derived fields + the predicate conjunction + the classification-consistency / complete-without-marker-forgery checks + `POLICY_IDS_CANONICAL` → POL-001..013) and `src/pcae/core/runtime_dispatch_permission.py` (N-16-6 supply-chain admission **interface** + fail-closed **non-admitting** production stub; the trusted-builder classification derivation; the test-boundary `_supply_chain_admission_resolver` kwarg) — exactly the `.1R.21` §39 anticipated set. `policy.py` untouched (it enumerates no POL IDs).
-**Normative contracts changed:** `PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md` — **PBRD-001 v2.1 → v3.0 (MAJOR)** with new §12a and §16 inline explicit migration semantics; new `PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md` — **PBNDE-001 v1.0**; `PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md` — **PBPA-001 v1.0 → v1.1 (additive)**; `V0_2_EXECUTION_READINESS_NO_GO_GATES.md` — NG-025 canonical-statement annotation. The mechanical `PBRD-001 v2.1` → `v3.0` "Related contracts" edits in RDGO-001 / RIHAC-001 and their siblings are **deferred to a dedicated contract-normalization pass** (the `.1R.15.4` precedent; PBRD-001 v3.0 §16 point 5 records this normatively) — attempting them in `.1R.22` cascaded 51 failures across the RIHAC/HPAC contract-freeze suites and is out of scope.
+**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.23
+**Type:** independent verification of `.1R.22` (N-16-3 Narrow-Eligibility Policy and Contract Implementation)
+**Status:** BLOCKED INDEPENDENT-VERIFICATION RESULT — finalized (Option B)
+**Verification-entry SHA:** `15aeb269` (`.1R.22` finalize head; `HEAD == origin/main`; `origin/main..HEAD = 0` at entry)
+**Immutable pre-`.1R.22` baseline (independently reconstructed):** `8603fe6a` (`.1R.21` push-reconcile head; parent of the `.1R.22` implementation commit `1dadeb21`; `git rev-list --count 8603fe6a..HEAD = 9`; `git diff --name-only 8603fe6a HEAD -- src/pcae` = exactly the two authorized files)
+**First external effect:** ABSENT — no `adapter.dispatch(` / `subprocess` / `socket` / `Popen` / `os.system` / `urllib` / `requests` / `httpx` added in the `8603fe6a..HEAD` `src/pcae` diff; no `runtime_dispatch_gate10.py`; no real adapter; two independent production blockers keep the profile unsatisfiable
+**Execution:** not enabled — runtime `not_implemented / Observed / observe / unavailable`; POL-005 DENY body byte-unchanged; 0 plugins / 0 capabilities; `pcae runtime inspect` posture byte-identical at entry and finalization
+**Production source changed by this phase:** none
+**Normative contracts changed by this phase:** none
+**Scope-fence / guard files changed by this phase:** none — the 16 undisclosed `.1R.22`-attributable point-in-time guard-freeze test failures (N-23-3) are NOT repaired inside `.1R.23`; referred to `149O.20L.7O.3W.1R.2B.1R.1.1R.22R`
 
-## Versioning adjudication
-
-`.1R.21` §31 / §34 planned the PBRD change as **v2.2 (MINOR)**. On `.1R.22`
-primary-source review this was found to conflict with **PBRD-001 v2.1 §16**,
-which lists *"weakening POL-005 eligibility"* among the changes that *"require
-a new MAJOR plus explicit migration and independent verification."* §12a is
-exactly that clause. The phase was **BLOCKED at primary-source review** (no
-repository mutation; no task opened at that point) and the primary
-human-authorized operator adjudicated: **carry N-16-3 as PBRD-001 v3.0 —
-MAJOR**, with inline explicit migration semantics (§16) and independent
-verification in `.1R.23`; do not implement the v2.2 MINOR path. Repository
-convention (RDGO-001 v2 → v3.0; PBRD-001 v1.1 → v2.0) carries a contract MAJOR
-**inline** in its implementing/freeze phase with the migration statement in
-the contract's own versioning section, so `.1R.22` authored the migration
-artifact inline and did **not** re-STOP. `.1R.21` §38's NG-025 annotation
-target (`RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md`) is a planning-document
-location error — NG-025 is owned by `docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md`,
-where the annotation was applied; no `RE-NOGO-*` entry was created.
-
-## Dispositions
+## Substantive dispositions (independently RE-DERIVED, not trusted from `.1R.22`)
 
 | Item | Result |
 |---|---|
-| N-16-3 NARROW-ELIGIBILITY POLICY AND CONTRACT | IMPLEMENTED — IV PENDING (`.1R.23`) |
-| `RUNTIME_DISPATCH_LOCAL_CLI_V1` (trusted-derived profile) | IMPLEMENTED — PRODUCTIONALLY UNSATISFIABLE — IV PENDING |
-| `POL-013` (Narrow Local-CLI Dispatch Eligibility) | IMPLEMENTED — NEVER EMITS ALLOW OR HUMAN_REVIEW — IV PENDING |
-| POL-005 canonical-statement v2 amendment (ID retained) | IMPLEMENTED — IV PENDING |
-| PBRD-001 v2.1 → v3.0 (MAJOR) + inline explicit migration | IMPLEMENTED — IV MANDATED (`.1R.23`) |
-| PBNDE-001 v1.0 (new policy contract) | FROZEN — IV PENDING |
-| PBPA-001 v1.0 → v1.1 (POL-013 applicability row) | FROZEN — IV PENDING |
-| NG-025 canonical-statement annotation | APPLIED (correct owner) |
-| N-16-6 supply-chain admission interface + fail-closed stub | IMPLEMENTED (non-admitting; profile unsatisfiable in production) |
-| FIRST EXTERNAL EFFECT | ABSENT |
-| N-16-4 / N-16-5 / N-16-6 (store) / N-16-7 | OPEN — not begun |
-| Slice C / Slice D | NO PHASE ID |
-| DELEGATED `.3` FINALIZATION / COMMIT / PUSH | UNAUTHORIZED (preserved) |
+| PBRD-001 v3.0 MAJOR trigger (§16 "weakening POL-005 eligibility", present verbatim at `8603fe6a`) | VERIFIED |
+| PBRD-001 v3.0 explicit migration completeness / no silent auto-upgrade / no compatibility default | VERIFIED |
+| Legacy v2.x request → no marker → POL-005 DENY | VERIFIED |
+| Trusted-derived `RUNTIME_DISPATCH_LOCAL_CLI_V1` classification — 13 predicates (AST-counted), builder-owned, sole `profile_classification` writer | VERIFIED |
+| Forged / `dataclasses.replace`-transplanted / incomplete-marker / complete-without-marker / seal-stripped → structural DENY (live recomputation) | VERIFIED |
+| N-16-6 admission interface + fail-closed non-admitting production stub | VERIFIED |
+| Private `_supply_chain_admission_resolver` override — no production call site; sole production builder call omits it | VERIFIED |
+| **`RUNTIME_DISPATCH_LOCAL_CLI_V1` PRODUCTIONALLY UNSATISFIABLE — two independent blockers (B1 N-16-6, B2 N-16-5)** | VERIFIED |
+| No production PB `ALLOW` for a real `runtime_dispatch` | VERIFIED |
+| POL-005 amended semantics — exact one-profile carve-out; DENY body byte-identical; universal applicability retained | VERIFIED |
+| POL-013 statically never `ALLOW` / never `HUMAN_REVIEW` (AST); dynamic vocabulary DENY-or-neutral; adapter-only; registered last; canonical POL-001..013 | VERIFIED |
+| `_compose` / `_structural_request_failure` / `_decision` whole-function byte-unchanged; `DENY > HUMAN_REVIEW > ALLOW` intact | VERIFIED |
+| Human authority alone never exempts POL-005 | VERIFIED |
+| Broader effect classes (provider/network/credential/shell/argv/wrong-target/missing-admission) all blocked | VERIFIED |
+| NON_REAL / real-human-authority wall (N-16-5) — upstream, unchanged | VERIFIED |
+| Gate 5/7/8/9/10 modules byte-unchanged; N-16-4 independence; runtime posture unchanged; NG-025 in the correct file; PBPA-001 v1.1 additive-only | VERIFIED |
+| No test weakening in the `.1R.22` diff (0 removed defs, 0 xfail, 1 scoped skip, no rename) | VERIFIED |
+| **Fixed-SHA A/B regression attribution / `.1R.22` verification-evidence completeness** | **BLOCKED — N-23-3** |
 
-## Frozen Option C + D architecture, implemented unchanged
+## Adjudications
 
-A trusted-derived `RUNTIME_DISPATCH_LOCAL_CLI_V1` profile lies **outside**
-POL-005's categorical hard-block match domain — POL-005's `evaluate` gains one
-`_not_triggered` carve-out (`_is_trusted_narrow_local_cli_dispatch_v1`, which
-reads **only** the derived marker + the construction seal); the body of the
-unconditional `DENY` (NG-025 / INV-001 / COMP-002) is byte-unchanged. A
-dedicated conjunctive **`POL-013`** (`NarrowLocalCliDispatchEligibilityRule`,
-`execution_class=adapter`-scoped, trigger narrowed inside `evaluate()` to
-`action_type == runtime_dispatch` + `simulation_only is False`) checks the
-full P1–P21 predicate conjunction: all predicates hold → *not-triggered*; any
-missing / malformed / untrusted / broader predicate → `DENY`
-(`narrow_local_cli_dispatch_profile_incomplete`) which **reinforces** POL-005
-(both DENY). **POL-013 has exactly the `_not_triggered` and `DECISION_DENY`
-return shapes — statically verified it never returns `ALLOW` or
-`HUMAN_REVIEW`.** `_compose`'s `DENY > HUMAN_REVIEW > ALLOW` precedence is
-byte-unchanged; no specificity tier / weight / override. Human approval is one
-predicate among the fourteen checked, necessary and never sufficient, and it
-does not touch POL-005's match logic (`if human_approved: ignore POL-005` and
-`trusted principal → ALLOW` remain rejected and not expressible in the code).
+- **N-16-3 — PARTIALLY CLOSED** (model verified; not fully CLOSED solely due to N-23-3).
+- **PBRD-001 v3.0 MAJOR MIGRATION — VERIFIED.**
+- **POL-005 NARROW MATCH-DOMAIN EVOLUTION — VERIFIED.**
+- **POL-013 — VERIFIED; NEVER EMITS ALLOW OR HUMAN_REVIEW.**
+- **`RUNTIME_DISPATCH_LOCAL_CLI_V1` PRODUCTIONALLY UNSATISFIABLE — VERIFIED** (B1 N-16-6 + B2 N-16-5).
+- **`.3` delegated finalization / commit / push — remains UNAUTHORIZED** (preserved verbatim; no precedent).
+- **N-16-4 / N-16-5 / N-16-6 / N-16-7 — OPEN.** Slice C / Slice D — no phase ID. First external effect — ABSENT.
 
-## Trusted-derived classification and digest binding
+## Blocker — N-23-3
 
-`profile_classification` is derived **last** by
-`build_runtime_dispatch_permission_broker_request` from the fully bound
-provisional request; it is never caller input.
-`_valid_runtime_dispatch_request` recomputes it and fails closed on any
-inconsistency — a marker set without a complete profile **and** a complete
-profile that lacks the trusted marker (a post-construction admission-field
-forgery) are both structural `DENY` before POL-005 / POL-013 evaluate. The
-N-16-6 admission sub-fields are inside `canonical_runtime_dispatch_projection`
-→ the `idempotency_key` canonical-content digest (mutation → `build_…`
-key-match failure). `_expected_subject_scope_binding_digest` is deliberately
-**not** extended (admission is a PB-policy predicate, not part of the
-human-authority scope binding) — no Gate-5 projection test changes.
+The fixed-SHA A/B (`git worktree` at `8603fe6a`, deterministic, no xdist; B `15aeb269` ≡ C `origin/main`) finds **16 functional guard-test nodes that PASS at `8603fe6a` and FAIL at `15aeb269`**, attributable to the two authorized `.1R.22` changes (add POL-013; PBPA-001 v1.0→v1.1 + PBRD v2.1→v3.0 + POL-005 §12a), across ≥9 test files — `test_permission_broker_policy_rule_framework.py` (×5, incl. `test_registry_has_twelve_policies`); `test_permission_broker_observation_verification.py::test_broker_default_policy_rule_count_unchanged`; `test_phase_149d_rwmpc_contract_independent_verification.py::TestContractsUnamended::test_pbpc_and_pbpa_contract_files_unchanged_since_before_chapter_149`; `test_phase_149o_16_hatp_mandatory_consumption_contract_independent_verification.py::TestMC14EffectTruthfulnessAgainstCurrentSource::test_pol_005_denies_unconditionally_when_simulation_only_false`; `test_phase_149o_18c_ag3_mandatory_consumption_integration.py` / `test_phase_149o_18d_ag5_...` / `test_phase_149o_18e_cli_legacy_authority_migration_integration.py` (each `::TestContractByteIdentity::test_contract_byte_unchanged[PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md]`); `test_phase_149o_19_3r_hmic_frozen_file_set_contract_repair.py::test_upstream_contract_byte_unchanged_by_this_repair[PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md]`; `test_phase_149o_20l_7o_3v_1r_1_contract_verification.py::TestBoundariesUnchanged::test_pol_005_unchanged_claim_present`; `test_phase_149o_20l_7o_3v_1r_contract_repair.py::TestNoNewContradictions::test_no_go_statements_preserved`; `test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_pbrd_remains_projection_only_and_pol005_remains_hard_deny` + `::test_rpac_companion_contract_is_byte_identical_and_riasc_pbrd_only_normalized`.
 
-## Production profile is unsatisfiable
+**None** is named in the `.1R.22` canonical artifact §11.1 guard-impact inventory or disclosed in §12 — directly contradicting its "0 unexplained attributable functional regressions" (§12 / PROJECT_STATUS) and "each was widened … and is listed here" (§11.1) claims. All 16 are stale point-in-time **text/count freeze** guards (registry cardinality 12→13; PBPA-001 byte-freeze → v1.1; PBRD/POL-005 text-freeze → v3.0 wording), **not behavioural** Permission-Broker regressions — but real failing nodes, re-run individually at both SHAs (not order-dependent). This is the identical failure mode that BLOCKED `.1R.18` (17 undisclosed `.1R.17` guard regressions → `.1R.17R`) and `.1R.20` (3 undisclosed `.1R.19` guard regressions → `.1R.19R`). Repair requires guard **test**-file edits across ≥9 phases plus a provenance-preserving `.1R.22` §11/§12 erratum — a dedicated repair phase, not this IV.
 
-`_PRODUCTION_SUPPLY_CHAIN_ADMISSION_RESOLVER` (`_NonAdmittingSupplyChainAdmissionResolver`)
-admits **nothing** for any adapter — `admitted=False`,
-`admission_class="unadmitted"`. `_resolve_supply_chain_admission` fail-closes
-a broken / exception-raising / malformed resolver to `unadmitted`. Therefore
-`P_supply_chain_admission` always fails, `profile_classification == ""` on
-**every** production path, POL-005 keeps its hard-DENY match, and POL-013
-DENYs. **No production PB `ALLOW` for the first-effect local-CLI profile is
-reachable; Gate 6 itself remains non-positive.** N-16-5 independently keeps it
-unsatisfiable (`validate_approval` NON_REAL hard-stop; there is no test or
-production path to a trusted `ValidatedAuthorityProjection`).
+## Non-blocking findings
 
-## Test evidence
+- **N-23-1** — a structurally-complete (test-built, sealed) profile with nothing else triggering composes to the `_compose` INV-008 non-executable default `ALLOW` (`policy_would_allow_if_execution_existed`, `implementation_status = EXECUTION_UNAVAILABLE`). Contract-sanctioned (PBRD §12a.4/.5), unreachable in production (B1 + B2), every downstream gate still blocks. `.1R.22`'s own `test_case_12` asserts this.
+- **N-23-2** — PBNDE-001 §3 / PBRD §12a.1 say the marker is "committed into the request canonical digest"; it is not literally in the digest. PBRD §5's "derived commitments" paragraph describes the real mechanism (live structural recomputation, at least as strong). Wording only.
 
-- New defensive suite `tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py`
-  — **43 passed** (the `.1R.21` §37 25 cases + cases 26–33 + the phase-prompt
-  §50 static-never-ALLOW AST scan + §53/§54 seal / reconstruction / provenance
-  challenges + the §63 contract-production equivalence map; every case asserts
-  no external effect — runtime posture unchanged, the `.1R.22` `src/pcae`
-  diff is exactly the two authorized files and adds no `adapter.dispatch(`
-  line).
-- **Scope-fence + meta-guard reconciliation:** ~20 assertions across `.1R.8` /
-  `.1R.11` / `.1R.15.2` / `.1R.15.5` / `.1R.17` / `.1R.17R` / `.1R.17R.1` /
-  `.1R.18` / `.1R.19` / `.1R.19R` / `.1R.19R.1` / `.1R.20` plus the PBPC /
-  PBPA / composition-hardening count assertions — subset checks over the
-  exact authorized filename set, no wildcard; Gate 5 / 7 / 8 / 9 + Slice-A
-  freezes and every adversarial companion preserved; the two `.1R.19R` /
-  `.1R.19R.1` `test_meta_guards_byte_unchanged_since_r20_head` meta-guards
-  keep `.1R.15.3` byte-frozen and assert `.1R.18` is not weakened (`"*"`
-  count, `fnmatch` count, `def test_` count unchanged / non-decreasing vs
-  `e05f0ea3`). **No reconciliation renamed a test function or removed an
-  assertion decorator** (`.1R.19R.1::test_no_test_weakening_in_the_r19r_diff`
-  passes unmodified).
-- **Fixed-SHA A/B** vs the immutable pre-`.1R.22` baseline `8603fe6a`
-  (deterministic, `-p no:randomly`, no xdist): *(numbers finalized in the
-  completion metadata)*. **CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING
-  NODES = 0; UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.** Four
-  pre-existing failures reproduce identically with `.1R.22`'s changes stashed:
-  `.1R.13::test_no_downstream_production_consumer_of_gate6_symbols` (Slice-A
-  `.1R.17` added the `runtime_dispatch_gate10_eligibility.py` consumer),
-  `3w1::test_only_content_bound_projection_registry_is_added_to_authority_module`
-  (`_GATE6_DECISIONS` is a `.1R.12` module-level set),
-  `.148f::test_permission_broker_consumer_scope_inventory` (a `.148f`
-  consumer-inventory guard already listing later-phase consumers),
-  `.148g2::test_actual_git_push_dispatch_site_in_core_agent_remains_unwired`
-  (unrelated to PB policy).
+## Evidence
 
-## New findings
+Fresh IV suite `tests/test_narrow_eligibility_policy_iv_3w1r2b1r1_1r23.py` — **55 tests, 55 passed, 0 failed** (deterministic, no xdist). Targeted affected-suite run at HEAD: 566 passed / 3 skipped / 1 pre-existing failure (reproduces byte-identically at `8603fe6a`). Gate/Slice suite run at HEAD: 696 passed. `.1R.23`-attributable functional regressions = 0. 4 known pre-existing failures reproduce identically at both SHAs (0 delta) and match the `.1R.22` §12 disclosure.
 
-- **N-16-3-1** — `.1R.21`'s versioning adjudication (PBRD change = v2.2 MINOR)
-  conflicts with PBRD-001 v2.1 §16 ("weakening POL-005 eligibility … requires
-  a new MAJOR"). Corrected to PBRD-001 v3.0 (MAJOR) with inline explicit
-  migration + `.1R.23` IV (human-authorized).
-- **N-16-3-2** — `.1R.21` §38 lists the NG-025 canonical-statement annotation
-  against `RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md`, which contains no NG-025.
-  Corrected to `docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md`.
+## Governance
 
-## Recommended next phase
+`pcae health` healthy · `pcae check` passed · `pcae status coherence` coherent · `pcae doctor task-memory` warning-only historical `tasks/DONE.md` omissions · `pcae runtime inspect` `not_implemented / Observed / observe / unavailable` byte-identical. Governed `pcae` lifecycle only; the historical delegated `.3` finalization / commit / push incident remains **UNAUTHORIZED — preserved**. Only the primary human-authorized operator holds `.1R.23` lifecycle authority. This phase is **not self-closed**.
 
-`149O.20L.7O.3W.1R.2B.1R.1.1R.23` — Independent Verification of the N-16-3
-Narrow-Eligibility Policy. Requires its own explicit human authorization. Not
-begun. Do not proceed to N-16-4..7; do not implement Slice C; do not call the
-first external effect; do not enable execution.
+## Required human decision / recommended next
 
-Canonical artifact: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_22_N_16_3_NARROW_ELIGIBILITY_POLICY_AND_CONTRACT_IMPLEMENTATION.md`.
+Authorize **`149O.20L.7O.3W.1R.2B.1R.1.1R.22R` — N-16-3 Scope-Fence / Verification-Evidence Reconciliation and Repair** (widen the 16 stale guards to the authorized change set, no wildcard, each still rejecting an unauthorized change; provenance-preserving `.1R.22` §11/§12 erratum; no production or normative-contract change), then **`.1R.22R.1`** — its Independent Verification. **Do not skip to N-16-4.** N-16-4 / N-16-5 / N-16-6 / N-16-7 — OPEN. Do not implement Slice C, the first external effect, or execution enablement.
+
+Canonical artifact: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_23_INDEPENDENT_VERIFICATION_OF_THE_N_16_3_NARROW_ELIGIBILITY_POLICY.md`.
