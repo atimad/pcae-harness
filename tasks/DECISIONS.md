@@ -3543,3 +3543,11 @@
   SUBSTANTIVELY VERIFIED (not reopened); N-16-3 lifecycle acceptance REPAIR
   IMPLEMENTED — IV pending `.1R.22R.1` (not CLOSED). N-16-4..7 OPEN. `.3`
   incident remains UNAUTHORIZED.
+- **Meta-guard non-weakening check split.** Three of the 22 reconciled
+  guards live in IV / normalization suites that also appear in `.1R.22R`'s
+  meta/IV inventory. The reconciliation suite therefore splits the check:
+  the genuinely untouched meta/IV suites are byte-frozen since phase entry;
+  the three reconciled IV suites
+  (`…3w1r2b1r111r1.py`, `…3w1r2b1r1_1r15_4.py`, `…freeze_repair_independent_verification_3w1r2b1r11.py`)
+  are separately bounded to their stale PBRD-v2.1 / `.1R.15.4` version-pin
+  nodes with no test function added, removed, or renamed.

@@ -405,7 +405,9 @@ def test_r22_doc_original_sections_1_to_20_preserved_verbatim():
 
 # ═══════════ 17, 32. meta-guard inventory / recovery ═══════════════════
 
-_META_AND_IV_SUITES = (
+# Suites that freeze / re-run guard families and are NOT part of this
+# reconciliation — each must be byte-unchanged by .1R.22R.
+_UNTOUCHED_META_AND_IV_SUITES = (
     "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py",
     "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py",
     "tests/test_dispatch_attempt_durable_lifecycle_reconciliation_3w1r2b1r1_1r19r.py",
@@ -413,15 +415,39 @@ _META_AND_IV_SUITES = (
     "tests/test_permission_broker_policy_composition_hardening.py",
     "tests/test_permission_broker_verification_compatibility.py",
     "tests/test_phase_149o_19_3r_1_hmic_frozen_identity_repair_independent_reverification.py",
+)
+
+# IV / normalization suites that DID carry one stale PBRD-v2.1 / .1R.15.4
+# version-pin guard and are reconciled by .1R.22R (nodes 19-22). Their diff
+# is non-empty but is bounded to the authorized change (checked by
+# test_no_test_weakening_in_the_r22r_diff + the reconciliation table).
+_RECONCILED_IV_SUITES = (
     "tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_independent_verification_3w1r2b1r111r1.py",
+    "tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py",
+    "tests/test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py",
 )
 
 
-def test_no_meta_or_iv_guard_was_weakened_by_this_reconciliation():
-    # These suites either freeze or re-run the guards .1R.22R edits. None is
-    # touched by this phase; the diff since phase entry is empty for each.
-    diff = _git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", *_META_AND_IV_SUITES)
+def test_untouched_meta_and_iv_guards_are_byte_unchanged_by_this_reconciliation():
+    diff = _git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", *_UNTOUCHED_META_AND_IV_SUITES)
     assert diff.strip() == ""
+
+
+def test_reconciled_iv_suites_changed_only_their_stale_version_pins():
+    # Each reconciled IV suite is in the 22-node table exactly for its
+    # PBRD-v2.1 / .1R.15.4-normalization version-pin node(s); the diff
+    # touches only assertion values + comments (no def removed/renamed —
+    # test_no_test_weakening_in_the_r22r_diff), and the file is still named
+    # by at least one reconciliation-table node.
+    for suite in _RECONCILED_IV_SUITES:
+        assert any(suite in node for node in RECONCILIATION_TABLE), suite
+        old = _git("show", f"{R22R_ENTRY}:{suite}")
+        new = (REPO / suite).read_text()
+        old_defs = {l for l in old.splitlines() if l.strip().startswith("def test_")}
+        new_defs = {l for l in new.splitlines() if l.strip().startswith("def test_")}
+        assert old_defs == new_defs, suite            # no test added/removed/renamed
+        # PBRD is now pinned to v3.0 in each (the authorized change)
+        assert "v3.0" in new or "3.0" in new, suite
 
 
 # ═══════════ 21-22. N-23-1 / N-23-2 disposition ════════════════════════
