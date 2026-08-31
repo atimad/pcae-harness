@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260830-2303-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-19-slice-b-independent-verification-1r-20-recommended-next
+20260831-0213-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-20-independent-verification-of-the-dispatch-attempt-durable-lifecycle
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.19); Slice B independent verification (.1R.20) recommended next
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.20: Independent Verification of the Dispatch-Attempt Durable Lifecycle
 
 ## Status
 
@@ -18,16 +18,17 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.19); Slice B independent verification (.1R.20) recommended next
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.20: Independent Verification of the Dispatch-Attempt Durable Lifecycle
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- tests/test_dispatch_attempt_durable_lifecycle_iv_3w1r2b1r1_1r20.py
+- docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_20_INDEPENDENT_VERIFICATION_OF_THE_DISPATCH_ATTEMPT_DURABLE_LIFECYCLE.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/**
-- tests/**
 
 ## Forbidden Files
 
@@ -81,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-08-30T23:03:06.147013+02:00
+2026-08-31T02:13:56.718602+02:00
