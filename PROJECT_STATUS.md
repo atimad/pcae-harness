@@ -2,6 +2,118 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.21 — N-16-3 Local-CLI Narrow-Eligibility
+Policy and Contract Planning. **STATUS: N-16-3 ARCHITECTURE / CONTRACT PLAN
+COMPLETE — IMPLEMENTATION NOT BEGUN. POL-005 NARROW-ELIGIBILITY MODEL FROZEN
+FOR IMPLEMENTATION; CURRENT HARD-DENY PRODUCTION BEHAVIOUR UNCHANGED. FIRST
+EXTERNAL EFFECT STILL BLOCKED; EXECUTION NOT ENABLED.** Planning / contract
+analysis only. Phase-entry SHA `ced1b934` (`origin/main..HEAD = 0` at entry).
+
+No `src/pcae`, no normative-contract, and no POL-005 change: `git diff
+--name-only ced1b934 HEAD -- src/pcae docs/contracts
+docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md` is empty. Runtime remains
+`not_implemented / Observed / observe / unavailable`; 0 plugins / 0
+capabilities; deterministic authentication remains NON_REAL.
+
+**Central question answered (frozen).** A future local-CLI `runtime_dispatch`
+request can be made Permission-Broker *eligible* — POL-005 does not
+categorically preclude ordinary PB evaluation — **only** via a single
+**trusted-derived** execution profile `RUNTIME_DISPATCH_LOCAL_CLI_V1` that is
+not within POL-005's historical hard-block domain, governed by a **dedicated
+conjunctive policy `POL-013`** whose most permissive output is
+*not-triggered* (it never emits `ALLOW`, never suppresses another policy).
+Failure of any profile predicate → POL-005 retains its hard-DENY match **and**
+`POL-013` DENYs. Selected architecture: **Option C + D**; **Option B REJECTED**
+— `_compose`'s `DENY > HUMAN_REVIEW > ALLOW` has no specificity tier / weight /
+override, so an ALLOW policy cannot overcome a POL-005 DENY (code-proven);
+Option A inferior (POL-005 semantics would become taxonomy-dependent); Option
+E rejected (the rule is contract-expressible now and ships unsatisfiable).
+
+**Current POL-005 (re-derived from `permission_broker_foundation.py`
+`ExecutionDisabledRule`).** Triggered exactly when `request.simulation_only
+is False`; then an unconditional `DENY` (NG-025 / INV-001 / COMP-002) for
+every action type and execution class; universally applicable; never
+`HUMAN_REVIEW` / `ALLOW`; no exception channel; absolute under `_compose`.
+The modeled future Slice-C PB request (14-fact sealed `runtime_dispatch` /
+`adapter` / `simulation_only=false` / `approval_present=true`) → **`DENY`,
+`causing_policy_ids=("POL-005",)`** today — correct and must remain so for
+every request outside the full narrow profile.
+
+**Target profile (§7 of the artifact) — 21 trusted predicates:**
+`runtime_dispatch`/`adapter`; `transport_type=local_cli`;
+`network_requirement=false` (mandatory); no credential / provider / model
+field (mandatory); no shell/command string; supply-chain-admitted
+`local_fixed_argv` executable (N-16-6 admission binding); real (non-NON_REAL)
+RIHAC-001 v2.0 validated human authority (N-16-5); coordinator-minted
+`attempt_id` / `idempotency_key`; one exact `runtime_target_id`;
+`filesystem_scope_ref` digest-bound; durable dispatch-attempt lifecycle
+wired; and a derived, non-caller `profile_classification` marker set only by
+the sealed trusted request builder from the other predicates. **Every
+authority-bearing predicate is `Caller-controllable? = No`** — the
+classification is trusted-derived, not caller-declared, so no
+manufacture-and-escape path exists (the sealed builder + const transport
+shipped in `.1R.13` already provide this).
+
+**Semantic walls all verified against current source:** human approval ≠ PB
+permission ≠ RE capability ≠ execution availability ≠ external effect;
+POL-005 eligibility ≠ blanket execution permission. Human approval is **one
+predicate among twenty-one**, consumed once at Gate 9 — never a policy
+override (`if human_approved: ignore POL-005` and `trusted principal → ALLOW`
+are explicitly rejected). "Eligibility to evaluation, not guaranteed ALLOW":
+a `…_V1` request that clears POL-005 + `POL-013` is still subject to POL-001 /
+003 / 004 / 006 / 007 and the full `DENY > HUMAN_REVIEW > ALLOW` composition;
+POL-004 still emits HUMAN_REVIEW (dominating ALLOW) if approval is absent.
+
+**Conceptual deltas (no contract / production edit this phase).** PBRD-001
+new **§12a** spelling out the narrow rule — **MINOR** (→ v2.2); it defines
+the rule §12 already mandated, adds no request fact, changes no precedence.
+**POL-005**: canonical-statement **versioned amendment** (POL-005 **keeps its
+ID** for audit-trail continuity) — match domain gains exactly one
+trusted-derived carve-out; the *policy-semantics* change is MAJOR-class and
+is carried with an explicit migration note + independent verification.
+**`POL-013`**: new additive conjunctive policy. **PB request schema**: two
+additive **internal, non-caller** fields —
+`RuntimeDispatchRequestFacts.profile_classification` (derived) and
+`RuntimeDispatchAdapterDescriptorBinding.admission_record_digest` /
+`admission_class` (N-16-6) — both inside the PBRD §5 canonical request
+digest, transitively into `consumption.json` `record_digest`. **RE No-Go
+Registry**: NG-025 annotation only (schema unchanged).
+
+**Prerequisite dependency ordering (frozen).** N-16-3 (impl `.1R.22` / IV
+`.1R.23`) → N-16-4 (real positive single-attempt Runtime Enforcement gate) →
+N-16-5 (real FIDO2 / WebAuthn / CTAP + protected human-approval UI) → N-16-6
+(RPAC-REQ-095 fixed-argv external-executable adapter + supply-chain admission)
+→ N-16-7 (runtime capability enablement `Observed → Approved/Executable`,
+**strictly last**). Adjudicated: **N-16-4 before N-16-5** — a structural
+positive RE path can be verified while real HPAC is unreachable, is
+lower-risk, and has no hardware dependency. Each of N-16-4..7 is its own
+explicitly authorized implementation + IV pair. **N-16-3 stays unsatisfiable
+in production even after `.1R.22`** — N-16-6's admission store and N-16-5's
+real authority and N-16-7's capability each independently keep the profile
+incomplete (the safer, contract-consistent §47 outcome).
+
+**Recommended next phase (requires its own explicit human authorization):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.22` — N-16-3 Narrow-Eligibility Policy and
+Contract Implementation (PBRD §12a → v2.2 MINOR; POL-005 canonical-statement
+amendment; new `POL-013`; derived `profile_classification` +
+`admission_record_digest` via the trusted builder; N-16-6 admission-binding
+interface with a fail-closed stub; the 25-case defensive test matrix; scope-
+fence guard reconciliation; **no `adapter.dispatch()` call site, no runtime
+capability change, no N-16-6 store, no execution enablement**), then
+`.1R.23` — its Independent Verification. `.1R.22` / `.1R.23` are recommended,
+not reserved; IDs above `.1R.20` are not reserved (`.1R.16` §36.2). **Do not
+implement N-16-3. Do not modify POL-005. Do not modify normative contracts.
+Do not begin N-16-4..7. Do not implement or call the first external effect.
+Do not enable execution.**
+
+N-16-3 status: **ARCHITECTURE / CONTRACT PLAN COMPLETE — IMPLEMENTATION
+PENDING** (NOT CLOSED). Slice C / D keep no phase ID. Governed `pcae`
+lifecycle only; the delegated `.3` finalization / commit / push incident
+remains **UNAUTHORIZED — preserved**. Canonical artifact
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_21_N_16_3_LOCAL_CLI_NARROW_ELIGIBILITY_POLICY_AND_CONTRACT_PLANNING.md`.
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19R.1 — Independent Verification of the
 Slice-B Reconciliation. **STATUS: INDEPENDENTLY VERIFIED WITH NON-BLOCKING
 FINDINGS — SLICE-B RECONCILIATION COMPLETE. FIRST EXTERNAL EFFECT ABSENT;
