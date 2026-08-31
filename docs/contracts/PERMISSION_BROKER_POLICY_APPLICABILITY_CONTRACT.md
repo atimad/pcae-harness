@@ -3,11 +3,22 @@
 ## Contract identity and status
 
 **Contract:** PBPA-001
-**Version:** 1.0
+**Version:** 1.1
 **Status:** FROZEN (normative contract text; does not close Finding B-1 —
 see Section 22, Section 38)
 **Frozen by:** Phase 148C.3 — Permission Broker Foundation Policy
 Applicability Contract Freeze
+**Amended to v1.1 by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 — N-16-3
+Narrow-Eligibility Policy and Contract Implementation. **v1.1 is an additive
+amendment** (Section 29 / PBPA-REQ-087 — the first exercise of that clause):
+the new canonical policy `POL-013` ("Narrow Local-CLI Dispatch Eligibility",
+PBNDE-001 v1.0) is added to the POL-001..012 applicability matrix (now
+POL-001..013) with `applicable_execution_classes ==
+frozenset({EXECUTION_CLASS_ADAPTER})` (scoped), and PBPA-REQ-062's count is
+updated from one to two currently-implemented scoped policies. No existing
+row's applicability class is changed; no other contract text changes.
+Independent re-verification of the amendment is Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.23.
 **Predecessor:** Phase 148C.2 — Permission Broker Foundation Policy
 Applicability Model Design (`docs/PHASE_148C.2_PERMISSION_BROKER_FOUNDATION_POLICY_APPLICABILITY_MODEL_DESIGN.md`,
 commits `506cd88a`, `a53b0fe9`) — architectural recommendation only, not
@@ -560,6 +571,7 @@ independently re-derived from primary source during this phase (Section
 | POL-010 | Rollback Unavailable (stub) | Would gate actions requiring rollback readiness | **UNRESOLVED** — plausibly scoped, not decided | Moot; stub; **out of scope for this contract** | `INV-006` plausibly implies a read has nothing to roll back, but designing this policy's eventual applicability is explicitly deferred to whatever future phase implements `COMP-008` — this contract does not decide it now (consistent with 148C.2 §2, re-affirmed). |
 | POL-011 | Unknown Backend (stub) | Would gate `execution_class=backend` requests specifically | **UNRESOLVED** — plausibly scoped to `{EXECUTION_CLASS_BACKEND}`, not decided | Moot; stub; **out of scope for this contract** | The rule's own name implies a backend-identity check has no meaning outside `execution_class=backend`; deferred to the implementing phase per PBPA-REQ-061. |
 | POL-012 | Unknown Adapter (stub) | Would gate `execution_class=adapter` requests specifically | **UNRESOLVED** — plausibly scoped to `{EXECUTION_CLASS_ADAPTER}`, not decided | Moot; stub; **out of scope for this contract** | Same reasoning as `POL-011`, for `adapter`. |
+| POL-013 *(v1.1 — Phase ...1R.22, N-16-3)* | Narrow Local-CLI Dispatch Eligibility (`NarrowLocalCliDispatchEligibilityRule`, PBNDE-001 v1.0) — the conjunctive companion to POL-005's `RUNTIME_DISPATCH_LOCAL_CLI_V1` carve-out | The runtime-dispatch / `adapter` policy surface | `frozenset({EXECUTION_CLASS_ADAPTER})` | **Scoped** | PBNDE-001 v1.0 §4. Applicability is on `execution_class == adapter`; within that class the *trigger* is further restricted inside `evaluate()` to `action_type == runtime_dispatch` **and** `simulation_only is False` **and** `runtime_dispatch_context is not None` — a trigger condition, not an applicability filter (PBPA-REQ-034 forbids `action_type` as an applicability input). `POL-013` is a no-op (`not-triggered`) for the dry `adapter_invocation` / `simulation_only=true` path and for any non-`runtime_dispatch` adapter request. It never emits `ALLOW` or `HUMAN_REVIEW`. |
 
 PBPA-REQ-061: `POL-010`, `POL-011`, and `POL-012` are stub rules
 (`POLICY_STATUS_NOT_IMPLEMENTED`) that cannot currently trigger regardless
@@ -573,9 +585,16 @@ mechanism but not pre-bound by it. Marking a policy's future scope
 45) because no currently-reachable request is affected by an unresolved
 stub's eventual scope.
 
-PBPA-REQ-062: Exactly one currently-implemented policy, `POL-004`, is
-scoped under this contract. The remaining five implemented policies
-(`POL-001`, `POL-003`, `POL-005`, `POL-006`, `POL-007`) are universal.
+PBPA-REQ-062: **v1.0:** exactly one currently-implemented policy, `POL-004`,
+is scoped; the remaining five (`POL-001`, `POL-003`, `POL-005`, `POL-006`,
+`POL-007`) are universal. **v1.1 (Phase ...1R.22, N-16-3):** exactly **two**
+currently-implemented policies are scoped — `POL-004`
+(`{SHELL, BACKEND, ADAPTER, ROLLBACK}`) and `POL-013`
+(`{ADAPTER}`, PBNDE-001 v1.0). The five universal policies are unchanged.
+POL-005 stays universal (`applicable_execution_classes` remains `None`) — its
+`RUNTIME_DISPATCH_LOCAL_CLI_V1` carve-out is a self-limiting *trigger*
+condition, not a narrowed *applicability* (Section 20), exactly as the v1.0
+matrix already recorded.
 
 ## 18. POL-004 Applicability
 
@@ -839,6 +858,18 @@ not create a separate artifact/version domain without demonstrated
 need," restated from 148C.2 §22) — no such need is demonstrated for a
 twelve-rule registry with (currently) exactly one scoped rule and three
 unresolved stubs.
+
+PBPA-REQ-089 *(v1.1 — Phase ...1R.22, N-16-3)*: The first exercise of
+PBPA-REQ-087. Adding `POL-013` with `applicable_execution_classes ==
+frozenset({EXECUTION_CLASS_ADAPTER})` is a versioned amendment (PBPA-001
+v1.0 → v1.1) with its own independent re-verification (`.1R.23`), not an
+implementation detail. It is **additive**: it registers a new canonical
+policy id (POL-013) and its scoped applicability; it changes no existing
+row's applicability class, alters no existing behaviour, and touches no
+other clause. The Section 17 matrix now covers POL-001..013; PBPA-REQ-062's
+count is updated to two currently-implemented scoped policies. The
+`PolicyRegistry` construction-time completeness check (PBPA-REQ-073) now
+requires POL-013 to be present in any conforming registry.
 
 ## 30. New Execution Classes
 

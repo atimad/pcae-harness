@@ -82,11 +82,21 @@ def test_rdgo_v3_1_no_gate_reorder_no_boundary_move_no_merge():
 
 
 def test_pbrd_v2_1_seven_logical_fields_and_precedence_unchanged():
-    assert PBRD.startswith("# PBRD-001 v2.1")
+    # Phase ...1R.22 (N-16-3) evolves PBRD-001 to v3.0 (MAJOR) — the §12a
+    # narrow-eligibility rule. The v2.1 §4a representation-equivalence
+    # normalization this suite verified is CARRIED FORWARD unchanged: the
+    # seven logical `human_authority_binding` fields, their meanings, and
+    # `DENY > HUMAN_REVIEW > ALLOW` precedence are unchanged (PBRD-001 v3.0
+    # §16 states this explicitly).
+    assert PBRD.startswith("# PBRD-001 v3.0")
     f = _flat(PBRD)
     assert "DENY > HUMAN_REVIEW > ALLOW" in f or "DENY>HUMAN_REVIEW>ALLOW" in f.replace(" ", "")
     assert "seven *logical* fields" in f or "seven logical fields" in f
     assert '"closed shape" MAJOR' in PBRD
+    # v2.1 remains the recorded superseded MINOR line; the v3.0 MAJOR is the
+    # §12a narrow-eligibility rule.
+    assert "v2.1" in f and "v3.0" in f
+    assert "narrow" in f.lower() and "RUNTIME_DISPATCH_LOCAL_CLI_V1" in PBRD
 
 
 def test_hpac_v2_1_additive_no_authority_widened():

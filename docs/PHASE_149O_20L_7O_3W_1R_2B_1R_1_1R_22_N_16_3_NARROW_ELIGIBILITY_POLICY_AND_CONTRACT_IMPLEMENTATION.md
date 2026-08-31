@@ -131,6 +131,23 @@ Read in full unless noted:
 
 ## 3. Contract evolution — PBRD-001 v3.0 (MAJOR) with explicit migration
 
+Authored this phase: `PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md` (header →
+PBRD-001 v3.0; new §12a; §16 rewritten with the v3.0 MAJOR rationale + the
+six-point explicit migration semantics + §17 non-goal update; §4 fact 8 + §5
+derived-commitment notes; freeze verdict); new
+`PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md` (PBNDE-001 v1.0);
+`PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md` (header → v1.1; POL-013
+matrix row; PBPA-REQ-062 count; new PBPA-REQ-089);
+`V0_2_EXECUTION_READINESS_NO_GO_GATES.md` (NG-025 annotation). The mechanical
+`PBRD-001 v2.1` → `v3.0` "Related contracts" edits in RDGO-001 / RIHAC-001 and
+their siblings are **deferred to a dedicated contract-normalization pass**
+(the `.1R.15.4` precedent) — each of those contracts is byte-frozen by ~50
+point-in-time assertions in the RIHAC/HPAC contract-freeze suites, and a
+cross-reference bump there is out of `.1R.22`'s authorized scope; PBRD-001
+v3.0 §16 point 5 records this normatively. The
+`runtime_dispatch_permission.py` module docstring PBRD reference is updated in
+this phase.
+
 ### 3.1 PBRD-001 v2.1 → v3.0
 
 `docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md`:

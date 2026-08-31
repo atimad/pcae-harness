@@ -2,8 +2,9 @@
 Runtime Dispatch Permission — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7,
 extended by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.12 (Gate-6).
 
-Implements PBRD-001 v1.1's `runtime_dispatch` request architecture
-extension: the trusted construction of a `PermissionBrokerRequest`
+Implements PBRD-001 v3.0's `runtime_dispatch` request architecture
+extension (Phase ...1R.22, N-16-3 — PBRD-001 v3.0 §12a): the trusted
+construction of a `PermissionBrokerRequest`
 carrying the exact fourteen immutable binding facts
 (`permission_broker_foundation.RuntimeDispatchRequestFacts`), and the
 trusted approval projection adapter (PBRD-001 §7 / §22) that is the only
@@ -15,13 +16,22 @@ Before projecting an existing `ValidatedAuthorityProjection`, it asks the
 authority boundary to re-resolve and revalidate every canonical dependency;
 that is a B1 currentness check, not Gate-5 coordinator wiring. It then
 constructs the already-existing PB request shape, preserving RIHAC-001's
-wall that human approval is not PB permission. This phase changes no PB
-policy or evaluator.
+wall that human approval is not PB permission.
 
-POL-005 (`ExecutionDisabledRule`) is untouched by this module and by
-design: every `runtime_dispatch` request built here with
-`simulation_only=False` is denied by the unmodified existing rule,
-exactly like every other action type (PBRD-001 §12/§24).
+Phase ...1R.22 (N-16-3, PBRD-001 v3.0 §12a): this module gains the N-16-6
+supply-chain admission INTERFACE + a fail-closed non-admitting production
+stub, and — as the sole trusted PB runtime-dispatch request builder — it
+DERIVES (never accepts) the `RUNTIME_DISPATCH_LOCAL_CLI_V1` profile
+classification marker. It still authors no policy semantics: POL-005's
+one-profile carve-out and the new POL-013 live in
+`permission_broker_foundation.py`.
+
+POL-005 (`ExecutionDisabledRule`, PBRD-001 v3.0 §12a) still denies every
+`runtime_dispatch` request built here that is not the fully bound,
+trusted-derived `RUNTIME_DISPATCH_LOCAL_CLI_V1` profile -- and that profile
+is unsatisfiable in production, because the only production N-16-6 admission
+resolver admits nothing. Every non-eligible non-simulation request is denied
+exactly like every other action type (PBRD-001 §12 / §12a / §24).
 
 Gate 6 (Phase `.1R.12`, `.1R.9` §16.1 slice 2 / §16.2): `run_gate6_permission_broker`
 is the frozen single owner of RDGO-001 v3.0 §7 Permission Broker

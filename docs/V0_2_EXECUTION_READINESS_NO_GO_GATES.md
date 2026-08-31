@@ -476,6 +476,17 @@ Each gate below is defined with exactly these fields:
 - **Related Invariant:** INV-001.
 - **Related Component:** Execution Boundary (COMP-002).
 - **Current Implementation Status:** not enforced / future.
+- **Canonical-statement annotation (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 —
+  N-16-3; additive, parallels the RE No-Go Registry schema-1.1 V-13-3-2
+  annotation precedent — schema, blocking verdict, and human-override posture
+  are unchanged):** NG-025 is unconditionally active for every non-simulation
+  request **except the single trusted-derived `RUNTIME_DISPATCH_LOCAL_CLI_V1`
+  execution profile** defined by PBRD-001 v3.0 §12a and PBNDE-001 v1.0. That
+  profile is **productionally unsatisfiable** pending N-16-4..7 (the N-16-6
+  supply-chain admission binding has no admitting implementation), so no
+  production request ever escapes this gate. POL-005 retains its policy ID
+  and continues to hard-DENY every other non-simulation request. Human
+  override remains `no`.
 
 ## Gate Index
 

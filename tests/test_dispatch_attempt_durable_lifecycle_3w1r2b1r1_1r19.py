@@ -835,8 +835,16 @@ def test_gate5_through_gate9_byte_unchanged():
 
 
 def test_no_contract_file_changed():
-    assert _git_diff(PRE_1R19_BASELINE, "--", "docs/contracts",
-                     "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md") == ""
+    changed = set(_git_diff("--name-only", PRE_1R19_BASELINE, "--", "docs/contracts",
+                            "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").split())
+    # Phase ...1R.22 (N-16-3) authorizedly evolves the PB policy contracts
+    # (PBRD-001 -> v3.0 MAJOR, PBPA-001 -> v1.1, new PBNDE-001). Exact paths.
+    _r122_contracts = {
+        "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
+        "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+    }
+    assert changed <= _r122_contracts, changed - _r122_contracts
 
 
 def test_no_adapter_registered_and_registry_still_empty():

@@ -3443,3 +3443,51 @@
   delegated finalization/commit/push incident `UNAUTHORIZED`. B1/B7/N1/N2 and
   F2 are repaired but not closed pending the separately authorized exact next
   phase `.1R.8` independent verification.
+
+# 2026-08-31 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 — N-16-3 Narrow-Eligibility Policy and Contract Implementation
+
+- **Versioning adjudication (human-authorized correction to `.1R.21`).**
+  `.1R.21` §31/§34 planned the PBRD-001 change as **v2.2 (MINOR)**. On
+  `.1R.22` primary-source review this was found to conflict with **PBRD-001
+  v2.1 §16**, which lists *"weakening POL-005 eligibility"* among changes that
+  "require a new MAJOR plus explicit migration and independent verification."
+  §12a is exactly that clause. The phase was **BLOCKED at primary-source
+  review** (no repository mutation, no task opened at that point) and the
+  primary human-authorized operator adjudicated: **carry N-16-3 as PBRD-001
+  v3.0 — MAJOR**, with inline explicit migration semantics (§16) and
+  independent verification in `.1R.23`; do not implement the v2.2 MINOR path.
+  Rationale: even though §12 anticipated a future narrow-eligibility rule, the
+  operative contract meaning still changes, so the contract's own versioning
+  rule controls; a v2.2 artifact would reasonably be classified by future
+  verification as violating §16.
+- **No separate migration phase.** Repository convention was checked:
+  **RDGO-001 v2 → v3.0** (a load-bearing gate-semantics MAJOR) and **PBRD-001
+  v1.1 → v2.0** (the `human_authority_binding` meaning MAJOR) were each carried
+  **inline** in their implementing/freeze phase, with the migration statement
+  in the contract's own versioning section and the independent verification in
+  a separate paired phase. No separate-migration-phase convention exists, so
+  `.1R.22` authored the migration artifact inline (PBRD-001 v3.0 §16) and did
+  not re-STOP.
+- **Sibling cross-reference bumps deferred.** The mechanical `PBRD-001 v2.1` →
+  `v3.0` "Related contracts" edits in RDGO-001 / RIHAC-001 and their siblings
+  are deferred to a dedicated contract-normalization pass (the `.1R.15.4`
+  precedent). Attempting them in `.1R.22` cascaded 51 failures across the
+  RIHAC/HPAC contract-freeze verification suites (each contract is byte-frozen
+  by ~50 point-in-time assertions) — out of scope per the phase prompt.
+- **NG-025 annotation target corrected.** `.1R.21` §38 listed the NG-025
+  canonical-statement annotation against `RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md`
+  (the `RE-NOGO-NNN` registry, which contains no NG-025). NG-025 is owned by
+  `docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md`, where the additive
+  annotation was applied. No unrelated `RE-NOGO-*` entry was created.
+- **Digest binding.** The N-16-6 admission sub-fields are bound in the
+  `idempotency_key` canonical content (mutation → construction rejection);
+  `profile_classification` is bound by structural recompute-and-reject in
+  `_valid_runtime_dispatch_request` (marker present but profile incomplete, or
+  profile complete but marker absent — both fail closed) rather than by digest
+  inclusion, which is a stronger tamper-evidence property and avoids
+  restructuring the identity-minting flow.
+- `.1R.22` leaves N-16-4 / N-16-5 / N-16-6 / N-16-7 OPEN, the first external
+  effect ABSENT, execution NOT enabled, Slice C/D with no phase ID, and the
+  `.3` delegated finalization/commit/push incident `UNAUTHORIZED`. N-16-3 is
+  IMPLEMENTED but NOT CLOSED pending the separately authorized `.1R.23`
+  independent verification.

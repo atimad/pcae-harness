@@ -1,36 +1,50 @@
-# PBRD-001 v2.1 — Permission Broker Runtime Dispatch Extension Contract
+# PBRD-001 v3.0 — Permission Broker Runtime Dispatch Extension Contract
 
 ## Contract identity and status
 
 **Contract:** PBRD-001  
-**Version:** 2.1
+**Version:** 3.0
 **Status:** FROZEN  
-**Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1 — Cross-Contract Runtime
-Invocation Human-Principal Authentication Freeze Repair
-**Normalized to v2.1 by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.15.4 —
-Runtime-Dispatch Contract Normalization Implementation. **v2.1 is a MINOR
-clarification** (§16): the fourteen facts, their meanings, the action
-behaviour, and the `DENY > HUMAN_REVIEW > ALLOW` precedence are unchanged.
-It adds a normative *representation-equivalence* clause to §4 fact 14
-(`human_authority_binding`): the seven *logical* fields remain the semantic
-requirement, and a documented equivalent compact 3-tuple representation
-(`approval_id`, `approval_record_digest`, `validation_evidence_digest`) is
-permitted — the verified lossless production form (finding V-4). No
-production change; no request field added or removed.
-**Supersedes:** PBRD-001 v1.0 and v1.1. V1.x human-authority binding semantics
-are not valid for v2 requests and have no migration. The original v1.0 twelve-fact request
-was independently found incomplete against RPAC-REQ-025/044/064–068 by
-Phase 149O.20L.7O.3V.1 (Finding B-149O.20L.7O.3V.1-2): it lacked mandatory
-`attempt_id` and `idempotency_key` binding.  
-**Scope:** Contract-only, additive Permission Broker extension for one future
-real local-CLI runtime dispatch.  
-**Related contracts:** Permission Broker Foundation, PBPA-001 v1.0,
-PBPC-001 v1.2, RPAC-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0,
+**Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 — N-16-3 Narrow-Eligibility
+Policy and Contract Implementation.
+**v3.0 is a MAJOR** (§16): §16 lists *"weakening POL-005 eligibility"* as a
+change that "requires a new MAJOR plus explicit migration and independent
+verification." The new §12a defines the `RUNTIME_DISPATCH_LOCAL_CLI_V1`
+narrow-eligibility rule §12 anticipated, and that rule narrows POL-005's
+categorical hard-block match domain. The migration semantics are stated
+inline in §16; the mandated independent verification is Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.23. The narrow profile ships **unsatisfiable in
+production** (the N-16-6 supply-chain admission binding has no admitting
+implementation), so v3.0 introduces no shipped behaviour change: every
+truthful non-simulation request that is not the (unsatisfiable) narrow
+profile still receives POL-005's unconditional `DENY`.
+**Prior MAJOR line (superseded):** PBRD-001 v2.1 (and v2.0). v2.1 was a MINOR
+clarification adding the §4 fact 14 representation-equivalence clause; v2.0
+changed the mandatory meaning of `human_authority_binding`.
+**Supersedes:** PBRD-001 v1.0, v1.1, and **v2.x**. v1.x human-authority
+binding semantics are not valid for v2 requests and have no migration; v2.x
+request shapes remain parseable under v3.0 but are categorically DENIED
+because they carry no `RUNTIME_DISPATCH_LOCAL_CLI_V1` classification (see
+§16). The original v1.0 twelve-fact request was independently found
+incomplete against RPAC-REQ-025/044/064–068 by Phase 149O.20L.7O.3V.1
+(Finding B-149O.20L.7O.3V.1-2): it lacked mandatory `attempt_id` and
+`idempotency_key` binding.  
+**Scope:** Contract + policy Permission Broker extension for one future real
+local-CLI runtime dispatch. v3.0 defines the narrow-eligibility rule and its
+companion policy `POL-013` (see PBNDE-001 v1.0); the production policy
+semantics live in the Permission Broker Foundation policy registry
+(`permission_broker_foundation.py`).  
+**Related contracts:** Permission Broker Foundation, PBNDE-001 v1.0,
+PBPA-001 v1.1, PBPC-001 v1.2, RPAC-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0,
 HPAC-001 v2.1, RDGO-001 v3.1.
 
-PBRD-001 freezes a future PB request/action contract. It does not add source
-constants, policies, request fields, a production consumer, or execution.
-POL-005 remains unchanged and therefore real dispatch remains denied.
+PBRD-001 v3.0 defines a future PB request/action contract, the
+`RUNTIME_DISPATCH_LOCAL_CLI_V1` narrow-eligibility rule (§12a), and the two
+additive internal derived fields that carry its trusted evidence. It does not
+launch a process, invoke an external runtime, access credentials, or enable
+network/execution. POL-005 continues to deny every non-eligible non-simulation
+request, and the narrow profile is unsatisfiable in production, so real
+dispatch remains denied.
 
 ## 0. Normative language and non-equivalence
 
@@ -132,7 +146,7 @@ trust owner changed.
 | 5 | `task_id` | Active task contract | non-empty string | Yes | Task lifecycle | Exact task; task A cannot authorize task B |
 | 6 | `lifecycle_context` | Active governed lifecycle/session state | closed object: required `phase_id`, conditional `session_id` | Yes; session conditional | Lifecycle/session owner | Phase context and session only when actually session-scoped |
 | 7 | `runtime_target_id` | Explicit target selection | exact non-empty ID | Yes | Target selector + registry | No alias or fallback |
-| 8 | `adapter_descriptor_binding` | Registry/config preflight | closed object: `adapter_id`, descriptor version/digest, target-config digest | Yes | Runtime Registry/config owner | Stable adapter and configuration identity |
+| 8 | `adapter_descriptor_binding` | Registry/config preflight | closed object: `adapter_id`, descriptor version/digest, target-config digest. **v3.0:** two additive **internal** sub-fields `admission_record_digest` / `admission_class` carry the N-16-6 supply-chain admission binding — populated ONLY by the trusted request builder from the N-16-6 admission resolver, default empty, never caller input (§12a). | Yes | Runtime Registry/config owner; admission sub-fields: N-16-6 admission resolver via the trusted builder | Stable adapter and configuration identity; plus supply-chain admission evidence |
 | 9 | `prompt_hash` | `pcae.prompt-semantic.v1` canonicalizer | 64-lowercase-hex SHA-256 | Yes | Prompt builder | Exact semantic instruction identity |
 | 10 | `requested_capability` | Governed invocation request | non-empty capability ID | Yes | Integration contract/coordinator | Capability requested, not capability possessed |
 | 11 | `transport_type` | Contract-fixed integration point | const `local_cli` | Yes | PBRD-001 integration | Excludes API/provider transports |
@@ -199,6 +213,19 @@ Every request SHALL have a canonical digest over the complete Foundation
 envelope plus all fourteen facts. A change creates a different request and
 invalidates any prior PB or Runtime Enforcement decision. Requests and
 decisions are immutable evidence; neither is an authority artifact.
+
+**v3.0 — derived commitments.** Two derived, non-caller commitments are added
+inside the runtime-dispatch subject facts and are covered by this canonical
+digest: the N-16-6 admission sub-fields on `adapter_descriptor_binding`
+(fact 8) are part of the canonical-content digest that produces
+`idempotency_key` (fact 3), so a post-construction mutation of the admission
+binding yields a different `idempotency_key` and a construction-time rejection;
+and `profile_classification` — the `RUNTIME_DISPATCH_LOCAL_CLI_V1` marker
+(§12a) — is bound by a stronger mechanism than digest inclusion: the trusted
+structural validator recomputes it from the bound facts and fails closed on
+any inconsistency (marker present without a complete profile, or a complete
+profile without the trusted marker). Neither is a fifteenth logical fact;
+both are derived from the existing facts.
 
 ## 6. Request exclusions
 
@@ -342,6 +369,70 @@ local-CLI `runtime_dispatch` profile, not deletion of POL-005, a universal
 non-simulation bypass, or an inference that `simulation_only=false` is itself
 permission. Every non-eligible non-simulation request remains denied.
 
+**v3.0:** that narrowly scoped eligibility rule is now defined — §12a. It is
+the only rule by which `runtime_dispatch` becomes eligible; POL-005 is not
+deleted and denies every other non-simulation request.
+
+## 12a. `RUNTIME_DISPATCH_LOCAL_CLI_V1` narrow-eligibility rule (v3.0)
+
+When, and only when, all eleven §12 conditions are separately implemented and
+independently verified, `runtime_dispatch` becomes eligible for ordinary
+Permission Broker evaluation under the following rule and no other. The
+companion policy semantics (`POL-005` amendment and the new `POL-013`) are
+frozen by **PBNDE-001 v1.0**.
+
+1. **Trusted-derived classification.** The trusted PB runtime-dispatch request
+   builder SHALL derive a closed profile classification
+   `RUNTIME_DISPATCH_LOCAL_CLI_V1` from the bound request facts. The
+   classification SHALL hold only if: the request is seal-constructed;
+   `action_type == runtime_dispatch`; `execution_class == adapter`;
+   `transport_type == local_cli`; `network_requirement == false`; no
+   credential, secret, provider, or model field is present; no shell or
+   command string is present; `adapter_descriptor_binding` carries a
+   resolvable canonical supply-chain admission binding of class
+   `local_fixed_argv`; `human_authority_binding` is a valid RIHAC-001 v2.0
+   validated-authority projection bound to the exact `invocation_id` with a
+   real (non-deterministic, non-NON_REAL) assurance verdict; `attempt_id` and
+   `idempotency_key` are coordinator-minted and present; exactly one
+   `runtime_target_id` is bound; `filesystem_scope_ref` is present and
+   digest-bound; and the durable dispatch-attempt lifecycle is wired. The
+   classification SHALL NOT be a caller-supplied field, SHALL be committed
+   into the request canonical digest (§5), and SHALL be recomputed and
+   rejected for any inconsistency by the trusted structural validator (a
+   marker set without a complete profile, or a complete profile that lacks
+   the trusted marker, both fail closed as a structural DENY).
+
+2. **POL-005 for a classified request.** For a
+   `RUNTIME_DISPATCH_LOCAL_CLI_V1`-classified request, POL-005 SHALL return
+   *not-triggered*, meaning ONLY that POL-005 does not categorically preclude
+   ordinary Permission Broker evaluation. It is NOT an `ALLOW`.
+
+3. **`POL-013`.** A dedicated policy (`POL-013`, "Narrow Local-CLI Dispatch
+   Eligibility") SHALL evaluate the full predicate conjunction and SHALL
+   return `DENY` (never `ALLOW`, never `HUMAN_REVIEW`) on any missing,
+   malformed, unknown-state, unresolvable, or broader predicate, with reason
+   `narrow_local_cli_dispatch_profile_incomplete`. When every predicate holds
+   it is *not-triggered*. `POL-013` is applicable only to the
+   runtime-dispatch / `adapter` policy surface (PBPA-001 v1.1).
+
+4. **No precedence weakening; no other-policy suppression; no ALLOW by
+   itself.** Eligibility SHALL NOT weaken the `DENY > HUMAN_REVIEW > ALLOW`
+   precedence, SHALL NOT suppress any other policy, and SHALL NOT by itself
+   produce `ALLOW`. Every other non-simulation request of every action type
+   and execution class SHALL continue to receive POL-005's unconditional
+   `DENY`.
+
+5. **`ALLOW` still means only §2's bounded statement.** Gates 7–10 each
+   independently gate the effect; runtime execution availability, Runtime
+   Enforcement, containment, and the durable pre-dispatch record remain
+   separate mandatory gates.
+
+The rule is **contract-expressible and defined now** but remains
+**unsatisfiable in production** until N-16-4..7 close: the N-16-6
+supply-chain admission binding has no admitting production implementation, so
+predicate (1)'s admission requirement always fails and no production request
+can be classified.
+
 ## 13. Backward and simulation compatibility
 
 This extension SHALL NOT change behavior for rollback, push, publication,
@@ -426,16 +517,81 @@ execution class, weakening POL-005 eligibility, or altering precedence
 remains incompatible and requires a new MAJOR plus explicit migration and
 independent verification.
 
+**v3.0 (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22) — MAJOR.** §12a defines the
+`RUNTIME_DISPATCH_LOCAL_CLI_V1` narrow-eligibility rule, which **narrows
+POL-005's categorical hard-block match domain** — the exact change this
+section lists as requiring "a new MAJOR plus explicit migration and
+independent verification." The `.1R.21` planning artifact provisionally
+adjudicated this as a v2.2 MINOR on the ground that §12 already anticipated a
+future narrow-eligibility rule; on primary-source review that was corrected
+(the operative contract meaning still changes, so this section controls) and
+the human operator authorized the v3.0 MAJOR path. `DENY > HUMAN_REVIEW >
+ALLOW` precedence, POL-005's universal applicability to every non-eligible
+request, POL-005's policy ID, the fourteen logical facts, and the fail-closed
+principle are all unchanged; `POL-013` never emits `ALLOW` or `HUMAN_REVIEW`.
+
+**v3.0 explicit migration semantics.**
+
+1. **PBRD-001 v2.1 is the superseded prior MAJOR line;** PBRD-001 v3.0 is the
+   new canonical contract. v1.x / v2.x authority-binding semantics have no
+   migration.
+2. **Existing v2.x request shapes remain parseable.** A v2.x-shaped
+   `runtime_dispatch` request carries no `profile_classification` and no
+   N-16-6 admission sub-fields; it is structurally valid and **categorically
+   DENIED** — POL-005 keeps its hard-DENY match (the classification was never
+   achieved) and `POL-013` DENYs on the missing predicates.
+3. **No silent auto-upgrade.** No v2.x request is ever reclassified as
+   `RUNTIME_DISPATCH_LOCAL_CLI_V1`; the marker is derived by the trusted
+   builder only, from a complete predicate set. Legacy callers of the generic
+   `build_permission_broker_request` still cannot construct any
+   `runtime_dispatch` request.
+4. **Classification absence ⇒ the old POL-005 domain.** There is no
+   compatibility default to the narrow profile.
+5. **Sibling-contract version cross-references SHALL be refreshed to
+   `PBRD-001 v3.0`.** The `runtime_dispatch_permission.py` trusted-builder
+   module docstring is updated in this phase. The mechanical "Related
+   contracts" line edits in RDGO-001 v3.1, RIHAC-001 v2.0, and their siblings
+   are performed under a dedicated contract-normalization pass — the same
+   mechanism by which `.1R.15.4` last refreshed those cross-references —
+   because each of those contracts is byte-frozen by ~50 point-in-time
+   verification assertions in the RIHAC/HPAC contract-freeze suites, and a
+   cross-reference bump there is out of `.1R.22`'s authorized scope (phase
+   prompt §66 / §67). Until that pass, a sibling's "Related contracts" line
+   naming `PBRD-001 v2.1` is a stale reference only; each contract is
+   individually versioned and RDGO-001 / RIHAC-001's normative content does
+   not depend on PBRD's version. RDGO-001's normative gate semantics are
+   unchanged: a non-triggered POL-005 for `…_V1` is not a `DENY`, so RDGO-001
+   §7's "`DENY` … stops the flow" and §21's "does not … relax POL-005" are
+   unaffected in substance (the categorical block is made *more precise*, not
+   relaxed for any production request).
+6. **Independent verification is mandatory** — Phase
+   149O.20L.7O.3W.1R.2B.1R.1.1R.23.
+
 Unknown contract/request versions fail closed. Existing actions are never
 retrospectively reclassified by a PBRD revision.
 
 ## 17. Non-goals and freeze verdict
 
-This contract does not modify `src/pcae`, tests, PB source, Runtime
-Enforcement, adapters, runtime inspect, session/bootstrap, schema packages,
-or version/build configuration. It does not launch a process, invoke an
-external runtime, access credentials, or enable network/execution.
+**v2.1 non-goal (historical):** the v2.1 normalization did not modify
+`src/pcae`, tests, or PB source.
 
-**PBRD-001 v2.1: NORMALIZED AND FROZEN; v1.x authority bindings have no migration.**
-**POL-005 production behavior: UNCHANGED.**  
+**v3.0:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 implements §12a in
+`permission_broker_foundation.py` (POL-005 carve-out + `POL-013` + the two
+derived fields) and `runtime_dispatch_permission.py` (the N-16-6 admission
+interface + fail-closed non-admitting stub + the trusted-builder
+classification derivation), and adds the `.1R.21` §37 defensive test matrix.
+It does **not** modify Runtime Enforcement, adapters, runtime inspect,
+session/bootstrap, schema packages, or version/build configuration; it does
+**not** launch a process, invoke an external runtime, register an adapter,
+access credentials, or enable network/execution; and it does **not** add an
+`adapter.dispatch()` call site or change runtime capability. The narrow
+profile is unsatisfiable in production.
+
+**PBRD-001 v3.0: FROZEN (MAJOR); explicit migration in §16; independent
+verification is Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.23. v1.x / v2.x authority
+bindings have no migration; v2.x request shapes are parseable but
+categorically DENIED.**
+**POL-005 production behaviour for every non-eligible non-simulation request:
+UNCHANGED (unconditional `DENY`). The single `RUNTIME_DISPATCH_LOCAL_CLI_V1`
+carve-out is unsatisfiable in production.**  
 **Real execution: UNAVAILABLE.**
