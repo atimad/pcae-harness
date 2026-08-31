@@ -2,6 +2,97 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.23 — Independent Verification of the N-16-3
+Narrow-Eligibility Policy. **STATUS: BLOCKED INDEPENDENT-VERIFICATION RESULT
+(Option B). The N-16-3 policy model is SUBSTANTIVELY INDEPENDENTLY VERIFIED /
+CLOSED-WORTHY; acceptance is BLOCKED and referred to
+`149O.20L.7O.3W.1R.2B.1R.1.1R.22R`.** No production source, normative
+contract, or scope-fence guard modified by this phase. Runtime
+`not_implemented / Observed / observe / unavailable`; POL-005 hard DENY
+unchanged for every non-eligible non-simulation request; FIRST EXTERNAL
+EFFECT ABSENT; execution not enabled. Verification-entry SHA `15aeb269`
+(`HEAD == origin/main`, `origin/main..HEAD = 0`). Independently reconstructed
+baseline `8603fe6a` (`.1R.22` range = 9 commits `1dadeb21..15aeb269`).
+
+**Substantively VERIFIED (RE-DERIVE, primary source):** PBRD-001 v3.0 MAJOR
+trigger (§16 "weakening POL-005 eligibility" predates `.1R.22`; §12a does
+exactly that) and its explicit migration (no silent auto-upgrade; v2.x
+shapes parseable but categorically DENIED); trusted-derived
+`RUNTIME_DISPATCH_LOCAL_CLI_V1` classification — 13 conjunctive predicates
+(AST-counted), derived **last** by the sole trusted builder, the only write
+of `profile_classification` in `src/pcae`, `_validate_construction_inputs`
+rejects caller-preset admission fields; forged / transplanted /
+incomplete-marker and seal-stripped requests → structural DENY via live
+recomputation in `_valid_runtime_dispatch_request`; N-16-6 admission
+interface + fail-closed non-admitting production stub; **production
+unsatisfiability — TWO independent blockers**: B1 the only production
+`SupplyChainAdmissionResolver` admits nothing, B2 there is no path (prod or
+test) to a trusted `ValidatedAuthorityProjection` so `approval_present` is
+never `True` for a real request; the private `_supply_chain_admission_resolver`
+override has **no production call site** and the sole production builder call
+(`run_gate6_permission_broker`) omits it; POL-005 DENY `PolicyResult` body
+**byte-identical**, carve-out reads only the derived marker + seal,
+applicability stays universal; POL-013 **statically** DENY-or-neutral only
+(no `ALLOW` / `HUMAN_REVIEW` name or constant in the rule's code),
+adapter-scoped, registered last, canonical set → POL-001..013; `_compose` /
+`_structural_request_failure` / `_decision` **byte-unchanged**,
+`DENY > HUMAN_REVIEW > ALLOW` intact; human authority alone never exempts
+POL-005; broader effect classes all blocked; NON_REAL / real-human-authority
+wall (N-16-5) upstream and unchanged; Gate 5/7/8/9/10 modules byte-unchanged
+(N-16-4 independent); NG-025 annotation in the correct file; PBPA-001 v1.1
+additive-only; no test weakening in the `.1R.22` diff (0 removed defs, 0
+xfail, 1 scoped skip). Fresh IV suite
+`tests/test_narrow_eligibility_policy_iv_3w1r2b1r1_1r23.py` — **55 tests, all
+green**; fixed-SHA A/B via `git worktree` at `8603fe6a`.
+
+**BLOCKER — N-23-3.** Fixed-SHA A/B finds **16 functional guard-test nodes
+that PASS at `8603fe6a` and FAIL at `15aeb269`**, attributable to the two
+authorized `.1R.22` changes (add POL-013; PBPA-001 v1.0→v1.1 + PBRD v2.1→v3.0
++ POL-005 §12a), across ≥9 test files that the `.1R.22` artifact §11.1
+guard-impact inventory never names and §12 never discloses — directly
+contradicting its "0 unexplained attributable functional regressions" and
+"each was widened … and is listed here" claims. All 16 are stale
+point-in-time **text/count freeze** guards (registry cardinality → 13;
+PBPA-001 byte-freeze → v1.1; PBRD/POL-005 text-freeze → v3.0 wording), **not
+behavioural** Permission-Broker regressions — but they are real failing
+nodes. This is the identical failure mode that BLOCKED `.1R.18` (17
+undisclosed `.1R.17` guard regressions → `.1R.17R`) and `.1R.20` (3
+undisclosed `.1R.19` guard regressions → `.1R.19R`). Repair requires guard
+**test**-file edits across those phases and belongs in a dedicated repair
+phase, not this IV phase.
+
+**Non-blocking findings.** *N-23-1* — a structurally-complete (test-built,
+sealed) profile with nothing else triggering composes to the `_compose`
+INV-008 non-executable default ALLOW
+(`policy_would_allow_if_execution_existed`,
+`implementation_status = EXECUTION_UNAVAILABLE`); contract-sanctioned (PBRD
+§12a.4/.5), unreachable in production (B1 + B2), every downstream gate still
+blocks. *N-23-2* — PBNDE-001 §3 / PBRD §12a.1 say the marker is "committed
+into the request canonical digest"; it is not literally in the digest — PBRD
+§5's "derived commitments" paragraph describes the real, sound mechanism
+(live structural recomputation, at least as strong). Wording only.
+
+**Adjudications.** N-16-3 — **PARTIALLY CLOSED** (model verified; not fully
+CLOSED solely due to N-23-3). PBRD-001 v3.0 MAJOR MIGRATION — **VERIFIED**.
+POL-005 NARROW MATCH-DOMAIN EVOLUTION — **VERIFIED**. POL-013 — **VERIFIED;
+NEVER EMITS ALLOW OR HUMAN_REVIEW**. `RUNTIME_DISPATCH_LOCAL_CLI_V1`
+PRODUCTIONALLY UNSATISFIABLE — **VERIFIED**. `.3` delegated finalization /
+commit / push — remains **UNAUTHORIZED**.
+
+**Recommended next (needs explicit human authorization).** A repair phase
+first: `149O.20L.7O.3W.1R.2B.1R.1.1R.22R` — N-16-3 Scope-Fence /
+Verification-Evidence Reconciliation and Repair (widen the 16 stale guards
+to the authorized change set, no wildcard, each still rejecting an
+unauthorized change; provenance-preserving `.1R.22` §11/§12 erratum; no
+production or contract change), then `.1R.22R.1` — its Independent
+Verification. **Do not skip to N-16-4.** N-16-4 / N-16-5 / N-16-6 / N-16-7:
+**OPEN**. Slice C / Slice D: **no phase ID**. Do not implement Slice C, the
+first external effect, or execution enablement.
+
+See `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_23_INDEPENDENT_VERIFICATION_OF_THE_N_16_3_NARROW_ELIGIBILITY_POLICY.md`.
+
+---
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 — N-16-3 Narrow-Eligibility Policy and
 Contract Implementation. **STATUS: N-16-3 IMPLEMENTED — INDEPENDENT
 VERIFICATION PENDING `.1R.23`. `RUNTIME_DISPATCH_LOCAL_CLI_V1` IMPLEMENTED AS
