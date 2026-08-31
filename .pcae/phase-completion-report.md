@@ -1,54 +1,54 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.19 Complete — Dispatch-Attempt Durable Lifecycle, Idempotency, and 3S.2.1 Prerequisite Repairs
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.20 Complete — Independent Verification of the Dispatch-Attempt Durable Lifecycle (BLOCKED independent-verification result — Option B)
 
-**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.19
-**Type:** implementation (Slice B of the `.1R.16` Gate-10 plan)
-**Status:** IMPLEMENTED — INDEPENDENT VERIFICATION PENDING (`.1R.20`)
-**Phase-entry SHA:** `a2b679fe` (`.1R.17R.1` finalize head; `origin/main..HEAD = 0` at entry)
-**First external effect:** ABSENT — no `adapter.dispatch()` call site, no `runtime_dispatch_gate10.py`, no real adapter, no subprocess / socket / provider / credential path
-**Execution:** not enabled — runtime `not_implemented / Observed / observe / unavailable`; POL-005 byte-unchanged and re-verified hard DENY; 0 plugins / 0 capabilities; `--json pcae runtime inspect` byte-identical at entry and finalization
-**Production source changed:** `src/pcae/core/runtime_dispatch_attempt_lifecycle.py` (new), `runtime_invocation.py` (3S.2.1 MUST-FIX #2), `runtime_adapter.py` (3S.2.1 MUST-FIX #1), `runtime_introspection.py` + `commands/runtime_inspect.py` (item-9 runtime-inspect discoverability repair) — exactly the `.1R.16` §36.2 / §38-authorized Slice-B set
-**Byte-unchanged since `a2b679fe`:** `runtime_dispatch_gate10_eligibility.py` (Slice-A coordinator), Gate 5–9 + `runtime_invocation_authority_consumption.py`, `runtime_snapshot.py`, the `--json` runtime-inspect contract
-**Normative contracts changed:** none (`git diff a2b679fe HEAD -- docs/contracts docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md` empty) — no STOP condition triggered
+**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.20
+**Type:** independent verification of `.1R.19` (Slice B of the `.1R.16` Gate-10 plan)
+**Status:** BLOCKED INDEPENDENT-VERIFICATION RESULT — finalized (Option B)
+**Verification-entry SHA:** `738e8209` (`.1R.19` finalize head; `origin/main..HEAD = 0` at entry)
+**Immutable pre-`.1R.19` baseline:** `a2b679fe` (`git rev-parse bb646972^` — parent of the `.1R.19` production implementation commit)
+**First external effect:** ABSENT — no `adapter.dispatch()` call node in the Slice-B lifecycle module (AST), no `runtime_dispatch_gate10.py`, no real adapter, dynamic effect-trap recorded 0 effect-boundary calls
+**Execution:** not enabled — runtime `not_implemented / Observed / observe / unavailable`; POL-005 byte-unchanged; 0 plugins / 0 capabilities; `pcae runtime inspect` posture byte-identical at entry and finalization
+**Production source changed by this phase:** none
+**Normative contracts changed by this phase:** none
+**Scope-fence / guard files changed by this phase:** none — the 3 undisclosed `.1R.19`-attributable guard regressions (+ 2 consequential meta-guard failures) are NOT repaired inside `.1R.20`; referred to `.1R.19R`
 
-## Dispositions
+## Substantive dispositions (independently RE-DERIVED, not trusted from `.1R.19`)
 
 | Item | Result |
 |---|---|
-| DISPATCH-ATTEMPT DURABLE LIFECYCLE | IMPLEMENTED — IV PENDING (`.1R.20`) |
-| AT-MOST-ONCE ATTEMPT / FAIL-CLOSED UNCERTAINTY | IMPLEMENTED — IV PENDING |
-| 3S.2.1 MUST-FIX #1 (malformed adapter-result fail-closed) | IMPLEMENTED — IV PENDING |
-| 3S.2.1 MUST-FIX #2 (RuntimeInvocationStore path containment) | IMPLEMENTED — IV PENDING |
-| 3S.2.1 item-9 (runtime-inspect discoverability) | IMPLEMENTED — IV PENDING |
-| ITEM 9 (all three parts) | IMPLEMENTED — IV PENDING `.1R.20` (not CLOSED before `.1R.20`) |
-| N-16-2 (dispatch-attempt durable mirror) | IMPLEMENTED — IV PENDING |
-| FIRST EXTERNAL EFFECT | ABSENT |
+| DISPATCH-ATTEMPT DURABLE LIFECYCLE | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| AT-MOST-ONCE ATTEMPT / FAIL-CLOSED UNCERTAINTY | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY (see N-20-4, non-blocking) |
+| CRASH / RESTART DETERMINATION (`resolve_disposition`) | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| DETERMINISTIC IDEMPOTENCY IDENTITY | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| `RuntimeInvocationRecord` NON-AUTHORITY | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| 3S.2.1 MUST-FIX #1 (malformed adapter-result fail-closed) | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| 3S.2.1 MUST-FIX #2 (`RuntimeInvocationStore` path containment) | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| 3S.2.1 item-9 (runtime-inspect discoverability; `--json` byte-unchanged) | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| ITEM 9 (A ∧ B ∧ C) | SUBSTANTIVELY VERIFIED / CLOSED-WORTHY |
+| N-16-2 (dispatch-attempt durable mirror) | CLOSED (Slice-B scope; interpretation A) — infrastructure complete; zero production importers; Gate-10-caller wiring is Slice C |
+| FIRST EXTERNAL EFFECT | ABSENT (verified) |
+| SLICE-B LIFECYCLE ACCEPTANCE | BLOCKED — referred to `.1R.19R` |
 | N-16-3 … N-16-7 (Slice-C prerequisites) | UNCHANGED — all remain hard prerequisites |
 | DELEGATED `.3` FINALIZATION / COMMIT / PUSH | UNAUTHORIZED (preserved) |
 
-## Semantic wall
+## Blocker (Option B — NOT repaired inside `.1R.20`)
 
-`RuntimeInvocationRecord != permission != human approval != PB ALLOW != runtime capability != authorization to dispatch`. Structural: no `approve` / `authorize` / `permit` / `grant` / `consume` method; no `execution_allowed` / `permission` / `authorized` field; `GRANTS_NO_EFFECT_AUTHORITY` permanent; `record_grants_no_effect_authority()` always `True`; a copied / reconstructed record grants nothing. The authoritative at-most-once authority-consumption truth stays `consumption.json` (`HPAC-AUTHORITY-CONSUMPTION/2.1`).
+- **N-20-1 (BLOCKING):** `.1R.19` added `from pcae.core.hpac_foundation import (...)` to `runtime_dispatch_attempt_lifecycle.py` (new) and `runtime_invocation.py` (MUST-FIX #2) — a legitimate reuse of the canonical path-safety / digest helpers — without widening or disclosing the HPAC Layer-1/2 consumer-inventory guard family. Three guards pass at `a2b679fe` and FAIL at HEAD: `test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py::test_hpac_repair_has_zero_preexisting_production_consumers`, `test_hpac_foundation_independent_verification_3w1r2b1r111r31.py::test_new_hpac_modules_have_zero_preexisting_production_consumers`, `test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py::test_foundation_has_no_production_consumers_or_gate_wiring`. Each still rejects any other importer — a guard-maintenance / verification-evidence defect, not a production Slice-B implementation defect.
+- **N-20-2 (BLOCKING):** the `.1R.19` finalized fixed-SHA A/B record ("0 unexplained attributable regressions"; "every widened scope-fence guard keeps explicit finite enumeration and still rejects an unauthorized importer") is materially inaccurate — three guards were never widened at all. Same defect class that BLOCKED `.1R.18`.
+- **N-20-3 (BLOCKING, consequential):** `.1R.19`'s own meta-guard `test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py::test_widened_guard_module_passes_at_head[test_hpac_foundation_trust_root_repair_3w1r2b1r111r32]` — and the pre-existing `.1R.15.3` meta-guard `test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py::test_v15_2_guards_pass_at_head` — fail at HEAD as a direct consequence. `.1R.19` shipped a self-contradicting test.
+- **N-20-4 (NON-BLOCKING):** concurrent `begin_effect_attempt` losers do not all map to `DispatchAttemptAlreadyStartedError` (~1/3 leak a raw `DispatchAttemptTransitionError`). Fail-closed and at-most-once still hold; folded into the `.1R.19R` repair.
 
-## State machine
+## Fixed-SHA A/B (independently re-executed, deterministic, no xdist)
 
-```
-none ──▶ PREPARED ──▶ EFFECT_ATTEMPT_STARTED ──▶ RECEIPT_CAPTURED   (terminal)
-              │                    └──────────▶ DISPATCH_UNCERTAIN  (terminal)
-              └───────────────────────────────▶ DISPATCH_NOT_STARTED (terminal)
-```
+A (`a2b679fe`) = 38 failing → B/C (`738e8209`, `origin/main == HEAD`) = 43 failing. ADDED in B = 6, REMOVED = 1. **5 ADDED attributable to and explained by `.1R.19` (root cause N-20-1)** — the 3 guard nodes + the 2 consequential meta-guards. 1 ADDED is a pre-existing non-attributable flake (`test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py::test_concurrent_conflicting_successors_have_one_canonical_winner` — non-deterministic on repeated runs at both SHAs). 1 REMOVED is environmental (detached worktree vs. main working copy). **`.1R.20`-attributable functional regressions = 0** (this phase changes no production source; its 67-test suite is 67/67 green). The 38 baseline failures are pre-existing on `main` and unrelated, reproduced identically in A and B.
 
-Exactly 5 ALLOW transition edges; three terminal states; digest-chained immutable transitions written through an `O_CREAT | O_EXCL` + `os.link` primitive (exactly one concurrent winner). Write-before-effect (Model A + Model C). `resolve_disposition` derives the RDGO-001 v3.1 §17 crash vocabulary from durable state only; `automatic_retry_permitted` is `False` for every state once a record exists.
+## Recommended next step
 
-## Test evidence
+Repair phase required first — `149O.20L.7O.3W.1R.2B.1R.1.1R.19R` — Slice-B Scope-Fence and Verification-Evidence Reconciliation: widen the three HPAC Layer-1/2 consumer-inventory guards by exactly the two authorized Slice-B entries (no wildcard; each still rejecting any other importer); confirm the two consequential meta-guards go green; issue a provenance-preserving erratum correcting the `.1R.19` fixed-SHA A/B figure; normalize `begin_effect_attempt` so every concurrent loser raises `DispatchAttemptAlreadyStartedError` (N-20-4); re-run the fixed-SHA A/B. Then `149O.20L.7O.3W.1R.2B.1R.1.1R.19R.1` — its Independent Verification. After `.1R.19R.1` closes, the Slice-B track is complete and the next work is the Slice-C prerequisite set N-16-3 … N-16-7 (each its own explicitly authorized phase). Slice C / D keep no phase ID. Do not implement Gate 10's effect. Do not enable execution.
 
-- New RE-DERIVE suite `tests/test_dispatch_attempt_durable_lifecycle_3w1r2b1r1_1r19.py` — **55 passed** (phase-prompt §42 case list).
-- 3S.2.1 suite `tests/test_production_dry_lifecycle_verification_3s2_1.py` — **37 passed** (xfail(strict=True) gap demonstrator **promoted** to a passing expected-rejection test; malformed-result test **adapted** to the repaired fail-closed behaviour).
-- Targeted affected suites — **1092 passed, 0 failed** (`-p no:randomly`, no xdist); one pre-existing `.1R.18` cascade node `[test_hpac_foundation_trust_root_repair_3w1r2b1r111r32]` deselected (fails identically at `a2b679fe` with this phase's changes stashed).
-- Fixed-SHA A/B vs `a2b679fe` (61 test files): BASELINE 62 failing / AFTER 63 failing; **NEW attributable = 1** (`test_phase_149o_20l_7d_4…::test_no_production_source_modified_this_phase` — an `origin/main`-relative guard that passes once the phase is pushed); **FIXED = 0; UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0; CANDIDATE-ONLY UNEXPLAINED = 0**.
-- 14 assertions across 9 earlier-phase scope-fence / consumer-inventory / byte-freeze / import-allowlist guards (`.1R.8`, `.1R.11`, `.117`, `.1R.15.5`, `.1R.17` ×2, `.1R.17R` ×2, `.1R.17R.1` ×4, `.1R.18` ×3, both `pcae runtime inspect` import-allowlists) widened to subset checks over the exact `.1R.16`-§38 Slice-B filename set — explicit finite enumeration, no wildcard, still rejecting an unauthorized importer; Gate 5/6/7/8 byte-unchanged (each guard's separate `forbidden` set) and the Slice-A coordinator byte-unchanged assertions retained. **0 tests removed / skipped / xfailed / wildcarded.**
+## Fresh `.1R.20` verification suite
 
-## Recommended next phase
+`tests/test_dispatch_attempt_durable_lifecycle_iv_3w1r2b1r1_1r20.py` — 67 passed, 0 failed (deterministic, `-p no:randomly`, no xdist).
 
-`149O.20L.7O.3W.1R.2B.1R.1.1R.20` — Independent Verification of the Dispatch-Attempt Durable Lifecycle (Slice B IV). Not begun. Do not implement the Gate-10 effect. Do not enable execution. Slice C / D keep no phase ID.
+## Canonical artifact
 
-Canonical artifact: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_19_DISPATCH_ATTEMPT_DURABLE_LIFECYCLE_IDEMPOTENCY_AND_3S_2_1_PREREQUISITE_REPAIRS.md`.
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_20_INDEPENDENT_VERIFICATION_OF_THE_DISPATCH_ATTEMPT_DURABLE_LIFECYCLE.md`
