@@ -3498,13 +3498,16 @@
   point-in-time guard-freeze failures and the incomplete `.1R.22` fixed-SHA
   A/B / guard-inventory evidence. No production source change; no normative
   contract change; N-23-1 preserved; N-23-2 deferred.
-- **Attributable set = 18, not 16.** Independently re-derived the fixed-SHA
-  A/B (baseline `8603fe6a` in a `git worktree`, HEAD `15aeb269`): 18 guard
+- **Attributable set = 22, not 16.** Independently re-derived the fixed-SHA
+  A/B (baseline `8603fe6a` and `15aeb269` `git worktree`s; two sweeps — the
+  11 files `.1R.23` implicates, then ~65 broad candidate files): 22 guard
   nodes pass at `8603fe6a` and fail at `15aeb269`, attributable to the two
   authorized `.1R.22` changes (POL-013 → registry 12→13; PBPA-001 v1.0→v1.1;
   PBRD-001 v2.1→v3.0 + POL-005 §12a). `.1R.23` §12 enumerated 16; it
-  under-counted by 2 (N-22R-1, non-blocking). 0 attributable removals. All 18
-  are non-behavioural stale text/count/byte freezes.
+  under-counted by 6 (N-22R-1, non-blocking — 2 in the 11-file re-derivation,
+  4 more in the full-suite sweep, all PBRD v2.1→v3.0 / PBPA byte-freeze).
+  0 attributable removals. All 22 are non-behavioural stale text/count/byte
+  freezes.
 - **Repair discipline.** Every widening is to an exact finite set / exact
   sha256 / exact semantic property — no wildcard, no broad prefix, no
   "contains-expected" downgrade. Registry-cardinality guards assert exactly

@@ -816,12 +816,18 @@ R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS = (
 
 
 # .1R.22R independently re-derived the fixed-SHA A/B (8603fe6a -> 15aeb269)
-# and found the true attributable set is EIGHTEEN, not sixteen: the .1R.23
-# enumeration above under-counted by two (same self-similar guard-freeze
-# class), both of which .1R.22R also reconciled.
+# — first over the 11 files this suite implicates, then over the full suite /
+# ~65 candidate files — and found the true attributable set is TWENTY-TWO,
+# not sixteen: the .1R.23 enumeration above under-counted by SIX (same
+# self-similar guard-freeze class: PBRD-001 v2.1->v3.0 version pins and PBPA
+# byte-freeze). All six were reconciled by .1R.22R.
 R122R_ADDITIONALLY_ENUMERATED = (
     "test_phase_149d_rwmpc_contract_independent_verification.py::TestNoProductionModification::test_existing_contract_text_not_amended_by_phase_149d",
     "test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization",
+    "test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_independent_verification_3w1r2b1r111r1.py::test_versions_after_1r15_4_normalization",
+    "test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_contract_headers_are_the_normalized_minor_versions",
+    "test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_both_major_candidate_calls_are_adjudicated_minor",
+    "test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py::test_active_versions_and_supersession_are_exact",
 )
 R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS = (
     R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS + R122R_ADDITIONALLY_ENUMERATED
@@ -843,7 +849,7 @@ def test_r122_artifact_does_not_disclose_these_regressions():
     assert "0 unexplained attributable functional regressions" in flat_status
     # Erratum issued by .1R.22R, appended after the original canonical trailer:
     assert "## ERRATUM" in doc and "149O.20L.7O.3W.1R.2B.1R.1.1R.22R" in doc
-    assert "18" in doc  # the corrected attributable count
+    assert "22" in doc  # the corrected attributable count
     for node in R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS:
         base = node.split("::")[0]
         assert base in doc, f"erratum omits attributable guard: {base}"
@@ -853,12 +859,12 @@ def test_r122_artifact_does_not_disclose_these_regressions():
 
 def test_count_is_sixteen_and_all_are_registry_or_contract_freeze_guards():
     # The .1R.23 enumeration was sixteen; .1R.22R's independent re-derivation
-    # found two more of the same class (total eighteen). Both figures are
+    # found six more of the same class (total twenty-two). Both figures are
     # asserted so the historical .1R.23 count stays on record.
     assert len(R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS) == 16
     assert len(set(R122_UNDISCLOSED_ATTRIBUTABLE_GUARD_REGRESSIONS)) == 16
-    assert len(R122R_ADDITIONALLY_ENUMERATED) == 2
-    assert len(set(R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS)) == 18
+    assert len(R122R_ADDITIONALLY_ENUMERATED) == 6
+    assert len(set(R122_ALL_ATTRIBUTABLE_GUARD_REGRESSIONS)) == 22
 
 
 @pytest.mark.skipif(
@@ -878,7 +884,7 @@ def test_ab_delta_is_exactly_these_sixteen_when_a_baseline_worktree_is_available
         cwd=REPO, capture_output=True, text=True,
     )
     assert " failed" not in r.stdout, r.stdout[-3000:]
-    assert "18 passed" in r.stdout, r.stdout[-3000:]
+    assert "22 passed" in r.stdout, r.stdout[-3000:]
 
 
 def test_policy_registry_integrity_no_dupes_no_gaps():

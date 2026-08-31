@@ -88,32 +88,41 @@ phase; no active governed phase before startup. Runtime posture re-confirmed
 | `.1R.23` finalize head | `2338e7c7` |
 | `.1R.22R` phase-entry | `2338e7c7` |
 
-## 6. Historical fixed-SHA A/B — the 18-node discrepancy (reproduced)
+## 6. Historical fixed-SHA A/B — the 22-node discrepancy (reproduced)
 
-`git worktree add --detach <wt> 8603fe6a`; deterministic, no xdist,
-`-p no:randomly`. Guard/contract-freeze suite set (the 11 files N-23-3
-implicates).
+`git worktree add --detach <wt> 8603fe6a` and at `15aeb269`; deterministic,
+no xdist, `-p no:randomly`. Two sweeps: (i) the 11 files `.1R.23` §12
+implicates; (ii) a full-suite / broad candidate sweep (~65 files matching
+every PBRD / PBPA / POL-005 / policy-count freeze pattern) to find what
+`.1R.23` missed.
 
-| Side | Failing nodes (in the implicated files) |
+| Side | Failing nodes (implicated + swept files) |
 |---|---|
-| A = `8603fe6a` | 41 pre-existing stale failures (reproduce identically at both SHAs — unrelated to `.1R.22`; e.g. `TestVersioning::test_pbrd_is_v1_1_frozen`, requirement-count freezes from earlier phases) |
-| B = `15aeb269` | the same 41 **+ 18** |
+| A = `8603fe6a` | pre-existing stale failures that reproduce identically at both SHAs — unrelated to `.1R.22` (e.g. `TestVersioning::test_pbrd_is_v1_1_frozen`, requirement-count freezes from earlier phases) |
+| B = `15aeb269` | the same set **+ 22** |
 
-**ADDED attributable = 18. REMOVED attributable = 0.** Every one of the 18
+**ADDED attributable = 22. REMOVED attributable = 0.** Every one of the 22
 passes at `8603fe6a` and fails at `15aeb269` (each re-run individually at both
 SHAs; not order-dependent). B ≡ C (`git rev-parse 15aeb269 origin/main` — same
 commit at the time), no origin-relative node class.
 
-`.1R.23` §12 enumerated **16**; it under-counted by **2**
-(`test_phase_149d_rwmpc_contract_independent_verification.py::TestNoProductionModification::test_existing_contract_text_not_amended_by_phase_149d`,
-`test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization`)
-— same self-similar guard-freeze class (PBPA byte-freeze / PBRD version pin).
-This is **N-22R-1** (non-blocking): the `.1R.23` inventory is itself
-incomplete; `.1R.22R` completes it. The 41 pre-existing common failures are
-**outside N-23-3 scope** (they fail identically at `8603fe6a`) and are not
-combined with this repair (phase prompt §6).
+`.1R.23` §12 enumerated **16**; it under-counted by **6** — same
+self-similar guard-freeze class (PBPA byte-freeze / PBRD-001 v2.1→v3.0
+version pins). Two (`…149d_rwmpc…::test_existing_contract_text_not_amended_by_phase_149d`,
+`…3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization`)
+were found re-deriving the `.1R.23` 11-file A/B set; four more
+(`test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py` ×2,
+`test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py` ×1,
+`test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_independent_verification_3w1r2b1r111r1.py` ×1)
+by `.1R.22R`'s full-suite fixed-SHA A/B sweep (baseline `8603fe6a` and
+`15aeb269` worktrees, ~65 candidate files matching every PBRD/PBPA/POL-005 /
+policy-count freeze pattern). This is **N-22R-1** (non-blocking): the
+`.1R.23` inventory is itself incomplete by six; `.1R.22R` completes it to
+**22**. The pre-existing common failures are **outside N-23-3 scope** (they
+fail identically at `8603fe6a`) and are not combined with this repair (phase
+prompt §6).
 
-## 7. Exact 18-node one-to-one reconciliation table
+## 7. Exact 22-node one-to-one reconciliation table
 
 Every widening below is to an exact finite set / exact sha256 / exact
 semantic property — **no wildcard, no broad prefix glob, no
@@ -123,7 +132,7 @@ unauthorized change (§18, adversarial companions in the reconciliation suite).
 Guard classes: **A** — policy-registry cardinality `12 → 13` (POL-013 added).
 **B** — PBPA-001 v1.0 byte-freeze → authorized v1.1 additive amendment
 (POL-013 row + PBPA-REQ-089). **C** — PBRD-001 v2.1 / POL-005 text-freeze →
-authorized v3.0 MAJOR + §12a carve-out wording.
+authorized v3.0 MAJOR + §12a carve-out wording. Class sizes: A = 6, B = 6, C = 10.
 
 | # | Node | Cls | Old assumption | Authorized `.1R.22` change | Repair | Adversarial challenge |
 |---|---|---|---|---|---|---|
@@ -144,9 +153,13 @@ authorized v3.0 MAJOR + §12a carve-out wording.
 | 15 | `test_phase_149o_20l_7o_3v_1r_contract_repair.py::TestNoNewContradictions::test_no_go_statements_preserved` | C | `"does not launch a process"` literal in PBRD | PBRD v3.0 → `"**not** launch a process, invoke an external runtime, …"` | accept either phrasing via regex; keep `UNAVAILABLE` + the RDGO literal | removal of the no-launch clause fails |
 | 16 | `test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_pbrd_remains_projection_only_and_pol005_remains_hard_deny` | C | `"POL-005 production behavior: UNCHANGED"` literal | PBRD v3.0 reworded trailer | keep the projection-only asserts; assert the v3.0 POL-005 hard-DENY property + `POL-013` never `ALLOW`/`HUMAN_REVIEW` | same as #14 |
 | 17 | `test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_rpac_companion_contract_is_byte_identical_and_riasc_pbrd_only_normalized` | C | PBRD starts `"# PBRD-001 v2.1"` | PBRD v2.1→v3.0 MAJOR | RPAC still exact sha256; PBRD starts `v3.0`, carries the `.1R.22` MAJOR marker **and** the `.1R.15.4` §4a clause (both authorized, nothing else) | a PBRD change beyond the two authorized amendments fails; RPAC drift fails |
-| 18 | `test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization` | C | PBRD starts `"# PBRD-001 v2.1"` | PBRD v2.1→v3.0 MAJOR | PBRD pin → `v3.0`; every other version pin unchanged | any other contract version drift fails |
+| 18 | `test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization` | C | PBRD starts `"# PBRD-001 v2.1"` | PBRD v2.1→v3.0 MAJOR | PBRD pin → `v3.0` + `.1R.22` MAJOR-marker comment; every other version pin unchanged | any other contract version drift fails |
+| 19 | `test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_independent_verification_3w1r2b1r111r1.py::test_versions_after_1r15_4_normalization` | C | PBRD starts `"# PBRD-001 v2.1"` | PBRD v2.1→v3.0 MAJOR | PBRD pin → `v3.0`; the IV companion of node 18 — every other pin unchanged | PBRD not-`v3.0`, or another pin drift, fails |
+| 20 | `test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_contract_headers_are_the_normalized_minor_versions` | C | PBRD starts `"# PBRD-001 v2.1"` | PBRD v2.1→v3.0 MAJOR | PBRD pin → `v3.0`; the `.1R.15.4` normalization itself is still asserted MINOR by node 21 | PBRD not-`v3.0` fails; RDGO/HPAC/RIASC pins unchanged |
+| 21 | `test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_both_major_candidate_calls_are_adjudicated_minor` | C | `"**v2.1 is a MINOR clarification**"` literal in PBRD | PBRD v3.0 reworded the version-history line | assert `"v2.1 was a MINOR clarification"` (the `.1R.15.4` normalization stays MINOR) **and** `"**v3.0 is a MAJOR**"` (the separate N-16-3 bump); keep `'This is not a "closed shape" MAJOR.'` | removal of either the v2.1-MINOR or the v3.0-MAJOR statement fails |
+| 22 | `test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py::test_active_versions_and_supersession_are_exact` | C | PBRD `"**Version:** 2.1"` in the version tuple | PBRD v2.1→v3.0 MAJOR | the expected-version tuple's PBRD entry → `"3.0"`; RIHAC/RIASC/HPAC/RDGO/RPAC entries unchanged | any pin in the tuple drifting fails |
 
-Nodes **8** and **18** are the two `.1R.23` §12 did not list.
+Nodes **8**, **18**, **19**, **20**, **21**, **22** are the six `.1R.23` §12 did not list.
 
 ## 8. Guard class A — registry cardinality (§8, §9, §44)
 
@@ -215,9 +228,9 @@ The meta-guards that byte-freeze or re-run guard families
 (`.1R.15.3::test_v15_2_guards_pass_at_head`,
 `.1R.18::test_widened_guard_module_passes_at_head`, the two `.1R.19R` /
 `.1R.19R.1` `test_meta_guards_*byte_unchanged_since_r20_head`) operate on the
-**HPAC / Gate-10 consumer-inventory** guard families, **not** on any of the 18
+**HPAC / Gate-10 consumer-inventory** guard families, **not** on any of the 22
 PB-policy / contract-freeze guards this phase edits. Suites that re-run or
-depend on the 18 (`test_permission_broker_policy_composition_hardening.py`,
+depend on the 22 (`test_permission_broker_policy_composition_hardening.py`,
 `test_permission_broker_verification_compatibility.py`,
 `test_phase_149o_19_3r_1_…reverification.py`,
 `test_trusted_approval_presentation_…_independent_verification_3w1r2b1r111r1.py`)
@@ -234,13 +247,13 @@ asserted) — matching the `.1R.19R` treatment of `.1R.20`'s `finding_n20_*`
 tests:
 
 - `test_ab_delta_is_exactly_these_sixteen_when_a_baseline_worktree_is_available`
-  — now asserts every attributable node (16 + the 2 additionally enumerated =
-  **18**) **passes** at HEAD.
+  — now asserts every attributable node (16 + the 6 additionally enumerated =
+  **22**) **passes** at HEAD.
 - `test_r122_artifact_does_not_disclose_these_regressions` — now asserts BOTH
   the original "0 unexplained" claim is preserved **and** the `.1R.22` doc
   `## ERRATUM` names the set with the corrected count.
 - `test_count_is_sixteen_and_all_are_registry_or_contract_freeze_guards` —
-  keeps the historical 16, adds the 2, asserts total 18.
+  keeps the historical 16, adds the 6, asserts total 22.
 
 Two further `.1R.23` tests were **already failing at the `.1R.22R`
 phase-entry SHA `2338e7c7`** (pre-existing `.1R.23`-suite bugs, not caused by
@@ -267,9 +280,9 @@ file (verified: `new.startswith(old)`). The immutable `.1R.22` `pcae`
 phase-report artifacts
 (`.pcae/phase-reports/20260831-1438*-149O.20L.7O.3W.1R.2B.1R.1.1R.22.{md,json}`)
 are **byte-unchanged** (`git diff 15aeb269..HEAD` empty for them). The erratum
-records: the original claims verbatim; the corrected historical result (**18
+records: the original claims verbatim; the corrected historical result (**22
 attributable added, 0 removed**, non-behavioural stale current-state freezes,
-classes A/B/C); the full 18-node list; that **no N-16-3 policy-model defect**
+classes A/B/C); the full 22-node list; that **no N-16-3 policy-model defect**
 was found; that the impact is a **material completeness defect** in the
 `.1R.22` guard inventory / A-B evidence; the immutable baseline/head SHAs and
 `.1R.23` discovery provenance. `PROJECT_STATUS.md` carries a matching `›
@@ -280,7 +293,7 @@ Current-Phase section for `.1R.22R`.
 
 | | `8603fe6a → 15aeb269` (historical `.1R.22`) | `8603fe6a → .1R.22R HEAD` (repaired) |
 |---|---|---|
-| attributable added guard failures | **18** | **0** |
+| attributable added guard failures | **22** | **0** |
 | attributable removed | 0 | 0 |
 
 The original `.1R.22` head is **not** claimed to have been clean.
@@ -292,7 +305,7 @@ Baseline `8603fe6a` (`git worktree`) → repaired working tree / HEAD:
 
 - **CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0**
 - **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0**
-- **N-23-3-attributable guard failures remaining = 0** (all 18 green at HEAD)
+- **N-23-3-attributable guard failures remaining = 0** (all 22 green at HEAD)
 - The 41 pre-existing common failures reproduce **identically** at `8603fe6a`
   and at HEAD (0 A/B delta) — unrelated to `.1R.22` / `.1R.22R`.
 
@@ -338,7 +351,7 @@ no assertion became meaningfully weaker.
 - **N-16-3 lifecycle acceptance — REPAIR IMPLEMENTED — IV PENDING
   `.1R.22R.1`.** **Not CLOSED.**
 - **N-22R-1 (non-blocking)** — the `.1R.23` §12 inventory under-counted the
-  attributable set by 2; `.1R.22R` completed the enumeration to 18. Same
+  attributable set by 6; `.1R.22R` completed the enumeration to 22. Same
   guard-freeze class; no production impact.
 - **N-23-1 — preserved (informational).** A synthetic structurally-complete
   sealed narrow profile with nothing else triggering composes to the
@@ -355,7 +368,7 @@ no assertion became meaningfully weaker.
 
 ## 19. Final verdict
 
-**RECONCILIATION COMPLETE.** All 18 N-23-3-attributable stale point-in-time
+**RECONCILIATION COMPLETE.** All 22 N-23-3-attributable stale point-in-time
 guard-freeze failures are reconciled without weakening any guard's
 trust/security purpose; the historical `.1R.22` evidence is preserved with an
 explicit provenance-preserving erratum; the repaired tree is at **0
@@ -377,7 +390,7 @@ prerequisite is N-16-4.
 - Phase-entry / exit: `origin/main..HEAD = 0` (at entry; and after governed
   finalization of this phase).
 - Production source / normative contracts modified by `.1R.22R`: **none.**
-- Added / modified by `.1R.22R`: the 11 guard test files (assertion bodies +
+- Added / modified by `.1R.22R`: the 14 guard test files (assertion bodies +
   comments only), `tests/test_narrow_eligibility_policy_iv_3w1r2b1r1_1r23.py`
   (4 reconciliation-aware + 2 pre-existing-bug fixes),
   `tests/test_n16_3_scope_fence_reconciliation_3w1r2b1r1_1r22r.py` (new),

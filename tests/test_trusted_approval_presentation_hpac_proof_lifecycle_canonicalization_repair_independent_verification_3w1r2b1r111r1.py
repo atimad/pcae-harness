@@ -91,10 +91,13 @@ def test_versions_after_1r15_4_normalization() -> None:
     # `.1R` left these at v2.0/v3.0; `.1R.15.4` normalized RDGO->v3.1,
     # PBRD->v2.1, HPAC->v2.1 (all MINOR). RIHAC v2.0, RIASC v3.0, RPAC v1.0
     # unchanged.
+    # Phase ...1R.22 (N-16-3) then took PBRD-001 v2.1 -> v3.0 (MAJOR) —
+    # PBRD-001 §16 lists "weakening POL-005 eligibility" as a MAJOR trigger
+    # and §12a is that clause. Reconciled by .1R.22R (N-23-3).
     assert HPAC.startswith("# HPAC-001 v2.1")
     assert RIHAC.startswith("# RIHAC-001 v2.0")
     assert RIASC.startswith("# RIASC-001 v3.0")
-    assert PBRD.startswith("# PBRD-001 v2.1")
+    assert PBRD.startswith("# PBRD-001 v3.0")
     assert RDGO.startswith("# RDGO-001 v3.1")
     assert "**Contract:** RPAC-001" in RPAC and "**Version:** 1.0" in RPAC
 

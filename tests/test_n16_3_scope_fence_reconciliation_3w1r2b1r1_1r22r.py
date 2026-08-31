@@ -9,7 +9,7 @@ change.
 Every assertion here is derived from primary evidence (the current Permission
 Broker policy registry, the PBPA-001 v1.1 / PBRD-001 v3.0 contract text, git
 history, and the repaired guard files themselves), not from a report or from
-test names. The historical 18-node set was reproduced with a dedicated
+test names. The historical 22-node attributable set (16 that .1R.23 §12 enumerated + 6 it under-counted) was reproduced with a dedicated
 ``git worktree`` at the immutable pre-`.1R.22` baseline ``8603fe6a``.
 """
 
@@ -51,7 +51,7 @@ def _pytest(*nodeids: str) -> subprocess.CompletedProcess:
     )
 
 
-# ── The exact 18-node one-to-one reconciliation table ────────────────────
+# ── The exact 22-node one-to-one reconciliation table ────────────────────
 #
 # Node -> (guard class, historical stale assumption, authorized .1R.22
 # change that made it stale). Class A: policy-registry cardinality 12->13.
@@ -98,26 +98,47 @@ RECONCILIATION_TABLE = {
         ("C", "PBRD starts '# PBRD-001 v2.1'", "PBRD v2.1 -> v3.0 MAJOR"),
     "tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization":
         ("C", "PBRD starts '# PBRD-001 v2.1'", "PBRD v2.1 -> v3.0 MAJOR"),
+    # ── class C — found by .1R.22R's full-suite fixed-SHA A/B sweep,
+    #    missed by .1R.23 §12 (all PBRD v2.1 -> v3.0 attributable) ──────────
+    "tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_independent_verification_3w1r2b1r111r1.py::test_versions_after_1r15_4_normalization":
+        ("C", "PBRD starts '# PBRD-001 v2.1'", "PBRD v2.1 -> v3.0 MAJOR"),
+    "tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_contract_headers_are_the_normalized_minor_versions":
+        ("C", "PBRD starts '# PBRD-001 v2.1'", "PBRD v2.1 -> v3.0 MAJOR"),
+    "tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_both_major_candidate_calls_are_adjudicated_minor":
+        ("C", "'**v2.1 is a MINOR clarification**' literal in PBRD", "PBRD v3.0 reworded the version-history line"),
+    "tests/test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py::test_active_versions_and_supersession_are_exact":
+        ("C", "PBRD '**Version:** 2.1'", "PBRD v2.1 -> v3.0 MAJOR"),
 }
 
-# The 16 that .1R.23 §12 enumerated; the 2 it under-counted.
-R23_ENUMERATED_16 = tuple(
+# The 16 that .1R.23 §12 enumerated; the 6 it under-counted (2 from
+# .1R.22R's initial 11-file re-derivation of the .1R.23 set, 4 more from
+# .1R.22R's full-suite fixed-SHA A/B sweep — all PBRD v2.1->v3.0 / PBPA
+# byte-freeze, same class).
+_R22R_ADDITIONALLY_ENUMERATED_NAMES = (
+    "test_existing_contract_text_not_amended_by_phase_149d",
+    "test_active_contract_versions_after_1r15_4_normalization",
+    "3w1r2b1r111r1.py::test_versions_after_1r15_4_normalization",
+    "test_contract_headers_are_the_normalized_minor_versions",
+    "test_both_major_candidate_calls_are_adjudicated_minor",
+    "test_active_versions_and_supersession_are_exact",
+)
+R22R_ADDITIONALLY_ENUMERATED = tuple(
     n for n in RECONCILIATION_TABLE
-    if "test_existing_contract_text_not_amended_by_phase_149d" not in n
-    and "test_active_contract_versions_after_1r15_4_normalization" not in n
+    if any(m in n for m in _R22R_ADDITIONALLY_ENUMERATED_NAMES)
 )
-R22R_ADDITIONALLY_ENUMERATED_2 = tuple(
-    n for n in RECONCILIATION_TABLE if n not in R23_ENUMERATED_16
+R23_ENUMERATED_16 = tuple(
+    n for n in RECONCILIATION_TABLE if n not in R22R_ADDITIONALLY_ENUMERATED
 )
+R22R_ADDITIONALLY_ENUMERATED_2 = R22R_ADDITIONALLY_ENUMERATED  # back-compat alias
 
 
 # ═══════════ 1-2. exact historical inventory / one-to-one mapping ════════
 
-def test_reconciliation_table_is_exactly_eighteen_one_to_one():
-    assert len(RECONCILIATION_TABLE) == 18
-    assert len(set(RECONCILIATION_TABLE)) == 18
+def test_reconciliation_table_is_exactly_twentytwo_one_to_one():
+    assert len(RECONCILIATION_TABLE) == 22
+    assert len(set(RECONCILIATION_TABLE)) == 22
     assert len(R23_ENUMERATED_16) == 16
-    assert len(R22R_ADDITIONALLY_ENUMERATED_2) == 2
+    assert len(R22R_ADDITIONALLY_ENUMERATED) == 6
 
 
 def test_every_node_classified_A_B_or_C():
@@ -126,14 +147,14 @@ def test_every_node_classified_A_B_or_C():
     classes = [v[0] for v in RECONCILIATION_TABLE.values()]
     assert classes.count("A") == 6
     assert classes.count("B") == 6
-    assert classes.count("C") == 6
+    assert classes.count("C") == 10
 
 
 @pytest.mark.skipif(
     BASELINE not in _git("rev-list", "HEAD", "--max-count=400"),
     reason="baseline not in local history",
 )
-def test_historical_18_node_set_reproduces_at_the_fixed_shas():
+def test_historical_22_node_set_reproduces_at_the_fixed_shas():
     # Every node PASSES at BASELINE and FAILS at R22_HEAD — reproduced via
     # a dedicated detached worktree. This is the N-23-3 blocker.
     wt = REPO / ".git" / "_r22r_ab_wt"
@@ -152,7 +173,7 @@ def test_historical_18_node_set_reproduces_at_the_fixed_shas():
             cwd=wt, capture_output=True, text=True,
         )
         _ = head  # head-side (R22_HEAD) is covered by the repaired-tree test
-        assert "18 passed" in base.stdout, base.stdout[-3000:]
+        assert "22 passed" in base.stdout, base.stdout[-3000:]
     finally:
         subprocess.run(["git", "worktree", "remove", "--force", str(wt)],
                        cwd=REPO, capture_output=True, text=True)
@@ -435,10 +456,10 @@ def test_original_r22_completion_artifacts_preserved_unrewritten():
 def test_erratum_records_quantitative_truth():
     doc = R22_DOC.read_text()
     erratum = doc[doc.index("## ERRATUM"):]
-    assert "18" in erratum
+    assert "22" in erratum
     assert "0 attributable removals" in erratum or "0 removals" in erratum
     assert "non-behavioural" in erratum
-    # names every one of the 18 attributable nodes
+    # names every one of the 22 attributable nodes
     for node in RECONCILIATION_TABLE:
         assert node.split("::")[0] in erratum
 
@@ -513,7 +534,7 @@ def test_r22r_canonical_artifact_exists_and_is_complete():
     doc = R22R_DOC.read_text()
     for token in ("N-23-3", "REPAIRED", "INDEPENDENT VERIFICATION PENDING",
                   "149O.20L.7O.3W.1R.2B.1R.1.1R.22R.1", "8603fe6a", "15aeb269",
-                  "18", "no wildcard", "N-23-1", "N-23-2", "UNAUTHORIZED"):
+                  "22", "no wildcard", "N-23-1", "N-23-2", "UNAUTHORIZED"):
         assert token in doc, token
 
 
@@ -559,7 +580,7 @@ def test_repaired_tree_ab_zero_attributable_added_or_removed():
     # baseline newly passes (0 removed) and nothing new fails (0 added).
     r = _pytest(*RECONCILIATION_TABLE.keys())
     assert " failed" not in r.stdout, r.stdout[-3000:]
-    assert "18 passed" in r.stdout, r.stdout[-3000:]
+    assert "22 passed" in r.stdout, r.stdout[-3000:]
 
 
 # ═══════════ 49-53. dispositions ═════════════════════════════════════

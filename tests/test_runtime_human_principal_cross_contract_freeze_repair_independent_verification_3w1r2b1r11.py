@@ -59,7 +59,10 @@ def test_active_versions_and_supersession_are_exact() -> None:
     # `.1R.15.4` normalization bumped RDGO-001 -> v3.1, PBRD-001 -> v2.1,
     # HPAC-001 -> v2.1 (all MINOR). RIHAC-001 v2.0, RIASC-001 v3.0,
     # RPAC-001 v1.0 unchanged.
-    expected = [(RIHAC, "RIHAC-001", "2.0"), (RIASC, "RIASC-001", "3.0"), (HPAC, "HPAC-001", "2.1"), (PBRD, "PBRD-001", "2.1"), (RDGO, "RDGO-001", "3.1"), (RPAC, "RPAC-001", "1.0")]
+    # Phase ...1R.22 (N-16-3): PBRD-001 v2.1 -> v3.0 (MAJOR; §16 "weakening
+    # POL-005 eligibility"). Every other version pin is unchanged.
+    # Reconciled by .1R.22R (N-23-3).
+    expected = [(RIHAC, "RIHAC-001", "2.0"), (RIASC, "RIASC-001", "3.0"), (HPAC, "HPAC-001", "2.1"), (PBRD, "PBRD-001", "3.0"), (RDGO, "RDGO-001", "3.1"), (RPAC, "RPAC-001", "1.0")]
     for text, contract, version in expected:
         assert f"**Contract:** {contract}" in text
         assert f"**Version:** {version}" in text

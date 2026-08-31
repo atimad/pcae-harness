@@ -16,20 +16,26 @@ ALLOW / HUMAN_REVIEW; FIRST EXTERNAL EFFECT ABSENT; execution not enabled.
 Phase-entry SHA `2338e7c7`. Immutable pre-`.1R.22` baseline `8603fe6a`;
 `.1R.22` finalize head `15aeb269` (`8603fe6a..15aeb269` = 9 commits).
 
-**Historical 16/18-node reproduction.** Independent deterministic no-xdist
-fixed-SHA A/B (baseline `8603fe6a` in a `git worktree`, HEAD `15aeb269`)
-reproduces **18** functional guard-test nodes that PASS at `8603fe6a` and
+**Historical 22-node reproduction.** Independent deterministic no-xdist
+fixed-SHA A/B (baseline `8603fe6a` and `15aeb269` `git worktree`s; two
+sweeps — the 11 files `.1R.23` §12 implicates, then ~65 broad candidate
+files matching every PBRD / PBPA / POL-005 / policy-count freeze pattern)
+reproduces **22** functional guard-test nodes that PASS at `8603fe6a` and
 FAIL at `15aeb269`, attributable to the two authorized `.1R.22` changes (add
 POL-013 → canonical registry 12→13; PBPA-001 v1.0→v1.1 byte change; PBRD-001
 v2.1→v3.0 + POL-005 §12a wording). **0 attributable removals.** `.1R.23` §12
-enumerated **16**; its own enumeration under-counted by **2**
-(`test_phase_149d_rwmpc_…::test_existing_contract_text_not_amended_by_phase_149d`,
-`test_trusted_approval_presentation_…3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization`)
-— same self-similar guard-freeze class. All 18 are stale point-in-time
+enumerated **16**; its own enumeration under-counted by **6** — 2 found
+re-deriving the 11-file set (`…149d_rwmpc…::test_existing_contract_text_not_amended_by_phase_149d`,
+`…3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization`),
+4 more in the full-suite sweep
+(`test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py` ×2,
+`…cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py` ×1,
+`…canonicalization_repair_independent_verification_3w1r2b1r111r1.py` ×1) —
+all the same self-similar guard-freeze class. All 22 are stale point-in-time
 **text/count/byte freeze** guards, **not behavioural** Permission-Broker
 regressions.
 
-**What `.1R.22R` did.** All 18 guards widened to the **exact authorized
+**What `.1R.22R` did.** All 22 guards widened to the **exact authorized
 change set** (POL-013 / PBPA-001 v1.1 / PBRD-001 v3.0 / POL-005 §12a), **no
 wildcard, no broad prefix, no loosened invariant** — each still rejects an
 unauthorized change: (A) registry-cardinality guards now assert exactly 13
@@ -45,7 +51,7 @@ hard-DENY domain. Provenance-preserving **`## ERRATUM`** appended to the
 `.1R.22` canonical doc (original §§1–20 and the immutable `.pcae` phase-report
 artifacts preserved verbatim) correcting *"0 unexplained attributable
 functional regressions"* / *"each was widened … and is listed here"* to the
-true **"18 attributable, non-behavioural point-in-time guard-freeze failures,
+true **"22 attributable, non-behavioural point-in-time guard-freeze failures,
 0 removals, referred to `.1R.22R`"**. New reconciliation suite
 `tests/test_n16_3_scope_fence_reconciliation_3w1r2b1r1_1r22r.py`. Four
 `.1R.23` IV tests made reconciliation-aware in place (historical finding kept
@@ -276,7 +282,7 @@ changes stashed — documented in the canonical artifact §12).
 > checks … no wildcard … every adversarial companion preserved"* as a
 > **complete** inventory — were **incomplete**. `.1R.23` and `.1R.22R`
 > independently re-derived the fixed-SHA A/B over the full guard-freeze suite
-> set and found **18 attributable, non-behavioural point-in-time
+> set and found **22 attributable, non-behavioural point-in-time
 > guard-freeze failures** (`8603fe6a` pass / `15aeb269` fail), **0
 > removals**, that the `.1R.22` §11.1 inventory never named. No N-16-3
 > policy-model defect. Repaired by `.1R.22R` (see this file's Current Phase

@@ -905,33 +905,36 @@ The `.1R.22` A/B **file-selection was incomplete**. A deterministic,
 no-xdist fixed-SHA A/B over the full set of guard/contract-freeze suites
 (baseline `8603fe6a` in a dedicated `git worktree`, HEAD `15aeb269`) finds:
 
-> **EIGHTEEN functional guard-test nodes that PASS at `8603fe6a` and FAIL at
-> `15aeb269`, attributable to the two authorized `.1R.22` changes** (add
+> **TWENTY-TWO functional guard-test nodes that PASS at `8603fe6a` and FAIL
+> at `15aeb269`, attributable to the two authorized `.1R.22` changes** (add
 > POL-013 → canonical registry 12→13; PBPA-001 v1.0→v1.1 byte change;
 > PBRD-001 v2.1→v3.0 header/body + POL-005 §12a wording).
 > **0 attributable removals.**
 
 `.1R.23` §12 enumerated **16** of these; its own enumeration under-counted by
-**2** (`test_phase_149d_rwmpc_contract_independent_verification.py::TestNoProductionModification::test_existing_contract_text_not_amended_by_phase_149d`
-and
-`test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization`)
-— same self-similar guard-freeze class. `.1R.22R` reconciled all **18**.
+**6** — same self-similar guard-freeze class (PBRD v2.1→v3.0 version pins and
+PBPA byte-freeze). Two were found by `.1R.22R`'s re-derivation of the
+`.1R.23` 11-file A/B set; four more by `.1R.22R`'s full-suite fixed-SHA A/B
+sweep (`tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py`
+×2, `tests/test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py` ×1,
+`tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_independent_verification_3w1r2b1r111r1.py` ×1).
+`.1R.22R` reconciled all **22**.
 
 ### E-3. Corrected historical result
 
 | Field | Original `.1R.22` claim | Corrected (`.1R.23` / `.1R.22R`) |
 |---|---|---|
 | Fixed-SHA A/B scope | 42 curated files | full guard/contract-freeze suite set |
-| Attributable added guard failures `8603fe6a → 15aeb269` | **0** | **18** |
+| Attributable added guard failures `8603fe6a → 15aeb269` | **0** | **22** |
 | Attributable removed | 0 | 0 |
 | Classification | n/a | **non-behavioural** stale current-state point-in-time freezes |
-| Guard classes | n/a | (A) policy-registry cardinality 12→13; (B) PBPA-001 v1.1 byte-freeze; (C) PBRD-001 v3.0 / POL-005 §12a text-freeze |
-| §11 "and is listed here" | asserted complete | **incomplete** — the 18 basenames do not appear in §11.1 or §12 |
+| Guard classes | n/a | (A) policy-registry cardinality 12→13 (6); (B) PBPA-001 v1.1 byte-freeze (6); (C) PBRD-001 v3.0 / POL-005 §12a text-freeze (10) |
+| §11 "and is listed here" | asserted complete | **incomplete** — the basenames do not appear in §11.1 or §12 |
 | Production N-16-3 policy-model impact | — | **none** — no policy-model defect; the policy model is substantively verified (`.1R.23` §3, §17) |
 | Governance / evidence impact | — | **material completeness defect** in the `.1R.22` guard inventory and fixed-SHA A/B evidence |
 | Repair | — | `149O.20L.7O.3W.1R.2B.1R.1.1R.22R` (IV pending `.1R.22R.1`) |
 
-### E-4. The 18 attributable point-in-time guard-freeze nodes
+### E-4. The 22 attributable point-in-time guard-freeze nodes
 
 Guard class **A — policy-registry cardinality (12 → 13; POL-013 added):**
 
@@ -959,6 +962,10 @@ Guard class **C — PBRD-001 v2.1 / POL-005 text-freeze (authorized v3.0 MAJOR +
 16. `tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_pbrd_remains_projection_only_and_pol005_remains_hard_deny`
 17. `tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_rpac_companion_contract_is_byte_identical_and_riasc_pbrd_only_normalized`
 18. `tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_3w1r2b1r111r.py::test_active_contract_versions_after_1r15_4_normalization` *(not in `.1R.23` §12)*
+19. `tests/test_trusted_approval_presentation_hpac_proof_lifecycle_canonicalization_repair_independent_verification_3w1r2b1r111r1.py::test_versions_after_1r15_4_normalization` *(not in `.1R.23` §12)*
+20. `tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_contract_headers_are_the_normalized_minor_versions` *(not in `.1R.23` §12)*
+21. `tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py::test_both_major_candidate_calls_are_adjudicated_minor` *(not in `.1R.23` §12)*
+22. `tests/test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py::test_active_versions_and_supersession_are_exact` *(not in `.1R.23` §12)*
 
 ### E-5. Provenance
 

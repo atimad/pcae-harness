@@ -67,7 +67,10 @@ def _flat(s: str) -> str:
 # ═══════════════════════════════════════════════════════════════════════
 def test_contract_headers_are_the_normalized_minor_versions():
     assert RDGO.startswith("# RDGO-001 v3.1")
-    assert PBRD.startswith("# PBRD-001 v2.1")
+    # Phase ...1R.22 (N-16-3) took PBRD-001 v2.1 -> v3.0 (MAJOR, §16
+    # "weakening POL-005 eligibility"). The .1R.15.4 normalization itself
+    # remains a MINOR (see the following test). Reconciled by .1R.22R.
+    assert PBRD.startswith("# PBRD-001 v3.0")
     assert HPAC.startswith("# HPAC-001 v2.1")
     assert RIASC.startswith("# RIASC-001 v3.0")  # errata only, no bump
     assert "**Schema version**: 1.1" in RENOGO
@@ -75,7 +78,12 @@ def test_contract_headers_are_the_normalized_minor_versions():
 
 def test_both_major_candidate_calls_are_adjudicated_minor():
     assert "**v3.1 is a MINOR clarification**" in _flat(RDGO)
-    assert "**v2.1 is a MINOR clarification**" in _flat(PBRD)
+    # The .1R.15.4 PBRD normalization (§4a fact-14 representation
+    # equivalence) was and remains a MINOR — v3.0's own version history
+    # says so. The later N-16-3 v2.1->v3.0 bump is a *separate* MAJOR
+    # (§12a weakens POL-005 eligibility) and is not this normalization.
+    assert "v2.1 was a MINOR clarification" in _flat(PBRD)
+    assert "**v3.0 is a MAJOR**" in _flat(PBRD)
     # RDGO explicitly disclaims the reorder/merge/first-effect-move MAJORs
     assert "does not reorder a gate" in _flat(RDGO)
     assert 'This is not a "closed shape" MAJOR.' in PBRD
