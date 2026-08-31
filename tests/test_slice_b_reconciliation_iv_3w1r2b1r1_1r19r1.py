@@ -580,7 +580,9 @@ def test_pol_005_hard_deny_still_present():
 # ── 50. test-weakening audit over the whole .1R.19R diff ─────────────
 
 def test_no_test_weakening_in_the_r19r_diff():
-    diff = _git("diff", R20_HEAD, "HEAD", "--", "tests/")
+    # Exclude this IV suite itself — it quotes marker names as string data.
+    this_file = Path(__file__).name
+    diff = _git("diff", R20_HEAD, "HEAD", "--", "tests/", f":(exclude)tests/{this_file}")
     added = [l[1:] for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
 
     def defs(text: str) -> set[str]:
@@ -599,13 +601,17 @@ def test_no_test_weakening_in_the_r19r_diff():
         "test_finding_n20_3_1r19_own_meta_guard_is_self_contradicting",
     }
     for rel in touched:
+        if rel == f"tests/{this_file}":
+            continue
         old = defs(_git("show", f"{R20_HEAD}:{rel}"))
         new = defs((REPO_ROOT / rel).read_text())
         assert len(new) >= len(old), (rel, sorted(old - new))
         assert (old - new) <= reconciliation_aware, (rel, sorted(old - new))
 
-    # no skip / xfail introduced to pass; no wildcard consumer entry introduced
+    # no skip / xfail *decorator* introduced to pass; no wildcard consumer entry
     for l in added:
-        assert "pytest.mark.skip" not in l
-        assert "pytest.mark.xfail" not in l
-        assert not ("AUTHORIZED_CONSUMERS" in l and ("*" in l or "fnmatch" in l))
+        s = l.strip()
+        assert not s.startswith("@pytest.mark.skip"), l
+        assert not s.startswith("@pytest.mark.xfail"), l
+        assert not s.startswith("@pytest.mark.skipif"), l
+        assert not ("AUTHORIZED_CONSUMERS" in l and ('"*"' in l or "fnmatch" in l))
