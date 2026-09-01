@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1 — Independent Verification of
+the N-16-4 Scope-Fence / Verification-Evidence Reconciliation. **STATUS:
+BLOCKED — `.1R.26R` NOT VERIFIED.** Verification-entry SHA `e52d2f8e`.
+
+Independent fixed-SHA reconstruction verified both intended repairs as exact,
+finite, and adversarially restrictive; independently derived the complete
+historical attributable set as exactly 42; and found zero candidate-only
+attributable failures in the repaired A/R 69-file broad guard sweep. The
+`.1R.26` append-only erratum is quantitatively and chronologically truthful,
+and `.1R.27` remains historically BLOCKED.
+
+**BLOCKER:** finalized `.1R.26R` repair-suite nodes
+`test_14_no_test_weakening_in_the_r26r_diff` and
+`test_15_no_wildcard_or_fnmatch_introduced_in_the_r26r_diff` fail at R because
+their `B..HEAD` scans match the suite's own newly committed `xfail` and
+`fnmatch` literals. Combined evidence run: 782 passed, 2 failed. This is
+`.1R.26R`-attributable verification-evidence debt; repair is required and was
+not performed inside this IV.
+
+No production or normative-contract change. Runtime remains Observed / observe
+/ unavailable; first external effect ABSENT. N-16-5/6/7 remain OPEN. N-23-2
+remains INFO / DEFERRED. N-16-4 remains IMPLEMENTED — FRESH INDEPENDENT
+VERIFICATION REQUIRED. A separately authorized repair/adjudication successor
+must fix the self-referential evidence guard, followed by a new IV. Historical
+`.1R.27` must not be reused; later runtime-gate IV identity is `.1R.27R` or the
+exact governed successor. DELEGATED `.3` FINALIZATION / COMMIT / PUSH remains
+UNAUTHORIZED.
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_1_INDEPENDENT_VERIFICATION_OF_THE_N_16_4_SCOPE_FENCE_RECONCILIATION.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R — N-16-4 Scope-Fence /
 Verification-Evidence Reconciliation and Repair. **STATUS: REPAIRED —
 INDEPENDENT VERIFICATION PENDING `.1R.26R.1`.** Phase-entry SHA `9d28f7ef`

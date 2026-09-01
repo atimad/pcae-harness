@@ -2,6 +2,18 @@
 
 ## Accepted
 
+- **Phase `.1R.26R.1` BLOCKED adjudication (2026-09-01).** The historical
+  `.1R.26` attributable stale-guard set is independently established as
+  exactly 42 and both intended `.1R.26R` repairs are exact. `.1R.26R` is
+  nevertheless NOT VERIFIED because its finalized repair suite's tests 14
+  and 15 inspect the full `B..HEAD` tests diff and match their own committed
+  `xfail` / `fnmatch` literals. This self-referential evidence defect is
+  `.1R.26R`-attributable and must be repaired only in a separately authorized
+  successor. The unrelated Gate6-consumer guard first fails at `.1R.17`
+  commit `302f5aba` and covers an intentional fail-closed Gate6-to-Gate10
+  dependency, not an N-16-4 product/security defect. Phase IDs are unique;
+  historical `.1R.27` remains BLOCKED and cannot be reused, so a later
+  runtime-gate IV uses `.1R.27R` or the exact governed successor.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 — N-16-4 positive Runtime
   Enforcement gate implementation (2026-09-01).** Implemented the `.1R.25`
   trust-boundary freeze exactly: B-1 = Model B1-B (no
