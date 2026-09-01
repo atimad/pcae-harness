@@ -17,6 +17,9 @@
     "bootstrap_session_reporting_tests": "not_applicable: bootstrap implementation unchanged"
   },
   "validation_results": {
+    "fast_green": "352 passed across implementation, historical IV, reconciliation, harness, and fresh product IV",
+    "report_notification_tests": "not_applicable: reporting implementation unchanged",
+    "bootstrap_session_reporting_tests": "not_applicable: bootstrap implementation unchanged",
     "fresh_iv": "69 passed",
     "combined_lineage": "352 passed",
     "affected_current": "1378 passed, 0 failed over 30 files",
@@ -50,6 +53,6 @@
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.28 — N-16-5 Real FIDO2/WebAuthn/CTAP and Protected Human-Approval UI Architecture and Contract Planning",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head": "3"
+  "pushed_status": "pending_push",
+  "origin_main_head": "5"
 }
