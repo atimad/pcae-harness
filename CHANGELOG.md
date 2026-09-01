@@ -6,6 +6,49 @@
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.28: N-16-5 real FIDO2/CTAP and protected approval planning to Idle: awaiting authorization for the N-16-5 contract-freeze phase post 149O.20L.7O.3W.1R.2B.1R.1.1R.28; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for N-16-5 architecture and contract planning after N-16-4 closure to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.28: N-16-5 real FIDO2/CTAP and protected approval planning; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27R: Independent Verification of the N-16-4 Runtime Enforcement Gate After Reconciliation to Idle: awaiting explicit authorization for N-16-5 architecture and contract planning after N-16-4 closure; session refreshed and governance continuity revalidated.
+- Phase `.1R.29` froze **RHAMP-001 v1.0 — Real Human Authentication Mechanism &
+  Protected Presentation Profile Contract**
+  (`docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md`,
+  RHAMP-REQ-001..169, RHAMP-INV-001..018) as a companion under HPAC-001 v2.1's
+  existing extension points, changing none of its text. Frozen: real
+  `mechanism_id` allowlist = exactly `{hpac.fido2.uv_presence.v2}`; real
+  `verifier_kind` allowlist = exactly `{pcae-protected-local-presentation/1.0}`
+  plus process-isolated presentation-helper integrity obligations (pinned
+  executable digest + administrator-installed descriptor + protected
+  installation record — not path alone); native-CTAP2 terminology separated
+  from WebAuthn/browser-origin semantics (no browser, no web origin, no TLS, no
+  loopback, no port); a PCAE-owned canonical native-CTAP2 client-data context
+  (`RHAMP-CLIENT-CONTEXT/1.0`) whose `context_identifier`
+  `pcae-hpac://hpac.pcae.local/runtime-invocation-approval.v2` is classified as
+  an internal domain-separation constant, not a browser origin;
+  `rp_id = "hpac.pcae.local"` compiled-in constant with `rpIdHash` verified;
+  attestation not authoritative (none/self accepted, enterprise prohibited, no
+  MDS, no device-uniqueness claim); non-discoverable / `allowList`-bound
+  roaming USB-HID / NFC credentials only; UP + UV mandatory (RHAMP adds the
+  `FLAG.UV` check `hatp_fido2_provider.py` omits); challenge TTL ≤ 120 s, proof
+  age ≤ 300 s, presentation expiry == approval expiry; signature-counter policy
+  (0/absent accept, non-zero regression → fail closed, never auto-revoke)
+  backed by a new protected per-credential counter-state artifact
+  (`RHAMP-COUNTER-STATE/1.0`) with frozen update linearization; a new protected
+  per-credential FIDO2-credential sidecar (`RHAMP-FIDO2-CREDENTIAL/1.0`) for the
+  raw CTAP2 credential id — `CredentialRecord` and every HPAC-001 schema
+  byte-unchanged; first-credential bootstrap anchored by HPAC-REQ-023's external
+  deployment-owner protected administration principal; explicit Approve/Reject
+  election with no implicit/timeout/touch-alone approval; the closed
+  `terminal_reason_code` vocabulary re-derived to 41 codes (the `.1R.28`
+  "25"/"27" figures superseded and the discrepancy disclosed); NON_REAL
+  non-upgradeability preserved structurally; local interactive control-plane
+  host required, headless/remote approval deferred and authorized by no part of
+  the contract. Existing-contract versioning re-derived: **no existing contract
+  moves** — HPAC-001 stays v2.1; RHAMP-001 v1.0 is the sole normative delta of
+  the N-16-5 track through `.1R.29` (REPRC-001 v1.0 companion precedent). No
+  `src/pcae/**` change. Production positive path after N-16-5 alone = NONE;
+  first external effect remains UNREACHABLE. Implementation decomposition
+  frozen: `.1R.30` (mechanism + registry + bootstrap) → `.1R.31` (IV) →
+  `.1R.32` (protected presentation + `require_real_assurance=True` wiring) →
+  `.1R.33` (IV + mandatory real-CTAP2-hardware verification + N-16-5 closure).
+  Runtime remains Observed / observe / unavailable; first external effect
+  ABSENT.
 - Phase `.1R.28` completed governed N-16-5 architecture/contract planning.
   Central finding: real human-principal authentication and protected approval
   presentation are already architecturally frozen (HPAC-001 v2.1, RIHAC-001

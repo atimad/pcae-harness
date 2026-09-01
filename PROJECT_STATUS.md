@@ -2,6 +2,75 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.29 — N-16-5 Real Human Authentication
+Mechanism & Protected Presentation Profile Contract Freeze (RHAMP-001 v1.0).
+**STATUS: CONTRACT FREEZE COMPLETE — RHAMP-001 v1.0 FROZEN AS THE SOLE
+NORMATIVE DELTA — IMPLEMENTATION NOT BEGUN.** Phase-entry SHA `4ae0a025`.
+
+This phase turned the `.1R.28` planning decisions into a precise normative
+companion contract, **RHAMP-001 v1.0** (RHAMP-REQ-001..169, RHAMP-INV-001..018),
+authored under HPAC-001 v2.1's existing extension points and changing none of
+its text. Frozen: real `mechanism_id` allowlist = exactly
+`{hpac.fido2.uv_presence.v2}`; real `verifier_kind` allowlist = exactly
+`{pcae-protected-local-presentation/1.0}` plus the process-isolated
+presentation-helper integrity obligations (pinned executable digest +
+administrator-installed descriptor + protected installation record — **not path
+alone**); native-CTAP2 terminology separated from WebAuthn/browser-origin
+semantics (no browser, no web origin, no TLS, no loopback, no port); a
+PCAE-owned canonical native-CTAP2 client-data context
+(`RHAMP-CLIENT-CONTEXT/1.0`) with `context_identifier`
+`pcae-hpac://hpac.pcae.local/runtime-invocation-approval.v2` classified as an
+internal domain-separation constant, **not** a browser security origin;
+`rp_id = "hpac.pcae.local"` (compiled-in constant, `rpIdHash` verified);
+attestation not authoritative (none/self accepted, enterprise prohibited, no
+MDS, no device-uniqueness claim); non-discoverable / `allowList`-bound
+credentials; roaming USB-HID / NFC only; UP + UV mandatory (RHAMP adds the
+`FLAG.UV` check HATP omits — finding N-16-5-3); challenge TTL ≤ 120 s, proof
+age ≤ 300 s, presentation expiry == approval expiry; signature-counter policy
+(0/absent accept, non-zero regression → fail closed, never auto-revoke) backed
+by a **new protected per-credential counter-state artifact**
+(`RHAMP-COUNTER-STATE/1.0`) with frozen create/update linearization; a **new
+protected per-credential FIDO2-credential sidecar** (`RHAMP-FIDO2-CREDENTIAL/1.0`)
+for the raw CTAP2 credential id — `CredentialRecord` and every HPAC-001 schema
+**byte-unchanged**; first-credential bootstrap anchored by HPAC-REQ-023's
+external deployment-owner protected administration principal (never an arbitrary
+CLI caller, OS username, first registrant, agent, or repo identity); explicit
+Approve/Reject election, no implicit/timeout/touch-alone approval; the closed
+`terminal_reason_code` vocabulary **re-derived to 41 codes** (the `.1R.28`
+"25"/"27" figures superseded and the discrepancy disclosed — RHAMP-REQ-130);
+NON_REAL non-upgradeability preserved structurally; local interactive
+control-plane host required, headless/remote approval deferred and authorized by
+no part of the contract.
+
+**Existing-contract versioning re-derived: no existing contract moves.**
+HPAC-001 stays v2.1; the only normative delta of the entire N-16-5 track
+through `.1R.29` is RHAMP-001 v1.0 (REPRC-001 v1.0 companion precedent). No
+`src/pcae/**` change. Production positive path after N-16-5 alone = NONE; first
+external effect remains UNREACHABLE (N-16-6 admission + N-16-7 capability
+independently block it). No BLOCKED condition applies.
+
+Implementation decomposition frozen (RHAMP-001 §64; IDs recommended, NOT
+reserved; each its own human auth + IV pair): `.1R.30` (real FIDO2 mechanism +
+registry writer + bootstrap ceremony) → `.1R.31` (IV) → `.1R.32` (protected
+presentation + `require_real_assurance=True` wiring through Gate 5 / Gate 9) →
+`.1R.33` (IV + **mandatory real-CTAP2-hardware verification** + N-16-5 closure).
+Then N-16-6 → N-16-7 (strictly last). Slice C/D no phase ID until N-16-3..7 all
+close. N-23-1 INFO; N-23-2 INFO / DEFERRED. Exact recommended next phase:
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30` — requires its own explicit human
+authorization. DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
+
+Canonical artifacts:
+`docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md`
+(RHAMP-001 v1.0),
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_29_N_16_5_REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT_FREEZE.md`.
+
+Runtime: `not_implemented` / `Observed` / `observe` / `unavailable`. First
+external effect: ABSENT.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.28 — N-16-5 Real FIDO2/WebAuthn/CTAP and
 Protected Human-Approval UI Architecture and Contract Planning. **STATUS:
 PLANNING COMPLETE — ARCHITECTURE FROZEN FROM PRIMARY SOURCE — IMPLEMENTATION
