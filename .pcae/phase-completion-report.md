@@ -1,6 +1,6 @@
 # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R.1 Complete — Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Skip-Detection Repair
 
-**Status:** VERIFIED — pending governed push promotion
+**Status:** VERIFIED
 
 ## Summary
 
@@ -36,7 +36,7 @@ lifecycle, hook bypass, force push, or history rewrite.
 DELEGATED `.3` FINALIZATION / COMMIT / PUSH:
 UNAUTHORIZED
 
-Pushed: pending governed push. `origin/main..HEAD`: 2.
+Pushed: pushed. `origin/main..HEAD`: 0.
 
 ## Recommended next phase
 

@@ -36,8 +36,8 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only pre-existing historical DONE-index omissions",
-    "pcae_push_check": "pending governed push",
-    "telegram_runtime": "configured and outbound-ready; dispatch reserved for complete promotion",
+    "pcae_push_check": "nothing_to_push",
+    "telegram_runtime": "configured and outbound-ready",
     "pcae_runtime_inspect": "Observed / observe / unavailable; plugins 0; capabilities 0",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED"
   },
@@ -60,6 +60,6 @@
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.27R — Independent Verification of the N-16-4 Runtime Enforcement Gate After Reconciliation",
   "execution_availability": "unavailable",
-  "pushed_status": "pending_push",
-  "origin_main_head": "2"
+  "pushed_status": "pushed",
+  "origin_main_head": "0"
 }
