@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Phase `.1R.27R` independently verified the N-16-4 product gate from the
+  repaired baseline and closes N-16-4. REPRC/B1-B/B2-D/Currentness B,
+  stale-result rejection, non-bearer trust, production ALLOW unreachability,
+  PB/no-go semantics, and downstream independence all verify clean. Fresh IV:
+  69 passed; combined lineage: 352 passed; affected lineage: 1,378 passed;
+  broad 4,845-node sweep has zero N-16-4 candidate-only unexplained failure.
+  Production/contracts/runtime/effects remain unchanged. N-16-5/6/7 remain
+  open; exact next recommendation is `.1R.28` N-16-5 architecture/contract
+  planning.
+
+- Transitioned active task from Idle: awaiting explicit authorization after completed harness verification to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27R: Independent Verification of the N-16-4 Runtime Enforcement Gate After Reconciliation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R.1: Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Skip-Detection Repair to Idle: awaiting explicit authorization after completed harness verification; session refreshed and governance continuity revalidated.
 - Phase `.1R.26R.1R.1R.1` independently verified the syntax-aware
   skip-detection repair. Fresh AST adversaries detect executable xfail,

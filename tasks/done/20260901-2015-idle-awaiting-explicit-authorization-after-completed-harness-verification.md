@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization after completed harness verification
 
 ## Status
 
-active
+done
 
 ## Mode
 

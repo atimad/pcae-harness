@@ -2,6 +2,17 @@
 
 ## Accepted
 
+- **Phase `.1R.27R` N-16-4 final product IV (2026-09-01).** Close N-16-4
+  after independently verifying REPRC-001, B1-B, B2-D, Currentness B,
+  stale-result rejection, non-bearer trust, production ALLOW
+  unreachability, PB/no-go semantics, downstream independence, clean
+  reconciliation/harness lineage, and absence of product/contract/runtime/
+  effect drift. Carry the pre-existing Gate6/Gate10 stale guard as separate
+  non-blocking architectural debt. N-16-5 requires a dedicated combined
+  mechanism/contract plan before implementation; recommend exactly
+  `.1R.28` — N-16-5 Real FIDO2/WebAuthn/CTAP and Protected Human-Approval UI
+  Architecture and Contract Planning.
+
 - **Phase `.1R.26R.1R.1R.1` independent verification (2026-09-01).** The
   unified AST detector restores every source-backed predecessor weakening
   form and the explicitly authorized direct-skip completion without
