@@ -1,85 +1,63 @@
 {
-    "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.26R",
-    "phase_name": "N-16-4 Scope-Fence / Verification-Evidence Reconciliation and Repair",
-    "phase_title": "N-16-4 Scope-Fence / Verification-Evidence Reconciliation and Repair",
-    "status": "completed",
-    "commit_attribution": "The narrow repair to tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py, the second same-class repair to tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py's AUTHORIZED_GATE7_TEST_IMPORTERS allowlist, the new tests/test_runtime_dispatch_1r26r_scope_fence_reconciliation.py repair suite, the additive .1R.26 erratum, the new canonical .1R.26R artifact, the tasks/DECISIONS.md entry, the PROJECT_STATUS.md / CHANGELOG.md records, the task lifecycle, and this completion metadata / report were authored and committed by the human-authorized primary operator for this exact phase through the governed pcae lifecycle. The initial repair-and-investigation body was performed by a delegated background investigation under the primary operator's direction; the delegated worker did not commit, finalize, or push -- all commits and the governed push were performed directly by the primary operator, who also independently re-verified the delegated investigation's key claims (reproduced the blocking node's baseline PASS / candidate FAIL directly, discovered and repaired one additional same-class stale guard the delegated investigation missed, and confirmed one further pre-existing unrelated finding via a clean git worktree at the unmodified .1R.26 head). git diff 9d28f7ef HEAD -- src/pcae is empty; git diff 9d28f7ef HEAD -- docs/contracts is empty. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED preserved.",
-    "execution_availability": "unavailable",
-    "summary": "N-16-4 Scope-Fence / Verification-Evidence Reconciliation and Repair (.1R.26R). REPAIRED -- INDEPENDENT VERIFICATION PENDING .1R.26R.1. Phase-entry SHA 9d28f7ef (.1R.26 finalized head; .1R.27's own governed finalization commits landed between phase-entry and this phase's task start, attributed to .1R.27, not this phase). Repairs the one undisclosed .1R.26-attributable stale point-in-time scope-fence guard .1R.27's independent verification discovered and BLOCKED on: tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py::test_runtime_posture_unchanged_and_no_new_first_effect_call_site -- independently reproduced PASS at pre-.1R.26 baseline 28b8b2b7, FAIL at .1R.26 finalized head 9d28f7ef, because its .1R.22-baseline-rooted (8603fe6a) exact src/pcae current-state file-set assertion was never widened to include .1R.26's authorized single-file addition runtime_dispatch_gate7.py. N-16-4 implementation semantics UNCHANGED -- verification-evidence / scope-fence defect only, not a product or contract defect. Repair: widened the guard's exact-equality set to {permission_broker_foundation.py, runtime_dispatch_permission.py, runtime_dispatch_gate7.py} -- exact-set equality preserved (no wildcard, no fnmatch, no prefix, no subset/superset tolerance); the guard's other two assertions (runtime posture unchanged; no new adapter.dispatch( call site) untouched. A broad independent re-derivation (fixed-SHA A/B, 28b8b2b7 baseline vs. repaired HEAD, deterministic no-xdist) plus a direct primary-operator run of the full Gate-7-referencing suite family found ONE FURTHER same-class stale guard the delegated investigation's narrower A/B missed: tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py::test_53_test_importers_of_gate7_symbols_are_a_known_finite_set -- .1R.26's own finite AUTHORIZED_GATE7_TEST_IMPORTERS allowlist did not admit the later-authorized .1R.27 independent-verification suite (which legitimately imports Gate-7 symbols); repaired identically (exact-set widened by exactly one entry, no wildcard). True attributable stale-guard count for this class: 42 (40 original .1R.26 + 2 this phase). One further, UNRELATED pre-existing finding was surfaced and independently confirmed present at the unmodified 9d28f7ef head via a clean git worktree (zero .1R.26R changes applied): tests/test_gate6_permission_broker_production_consumption_integration_independent_verification_3w1r2b1r1_1r13.py::test_no_downstream_production_consumer_of_gate6_symbols fails because runtime_dispatch_gate10_eligibility.py references Gate-6 symbols outside that guard's frozen subset allowlist -- this is NOT .1R.26-attributable (unrelated to runtime_dispatch_gate7.py, pre-dates .1R.26) and was left unrepaired, disclosed as an out-of-scope carried finding, not assigned a phase ID by this repair. Provenance: the original .1R.26 canonical report is preserved unrewritten; a provenance-preserving erratum was appended (additive only) recording the original claim (40 nodes / 0 unexplained regressions), the .1R.27 discovery, this repair, and the corrected true count (42). .1R.27's BLOCKED verdict is preserved as historical record, not converted into a successful IV -- its own evidence suite was committed and finalized under .1R.27's own dedicated governed phase (mirroring the .1R.18 BLOCKED-finalization precedent) entirely before this .1R.26R phase's task was opened; this repair's new suite (test 17) verifies that attribution directly via git log commit-subject inspection, not mere untracked-ness. New repair suite tests/test_runtime_dispatch_1r26r_scope_fence_reconciliation.py (20 adversarial cases: exact 3-file authorized set passes; synthetic 4th unauthorized file fails; missing authorized file fails; substituted wrong module fails; runtime-posture / no-first-effect preserved; no-wildcard / no-weakening / provenance audits pass). New canonical doc docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_N_16_4_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md. No production source change (git diff 9d28f7ef HEAD -- src/pcae = empty). No normative-contract change (git diff 9d28f7ef HEAD -- docs/contracts = empty). Runtime not_implemented / Observed / observe / unavailable; 0 plugins / 0 capabilities; pcae runtime inspect byte-unchanged. First external effect ABSENT. N-16-5 / N-16-6 / N-16-7 remain OPEN, untouched. N-23-2 carried (INFO / DEFERRED). .3 delegated finalization / commit / push remains UNAUTHORIZED. Verdict: N-16-4 implementation UNCHANGED (IMPLEMENTED); .1R.26 verification-evidence / scope-fence defect REPAIRED -- INDEPENDENT VERIFICATION PENDING .1R.26R.1; N-16-4 remains NOT CLOSED -- .1R.27 did not resume or complete its adjudication in this phase.",
-    "derived_correctness": "Every claim was independently re-derived, not trusted from the delegated investigation's report: the blocking node's PASS/FAIL split was reproduced directly by the primary operator in a dedicated git worktree at 28b8b2b7 before any repair was made; the repair diff was inspected line-by-line to confirm exact-set semantics were preserved (no wildcard/fnmatch/subset introduced); a direct primary-operator run of the full 27-file Gate-7-referencing suite family (git grep -l for Gate7Result|is_gate7_result|runtime_dispatch_gate7 over tests/) surfaced the second same-class stale guard (AUTHORIZED_GATE7_TEST_IMPORTERS) and the one unrelated pre-existing finding that the delegated investigation's narrower A/B had not covered; the unrelated finding's pre-existing status was confirmed via a second dedicated git worktree at the unmodified 9d28f7ef head with zero .1R.26R changes applied, proving it could not be attributable to this phase.",
-    "metadata_consistency": "phase_id / phase_name / phase_title / status / summary / recommended_next_phase all name 149O.20L.7O.3W.1R.2B.1R.1.1R.26R. The canonical report title matches. phase_commits are the governed .1R.26R commits made before this metadata-staging commit, each subject carrying the ...1R.1.1R.26R token.",
-    "internal_evidence_coherence": "The new 20-test repair suite passes at HEAD (verified live, re-run twice by the primary operator after each fix). The combined directly-relevant Gate-7 suite family (292 tests across 6 files) passes 292/292 at HEAD. The broader 22-file Gate-7-referencing family passes 1148/1154 (6 failed, 3 skipped) -- all 6 failures independently classified: 5 are .1R.26's own already-disclosed pre-existing baseline-common failures (identical test node names), 1 is the newly-disclosed unrelated pre-existing Gate-6/Gate-10-eligibility finding, confirmed present at the unmodified .1R.26 head via worktree. No contradiction found; no unexplained candidate-only failure remains.",
-    "test_evidence_classification": "governed_reconciliation_repair_phase_two_finite_allowlist_guards_widened_by_exactly_their_authorized_new_entries_one_unrelated_preexisting_finding_disclosed_not_repaired_zero_unexplained_attributable_regressions",
-    "tests_run": 1440,
-    "tests_added_or_updated": "20 new tests in tests/test_runtime_dispatch_1r26r_scope_fence_reconciliation.py (baseline/candidate SHA reconstruction; known node baseline PASS / candidate FAIL / exact stale src/pcae set; current exact authorized 3-file set; 4th unauthorized file rejected; missing authorized file rejected; substituted unauthorized runtime file rejected; runtime posture assertion preserved; no first-effect assertion preserved; test basename unchanged; no wildcard; no fnmatch/prefix; no skip/xfail; historical/current distinction; broad A/B true attributable count; all repaired nodes green at HEAD; .1R.26 report preserved; erratum present; erratum true count; .1R.27 BLOCKED preservation via commit-attribution check; no production diff; no contract diff; runtime unchanged; first effect absent; N-16-5/6/7 untouched; N-23-2 deferred). 2 modified: tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py (exact-set widened by runtime_dispatch_gate7.py) and tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py (AUTHORIZED_GATE7_TEST_IMPORTERS widened by the .1R.27 evidence suite entry).",
-    "test_results": {
-        "fast_green": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R evidence. Directly-relevant combined suite (tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py + tests/test_runtime_dispatch_1r26r_scope_fence_reconciliation.py + tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py + tests/test_gate7_positive_runtime_enforcement_independent_verification_3w1r2b1r1_1r27.py + tests/test_gate7_runtime_enforcement_coordinator_integration_3w1r2b1r1_1r13_2.py + tests/test_gate7_runtime_enforcement_coordinator_independent_verification_3w1r2b1r1_1r13_3.py): 292 passed, 0 failed (-p no:randomly, no xdist). Broader 22-file whole-tests Gate-7-referencing family: 1148 passed, 6 failed, 3 skipped -- 5 are .1R.26's own already-disclosed pre-existing baseline-common failures (.1R.19R.1::test_no_test_weakening_in_the_r19r_diff, .1R.22R::test_no_test_weakening_in_the_r22r_diff, .1R.22R::test_n16_4_to_7_untouched, .1R.22R::test_no_older_phase_doc_or_contract_was_rewritten_to_imply_v3_0_existed_earlier, .1R.22R.1::test_27_no_wildcard_introduced_in_tests_diff_since_r23_head); 1 is the newly-disclosed unrelated pre-existing finding (test_no_downstream_production_consumer_of_gate6_symbols), independently confirmed present at the unmodified 9d28f7ef head via a dedicated git worktree -- NOT .1R.26-attributable, out of scope, not repaired. CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES beyond these 6 disclosed/classified failures = 0. UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.",
-        "known_node_reproduction": "Independently reproduced by the primary operator in a dedicated git worktree at 28b8b2b7: PASS. At current HEAD (post-.1R.27, pre-repair): FAIL -- AssertionError: extra item 'src/pcae/core/runtime_dispatch_gate7.py'. After repair: PASS.",
-        "second_node_discovery_and_repair": "test_53_test_importers_of_gate7_symbols_are_a_known_finite_set failed after the .1R.27 evidence suite was committed (legitimately imports Gate-7 symbols) because AUTHORIZED_GATE7_TEST_IMPORTERS was never widened to admit it. Repaired by adding exactly one entry with an explicit .1R.26R citation comment; the allowlist stays exact/finite, no wildcard.",
-        "unrelated_finding_confirmation": "test_no_downstream_production_consumer_of_gate6_symbols fails identically in a clean git worktree at 9d28f7ef (the unmodified .1R.26 finalized head, zero .1R.26R changes applied) -- proves this failure pre-dates and is unrelated to both .1R.26 and .1R.26R. Cause: runtime_dispatch_gate10_eligibility.py references Gate-6 symbols outside that guard's frozen subset allowlist. Not repaired; disclosed as an out-of-scope carried finding.",
-        "adversarial_challenge": "New suite, 20/20 passing: authorized exact 3-file set passes; synthetic 4th unauthorized file fails; removing one authorized file fails; substituting the wrong module fails; runtime-posture / no-first-effect assertions preserved; no-wildcard / no-test-weakening / provenance audits pass.",
-        "no_test_weakening_audit": "git diff 9d28f7ef HEAD -- tests/ contains zero removed def test_ lines and zero added @pytest.mark.skip/xfail decorator lines (grepped directly). No test renamed to evade discovery. No wildcard/fnmatch/prefix introduced into any allowlist.",
-        "production_byte_scope": "git diff --name-only 9d28f7ef HEAD -- src/pcae is empty.",
-        "normative_byte_scope": "git diff --name-only 9d28f7ef HEAD -- docs/contracts is empty.",
-        "runtime_state": "not_implemented / Observed / observe / unavailable; 0 plugins / 0 capabilities; pcae runtime inspect byte-identical before and after.",
-        "first_effect_absence": "No adapter.dispatch() call site anywhere in src/pcae (unchanged since .1R.26).",
-        "report_notification_tests": "not_applicable_this_phase -- .1R.26R adds no report / notification code path; unmodified and out of scope.",
-        "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no session / bootstrap / handoff code path changed; pcae status coherence / health / check passed at phase entry and finalization."
-    },
-    "validation_results": {
-        "fast_green": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R evidence. Directly-relevant combined suite: 292 passed, 0 failed. Broader 22-file family: 1148 passed, 6 failed (5 pre-existing baseline-common + 1 unrelated pre-existing, both disclosed and classified), 3 skipped. 0 unexplained attributable functional regressions.",
-        "report_notification_tests": "not_applicable_this_phase -- .1R.26R adds no report / notification code path; unmodified and out of scope.",
-        "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no session / bootstrap / handoff code path changed; pcae status coherence / health / check passed at phase entry.",
-        "repair_disposition": "N-16-4 implementation semantics UNCHANGED. .1R.26 verification-evidence / scope-fence defect REPAIRED -- INDEPENDENT VERIFICATION PENDING .1R.26R.1. N-16-4 remains NOT CLOSED. .1R.27 historical BLOCKED verdict not reopened or converted.",
-        "true_attributable_count": "42 (40 originally disclosed and reconciled in .1R.26, plus 2 this phase: the .1R.22-suite exact-set node, and the AUTHORIZED_GATE7_TEST_IMPORTERS finite-allowlist node). Independently re-derived via fixed-SHA A/B plus a direct primary-operator suite run, not assumed.",
-        "unrelated_finding_disposition": "test_no_downstream_production_consumer_of_gate6_symbols (Gate-6 symbols referenced by runtime_dispatch_gate10_eligibility.py) is NOT .1R.26-attributable; confirmed present at the unmodified 9d28f7ef head; disclosed, not repaired, no phase ID assigned by this repair.",
-        "provenance_preservation": "Original .1R.26 canonical report preserved unrewritten (original sections unedited); provenance-preserving erratum appended additively (Section 21) recording the original claim, the .1R.27 discovery, this repair, and the corrected count. .1R.27's own canonical BLOCKED report and completion metadata (committed and pushed under .1R.27's own governed phase before this phase began) are untouched by this phase."
-    },
-    "governance_results": {
-        "pcae_health": "healthy",
-        "pcae_check": "passed",
-        "pcae_status_coherence": "coherent",
-        "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing hygiene debt from earlier phases); no current-phase error",
-        "pcae_push_check": "nothing_to_push",
-        "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins / capabilities; re-asserted at phase entry and finalization; byte-unchanged",
-        "telegram_runtime": "configured and outbound-ready",
-        "delegated_3_finalization_commit_push": "UNAUTHORIZED",
-        "finding_adjudication_status": "N-16-4: IMPLEMENTED -- INDEPENDENT VERIFICATION PENDING (a fresh/restarted .1R.27, NOT CLOSED). .1R.26 verification-evidence / scope-fence defect: REPAIRED -- INDEPENDENT VERIFICATION PENDING .1R.26R.1. .1R.27's BLOCKED verdict preserved as historical record. N-16-5 / N-16-6 / N-16-7 OPEN, not begun. Slice C / Slice D: no phase ID. One unrelated pre-existing Gate-6/Gate-10-eligibility finding disclosed, not repaired, out of scope.",
-        "recommended_repair_phase": "Not applicable -- this IS the repair phase. Both same-class stale guards discovered (one referred by .1R.27, one discovered directly by this phase's own broader re-derivation) were reconciled narrowly and exactly. The unrelated Gate-6/Gate-10-eligibility finding was NOT repaired -- it is out of .1R.26R's scope (not .1R.26-attributable); it remains an open, disclosed, un-phase-ID'd carried finding for a future phase to adjudicate if desired."
-    },
-    "notification_dispatch_result": {},
-    "no_go_confirmation": "No production source file was created, modified, or deleted by .1R.26R; git diff 9d28f7ef HEAD -- src/pcae is empty.\nNo normative contract was created, modified, or deleted by .1R.26R; git diff 9d28f7ef HEAD -- docs/contracts is empty.\nNo N-16-4 technical semantics were reopened; REPRC-001, B1-B, B2-D, and Currentness B remain exactly as .1R.26 implemented and .1R.27 independently verified them.\n.1R.27 was not resumed within .1R.26R; its BLOCKED verdict remains historical record, not converted into a successful IV; its own governed finalization (commit, report, push) happened entirely before this phase's task was opened.\nNo N-16-5 / N-16-6 / N-16-7 work was begun; all three remain OPEN.\nNo Slice C was implemented; no adapter.dispatch( call site exists anywhere in src/pcae.\nNo first external effect was implemented or called.\nNo execution was enabled; runtime remains not_implemented / Observed / observe / unavailable; 0 plugins / 0 capabilities.\nNo test was weakened: no def test_ was removed in any suite; no @pytest.mark.skip / xfail decorator was added; no wildcard, fnmatch, or package prefix was introduced into either widened allowlist -- both stay exact-equality / finite-set checks that still reject any other unauthorized file.\nNo test was renamed to evade discovery; the repaired guard's name, location, and other two assertions are unchanged.\nNo reopening of a closed gate boundary (Gate 5, 6, 7, 8, 9, 10 pre-effect) occurred; Gate 8/9/10 independence and Slice-B independence were re-confirmed via the re-run suite, not weakened.\nNo repair beyond the two same-class stale-guard nodes was performed; the one unrelated pre-existing Gate-6/Gate-10-eligibility finding was disclosed but deliberately NOT repaired, since it is not .1R.26-attributable and repairing it would exceed this phase's narrow charter.\nNo human approval was treated as a policy or enforcement override.\nNo raw git commit / git push, no --no-verify, no force push, no history rewrite, no hook bypass; governed pcae lifecycle only.\nNo delegated worker committed, finalized, or pushed; only the primary human-authorized operator holds .1R.26R lifecycle authority; the historical delegated .3 finalization / commit / push incident remains UNAUTHORIZED.\nNo Remaining section is presented; all authorized .1R.26R work is complete.",
-    "files_changed": [
-        "CHANGELOG.md",
-        "PROJECT_STATUS.md",
-        "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26_N_16_4_REAL_POSITIVE_SINGLE_ATTEMPT_RUNTIME_ENFORCEMENT_GATE_IMPLEMENTATION.md",
-        "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_N_16_4_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md",
-        "tasks/DECISIONS.md",
-        "tasks/active/20260901-1550-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-27-repair-phase-recommended-before-1r-27-can-resume.md",
-        "tasks/active/20260901-1551-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-26r-n-16-4-scope-fence-verification-evidence-reconciliation-and-repair.md",
-        "tasks/active/20260901-1605-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-26r.md",
-        "tasks/done/20260901-1550-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-27-repair-phase-recommended-before-1r-27-can-resume.md",
-        "tasks/done/20260901-1551-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-26r-n-16-4-scope-fence-verification-evidence-reconciliation-and-repair.md",
-        "tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py",
-        "tests/test_runtime_dispatch_1r26r_scope_fence_reconciliation.py",
-        "tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py"
-    ],
-    "files_changed_count": 13,
-    "phase_commits": [
-        {
-            "hash": "8b762a35",
-            "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R: reconcile two .1R.26-attributable stale scope-fence guards (exact-set file-fence widened by runtime_dispatch_gate7.py; finite Gate7-test-importer allowlist widened by the .1R.27 evidence suite), true attributable count 42; provenance-preserving .1R.26 erratum; canonical .1R.26R artifact; PROJECT_STATUS + CHANGELOG; disclose one unrelated pre-existing Gate-6/Gate-10-eligibility finding (not repaired, out of scope)"
-        },
-        {
-            "hash": "b4982d4c",
-            "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R: open dedicated governed phase task; reconcile post-.1R.27 idle task into tasks/done/ (task-memory hygiene)"
-        },
-        {
-            "hash": "fe823100",
-            "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R: close phase task, transition to idle; expand idle-task allowed-file zone for canonical completion authorship"
-        }
-    ],
-    "recommended_next_phase": "Repair phase required first (own explicit human authorization, ID recommended not reserved): 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1 -- Independent Verification of the N-16-4 Scope-Fence / Verification-Evidence Reconciliation. RE-DERIVE, do not trust this phase's report or suite: independently reproduce the repaired node's PASS at HEAD; independently confirm no other .1R.26-attributable stale guard remains via a fresh broad fixed-SHA A/B; independently verify the erratum's provenance and quantitative truth (42); independently confirm .1R.27's BLOCKED verdict was not altered; independently confirm the unrelated Gate-6/Gate-10-eligibility finding is genuinely unattributable to .1R.26/.1R.26R. After 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1 closes, recommend a fresh/restarted 149O.20L.7O.3W.1R.2B.1R.1.1R.27 IV from this repaired baseline -- do not skip directly to N-16-5. Do not begin N-16-5/6/7. Do not begin Slice C. Do not implement or call the first external effect. Do not enable execution.",
-    "pushed_status": "pending",
-    "origin_main_head": "pending"
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1",
+  "phase_name": "Independent Verification of the N-16-4 Scope-Fence / Verification-Evidence Reconciliation",
+  "phase_title": "Independent Verification of the N-16-4 Scope-Fence / Verification-Evidence Reconciliation",
+  "status": "blocked",
+  "summary": "Independent verification BLOCKED. The finalized repair evidence suite fails two self-referential no-weakening guards at its own finalized SHA. The true historical attributable count is exactly 42 and both intended repairs are exact, but the repair phase is not verified and no repair was performed in this IV.",
+  "commit_attribution": "Commit 0c16a0e309409398235a266d03f3a6909119f28e is owned by this exact independent-verification phase and contains only fresh IV evidence, canonical documentation, and governed task/project memory. No production or normative-contract file changed.",
+  "derived_correctness": "Primary-source Git reconstruction established A=28b8b2b7, I=99d85106, B=9d28f7ef, C=ba4d21c3, R/V=e52d2f8e. Fixed-SHA worktrees independently reproduced both intended historical failures, the exact 42-node set, and zero repaired A/R candidate-only failures. The blocking repair-suite failures were then reproduced at finalized R/current and require repair.",
+  "metadata_consistency": "All structured identity fields and the canonical report identify the same independent-verification phase and BLOCKED disposition.",
+  "internal_evidence_coherence": "Fresh IV suite 26/26 passed. The combined relevant evidence run produced 782 passed and 2 failed; both failures are the disclosed self-referential repair-suite blockers. Historical A/B and repaired A/R counts, provenance, source/contract diffs, and runtime state agree.",
+  "test_evidence_classification": "blocked_independent_verification_two_reproducible_repair_suite_failures_no_repair",
+  "tests_run": 810,
+  "tests_added_or_updated": "26 fresh independent-verification tests covering the required 37 evidence axes; production and normative contracts untouched.",
+  "test_results": {
+    "fast_green": "BLOCKED: combined relevant evidence 782 passed, 2 failed. Exact failures are repair-suite tests 14 and 15; fresh IV suite 26/26 passed.",
+    "report_notification_tests": "not_applicable: no reporting implementation changed",
+    "bootstrap_session_reporting_tests": "not_applicable: no bootstrap implementation changed"
+  },
+  "validation_results": {
+    "historical_ab": "exact historical attributable set 42",
+    "repaired_ar": "zero candidate-only attributable guard failures",
+    "blocker": "finalized repair suite self-matches its own xfail and fnmatch literals",
+    "fast_green": "BLOCKED: 782 passed, 2 disclosed repair-suite failures; fresh IV 26/26 passed",
+    "report_notification_tests": "not_applicable: reporting implementation unchanged",
+    "bootstrap_session_reporting_tests": "not_applicable: bootstrap implementation unchanged"
+  },
+  "governance_results": {
+    "pcae_health": "healthy",
+    "pcae_check": "passed",
+    "pcae_status_coherence": "coherent",
+    "pcae_doctor_task_memory": "warning-only pre-existing historical DONE-index omissions",
+    "pcae_push_check": "nothing_to_push",
+    "telegram_runtime": "configured and outbound-ready",
+    "pcae_runtime_inspect": "Observed / observe / unavailable; plugins 0; capabilities 0",
+    "delegated_3_finalization_commit_push": "UNAUTHORIZED"
+  },
+  "notification_dispatch_result": {},
+  "no_go_confirmation": "No production source changed.\nNo normative contract changed.\nNo repair was performed inside this IV.\nNo historical report was rewritten.\nNo runtime capability changed.\nNo first external effect was implemented or called.\nNo execution was enabled.\nNo N-16-5 work began.\nNo N-16-6 work began.\nNo N-16-7 work began.\nNo Slice C work began.\nNo raw git commit, raw git push, bypass, force push, or history rewrite was used.",
+  "files_changed": [
+    "CHANGELOG.md",
+    "PROJECT_STATUS.md",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_1_INDEPENDENT_VERIFICATION_OF_THE_N_16_4_SCOPE_FENCE_RECONCILIATION.md",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/active/20260901-1756-idle-awaiting-explicit-human-authorization-for-the-1r-26r-verification-evidence-repair-after-1r-26r-1-blocked.md",
+    "tasks/done/20260901-1605-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-26r.md",
+    "tasks/done/20260901-1725-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-26r-1-independent-verification-of-the-n-16-4-scope-fence-verification-evidence-reconciliation.md",
+    "tests/test_runtime_dispatch_1r26r_reconciliation_independent_verification_3w1r2b1r1_1r26r1.py",
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md"
+  ],
+  "files_changed_count": 11,
+  "phase_commits": [
+    {
+      "hash": "0c16a0e309409398235a266d03f3a6909119f28e",
+      "subject": "Phase .1R.26R.1 BLOCKED independent verification"
+    }
+  ],
+  "recommended_next_phase": "Human-authorized verification-evidence repair/adjudication successor; identifier must be derived under repository phase-ID rules before start",
+  "execution_availability": "unavailable",
+  "pushed_status": "pending",
+  "origin_main_head": "pending"
 }

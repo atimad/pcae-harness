@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting explicit human authorization for the .1R.26R verification-evidence repair after .1R.26R.1 BLOCKED
+Idle: awaiting explicit human authorization for the verification-evidence repair after the blocked IV
 
 ## Status
 
@@ -18,7 +18,7 @@ validation
 
 ## Goal
 
-Idle: awaiting explicit human authorization for the .1R.26R verification-evidence repair after .1R.26R.1 BLOCKED
+Idle: awaiting explicit human authorization for the verification-evidence repair after the blocked IV
 
 ## Allowed Files
 
@@ -31,6 +31,8 @@ Idle: awaiting explicit human authorization for the .1R.26R verification-evidenc
 - CHANGELOG.md
 - docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_1_INDEPENDENT_VERIFICATION_OF_THE_N_16_4_SCOPE_FENCE_RECONCILIATION.md
 - tests/test_runtime_dispatch_1r26r_reconciliation_independent_verification_3w1r2b1r1_1r26r1.py
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -63,8 +65,6 @@ strict
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
 - No rollback
 
 ## Acceptance Criteria
