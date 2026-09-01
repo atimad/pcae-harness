@@ -29,6 +29,7 @@ Idle: awaiting explicit authorization for the required harness security repair
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/**
 
 ## Forbidden Files
 
@@ -61,8 +62,7 @@ strict
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
+- No raw git commit or raw git push; governed PCAE phase-finalization lifecycle only
 - No rollback
 
 ## Acceptance Criteria
