@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Phase `.1R.26R.1R` repaired the `.1R.26R.1` verification-harness
+  self-reference defects with AST-aware executable expected-failure and live
+  wildcard/fnmatch detection; also corrected its finalized-V ancestry check.
+  Real violations remain adversarially detected, while strings/comments/
+  docstrings are ignored. Combined suites: 68 passed. Substantive guards,
+  production, contracts, runtime/effects, historical count 42, A/R zero, and
+  historical BLOCKED verdicts are preserved. IV pending `.1R.26R.1R.1`.
+- Transitioned active task from Idle: awaiting explicit human authorization for the verification-evidence repair after the blocked IV to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R: N-16-4 Reconciliation IV Evidence-Harness Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1: Independent Verification of the N-16-4 Scope-Fence / Verification-Evidence Reconciliation to Idle: awaiting explicit human authorization for the .1R.26R verification-evidence repair after .1R.26R.1 BLOCKED; session refreshed and governance continuity revalidated.
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1 independent verification is
   **BLOCKED — `.1R.26R` NOT VERIFIED**. Independent A/I/B/C/R reconstruction

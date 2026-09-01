@@ -2,6 +2,14 @@
 
 ## Accepted
 
+- **Phase `.1R.26R.1R` harness repair (2026-09-01).** Replace the two raw
+  `B..HEAD` added-line substring scanners with AST-aware executable-structure
+  inspection. Detect real pytest expected-failure decorators/calls and aliases,
+  executable fnmatch calls, and wildcard entries in live scope assignments;
+  ignore non-executable prose/fixture data. Bind finalized IV SHA V by ancestry,
+  not moving-HEAD equality. This is harness-only: substantive guards remain
+  byte-identical; `.1R.26R.1` remains historically BLOCKED; IV is required at
+  exactly `.1R.26R.1R.1`.
 - **Phase `.1R.26R.1` BLOCKED adjudication (2026-09-01).** The historical
   `.1R.26` attributable stale-guard set is independently established as
   exactly 42 and both intended `.1R.26R` repairs are exact. `.1R.26R` is

@@ -114,3 +114,25 @@ Combined evidence result before stop: **782 passed, 2 failed**. This is `.1R.26R
 Required next phase: a separately authorized `.1R.26R` verification-evidence repair/adjudication successor that bounds the no-weakening scan to the immutable substantive repair diff (or an equally restrictive non-self-referential design), followed by a new IV. This IV did not repair it. Canonical IDs are unique, so a later runtime-gate IV must use `.1R.27R` or the exact repository-governed successor, never rewrite/reuse `.1R.27`.
 
 No production, normative-contract, runtime/effect, N-16-5/6/7, Slice C, or execution state changed.
+
+## Successor annotation — `.1R.26R.1R`
+
+The original BLOCKED verdict above remains historical and is not converted
+into success. Successor repair phase `.1R.26R.1R` independently reproduced
+both named failures at finalized `.1R.26R.1` SHA `7d60eda6` and established
+that they were verification-harness self-reference defects only:
+
+- `test_14_no_test_weakening_in_the_r26r_diff` matched quoted expected-failure
+  marker text in its own scanner source; no executable expected-failure use
+  existed.
+- `test_15_no_wildcard_or_fnmatch_introduced_in_the_r26r_diff` matched its own
+  explanatory/scanner literals; no live wildcard allowlist or executable
+  `fnmatch` broadening existed.
+
+`.1R.26R.1R` replaced raw added-line text matching with syntax-aware executable
+structure inspection and added adversarial proof that real violations remain
+detected. It also corrected the IV SHA check to bind immutable finalized `V`
+as an ancestor rather than equating it with moving `HEAD`. These are harness
+repairs only: the two substantive `.1R.26R` guards, production source, and
+normative contracts remain byte-identical. The evidence-harness repair remains
+pending its own `.1R.26R.1R.1` independent verification.

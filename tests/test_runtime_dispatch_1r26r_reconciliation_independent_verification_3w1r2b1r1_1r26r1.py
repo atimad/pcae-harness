@@ -26,7 +26,7 @@ I = "99d85106"  # .1R.26 production implementation, before guard reconciliation
 B = "9d28f7ef"
 C = "ba4d21c3"  # finalized historical .1R.27 BLOCKED head
 R = "e52d2f8e"
-V = R
+V = "7d60eda674ec31dd2f7efafdbbfd168c358caca6"
 
 FIRST_FILE = "tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py"
 FIRST_NODE = f"{FIRST_FILE}::test_runtime_posture_unchanged_and_no_new_first_effect_call_site"
@@ -156,7 +156,7 @@ def test_01_sha_chain_is_reconstructed_from_git():
     assert _git("merge-base", A, B).strip().startswith(A)
     assert _git("merge-base", B, C).strip().startswith(B)
     assert _git("merge-base", C, R).strip().startswith(C)
-    assert _git("rev-parse", "HEAD").strip().startswith(V)
+    assert _git("merge-base", V, "HEAD").strip() == V
 
 
 def test_02_actual_repair_commit_parent_is_the_finalized_blocked_head():

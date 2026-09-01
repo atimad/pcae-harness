@@ -10,7 +10,7 @@ Idle: awaiting explicit human authorization for the verification-evidence repair
 
 ## Status
 
-active
+done
 
 ## Mode
 

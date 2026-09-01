@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R — N-16-4 Reconciliation IV
+Evidence-Harness Repair. **STATUS: REPAIRED — INDEPENDENT VERIFICATION PENDING
+`.1R.26R.1R.1`.** Phase-entry/finalized-V SHA `7d60eda6`.
+
+Independently reproduced the two `.1R.26R.1` BLOCKED self-reference failures
+at V and replaced raw added-line substring scans with AST-aware executable
+structure inspection. Real pytest expected-failure decorators/calls (including
+aliases), executable fnmatch calls, and wildcard entries in live scope sets are
+still rejected; prose, comments, docstrings, and fixture strings are ignored.
+Also corrected the finalized IV's moving-HEAD SHA assertion to bind immutable V
+as an ancestor. Combined repair/IV/fresh suites: 68 passed.
+
+The two substantive `.1R.26R` guards are byte-identical to entry; historical
+count 42 and repaired A/R zero-attributable result are preserved. `.1R.26R.1`
+remains historically BLOCKED with an append-only successor annotation. No
+production/contract/runtime/effect drift. N-16-4 remains IMPLEMENTED / NOT
+CLOSED; N-16-5/6/7 OPEN; N-23-2 INFO / DEFERRED. Recommend exactly
+`.1R.26R.1R.1` independent verification next. DELEGATED `.3` FINALIZATION /
+COMMIT / PUSH: UNAUTHORIZED.
+
+Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_1R_N_16_4_RECONCILIATION_IV_EVIDENCE_HARNESS_REPAIR.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1 — Independent Verification of
 the N-16-4 Scope-Fence / Verification-Evidence Reconciliation. **STATUS:
 BLOCKED — `.1R.26R` NOT VERIFIED.** Verification-entry SHA `e52d2f8e`.

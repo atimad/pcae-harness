@@ -29,6 +29,7 @@ history and the repaired guard file itself, not report prose), that:
 
 from __future__ import annotations
 
+import ast
 import subprocess
 from pathlib import Path
 
@@ -59,6 +60,113 @@ def _pytest(*nodeids: str, cwd: Path = REPO_ROOT) -> subprocess.CompletedProcess
          "--no-header", *nodeids],
         cwd=cwd, capture_output=True, text=True,
     )
+
+
+def _attribute_chain(node: ast.AST) -> tuple[str, ...]:
+    parts: list[str] = []
+    while isinstance(node, ast.Attribute):
+        parts.append(node.attr)
+        node = node.value
+    if isinstance(node, ast.Name):
+        parts.append(node.id)
+    return tuple(reversed(parts))
+
+
+def _executable_xfail_uses(source: str) -> list[tuple[str, int]]:
+    """Return executable pytest expected-failure uses, ignoring text data."""
+    tree = ast.parse(source)
+    pytest_names = {"pytest"}
+    mark_names: set[str] = set()
+    direct_names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "pytest":
+                    pytest_names.add(alias.asname or alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module == "pytest":
+            for alias in node.names:
+                if alias.name == "xfail":
+                    direct_names.add(alias.asname or alias.name)
+                elif alias.name == "mark":
+                    mark_names.add(alias.asname or alias.name)
+
+    def kind(expr: ast.AST) -> str | None:
+        target = expr.func if isinstance(expr, ast.Call) else expr
+        if isinstance(target, ast.Name) and target.id in direct_names:
+            return "call"
+        chain = _attribute_chain(target)
+        if len(chain) == 2 and chain[0] in pytest_names and chain[1] == "xfail":
+            return "call"
+        if len(chain) == 3 and chain[0] in pytest_names and chain[1:] == ("mark", "xfail"):
+            return "decorator"
+        if len(chain) == 2 and chain[0] in mark_names and chain[1] == "xfail":
+            return "decorator"
+        return None
+
+    found: set[tuple[str, int]] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            detected = kind(node)
+            if detected:
+                found.add((detected, node.lineno))
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            for decorator in node.decorator_list:
+                detected = kind(decorator)
+                if detected:
+                    found.add(("decorator", decorator.lineno))
+    return sorted(found)
+
+
+_LIVE_SCOPE_NAME_PARTS = (
+    "ALLOWLIST", "ALLOWED", "AUTHORIZED", "CONSUMER", "EXPECTED",
+    "IMPORTER", "PERMITTED", "SCOPE",
+)
+
+
+def _live_wildcard_or_fnmatch_uses(source: str) -> list[tuple[str, int]]:
+    """Return executable broadening constructs, ignoring prose/fixture text."""
+    tree = ast.parse(source)
+    module_names = {"fnmatch"}
+    direct_names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "fnmatch":
+                    module_names.add(alias.asname or alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module == "fnmatch":
+            for alias in node.names:
+                if alias.name == "fnmatch":
+                    direct_names.add(alias.asname or alias.name)
+
+    found: set[tuple[str, int]] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            target = node.func
+            chain = _attribute_chain(target)
+            if ((isinstance(target, ast.Name) and target.id in direct_names) or
+                    (len(chain) == 2 and chain[0] in module_names and chain[1] == "fnmatch")):
+                found.add(("fnmatch-call", node.lineno))
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            names = {target.id for target in targets if isinstance(target, ast.Name)}
+            if not any(part in name.upper() for name in names for part in _LIVE_SCOPE_NAME_PARTS):
+                continue
+            value = node.value
+            for item in ast.walk(value):
+                if isinstance(item, ast.Constant) and isinstance(item.value, str):
+                    if any(char in item.value for char in ("*", "?", "[")):
+                        found.add(("wildcard-scope-entry", item.lineno))
+    return sorted(found)
+
+
+def _changed_test_sources() -> list[tuple[str, str, str]]:
+    result = []
+    for rel in _git("diff", "--name-only", PHASE_ENTRY, "HEAD", "--", "tests/").split():
+        old = _git("show", f"{PHASE_ENTRY}:{rel}")
+        path = REPO_ROOT / rel
+        new = path.read_text() if path.exists() else ""
+        result.append((rel, old, new))
+    return result
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -198,22 +306,24 @@ def test_13_test_basename_and_function_name_unchanged():
 # ══════════════════════════════════════════════════════════════════════════
 
 def test_14_no_test_weakening_in_the_r26r_diff():
-    diff = _git("diff", PHASE_ENTRY, "HEAD", "--", "tests/")
-    added = [l for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
-    removed_def_test = [l for l in diff.splitlines()
-                         if l.startswith("-") and not l.startswith("---") and "def test_" in l]
-    added_def_test = [l for l in added if "def test_" in l]
-    assert not any("@pytest.mark.skip" in l or "xfail" in l for l in added)
-    # removals are only permitted if the same def test_ name is also re-added
-    removed_names = {l.split("def test_", 1)[1].split("(")[0] for l in removed_def_test}
-    added_names = {l.split("def test_", 1)[1].split("(")[0] for l in added_def_test}
-    assert removed_names <= added_names or not removed_names
+    for rel, old, new in _changed_test_sources():
+        old_defs = {
+            node.name for node in ast.walk(ast.parse(old))
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name.startswith("test_")
+        } if old else set()
+        new_defs = {
+            node.name for node in ast.walk(ast.parse(new))
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name.startswith("test_")
+        } if new else set()
+        assert old_defs <= new_defs, (rel, sorted(old_defs - new_defs))
+        assert _executable_xfail_uses(new) == [], rel
 
 
 def test_15_no_wildcard_or_fnmatch_introduced_in_the_r26r_diff():
-    diff = _git("diff", PHASE_ENTRY, "HEAD", "--", "tests/")
-    added = [l for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
-    assert not any("fnmatch" in l for l in added)
+    for rel, _old, new in _changed_test_sources():
+        assert _live_wildcard_or_fnmatch_uses(new) == [], rel
 
 
 # ══════════════════════════════════════════════════════════════════════════
