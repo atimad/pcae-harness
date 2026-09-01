@@ -42,7 +42,7 @@ raw Git lifecycle, hook bypass, force push, or history rewrite.
 DELEGATED `.3` FINALIZATION / COMMIT / PUSH:
 UNAUTHORIZED
 
-Pushed: not_pushed (pending governed PCAE push).
+Pushed: pushed. `origin/main..HEAD`: 0 at post-push reconciliation.
 
 ## Recommended next phase
 
