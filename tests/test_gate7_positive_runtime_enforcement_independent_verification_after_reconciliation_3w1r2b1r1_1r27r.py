@@ -93,7 +93,7 @@ def test_01_phase_sha_chain_is_immutable_and_linear():
         assert _git("cat-file", "-t", sha) == "commit"
     for left, right in zip(chain, chain[1:]):
         assert _git("merge-base", "--is-ancestor", left, right) == ""
-    assert _git("rev-parse", "HEAD") == P
+    assert _git("merge-base", "--is-ancestor", P, "HEAD") == ""
 
 
 def test_02_reprc_freeze_correction_implementation_order():

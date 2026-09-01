@@ -23,6 +23,8 @@ REAL POSITIVE SINGLE-ATTEMPT RUNTIME ENFORCEMENT GATE COMPLETE.
 Ancestry was re-derived with `git merge-base --is-ancestor`; none of these
 identities was accepted from report prose alone. The historical `.1R.27`
 canonical report remains BLOCKED and is not reused or rewritten.
+The fresh suite binds phase entry P by immutable ancestry rather than moving
+HEAD equality, so it remains valid after governed evidence commits.
 
 ## Primary sources
 
@@ -256,4 +258,3 @@ UNAUTHORIZED
 
 Only the primary human-authorized operator owns `.1R.27R` lifecycle actions.
 No raw commit/push, bypass, force push, or history rewrite is permitted.
-
