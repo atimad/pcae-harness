@@ -10,7 +10,7 @@ Idle: awaiting explicit human authorization for the .1R.26R repair (post-149O.20
 
 ## Status
 
-active
+done
 
 ## Mode
 
