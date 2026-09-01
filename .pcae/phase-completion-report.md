@@ -25,7 +25,7 @@ The carried Gate6/Gate10 guard is pre-existing intentional fail-closed evidence 
 DELEGATED `.3` FINALIZATION / COMMIT / PUSH:
 UNAUTHORIZED
 
-Pushed: pending governed push. `origin/main..HEAD`: 3.
+Pushed: yes, through governed `pcae push`. `origin/main..HEAD`: 0 at post-push reconciliation.
 
 ---
 *Canonical report artifact. Schema version 1.0.*
