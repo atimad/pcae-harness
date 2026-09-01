@@ -2,7 +2,30 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for N-16-5 architecture and contract planning after N-16-4 closure to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.28: N-16-5 real FIDO2/CTAP and protected approval planning; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27R: Independent Verification of the N-16-4 Runtime Enforcement Gate After Reconciliation to Idle: awaiting explicit authorization for N-16-5 architecture and contract planning after N-16-4 closure; session refreshed and governance continuity revalidated.
+- Phase `.1R.28` completed governed N-16-5 architecture/contract planning.
+  Central finding: real human-principal authentication and protected approval
+  presentation are already architecturally frozen (HPAC-001 v2.1, RIHAC-001
+  v2.0, RIASC-001 v3.0) and implemented against NON_REAL doubles; `fido2` is
+  already a dependency and `hatp_fido2_provider.py` is a reusable real CTAP2
+  primitive. Frozen: native CTAP2 roaming hardware FIDO2
+  (`hpac.fido2.uv_presence.v2`), UP+UV mandatory, fixed internal `rpId`
+  `hpac.pcae.local`, no browser / no web origin / no TLS / no loopback;
+  PCAE-owned process-isolated local presentation helper
+  (`pcae-protected-local-presentation/1.0`); no attestation required;
+  non-discoverable `allowList`-bound credentials; USB-HID/NFC only; challenge
+  TTL ≤ 120 s, proof age ≤ 300 s; signature-counter regression fails closed;
+  25-code `terminal_reason_code` vocabulary; local interactive control-plane
+  host with headless/remote approval explicitly deferred. Contract impact:
+  new companion RHAMP-001 v1.0, no HPAC-001 bump, no MAJOR/MINOR to any
+  existing contract. Production positive path after N-16-5 alone = NONE; first
+  external effect remains unreachable. Implementation decomposed into
+  `.1R.29` (RHAMP-001 freeze) → `.1R.30`/`.1R.31` (mechanism + registry +
+  bootstrap + IV) → `.1R.32`/`.1R.33` (protected presentation + real-assurance
+  wiring + IV + N-16-5 closure incl. mandatory real-hardware verification).
+  No production/contract/schema/runtime/effect change. Runtime remains
+  Observed / observe / unavailable; first external effect ABSENT.
 - Phase `.1R.27R` independently verified the N-16-4 product gate from the
   repaired baseline and closes N-16-4. REPRC/B1-B/B2-D/Currentness B,
   stale-result rejection, non-bearer trust, production ALLOW unreachability,

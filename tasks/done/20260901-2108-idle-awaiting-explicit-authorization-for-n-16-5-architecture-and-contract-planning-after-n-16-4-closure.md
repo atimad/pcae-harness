@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for N-16-5 architecture and contract plann
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.28 — N-16-5 Real FIDO2/WebAuthn/CTAP and
+Protected Human-Approval UI Architecture and Contract Planning. **STATUS:
+PLANNING COMPLETE — ARCHITECTURE FROZEN FROM PRIMARY SOURCE — IMPLEMENTATION
+NOT BEGUN.** Phase-entry SHA `9901e546`.
+
+Central finding (analogous to N-16-4's): the architecture and the
+wire/store schemas for real human-principal authentication and protected
+approval presentation are **already frozen** — HPAC-001 v2.1
+(comprehensively), RIHAC-001 v2.0 §12 condition 7 / §16, RIASC-001 v3.0 —
+and the mechanism-neutral consumption path (registry, verifier, proof
+lifecycle, presentation store, Gates 5/6/7/8/9/10) is already implemented
+against NON_REAL doubles. `fido2>=1.1,<2` is already a project dependency
+and `hatp_fido2_provider.py` is a working real CTAP2 primitive whose reuse
+HPAC-REQ-019 authorizes. `.1R.28` is therefore a contract-sufficiency
+confirmation + residual-decision freeze + implementation-decomposition
+phase.
+
+Frozen: native CTAP2 roaming hardware FIDO2 (`hpac.fido2.uv_presence.v2`),
+UP+UV mandatory, offline, OS-neutral, fixed internal `rpId` `hpac.pcae.local`
+— **no browser, no WebAuthn ceremony, no web origin, no TLS, no loopback**
+(the RP/origin/HTTPS/port questions are moot). Protected presentation =
+PCAE-owned process-isolated local presentation helper
+(`verifier_kind = "pcae-protected-local-presentation/1.0"`). Attestation:
+none required. Discoverable creds: non-discoverable / `allowList`-bound.
+Transports: USB-HID primary, NFC permitted; no BLE/hybrid. Challenge TTL
+≤ 120 s; proof age ≤ 300 s. Signature-counter regression → fail closed via
+a new protected per-credential counter-state artifact. `terminal_reason_code`
+vocabulary of 25 codes frozen. Deployment: local interactive control-plane
+host + attached USB key; **headless/remote approval explicitly deferred to
+a separate authorized architecture — not N-16-5, not BLOCKED**.
+
+Contract impact: **new companion RHAMP-001 v1.0** (Real Human Authentication
+Mechanism & Protected Presentation Profile) — **no HPAC-001 bump, no MAJOR,
+no MINOR** to any existing contract (REPRC-001 v1.0 precedent). NON_REAL
+non-upgradeability preserved structurally. Production positive path after
+N-16-5 alone = NONE; first external effect remains UNREACHABLE (N-16-6
+admission + N-16-7 capability independently block it). No BLOCKED condition
+applies. No production/contract/schema/runtime/effect change by this phase.
+
+Findings N-16-5-1..6 (all non-blocking) feed `.1R.29`. N-16-3 and N-16-4
+not reopened. N-16-6/7 OPEN, N-16-7 last; Slice C/D no phase ID. N-23-1
+INFO; N-23-2 INFO / DEFERRED. Exact recommended next phase:
+`149O.20L.7O.3W.1R.2B.1R.1.1R.29` — N-16-5 Real Human Authentication
+Mechanism & Protected Presentation Profile Contract Freeze (RHAMP-001 v1.0);
+requires its own explicit human authorization. DELEGATED `.3` FINALIZATION /
+COMMIT / PUSH: UNAUTHORIZED.
+
+Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_28_N_16_5_REAL_FIDO2_WEBAUTHN_CTAP_AND_PROTECTED_HUMAN_APPROVAL_UI_ARCHITECTURE_AND_CONTRACT_PLANNING.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27R — Independent Verification of the
 N-16-4 Runtime Enforcement Gate After Reconciliation. **STATUS:
 INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS — N-16-4 CLOSED.**
