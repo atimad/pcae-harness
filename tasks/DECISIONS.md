@@ -2,6 +2,17 @@
 
 ## Accepted
 
+- **Phase `.1R.26R.1R.1R.1` independent verification (2026-09-01).** The
+  unified AST detector restores every source-backed predecessor weakening
+  form and the explicitly authorized direct-skip completion without
+  reintroducing self-text false positives. Wildcard/fnmatch protection,
+  substantive guards, 42/A-R evidence, historical BLOCKED records, and
+  runtime/effect boundaries are preserved. Close the `.1R.26R.1R.1`
+  skip-detection blocker while leaving that phase historically BLOCKED.
+  Because `.1R.27` is immutable/finalized BLOCKED, the exact next product IV
+  successor is `.1R.27R` — Independent Verification of the N-16-4 Runtime
+  Enforcement Gate After Reconciliation.
+
 - **Phase `.1R.26R.1R.1R` skip-detection repair (2026-09-01).** Preserve the
   `.1R.26R.1R` AST/self-reference design and extend it into one executable
   weakening detector for xfail, skip, skipif, and direct calls. Attribute

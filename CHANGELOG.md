@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Phase `.1R.26R.1R.1R.1` independently verified the syntax-aware
+  skip-detection repair. Fresh AST adversaries detect executable xfail,
+  skip, skipif, direct calls, module/class marks, and supported aliases while
+  ignoring inert self-text; wildcard/fnmatch protection and parse-failure
+  safety remain intact. Fresh IV: 43 passed; combined evidence: 273 passed;
+  broad J/K/current fixed-SHA attribution has zero unexplained candidate-only
+  functional failure. Substantive guards, historical 42/A-R truth, BLOCKED
+  provenance, production/contracts/runtime/effects remain unchanged. The
+  `.1R.26R.1R.1` blocker is closed; N-16-4 remains implemented/not closed and
+  requires product-IV successor `.1R.27R`.
+
+- Transitioned active task from Idle: awaiting explicit authorization for next governed phase to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R.1: Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Skip-Detection Repair; session refreshed and governance continuity revalidated.
 - Phase `.1R.26R.1R.1R` repaired the executable skip-to-pass false negative
   found by `.1R.26R.1R.1`. A unified AST detector now rejects real xfail,
   skip, skipif, direct pytest calls, supported aliases, and module-level marks

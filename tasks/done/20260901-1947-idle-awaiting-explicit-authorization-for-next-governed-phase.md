@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for next governed phase
 
 ## Status
 
-active
+done
 
 ## Mode
 
