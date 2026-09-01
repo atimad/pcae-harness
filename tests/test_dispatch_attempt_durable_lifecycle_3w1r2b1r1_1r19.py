@@ -817,6 +817,7 @@ def test_slice_a_coordinator_byte_unchanged():
 _POST_1R19_AUTHORIZED_SURFACE = {
     "src/pcae/core/runtime_dispatch_permission.py",       # Gate 6 -- N-16-3 profile derivation
     "src/pcae/core/permission_broker_foundation.py",      # POL-005 §12a carve-out + POL-013
+    "src/pcae/core/runtime_dispatch_gate7.py",            # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0)
 }
 
 
@@ -843,6 +844,8 @@ def test_no_contract_file_changed():
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+        # Phase ...1R.26 (N-16-4): the one NEW companion contract REPRC-001 v1.0.
+        "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
     }
     assert changed <= _r122_contracts, changed - _r122_contracts
 

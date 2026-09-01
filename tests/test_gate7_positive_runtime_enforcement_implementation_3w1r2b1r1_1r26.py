@@ -130,6 +130,19 @@ def _allow_posture() -> g7.RuntimeEnforcementPosture:
     )
 
 
+@pytest.fixture(autouse=True)
+def _isolate_gate7_result_registry():
+    """The synthetic-seam tests below add real ``ALLOW`` ``Gate7Result``
+    objects to the process-local ``_GATE7_RESULTS`` registry. Restore it
+    exactly after every test so no other suite in the same pytest process
+    observes a positive result it did not create (e.g. the ``.1R.13.3``
+    ``test_no_production_path_adds_a_positive_gate7result`` invariant)."""
+    snapshot = set(g7._GATE7_RESULTS)
+    yield
+    g7._GATE7_RESULTS.clear()
+    g7._GATE7_RESULTS.update(snapshot)
+
+
 @pytest.fixture
 def bound():
     inp = dispatch_inputs()
@@ -703,31 +716,19 @@ AUTHORIZED_GATE7_CONSUMERS = {
     "src/pcae/core/runtime_dispatch_gate9.py",
     "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
 }
+#: Exact, finite set of test files that *import* the Gate-7 module or its
+#: symbols (real `import` statements, not path strings in scope-fence
+#: comments). No wildcard, no fnmatch, no package prefix.
 AUTHORIZED_GATE7_TEST_IMPORTERS = {
-    "tests/test_b1_b7_n1_n2_production_authority_repair_independent_verification_3w1r2b1r1_1r8.py",
-    "tests/test_dispatch_attempt_durable_lifecycle_3w1r2b1r1_1r19.py",
-    "tests/test_dispatch_attempt_durable_lifecycle_iv_3w1r2b1r1_1r20.py",
+    "tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py",
+    "tests/test_gate7_runtime_enforcement_coordinator_integration_3w1r2b1r1_1r13_2.py",
+    "tests/test_gate7_runtime_enforcement_coordinator_independent_verification_3w1r2b1r1_1r13_3.py",
+    "tests/test_gate8_process_containment_coordinator_integration_3w1r2b1r1_1r13_4.py",
+    "tests/test_gate8_process_containment_coordinator_independent_verification_3w1r2b1r1_1r13_5.py",
+    "tests/test_gate9_atomic_authority_consumption_coordinator_integration_3w1r2b1r1_1r14.py",
+    "tests/test_gate9_atomic_authority_consumption_coordinator_independent_verification_3w1r2b1r1_1r15.py",
     "tests/test_gate10_pre_effect_eligibility_coordinator_3w1r2b1r1_1r17.py",
     "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py",
-    "tests/test_gate10_slice_a_reconciliation_independent_verification_3w1r2b1r1_1r17r_1.py",
-    "tests/test_gate10_slice_a_scope_fence_reconciliation_3w1r2b1r1_1r17r.py",
-    "tests/test_gate5_approval_validation_coordinator_3w1r2b1r1_1r10.py",
-    "tests/test_gate5_approval_validation_coordinator_integration_independent_verification_3w1r2b1r1_1r11.py",
-    "tests/test_gate6_permission_broker_production_consumption_3w1r2b1r1_1r12.py",
-    "tests/test_gate6_permission_broker_production_consumption_integration_independent_verification_3w1r2b1r1_1r13.py",
-    "tests/test_gate7_runtime_enforcement_coordinator_independent_verification_3w1r2b1r1_1r13_3.py",
-    "tests/test_gate7_runtime_enforcement_coordinator_integration_3w1r2b1r1_1r13_2.py",
-    "tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py",
-    "tests/test_gate8_process_containment_coordinator_independent_verification_3w1r2b1r1_1r13_5.py",
-    "tests/test_gate8_process_containment_coordinator_integration_3w1r2b1r1_1r13_4.py",
-    "tests/test_gate9_atomic_authority_consumption_coordinator_independent_verification_3w1r2b1r1_1r15.py",
-    "tests/test_gate9_atomic_authority_consumption_coordinator_integration_3w1r2b1r1_1r14.py",
-    "tests/test_gate9_serialization_semantics_repair_3w1r2b1r1_1r15_2.py",
-    "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py",
-    "tests/test_narrow_eligibility_policy_iv_3w1r2b1r1_1r23.py",
-    "tests/test_runtime_authority_production_repair_3w1r2b1r1117.py",
-    "tests/test_runtime_dispatch_contract_normalization_independent_verification_3w1r2b1r1_1r15_5.py",
-    "tests/test_slice_b_reconciliation_iv_3w1r2b1r1_1r19r1.py",
 }
 
 
@@ -749,24 +750,35 @@ def test_52_unauthorized_extra_consumer_would_fail_the_exact_check():
 def test_53_test_importers_of_gate7_symbols_are_a_known_finite_set():
     hits = set(subprocess.run(
         ["git", "grep", "-l", "-E",
-         r"runtime_dispatch_gate7|Gate7Result|run_gate7_runtime_enforcement", "--", "tests"],
+         r"import +runtime_dispatch_gate7|runtime_dispatch_gate7 +import|"
+         r"runtime_dispatch_gate7 +as |from +pcae\.core\.runtime_dispatch_gate7",
+         "--", "tests"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
     # this file is untracked until the phase's test commit; tolerate its
     # absence from `git grep` output pre-commit.
-    hits.discard("tests/" + Path(__file__).name)
-    known = AUTHORIZED_GATE7_TEST_IMPORTERS - {"tests/" + Path(__file__).name}
+    self_rel = "tests/" + Path(__file__).name
+    hits.discard(self_rel)
+    known = AUTHORIZED_GATE7_TEST_IMPORTERS - {self_rel}
     unexpected = hits - known
     assert unexpected == set(), sorted(unexpected)
-    assert not any(("fnmatch" in x or x == "*") for x in AUTHORIZED_GATE7_TEST_IMPORTERS)
+    missing = known - hits
+    assert missing == set(), sorted(missing)
+    # every allowlist entry is a concrete repo-relative path (exact, finite)
+    for entry in AUTHORIZED_GATE7_TEST_IMPORTERS:
+        assert entry.startswith("tests/") and entry.endswith(".py")
+        assert set(entry) & set("*?[]") == set()
 
 
-def test_54_no_wildcard_in_this_suites_consumer_allowlists():
+def test_54_consumer_allowlists_are_exact_and_finite():
+    # every authorized entry is a literal repo-relative path; none is a glob
+    for entry in (AUTHORIZED_GATE7_CONSUMERS | AUTHORIZED_GATE7_TEST_IMPORTERS):
+        assert isinstance(entry, str)
+        assert entry.endswith(".py")
+        assert not (set(entry) & set("*?[]"))
     src = (REPO_ROOT / "tests" / Path(__file__).name).read_text()
-    seg = src[src.index("AUTHORIZED_GATE7_CONSUMERS ="):src.index("def test_51")]
-    for loose in ('"*"', "fnmatch", ".startswith(", ".endswith("):
-        assert loose not in seg, loose
-    # the production consumer check is exact equality, not a subset
+    # the production consumer check is exact equality, not a subset relation
     assert "hits == AUTHORIZED_GATE7_CONSUMERS" in src
+    assert len(AUTHORIZED_GATE7_CONSUMERS) == 3
 
 
 # ═══════════════════════════════════════════════════════════════════════

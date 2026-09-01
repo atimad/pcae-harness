@@ -388,6 +388,10 @@ def test_no_unpushed_divergence_at_verification_entry():
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+        # Phase .1R.26 (N-16-4 -- REPRC-001 v1.0): Gate 7 + the one new
+        # companion contract. Exact paths, no wildcard.
+        "src/pcae/core/runtime_dispatch_gate7.py",
+        "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
     }
     assert set(prod.split()) <= _authorized, set(prod.split()) - _authorized
 
@@ -1253,7 +1257,10 @@ def test_unauthorized_new_production_importer_would_fail_a_guard(tmp_path):
 # ═══════════════════════════════════════════════════════════════════════
 _UNCHANGED_SINCE_BASELINE = [
     "src/pcae/core/runtime_dispatch_gate5.py",
-    "src/pcae/core/runtime_dispatch_gate7.py",
+    # runtime_dispatch_gate7.py: authorizedly changed by Phase
+    # 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0, the positive
+    # Gate-7 result schema/identity/TTL/immutability). Gate 5 / 8 / 9 stay
+    # byte-frozen here; see _SLICE_A_PLUS_B_PLUS_C_SCOPE.
     "src/pcae/core/runtime_dispatch_gate8.py",
     "src/pcae/core/runtime_dispatch_gate9.py",
     # runtime_dispatch_permission.py (Gate 6) + permission_broker_foundation.py
@@ -1294,7 +1301,7 @@ def test_file_byte_unchanged_since_phase_entry_baseline(rel):
 #: admits the exact `.1R.16`-§38-authorized set (the two 3S.2.1 MUST-FIX
 #: repairs + the item-9 runtime-inspect repair + one new non-authoritative
 #: mirror module). An unauthorized production-file expansion still fails.
-_SLICE_A_PLUS_B_SCOPE = {
+_SLICE_A_PLUS_B_PLUS_C_SCOPE = {
     "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
     "src/pcae/core/runtime_dispatch_attempt_lifecycle.py",
     "src/pcae/core/runtime_invocation.py",
@@ -1305,7 +1312,11 @@ _SLICE_A_PLUS_B_SCOPE = {
     # narrow-eligibility policy + POL-013). Exact filenames, no wildcard.
     "src/pcae/core/permission_broker_foundation.py",
     "src/pcae/core/runtime_dispatch_permission.py",
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0). The
+    # sole authorized production surface for the positive Gate-7 result.
+    "src/pcae/core/runtime_dispatch_gate7.py",
 }
+_SLICE_A_PLUS_B_SCOPE = _SLICE_A_PLUS_B_PLUS_C_SCOPE
 
 
 def test_production_scope_since_baseline_is_exactly_one_new_file():

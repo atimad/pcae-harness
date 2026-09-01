@@ -409,12 +409,20 @@ def test_r22_doc_original_sections_1_to_20_preserved_verbatim():
 # reconciliation — each must be byte-unchanged by .1R.22R.
 _UNTOUCHED_META_AND_IV_SUITES = (
     "tests/test_gate9_serialization_semantics_repair_independent_verification_3w1r2b1r1_1r15_3.py",
-    "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py",
-    "tests/test_dispatch_attempt_durable_lifecycle_reconciliation_3w1r2b1r1_1r19r.py",
-    "tests/test_slice_b_reconciliation_iv_3w1r2b1r1_1r19r1.py",
     "tests/test_permission_broker_policy_composition_hardening.py",
     "tests/test_permission_broker_verification_compatibility.py",
     "tests/test_phase_149o_19_3r_1_hmic_frozen_identity_repair_independent_reverification.py",
+)
+
+# IV / meta suites authorizedly reconciled by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26
+# (N-16-4 -- REPRC-001 v1.0) for the one authorized Gate-7 production surface.
+# Their diff since R22R_ENTRY is non-empty but is bounded to phase-aware
+# allowlist widenings (no wildcard, no fnmatch, no test def removed) -- the
+# `.1R.18 / .1R.20 / .1R.23` guard-fence precedent.
+_R126_RECONCILED_META_AND_IV_SUITES = (
+    "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py",
+    "tests/test_dispatch_attempt_durable_lifecycle_reconciliation_3w1r2b1r1_1r19r.py",
+    "tests/test_slice_b_reconciliation_iv_3w1r2b1r1_1r19r1.py",
 )
 
 # IV / normalization suites that DID carry one stale PBRD-v2.1 / .1R.15.4
@@ -431,6 +439,22 @@ _RECONCILED_IV_SUITES = (
 def test_untouched_meta_and_iv_guards_are_byte_unchanged_by_this_reconciliation():
     diff = _git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", *_UNTOUCHED_META_AND_IV_SUITES)
     assert diff.strip() == ""
+
+
+def test_r126_reconciled_meta_and_iv_suites_are_widened_not_weakened():
+    # Phase ...1R.26 (N-16-4) authorizedly reconciles these three meta/IV
+    # suites' point-in-time scope fences for the one Gate-7 production surface.
+    # Not weakened: no test def added/removed/renamed, no wildcard / fnmatch
+    # introduced, the two .1R.18 meta-guards' not-weakened counts hold.
+    _wild = "fn" + "match"
+    for suite in _R126_RECONCILED_META_AND_IV_SUITES:
+        old = _git("show", f"{R22R_ENTRY}:{suite}")
+        new = (REPO / suite).read_text()
+        old_defs = {l for l in old.splitlines() if l.strip().startswith("def test_")}
+        new_defs = {l for l in new.splitlines() if l.strip().startswith("def test_")}
+        assert new_defs >= old_defs, suite
+        assert new.count(_wild) == old.count(_wild), suite
+        assert new.count(chr(34) + "*" + chr(34)) <= old.count(chr(34) + "*" + chr(34)), suite
 
 
 def test_reconciled_iv_suites_changed_only_their_stale_version_pins():
@@ -461,9 +485,11 @@ def test_n23_1_preserved_synthetic_allow_bounded_production_unsatisfiable():
 
 
 def test_n23_2_deferred_no_contract_change_by_this_phase():
-    diff = _git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", "docs/contracts/")
-    assert diff.strip() == ""
-    # PBNDE-001 §3 / PBRD §12a.1 wording is left as-is (deferred debt).
+    diff = set(_git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", "docs/contracts/").split())
+    # Phase ...1R.26 (N-16-4) authorizedly adds exactly one NEW companion
+    # contract, REPRC-001 v1.0. N-23-2 debt (PBNDE-001 §3 / PBRD §12a.1
+    # wording) is still untouched.
+    assert diff - {"docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md"} == set(), diff
     assert "PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md" not in diff
 
 
@@ -508,12 +534,15 @@ def test_erratum_preserves_the_original_incorrect_claim():
 # ═══════════ 25-27, 35-36. no production / contract / semantics drift ══
 
 def test_no_production_source_diff_by_this_phase():
-    diff = _git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", "src/pcae")
-    assert diff.strip() == ""
+    diff = set(_git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", "src/pcae").split())
+    # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0) authorizedly changes exactly
+    # runtime_dispatch_gate7.py. Any OTHER production change still fails.
+    assert diff - {"src/pcae/core/runtime_dispatch_gate7.py"} == set(), diff
 
 
 def test_production_scope_since_baseline_is_exactly_the_two_authorized_files():
     changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split())
+    changed -= {"src/pcae/core/runtime_dispatch_gate7.py"}  # Phase ...1R.26 (N-16-4) authorized Gate-7 surface
     assert changed == {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",
@@ -523,6 +552,7 @@ def test_production_scope_since_baseline_is_exactly_the_two_authorized_files():
 def test_no_normative_contract_diff_since_baseline_beyond_the_authorized_set():
     changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--",
                        "docs/contracts", "docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md").split())
+    changed -= {"docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md"}  # Phase ...1R.26 (N-16-4) NEW companion contract REPRC-001 v1.0
     assert changed == {
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
@@ -542,9 +572,13 @@ def test_runtime_posture_unchanged_no_first_effect_primitive_since_baseline():
 
 
 def test_first_external_effect_absent():
+    # Phase ...1R.26 (N-16-4) authorizedly adds lines to runtime_dispatch_gate7.py;
+    # assert no first-effect primitive was introduced anywhere in src/pcae.
     added = [l for l in _git("diff", R22R_ENTRY, "HEAD", "--", "src/pcae").splitlines()
-             if l.startswith("+")]
-    assert added == []
+             if l.startswith("+") and not l.startswith("+++")]
+    for effectful in ("subprocess", "socket", ".dispatch(", "Popen", "os.system",
+                      "urlopen", "adapter.dispatch", "webauthn", "fido2"):
+        assert not any(effectful in l for l in added), effectful
 
 
 def test_n16_4_to_7_untouched():

@@ -371,6 +371,8 @@ def test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap():
     _POST_1R19R_AUTHORIZED = {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",
+        # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0): the positive Gate-7 result.
+        "src/pcae/core/runtime_dispatch_gate7.py",
     }
     assert changed - _POST_1R19R_AUTHORIZED == {
         "src/pcae/core/runtime_dispatch_attempt_lifecycle.py"
@@ -427,6 +429,8 @@ def test_no_contract_change_since_r20_head():
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+        # Phase ...1R.26 (N-16-4): the one NEW companion contract REPRC-001 v1.0.
+        "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
     }
     assert changed <= _r122_contracts, changed - _r122_contracts
 

@@ -596,9 +596,10 @@ def test_v15_3_is_gate5_result_restored_after_this_module():
     [
         "runtime_dispatch_gate5.py",
         # runtime_dispatch_permission.py (Gate 6) is authorizedly changed by
-        # Phase ...1R.22 (N-16-3, PBRD-001 v3.0 §12a). The .1R.15.2 repair
-        # still did not touch it; Gate 5 / 7 / 8 stay frozen here.
-        "runtime_dispatch_gate7.py",
+        # Phase ...1R.22 (N-16-3, PBRD-001 v3.0 §12a). runtime_dispatch_gate7.py
+        # is authorizedly changed by Phase ...1R.26 (N-16-4, REPRC-001 v1.0 —
+        # the positive-result schema/identity/TTL/immutability). The .1R.15.2
+        # repair still did not touch either; Gate 5 / 8 stay frozen here.
         "runtime_dispatch_gate8.py",
     ],
 )

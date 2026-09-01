@@ -176,6 +176,10 @@ def test_baseline_and_range_reconstructed_independently():
 
 def test_only_two_production_files_changed_since_baseline():
     changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split())
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0)
+    # authorizedly changes exactly runtime_dispatch_gate7.py. Subtract that
+    # one file; any OTHER unauthorized production change still fails.
+    changed -= {"src/pcae/core/runtime_dispatch_gate7.py"}
     assert changed == {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",
@@ -185,6 +189,8 @@ def test_only_two_production_files_changed_since_baseline():
 def test_only_authorized_contract_files_changed_since_baseline():
     changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "docs/contracts",
                        "docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md").split())
+    # Phase ...1R.26 (N-16-4): exactly one NEW companion contract, REPRC-001 v1.0.
+    changed -= {"docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md"}
     assert changed == {
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
@@ -712,7 +718,9 @@ def test_non_real_lineage_wall_is_upstream_and_unchanged():
 
 
 def test_gate7_and_gate9_and_gate10_modules_byte_unchanged():
-    for g in ["runtime_dispatch_gate7.py", "runtime_dispatch_gate8.py",
+    # runtime_dispatch_gate7.py is authorizedly changed by Phase ...1R.26
+    # (N-16-4 -- REPRC-001 v1.0); Gate 5 / 8 / 9 / 10 remain byte-frozen here.
+    for g in ["runtime_dispatch_gate8.py",
               "runtime_dispatch_gate9.py", "runtime_dispatch_gate10_eligibility.py",
               "runtime_dispatch_gate5.py"]:
         assert _git("diff", "--stat", BASELINE, "HEAD", "--", f"src/pcae/core/{g}").strip() == "", g

@@ -77,7 +77,12 @@ _R122_CONTRACTS = {
     "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
     "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
     "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+    # Phase ...1R.26 (N-16-4): the one NEW companion contract REPRC-001 v1.0.
+    "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
 }
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0): the sole
+# authorized production surface for the positive Gate-7 result.
+_R126 = {"src/pcae/core/runtime_dispatch_gate7.py"}
 R19R_HEAD = "59af5abd"         # .1R.19R finalize head
 
 DIRECT_GUARDS = (
@@ -348,7 +353,7 @@ def test_n20_4_repair_is_confined_to_the_started_started_edge_in_source():
 
 def test_n20_4_lifecycle_diff_since_r20_head_is_only_the_remap():
     diff = _git("diff", R20_HEAD, "HEAD", "--", "src/pcae",
-                *(f":(exclude){p}" for p in _R122))
+                *(f":(exclude){p}" for p in (_R122 | _R126)))
     changed = {
         ln.split(" b/")[-1] for ln in diff.splitlines() if ln.startswith("diff --git ")
     }
@@ -518,14 +523,14 @@ def test_production_diff_since_r19_head_is_exactly_the_n20_4_remap():
     changed = set(_git("diff", "--name-only", R19_HEAD, "HEAD", "--", "src/").split())
     # Phase ...1R.22 (N-16-3) authorizedly changes _R122; the .1R.19R repair
     # itself was confined to the lifecycle module.
-    assert changed - _R122 == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
+    assert changed - _R122 - _R126 == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
 
 
 @pytest.mark.parametrize("rel", [
     "src/pcae/core/runtime_dispatch_gate10_eligibility.py",   # Slice A
     "src/pcae/core/runtime_dispatch_gate5.py",
     "src/pcae/core/runtime_dispatch_gate6.py",
-    "src/pcae/core/runtime_dispatch_gate7.py",
+    # runtime_dispatch_gate7.py: authorized Phase ...1R.26 (N-16-4) target.
     "src/pcae/core/runtime_dispatch_gate8.py",
     "src/pcae/core/runtime_dispatch_gate9.py",
     # permission_broker_foundation.py is an authorized Phase ...1R.22

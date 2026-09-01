@@ -1067,12 +1067,18 @@ _SLICE_B_AUTHORIZED_SINCE_BASELINE = {
     # narrow-eligibility policy + POL-013). Exact filenames, no wildcard.
     "src/pcae/core/permission_broker_foundation.py",         # POL-005 §12a carve-out + POL-013
     "src/pcae/core/runtime_dispatch_permission.py",          # Gate 6 -- N-16-3 profile derivation + N-16-6 admission stub
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0). Gate 7
+    # is the sole authorized production surface for the positive-result
+    # schema/identity/TTL/immutability. Exact filename, no wildcard.
+    "src/pcae/core/runtime_dispatch_gate7.py",
 }
 
 #: Contracts a later authorized phase may change (exact paths, no wildcard).
 #: Phase ...1R.22: PBRD-001 -> v3.0 (MAJOR).
 _R122_AUTHORIZED_CONTRACT_CHANGES = {
     "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
+    # Phase ...1R.26 (N-16-4): the one NEW companion contract REPRC-001 v1.0.
+    "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
 }
 
 

@@ -78,6 +78,9 @@ def test_2_baseline_to_r22_head_is_nine_commits_all_1r22_tokened():
 
 def test_3_production_scope_since_baseline_is_exactly_the_two_authorized_files():
     names = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split())
+    # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0) authorizedly changes exactly
+    # runtime_dispatch_gate7.py; any OTHER production change still fails.
+    names -= {"src/pcae/core/runtime_dispatch_gate7.py"}
     assert names == {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",
@@ -477,15 +480,21 @@ def test_37_n23_1_synthetic_complete_profile_still_composes_to_bounded_allow():
 
 
 def test_38_n23_2_contract_wording_left_untouched_since_r23_head():
-    diff = _git("diff", R23_HEAD, "HEAD", "--", "docs/contracts")
-    assert diff == ""
+    # Phase ...1R.26 (N-16-4) authorizedly adds exactly the NEW companion
+    # contract REPRC-001 v1.0; no existing contract's N-23-2 wording changes.
+    changed = set(_git("diff", "--name-only", R23_HEAD, "HEAD", "--", "docs/contracts").split())
+    assert changed - {"docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md"} == set(), changed
 
 
 # ═══════════════ 39. Production / contract byte identity ═════════════════
 
 def test_39_no_production_or_contract_diff_since_r22r1_entry():
-    assert _git("diff", R23_HEAD, "HEAD", "--", "src/pcae") == ""
-    assert _git("diff", R23_HEAD, "HEAD", "--", "docs/contracts") == ""
+    # Phase ...1R.26 (N-16-4): exactly runtime_dispatch_gate7.py + the one
+    # NEW companion contract REPRC-001 v1.0. No other src/pcae or contract diff.
+    prod = set(_git("diff", "--name-only", R23_HEAD, "HEAD", "--", "src/pcae").split())
+    assert prod - {"src/pcae/core/runtime_dispatch_gate7.py"} == set(), prod
+    contracts = set(_git("diff", "--name-only", R23_HEAD, "HEAD", "--", "docs/contracts").split())
+    assert contracts - {"docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md"} == set(), contracts
 
 
 # ═══════════════ 40. Policy-model regression (spot re-derivation) ═════════

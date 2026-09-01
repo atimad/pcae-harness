@@ -572,13 +572,20 @@ def test_gate_5_6_7_8_production_modules_byte_unchanged_since_baseline():
     changed = set(out)
     forbidden = {
         "src/pcae/core/runtime_dispatch_gate5.py",
-        "src/pcae/core/runtime_dispatch_gate7.py",
         "src/pcae/core/runtime_dispatch_gate8.py",
     }
     assert not (changed & forbidden), changed & forbidden
     allowed = {
         "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/runtime_invocation_authority_consumption.py",
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0):
+        # runtime_dispatch_gate7.py is the sole authorized production surface
+        # for the positive-result schema (3 additive Gate7Result slots, the
+        # runtime_enforcement_result_id composition, the 300 s ALLOW-branch
+        # TTL backstop, the positive causing_reason_ids vocabulary, and the
+        # __setattr__ immutability guard). Gate 5 / 8 remain byte-unchanged
+        # (asserted via `forbidden` above); this only widens the delta set.
+        "src/pcae/core/runtime_dispatch_gate7.py",
         # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22 (N-16-3 -- PBRD-001 v3.0 §12a
         # narrow-eligibility policy + POL-013). Gate 6 (runtime_dispatch_permission.py)
         # is authorizedly modified here; Gate 5 / 7 / 8 stay in `forbidden`.
@@ -643,4 +650,9 @@ def test_no_unplanned_contract_file_changed_since_task_open():
         "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
         "docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md",
     }
-    assert set(out) - _r122_authorized_contract_delta == expected
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4): exactly one NEW companion
+    # contract, REPRC-001 v1.0. No RDGO/HPAC/PBRD/PBNDE/PBPA/RPAC version bump.
+    _r126_authorized_contract_delta = {
+        "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
+    }
+    assert set(out) - _r122_authorized_contract_delta - _r126_authorized_contract_delta == expected

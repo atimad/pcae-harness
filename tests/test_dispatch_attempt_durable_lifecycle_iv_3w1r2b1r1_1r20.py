@@ -146,6 +146,9 @@ def test_pre_1r19_baseline_is_the_parent_of_the_impl_commit():
 _R122_AUTHORIZED = {
     "src/pcae/core/permission_broker_foundation.py",
     "src/pcae/core/runtime_dispatch_permission.py",
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0): the
+    # sole authorized production surface for the positive Gate-7 result.
+    "src/pcae/core/runtime_dispatch_gate7.py",
 }
 
 
@@ -164,7 +167,8 @@ def test_slice_a_and_closed_gate_modules_are_byte_unchanged_since_baseline():
     for rel in (
         "src/pcae/core/runtime_dispatch_gate10_eligibility.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
-        "src/pcae/core/runtime_dispatch_gate7.py",
+        # runtime_dispatch_gate7.py: authorizedly changed by Phase ...1R.26
+        # (N-16-4 -- REPRC-001 v1.0). Gate 5 / 8 / 9 / 10 stay byte-frozen.
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/runtime_invocation_authority_consumption.py",
@@ -181,6 +185,8 @@ def test_no_normative_contract_changed_since_baseline():
         "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
         "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
+        # Phase ...1R.26 (N-16-4): the one NEW companion contract REPRC-001 v1.0.
+        "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
     }
     assert changed <= _r122_contracts, changed - _r122_contracts
 
