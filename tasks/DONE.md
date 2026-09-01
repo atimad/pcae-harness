@@ -83,6 +83,9 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); .1R.30R protected-admin writer anchor adjudication recommended before .1R.30 can resume (20260902-0011-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30-1r-30r-protected-admin-writer-anchor-adjudication-recommended-before-1r-30-can-resume)
+- Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30: N-16-5 Real FIDO2 Credential Registry and Authentication Mechanism Implementation (BLOCKED) (20260902-0010-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30-n-16-5-real-fido2-credential-registry-and-authentication-mechanism-implementation-blocked)
+- Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.29) (20260901-2314-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-29)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.29: RHAMP-001 v1.0 contract freeze (20260901-2259-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-29-rhamp-001-v1-0-contract-freeze)
 - Idle: awaiting authorization for the N-16-5 contract-freeze phase post 149O.20L.7O.3W.1R.2B.1R.1.1R.28 (20260901-2229-idle-awaiting-authorization-for-the-n-16-5-contract-freeze-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-28)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.28: N-16-5 real FIDO2/CTAP and protected approval planning (20260901-2219-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-28-n-16-5-real-fido2-ctap-and-protected-approval-planning)

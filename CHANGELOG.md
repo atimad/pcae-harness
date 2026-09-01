@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); .1R.30R protected-admin writer anchor adjudication recommended before .1R.30 can resume to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); an adjudication phase for the production protected-admin writer anchor is recommended before implementation resumes; session refreshed and governance continuity revalidated.
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30: N-16-5 Real FIDO2 Credential Registry and Authentication Mechanism Implementation (BLOCKED) to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); .1R.30R protected-admin writer anchor adjudication recommended before .1R.30 can resume; session refreshed and governance continuity revalidated.
 - Phase `.1R.30` (N-16-5 Real FIDO2 Credential Registry and Authentication
   Mechanism Implementation) is **BLOCKED** — no production source or normative
   contract was created or modified (`git diff e40d4ce1 HEAD -- src/pcae` and
