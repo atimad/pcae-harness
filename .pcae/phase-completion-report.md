@@ -1,44 +1,31 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R.1 Complete — Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Skip-Detection Repair
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27R Complete — Independent Verification of the N-16-4 Runtime Enforcement Gate After Reconciliation
 
-**Status:** VERIFIED
+**Status:** INDEPENDENTLY VERIFIED WITH NON-BLOCKING FINDINGS — N-16-4 REAL POSITIVE SINGLE-ATTEMPT RUNTIME ENFORCEMENT GATE COMPLETE.
 
-## Summary
-
-Independently verified complete executable xfail/skip detection with AST-aware
-self-reference immunity and preserved wildcard/fnmatch protection. N-16-4
-remains implemented/not closed pending fresh product IV.
+**N-16-4:** CLOSED. **Verification entry:** `8bfafb05c810e95e344d7bb25477ae5187b41c6d`.
 
 ## Evidence
 
-- Fresh independent suite: 43 passed.
-- Combined repair/historical/reconciliation/N-16-4 evidence: 273 passed.
-- Broad current tree: 3,908 passed / 182 failed / 5 skipped over 4,095 nodes.
-- J/K normalized failures: 182 common; side-only functional failures: 0.
-- Historical attributable count: 42. Repaired A/R attributable failures: 0.
-- Production diff: empty. Normative-contract diff: empty.
+- A/B/R/V/H/J/K/KI history reconstructed; historical BLOCKED reports preserved.
+- REPRC-001 v1.0, B1-B, B2-D, Currentness B, and all stale owners verified.
+- Gate7Result is immutable, non-serializable, registry-bound, non-bearer, and non-transferable.
+- Production Gate7 ALLOW is unreachable; PB/no-go semantics and Gates 8/9/10/Slice-B/runtime independence verified.
+- Fresh IV 69 passed; combined lineage 352 passed; affected current 1,378 passed; candidate-only unexplained 0.
+- Historical 42 and repaired A/R zero preserved. Broad 4,845 nodes: 4,594 passed, 246 unrelated historical failures, 5 skipped.
+- Production/contracts unchanged; runtime Observed / observe / unavailable, plugins 0, capabilities 0; FIRST EXTERNAL EFFECT ABSENT.
 
-## Preservation
+The carried Gate6/Gate10 guard is pre-existing intentional fail-closed evidence consumption plus stale guard debt, not an N-16-4 blocker.
 
-`.1R.27`, `.1R.26R.1`, and `.1R.26R.1R.1` remain historically BLOCKED; the
-last blocker is closed without rewriting its phase. Runtime remains Observed /
-observe / unavailable with 0 plugins and 0 capabilities. First external effect
-is ABSENT. N-16-5/6/7 remain OPEN. N-23-2 remains INFO / DEFERRED.
+## Next phase
 
-## No-Go confirmation
-
-No production or normative-contract change. No substantive reconciliation
-guard change. No execution enablement, Slice C, first external effect,
-N-16-5/6/7 work, test weakening, wildcard/fnmatch broadening, raw Git
-lifecycle, hook bypass, force push, or history rewrite.
+`149O.20L.7O.3W.1R.2B.1R.1.1R.28` — N-16-5 Real FIDO2/WebAuthn/CTAP and Protected Human-Approval UI Architecture and Contract Planning. Separate authorization required.
 
 ## Governance
 
 DELEGATED `.3` FINALIZATION / COMMIT / PUSH:
 UNAUTHORIZED
 
-Pushed: pushed. `origin/main..HEAD`: 0.
+Pushed: pending governed push. `origin/main..HEAD`: 3.
 
-## Recommended next phase
-
-`149O.20L.7O.3W.1R.2B.1R.1.1R.27R` — Independent Verification of the N-16-4
-Runtime Enforcement Gate After Reconciliation.
+---
+*Canonical report artifact. Schema version 1.0.*

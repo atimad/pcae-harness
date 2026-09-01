@@ -29,6 +29,7 @@ Idle: awaiting explicit authorization for N-16-5 architecture and contract plann
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/**
 
 ## Forbidden Files
 
