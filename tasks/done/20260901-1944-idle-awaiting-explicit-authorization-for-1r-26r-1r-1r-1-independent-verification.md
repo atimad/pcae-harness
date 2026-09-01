@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for .1R.26R.1R.1R.1 independent verificati
 
 ## Status
 
-active
+done
 
 ## Mode
 
