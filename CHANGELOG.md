@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for .1R.26R.1R.1R skip-detection repair to Idle: awaiting explicit authorization for the required harness security repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1: Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Repair to Idle: awaiting explicit authorization for .1R.26R.1R.1R skip-detection repair; session refreshed and governance continuity revalidated.
 - Phase `.1R.26R.1R.1` independent verification is **BLOCKED —
   `.1R.26R.1R` NOT VERIFIED**. V/H reproduction confirmed the three reported
