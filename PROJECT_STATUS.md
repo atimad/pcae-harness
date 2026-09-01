@@ -2,6 +2,33 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1 — Independent Verification of
+the N-16-4 Reconciliation IV Evidence-Harness Repair. **STATUS: BLOCKED —
+`.1R.26R.1R` NOT VERIFIED.** Verification-entry SHA `ee473b94`.
+
+Independent V/H reproduction confirmed the three reported concrete fixes,
+but found a material security-invariant regression in the repaired AST
+scanner. V's no-test-weakening guard explicitly rejected added
+`@pytest.mark.skip`; H's `_executable_xfail_uses` detects xfail only. Fresh
+fixtures show real xfail decorators/calls are detected, while a real
+`@pytest.mark.skip` and `pytest.skip(...)` both return no finding; test 14
+passes when fed the executable skip fixture. Repair is required and was not
+performed in this IV.
+
+Substantive reconciliation guards, production, contracts, historical BLOCKED
+records, runtime/effect posture, N-16-5/6/7, and N-23-2 remain unchanged.
+Historical 42 and repaired A/R zero remain carried, not overwritten. N-16-4
+remains IMPLEMENTED / NOT CLOSED. Required next: `.1R.26R.1R.1R` — N-16-4
+Reconciliation IV Evidence-Harness Skip-Detection Repair. DELEGATED `.3`
+FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_1R_1_INDEPENDENT_VERIFICATION_OF_THE_N_16_4_RECONCILIATION_IV_EVIDENCE_HARNESS_REPAIR.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R — N-16-4 Reconciliation IV
 Evidence-Harness Repair. **STATUS: REPAIRED — INDEPENDENT VERIFICATION PENDING
 `.1R.26R.1R.1`.** Phase-entry/finalized-V SHA `7d60eda6`.

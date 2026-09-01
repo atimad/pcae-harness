@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for the evidence-harness repair independen
 
 ## Status
 
-active
+done
 
 ## Mode
 

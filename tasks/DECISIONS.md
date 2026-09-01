@@ -2,6 +2,14 @@
 
 ## Accepted
 
+- **Phase `.1R.26R.1R.1` BLOCKED adjudication (2026-09-01).** The repaired
+  scanner correctly removes xfail/fnmatch self-reference, but materially
+  weakens V's no-test-weakening guarantee: V explicitly rejected added
+  `@pytest.mark.skip`, whereas H's AST helper detects xfail only. Independent
+  real skip decorator/call fixtures return no finding, and test 14 passes when
+  fed an executable skip. This is `.1R.26R.1R`-attributable harness debt, not
+  product/contract/reconciliation debt; do not repair in IV. The unique
+  successor is `.1R.26R.1R.1R`, followed by its own IV.
 - **Phase `.1R.26R.1R` harness repair (2026-09-01).** Replace the two raw
   `B..HEAD` added-line substring scanners with AST-aware executable-structure
   inspection. Detect real pytest expected-failure decorators/calls and aliases,

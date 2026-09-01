@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Phase `.1R.26R.1R.1` independent verification is **BLOCKED —
+  `.1R.26R.1R` NOT VERIFIED**. V/H reproduction confirmed the three reported
+  fixed harness nodes, but independent executable fixtures proved the repaired
+  AST scanner materially dropped V's explicit `@pytest.mark.skip`
+  prohibition: real skip decorators/calls are not detected and test 14 passes
+  with an injected executable skip. No repair was made in this IV. Substantive
+  guards, production/contracts, historical results, runtime/effects, and
+  downstream phase boundaries remain unchanged. Required repair successor:
+  `.1R.26R.1R.1R`.
+- Transitioned active task from Idle: awaiting explicit authorization for the evidence-harness repair independent verification to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1: Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R: N-16-4 Reconciliation IV Evidence-Harness Repair to Idle: awaiting explicit authorization for the evidence-harness repair independent verification; session refreshed and governance continuity revalidated.
 - Phase `.1R.26R.1R` repaired the `.1R.26R.1` verification-harness
   self-reference defects with AST-aware executable expected-failure and live
