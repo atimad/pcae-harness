@@ -1,84 +1,190 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.25 Complete — N-16-4 Positive Runtime Enforcement Contract and Trust-Boundary Freeze
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 Complete — N-16-4 Real Positive Single-Attempt Runtime Enforcement Gate Implementation
 
-**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.25
-**Type:** re-adjudication / primary-source analysis / trust-boundary freeze / contract-versioning adjudication / decision-freezing only
-**Status:** N-16-4 TRUST-BOUNDARY / CONTRACT FREEZE COMPLETE — IMPLEMENTATION NOT BEGUN — Gate7Result(ALLOW) ARCHITECTURE FROZEN — NON-BEARER — ATTEMPT-BOUND — CURRENTNESS MODEL EXPLICIT — DOWNSTREAM GATES STILL REQUIRED
-**Phase-entry SHA:** `8191c7e4` (`origin/main` synced; `origin/main..HEAD = 0` at entry)
-**Production source changed:** none (`git diff --name-only 8191c7e4 HEAD -- src/pcae` empty; `runtime_dispatch_gate7.py` / `runtime_dispatch_permission.py` / `runtime_dispatch_gate9.py` / `runtime_invocation_authority_consumption.py` / `runtime_authority.py` byte-identical)
-**Normative contracts changed:** none (`git diff --name-only 8191c7e4 HEAD -- docs/contracts docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md` empty)
-**Runtime:** `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; FIRST EXTERNAL EFFECT ABSENT; execution NOT enabled
+**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.26
+**Type:** governed implementation — one new companion contract, one production file, one new defensive suite, phase-aware guard-fence reconciliation, governed lifecycle
+**Status:** N-16-4 IMPLEMENTED — INDEPENDENT VERIFICATION PENDING `.1R.27` — REPRC-001 v1.0 AUTHORED / FROZEN — `Gate7Result(ALLOW)` SYNTHETIC TEST PATH REACHABLE / PRODUCTION PATH UNREACHABLE — B1-B / B2-D / Currentness B IMPLEMENTED EXACTLY — N-16-4 NOT CLOSED
+**Phase-entry SHA:** `28b8b2b70dcd4642dc45d4a3961a5218402c3c7c` (`origin/main` synced; `origin/main..HEAD = 0` at entry)
+**Production source changed:** exactly `src/pcae/core/runtime_dispatch_gate7.py` (`git diff --name-only 28b8b2b7 HEAD -- src/pcae`)
+**Normative contracts changed:** exactly the NEW `docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md` (`git diff --name-only 28b8b2b7 HEAD -- docs/contracts`); RDGO-001 v3.1, HPAC-001 v2.1, `HPAC-AUTHORITY-CONSUMPTION/2.1`, PBRD-001, PBNDE-001, PBPA-001, RPAC-001, RIHAC-001, RIASC-001, the RE No-Go Registry, `V0_2_EXECUTION_READINESS_NO_GO_GATES.md` all byte-unchanged
+**Runtime:** `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; `pcae runtime inspect` byte-unchanged; FIRST EXTERNAL EFFECT ABSENT; execution NOT enabled
 
 ## Summary
 
-Re-adjudication / primary-source analysis / trust-boundary freeze / contract-versioning adjudication / decision-freezing only. This phase exists because the previously authorized `.1R.25` (N-16-4 implementation) **STOPPED during primary-source review before any repository mutation** — no `src/pcae` change, no contract change, no test, no commit, no governed-lifecycle mutation, at `8191c7e4`. That STOP is **accepted**: `.1R.24` deferred three load-bearing implementation details to "`.1R.25` derives the repository-compatible X from the then-current source", and primary-source review shows each collides with a scope or contract freeze `.1R.24` itself set (`.1R.24` §§30/61/62). `.1R.24` §§31/47 anticipated exactly this STOP-and-re-adjudicate.
+Implements the `.1R.25` trust-boundary freeze exactly — **B-1 = Model B1-B**
+(no `HPAC-AUTHORITY-CONSUMPTION/2.1` change), **B-2 = Model B2-D** (no Gate-7
+admission binding), **B-3 = Currentness B** (`run_gate7_runtime_enforcement`
+signature unchanged, no `currentness_binding` slot).
 
-This phase re-adjudicates and **freezes** the three trust-boundary decisions; it performs **no** production implementation and authors **no** `docs/contracts` file (REPRC-001 v1.0 is frozen here as conceptual normative text for the implementation phase to author first — the `.1R.21 → .1R.22` precedent).
+**REPRC-001 v1.0** authored first as the first substantive commit `fa62717b`
+(freeze SHA-256 `8700c8717d3a822f61f9139cec0fefef48a06b6576a7a1ea4fc4420c14c7c99c`);
+one disclosed non-blocking precision correction (finding **N-16-4-IMPL-1**,
+commit `cde76fd3`, §8 / §8.1 — Gate 8's stale-rejection ownership is its own
+projection revalidation, not a `run_gate7` re-invocation, which its
+`_gate7_result_digest` helper documents; the security property is unchanged and
+needs no production change outside `runtime_dispatch_gate7.py`, so it is not a
+BLOCKED condition) → final SHA-256
+`c30cb30d81ab2f4080cc592fdc9e71cfb2e0224fdb1ac452d676db0d2b3226d1`.
 
-## The three blocked questions and their frozen re-adjudication
+**Production surface: `src/pcae/core/runtime_dispatch_gate7.py` ONLY.** Three
+additive `Gate7Result` `__slots__` — `reprc_schema_version` (`"REPRC-001/1.0"`,
+rejected on construction otherwise), `runtime_enforcement_result_id` (canonical
+digest over `invocation_id` / `attempt_id` / `idempotency_key` +
+`pb_decision_digest` + `evaluated_input_digest` + `authority_freshness_digest` +
+`runtime_posture_digest` + the literal `"REPRC-001/1.0"`, no circular identity),
+`idempotency_key` (promoted to an explicit slot). **No `currentness_binding`
+slot. No signature change.** `expires_at` = `evaluated_at +
+REPRC_MAX_RESULT_TTL_SECONDS` (frozen **300 s**) on the **ALLOW branch only** as
+a bounded wall-clock backstop; the DENY branch keeps `expires_at ==
+evaluated_at`. Positive `causing_reason_ids` vocabulary
+(`GATE7_POSITIVE_CAUSING_REASON_IDS`, always incl.
+`gate7_synthetic_evaluation_path`). `__setattr__` / `__delattr__` immutability
+guard mirroring `DispatchEnvelope`. `_pb_decision_digest`,
+`evaluated_input_digest`, and Gate 8's `_gate7_result_digest` compositions
+**unchanged**.
 
-**All three selections are strictly smaller than `.1R.24` proposed.**
+**The positive branch stays `# pragma: no cover - unreachable in production`.**
+It is reachable only through the documented in-memory test-only substitution of
+`resolve_runtime_enforcement_posture` (REPRC-001 §17) — no signature parameter,
+no production caller, no env/config path, restored on teardown. Production
+`run_gate7_runtime_enforcement(...)` still returns `DENY` / `(None, reasons)` for
+every currently constructible real request: the N-16-5 human-authority wall, the
+N-16-6 admission wall, and the current Runtime-Enforcement no-go posture each
+independently block it.
 
-**B-1 — durable `currentness_binding` / Gate-9 record = Model B1-B.** The `HPAC-AUTHORITY-CONSUMPTION/2.1` record, `runtime_invocation_authority_consumption.py`, and HPAC-001 v2.1 §41 are **unchanged**. Collision: `runtime_invocation_authority_consumption.py:125` — `runtime_enforcement_binding` is a **closed, validator-enforced 5-field set** (`{decision_id, decision_digest, verdict, expires_at, evaluated_input_digest}`); adding a field is a consumption-record schema change (→ `/2.2` + HPAC-001 §41 amendment + own versioning + IV) that `.1R.24` §30 froze as "no change". Gate-7 currentness is anchored by the **existing** item-7 `evaluated_input_digest` (which already commits `authority_freshness_digest` = `projection.freshness_verdict_digest`) + `decision_digest`, the **existing** item-9 `authority_generation_binding` (the 6-field S1 snapshot Gate 10 step 13 re-derives against), and the live re-derivation owners. B1-A / B1-C rejected (durable-record + contract change for a redundant denormalised field); B1-D folded into B1-B.
+**Currentness B — four named mandatory stale-rejection owners** (re-derived from
+source): Gate 7 creation-time projection revalidation →
+`gate7_stale_validated_authority_projection`; Gate 8's independent projection
+re-trust + `revalidate_validated_authority_projection` →
+`gate8_stale_validated_authority_projection`; Gate 10 step 13
+`authority_generation_resolver()` + `_first_generation_drift` →
+`gate10_authority_generation_drift:<source>`; Gate 10 step 11 `re_expires_at`
+wall-clock backstop → `gate10_re_decision_expired`.
 
-**B-2 — trusted Gate6→7 admission-evidence route = Model B2-D.** Gate 7 binds **no** adapter-admission evidence. Collision: no trusted object `run_gate7_runtime_enforcement` receives carries `admission_record_digest` / `admission_class` — `inputs.adapter_descriptor_binding.*` is `""` by construction (`runtime_dispatch_permission.py:233-234` rejects any preset value), and `Gate6Decision.__slots__` (L825-839) does not expose the PB request. Every route (add to `Gate6Decision`, change the `run_gate7_runtime_enforcement` signature, touch `runtime_dispatch_permission.py`) violates the `.1R.13.1` frozen file matrix ("`runtime_dispatch_permission.py`: None anticipated") and its explicit rejection ("Extending the Gate-6 module would blur the Gate-6/Gate-7 trust boundary"). **Findings N-16-4-2 and N-16-4-3 (as framed) are WITHDRAWN.** Admission is **not required** for the RDGO §8 conjunction (it is an N-16-6 concern) and is **already gated three times** — Gate 6 (POL-013 `P_supply_chain_admission`), Gate 8 (descriptor re-resolution + executable re-hash), Gate 10 (lineage re-check against `record.target_binding`). B2-A / B2-B / B2-C rejected (each touches `runtime_dispatch_permission.py` or adds a new trust surface for a defence-in-depth-only binding). The `.1R.13.1` Gate-6/Gate-7 boundary is preserved **verbatim**.
+**Non-bearer / Model A preserved:** `is_gate7_result` still requires
+process-local `_GATE7_RESULTS` membership; `__reduce__` raises; `object.__new__`
+/ copy / reconstruction / a known `runtime_enforcement_result_id` grant nothing;
+process restart drops the registry and forces re-evaluation; no durable Gate-7
+store.
 
-**B-3 — Gate-7 generational currentness source / signature = Currentness B.** `run_gate7_runtime_enforcement`'s **signature is unchanged**; `Gate7Result` gains **no** `currentness_binding` slot. Collision: Gate 7 takes no `authority_generation_resolver` (Gate 9 and Gate 10 both do) and holds no `principal_registry` / `approval_store` / `lifecycle_store` handle — a genuinely generational token needs a new trusted parameter = a change to the frozen Gate-7 boundary. Currentness is anchored by the **existing** `authority_freshness_digest` + Gate 7's creation-time `is_trusted_validated_authority_projection` + `revalidate_validated_authority_projection` (re-runs `validate_approval` — catches principal / credential / proof / approval / expiry / consumption drift) + Gate 8's mandatory Gate-7 re-run (RDGO §8) + Gate 10 step 13's mandatory authority-generation re-derivation against the durable item-9 snapshot. Currentness A / C / D rejected (A duplicates Gate 9/10 responsibility and needs a frozen-signature change; C drops Gate 8's re-run as a currentness guarantee; D adds a new trust surface).
+**Contract-versioning:** REPRC-001 v1.0 (new companion, initial freeze) is the
+**only** version movement. RDGO-001 stays v3.1; HPAC-001 stays v2.1;
+`HPAC-AUTHORITY-CONSUMPTION` stays `/2.1`; PBRD-001 / PBNDE-001 / PBPA-001 /
+RPAC-001 / RIHAC-001 / RIASC-001 / RE No-Go Registry / NG-025 byte-unchanged. No
+MAJOR, no MINOR. `runtime_dispatch_permission.py`, `runtime_dispatch_gate8.py`,
+`runtime_dispatch_gate9.py`, `runtime_dispatch_gate10_eligibility.py`,
+`runtime_invocation_authority_consumption.py`, `runtime_authority.py` all
+byte-unchanged.
 
-**Named mandatory stale-rejection owners:** Gate 7 creation-time projection revalidation → Gate 8 Gate-7 re-run → Gate 9 S1/S2 capture → Gate 10 step 13. Gate 10 step 11 (`re_expires_at`) is defence-in-depth.
+## Tests
 
-**Non-bearer proof holds under Currentness B:** a stale / copied / `deepcopy` / reconstructed / serialized `Gate7Result` or a known `runtime_enforcement_result_id` cannot traverse the next legitimate consumer chain — `is_gate7_result` requires process-local `_GATE7_RESULTS` membership (populated only by `run_gate7_runtime_enforcement`'s completed-evaluation return path), `__reduce__` raises, identity-only `==`/`hash`, the `_seal` check rejects direct construction; Gate 8 re-runs Gate 7; Gate 10 step 13 re-derives generations restart-safe.
+New `tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py`
+— **78 cases, all green** (the ≥ 48-case defensive matrix + the REPRC-001
+contract-production equivalence map + the exact finite consumer-inventory guard
+(production `{gate8, gate9, gate10_eligibility}`, exact equality, no wildcard; a
+separate exact 9-file test-import allowlist) + AST no-effect scans + the
+synthetic-seam isolation proofs). The two Gate-7 suites (`.1R.13.2` / `.1R.13.3`,
+98 cases) pass **byte-unchanged** — no `def test_` renamed or removed.
 
-## Gate7Result future schema (frozen for the implementation phase)
+## Guard-fence reconciliation (broad deterministic no-xdist fixed-SHA A/B)
 
-Exactly **three** additive `__slots__` — `reprc_schema_version` (`"REPRC-001/1.0"`), `runtime_enforcement_result_id`, `idempotency_key` (promoted from inside `evaluated_input_digest`). **No `currentness_binding` slot.** `expires_at` value on the ALLOW branch → `evaluated_at + REPRC_MAX_RESULT_TTL` (frozen at **300 seconds**, a bounded wall-clock backstop only, never the currentness mechanism — finding N-16-4-1 retained). Positive `causing_reason_ids` vocabulary (finding N-16-4-4 retained). `__setattr__` immutability guard mirroring `DispatchEnvelope`. `runtime_enforcement_result_id` = `compute_canonical_digest` over `invocation_id` / `attempt_id` / `idempotency_key` + `pb_decision_digest` + `evaluated_input_digest` + `authority_freshness_digest` + `runtime_posture_digest` + the literal `"REPRC-001/1.0"` (no circular identity; uses canonical lower-level digests). `_pb_decision_digest`, `evaluated_input_digest`, and `_gate7_result_digest` compositions **unchanged**.
+Baseline `git worktree` at `28b8b2b70dcd4642dc45d4a3961a5218402c3c7c`, candidate
+at HEAD, identical affected set, `-p no:randomly`, no xdist:
 
-## Contract ownership and versioning
+| | Baseline (`28b8b2b7`) | Candidate (HEAD) |
+|---|---|---|
+| failed | 8 | 5 |
+| passed | 1330 | 1409 |
 
-**Only version movement in the entire N-16-4 track: REPRC-001 v1.0 (initial freeze).** No MAJOR. No MINOR. No sibling-bump cascade.
+- **CANDIDATE-ONLY UNEXPLAINED FUNCTIONAL NONPASSING NODES = 0.**
+- **UNEXPLAINED ATTRIBUTABLE FUNCTIONAL REGRESSIONS = 0.**
+- 40 attributable point-in-time scope-fence / byte-freeze guard nodes across 13
+  IV / reconciliation suites (`.1R.15.2`, `.1R.15.5`, `.1R.17`, `.1R.17R`,
+  `.1R.17R.1`, `.1R.18`, `.1R.19`, `.1R.19R`, `.1R.19R.1`, `.1R.20`, `.1R.22R`,
+  `.1R.22R.1`, `.1R.23`) reconciled phase-aware — each authorized set widened by
+  **exactly** `{runtime_dispatch_gate7.py}` and/or
+  `{RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md}` with an explicit `.1R.26`
+  citation; no wildcard, no `fnmatch`, no `def test_` renamed or removed; every
+  guard still rejects any other unauthorized file. The two `.1R.18` / `.1R.15.3`
+  meta-guards' not-weakened counts (`"*"`, `fnmatch`, `def test_`) hold.
+  `.1R.13.3` and `.1R.15.3` byte-unchanged.
+- 5 pre-existing baseline-common failures reproduced at `28b8b2b7` and left
+  unrepaired (out of scope): `.1R.19R.1::test_no_test_weakening_in_the_r19r_diff`
+  (the disclosed N-22R1-1 finding),
+  `.1R.22R::test_no_test_weakening_in_the_r22r_diff`,
+  `.1R.22R::test_n16_4_to_7_untouched`,
+  `.1R.22R::test_no_older_phase_doc_or_contract_was_rewritten_to_imply_v3_0_existed_earlier`,
+  `.1R.22R.1::test_27_no_wildcard_introduced_in_tests_diff_since_r23_head`.
+- A broad whole-`tests/` needle sweep surfaced 1 further candidate-only node — a
+  flaky HPAC concurrency test
+  (`test_concurrent_conflicting_successors_have_one_canonical_winner`, passes
+  3/3 standalone at HEAD; `.1R.26` adds no concurrency and imports no HPAC code)
+  — classified as a non-attributable environmental flake.
 
-| Artifact | Change |
-|---|---|
-| **REPRC-001** (new companion contract, `docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md`) | **v1.0 — initial freeze**, authored first in the implementation phase; IV in the verification phase; PBNDE-001 / PBRD-001 §16 precedent |
-| **RDGO-001** | **v3.1 — NO CHANGE** — §8's existing "Its positive decision is single-attempt, expiring, and invalid across any relevant input or policy change" already accommodates a bounded positive Gate-7 result; REPRC-001 stands alone as a companion; a future v3.2 MINOR §8 cross-reference is **deferred** to a normalization pass (the `.1R.24` §42 recommendation + the `.1R.22` PBRD sibling-bump-cascade lesson) |
-| **HPAC-001** / **HPAC-AUTHORITY-CONSUMPTION** | **v2.1 / /2.1 — NO CHANGE** (B1-B) |
-| **PBRD-001 / PBNDE-001 / PBPA-001 / RPAC-001 / RIHAC-001 / RIASC-001 / RE No-Go Registry / NG-025** | **NO CHANGE** |
+Exact guard-impact table in the canonical doc §11.2; meta-guard results §11.3.
 
-## Implementation surface reduced
+## Static proofs
 
-**`runtime_dispatch_gate7.py` + REPRC-001 v1.0 + new tests only** — strictly smaller than `.1R.24` proposed. No `runtime_dispatch_permission.py` / `runtime_dispatch_gate9.py` / `runtime_invocation_authority_consumption.py` change; no `run_gate7_runtime_enforcement` signature change; no RDGO / HPAC / PB-contract change; no `currentness_binding` slot; no admission binding at Gate 7.
+- PB-rerun AST proof — `runtime_dispatch_gate7.py` imports/uses no
+  `PolicyRegistry` / `_compose` / `POL-*` rule / `PermissionBroker`; PB `ALLOW` +
+  a violating request → `DENY`.
+- No-effect static scan — no `adapter.dispatch(` / `.dispatch(` / `Popen(` /
+  `subprocess.` / `os.system(` / `socket.` / `pty` / `webauthn` / `ctap2`; no
+  import of any effectful stdlib/network module. The only new import is
+  `from datetime import datetime, timedelta`.
 
-## Predicted guard-impact inventory (whole-`tests/` grep — 37 files)
+## Byte scope
 
-The two Gate-7 suites need reconciliation: `test_positive_branch_is_pragma_no_cover_and_guarded_by_posture` (`…_1r13_3.py:424`) **split** historical/current; the `assert r.expires_at == NOW` assertion (`…_1r13_2.py:472`) and the `Gate7Result.__slots__` iteration (`…_1r13_3.py:500`) **evolved** to subset checks — no wildcard, no `def test_` renamed. The Gate-7 single-file scope-fence guards (`…_1r13_3.py:154` `assert hits == {"src/pcae/core/runtime_dispatch_gate7.py"}`, `…_1r13_2.py:630`) **pass unchanged** — the whole point of the minimal freeze. The RDGO header / MINOR-marker / §8 text-freeze (`…_1r15_4.py:69/80/141`), the record-has-nine-binding-objects + `runtime_enforcement_binding` field list (`…_1r15_4.py:287-329`), `test_hpac_authority_consumption.py`, and the `test_narrow_eligibility_policy_iv` (`runtime_dispatch_permission.py` byte-freezes) all stay **untouched**. The implementation phase RE-DERIVES this via a broad deterministic no-xdist fixed-SHA A/B in `git worktree`s + a broad whole-`tests/` grep sweep — do NOT trust the implementation phase's own inventory. A ≥ 48-case defensive matrix and a 14-point independent-verification design are frozen.
+- `git diff --name-only 28b8b2b7 HEAD -- src/pcae` → exactly
+  `src/pcae/core/runtime_dispatch_gate7.py`.
+- `git diff --name-only 28b8b2b7 HEAD -- docs/contracts` → exactly
+  `docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md`.
+- 8 downstream / sibling production modules and 6 frozen contracts byte-unchanged.
 
-## Non-blocking findings re-dispositioned
+## Findings
 
-- **N-16-4-1** (`expires_at`) — **retained**, frozen as the bounded 300 s TTL model.
-- **N-16-4-2** (admission digest binding) — **WITHDRAWN** (B2-D).
-- **N-16-4-3** (PB request digest + policy/contract versions into `_pb_decision_digest`) — **WITHDRAWN as framed** (the PB request digest is not on `Gate6Decision`; policy/contract versions are Gate 6's exclusive concern per RDGO §8; the existing canonical `_pb_decision_digest` binding suffices).
-- **N-16-4-4** (positive reason vocabulary) — **retained**, frozen.
-- **N-16-4-5** (observation) — carried.
-
-**No new blocker. N-16-3 is CLOSED and not reopened. N-23-2 carried (INFO / DEFERRED NORMALIZATION DEBT — may also carry the deferred RDGO v3.2 §8 cross-reference). N-23-1 carried.**
-
-## Prerequisite ordering (reconfirmed, frozen)
-
-N-16-3 (**CLOSED**) → N-16-4 → N-16-5 (real FIDO2/WebAuthn/CTAP + protected human-approval UI) → N-16-6 (RPAC-REQ-095 fixed-argv adapter + supply-chain admission) → N-16-7 (capability enablement — **strictly last**). N-16-4 lands **before** N-16-5. Slice C / Slice D keep **no phase ID**.
-
-## Whole-system authority chain (post-N-16-4)
-
-`real human authentication/approval → Gate 5 → Gate 6 PB → Gate 7 Runtime Enforcement → Gate 8 containment → Gate 9 authority consumption → Gate 10 pre-effect eligibility → Slice-B durable attempt lifecycle → runtime capability → Slice-C adapter dispatch (first external effect)`. **Gate 7 never appears as final effect authority** — it creates nothing, consumes nothing, is not reusable, is not durable, cannot cause an effect. A Gate-7 `DENY` stops the flow; no later gate may override it.
-
-## Governance
-
-`pcae health` healthy · `pcae check` passed · `pcae status coherence` coherent · `pcae push check` nothing_to_push · `pcae runtime inspect` `not_implemented / Observed / observe / unavailable` (0 plugins / 0 capabilities). No `src/pcae` change; no `docs/contracts` change. Governed `pcae` lifecycle only — no raw `git commit` / `git push`, no `--no-verify`, no force push, no history rewrite, no hook bypass. **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED** — preserved. Only the primary human-authorized operator holds `.1R.25` lifecycle authority; no delegated worker committed, finalized, or pushed.
+- **N-16-4-IMPL-1** (non-blocking) — disclosed precision correction to REPRC-001
+  §8 / §8.1; reflected in the two REPRC SHA-256 values; not a BLOCKED condition.
+- **N-16-4-IMPL-2** (non-blocking) — `network_requirement is True` fails closed
+  as `gate7_request_currentness_drift:invalid_construction_input_facts` (an
+  earlier fail-closed reason than `.1R.25` §19 case 22 predicted); the correct
+  conservative outcome; no production change.
+- N-16-4-1 and N-16-4-4 resolved. N-16-4-2 / N-16-4-3 remain withdrawn (B2-D).
+  N-16-4-5 (observational) unchanged.
+- N-23-2 INFO / DEFERRED NORMALIZATION DEBT — carried, not dropped. N-23-1 INFO
+  — carried.
 
 ## Verdict
 
-**N-16-4 POSITIVE RUNTIME ENFORCEMENT CONTRACT AND TRUST-BOUNDARY FREEZE COMPLETE — ANALYSIS / FREEZE ONLY.** N-16-4 NOT implemented; Gate-7 production behaviour unchanged (still always `DENY` on the production path); FIRST EXTERNAL EFFECT still ABSENT; execution NOT enabled. The three blocked trust-boundary questions are re-adjudicated from primary source and frozen: B-1 = Model B1-B (no consumption-record schema change); B-2 = Model B2-D (no Gate-7 admission binding; N-16-4-2 / N-16-4-3 withdrawn; the `.1R.13.1` boundary preserved verbatim); B-3 = Currentness B (`run_gate7_runtime_enforcement` signature unchanged; no `currentness_binding` slot). Gate7Result(ALLOW) architecture FROZEN — NON-BEARER — ATTEMPT-BOUND — CURRENTNESS MODEL EXPLICIT (four named mandatory owners) — DOWNSTREAM GATES STILL REQUIRED. Contract ownership: new REPRC-001 v1.0 companion contract; RDGO v3.1 NO CHANGE; HPAC v2.1 NO CHANGE; only version movement is REPRC-001 v1.0.
+**N-16-4: IMPLEMENTED — INDEPENDENT VERIFICATION PENDING `.1R.27`. NOT CLOSED.**
+**REPRC-001 v1.0: AUTHORED / FROZEN — IV PENDING.**
+**`Gate7Result(decision="ALLOW")`: SYNTHETIC TEST PATH REACHABLE; PRODUCTION PATH
+UNREACHABLE.**
+**B-1 = B1-B / B-2 = B2-D / B-3 = Currentness B: IMPLEMENTED EXACTLY.**
+Runtime `not_implemented / Observed / observe / unavailable`. First external
+effect ABSENT. N-16-5 / N-16-6 / N-16-7 not begun; Slice C / Slice D keep no
+phase ID.
 
-**Runtime: Observed / observe / unavailable. First external effect: ABSENT. Execution enabled: NO.**
+## `.3` governance incident — preserved
+
+```
+DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+```
+
+Only the primary human-authorized operator holds `.1R.26` lifecycle authority.
+No delegated worker committed, finalized, or pushed. No raw `git commit` /
+`git push`, no `--no-verify`, no force push, no history rewrite, no hook bypass —
+governed `pcae` lifecycle only.
 
 ## Recommended next phase
 
-`149O.20L.7O.3W.1R.2B.1R.1.1R.26` — **N-16-4 Real Positive Single-Attempt Runtime Enforcement Gate Implementation** (production surface `runtime_dispatch_gate7.py` ONLY; author REPRC-001 v1.0 first; the three additive slots + `expires_at` TTL fix + positive reason vocabulary + `__setattr__` guard + consumer-inventory guard + synthetic-only seam; ≥ 48-case defensive matrix; scope-fence guard reconciliation with a broad fixed-SHA A/B; NO RDGO/HPAC/PB-contract change, NO signature change, NO `currentness_binding` slot, NO admission binding, NO adapter call site, NO capability change, NO N-16-5/6/7 work, NO Slice C, NO execution enablement) → then `149O.20L.7O.3W.1R.2B.1R.1.1R.27` — **Independent Verification of the N-16-4 Runtime Enforcement Gate**. Each requires its own separate explicit human authorization; IDs recommended, not reserved. **Do not begin `.1R.26` / `.1R.27`.**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.27` — **Independent Verification of the N-16-4
+Runtime Enforcement Gate** (own explicit human authorization; ID recommended,
+NOT reserved). RE-DERIVE the 14-point proof of `.1R.25` §20; independent broad
+fixed-SHA A/B — do not trust this phase's enumeration; disclose any undisclosed
+attributable guard regression as a BLOCKER referred to a
+`149O.20L.7O.3W.1R.2B.1R.1.1R.26R` reconciliation (the `.1R.18` / `.1R.20` /
+`.1R.23` precedent). Do not begin `.1R.27`, N-16-5/6/7, Slice C, the first
+external effect, or execution enablement.
+
+---
+*Canonical report artifact. Schema version 1.0.*
