@@ -11,6 +11,7 @@
 - R, finalized `.1R.26R`: `e52d2f8e`
 - V, finalized `.1R.26R.1` BLOCKED head: `7d60eda674ec31dd2f7efafdbbfd168c358caca6`
 - E, this phase entry: `7d60eda674ec31dd2f7efafdbbfd168c358caca6`
+- H, substantive harness-repair head: `5f894e72fb37429b221c122bfad4943be88287bd`
 
 Inspected from primary source: `PROJECT_STATUS.md`; the complete `.1R.26R.1`
 BLOCKED artifact and tracked completion metadata; `.1R.26R`, `.1R.27`,
@@ -96,10 +97,17 @@ side: V 5,355 passed / 315 failed / 6 skipped; repaired worktree 5,357 passed /
 313 failed / 6 skipped. It had 309 common failures. The two named scanner
 nodes were fixed. Four current-only failures were explicitly dirty-worktree /
 real-host cleanliness assertions and are non-functional phase-worktree
-artifacts; three additional V-only historical artifact nodes and the corrected
-moving-HEAD SHA assertion were likewise environment/history-sensitive, not
-security behavior. A clean committed V/H comparison is recorded at phase
-finalization to isolate the exact two expected functional fixes.
+  artifacts; three additional V-only historical artifact nodes and the corrected
+  moving-HEAD SHA assertion were likewise environment/history-sensitive, not
+  security behavior.
+
+A clean committed V/H comparison over the two common IV/reconciliation suites
+isolated the harness delta exactly: V **43 passed / 3 failed**; H **46 passed**;
+common failures 0; fixed nodes exactly the two self-reference scanners plus the
+newly discovered moving-HEAD SHA assertion; candidate-only unexplained 0;
+unexplained attributable regressions 0. The prompt's two expected scanner fixes
+remain exactly two; the third fixed node is the separately disclosed finalized-
+SHA harness defect found by the mandatory full-suite rerun.
 
 ## Preservation and attribution
 
