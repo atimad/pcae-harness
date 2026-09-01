@@ -2,6 +2,131 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.24 — N-16-4 Real Positive Single-Attempt
+Runtime Enforcement Gate Architecture and Contract Planning. **STATUS: N-16-4
+ARCHITECTURE / CONTRACT PLAN COMPLETE — IMPLEMENTATION NOT BEGUN.** Planning /
+primary-source analysis / contract-impact analysis / threat-modeling /
+decision-freezing only. Phase-entry SHA `1ca1f6ab`. **No `src/pcae` change**
+(`git diff --name-only 1ca1f6ab HEAD -- src/pcae` empty; `runtime_dispatch_gate7.py`
+byte-identical). **No normative-contract change** (`git diff --name-only
+1ca1f6ab HEAD -- docs/contracts docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md
+docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md` empty). Runtime
+`not_implemented / Observed / observe / unavailable`; 0 plugins / 0
+capabilities; FIRST EXTERNAL EFFECT ABSENT; execution NOT enabled.
+
+Re-derived from primary source (RDGO-001 v3.1 all 21 sections; PBNDE-001
+v1.0; the RE No-Go Registry schema 1.1; NG-025; the legacy Phase-102
+`RuntimeEnforcementDecision` freeze; `runtime_dispatch_gate7.py` **read in
+full** — `Gate7Result` / `is_gate7_result` / `run_gate7_runtime_enforcement`
+/ `resolve_runtime_enforcement_posture` / the `_GATE7_RESULTS` registry / the
+constructor seal; `runtime_dispatch_gate10_eligibility.py` **read in full**;
+`runtime_dispatch_gate8.py` / `gate9.py` Gate-7 consumption paths;
+`runtime_enforcement_safety_authorization.py`; `.1R.16` §35 row 14 = the
+N-16-4 mandate; `.1R.13.1`/`.1R.13.2`/`.1R.13.3` Gate-7 frozen decisions),
+not from phase summaries.
+
+**Central finding.** Gate 7's positive `Gate7Result(decision="ALLOW", …)`
+branch **already exists** (sealed, non-serializable, registry-provenanced,
+`# pragma: no cover - unreachable in production`) and is **already consumed**
+by three frozen downstream gates (Gate 8 binds `_gate7_result_digest`; Gate 9
+writes `consumption.json` item 7 `runtime_enforcement_binding`; Gate-10
+pre-effect eligibility requires `is_gate7_result` + `decision == "ALLOW"` +
+digest lineage + durable `re_binding.verdict == "ALLOW"` + `re_expires_at >
+now`). **N-16-4 is therefore fundamentally a contract-freeze**, not a
+green-field build: what is missing is a frozen contract governing what the
+positive object *means*, how its trust is anchored, its identity, its
+currentness/lifetime, and its replay semantics.
+
+**Frozen architecture.** (1) **Meaning:** a positive Gate-7 result asserts
+*only* "the exact bound invocation/attempt satisfies Runtime Enforcement
+constraints sufficiently to proceed to Gate 8" — explicitly NOT permission
+to execute/dispatch, NOT runtime capability / adapter availability, NOT
+effect authorization, NOT human authority, NOT PB permission, NOT a
+`DispatchEnvelope`. (2) **Vocabulary:** Option A — reuse `decision="ALLOW"`
+(B/C/D rejected: a rename ripples through three frozen gates; a second typed
+result doubles the provenance surface; a separate "certificate" is exactly
+the extra bearer token the walls forbid). (3) **Non-bearer trust model:**
+the process-local exact-object identity registry `_GATE7_RESULTS` +
+constructor seal + `__reduce__`-raises + identity-only `==`/`hash` — the
+existing primitive, documented and frozen; no new trust primitive; F7
+same-account boundary carried verbatim. (4) **Identity:**
+`runtime_enforcement_result_id` = canonical digest over invocation/attempt/
+idempotency + `pb_decision_digest` + `evaluated_input_digest` +
+`authority_freshness_digest` + `runtime_posture_digest` + a new
+`currentness_binding` + `"REPRC-001/1.0"`. (5) **Currentness/lifetime:**
+generational-first — a `currentness_binding` digest over the authority-
+generation vector, invalid the moment any bound digest no longer matches a
+fresh re-derivation — plus a bounded wall-clock TTL backstop (wall-clock
+alone is insufficient). (6) **Subordination frozen:** Gate 8 still
+independently required; Gate 9 remains the sole owner of authority
+consumption (`Gate-7 result != authority consumption`); Gate-10's 18-step
+pre-effect battery unchanged (`Gate-7 ALLOW != DispatchEnvelope`); the
+Slice-B `RuntimeInvocationRecord` is never read or written by Gate 7;
+runtime capability (N-16-7) and adapter admission (N-16-6) stay independent.
+(7) **No-go / positive-path:** any applicable unresolved per-decision hard
+no-go → `DENY`; no "trusted narrow profile" shortcut; the RE No-Go Registry
+needs **no change** (RE-NOGO-001's per-decision projection simply un-matches
+for a synthetic fully-satisfied `RUNTIME_DISPATCH_LOCAL_CLI_V1` profile,
+while RE-NOGO-002/010/011 keep every production and end-to-end path
+blocked). (8) **Persistence:** Model A — no durable positive-result store;
+recompute Gate 7 after restart; the durable truth is Gate 9's
+`consumption.json` (Models B/C rejected). (9) **Replay/stale:** every
+transplant / copy / serialized / reconstructed / forged result and every
+authority-currentness mutation is rejected by a named component (three
+independent enforcement layers today).
+
+**Contract ownership (frozen).** A new dedicated contract **REPRC-001 v1.0**
+(Runtime Enforcement Positive-Result Contract) — directly analogous to how
+PBNDE-001 v1.0 was born for N-16-3 — plus an **optional** RDGO-001 v3.1 →
+v3.2 **MINOR** clarifying cross-reference in §8 (made blast-radius-gated: if
+the `RDGO-001/3.1` cross-ref sprawl is large, keep RDGO at v3.1 and put the
+clarification only in REPRC-001, per the `.1R.22` sibling-bump-cascade
+lesson). **No MAJOR bump.** Sequence: **Path X (inline, N-16-3 precedent)** —
+planning (`.1R.24`) → implementation with inline REPRC-001 authorship as the
+first commit (`.1R.25`) → IV (`.1R.26`); a separate contract-freeze phase is
+NOT required (initial freeze, no incumbent to migrate), with a documented
+fallback to STOP-and-re-adjudicate to a separate freeze phase if `.1R.25`
+primary-source review finds a forced MAJOR.
+
+**Non-blocking findings (feed `.1R.25`/`.1R.26`; no new blocker; N-16-3 not
+reopened).** N-16-4-1: the current `expires_at = evaluation instant` is
+unusable for a real positive path (Gate 10 requires `re_expires_at > now`
+strictly) → `.1R.25` replaces it with the dual-bound (generational + TTL)
+model. N-16-4-2: bind `admission_record_digest` / `admission_class` into the
+Gate-7 digest (defence in depth; not an N-16-6 implementation). N-16-4-3:
+bind a PB request canonical digest + policy/contract versions into
+`_pb_decision_digest`. N-16-4-4: the positive branch sets
+`causing_reason_ids=()` — a positive result must carry an explicit positive
+rationale. N-16-4-5 (observation): `.1R.16` §35 row 14's "PBRD §12 item 5"
+label predates PBRD-001 v3.0 §12a — frame N-16-4 as "the positive Gate-7
+result over the RDGO-001 v3.1 §8 projection".
+
+**Prerequisite ordering reconfirmed.** N-16-3 (**CLOSED**) → N-16-4 →
+N-16-5 (real FIDO2/WebAuthn/CTAP + protected UI) → N-16-6 (RPAC-REQ-095
+fixed-argv adapter + supply-chain admission) → N-16-7 (capability
+enablement — **strictly last**). N-16-4 is adjudicated to land **before**
+N-16-5: a synthetic/test-only positive Runtime Enforcement implementation is
+independently useful (it freezes the positive-result contract and makes the
+downstream positive-path handling testable) and safe (local/in-memory,
+underscore-private test seams only, no capability/adapter/credential/network,
+production Gate 7 stays `DENY`-only) — the exact pattern Gates 8/9, Slice A,
+Slice B were built on. Slice C / Slice D keep **no phase ID** until
+N-16-3..7 all close. N-23-2 carried (INFO / DEFERRED NORMALIZATION DEBT); no
+PBRD/PBNDE edit. `.3` delegated finalization / commit / push remains
+**UNAUTHORIZED**.
+
+**Recommended next (needs its own explicit human authorization; ID
+recommended, NOT reserved).** `149O.20L.7O.3W.1R.2B.1R.1.1R.25` — N-16-4 Real
+Positive Single-Attempt Runtime Enforcement Gate Implementation → then
+`149O.20L.7O.3W.1R.2B.1R.1.1R.26` — Independent Verification of the N-16-4
+Runtime Enforcement Gate. **Do not implement `.1R.25` / `.1R.26`.** Do not
+begin N-16-5..7. Do not begin Slice C. Do not implement or call the first
+external effect. Do not enable execution.
+
+See `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_24_N_16_4_REAL_POSITIVE_SINGLE_ATTEMPT_RUNTIME_ENFORCEMENT_GATE_ARCHITECTURE_AND_CONTRACT_PLANNING.md`.
+
+---
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R.1 — Independent Verification of the
 N-16-3 Reconciliation. **STATUS: INDEPENDENTLY VERIFIED WITH NON-BLOCKING
 FINDINGS — N-16-3 RECONCILIATION COMPLETE.** RE-DERIVE, DO NOT TRUST:
