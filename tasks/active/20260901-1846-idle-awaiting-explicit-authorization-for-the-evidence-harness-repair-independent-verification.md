@@ -29,6 +29,8 @@ Idle: awaiting explicit authorization for the evidence-harness repair independen
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -61,8 +63,6 @@ strict
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
 - No rollback
 
 ## Acceptance Criteria

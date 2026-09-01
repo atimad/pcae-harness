@@ -1,6 +1,6 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1 BLOCKED — Independent Verification of the N-16-4 Scope-Fence / Verification-Evidence Reconciliation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R — N-16-4 Reconciliation IV Evidence-Harness Repair
 
-**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1
+**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R
 **Type:** governed reconciliation/repair phase — narrow scope-fence widening, no production/contract change
 **Status:** REPAIRED — INDEPENDENT VERIFICATION PENDING `.1R.26R.1`. N-16-4 implementation semantics UNCHANGED; N-16-4 remains NOT CLOSED
 **Phase-entry SHA:** `9d28f7ef` (`.1R.26` finalized head; `.1R.27`'s own governed finalization commits landed between phase-entry and this phase's task start, attributed to `.1R.27`, not this phase)
