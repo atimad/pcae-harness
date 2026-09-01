@@ -2,6 +2,73 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30 — N-16-5 Real FIDO2 Credential Registry
+and Authentication Mechanism Implementation.
+**STATUS: BLOCKED — no production source or contract changed.** Phase-entry
+SHA `e40d4ce1`.
+
+`.1R.30` was authorized to implement the credential-registry + real CTAP2
+authentication half of N-16-5 (RHAMP-001 v1.0 §64 / RHAMP-REQ-156 `.1R.30`
+row). During the mandated primary-source reconstruction (RHAMP-001 v1.0 read
+in full; HPAC-001 v2.1 §7; `hpac_foundation.py`, `human_principal_registry.py`,
+`hpac_verifier.py`, `human_authenticator.py` read in full) — **before any
+production code, store, tool, or test was written** — the phase hit a valid
+early-STOP condition at implementation scope item **A, "production
+`HumanPrincipalRegistryStore` writer path"**.
+
+**Blocker:** the existing governance model implements only the *negative* half
+of the HPAC-REQ-022/023 protected-admin anchor (`HPACStoreAuthority._validate_production_boundary`
+validates the protected root is **not** agent-writable) and provides **no**
+*positive* half — `HPACStoreAuthority.writer()` categorically raises
+`"no production HPAC writer is implemented in this foundation phase"` for any
+non-fixture class, there is "intentionally no public production-writer
+factory", and `ProtectedAdminCapability` "can never authorize a production
+store". No implemented, contract-specified mechanism exists by which the
+"externally established deployment-owner protected administration principal"
+(RHAMP-REQ-047) authenticates to PCAE and mints a `PRODUCTION`
+`HPACWriterCapability`. HPAC-001 §7 froze the *policy* (HPAC-REQ-022/023/024/080)
+but not the *mechanism*; `hpac_foundation.py` explicitly deferred it; the
+`.1R.28` planning artifact acknowledged it ("frozen in HPAC-001, not yet
+implemented") but under-estimated it as routine. Building it would require
+inventing a new admin-authority model (phase prompt §18 forbids), evolving the
+`hpac_foundation.py` trust boundary (valid early-STOP: "cannot safely host a
+production writer without contract evolution"), or resolving a genuine HPAC-001
+silence on *how* the external OS principal proves itself (valid early-STOP:
+"a new contract ambiguity requires human adjudication"). RHAMP-REQ-049 /
+RHAMP-INV-005 name this exact situation as a mandatory STOP.
+
+**No repair outside scope.** `git diff e40d4ce1 HEAD -- src/pcae` empty;
+`git diff e40d4ce1 HEAD -- docs/contracts` empty. RHAMP-001 v1.0
+byte-unchanged; HPAC-001 stays v2.1; `HPAC-AUTHORITY-CONSUMPTION` stays `/2.1`.
+No FIDO2/CTAP code, no `_ELIGIBLE_MECHANISM_IDS` widening, no `verifier_kind`
+addition, no sidecar/counter store, no enrollment tool, no protected UI, no
+approval proof, no PRODUCTION `AuthenticatedHumanPrincipal`, no hardware
+access, no test file, no guard reconciliation. No N-16-6 / N-16-7 / Slice C /
+first external effect / execution enablement. Runtime `not_implemented` /
+`Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities. First
+external effect ABSENT.
+
+**N-16-5:** CONTRACT PROFILE FROZEN (RHAMP-001 v1.0) / IMPLEMENTATION PENDING —
+`.1R.30` BLOCKED — NOT CLOSED. N-16-3 CLOSED; N-16-4 CLOSED; N-16-6 / N-16-7
+OPEN, not begun (N-16-7 strictly last). N-23-1 INFO; N-23-2 INFO / DEFERRED —
+carried unchanged.
+
+**Recommended successor (ID recommended, NOT reserved; own explicit human
+authorization required):** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R` — HPAC-REQ-022/023
+Production Protected-Admin Writer Anchor: Architecture and Contract
+Adjudication. Adjudicate and freeze the concrete trust mechanism for the
+external deployment-owner protected-admin principal (root-owned capability
+descriptor / privilege-gated context / administrator-signed installation
+record / OS keychain admin key — evaluated against the HPAC-001 threat model),
+decide MINOR-vs-implementation, then `.1R.30` resumes from the adjudicated
+baseline (not inside `.1R.30R`). Full BLOCKED analysis:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30_N_16_5_REAL_FIDO2_CREDENTIAL_REGISTRY_AND_AUTHENTICATION_MECHANISM_IMPLEMENTATION.md`.
+DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.29 — N-16-5 Real Human Authentication
 Mechanism & Protected Presentation Profile Contract Freeze (RHAMP-001 v1.0).
 **STATUS: CONTRACT FREEZE COMPLETE — RHAMP-001 v1.0 FROZEN AS THE SOLE

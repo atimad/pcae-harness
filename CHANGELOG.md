@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Phase `.1R.30` (N-16-5 Real FIDO2 Credential Registry and Authentication
+  Mechanism Implementation) is **BLOCKED** — no production source or normative
+  contract was created or modified (`git diff e40d4ce1 HEAD -- src/pcae` and
+  `-- docs/contracts` both empty). During the mandated primary-source
+  reconstruction (RHAMP-001 v1.0 read in full; HPAC-001 v2.1 §7;
+  `hpac_foundation.py` / `human_principal_registry.py` / `hpac_verifier.py` /
+  `human_authenticator.py` read in full), before any code/store/tool/test was
+  written, the phase reached a valid early-STOP at implementation scope item A,
+  "production `HumanPrincipalRegistryStore` writer path": the existing
+  governance model provides only the negative half of the HPAC-REQ-022/023
+  protected-admin anchor (the protected root is validated as not
+  agent-writable) and no positive half — `HPACStoreAuthority.writer()`
+  categorically refuses every non-fixture class ("no production HPAC writer is
+  implemented in this foundation phase"), there is "intentionally no public
+  production-writer factory", and `ProtectedAdminCapability` "can never
+  authorize a production store". No implemented, contract-specified mechanism
+  exists by which the external deployment-owner protected administration
+  principal (RHAMP-REQ-047) authenticates to PCAE and mints a `PRODUCTION`
+  `HPACWriterCapability`. HPAC-001 §7 froze the policy, not the mechanism.
+  RHAMP-REQ-049 / RHAMP-INV-005 name this exact situation as a mandatory STOP;
+  phase prompt §18 forbids inventing a new admin-authority model. Recommended
+  successor: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R` — HPAC-REQ-022/023 Production
+  Protected-Admin Writer Anchor: Architecture and Contract Adjudication
+  (own explicit human authorization required). N-16-5 remains NOT CLOSED;
+  N-16-6 / N-16-7 OPEN and not begun; runtime `Observed` / `observe` /
+  `unavailable`; first external effect ABSENT. Full analysis:
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30_N_16_5_REAL_FIDO2_CREDENTIAL_REGISTRY_AND_AUTHENTICATION_MECHANISM_IMPLEMENTATION.md`.
+  DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.29) to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30: N-16-5 Real FIDO2 Credential Registry and Authentication Mechanism Implementation (BLOCKED); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.29: RHAMP-001 v1.0 contract freeze to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.29); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting authorization for the N-16-5 contract-freeze phase post 149O.20L.7O.3W.1R.2B.1R.1.1R.28 to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.29: RHAMP-001 v1.0 contract freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.28: N-16-5 real FIDO2/CTAP and protected approval planning to Idle: awaiting authorization for the N-16-5 contract-freeze phase post 149O.20L.7O.3W.1R.2B.1R.1.1R.28; session refreshed and governance continuity revalidated.

@@ -2,6 +2,26 @@
 
 ## Accepted
 
+- **Phase `.1R.30` N-16-5 real FIDO2 mechanism implementation — BLOCKED
+  (2026-09-02).** Reconstructed RHAMP-001 v1.0 in full and the HPAC production
+  trust foundation (`hpac_foundation.py`, `human_principal_registry.py`,
+  `hpac_verifier.py`, `human_authenticator.py`) before writing any code.
+  BLOCKED at implementation scope item A ("production
+  `HumanPrincipalRegistryStore` writer path"): `HPACStoreAuthority` implements
+  only the negative half of the HPAC-REQ-022/023 anchor (protected root
+  validated as not agent-writable) and no positive half — `writer()` refuses
+  every non-fixture class, there is "intentionally no public production-writer
+  factory", `ProtectedAdminCapability` can never authorize production. HPAC-001
+  §7 froze the anchor *policy* but not the *mechanism*; building it hits phase
+  prompt §18 ("do not invent a new admin authority model") and the valid
+  early-STOP conditions "cannot safely host a production writer without
+  contract evolution" and "a new contract ambiguity requires human
+  adjudication". RHAMP-REQ-049 / RHAMP-INV-005 mandate STOP. No `src/pcae` or
+  `docs/contracts` change. Recommend `149O.20L.7O.3W.1R.2B.1R.1.1R.30R` —
+  HPAC-REQ-022/023 Production Protected-Admin Writer Anchor: Architecture and
+  Contract Adjudication (own explicit human authorization required); `.1R.30`
+  resumes from the adjudicated baseline, not inside `.1R.30R`.
+
 - **Phase `.1R.27R` N-16-4 final product IV (2026-09-01).** Close N-16-4
   after independently verifying REPRC-001, B1-B, B2-D, Currentness B,
   stale-result rejection, non-bearer trust, production ALLOW
