@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27 — Independent Verification of the
+N-16-4 Runtime Enforcement Gate. **STATUS: BLOCKED.** Phase-entry SHA
+`9d28f7ef` (`.1R.26` finalized head). RE-DERIVED (not trusted) every `.1R.26`
+claim: REPRC-001 v1.0, B1-B, B2-D, and Currentness B all **VERIFIED /
+IMPLEMENTED EXACTLY** (byte A/B + AST against production source);
+`Gate7Result(ALLOW)` **non-bearer / non-transferable VERIFIED** (the
+`_GATE7_RESULTS` registry-membership check precedes digest composition, so a
+transplanted new-slot object cannot reach trust regardless of the unchanged
+`_gate7_result_digest`); production `Gate7` ALLOW **UNREACHABLE / VERIFIED**
+(N-16-5 human-authority wall, N-16-6 admission wall, current RE no-go
+posture, N-16-7 runtime-unavailable wall each independently block it); first
+external effect **ABSENT**. New independent 37-test IV suite
+`tests/test_gate7_positive_runtime_enforcement_independent_verification_3w1r2b1r1_1r27.py`
+(production-bypass challenge via public APIs only, new-slot-transplant
+challenge, registry-membership-only mutation-site AST proof, PB-not-rerun /
+no-effect AST proofs, independent consumer-inventory re-derivation) — all
+passing.
+
+**BLOCKER (explicit valid early-stop condition):** an independent broad
+fixed-SHA A/B (baseline `28b8b2b7` vs candidate `9d28f7ef`, deterministic,
+no xdist) found one candidate-only failure beyond the 40 nodes `.1R.26`
+disclosed as reconciled —
+`tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py::test_runtime_posture_unchanged_and_no_new_first_effect_call_site`
+— independently reproduced **PASS at `28b8b2b7`, FAIL at `9d28f7ef`**,
+because its `.1R.22`-baseline-rooted (`8603fe6a`) exact `src/pcae`
+current-state file-set assertion was never widened to include `.1R.26`'s
+authorized single-file addition `runtime_dispatch_gate7.py`. The guard's
+other two assertions (runtime posture unchanged; no new `adapter.dispatch(`
+call site) still pass — this is a **verification-evidence / scope-fence
+defect, not a product or contract defect**.
+
+**Verdict.** N-16-4 remains **not** CLOSED. `.1R.27`'s substantive
+adjudication is clean; only the mandatory lifecycle-acceptance gate (zero
+unexplained attributable regressions) failed — the identical structure as
+the historical `.1R.18` BLOCKED precedent.
+
+**Recommended next (own explicit human authorization; ID recommended, NOT
+reserved):** `149O.20L.7O.3W.1R.2B.1R.1.1R.26R` — N-16-4 Scope-Fence /
+Verification-Evidence Reconciliation and Repair (the `.1R.18` / `.1R.20` /
+`.1R.23` precedent): widen the one guard's frozen file-set assertion by
+exactly `{runtime_dispatch_gate7.py}`; broadly re-derive whether any other
+`.1R.26`-attributable stale guard exists; no production or contract change.
+After it (and its own `.1R.26R.1` independent verification) close, resume
+`.1R.27` from the repaired baseline. Do not begin N-16-5/6/7, Slice C, the
+first external effect, or execution enablement.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 — N-16-4 Real Positive Single-Attempt
 Runtime Enforcement Gate Implementation. **STATUS: N-16-4 IMPLEMENTED —
 INDEPENDENT VERIFICATION PENDING `.1R.27`.** Phase-entry SHA

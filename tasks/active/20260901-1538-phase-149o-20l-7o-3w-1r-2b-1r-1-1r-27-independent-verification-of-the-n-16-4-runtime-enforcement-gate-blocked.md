@@ -23,6 +23,8 @@ Finalize the .1R.27 independent-verification cycle as BLOCKED (mirrors the .1R.1
 ## Allowed Files
 
 - tests/test_gate7_positive_runtime_enforcement_independent_verification_3w1r2b1r1_1r27.py
+- PROJECT_STATUS.md
+- CHANGELOG.md
 - tasks/**
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
