@@ -268,8 +268,8 @@ is still not a `_GATE7_RESULTS` member and `is_gate7_result` rejects it.
   step 11 (which requires `re_expires_at` strictly after its own
   `authority_current_time`).
 - **Stale generation overrides TTL.** Even within the 300-second window, a
-  generation drift detected at Gate 8's mandatory Gate-7 re-run or at
-  Gate 10 step 13's mandatory generation re-derivation SHALL reject the
+  generation drift detected at Gate 8's mandatory projection revalidation or
+  at Gate 10 step 13's mandatory generation re-derivation SHALL reject the
   result. TTL never rescues a generationally-stale result.
 - The projection's own wall-clock expiry is **not** folded into
   `expires_at`: `ValidatedAuthorityProjection.expiry_verdict` is a verdict
@@ -299,10 +299,16 @@ trusted upstream evidence** plus the revalidation Gate 7 already performs:
    — catching principal / credential / proof / approval / expiry /
    consumption drift → `gate7_stale_validated_authority_projection`, **no
    `Gate7Result`**.
-3. **Re-checked in-process** by Gate 8, which re-runs
-   `run_gate7_runtime_enforcement` over freshly re-resolved `Gate6Decision`
-   / `Gate5Result` objects (RDGO-001 §8 mandate). A projection stale at
-   Gate 8 fails the re-run.
+3. **Re-checked in-process** by Gate 8, which independently re-trusts and
+   re-validates the referenced `ValidatedAuthorityProjection` at its own
+   point of use (`is_trusted_validated_authority_projection` +
+   `revalidate_validated_authority_projection`, a fresh `validate_approval`)
+   and re-derives the Gate-7 lineage/digest (`_gate7_result_digest`). A
+   projection stale after Gate 7 fails closed at Gate 8
+   (`gate8_stale_validated_authority_projection`). Gate 8 does not re-invoke
+   `run_gate7_runtime_enforcement` (its `_gate7_result_digest` helper
+   documents this) — it re-executes the Gate-7 freshness and lineage checks
+   directly, which is the operative meaning of "re-run" here.
 4. **Re-derived restart-safe** by Gate 10 step 13, which calls its trusted
    `authority_generation_resolver()` and compares the live generation vector
    against the durable item-9 `authority_generation_binding` snapshot
@@ -315,7 +321,7 @@ TTL (§7) is the wall-clock defence-in-depth backstop over the top of these.
 | # | Owner | Check | Classification |
 |---|---|---|---|
 | 1 | Gate 7, creation time | `is_trusted_validated_authority_projection` + `revalidate_validated_authority_projection` (re-runs `validate_approval`); failure → `(None, ("gate7_stale_validated_authority_projection",))` | MANDATORY |
-| 2 | Gate 8, consumer | re-runs `run_gate7_runtime_enforcement` over freshly re-resolved objects; a stale projection fails the re-run; a trusted **negative** `Gate7Result` is a hard stop at `gate8_gate7_decision_not_allow` before Shell Gate evaluation | MANDATORY |
+| 2 | Gate 8, consumer | independently re-trusts + re-validates the `ValidatedAuthorityProjection` (fresh `validate_approval` via `revalidate_validated_authority_projection`) and re-derives the Gate-7 lineage/digest at its own point of use; a projection stale after Gate 7 fails closed at `gate8_stale_validated_authority_projection`; a trusted **negative** `Gate7Result` is a hard stop at `gate8_gate7_decision_not_allow` before Shell Gate evaluation | MANDATORY |
 | 3 | Gate 10 step 13 | `authority_generation_resolver()` → `_first_generation_drift(durable_snapshot, current_markers)` vs. item-9 `authority_generation_binding`; drift → `gate10_authority_generation_drift:<source>` (restart-safe) | MANDATORY |
 | 4 | Gate 10 step 11 | durable `re_binding.verdict == "ALLOW"` and `re_expires_at` strictly after `authority_current_time` (else `gate10_re_decision_expired`) | DEFENCE-IN-DEPTH (bounded wall-clock backstop; §7) |
 
@@ -332,9 +338,9 @@ A future independent verification SHALL be able to locate each of owners
 - **Stale generation.** A positive `Gate7Result(ALLOW)` for `(inv=A,
   att=1)` whose principal / credential / approval / proof / lifecycle
   generation changes before use cannot traverse the next legitimate
-  consumer chain: Gate 8's Gate-7 re-run re-runs `validate_approval`
-  against current state and returns `gate7_stale_validated_authority_
-  projection`; on a restart / cross-process path Gate 10 step 13 re-derives
+  consumer chain: Gate 8's independent projection revalidation re-runs
+  `validate_approval` against current state and returns
+  `gate8_stale_validated_authority_projection`; on a restart / cross-process path Gate 10 step 13 re-derives
   the generation vector from durable stores and rejects at
   `gate10_authority_generation_drift:<source>`. Gate 9 records no
   consumption for a Gate-8 rejection.
@@ -663,7 +669,7 @@ vocabulary (§20), the finite consumer set (§21). No prose-only guarantee.
 | ID | Statement |
 |---|---|
 | REPRC-INV-001 | A positive `Gate7Result` is invalid across any change to `invocation_id`, `attempt_id`, `idempotency_key`, the PB decision digest, the evaluated-input digest (any component), the authority-freshness digest, the runtime-posture digest, or `reprc_schema_version` (§3.1). |
-| REPRC-INV-002 | A stale positive `Gate7Result` is rejected by a **named** owner — Gate 7 creation-time projection revalidation, Gate 8's Gate-7 re-run, or Gate 10 step 13 — before it can acquire meaningful downstream authority; TTL (Gate 10 step 11) is the wall-clock backstop (§8.1). |
+| REPRC-INV-002 | A stale positive `Gate7Result` is rejected by a **named** owner — Gate 7 creation-time projection revalidation, Gate 8's independent projection revalidation, or Gate 10 step 13 — before it can acquire meaningful downstream authority; TTL (Gate 10 step 11) is the wall-clock backstop (§8.1). |
 | REPRC-INV-003 | A `Gate7Result` is non-bearer and non-transferable: structure, field equality, digest consistency, serialized form, and a known `runtime_enforcement_result_id` are each insufficient; only construction under the seal + `_GATE7_RESULTS` membership + live re-validation confer trust (§4, §5, §8.2). |
 | REPRC-INV-004 | Gate 7 consumes nothing, writes no `consumption.json`, calls no Gate-9 primitive, binds no adapter-admission evidence, re-runs no PB policy, and mutates no runtime capability (§10, §13, §14, §18). |
 | REPRC-INV-005 | A positive `Gate7Result` permits progression to Gate 8 evaluation only; Gates 8, 9, and the Gate-10 pre-effect read-back each remain independently required and independently authoritative (§9–§11). |
