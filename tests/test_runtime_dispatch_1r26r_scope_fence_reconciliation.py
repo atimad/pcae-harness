@@ -30,6 +30,7 @@ history and the repaired guard file itself, not report prose), that:
 from __future__ import annotations
 
 import ast
+import difflib
 import subprocess
 from pathlib import Path
 
@@ -72,12 +73,22 @@ def _attribute_chain(node: ast.AST) -> tuple[str, ...]:
     return tuple(reversed(parts))
 
 
-def _executable_xfail_uses(source: str) -> list[tuple[str, int]]:
-    """Return executable pytest expected-failure uses, ignoring text data."""
+_WEAKENING_MARKS = frozenset({"skip", "skipif", "xfail"})
+_WEAKENING_CALLS = frozenset({"skip", "xfail"})
+
+
+def _executable_test_weakening_uses(source: str) -> list[tuple[str, int]]:
+    """Return executable pytest skip/xfail uses, ignoring inert text.
+
+    Parsing is deliberately fail-closed: invalid Python raises ``SyntaxError``
+    instead of being classified as clean.  Qualified, imported, and aliased
+    pytest forms are resolved from imports.  Mark calls are detected wherever
+    they execute, including decorators and module-level ``pytestmark`` values.
+    """
     tree = ast.parse(source)
     pytest_names = {"pytest"}
     mark_names: set[str] = set()
-    direct_names: set[str] = set()
+    direct_names: dict[str, str] = {}
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -85,22 +96,22 @@ def _executable_xfail_uses(source: str) -> list[tuple[str, int]]:
                     pytest_names.add(alias.asname or alias.name)
         elif isinstance(node, ast.ImportFrom) and node.module == "pytest":
             for alias in node.names:
-                if alias.name == "xfail":
-                    direct_names.add(alias.asname or alias.name)
+                if alias.name in _WEAKENING_MARKS:
+                    direct_names[alias.asname or alias.name] = alias.name
                 elif alias.name == "mark":
                     mark_names.add(alias.asname or alias.name)
 
     def kind(expr: ast.AST) -> str | None:
         target = expr.func if isinstance(expr, ast.Call) else expr
         if isinstance(target, ast.Name) and target.id in direct_names:
-            return "call"
+            return f"{direct_names[target.id]}-mark" if direct_names[target.id] == "skipif" else f"{direct_names[target.id]}-call"
         chain = _attribute_chain(target)
-        if len(chain) == 2 and chain[0] in pytest_names and chain[1] == "xfail":
-            return "call"
-        if len(chain) == 3 and chain[0] in pytest_names and chain[1:] == ("mark", "xfail"):
-            return "decorator"
-        if len(chain) == 2 and chain[0] in mark_names and chain[1] == "xfail":
-            return "decorator"
+        if len(chain) == 2 and chain[0] in pytest_names and chain[1] in _WEAKENING_CALLS:
+            return f"{chain[1]}-call"
+        if len(chain) == 3 and chain[0] in pytest_names and chain[1] == "mark" and chain[2] in _WEAKENING_MARKS:
+            return f"{chain[2]}-mark"
+        if len(chain) == 2 and chain[0] in mark_names and chain[1] in _WEAKENING_MARKS:
+            return f"{chain[1]}-mark"
         return None
 
     found: set[tuple[str, int]] = set()
@@ -109,12 +120,30 @@ def _executable_xfail_uses(source: str) -> list[tuple[str, int]]:
             detected = kind(node)
             if detected:
                 found.add((detected, node.lineno))
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            for decorator in node.decorator_list:
-                detected = kind(decorator)
-                if detected:
-                    found.add(("decorator", decorator.lineno))
+        elif isinstance(node, (ast.Attribute, ast.Name)):
+            detected = kind(node)
+            if detected:
+                found.add((detected, node.lineno))
     return sorted(found)
+
+
+def _executable_xfail_uses(source: str) -> list[tuple[str, int]]:
+    """Compatibility view retained for the independently verified xfail API."""
+    labels = {"xfail-call": "call", "xfail-mark": "decorator"}
+    return [(labels[kind], line) for kind, line in _executable_test_weakening_uses(source)
+            if kind in labels]
+
+
+def _introduced_executable_test_weakening_uses(old: str, new: str) -> list[tuple[str, int]]:
+    """Return executable weakening uses on inserted/replaced new-source lines."""
+    old_lines = old.splitlines()
+    new_lines = new.splitlines()
+    changed_new_lines: set[int] = set()
+    matcher = difflib.SequenceMatcher(a=old_lines, b=new_lines, autojunk=False)
+    for tag, _old_start, _old_end, new_start, new_end in matcher.get_opcodes():
+        if tag in {"insert", "replace"}:
+            changed_new_lines.update(range(new_start + 1, new_end + 1))
+    return [use for use in _executable_test_weakening_uses(new) if use[1] in changed_new_lines]
 
 
 _LIVE_SCOPE_NAME_PARTS = (
@@ -318,7 +347,8 @@ def test_14_no_test_weakening_in_the_r26r_diff():
             and node.name.startswith("test_")
         } if new else set()
         assert old_defs <= new_defs, (rel, sorted(old_defs - new_defs))
-        assert _executable_xfail_uses(new) == [], rel
+        introduced = _introduced_executable_test_weakening_uses(old, new)
+        assert introduced == [], (rel, introduced)
 
 
 def test_15_no_wildcard_or_fnmatch_introduced_in_the_r26r_diff():

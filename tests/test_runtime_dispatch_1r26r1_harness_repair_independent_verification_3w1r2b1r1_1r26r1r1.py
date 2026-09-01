@@ -10,7 +10,10 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import subprocess
+import types
 from pathlib import Path
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +50,17 @@ def _load_scanner():
 SCANNER = _load_scanner()
 
 
+def _load_historical_scanner(sha: str):
+    module = types.ModuleType(f"historical_scanner_{sha}")
+    module.__file__ = str(ROOT / SCANNER_REL)
+    source = _git("show", f"{sha}:{SCANNER_REL}")
+    exec(compile(source, module.__file__, "exec"), module.__dict__)
+    return module
+
+
+H_SCANNER = _load_historical_scanner(H)
+
+
 def test_01_immutable_sha_chain_is_reconstructed():
     for sha in (A, B, R, V, H, I):
         assert _git("rev-parse", sha).strip() == sha
@@ -62,18 +76,23 @@ def test_02_pre_repair_guard_explicitly_prohibited_skip_to_pass():
 
 def test_03_repaired_ast_helper_misses_real_skip_decorator():
     source = "import pytest\n@pytest.mark.skip(reason='proof')\ndef test_example(): pass\n"
-    assert SCANNER._executable_xfail_uses(source) == []
+    assert H_SCANNER._executable_xfail_uses(source) == []
+    assert SCANNER._executable_test_weakening_uses(source) == [("skip-mark", 2)]
 
 
 def test_04_repaired_ast_helper_misses_real_pytest_skip_call():
     source = "import pytest\ndef test_example(): pytest.skip('proof')\n"
-    assert SCANNER._executable_xfail_uses(source) == []
+    assert H_SCANNER._executable_xfail_uses(source) == []
+    assert SCANNER._executable_test_weakening_uses(source) == [("skip-call", 2)]
 
 
 def test_05_repaired_no_weakening_test_false_negatives_executable_skip(monkeypatch):
     source = "import pytest\n@pytest.mark.skip(reason='proof')\ndef test_example(): pass\n"
+    monkeypatch.setattr(H_SCANNER, "_changed_test_sources", lambda: [("synthetic.py", "", source)])
+    H_SCANNER.test_14_no_test_weakening_in_the_r26r_diff()
     monkeypatch.setattr(SCANNER, "_changed_test_sources", lambda: [("synthetic.py", "", source)])
-    SCANNER.test_14_no_test_weakening_in_the_r26r_diff()
+    with pytest.raises(AssertionError):
+        SCANNER.test_14_no_test_weakening_in_the_r26r_diff()
 
 
 def test_06_repaired_ast_helper_still_detects_real_xfail_forms():
