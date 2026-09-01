@@ -2,6 +2,82 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R — HPAC-REQ-022/023 Production
+Protected-Admin Writer Anchor: Architecture and Contract Adjudication.
+**STATUS: COMPLETE — ADJUDICATED (not BLOCKED).** Phase-entry SHA `8e655295`.
+`git diff 8e655295 HEAD -- src/pcae` and `-- docs/contracts` are both **empty**.
+
+`.1R.30R` was authorized to adjudicate — architecture / trust-boundary /
+contract only — the absent *positive* half of the HPAC-REQ-022/023 protected-admin
+writer anchor that `.1R.30` correctly STOPPED at. HPAC-001 v2.1 §7 froze the
+anchor **policy** (HPAC-REQ-022/023/024/080) and the **negative** boundary
+(`HPACStoreAuthority._validate_production_boundary` — root not agent-writable),
+but deliberately deferred the **mechanism**: how PCAE code recognises the
+external deployment-owner admin principal and mints a `PRODUCTION`
+`HPACWriterCapability`.
+
+**Not BLOCKED.** The trust root is non-circular, same-UID-agent-safe, offline,
+macOS+Linux portable, and directly precedented by the independently-verified
+HBDC-001 Class-B Protected-Root writer boundary
+(`hatp_deployment_binding_admin.py`: "Real security boundary: OS filesystem
+write permission on the Protected Root, never an in-process check").
+
+**Preferred anchor (Candidate E, composed):** trust root = OS filesystem write
+authority on the out-of-band-provisioned `<HPAC_PROTECTED_ROOT>` with the agent
+principal provably excluded; positive recognition = a root-identity-bound
+`.authority/` deployment-owner descriptor + `_validate_production_boundary` + a
+positive write probe + a not-agent-identity check; capability issuer = a new
+`PRODUCTION` writer factory exported only from a **non-agent-importable** module
+guarded by a consumer-inventory test (HBDC-REQ-056/066 precedent); capability
+scope = one operation / one principal-credential, process-local,
+non-serializable, restart-invalid, non-reusable; bootstrap = a one-time
+out-of-band admin provisioning step, create-only, non-recurring, not
+agent-reachable. `sudo`/`euid` (Candidate B), an admin-signed record + pinned
+key (Candidate C), and an OS keychain/keyring key (Candidate D) are each
+**rejected** — the first because OS privilege ≠ deployment-owner identity and
+PCAE frozen precedent already bans `setuid`/`SUDO`-env reasoning; the second
+because it moves the trust root into an unexplained persistent key; the third
+because a user-keyring item is same-UID-readable (the exact threat).
+
+**Contract-adjudication verdict: B — NEW COMPANION CONTRACT REQUIRED.**
+Recommended `HPAC-PAWA-001 v1.0` (HPAC Production Protected Administration
+Writer Anchor Contract), authored by a dedicated contract-freeze successor
+(REPRC-001 / PBNDE-001 / RHAMP-001 companion precedent). **HPAC-001 stays
+v2.1** (no bump); **RHAMP-001 stays v1.0** (byte-unchanged — RHAMP-REQ-047
+already points to an external anchor). Pure implementation is rejected as the
+primary verdict (would hide normative trust decisions in code); HPAC MINOR /
+MAJOR is rejected (would force a parent-contract cascade for an additive,
+authority-preserving mechanism).
+
+**Historical `.1R.30`:** immutable BLOCKED — never reused, never resumed.
+**Fresh implementation successor (recommended, NOT reserved):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2`. **Dedicated IV of this adjudication:**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1`. **Re-derived downstream sequence:**
+`.1R.30R.1` (adjudication IV) → `.1R.30R.2` (`HPAC-PAWA-001 v1.0` freeze) →
+`.1R.30R.3` (mechanism + registry + writer-anchor implementation — the old
+`.1R.30` scope) → `.1R.30R.4` (IV) → `.1R.30R.5` (protected presentation +
+`require_real_assurance` wiring — old `.1R.32`) → `.1R.30R.6` (IV + mandatory
+real-CTAP2 hardware + N-16-5 closure — old `.1R.33`) → N-16-6 → N-16-7
+(strictly last). The stale RHAMP-REQ-156 tail (`.1R.31`/`.1R.32`/`.1R.33`) is
+superseded (it was recommended, not reserved, and assumed `.1R.30` completed).
+
+**N-16-5:** BLOCKED IMPLEMENTATION PREREQUISITE ADJUDICATED — IMPLEMENTATION
+NOT RESUMED — **NOT CLOSED.** N-16-3 CLOSED; N-16-4 CLOSED; N-16-6 / N-16-7
+OPEN, not begun (N-16-7 strictly last). N-23-1 INFO; N-23-2 INFO / DEFERRED —
+carried unchanged. Runtime `not_implemented` / `Observed` / `observe` /
+`unavailable`; 0 plugins / 0 capabilities. First external effect ABSENT. No
+FIDO2, no credential store, no enrollment, no protected presentation, no
+approval proof, no N-16-6/N-16-7, no Slice C, no first external effect, no
+execution enablement was performed. `DELEGATED .3 FINALIZATION / COMMIT /
+PUSH: UNAUTHORIZED` — preserved.
+
+Canonical document:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_HPAC_REQ_022_023_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_ARCHITECTURE_AND_CONTRACT_ADJUDICATION.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30 — N-16-5 Real FIDO2 Credential Registry
 and Authentication Mechanism Implementation.
 **STATUS: BLOCKED — no production source or contract changed.** Phase-entry

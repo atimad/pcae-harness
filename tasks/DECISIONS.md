@@ -3662,3 +3662,86 @@
   (`…3w1r2b1r111r1.py`, `…3w1r2b1r1_1r15_4.py`, `…freeze_repair_independent_verification_3w1r2b1r11.py`)
   are separately bounded to their stale PBRD-v2.1 / `.1R.15.4` version-pin
   nodes with no test function added, removed, or renamed.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R — Production Protected-Admin Writer Anchor Adjudication
+
+- **Verdict: NEW COMPANION CONTRACT REQUIRED** (option B of phase-prompt §56).
+  Recommended `HPAC-PAWA-001 v1.0` — HPAC Production Protected Administration
+  Writer Anchor Contract, independent `HPAC-PAWA-REQ-###` namespace (HPSE-001
+  precedent), authored by a dedicated contract-freeze successor `.1R.30R.2`.
+  HPAC-001 stays v2.1 (no bump — the mechanism is additive and widens no
+  authority; a MINOR would force a parent cascade — RIHAC-001 §12 cond 7 and
+  RHAMP-001 both pin "HPAC-001 v2.1" literally). RHAMP-001 stays v1.0,
+  byte-unchanged — RHAMP-REQ-047 already points to an *external* anchor.
+  Pure implementation rejected as primary verdict (phase-prompt §35: do not
+  hide normative trust decisions in code).
+- **Preferred anchor = Candidate E (composed), = the HBDC-001 Class-B pattern.**
+  Trust root = OS filesystem write authority on the out-of-band-provisioned
+  `<HPAC_PROTECTED_ROOT>`, agent principal provably excluded via
+  `_effective_write_access` / `_current_agent_identity`. Positive recognition =
+  root-identity-bound `.authority/` deployment-owner descriptor
+  (`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0`) + `_validate_production_boundary` + a
+  positive write probe (this invocation *can* write the root) + not-agent-identity.
+  Capability issuer = a new `PRODUCTION` writer factory (recommended
+  `HPACStoreAuthority.production_writer(operation, *, principal_id=None,
+  credential_id=None)`) exported only from a non-agent-importable module
+  (recommended `src/pcae/core/hpac_protected_admin_writer.py`) guarded by a
+  `.1R.30R.*` consumer-inventory test (HBDC-REQ-056/066 precedent, as for
+  `hatp_deployment_binding_admin.py`).
+- **`PRODUCTION` `HPACWriterCapability` semantics (new constraints vs. the
+  fixture writer):** operation-scoped (one of `enroll_principal` /
+  `revoke_principal` / `enroll_credential` / `revoke_credential`),
+  principal/credential-scoped, process-local, non-serializable (`__reduce__`
+  raises — unchanged), restart-invalid (fresh per-instance `_authority_seal`),
+  **not reusable for a second operation**. `CredentialRecord` byte-unchanged
+  (RHAMP-REQ-055). The registry `_writer()` performs no weaker independent
+  admin test — it delegates to `require_writer`, which now has a real
+  `PRODUCTION` capability to check.
+- **`sudo`/`euid` gate (Candidate B) — REJECTED:** OS privilege ≠ deployment-owner
+  identity; same-UID `sudo` NOPASSWD / `setuid` bypass; PCAE frozen precedent
+  (`hatp_class_b_topology_verifier._FORBIDDEN_SELF_ELEVATION_ATTRS`,
+  `_SUSPICIOUS_ENV_KEY_SUBSTRINGS` bans `SUDO`/`ADMIN`/`USER` env reasoning)
+  already rejects it. `euid == 0` mints nothing (phase-prompt §38).
+- **Admin-signed record + pinned key (Candidate C) — REJECTED for v1:** the
+  pinned key must itself be admin-installed into the protected root → collapses
+  to Candidate A; adds a persistent bearer secret for no threat-model gain in
+  the local-interactive topology (RHAMP-INV-014). A future remote/multi-host
+  MAJOR profile MAY revisit.
+- **OS keychain / keyring key (Candidate D) — REJECTED for v1:** user-keyring
+  items are same-UID-readable (the exact threat the anchor closes); not
+  portable (macOS Keychain vs. Linux keyctl/Secret Service); adds a second
+  interactive gate.
+- **Bare descriptor-by-path (Candidate A alone) — REJECTED:** path-only
+  authority (phase-prompt §39). Only viable composed with the write probe +
+  not-agent-identity + root-identity/provenance binding (→ Candidate E).
+- **Human authentication of the *admin* principal for the writer anchor:
+  NOT required** (phase-prompt §23) — requiring FIDO2 for the admin principal
+  would create the exact circular dependency (FIDO2 enrolment needs the writer;
+  the writer would need FIDO2). The *human principal being enrolled* still
+  performs UP+UV `makeCredential` (RHAMP-REQ-048) — that is credential
+  registration, not admin authentication.
+- **First-bootstrap exception:** a one-time out-of-band
+  `scripts/hpac_protected_root_admin.py provision` step by the admin OS
+  principal — creates the `0700` root + store-identity manifest + deployment-owner
+  descriptor + durable provenance entry. Create-only; non-recurring
+  (a second `provision` is a no-op / fail-closed conflict); not agent-reachable;
+  creates no runtime execution authority. HBDC-REQ-011..021 precedent.
+- **Failure taxonomy** maps onto RHAMP-001 §49 via `bootstrap_authority_unproven`
+  (#1), `enrollment_not_protected_admin` (#2), `protected_root_invalid` (#40) —
+  **no new `terminal_reason_code` required**; RHAMP-INV-010 unchanged.
+- **Phase-ID derivation (CPIPC-001 v1.0 §4).** `.1R.30` = `numeric-segment`
+  `30`, immutable BLOCKED, never reused/resumed. `.1R.30R` = `numeric-segment`
+  `30R` (digits + repair-letter suffix). Repository precedent: `.1R.19R`→`.1R.19R.1`,
+  `.1R.22R`→`.1R.22R.1`, `.1R.27R`. Fresh implementation successor =
+  `.1R.30R.2`; dedicated adjudication IV = `.1R.30R.1`. Stale RHAMP-REQ-156
+  tail (`.1R.31`/`.1R.32`/`.1R.33`) superseded (recommended-not-reserved;
+  assumed `.1R.30` completed) → re-derived as `.1R.30R.3`/`.1R.30R.5`/`.1R.30R.6`
+  with IVs `.1R.30R.4`/`.1R.30R.6`.
+- **Scope discipline.** `git diff 8e655295 HEAD -- src/pcae` empty; `-- docs/contracts`
+  empty. No writer-anchor mechanism implemented; no contract authored; no
+  FIDO2; no credential/sidecar/counter store; no enrollment tool; no protected
+  presentation; no approval proof; no `_ELIGIBLE_MECHANISM_IDS` change; no
+  guard reconciliation; no N-16-6/N-16-7/Slice C; no `adapter.dispatch()`; no
+  first external effect; no execution enablement. Runtime `Observed` /
+  `observe` / `unavailable`. N-16-5 NOT CLOSED. `DELEGATED .3 FINALIZATION /
+  COMMIT / PUSH: UNAUTHORIZED` preserved.

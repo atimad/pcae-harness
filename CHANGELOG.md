@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase `.1R.30R` (HPAC-REQ-022/023 Production Protected-Admin Writer Anchor:
+  Architecture and Contract Adjudication) is **COMPLETE — ADJUDICATED** (not
+  BLOCKED). No production source or normative contract was created or modified
+  (`git diff 8e655295 HEAD -- src/pcae` and `-- docs/contracts` both empty).
+  The absent *positive* half of the HPAC-REQ-022/023 anchor (how PCAE
+  recognises the external deployment-owner admin principal and mints a
+  `PRODUCTION` `HPACWriterCapability`) was independently reconstructed from
+  source; a writer-anchor threat model was frozen; five candidate trust
+  mechanisms were evaluated. **Preferred anchor:** OS filesystem write
+  authority on the out-of-band-provisioned protected root (agent principal
+  provably excluded) + a root-identity-bound `.authority/` deployment-owner
+  descriptor + a positive write probe + a not-agent-identity check + a
+  `PRODUCTION` writer factory in a non-agent-importable, consumer-inventory-guarded
+  module — the HBDC-001 Class-B Protected-Root writer boundary re-applied under
+  HPAC-001's separate registry/namespace. `sudo`/`euid`, an admin-signed
+  record + pinned key, and an OS keychain/keyring key were each rejected.
+  **Contract verdict: NEW COMPANION CONTRACT REQUIRED** — recommended
+  `HPAC-PAWA-001 v1.0`, authored by a dedicated contract-freeze successor;
+  HPAC-001 stays v2.1, RHAMP-001 stays v1.0 (byte-unchanged). Historical
+  `.1R.30` preserved immutable BLOCKED; fresh implementation successor
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2`; dedicated adjudication IV
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1`; downstream sequence re-derived under
+  `.1R.30R.*`. Runtime `Observed` / `observe` / `unavailable`; first external
+  effect ABSENT; N-16-5 NOT CLOSED. Canonical document:
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_HPAC_REQ_022_023_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_ARCHITECTURE_AND_CONTRACT_ADJUDICATION.md`.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); an adjudication phase for the production protected-admin writer anchor is recommended before implementation resumes to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R: Production Protected-Admin Writer Anchor Adjudication; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); .1R.30R protected-admin writer anchor adjudication recommended before .1R.30 can resume to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); an adjudication phase for the production protected-admin writer anchor is recommended before implementation resumes; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30: N-16-5 Real FIDO2 Credential Registry and Authentication Mechanism Implementation (BLOCKED) to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30); .1R.30R protected-admin writer anchor adjudication recommended before .1R.30 can resume; session refreshed and governance continuity revalidated.
 - Phase `.1R.30` (N-16-5 Real FIDO2 Credential Registry and Authentication
