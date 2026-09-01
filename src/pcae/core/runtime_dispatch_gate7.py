@@ -132,20 +132,46 @@ Explicit design decisions this phase makes (open questions in ``.1R.13.1``
   request field. One coherent snapshot is taken per evaluation (no
   multi-read TOCTOU); because the current result is always reject the
   window is inert regardless.
-* **Expiry / single-attempt (§21):** ``Gate7Result`` expiry is
-  **context/lifecycle-based, not wall-clock**: the result is invalid the
+* **Expiry / single-attempt (§21; REPRC-001 v1.0 §7):** ``Gate7Result``
+  currentness is **generational, not wall-clock**: the result is invalid the
   moment any bound input, the PB decision digest, the authority freshness
-  digest, or the runtime posture changes. ``expires_at`` is set to the
-  evaluation instant (``authority_current_time``) to make "valid only as of
-  this evaluation" explicit; a future Gate 8 MUST re-run Gate 7 rather than
-  reuse a ``Gate7Result``. "Single-attempt" is enforced structurally
+  digest, or the runtime posture changes, enforced by projection
+  revalidation at Gate 7 creation, Gate 8's mandatory Gate-7 re-run, and
+  Gate 10 step 13's generation re-derivation (Currentness B). For the
+  negative (``DENY``) branch ``expires_at`` is the evaluation instant
+  (``authority_current_time``); for the positive (``ALLOW``) branch it is
+  ``evaluated_at + REPRC_MAX_RESULT_TTL_SECONDS`` (frozen 300 s), a bounded
+  wall-clock **backstop only** so a stalled sequence cannot carry a positive
+  result forward indefinitely and a fresh positive result is not immediately
+  ``gate10_re_decision_expired``. A future Gate 8 MUST re-run Gate 7 rather
+  than reuse a ``Gate7Result``. "Single-attempt" is enforced structurally
   (exact-object registry membership + the bound digests); no durable
   "attempt consumed" state is created, so Gate 7 stays idempotently
   repeatable.
+
+REPRC-001 v1.0 (``docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md``)
+is the normative home of the **positive** ``Gate7Result`` semantics — its
+meaning and explicit negative list (§2), ``reprc_schema_version`` (§1), the
+``runtime_enforcement_result_id`` composition (§3), the ``idempotency_key``
+slot (§3), the non-bearer trust model (§4/§5), immutability (§6), the 300 s
+TTL backstop (§7), Currentness B and the four mandatory stale-rejection
+owners (§8), duplicate/restart Model A (§15), the positive
+``causing_reason_ids`` vocabulary (§20), the finite downstream-consumer set
+(§21), and the invariants ``REPRC-INV-001..006`` (§23). The positive branch
+is ``# pragma: no cover - unreachable in production`` and is exercised only
+through the documented in-memory test-only substitution of
+``resolve_runtime_enforcement_posture`` (REPRC-001 §17); the N-16-5 human-
+authority wall, the N-16-6 admission wall, and the current no-go posture
+each independently keep the production positive path unreachable (§18).
+REPRC-001 makes no RDGO-001 / HPAC-001 / ``HPAC-AUTHORITY-CONSUMPTION`` /
+PBRD-001 / PBNDE-001 / PBPA-001 / RE-No-Go-Registry change; no
+``run_gate7_runtime_enforcement`` signature change; no ``currentness_binding``
+slot; no admission binding at Gate 7.
 """
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import Optional
 
 from pcae.core.runtime_authority import (
@@ -176,12 +202,64 @@ __all__ = [
     "RuntimeEnforcementPosture",
     "resolve_runtime_enforcement_posture",
     "GATE7_DECISION_VALUES",
+    "REPRC_SCHEMA_VERSION",
+    "REPRC_MAX_RESULT_TTL_SECONDS",
+    "GATE7_POSITIVE_CAUSING_REASON_IDS",
 ]
 
 #: Gate 7 is a binary whether-to-invoke gate (RDGO-001 §8 / §14): there is
 #: no ``HUMAN_REVIEW`` at Gate 7. ``HUMAN_REVIEW`` is a Gate-6 concept and
 #: is a hard stop before Gate-7 evaluation.
 GATE7_DECISION_VALUES: frozenset[str] = frozenset({"ALLOW", "DENY"})
+
+#: REPRC-001 v1.0 (``docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md``)
+#: §1 — the closed-field-set schema marker every ``Gate7Result`` carries. A
+#: consumer that does not recognise this literal treats the result as
+#: untrusted; a future REPRC MINOR/MAJOR changes it and thereby invalidates
+#: every prior ``runtime_enforcement_result_id`` (§3).
+REPRC_SCHEMA_VERSION: str = "REPRC-001/1.0"
+
+#: REPRC-001 v1.0 §7 — the bounded wall-clock backstop for a positive
+#: (``ALLOW``) Gate-7 result, frozen at 300 seconds. This is **not** the
+#: currentness mechanism (Currentness B, §8: projection revalidation at
+#: Gate 7 creation + Gate 8's mandatory Gate-7 re-run + Gate 10 step 13's
+#: generation re-derivation). It exists only so a stalled governed sequence
+#: cannot carry a positive result forward indefinitely and so a fresh
+#: positive result is not immediately ``gate10_re_decision_expired`` at
+#: Gate 10 step 11.
+REPRC_MAX_RESULT_TTL_SECONDS: int = 300
+
+#: REPRC-001 v1.0 §20 — the stable positive-rationale vocabulary. A positive
+#: ``Gate7Result`` never carries an empty ``causing_reason_ids``.
+#: ``gate7_synthetic_evaluation_path`` is always present on a currently
+#: reachable positive result because the posture resolver was substituted
+#: through the documented test-only seam (§17); the production positive path
+#: is unreachable (§18).
+GATE7_POSITIVE_CAUSING_REASON_IDS: tuple[str, ...] = (
+    "gate7_runtime_enforcement_satisfied",
+    "gate7_pb_decision_allow_consumed",
+    "gate7_authority_projection_revalidated",
+    "gate7_runtime_target_within_local_cli_v1_scope",
+    "gate7_no_blocking_re_no_go_matched",
+    "gate7_synthetic_evaluation_path",
+)
+
+
+def _result_expires_at(evaluated_at: str) -> str:
+    """REPRC-001 v1.0 §7 — ``expires_at`` for the positive branch:
+    ``evaluated_at + REPRC_MAX_RESULT_TTL_SECONDS``, by ISO-8601 string/time
+    arithmetic on the single ``authority_current_time`` string the whole
+    governed sequence threads. No monotonic clock, no second wall-clock
+    read, no ``time.time()``, no PID, no nonce — restart-reconstructible
+    from the two strings. A malformed instant raises (the caller fails
+    closed at ``gate7_internal_error_fail_closed``; no positive result with
+    an unbounded ``expires_at`` is produced)."""
+    parsed = datetime.fromisoformat(evaluated_at.replace("Z", "+00:00"))
+    shifted = parsed + timedelta(seconds=REPRC_MAX_RESULT_TTL_SECONDS)
+    text = shifted.isoformat()
+    if evaluated_at.endswith("Z"):
+        text = text.replace("+00:00", "Z")
+    return text
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -380,6 +458,11 @@ class Gate7Result:
         "runtime_posture_digest",
         "expires_at",
         "evaluated_at",
+        # REPRC-001 v1.0 additive fields (§1, §3, §12) — no existing field
+        # removed or repurposed; not hashed by Gate 8's _gate7_result_digest.
+        "reprc_schema_version",
+        "runtime_enforcement_result_id",
+        "idempotency_key",
         "_seal",
     )
 
@@ -401,6 +484,9 @@ class Gate7Result:
         runtime_posture_digest: str,
         expires_at: str,
         evaluated_at: str,
+        reprc_schema_version: str,
+        runtime_enforcement_result_id: str,
+        idempotency_key: str,
         _seal: object,
     ) -> None:
         if _seal is not _GATE7_RESULT_CONSTRUCTOR_SEAL:
@@ -410,19 +496,40 @@ class Gate7Result:
             )
         if decision not in GATE7_DECISION_VALUES:
             raise TypeError(f"Gate7Result decision must be ALLOW or DENY, got {decision!r}")
-        self.decision = decision
-        self.matched_no_go_ids = tuple(matched_no_go_ids)
-        self.causing_reason_ids = tuple(causing_reason_ids)
-        self.invocation_id = invocation_id
-        self.attempt_id = attempt_id
-        self.request_id = request_id
-        self.pb_decision_digest = pb_decision_digest
-        self.authority_freshness_digest = authority_freshness_digest
-        self.evaluated_input_digest = evaluated_input_digest
-        self.runtime_posture_digest = runtime_posture_digest
-        self.expires_at = expires_at
-        self.evaluated_at = evaluated_at
-        self._seal = _seal
+        if reprc_schema_version != REPRC_SCHEMA_VERSION:
+            raise TypeError(
+                f"Gate7Result reprc_schema_version must be {REPRC_SCHEMA_VERSION!r}, "
+                f"got {reprc_schema_version!r}"
+            )
+        # Bind every field once via object.__setattr__ so the post-seal
+        # __setattr__ immutability guard (mirroring DispatchEnvelope) cannot
+        # be tripped during construction (REPRC-001 v1.0 §6).
+        object.__setattr__(self, "decision", decision)
+        object.__setattr__(self, "matched_no_go_ids", tuple(matched_no_go_ids))
+        object.__setattr__(self, "causing_reason_ids", tuple(causing_reason_ids))
+        object.__setattr__(self, "invocation_id", invocation_id)
+        object.__setattr__(self, "attempt_id", attempt_id)
+        object.__setattr__(self, "request_id", request_id)
+        object.__setattr__(self, "pb_decision_digest", pb_decision_digest)
+        object.__setattr__(self, "authority_freshness_digest", authority_freshness_digest)
+        object.__setattr__(self, "evaluated_input_digest", evaluated_input_digest)
+        object.__setattr__(self, "runtime_posture_digest", runtime_posture_digest)
+        object.__setattr__(self, "expires_at", expires_at)
+        object.__setattr__(self, "evaluated_at", evaluated_at)
+        object.__setattr__(self, "reprc_schema_version", reprc_schema_version)
+        object.__setattr__(
+            self, "runtime_enforcement_result_id", runtime_enforcement_result_id
+        )
+        object.__setattr__(self, "idempotency_key", idempotency_key)
+        object.__setattr__(self, "_seal", _seal)
+
+    def __setattr__(self, name: str, value: object) -> None:
+        if getattr(self, "_seal", None) is _GATE7_RESULT_CONSTRUCTOR_SEAL:
+            raise AttributeError("Gate7Result is immutable")
+        object.__setattr__(self, name, value)
+
+    def __delattr__(self, name: str) -> None:
+        raise AttributeError("Gate7Result is immutable")
 
     def __reduce__(self):
         raise TypeError(
@@ -643,6 +750,27 @@ def run_gate7_runtime_enforcement(
             }
         )
 
+        posture_digest = posture.digest()
+
+        # REPRC-001 v1.0 §3 — the positive/negative result's logical identity:
+        # a canonical digest over lower-level canonical digests (never over
+        # itself). No admission evidence (B2-D, §13), no separate
+        # currentness_binding (Currentness B, §8); the committed digests
+        # already transitively bind the runtime target, adapter descriptor/
+        # config, subject/scope, request construction facts, and no-go set.
+        runtime_enforcement_result_id = compute_canonical_digest(
+            {
+                "invocation_id": identity.invocation_id,
+                "attempt_id": identity.attempt_id,
+                "idempotency_key": identity.idempotency_key,
+                "pb_decision_digest": pb_digest,
+                "evaluated_input_digest": evaluated_input_digest,
+                "authority_freshness_digest": freshness_digest,
+                "runtime_posture_digest": posture_digest,
+                "reprc_schema_version": REPRC_SCHEMA_VERSION,
+            }
+        )
+
         blocking_no_gos = tuple(posture.matched_no_go_ids)
         if not posture.execution_available or blocking_no_gos:
             causing = ["gate7_runtime_execution_unavailable"]
@@ -660,9 +788,14 @@ def run_gate7_runtime_enforcement(
                 pb_decision_digest=pb_digest,
                 authority_freshness_digest=freshness_digest,
                 evaluated_input_digest=evaluated_input_digest,
-                runtime_posture_digest=posture.digest(),
+                runtime_posture_digest=posture_digest,
+                # A negative result is never consumed forward — REPRC-001
+                # v1.0 §7 keeps expires_at == evaluated_at for DENY.
                 expires_at=authority_current_time,
                 evaluated_at=authority_current_time,
+                reprc_schema_version=REPRC_SCHEMA_VERSION,
+                runtime_enforcement_result_id=runtime_enforcement_result_id,
+                idempotency_key=identity.idempotency_key,
                 _seal=_GATE7_RESULT_CONSTRUCTOR_SEAL,
             )
             _GATE7_RESULTS.add(result)
@@ -673,21 +806,29 @@ def run_gate7_runtime_enforcement(
         #    is matched, which cannot happen while the runtime is
         #    not_implemented / Observed / observe / unavailable. Even then
         #    the real Gate-6 decision is DENY (POL-005), so control never
-        #    arrives here on the production path. An ALLOW is NOT an
-        #    execution token (RDGO-001 §0).
+        #    arrives here on the production path (REPRC-001 v1.0 §18). It is
+        #    exercised only through the documented in-memory test-only
+        #    substitution of resolve_runtime_enforcement_posture (§17). An
+        #    ALLOW is NOT an execution token (RDGO-001 §0; REPRC-001 §2.1).
+        #    expires_at = evaluated_at + REPRC_MAX_RESULT_TTL_SECONDS is a
+        #    bounded wall-clock backstop only, never the currentness
+        #    mechanism (REPRC-001 v1.0 §7, §8).
         result = Gate7Result(  # pragma: no cover - unreachable in production
             decision="ALLOW",
             matched_no_go_ids=(),
-            causing_reason_ids=(),
+            causing_reason_ids=GATE7_POSITIVE_CAUSING_REASON_IDS,
             invocation_id=identity.invocation_id,
             attempt_id=identity.attempt_id,
             request_id=gate6_decision.request_id,
             pb_decision_digest=pb_digest,
             authority_freshness_digest=freshness_digest,
             evaluated_input_digest=evaluated_input_digest,
-            runtime_posture_digest=posture.digest(),
-            expires_at=authority_current_time,
+            runtime_posture_digest=posture_digest,
+            expires_at=_result_expires_at(authority_current_time),
             evaluated_at=authority_current_time,
+            reprc_schema_version=REPRC_SCHEMA_VERSION,
+            runtime_enforcement_result_id=runtime_enforcement_result_id,
+            idempotency_key=identity.idempotency_key,
             _seal=_GATE7_RESULT_CONSTRUCTOR_SEAL,
         )
         _GATE7_RESULTS.add(result)

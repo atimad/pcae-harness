@@ -2,6 +2,37 @@
 
 ## Accepted
 
+- **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 — N-16-4 positive Runtime
+  Enforcement gate implementation (2026-09-01).** Implemented the `.1R.25`
+  trust-boundary freeze exactly: B-1 = Model B1-B (no
+  `HPAC-AUTHORITY-CONSUMPTION/2.1` change), B-2 = Model B2-D (no Gate-7
+  admission binding), B-3 = Currentness B (`run_gate7_runtime_enforcement`
+  signature unchanged, no `currentness_binding` slot). REPRC-001 v1.0
+  authored first (`docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md`,
+  commit `fa62717b`, freeze SHA-256
+  `8700c8717d3a822f61f9139cec0fefef48a06b6576a7a1ea4fc4420c14c7c99c`).
+  Production surface: `src/pcae/core/runtime_dispatch_gate7.py` only — three
+  additive `Gate7Result` `__slots__` (`reprc_schema_version`,
+  `runtime_enforcement_result_id`, `idempotency_key`), the §12 canonical
+  `runtime_enforcement_result_id` composition, `expires_at = evaluated_at +
+  300 s` on the ALLOW branch only (bounded wall-clock backstop, not the
+  currentness mechanism), the §17.1 positive `causing_reason_ids`
+  vocabulary, a `__setattr__` / `__delattr__` immutability guard mirroring
+  `DispatchEnvelope`. The positive branch stays `# pragma: no cover -
+  unreachable in production`; it is reachable only through the documented
+  in-memory test-only substitution of `resolve_runtime_enforcement_posture`
+  (no signature parameter, no production caller). **Disclosed precision
+  correction to REPRC-001 before the production commit (finding
+  N-16-4-IMPL-1, non-blocking):** the `.1R.25` §8.4 owner-2 wording "Gate 8
+  re-runs `run_gate7_runtime_enforcement`" is imprecise — Gate 8's
+  `_gate7_result_digest` helper documents it never re-invokes Gate 7. Gate 8
+  is instead the mandatory owner via its own independent projection
+  re-trust + `revalidate_validated_authority_projection` (fresh
+  `validate_approval`) → `gate8_stale_validated_authority_projection`, plus
+  the Gate-7 lineage/digest recheck. REPRC-001 §8 / §8.1 describe this
+  accurately; the security property (a projection stale after Gate 7 is
+  caught before Gate 8 proceeds) is unchanged and needs no production change
+  outside `runtime_dispatch_gate7.py`, so this is not a BLOCKED condition.
 - **Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3.2.1 independent verification
   disposition (2026-08-28).** Do not certify the repaired HPAC foundation or
   begin Layer 3. Close the HumanPrincipalRegistry root/writer/fixture-
