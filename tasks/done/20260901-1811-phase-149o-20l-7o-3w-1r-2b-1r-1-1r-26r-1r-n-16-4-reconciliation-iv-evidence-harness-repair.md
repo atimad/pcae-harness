@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R: N-16-4 Reconciliation IV Evidence-Har
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -79,6 +79,15 @@ strict
 - Preserve detection of real executable xfail and live wildcard/fnmatch broadening.
 - Preserve `.1R.26R.1` as historically BLOCKED and keep all substantive reconciliation guards byte-identical.
 - Complete fresh repair tests, broad attribution, governed commit/push/report/notification lifecycle.
+
+## Outcome
+
+REPAIRED — INDEPENDENT VERIFICATION PENDING `.1R.26R.1R.1`. Both historical
+self-reference failures reproduce at V and are repaired by AST-aware scanners;
+real executable violations remain detected. The additional moving-HEAD SHA
+harness defect found by the full rerun is repaired by immutable-V ancestry.
+Substantive guards, production, contracts, runtime/effects, historical count
+42, repaired A/R zero, and historical BLOCKED records are preserved.
 
 ## Acceptance Checks
 
