@@ -17,6 +17,9 @@
     "bootstrap_session_reporting_tests": "not_applicable: bootstrap implementation unchanged"
   },
   "validation_results": {
+    "fast_green": "230 passed, 0 failed across repair, historical IV, reconciliation, Gate7, and narrow-eligibility suites",
+    "report_notification_tests": "not_applicable: reporting implementation unchanged",
+    "bootstrap_session_reporting_tests": "not_applicable: bootstrap implementation unchanged",
     "focused_n16_4": "230 passed",
     "blocked_skip_adversary": "H/J accepts; K2 detects and rejects",
     "broad_guard_sweep": "J 3834 passed/182 failed/5 skipped; current 3865 passed/182 failed/5 skipped; all 182 failures common; side-only failures 0",
@@ -27,6 +30,7 @@
     "contract_diff": "empty"
   },
   "governance_results": {
+    "metadata_consistency": "phase identity, status, commits, canonical artifact, and successor are mutually consistent",
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
