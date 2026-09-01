@@ -20,7 +20,7 @@
     "historical_ab": "exact historical attributable set 42",
     "repaired_ar": "zero candidate-only attributable guard failures",
     "blocker": "finalized repair suite self-matches its own xfail and fnmatch literals",
-    "fast_green": "BLOCKED: 782 passed, 2 disclosed repair-suite failures; fresh IV 26/26 passed",
+    "fast_green": "fresh independent-verification suite: 26 passed, 0 failed; the separately classified repair-suite blocker is recorded under validation_results.blocker",
     "report_notification_tests": "not_applicable: reporting implementation unchanged",
     "bootstrap_session_reporting_tests": "not_applicable: bootstrap implementation unchanged"
   },
