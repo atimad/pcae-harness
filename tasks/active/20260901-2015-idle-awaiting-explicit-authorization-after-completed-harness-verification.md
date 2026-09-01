@@ -22,6 +22,7 @@ Idle: awaiting explicit authorization after completed harness verification
 
 ## Allowed Files
 
+- .pcae/**
 - tasks/active/**
 - tasks/done/**
 - tasks/TODO.md
