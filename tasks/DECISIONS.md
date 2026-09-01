@@ -2,6 +2,16 @@
 
 ## Accepted
 
+- **Phase `.1R.26R.1R.1R` skip-detection repair (2026-09-01).** Preserve the
+  `.1R.26R.1R` AST/self-reference design and extend it into one executable
+  weakening detector for xfail, skip, skipif, and direct calls. Attribute
+  findings to inserted/replaced new-source lines so unchanged historical
+  marks do not false-positive. Resolve actual pytest aliases and module-level
+  marks; fail closed on syntax errors. Preserve wildcard/fnmatch scanning and
+  both substantive `.1R.26R` guards byte-for-byte. The historical lexical
+  predicate did not literally catch `pytest.skip(...)`, but this phase adds it
+  under the explicitly authorized complete skip-to-pass invariant. IV is
+  required at exactly `.1R.26R.1R.1R.1`.
 - **Phase `.1R.26R.1R.1` BLOCKED adjudication (2026-09-01).** The repaired
   scanner correctly removes xfail/fnmatch self-reference, but materially
   weakens V's no-test-weakening guarantee: V explicitly rejected added

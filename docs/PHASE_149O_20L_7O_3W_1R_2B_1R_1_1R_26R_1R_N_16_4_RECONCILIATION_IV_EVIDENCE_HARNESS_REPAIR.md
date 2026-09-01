@@ -142,3 +142,21 @@ N-16-4 Reconciliation IV Evidence-Harness Repair. Do not begin it here.
 
 DELEGATED `.3` FINALIZATION / COMMIT / PUSH:
 UNAUTHORIZED
+
+## Successor annotation — `.1R.26R.1R.1` discovery and `.1R.26R.1R.1R` repair
+
+The later independent verification `.1R.26R.1R.1` preserved this phase's
+self-reference fixes but found that the AST replacement unintentionally
+dropped the predecessor guard's executable skip-to-pass coverage.  In
+particular, H accepted a real `pytest.mark.skip` decorator and a direct
+`pytest.skip` call because `_executable_xfail_uses` classified xfail only.
+`.1R.26R.1R.1` remains historically BLOCKED; its report was not rewritten.
+
+The separately authorized successor `.1R.26R.1R.1R` extends the syntax-aware
+scanner into a unified executable test-weakening detector.  It restores
+skip/skipif/direct-skip detection, preserves xfail and wildcard/fnmatch
+detection, and continues to ignore comments, docstrings, inert explanatory
+strings, and adversarial snippets held only as fixture data.  This is a
+verification-harness correction only: no substantive `.1R.26R` guard,
+production source, or normative contract changed.  Independent verification
+of this successor remains required at `.1R.26R.1R.1R.1`.

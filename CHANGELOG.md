@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Phase `.1R.26R.1R.1R` repaired the executable skip-to-pass false negative
+  found by `.1R.26R.1R.1`. A unified AST detector now rejects real xfail,
+  skip, skipif, direct pytest calls, supported aliases, and module-level marks
+  only when introduced on changed executable lines; strings/comments/
+  docstrings remain inert, and wildcard/fnmatch protection is preserved.
+  Focused evidence: 230 passed. Broad J/current sweep: 182 common historical
+  failures, 0 side-only failures, 31 new passing repair nodes. Substantive
+  guards, production/contracts, 42/A-R history, runtime/effects, and all
+  historical BLOCKED verdicts remain unchanged. IV pending
+  `.1R.26R.1R.1R.1`.
+- Transitioned active task from Idle: awaiting explicit authorization for the required harness security repair to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R: N-16-4 Reconciliation IV Evidence-Harness Skip-Detection Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for .1R.26R.1R.1R skip-detection repair to Idle: awaiting explicit authorization for the required harness security repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1: Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Repair to Idle: awaiting explicit authorization for .1R.26R.1R.1R skip-detection repair; session refreshed and governance continuity revalidated.
 - Phase `.1R.26R.1R.1` independent verification is **BLOCKED —

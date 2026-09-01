@@ -83,6 +83,7 @@
 
 ## Completed
 
+- Idle: awaiting explicit authorization for the required harness security repair (20260901-1859-idle-awaiting-explicit-authorization-for-the-required-harness-security-repair)
 - Idle: awaiting explicit authorization for .1R.26R.1R.1R skip-detection repair (20260901-1858-idle-awaiting-explicit-authorization-for-1r-26r-1r-1r-skip-detection-repair)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1: Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Repair (20260901-1851-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-26r-1r-1-independent-verification-of-the-n-16-4-reconciliation-iv-evidence-harness-repair)
 - Idle: awaiting explicit authorization for the evidence-harness repair independent verification (20260901-1846-idle-awaiting-explicit-authorization-for-the-evidence-harness-repair-independent-verification)

@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R — N-16-4 Reconciliation IV
+Evidence-Harness Skip-Detection Repair. **STATUS: REPAIRED — INDEPENDENT
+VERIFICATION PENDING `.1R.26R.1R.1R.1`.** Phase-entry J `d334c74e`;
+substantive repair K2 `e512f96e`.
+
+Re-derived V's predecessor policy and restored executable skip-to-pass
+coverage without reverting to raw source-text scans. The unified AST detector
+rejects real xfail, skip, skipif, and direct pytest skip/xfail calls, including
+supported aliases and module-level marks; inert strings/comments/docstrings
+remain ignored. Wildcard/fnmatch detection is unchanged. Focused evidence:
+230 passed. Broad J/current comparison: 4,021 common nodes plus 31 new repair
+tests; 182 common historical failures, 0 J-only failures, 0 current-only
+failures, candidate-only unexplained 0.
+
+Substantive `.1R.26R` guards are byte-identical; historical count 42 and
+repaired A/R zero remain preserved. `.1R.27`, `.1R.26R.1`, and
+`.1R.26R.1R.1` remain historically BLOCKED. No production/contract/runtime/
+effect drift. N-16-4 remains IMPLEMENTED / NOT CLOSED; N-16-5/6/7 OPEN;
+N-23-2 INFO / DEFERRED. Required next:
+`.1R.26R.1R.1R.1` independent verification. DELEGATED `.3` FINALIZATION /
+COMMIT / PUSH: UNAUTHORIZED.
+
+Canonical artifact:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_1R_1R_N_16_4_RECONCILIATION_IV_EVIDENCE_HARNESS_SKIP_DETECTION_REPAIR.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1 — Independent Verification of
 the N-16-4 Reconciliation IV Evidence-Harness Repair. **STATUS: BLOCKED —
 `.1R.26R.1R` NOT VERIFIED.** Verification-entry SHA `ee473b94`.

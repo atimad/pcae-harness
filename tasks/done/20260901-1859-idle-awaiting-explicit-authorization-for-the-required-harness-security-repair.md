@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for the required harness security repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
