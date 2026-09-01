@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R.1: Independent Verification of the N-16-4 Reconciliation IV Evidence-Harness Skip-Detection Repair to Idle: awaiting explicit authorization after completed harness verification; session refreshed and governance continuity revalidated.
 - Phase `.1R.26R.1R.1R.1` independently verified the syntax-aware
   skip-detection repair. Fresh AST adversaries detect executable xfail,
   skip, skipif, direct calls, module/class marks, and supported aliases while
