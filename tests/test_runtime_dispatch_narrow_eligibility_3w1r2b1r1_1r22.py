@@ -173,7 +173,13 @@ def test_runtime_posture_unchanged_and_no_new_first_effect_call_site():
     assert not any("adapter.dispatch(" in l for l in added)
     # no Gate-10 real-effect module was created
     assert not (REPO_ROOT / "src/pcae/core/runtime_dispatch_gate10.py").exists()
-    # the .1R.22 production diff is exactly the two authorized files
+    # the current src/pcae diff since .1R.22 entry is exactly the authorized
+    # files: the original two .1R.22 files, plus `.1R.26`'s later-authorized,
+    # single-file N-16-4 addition of runtime_dispatch_gate7.py (149O.20L.7O.
+    # 3W.1R.2B.1R.1.1R.26R reconciliation — see production_byte_scope in the
+    # .1R.26 canonical report: git diff 28b8b2b7 HEAD -- src/pcae is exactly
+    # that one file). Exact-set equality is preserved; any further
+    # unauthorized src/pcae file still fails this assertion.
     changed = set(subprocess.run(
         ["git", "diff", "--name-only", PHASE_ENTRY, "HEAD", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True,
@@ -181,6 +187,7 @@ def test_runtime_posture_unchanged_and_no_new_first_effect_call_site():
     assert changed == {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",
+        "src/pcae/core/runtime_dispatch_gate7.py",
     }, changed
 
 

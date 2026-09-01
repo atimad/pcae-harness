@@ -2,6 +2,79 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R — N-16-4 Scope-Fence /
+Verification-Evidence Reconciliation and Repair. **STATUS: REPAIRED —
+INDEPENDENT VERIFICATION PENDING `.1R.26R.1`.** Phase-entry SHA `9d28f7ef`
+(`.1R.26` finalized head; `.1R.27`'s own governed finalization commits
+landed between phase-entry and this phase's start, attributed to `.1R.27`,
+not this phase). Repairs the one undisclosed `.1R.26`-attributable stale
+point-in-time scope-fence guard `.1R.27`'s independent verification
+discovered and BLOCKED on:
+`tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py::test_runtime_posture_unchanged_and_no_new_first_effect_call_site`
+— PASSES at pre-`.1R.26` baseline `28b8b2b7`, FAILS at `.1R.26` finalized
+head `9d28f7ef`, because its `.1R.22`-baseline-rooted (`8603fe6a`) exact
+`src/pcae` current-state file-set assertion was never widened to include
+`.1R.26`'s authorized single-file addition `runtime_dispatch_gate7.py`.
+**N-16-4 implementation semantics UNCHANGED — this is a verification-evidence
+/ scope-fence defect only, not a product or contract defect.**
+
+**Repair:** widened the guard's exact-equality set from
+`{permission_broker_foundation.py, runtime_dispatch_permission.py}` to
+`{permission_broker_foundation.py, runtime_dispatch_permission.py,
+runtime_dispatch_gate7.py}` — exact-set equality preserved (no wildcard, no
+`fnmatch`, no prefix, no subset/superset tolerance); the guard's other two
+assertions (runtime posture unchanged; no new `adapter.dispatch(` call site)
+untouched. A broad independent re-derivation (fixed-SHA A/B, `28b8b2b7`
+baseline vs. repaired HEAD, deterministic no-xdist, over every test file in
+the repo matching an exact `src/pcae` name-only-diff pattern) found **no
+other `.1R.26`-attributable stale guard** — the true attributable count for
+this class is **2**: this node, plus
+`test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py::test_53_test_importers_of_gate7_symbols_are_a_known_finite_set`
+(`.1R.26`'s own finite `AUTHORIZED_GATE7_TEST_IMPORTERS` allowlist never
+admitted the later-authorized `.1R.27` evidence suite, same mechanical
+class) — both repaired. One unrelated pre-existing finding (Gate-6 symbols
+referenced by `runtime_dispatch_gate10_eligibility.py`, confirmed present at
+the unmodified `.1R.26` head, not `.1R.26`-attributable) was disclosed and
+left unrepaired, out of scope.
+
+**Provenance:** the original `.1R.26` canonical report/doc is preserved
+unrewritten; a provenance-preserving erratum was appended to it (additive
+only) recording the original claim (40 attributable nodes / 0 unexplained
+regressions), the `.1R.27` discovery, and this repair. `.1R.27`'s BLOCKED
+verdict is preserved as historical record, not converted into a successful
+IV — its own evidence suite
+(`tests/test_gate7_positive_runtime_enforcement_independent_verification_3w1r2b1r1_1r27.py`)
+was committed and finalized under `.1R.27`'s own governed phase, prior to
+this phase's start, and this repair suite (test 17) verifies that
+attribution directly. New repair suite:
+`tests/test_runtime_dispatch_1r26r_scope_fence_reconciliation.py`. New
+canonical doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_N_16_4_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md`.
+
+**No production source change** (`git diff 9d28f7ef HEAD -- src/pcae` =
+empty). **No normative-contract change** (`git diff 9d28f7ef HEAD --
+docs/contracts` = empty). Runtime remains `not_implemented / Observed /
+observe / unavailable`, 0 plugins / 0 capabilities. First external effect
+remains ABSENT. N-16-5 / N-16-6 / N-16-7 remain OPEN, untouched. N-23-2
+carried (INFO / DEFERRED). `.3` delegated finalization / commit / push
+remains **UNAUTHORIZED**.
+
+**Verdict.** N-16-4 implementation: **UNCHANGED (IMPLEMENTED).** `.1R.26`
+verification-evidence / scope-fence defect: **REPAIRED — INDEPENDENT
+VERIFICATION PENDING `.1R.26R.1`.** N-16-4 remains **not** CLOSED — `.1R.27`
+did not resume or complete its adjudication in this phase.
+
+**Recommended next (own explicit human authorization; ID recommended, NOT
+reserved):** `149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1` — Independent Verification
+of the N-16-4 Scope-Fence / Verification-Evidence Reconciliation. After
+`.1R.26R.1` closes, recommend a fresh/restarted `.1R.27` IV from the repaired
+baseline (do not skip directly to N-16-5). Do not begin N-16-5/6/7, Slice C,
+the first external effect, or execution enablement.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27 — Independent Verification of the
 N-16-4 Runtime Enforcement Gate. **STATUS: BLOCKED.** Phase-entry SHA
 `9d28f7ef` (`.1R.26` finalized head). RE-DERIVED (not trusted) every `.1R.26`

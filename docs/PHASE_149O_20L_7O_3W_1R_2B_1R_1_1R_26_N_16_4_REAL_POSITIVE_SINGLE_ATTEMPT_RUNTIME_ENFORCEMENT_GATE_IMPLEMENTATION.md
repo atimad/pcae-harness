@@ -762,3 +762,73 @@ No delegated worker committed, finalized, or pushed. No raw `git commit` /
 - No STOP or BLOCKED condition was reached; every valid early-STOP condition in
   the phase prompt was checked against the implementation and none applies.
 - No "Remaining" section is presented; all authorized `.1R.26` work is complete.
+
+---
+
+## 21. Erratum — `149O.20L.7O.3W.1R.2B.1R.1.1R.26R` (provenance-preserving, additive)
+
+*This section is appended after the fact. Nothing above this line has been
+edited or rewritten; the original `.1R.26` claims and evidence stand exactly
+as authored.*
+
+**Original claim (§11.2 / §17 above, as authored):** "40 attributable
+point-in-time guard nodes across 13 IV / reconciliation suites... 0 unexplained
+attributable functional regressions."
+
+**`.1R.27` discovery.** `149O.20L.7O.3W.1R.2B.1R.1.1R.27`'s independent
+verification (RE-DERIVE discipline) reproduced its own broad fixed-SHA A/B
+independently and found **one additional undisclosed `.1R.26`-attributable
+stale point-in-time scope-fence guard** that the 40-node table above did not
+include:
+
+`tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py::test_runtime_posture_unchanged_and_no_new_first_effect_call_site`
+
+— PASSES at pre-`.1R.26` baseline `28b8b2b7`; FAILS at `.1R.26` finalized
+head `9d28f7ef`; fails only because its `.1R.22`-baseline-rooted (`8603fe6a`)
+exact `src/pcae` current-state file-set assertion,
+`{permission_broker_foundation.py, runtime_dispatch_permission.py}`, was
+never widened to include `.1R.26`'s authorized single-file addition
+`runtime_dispatch_gate7.py`. `.1R.27` classified this as an explicit BLOCKED
+condition ("an undisclosed `.1R.26`-attributable guard regression is found")
+and referred it to a `.1R.26R` reconciliation per this document's own §18
+precedent guidance, rather than repairing it itself (out of IV-only scope).
+
+**Corrected historical count.** `149O.20L.7O.3W.1R.2B.1R.1.1R.26R` freshly
+re-derived the true attributable count for this guard class via an
+independent fixed-SHA A/B (`28b8b2b7` baseline vs. `9d28f7ef` candidate,
+deterministic, no xdist, over every test file in the repo matching an exact
+`src/pcae` name-only-diff / current-state-freeze pattern), then via a direct
+primary-operator run of the full Gate-7-referencing suite family: the true count is
+**42** (the 40 originally disclosed and reconciled in `.1R.26`,
+plus 2 more — this node, and
+`tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py::test_53_test_importers_of_gate7_symbols_are_a_known_finite_set`,
+whose finite `AUTHORIZED_GATE7_TEST_IMPORTERS` allowlist did not admit the
+later-authorized `.1R.27` independent-verification suite — same mechanical
+class, both missed at `.1R.26` time and reconciled in `.1R.26R`). No further
+same-class stale guard was found. One unrelated pre-existing finding was
+also surfaced and independently confirmed present at the unmodified
+`9d28f7ef` head (zero `.1R.26R` changes applied):
+`tests/test_gate6_permission_broker_production_consumption_integration_independent_verification_3w1r2b1r1_1r13.py::test_no_downstream_production_consumer_of_gate6_symbols`
+fails because `runtime_dispatch_gate10_eligibility.py` references Gate-6
+symbols outside that guard's frozen allowlist — this is **not**
+`.1R.26`-attributable (unrelated to `runtime_dispatch_gate7.py`, pre-dates
+`.1R.26`) and was left unrepaired, out of `.1R.26R`'s scope.
+
+**Classification.** Non-behavioural verification-evidence defect only. No
+production defect. No contract defect. The guard's other two assertions
+(runtime posture unchanged; no new `adapter.dispatch(` call site) were never
+false and remained intact throughout — the missed widening never permitted
+an actual regression to go undetected; it only caused this one guard's own
+scope-fence to trip on legitimate, already-disclosed `.1R.26` change.
+
+**Repair.** `149O.20L.7O.3W.1R.2B.1R.1.1R.26R` — widened the guard's
+exact-equality set by exactly `{runtime_dispatch_gate7.py}`, preserving
+exact-set semantics (no wildcard, no `fnmatch`, no prefix, no
+subset/superset tolerance) and every other assertion in the function,
+unchanged. See
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_26R_N_16_4_SCOPE_FENCE_AND_VERIFICATION_EVIDENCE_RECONCILIATION.md`
+for the full reconciliation record.
+
+**N-16-4 implementation semantics: UNCHANGED.** This erratum does not alter
+any verdict in §17 above other than the guard-count correction stated here;
+N-16-4 remains **not** CLOSED pending a fresh/restarted `.1R.27`.

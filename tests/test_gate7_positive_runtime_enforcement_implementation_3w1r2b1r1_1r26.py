@@ -729,6 +729,12 @@ AUTHORIZED_GATE7_TEST_IMPORTERS = {
     "tests/test_gate9_atomic_authority_consumption_coordinator_independent_verification_3w1r2b1r1_1r15.py",
     "tests/test_gate10_pre_effect_eligibility_coordinator_3w1r2b1r1_1r17.py",
     "tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py",
+    # 149O.20L.7O.3W.1R.2B.1R.1.1R.26R reconciliation: `.1R.27`'s
+    # independent-verification suite legitimately imports Gate-7 symbols
+    # (production-bypass challenge, new-slot-transplant challenge,
+    # registry-membership-only mutation-site AST proof); widened by
+    # exactly this one authorized entry, no wildcard.
+    "tests/test_gate7_positive_runtime_enforcement_independent_verification_3w1r2b1r1_1r27.py",
 }
 
 
