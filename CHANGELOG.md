@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5` (Independent Verification of
+  the N-16-5 Merged RHAMP Real FIDO2 Credential Registration, Counter-State,
+  Bootstrap & Authentication Mechanism Implementation) — **BLOCKED.**
+  Independently re-derived A = `5a6f9d87`, I = `c9cf99d5`, V = `c9cf99d5`.
+  Production diff, contract byte-identity, `CredentialRecord` identity,
+  registration call graph/publish point, exact mechanism set, exact 41-code
+  terminal-reason vocabulary, presentation/Gate-5/9 fence, runtime/first-
+  effect boundary, and no-test-weakening all independently re-verify clean.
+  `.1R.30R.3.4` suite rerun 124/124 unchanged; broad lineage sweep shows 0
+  I-only unexplained regressions. **BLOCKING:**
+  `HPACStoreAuthority.complete_multi_write`
+  (`src/pcae/core/hpac_foundation.py:739-758`) has no re-entry/already-spent
+  guard, contradicting its own fail-closed docstring and the spec's
+  one-bounded-transaction invariant — reproduced with a second/concurrent
+  call succeeding with no exclusivity — though no live production exploit
+  path exists today (`record_write`'s independent `require_writer` gate
+  already blocks further durable writes, and the sole call site invokes it
+  once, synchronously, per ceremony). Fresh independent IV suite added (16
+  tests: 14 pass, 2 fail — the finding above, deliberately left
+  uncorrected; no production/contract repair performed inside this IV).
+  N-16-5 remains NOT CLOSED. Recommended next: `.1R.30R.3.6` — narrow
+  repair phase adding the missing re-entry guard to `complete_multi_write`.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4: N-16-5 merged RHAMP FIDO2 mechanism impl to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4); N-16-5 NOT CLOSED; next = .1R.30R.3.5 IV; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4` (N-16-5 Merged RHAMP Real
   FIDO2 Credential Registration, Counter-State, Bootstrap & Authentication

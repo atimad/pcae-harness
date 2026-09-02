@@ -4485,3 +4485,51 @@ pre-existing red guard reproduced identically at A (the `.1R.19R.1` /
 and HPAC-PAWA-001 were frozen *after* their baselines — and the
 `3w1r2b1r111r31` `test_blocking_reproduction_*` suite) or a working-tree /
 unpushed-divergence check that clears on the governed push.
+
+## 2026-09-02 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5: Independent Verification of the N-16-5 Merged RHAMP Real FIDO2 Mechanism Implementation — BLOCKED
+
+Independent verification (verification-only; no production/contract
+repair) of the `.1R.30R.3.4` merged RHAMP bundle. A = `5a6f9d87`
+(finalized `.1R.30R.3.3R` head), I = `c9cf99d5` (finalized `.1R.30R.3.4`
+head), V = `c9cf99d5` — all independently re-derived from `git log`, not
+inherited from the `.1R.30R.3.4` report's prose. Production diff inventory
+(exactly the claimed 9 new + 4 modified files), contract byte-identity
+(RHAMP-001 v1.0 / HPAC-PAWA-001 v1.1 / HPAC-001 v2.1 / `pyproject.toml`
+unchanged), `CredentialRecord` identity, the registration call graph and
+its ACTIVE-publish boundary, the exact 2-member mechanism set, the exact
+41-code terminal-reason vocabulary, the presentation/Gate-5/9 fence,
+runtime/first-effect boundary, and no-test-weakening all independently
+re-verified clean. Unchanged `.1R.30R.3.4` suite reran 124/124; a broad
+deterministic RHAMP/FIDO2/PAWA/HPAC lineage sweep showed 0 I-only
+unexplained regressions (25 pre-existing failures identical at A and I via
+a disposable `git worktree` at A).
+
+**BLOCKING finding:** `HPACStoreAuthority.complete_multi_write`
+(`src/pcae/core/hpac_foundation.py:739-758`) has no re-entry/already-spent
+guard before spending the capability — unlike `require_writer` /
+`record_write` in the same class — contradicting its own docstring's
+fail-closed `capability_stale` claim on a second call. Reproduced: a
+second/concurrent `complete_multi_write` call on an already-completed
+capability succeeds with no exclusivity at the completion boundary (8
+concurrent threads all "succeed"). Matches the phase's own listed BLOCKED
+trigger: `_multi_write` weakens the verified one-operation / non-bearer
+semantics. Mitigating factor independently verified, not assumed: no live
+production exploit path today, because `record_write`'s independent
+`require_writer` gate already rejects further durable writes once
+`_spent` is first set `True`, and the sole production call site
+(`hpac_rhamp_enrollment.py:302`) invokes `complete_multi_write` exactly
+once, synchronously, per ceremony — a latent contract violation in the
+method itself, not a currently-reachable double-registration.
+
+Fresh independent `.1R.30R.3.5` IV suite added (16 tests: 14 pass, 2 fail
+— the finding above, deliberately left uncorrected). PAWA Slice 1 remains
+CLOSED, unchanged. No custom cryptography, no new dependency. Runtime
+remains `Observed` / `observe` / `unavailable`; first external effect
+remains ABSENT. N-16-6 / N-16-7 / Slice C untouched. **N-16-5 remains NOT
+CLOSED.** Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6` —
+narrow repair phase adding the missing re-entry guard to
+`complete_multi_write` (mirroring `require_writer`'s existing pattern),
+scope limited to that one method plus the 2 failing IV tests; does not
+reopen the registration/counter/getAssertion surfaces already cleanly
+verified in this phase.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.

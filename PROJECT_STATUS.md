@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5 — Independent Verification of the
+N-16-5 Merged RHAMP Real FIDO2 Credential Registration, Counter-State,
+Bootstrap & Authentication Mechanism Implementation. **STATUS: BLOCKED.
+N-16-5: NOT CLOSED.**
+
+A = `5a6f9d87` (finalized `.1R.30R.3.3R` head); I = `c9cf99d5` (finalized
+`.1R.30R.3.4` head); V = `c9cf99d5` (`.1R.30R.3.5` phase-entry SHA;
+`origin/main..HEAD = 0` at entry) — all independently re-derived from
+`git log`/`git rev-list`, not inherited from the `.1R.30R.3.4` report.
+
+Independently re-verified clean: production diff inventory (exactly the
+claimed 9 new + 4 modified files, no unexpected change); RHAMP-001 v1.0 /
+HPAC-PAWA-001 v1.1 / HPAC-001 v2.1 / `pyproject.toml` byte-unchanged;
+`CredentialRecord` schema byte-unchanged; the registration call graph and
+its ACTIVE-publish boundary (registry `enroll_credential` append); the
+exact 2-member eligible-mechanism set and exact 41-code
+`terminal_reason_code` vocabulary; no `require_real_assurance` wiring into
+Gate 5/9 and no `pcae-protected-local-presentation/1.0` implementation;
+Gate 5/Gate 9 byte-identical; runtime `Observed` / `observe` /
+`unavailable`, 0 plugins/capabilities; no effect-adapter pattern; no test
+weakening beyond pre-existing platform guards. `.1R.30R.3.4` suite rerun:
+124/124 passed, unchanged. Broad RHAMP/FIDO2/PAWA/HPAC lineage sweep: 0
+I-only unexplained regressions (25 pre-existing failures identical at both
+A and I, confirmed via a disposable `git worktree` at A).
+
+**BLOCKING finding:** `HPACStoreAuthority.complete_multi_write`
+(`src/pcae/core/hpac_foundation.py:739-758`) has no re-entry/already-spent
+guard before spending the capability — unlike `require_writer` /
+`record_write` in the same class — contradicting its own fail-closed
+docstring and reproducibly allowing a second/concurrent
+`complete_multi_write` call on an already-completed capability to succeed
+with no exclusivity at the completion boundary. This matches the phase's
+own listed BLOCKED trigger: `_multi_write` weakens the verified
+one-operation / non-bearer semantics. Mitigating factor verified, not
+assumed: no live production exploit path today, because `record_write`'s
+independent `require_writer` gate already rejects further durable writes
+once `_spent` is first set `True`, and the sole production call site
+(`hpac_rhamp_enrollment.py:302`) invokes `complete_multi_write` exactly
+once, synchronously, on a ceremony-local capability — a latent contract
+violation, not a currently-reachable double-registration.
+
+Fresh independent `.1R.30R.3.5` IV suite added (16 tests: 14 pass, 2 fail —
+both failures are the finding above, deliberately left failing/uncorrected;
+this IV is verification-only and performs no production/contract repair).
+
+Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6` — narrow repair
+phase adding the missing re-entry guard to `complete_multi_write`, scope
+limited to that one method plus the 2 failing IV tests. Do not begin
+N-16-6, N-16-7, or Slice C. Do not implement protected presentation. Do
+not wire `require_real_assurance` through Gate 5/9. Own explicit human
+authorization required before beginning it.
+
+Full evidence in
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_5_N_16_5_MERGED_RHAMP_INDEPENDENT_VERIFICATION.md`.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 — N-16-5 Merged RHAMP Real FIDO2
 Credential Registration, Counter-State, Bootstrap & Authentication Mechanism
 Implementation. **STATUS: IMPLEMENTED — IV PENDING (`.1R.30R.3.5`).
