@@ -10,8 +10,8 @@
   "metadata_consistency": "passed",
   "internal_evidence_coherence": "passed",
   "internal_report_coherence": "passed",
-  "report_consistency": "pending governed push and phase-complete promotion",
-  "origin_main_head_count": 3,
+  "report_consistency": "passed",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "primary-source contract reconstruction, fresh contract reconciliation suite, historical guard reconciliation, broad deterministic affected-scope regression, production-diff and contract-identity proof",
   "tests_run": 511,
   "tests_added_or_updated": "One new 42-test contract reconciliation suite; seven historical point-in-time guards pinned to their immutable owning phase heads; zero test definitions removed or renamed and zero skip/skipif/pytest.skip/xfail added.",
@@ -42,7 +42,7 @@
     "pcae_check": "passed before finalization",
     "pcae_status_coherence": "coherent before finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing historical omissions; current phase task closed and recorded",
-    "pcae_push_check": "not_pushed",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -76,6 +76,6 @@
     {"hash": "608359c31c6297620917bb4b97e5937cd5e38340", "subject": "Phase .30R.4R: close governed task lifecycle"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 — N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption Implementation After Authority Reconciliation. Own explicit human authorization required; do not begin N-16-6, N-16-7, Slice C, a first external effect, or execution enablement.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "0"
 }
