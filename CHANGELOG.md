@@ -2,6 +2,63 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1` (N-16-5 PAWA Production
+  Protected-Admin Writer Anchor Implementation — Slice 1) is **COMPLETE —
+  HPAC-PAWA-001 v1.1 IMPLEMENTED FOR SLICE 1 — IV (`.1R.30R.3.2`) PENDING —
+  N-16-5 NOT CLOSED.** FIDO2-free. New non-agent-importable production modules
+  `src/pcae/core/hpac_pawa_schemas.py` (closed
+  `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` + v1.1 7-field
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` + `HPAC-PAWA-ISSUANCE-EVIDENCE/1.0`),
+  `src/pcae/core/hpac_pawa_agent_exclusion.py` (closed 12-field
+  `HPAC-PAWA-AGENT-EXCLUSION/1.0` + R1-HYBRID
+  `resolve_configured_agent_identity()`: `symbolic_account` → live
+  `pwd.getpwnam` + `os.getgrouplist`, `live uid == provisioned_uid` pin,
+  live groups never persisted, `agent_exclusion_digest` currentness bind,
+  fail-closed → `agent_principal_unknown`), and
+  `src/pcae/core/hpac_protected_admin_writer.py` (§33 11-step recognition
+  sequence, `production_writer` factory, one-operation `ProductionWriterHandle`,
+  closed 21-value `pawa_failure_code` taxonomy + §57 RHAMP map,
+  `O_CREAT|O_EXCL|O_NOFOLLOW` positive write probe, exact factory-consumer
+  inventory with no wildcard, out-of-band `provision` / `set-agent-exclusion` /
+  `rotate` / `revoke`). New standalone `scripts/hpac_protected_root_admin.py`
+  (not a `pcae` subcommand).
+- `src/pcae/core/hpac_foundation.py` gains a single seal-guarded `PRODUCTION`
+  writer mint primitive (reachable only from the fence), additive
+  `_spent` / `_single_use` one-operation capability state (never
+  caller-resettable), an F-1 re-scope of the production-writer negative
+  boundary to the configured-agent identity, and disclosed test-only seams.
+  `HPACStoreAuthority.writer()` still raises for every non-`FIXTURE_NON_REAL`
+  class; the single `HPACWriterCapability(` construction site is unchanged.
+  `src/pcae/core/human_principal_registry.py` threads a `PRODUCTION` subject
+  scope through `require_writer` (§43/§44/§60) — the `FIXTURE_NON_REAL` path
+  and `CredentialRecord` schema are byte-unchanged.
+- Fresh 95-test suite
+  `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1.py`
+  — **95 passed, 0 failed** — covers the §78 matrix incl. delete /
+  recreate-under-new-uid / UID-reuse / rename fail-closed, group drift /
+  removal recovery, the three distinct F-1 predicates, restored-stale
+  exclusion / descriptor rollback rejection, non-bearer / non-serializable /
+  restart-invalid / one-operation capability, direct-store bypass, and the
+  FIDO2-free / no-RHAMP / `hpac_verifier`-unchanged / Gate-5+9-unchanged /
+  runtime-unchanged / first-effect-absent scope fence.
+- Contract byte identity: `git diff --name-only <A=1793a75a> HEAD --
+  docs/contracts` **empty** (HPAC-PAWA-001 v1.1 / HPAC-001 v2.1 / RHAMP-001
+  v1.0 / HBDC-001 v1.2 byte-unchanged; no new `pawa_failure_code`, no new
+  `terminal_reason_code`).
+- Reconciled point-in-time production-file-scope and consumer-inventory
+  guards phase-aware across the `.1R.30R.1`, `.1R.30R.2A.1`, `…_31`, `…_32`,
+  `…_321`, `.1R.8`, `.1R.11.7`, `.1R.17`, and `.1R.19R` suites (immutable-SHA
+  historical assertion + current-state counterpart; the exact five-file PAWA
+  set added, no wildcard). **No `def test_` renamed, removed, skipped, or
+  xfailed.** Fixed-SHA A/B: 0 candidate-only functional regressions.
+- Runtime posture unchanged: `not_implemented` / `Observed` / `observe` /
+  `unavailable`; 0 plugins / 0 capabilities; first external effect ABSENT.
+  N-16-6 / N-16-7 OPEN and untouched. `DELEGATED .3 FINALIZATION / COMMIT /
+  PUSH: UNAUTHORIZED` preserved.
+- Recommended next phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2` —
+  Independent Verification of the Slice-1 implementation. Own explicit human
+  authorization required; ID recommended, NOT reserved. Do not begin it.
+
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3); HPAC-PAWA-001 v1.1 verified; PAWA Slice-1 implementation .1R.30R.3.1 recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1: N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation (Slice 1); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3: IV of HPAC-PAWA-001 v1.1 configured-agent-principal resolution source contract freeze to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3); HPAC-PAWA-001 v1.1 verified; PAWA Slice-1 implementation .1R.30R.3.1 recommended next; session refreshed and governance continuity revalidated.
 - Phase `.1R.30R.2A.3` (Independent Verification of the HPAC-PAWA-001 v1.1

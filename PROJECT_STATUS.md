@@ -2,6 +2,106 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 — N-16-5 PAWA Production
+Protected-Admin Writer Anchor Implementation (Slice 1).
+**STATUS: COMPLETE — HPAC-PAWA-001 v1.1 PRODUCTION PROTECTED-ADMIN WRITER
+ANCHOR IMPLEMENTED FOR SLICE 1 — IV (`.1R.30R.3.2`) PENDING — N-16-5 NOT
+CLOSED.** FIDO2-free. Phase-entry SHA `A = 1793a75a` (== finalized
+`.1R.30R.2A.3` head); `B30 = 8e655295` (immutable `.1R.30` BLOCKED).
+
+**Verdicts.** HPAC-PAWA-001 v1.1 — **IMPLEMENTED FOR SLICE 1 — IV PENDING**;
+configured-agent resolution (`resolve_configured_agent_identity()`, R1-HYBRID)
+— **IMPLEMENTED — IV PENDING**; production protected-admin writer anchor —
+**IMPLEMENTED — IV PENDING**; production `HPACWriterCapability` (process-local /
+non-bearer / restart-invalid / one-operation) — **IMPLEMENTED — IV PENDING**;
+`HumanPrincipalRegistryStore` production writer consumption — **IMPLEMENTED — IV
+PENDING**; RHAMP credential / enrollment / real FIDO2 / protected presentation —
+**NOT IMPLEMENTED** (Slices 2-3 / `.1R.30R.5`); **N-16-5 — NOT CLOSED**
+(`.1R.30R.3.2` IV → `.3.3`-`.3.6` Slices 2-3 → `.1R.30R.4` composite IV →
+`.1R.30R.5` presentation + `require_real_assurance` → `.1R.30R.6` IV +
+real-CTAP2-hardware still required).
+
+**Production surface (all inside the non-agent-importable fence, guard-tested
+against `cli.py` / `commands/**` / `core/agent.py`):**
+`src/pcae/core/hpac_pawa_schemas.py` (closed `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0`
+§14 [byte-unchanged shape], v1.1 closed **7-field**
+`HPAC-PAWA-CURRENT-GENERATION/1.0` [schema id `/1.0` kept, §20A],
+`HPAC-PAWA-ISSUANCE-EVIDENCE/1.0`); `src/pcae/core/hpac_pawa_agent_exclusion.py`
+(closed **12-field** `HPAC-PAWA-AGENT-EXCLUSION/1.0` + trusted load/validate +
+R1-HYBRID `resolve_configured_agent_identity()`: `symbolic_account` from the
+protected record → live `pwd.getpwnam` + `os.getgrouplist` → `(uid, gids)`,
+`live uid == provisioned_uid` pin [C-1], live primary+supplementary groups every
+recognition [§32A.6, never persisted], `agent_exclusion_digest` currentness bind
+[C-2], fail-closed → `agent_principal_unknown` on every fault);
+`src/pcae/core/hpac_protected_admin_writer.py` (the §33 **11-step** positive
+recognition sequence [steps 2/3/7 = atomic exclusion substeps], `production_writer`
+factory, one-operation `ProductionWriterHandle`, closed **21-value**
+`pawa_failure_code` taxonomy + the §57 RHAMP map [no new `terminal_reason_code`],
+`O_CREAT|O_EXCL|O_NOFOLLOW` positive write probe with a random sentinel [not
+`os.access`], exact enumerated factory-consumer inventory [no wildcard, PAWA-INV-9],
+bounded principal-admin operations, out-of-band `provision` / `set-agent-exclusion`
+/ `rotate` / `revoke`); `scripts/hpac_protected_root_admin.py` (standalone CLI
+wrapper, not a `pcae` subcommand). **Additive hook points:**
+`src/pcae/core/hpac_foundation.py` — a single seal-guarded `PRODUCTION` mint
+primitive, additive `_spent` / `_single_use` capability state (never
+caller-resettable), F-1 re-scope of `_validate_production_boundary` /
+`_relative_record_path` to the configured-agent identity on the writer path,
+disclosed test-only `_production_test_fixture` / `_topology_probe` seams;
+`HPACStoreAuthority.writer()` still raises for every non-`FIXTURE_NON_REAL` class
+(HPAC-PAWA-REQ-092); one `HPACWriterCapability(` construction site.
+`src/pcae/core/human_principal_registry.py` — `_writer` / `_write` thread a
+`PRODUCTION` subject scope through `require_writer` (§43/§44/§60); the
+`FIXTURE_NON_REAL` path is byte-identical; `CredentialRecord` schema
+byte-unchanged.
+
+**Scope fence (verified by the fresh 95-test suite,
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1.py`
+— 95 passed, 0 failed):** FIDO2-free (no `fido2` / `Ctap2` import in new code);
+no `RHAMP-FIDO2-CREDENTIAL/1.0` sidecar, no `RHAMP-COUNTER-STATE/1.0`, no
+enrollment ceremony, no `FIDO2HumanAuthenticator`; `src/pcae/core/hpac_verifier.py`
+**byte-unchanged**; `_ELIGIBLE_MECHANISM_IDS` unchanged (no
+`hpac.fido2.uv_presence.v2`); no protected presentation, no `require_real_assurance`
+wiring; `runtime_dispatch_gate5.py` / `runtime_dispatch_gate9.py` **byte-unchanged**;
+runtime `not_implemented` / `Observed` / `observe` / `unavailable`, 0 plugins /
+0 capabilities; **first external effect ABSENT** (no `adapter.dispatch(`,
+`subprocess`, `socket`, `Popen`, provider path in new code — the only writes are
+bounded PAWA administrative filesystem state); N-16-6 / N-16-7 OPEN and untouched,
+N-16-7 strictly last; N-23-1 / N-23-2 carried unchanged.
+
+**Contract byte identity.** `git diff --name-only <A=1793a75a> HEAD --
+docs/contracts` **empty** — HPAC-PAWA-001 v1.1, HPAC-001 v2.1, RHAMP-001 v1.0,
+HBDC-001 v1.2, and every other contract byte-unchanged.
+
+**Guard reconciliation (point-in-time, phase-aware; no `def test_` renamed,
+removed, skipped, or xfailed):** `.1R.30R.1` IV suite — `test_no_src_pcae_change_since_b30`
+upper bound re-pinned to the `.2A.3` finalized head;
+`test_no_production_writer_factory_symbols_anywhere_in_src`,
+`test_writer_refuses_non_fixture_class`, `test_registry_writer_gate_has_no_third_path`
+split into an immutable-SHA (`H30R`) historical assertion + a current-state
+counterpart. `.1R.30R.2A.1` IV suite — `test_validate_production_boundary_uses_live_identity`,
+`test_no_getpwnam_configured_agent_bridge_in_production`,
+`test_no_pcae_agent_principal_symbol_in_production` — same split, pinned to `J`,
+with `hpac_pawa_agent_exclusion.py` recorded as the sanctioned v1.1 bridge. The
+three HPAC Layer-1/2 consumer-inventory guards (`…_31` / `…_32` / `…_321`)
+widened by the exact five-file PAWA set (no wildcard, PAWA-INV-9). The `.1R.8` /
+`.1R.11.7` / `.1R.17` / `.1R.19R` production-scope subset invariants widened by
+the same five files. Fixed-SHA A/B (`A = 1793a75a`, `B = candidate`): **0
+candidate-only functional regressions**; pre-existing `git stash`-identical
+failures (HPAC verifier / foundation IV "blocking reproduction" demonstrations,
+class-B ACL-adapter-unavailable sandbox failures, `.1R.22R1` contract-drift
+guards, a `ThreadPoolExecutor` flake) documented in
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_1_N_16_5_PAWA_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_IMPLEMENTATION_SLICE_1.md`.
+
+**Recommended next phase:** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2` — Independent
+Verification of the N-16-5 PAWA Production Protected-Admin Writer Anchor
+Implementation (Slice 1). Own explicit human authorization required; ID
+recommended, NOT reserved. Do not begin it. `DELEGATED .3 FINALIZATION / COMMIT /
+PUSH: UNAUTHORIZED` preserved.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3 — Independent Verification of the
 HPAC-PAWA-001 v1.1 Configured-Agent-Principal Resolution Source Contract Freeze.
 **STATUS: COMPLETE — HPAC-PAWA-001 v1.1 VERIFIED WITH NON-BLOCKING FINDINGS.**
@@ -83,7 +183,7 @@ contract-production equivalence (C-3 discharged here).
 
 ---
 
-## Previous Phase
+## Prior Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.2 — HPAC-PAWA-001 v1.1
 Configured-Agent-Principal Resolution Source Contract Freeze.
