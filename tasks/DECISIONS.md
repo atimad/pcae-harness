@@ -2,6 +2,18 @@
 
 ## Accepted
 
+- **2026-09-02 — Independently verify `.1R.30R.3.6` and adjudicate the current
+  merged RHAMP mechanism verified without rewriting historical `.3.5`.** The
+  canonical issuance ACTIVE check and ACTIVE→CONSUMED transition share the
+  existing registry lock; sequential replay rejects, exactly one of eight
+  concurrent callers succeeds, registry state dominates `_spent`, invalid
+  authority cannot consume a valid issuance, and RHAMP enrollment completes
+  exactly once. Therefore the sole `.3.5` blocker is VERIFIED repaired and the
+  current merged mechanism is IMPLEMENTED + INDEPENDENTLY VERIFIED through
+  `.3.5` + `.3.6` + `.3.6.1`; `.3.5` itself remains BLOCKED / immutable.
+  N-16-5 stays NOT CLOSED. Exact next phase: `.1R.30R.4` protected human-
+  approval presentation and real-assurance consumption implementation.
+
 - **Phase `.1R.30R.3.6` canonical issuance lifecycle repair and successor
   (2026-09-02).** Keep `_multi_write` as one bounded multi-artifact
   transaction. Reuse the existing process-local issuance registry and its lock:

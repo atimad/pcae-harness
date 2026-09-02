@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1` independently verifies the
+  PAWA multi-write completion one-operation repair. Immutable `.3.4` reproduces
+  sequential replay and 8/8 concurrent success; finalized `.3.6` rejects replay
+  and permits exactly 1/8 concurrent successes under the canonical issuance
+  lock. Fresh IV 46/46; governing suites 386/386; targeted RHAMP/FIDO2/verifier
+  smoke 35/35; fixed-SHA A/R sweep has zero unexplained R-only failures. The
+  merged RHAMP mechanism is now implemented + independently verified through
+  combined `.3.5`/`.3.6`/`.3.6.1` evidence; historical `.3.5` remains BLOCKED.
+  N-16-5 remains NOT CLOSED pending protected presentation/Gate consumption
+  and mandatory real-hardware certification. Runtime/effect boundaries remain
+  unchanged. Next recommended phase: `.1R.30R.4`, not begun.
+
+- Transitioned active task from Idle: awaiting next governed phase authorization to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1: Independent Verification of the N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1 independent verification; N-16-5 NOT CLOSED to Idle: awaiting next governed phase authorization; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6: N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair to Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1 independent verification; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6` narrowly repairs
