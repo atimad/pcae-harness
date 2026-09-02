@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.2: HPAC-PAWA-001 v1.1 configured-agent-principal resolution source contract freeze to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.2); HPAC-PAWA-001 v1.1 frozen; dedicated contract IV .1R.30R.2A.3 recommended next; session refreshed and governance continuity revalidated.
 - Phase `.1R.30R.2A.2` (HPAC-PAWA-001 v1.1 Configured-Agent-Principal Resolution
   Source Contract Freeze) is **COMPLETE — HPAC-PAWA-001 v1.1 FROZEN** (MINOR;
   sole normative delta). `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`
