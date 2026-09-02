@@ -84,6 +84,6 @@
         }
     ],
     "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1 -- Independent Verification of the Configured-Agent-Principal Resolution Source Contract-Compatibility Adjudication. Requires its own separate explicit human authorization (ID recommended, NOT reserved). Independently re-derive the F-1 configured-agent-principal source gap from source, the three distinct F-1 predicates, the symbolic-name + live-uid/gids identity model and its group-drift / UID-reuse threat coverage, the R1 selection and R2/R3/R4 rejections, the B -- HPAC-PAWA-001 v1.1 MINOR contract verdict, the atomicity verdict, and the D1 decomposition against CPIPC-001. Then .1R.30R.2A.2 (HPAC-PAWA-001 v1.1 contract freeze -- adds HPAC-PAWA-AGENT-EXCLUSION/1.0), then .1R.30R.3.1 (Slice 1: PAWA production writer anchor implementation) -> .3.2 (IV) -> .3.3/.3.4 (Slice 2 / IV) -> .3.5/.3.6 (Slice 3 / IV) -> .4 (composite IV) -> .5 (protected presentation + require_real_assurance wiring) -> .6 (IV + mandatory real-CTAP2-hardware verification + N-16-5 closure). Do not begin N-16-6 / N-16-7 / Slice C; do not implement or call the first external effect; do not enable execution.",
-    "pushed_status": "pending",
-    "origin_main_head": "pending_push"
+    "pushed_status": "pushed",
+    "origin_main_head": "6c576d2d6c984f907561ec27d6e37ae5fc57a271"
 }
