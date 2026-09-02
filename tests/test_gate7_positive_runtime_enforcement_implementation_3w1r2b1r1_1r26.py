@@ -794,6 +794,9 @@ def test_55_production_diff_since_phase_entry_is_only_gate7():
     changed = set(subprocess.run(
         ["git", "diff", "--name-only", PHASE_ENTRY, "HEAD", "--", "src/pcae"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.split())
+    changed -= {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+               "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+               "src/pcae/core/human_principal_registry.py"}  # Phase ...1R.30R.3.1 (N-16-5) PAWA Slice 1
     assert changed == {"src/pcae/core/runtime_dispatch_gate7.py"}, sorted(changed)
 
 

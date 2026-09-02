@@ -91,7 +91,11 @@ def test_b30_is_the_blocked_1r30_head_and_immutable() -> None:
 # ── 2. No production / contract change since the phase entry ───────────────
 
 def test_no_src_pcae_change_since_phase_entry() -> None:
-    assert _git("diff", J, "HEAD", "--", "src/pcae").strip() == ""
+    # Reconciled by .1R.30R.3.1: re-pinned from HEAD to the .1R.30R.2A.1
+    # finalized head (this suite's own window). Later authorized phases
+    # (.1R.30R.2A.2 v1.1 MINOR, .1R.30R.3.1 Slice-1 implementation) legitimately
+    # move src/pcae; each carries its own dedicated verification.
+    assert _git("diff", J, FINALIZED_2A1_HEAD, "--", "src/pcae").strip() == ""
 
 
 # The .1R.30R.2A.1 finalized head. Point-in-time guards below are pinned to this
@@ -507,7 +511,7 @@ def test_runtime_posture_unchanged_language_in_iv_doc() -> None:
 def test_no_new_dispatch_call_site_added_by_this_phase() -> None:
     # This phase adds no src/pcae change at all, so no real-effect dispatch
     # call site can have been introduced.
-    assert _git("diff", J, "HEAD", "--", "src/pcae").strip() == ""
+    assert _git("diff", J, FINALIZED_2A1_HEAD, "--", "src/pcae").strip() == ""
     d = _norm(IV_DOC.read_text(encoding="utf-8"))
     assert "deterministic simulation\nharness in `runtime_adapter.py`".replace("\n", " ") in d or "deterministic simulation harness in `runtime_adapter.py`" in d
 

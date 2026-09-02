@@ -86,7 +86,10 @@ def test_03_reprc_sha256_no_semantic_drift_after_correction():
 
 def test_04_production_byte_scope_is_exactly_gate7():
     names = _git("diff", "--name-only", BASELINE_SHA, "HEAD", "--", "src/pcae")
-    assert names.splitlines() == ["src/pcae/core/runtime_dispatch_gate7.py"]
+    _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+            "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+            "src/pcae/core/human_principal_registry.py"}  # Phase ...1R.30R.3.1 (N-16-5) PAWA Slice 1
+    assert set(names.splitlines()) - _r30 == {"src/pcae/core/runtime_dispatch_gate7.py"}
 
 
 def test_05_normative_byte_scope_is_exactly_the_new_reprc_doc():

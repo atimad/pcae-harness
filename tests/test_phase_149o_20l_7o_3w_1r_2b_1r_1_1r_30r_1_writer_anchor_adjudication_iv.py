@@ -413,8 +413,11 @@ def test_only_the_known_simulation_dispatch_call_site_exists() -> None:
     sites = _adapter_dispatch_call_sites()
     assert sites == ["src/pcae/core/runtime_adapter.py:adapter"], sites
     # No new `.dispatch(` call site introduced by this phase.
-    added = _git("diff", B30, "HEAD", "--", "src/pcae")
-    assert added.strip() == "", "this IV phase changes no src/pcae"
+    # Reconciled by .1R.30R.3.1: re-pinned from HEAD to the .2A.3 finalized head
+    # (this suite's own window); .1R.30R.3.1 is the first authorized implementation
+    # phase. No new `.dispatch(` call site (asserted above) regardless.
+    added = _git("diff", B30, _2A3_FINALIZED_HEAD, "--", "src/pcae")
+    assert added.strip() == "", "no src/pcae change through the .2A.3 window"
 
 
 def test_no_n16_closure_or_transition_commit_since_b30() -> None:

@@ -537,12 +537,19 @@ def test_no_production_source_diff_by_this_phase():
     diff = set(_git("diff", "--name-only", f"{R22R_ENTRY}..HEAD", "--", "src/pcae").split())
     # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0) authorizedly changes exactly
     # runtime_dispatch_gate7.py. Any OTHER production change still fails.
-    assert diff - {"src/pcae/core/runtime_dispatch_gate7.py"} == set(), diff
+    # .1R.30R.3.1 (N-16-5) authorizedly adds the exact five-file PAWA set.
+    _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+            "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+            "src/pcae/core/human_principal_registry.py"}
+    assert diff - {"src/pcae/core/runtime_dispatch_gate7.py"} - _r30 == set(), diff
 
 
 def test_production_scope_since_baseline_is_exactly_the_two_authorized_files():
     changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split())
     changed -= {"src/pcae/core/runtime_dispatch_gate7.py"}  # Phase ...1R.26 (N-16-4) authorized Gate-7 surface
+    changed -= {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+               "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+               "src/pcae/core/human_principal_registry.py"}  # Phase ...1R.30R.3.1 (N-16-5) PAWA Slice 1
     assert changed == {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",

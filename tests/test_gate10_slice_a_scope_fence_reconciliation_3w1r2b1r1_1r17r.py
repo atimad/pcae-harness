@@ -156,6 +156,16 @@ _R122 = {_PERM, _PBF}
 #: authorized production surface for the positive Gate-7 result. Exact
 #: filename, no wildcard; Gate 5 / 8 stay byte-frozen (`forbidden`).
 _R126 = {_G7}
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (N-16-5 -- HPAC-PAWA-001 v1.1 Slice 1
+# production protected-admin writer anchor). Exact filenames, no wildcard; an
+# unauthorized production-file expansion still fails these subset invariants.
+_R30R31 = {
+    "src/pcae/core/hpac_pawa_schemas.py",
+    "src/pcae/core/hpac_pawa_agent_exclusion.py",
+    "src/pcae/core/hpac_protected_admin_writer.py",
+    "src/pcae/core/hpac_foundation.py",
+    "src/pcae/core/human_principal_registry.py",
+}
 #: Contracts a later authorized phase may change (Phase ...1R.22:
 #: PBRD-001 -> v3.0 MAJOR, PBPA-001 -> v1.1, new PBNDE-001; Phase ...1R.26:
 #: the one NEW companion contract REPRC-001 v1.0).
@@ -293,7 +303,7 @@ def test_gate5_permission_gate7_gate8_still_byte_unchanged_since_r153():
     # the two Gate-9-era files + the new Slice-A module + the .1R.16-§38
     # authorized Slice-B set + the .1R.22 (N-16-3) set + the .1R.26 (N-16-4)
     # Gate-7 surface; Gate 5 / Gate 8 stay forbidden (asserted above).
-    allowed = {_G9, _STORE, _GATE10} | _SLICE_B | _R122 | _R126
+    allowed = {_G9, _STORE, _GATE10} | _SLICE_B | _R122 | _R126 | _R30R31
     assert changed <= allowed, changed - allowed
 
 
@@ -385,7 +395,7 @@ def test_no_production_source_changed_since_baseline_except_the_one_r17_file():
     # Slice A: exactly the one new coordinator. Slice B (.1R.19) adds the
     # exact `.1R.16`-§38 authorized set; Phase .1R.22 (N-16-3) adds _R122 —
     # subset check, not equality.
-    allowed = {G10_MODULE} | _SLICE_B | _R122 | _R126
+    allowed = {G10_MODULE} | _SLICE_B | _R122 | _R126 | _R30R31
     assert changed <= allowed, changed - allowed
     assert G10_MODULE in changed
 

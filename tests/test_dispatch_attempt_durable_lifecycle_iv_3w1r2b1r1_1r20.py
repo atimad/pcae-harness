@@ -158,8 +158,16 @@ def test_slice_b_production_scope_since_baseline_is_exactly_the_authorized_set()
         for p in _git("diff", "--name-only", PRE_1R19_BASELINE, "HEAD").splitlines()
         if p.startswith("src/")
     }
-    assert changed - _R122_AUTHORIZED == set(SLICE_B_PRODUCTION_FILES), (
-        (changed - _R122_AUTHORIZED) ^ set(SLICE_B_PRODUCTION_FILES)
+    # .1R.30R.3.1 (N-16-5) authorizedly adds the exact five-file PAWA set.
+    _R30R31 = {
+        "src/pcae/core/hpac_pawa_schemas.py",
+        "src/pcae/core/hpac_pawa_agent_exclusion.py",
+        "src/pcae/core/hpac_protected_admin_writer.py",
+        "src/pcae/core/hpac_foundation.py",
+        "src/pcae/core/human_principal_registry.py",
+    }
+    assert changed - _R122_AUTHORIZED - _R30R31 == set(SLICE_B_PRODUCTION_FILES), (
+        (changed - _R122_AUTHORIZED - _R30R31) ^ set(SLICE_B_PRODUCTION_FILES)
     )
 
 

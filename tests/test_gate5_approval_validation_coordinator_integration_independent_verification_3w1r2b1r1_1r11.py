@@ -530,8 +530,13 @@ def test_production_scope_is_exactly_the_three_planned_files(tmp_path):
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout.split()
     )
-    assert changed - _AUTHORIZED_GATE_CHAIN_SURFACE == set(), (
-        f"unauthorized production-file expansion: {sorted(changed - _AUTHORIZED_GATE_CHAIN_SURFACE)}"
+    _r30 = {
+        "src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+        "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+        "src/pcae/core/human_principal_registry.py",
+    }  # Phase ...1R.30R.3.1 (N-16-5) PAWA Slice 1 -- exact filenames, no wildcard
+    assert changed - _AUTHORIZED_GATE_CHAIN_SURFACE - _r30 == set(), (
+        f"unauthorized production-file expansion: {sorted(changed - _AUTHORIZED_GATE_CHAIN_SURFACE - _r30)}"
     )
     assert {
         "src/pcae/core/runtime_dispatch_gate5.py",

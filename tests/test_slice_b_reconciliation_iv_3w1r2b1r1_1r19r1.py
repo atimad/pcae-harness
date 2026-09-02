@@ -105,6 +105,14 @@ SLICE_B_TUPLES = (
     ("runtime_dispatch_attempt_lifecycle.py", "pcae.core.hpac_foundation"),
     ("runtime_invocation.py", "pcae.core.hpac_foundation"),
 )
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (N-16-5) widens each HPAC Layer-1/2
+# consumer-inventory guard by these exact four tuples -- no wildcard.
+_R30R31_TUPLES = {
+    ("hpac_pawa_schemas.py", "pcae.core.hpac_foundation"),
+    ("hpac_pawa_agent_exclusion.py", "pcae.core.hpac_foundation"),
+    ("hpac_protected_admin_writer.py", "pcae.core.hpac_foundation"),
+    ("hpac_protected_admin_writer.py", "pcae.core.human_principal_registry"),
+}
 BASE_TUPLES = {
     ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
     ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
@@ -225,10 +233,10 @@ def test_guard_authorized_set_grew_by_exactly_the_two_slice_b_tuples(path, node)
     old_seg = _guard_segment(_git("show", f"{R20_HEAD}:{path}"), node)
     new_set = _authorized_set(new_seg)
     old_set = _authorized_set(old_seg)
-    assert new_set - old_set == set(SLICE_B_TUPLES), (path, new_set - old_set)
+    assert new_set - old_set == set(SLICE_B_TUPLES) | _R30R31_TUPLES, (path, new_set - old_set)
     assert old_set - new_set == set(), "nothing was dropped from the authorized set"
     assert old_set == BASE_TUPLES
-    assert new_set == BASE_TUPLES | set(SLICE_B_TUPLES)
+    assert new_set == BASE_TUPLES | set(SLICE_B_TUPLES) | _R30R31_TUPLES
     # subset-invariant orientation unchanged
     assert "- AUTHORIZED_CONSUMERS" in new_seg
     assert "unauthorized == set()" in new_seg
@@ -352,8 +360,11 @@ def test_n20_4_repair_is_confined_to_the_started_started_edge_in_source():
 
 
 def test_n20_4_lifecycle_diff_since_r20_head_is_only_the_remap():
+    _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+            "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+            "src/pcae/core/human_principal_registry.py"}  # .1R.30R.3.1 (N-16-5)
     diff = _git("diff", R20_HEAD, "HEAD", "--", "src/pcae",
-                *(f":(exclude){p}" for p in (_R122 | _R126)))
+                *(f":(exclude){p}" for p in (_R122 | _R126 | _r30)))
     changed = {
         ln.split(" b/")[-1] for ln in diff.splitlines() if ln.startswith("diff --git ")
     }
@@ -523,7 +534,10 @@ def test_production_diff_since_r19_head_is_exactly_the_n20_4_remap():
     changed = set(_git("diff", "--name-only", R19_HEAD, "HEAD", "--", "src/").split())
     # Phase ...1R.22 (N-16-3) authorizedly changes _R122; the .1R.19R repair
     # itself was confined to the lifecycle module.
-    assert changed - _R122 - _R126 == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
+    _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+            "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+            "src/pcae/core/human_principal_registry.py"}  # .1R.30R.3.1 (N-16-5)
+    assert changed - _R122 - _R126 - _r30 == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
 
 
 @pytest.mark.parametrize("rel", [

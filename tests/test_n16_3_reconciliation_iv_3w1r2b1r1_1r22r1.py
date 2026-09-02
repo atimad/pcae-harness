@@ -81,6 +81,9 @@ def test_3_production_scope_since_baseline_is_exactly_the_two_authorized_files()
     # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0) authorizedly changes exactly
     # runtime_dispatch_gate7.py; any OTHER production change still fails.
     names -= {"src/pcae/core/runtime_dispatch_gate7.py"}
+    names -= {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+             "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+             "src/pcae/core/human_principal_registry.py"}  # Phase ...1R.30R.3.1 (N-16-5) PAWA Slice 1
     assert names == {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",

@@ -180,6 +180,9 @@ def test_only_two_production_files_changed_since_baseline():
     # authorizedly changes exactly runtime_dispatch_gate7.py. Subtract that
     # one file; any OTHER unauthorized production change still fails.
     changed -= {"src/pcae/core/runtime_dispatch_gate7.py"}
+    changed -= {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
+               "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
+               "src/pcae/core/human_principal_registry.py"}  # Phase ...1R.30R.3.1 (N-16-5) PAWA Slice 1
     assert changed == {
         "src/pcae/core/permission_broker_foundation.py",
         "src/pcae/core/runtime_dispatch_permission.py",

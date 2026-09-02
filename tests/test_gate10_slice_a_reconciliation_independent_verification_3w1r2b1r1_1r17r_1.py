@@ -133,6 +133,16 @@ _R122 = {_PERM, _PBF}
 #: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26 (N-16-4 -- REPRC-001 v1.0). Sole
 #: authorized production surface for the positive Gate-7 result. No wildcard.
 _R126 = {_G7}
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (N-16-5 -- HPAC-PAWA-001 v1.1 Slice 1
+# production protected-admin writer anchor). Exact filenames, no wildcard; an
+# unauthorized production-file expansion still fails these subset invariants.
+_R30R31 = {
+    "src/pcae/core/hpac_pawa_schemas.py",
+    "src/pcae/core/hpac_pawa_agent_exclusion.py",
+    "src/pcae/core/hpac_protected_admin_writer.py",
+    "src/pcae/core/hpac_foundation.py",
+    "src/pcae/core/human_principal_registry.py",
+}
 _R122_CONTRACTS = {
     "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
     "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
@@ -336,7 +346,7 @@ def test_gate_5_perm_7_8_are_byte_unchanged_since_r153_baseline():
     # .1R.22 (N-16-3); Gate 5 / 7 / 8 stay byte-frozen.
     # Gate 7 is authorizedly changed by .1R.26 (N-16-4); Gate 5 / 8 stay frozen.
     assert not (changed & {_G5, _G8}), changed & {_G5, _G8}
-    allowed = {_G9, _STORE, _GATE10} | _SLICE_B | _R122 | _R126
+    allowed = {_G9, _STORE, _GATE10} | _SLICE_B | _R122 | _R126 | _R30R31
     assert changed <= allowed, changed - allowed
 
 
@@ -476,13 +486,13 @@ def test_no_production_source_changed_since_the_r17_head_except_authorized_slice
     # `.1R.16` §36.2 / §38 to change exactly _SLICE_B (+ the new mirror
     # module) and the Slice-A coordinator stays byte-unchanged.
     changed = set(_git("diff", "--name-only", R17_HEAD, "HEAD", "--", "src/pcae").split())
-    assert changed <= _SLICE_B | _R122 | _R126, changed - (_SLICE_B | _R122 | _R126)
+    assert changed <= _SLICE_B | _R122 | _R126 | _R30R31, changed - (_SLICE_B | _R122 | _R126 | _R30R31)
     assert _git("diff", R17_HEAD, "HEAD", "--", G10_MODULE).strip() == ""
 
 
 def test_production_scope_since_baseline_is_the_one_r17_file_plus_authorized_slice_b():
     names = set(_git("diff", "--name-only", BASELINE, "HEAD", "--", "src/pcae").split())
-    allowed = {G10_MODULE} | _SLICE_B | _R122 | _R126
+    allowed = {G10_MODULE} | _SLICE_B | _R122 | _R126 | _R30R31
     assert names <= allowed, names - allowed
     assert G10_MODULE in names
 

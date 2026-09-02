@@ -772,7 +772,11 @@ def test_d1_decomposition_is_cpipc_valid_no_reservation() -> None:
 # ── 53-56. No production / contract / runtime / effect change ────────
 
 def test_no_src_pcae_change_since_phase_entry() -> None:
-    assert _git("diff", V, "HEAD", "--", "src/pcae").strip() == ""
+    # Point-in-time guard, reconciled by .1R.30R.3.1: re-pinned from HEAD to the
+    # .1R.30R.2A.3 finalized head (this suite's own window). .1R.30R.3.1 is the
+    # first authorized implementation phase and legitimately changes src/pcae.
+    _2A3_FINALIZED_HEAD = "1793a75a73c54c6f6687bc830664caeac5aeaa66"
+    assert _git("diff", V, _2A3_FINALIZED_HEAD, "--", "src/pcae").strip() == ""
     # and none across the whole v1.1 evolution
     assert _git("diff", "--stat", J, F, "--", "src/pcae").strip() == ""
 
@@ -787,7 +791,7 @@ def test_only_the_pawa_contract_changed_v1_0_to_v1_1() -> None:
         "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
     ], names
     # and nothing new under docs/contracts since the phase entry
-    assert _git("diff", "--name-only", V, "HEAD", "--", "docs/contracts").strip() == ""
+    assert _git("diff", "--name-only", V, "1793a75a73c54c6f6687bc830664caeac5aeaa66", "--", "docs/contracts").strip() == ""
 
 
 def test_v1_0_freeze_record_not_rewritten() -> None:
@@ -823,8 +827,10 @@ def test_n16_5_status_v1_1_not_closed() -> None:
 
 def test_fixed_sha_attribution_zero_production_and_contract_delta() -> None:
     # A = finalized .1R.30R.2A.2 head (== F); B = this candidate (HEAD)
-    assert _git("diff", "--stat", F, "HEAD", "--", "src/pcae").strip() == ""
-    assert _git("diff", "--name-only", F, "HEAD", "--", "docs/contracts").strip() == ""
+    # Reconciled by .1R.30R.3.1: B re-pinned to the .1R.30R.2A.3 finalized head.
+    _B = "1793a75a73c54c6f6687bc830664caeac5aeaa66"
+    assert _git("diff", "--stat", F, _B, "--", "src/pcae").strip() == ""
+    assert _git("diff", "--name-only", F, _B, "--", "docs/contracts").strip() == ""
 
 
 # ── 58. No test weakening in this phase's own diff ──────────────────

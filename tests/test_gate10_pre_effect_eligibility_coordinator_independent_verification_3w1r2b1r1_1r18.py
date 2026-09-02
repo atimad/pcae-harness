@@ -1316,7 +1316,16 @@ _SLICE_A_PLUS_B_PLUS_C_SCOPE = {
     # sole authorized production surface for the positive Gate-7 result.
     "src/pcae/core/runtime_dispatch_gate7.py",
 }
-_SLICE_A_PLUS_B_SCOPE = _SLICE_A_PLUS_B_PLUS_C_SCOPE
+_SLICE_A_PLUS_B_SCOPE = _SLICE_A_PLUS_B_PLUS_C_SCOPE | {
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (N-16-5 -- HPAC-PAWA-001 v1.1 Slice 1
+# production protected-admin writer anchor). Exact filenames, no wildcard; an
+# unauthorized production-file expansion still fails these subset invariants.
+    "src/pcae/core/hpac_pawa_schemas.py",
+    "src/pcae/core/hpac_pawa_agent_exclusion.py",
+    "src/pcae/core/hpac_protected_admin_writer.py",
+    "src/pcae/core/hpac_foundation.py",
+    "src/pcae/core/human_principal_registry.py",
+}
 
 
 def test_production_scope_since_baseline_is_exactly_one_new_file():
