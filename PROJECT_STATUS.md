@@ -2,6 +2,97 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.2 — HPAC-PAWA-001 v1.1
+Configured-Agent-Principal Resolution Source Contract Freeze.
+**STATUS: COMPLETE — HPAC-PAWA-001 v1.1 FROZEN** (MINOR; sole normative delta).
+Contract-freeze / semantic-delta / decision-freezing / documentation only.
+Phase-entry SHA `164ecef8` (task-open); baseline tree = the `.1R.30R.2A.1`
+finalized head `3f23d6fd`; `origin/main..HEAD = 0` at entry.
+`git diff 164ecef8 HEAD -- src/pcae` **empty**;
+`git diff --name-only 164ecef8 HEAD -- docs/contracts` names **exactly**
+`HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md` (HPAC-PAWA-001 v1.1)
+and no other contract. HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2, CPIPC-001
+v1.0, and the `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` schema are byte-unchanged;
+**no new `pawa_failure_code`**; **no descriptor schema change**.
+
+`docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md` is
+evolved in place from v1.0 → **v1.1**: adds §7A (v1.0→v1.1 delta table); §9.1
+(names the resolution source); §20A (`agent_exclusion_digest` on
+`HPAC-PAWA-CURRENT-GENERATION/1.0` — **C-2**); §32A (`HPAC-PAWA-AGENT-EXCLUSION/1.0`
+closed schema — `symbolic_account` + `provisioned_uid` + live-group resolution;
+deletion / recreation-under-a-new-uid / UID-reuse / rename fail closed; group
+drift detected, group removal recovers without reprovision; OS-account-DB TCB;
+no env / no caller / no current-euid); §32B (provisioning / account selection /
+duplicate bootstrap / rotation / migration of the record); §32C (coordinated /
+full-root rollback boundary); §31 / §33 (11-step sequence unchanged — steps
+2/3/7 gain explicit atomic exclusion-record substeps); §42A (v1.1 rejections →
+the existing 21 codes); §57 / §61 / §63 / §73–§76 / §80.1 (**S-1** MINOR rule +
+MAJOR-trigger review) / §81–§84 / §87–§89; `PAWA-INV-12`; §90.1 / §95.1 verdict
+blocks; §95A (R1/R2/R3/R4 disposition); §94 v1.1 history; §96A (recommended
+next). `HPAC-PAWA-REQ-001..218` sequential, no gaps; `PAWA-INV-1..12`.
+
+**Authoritative design frozen (R1-HYBRID, C-1):** a protected,
+deployment-owner-provisioned, agent-unwritable, installation- and
+generation-bound `HPAC-PAWA-AGENT-EXCLUSION/1.0` record at
+`<HPAC_PROTECTED_ROOT>/.authority/agent-exclusion.json` stores the configured
+agent principal's **symbolic OS account name** and its **`provisioned_uid`**;
+at every §33 recognition the account is resolved live, `live uid ==
+provisioned_uid` is required (else `agent_principal_unknown`), current primary +
+supplementary groups are enumerated **live** and fed to `_effective_write_access`
+/ `_ancestor_chain_safe`, the current process is compared against the resolved
+configured-agent identity (`current_context_is_agent`), and the record's digest
+must equal `HPAC-PAWA-CURRENT-GENERATION/1.0`'s `agent_exclusion_digest` (C-2 —
+independent rollback impossible without forging the monotonic anchor). The
+three F-1 predicates stay distinct; `os.geteuid()` remains the subject of the
+positive write probe and one operand of the not-configured-agent check — never
+the `agent_has_protected_write_authority` operand.
+
+**Corrections incorporated:** C-1 (R1-PURE → R1-HYBRID identity model — closes
+the delete→recreate-under-a-new-uid silent-rebind path and resolves the
+adjudication's §6-vs-§12.2 inconsistency), C-2 (`agent_exclusion_digest` bound
+into the current-generation anchor), S-1 (explicit MINOR versioning rule). C-3
+(a **dedicated** v1.1 contract IV, `.1R.30R.2A.3`) is **recommended, not
+authorized** — foldable into `.1R.30R.3.2` only at explicit operator discretion.
+
+**Tests:** no functional implementation test authored. One point-in-time
+assertion in the `.1R.30R.2A.1` IV suite that pinned the v1.0 requirement total
+(`163`) was reconciled to also accept the v1.1 total (`218`) — mechanical
+maintenance, no `def test_` renamed / removed / skipped / xfailed. That suite is
+**56 passed, 0 failed** against the v1.1 contract. Two `.1R.30R.1` IV guards
+(`test_no_contract_change_since_b30`, `test_only_iv_artifacts_changed_since_v`)
+fail — **pre-existing** point-in-time guards that broke when `.1R.30R.2` /
+`.1R.30R.2A` legitimately added `docs/` artifacts since the B30/V baselines;
+they reproduce identically with this phase's changes stashed (`git stash` A/B:
+`2 failed, 33 passed` both ways; wider `pawa`/`hpac`+`contract` A/B: `46 failed,
+214 passed, 9 errors` both ways) — **zero regression attributable to
+`.1R.30R.2A.2`**; re-baselined by `.1R.30R.2A.3`.
+
+**N-16-5:** NOT CLOSED — the configured-agent-principal resolution-source gap is
+closed **at the contract level**; closure still requires `.1R.30R.2A.3` (the
+dedicated v1.1 contract IV) → `.1R.30R.3.*` (implementation) → `.1R.30R.4`
+(composite IV) → `.1R.30R.5` (presentation + `require_real_assurance` wiring) →
+`.1R.30R.6` (IV + mandatory real-CTAP2-hardware verification). **N-16-3 /
+N-16-4:** CLOSED, not reopened. **N-16-6 / N-16-7:** OPEN, untouched, N-16-7
+strictly last. **N-23-1 / N-23-2:** carried unchanged. **No Slice C.**
+Runtime `not_implemented` / `Observed` / `observe` / `unavailable`; 0 plugins /
+0 capabilities. First external effect: **ABSENT AND UNREACHABLE**.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
+**Recommended next phase (exactly one):** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3`
+— Independent Verification of the HPAC-PAWA-001 v1.1 Configured-Agent-Principal
+Resolution Source Contract Freeze (finding C-3; ID recommended, NOT reserved;
+own explicit human authorization required; foldable into `.1R.30R.3.2` only at
+explicit operator discretion). Do not begin it. Do not begin `.1R.30R.3.1`. Do
+not begin N-16-6 / N-16-7 / Slice C. Do not implement or call the first external
+effect. Do not enable execution.
+
+See `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_2A_2_HPAC_PAWA_001_V1_1_CONFIGURED_AGENT_PRINCIPAL_RESOLUTION_SOURCE_CONTRACT_FREEZE.md`
+and `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`.
+
+---
+
+## Prior Phase — 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1 — Independent Verification of the
 Configured-Agent-Principal Resolution Source Contract-Compatibility Adjudication.
 **STATUS: COMPLETE — ADJUDICATION VERIFIED WITH CORRECTIONS** (not BLOCKED).

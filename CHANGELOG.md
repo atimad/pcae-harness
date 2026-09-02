@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Phase `.1R.30R.2A.2` (HPAC-PAWA-001 v1.1 Configured-Agent-Principal Resolution
+  Source Contract Freeze) is **COMPLETE — HPAC-PAWA-001 v1.1 FROZEN** (MINOR;
+  sole normative delta). `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`
+  evolves in place v1.0 → v1.1: freezes `HPAC-PAWA-AGENT-EXCLUSION/1.0` (§32A) as
+  the configured-agent-principal resolution source — a protected,
+  deployment-owner-provisioned, agent-unwritable, installation- and
+  generation-bound record storing the agent's **symbolic OS account name** plus
+  a **`provisioned_uid`** integrity pin (R1-HYBRID, finding C-1), with `(uid,
+  gids)` resolved **live** at every §33 recognition and current groups
+  enumerated live (group drift detected; group removal recovers without
+  reprovision; deletion / recreation-under-a-new-uid / UID-reuse / rename all
+  fail closed to `agent_principal_unknown`). Binds `agent_exclusion_digest` into
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` (§20A, finding C-2) so the exclusion record
+  cannot be rolled back independently of the monotonic anchor. Adds the explicit
+  **S-1** MINOR versioning rule (§80.1) and a full MAJOR-trigger review (none
+  fires). `HPAC-PAWA-REQ-164..218`, `PAWA-INV-12`. **No `src/pcae` change; no
+  HPAC-001 bump; RHAMP-001 v1.0 byte-unchanged; no new `pawa_failure_code`; the
+  `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` schema is byte-unchanged.** A dedicated
+  v1.1 contract IV — `.1R.30R.2A.3` (finding C-3) — is recommended (foldable into
+  `.1R.30R.3.2` only at explicit operator discretion). Runtime unchanged
+  (`not_implemented` / `Observed` / `observe` / `unavailable`, 0/0); first
+  external effect ABSENT; N-16-5 NOT CLOSED. Recommended next:
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3`.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1); HPAC-PAWA-001 v1.1 contract freeze (.1R.30R.2A.2) recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.2: HPAC-PAWA-001 v1.1 configured-agent-principal resolution source contract freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1: IV configured-agent resolution source adjudication to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1); HPAC-PAWA-001 v1.1 contract freeze (.1R.30R.2A.2) recommended next; session refreshed and governance continuity revalidated.
 - Phase `.1R.30R.2A.1` (Independent Verification of the Configured-Agent-Principal

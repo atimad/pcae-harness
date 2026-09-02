@@ -375,7 +375,11 @@ def test_no_major_trigger_fires_for_r1() -> None:
 
 def test_no_new_pawa_failure_code_and_taxonomy_is_21() -> None:
     c = _norm(PAWA_CONTRACT.read_text(encoding="utf-8"))
-    assert "defines **163** requirements" in c
+    # Point-in-time requirement-inventory guard, reconciled by .1R.30R.2A.2 when
+    # HPAC-PAWA-001 legitimately evolved v1.0 -> v1.1 (MINOR): the v1.0 total was
+    # 163; the v1.1 total is 218 (HPAC-PAWA-REQ-001..218). The load-bearing
+    # invariant this test protects is the *failure taxonomy*, which is unchanged.
+    assert "defines **163** requirements" in c or "defines **218** requirements" in c
     assert "21 closed `pawa_failure_code` values" in c or "21 closed pawa_failure_code values" in c
     d = _norm(IV_DOC.read_text(encoding="utf-8"))
     assert "adds **no** new `pawa_failure_code`" in d
