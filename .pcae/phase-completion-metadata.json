@@ -10,7 +10,7 @@
  "metadata_consistency": "phase_id / phase_name / phase_title / status / summary all name 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3. The canonical BLOCKED phase document (docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_3_N_16_5_RHAMP_FIDO2_CREDENTIAL_REGISTRY_COUNTER_STATE_AND_PROTECTED_ADMIN_ENROLLMENT_IMPLEMENTATION_SLICE_2.md) names the same phase ID and the same BLOCKED decomposition-blocker verdict. phase_commits are the governed .1R.30R.3.3 commits made before this metadata-staging commit, each subject carrying the ...1R.30R.3.3 token. status is 'blocked'; the report title / summary / verdict prose carry the BLOCKED verdict and the Telegram document is the full BLOCKED report.",
  "internal_evidence_coherence": "All contract citations resolve to the current frozen text, byte-current (git diff 4218e076 HEAD -- docs/contracts is empty). RHAMP-001 v1.0, HPAC-PAWA-001 v1.1, HPAC-001 v2.1 byte-unchanged. src/pcae changed by this phase: none (git diff 4218e076 HEAD -- src/pcae is empty). tests/ changed by this phase: none (git diff 4218e076 HEAD -- tests is empty). No fresh .3.3 test suite was created -- the phase is BLOCKED before any test work, per its own BLOCKED discipline. pcae health / check / status coherence all pass.",
  "internal_report_coherence": "Test and validation evidence for this phase is this phase's own identity (149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3): there is no test evidence because the phase is BLOCKED before test work and made zero test changes. Other-phase tokens (.1R.30R.3.2.1.1, .1R.30R.3.1, .1R.30R, .1R.29, the recommended successor .1R.30R.3.3R) appear only in summary, governance_results, and recommended_next_phase, which is permitted.",
- "report_consistency": "governed push pending at stage time; will be reconciled to the pushed range and origin/main..HEAD = 0 after the governed push.",
+ "report_consistency": "governed push complete (4218e076..c2103c75, 5 commits); origin/main..HEAD = 0; pcae push check reports nothing_to_push.",
  "origin_main_head_count": 0,
  "test_evidence_classification": "governed_implementation_phase_blocked_decomposition_blocker_zero_src_pcae_change_zero_contract_change_zero_test_change_zero_test_weakening_slice_1_closed_unchanged",
  "tests_run": 0,
@@ -65,9 +65,17 @@
   {
    "hash": "b8f0eebbcd27138727d4e60b903225aa57ae9a80",
    "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3: close BLOCKED phase task, transition to idle awaiting operator decomposition adjudication"
+  },
+  {
+   "hash": "f1e62b14d895af8fc1efbf8d75fc41e581d683b4",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3: expand idle-task allowed-file zone; stage canonical BLOCKED completion metadata and report ahead of governed push"
+  },
+  {
+   "hash": "c2103c75b1498870d7cb74eb24afa2d0f3a35e93",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3: record idle-task allowed-file zone expansion"
   }
  ],
  "recommended_next_phase": "Decomposition adjudication required first: 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R -- N-16-5 RHAMP Slice 2 / Slice 3 Decomposition Adjudication (makeCredential-in-registration boundary; choose re-merge into RHAMP-REQ-156's .1R.30 bundle / a governed RHAMP-001 v1.1 MINOR defining a staged enrollment / an explicit material-free Slice-2 re-scope). ID recommended, NOT reserved; confirm under CPIPC before use; own explicit human authorization required. Do not begin it here. Do not implement RHAMP credential/counter-state. Do not implement enrollment. Do not implement FIDO2HumanAuthenticator. Do not modify hpac_verifier for REAL authentication. Do not widen _ELIGIBLE_MECHANISM_IDS. Do not implement protected presentation. Do not wire require_real_assurance through Gate 5/9. Do not begin N-16-6 or N-16-7. Do not begin Slice C. Do not implement or call the first external effect. Do not enable execution.",
- "pushed_status": "pending",
- "origin_main_head": "pending_push"
+ "pushed_status": "pushed",
+ "origin_main_head": "c2103c75b1498870d7cb74eb24afa2d0f3a35e93"
 }
