@@ -30,9 +30,11 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import stat
 import sys
 import tempfile
+import threading
 import unicodedata
 import uuid
 from collections.abc import Mapping
@@ -287,6 +289,110 @@ class HPACWriterCapability:
         if seal is not _WRITER_CONSTRUCTOR_SEAL:
             raise HPACAuthorityError("HPAC writer-capability spend state cannot be caller-set")
         self._spent = True
+
+
+class _CapabilityIssuanceState(str, Enum):
+    ACTIVE = "active"
+    CONSUMED = "consumed"
+
+
+_MISSING = object()
+
+
+class _CapabilityIssuanceRecord:
+    """Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1 (N-16-5 repair) — a
+    process-local, non-serializable issuance-membership record binding one
+    canonical, factory-issued :class:`HPACWriterCapability` *object* (by
+    identity, never by value) to the scope it was minted with.
+
+    HPAC-PAWA-REQ-102's identity check (``writer._authority_seal is
+    self._seal``) is necessary but was independently found (.1R.30R.3.2,
+    BLOCKED) insufficient: ``_authority_seal`` is an ordinary readable
+    instance attribute, so any code that already legitimately holds one
+    issued capability can copy that exact seal reference onto a fresh
+    ``object.__new__`` shell, which then also satisfies ``is`` identity —
+    genuinely, not by reconstruction, because the shell holds the very same
+    object. No per-capability field can close this gap, because any field
+    stored *on* the capability object is, by the same argument, readable and
+    copyable onto a shell.
+
+    The fix is therefore not a stronger field but an out-of-band fact no
+    shell can carry: whether *this exact object* — not a structurally
+    identical one — is the one the canonical factory (``_new_capability``,
+    the sole construction site) actually returned and has not yet consumed.
+    That fact lives here, keyed by object identity, never on the capability
+    itself; a copy/deepcopy/pickle/``__new__``-reconstruction/attribute
+    transplant can carry no membership in this table because membership is
+    not a value, it is being the literal object.
+
+    A strong reference to the capability is kept for the life of the entry
+    (there is no explicit eviction) so ``id()`` can never be reused for a
+    different live object while the entry stands — the classic id-reuse
+    forgery this table would otherwise itself be vulnerable to. This is a
+    process-local, admin-tool-scale table (HPAC-PAWA-REQ-108 — the enclosing
+    admin tool is short-lived, one operation per invocation); it is never
+    serialized, never written to disk, and does not survive a process
+    restart (HPAC-PAWA-REQ-105), matching every other PAWA process-local
+    fact.
+    """
+
+    __slots__ = ("capability", "issuance_id", "role", "subject", "authority_class", "state")
+
+    def __init__(
+        self,
+        capability: "HPACWriterCapability",
+        *,
+        role: str,
+        subject: Optional[str],
+        authority_class: "HPACAuthorityClass",
+    ) -> None:
+        self.capability = capability
+        #: Non-authoritative, process-local, never exposed on the capability
+        #: object or in any audit projection (HPAC-PAWA-REQ-104) — a
+        #: debugging/observability aid only. Authority is the table
+        #: membership + object identity, not this value.
+        self.issuance_id = secrets.token_bytes(32)
+        self.role = role
+        self.subject = subject
+        self.authority_class = authority_class
+        self.state = _CapabilityIssuanceState.ACTIVE
+
+
+_ISSUANCE_REGISTRY_LOCK = threading.Lock()
+#: Keyed by ``id(capability)`` for O(1) lookup; every read verifies
+#: ``record.capability is writer`` so a stale/reused id can never match a
+#: different live object (defense in depth on top of the strong reference).
+_ISSUED_CAPABILITY_REGISTRY: "dict[int, _CapabilityIssuanceRecord]" = {}
+
+
+def _register_issued_capability(
+    capability: "HPACWriterCapability",
+    *,
+    role: str,
+    subject: Optional[str],
+    authority_class: "HPACAuthorityClass",
+) -> None:
+    """Called only from :meth:`HPACStoreAuthority._new_capability` — the
+    single construction site — immediately after a capability is minted."""
+
+    record = _CapabilityIssuanceRecord(capability, role=role, subject=subject, authority_class=authority_class)
+    with _ISSUANCE_REGISTRY_LOCK:
+        _ISSUED_CAPABILITY_REGISTRY[id(capability)] = record
+
+
+def _lookup_issued_capability(capability: object) -> Optional[_CapabilityIssuanceRecord]:
+    with _ISSUANCE_REGISTRY_LOCK:
+        record = _ISSUED_CAPABILITY_REGISTRY.get(id(capability))
+    if record is None or record.capability is not capability:
+        return None
+    return record
+
+
+def _mark_capability_consumed(capability: "HPACWriterCapability") -> None:
+    with _ISSUANCE_REGISTRY_LOCK:
+        record = _ISSUED_CAPABILITY_REGISTRY.get(id(capability))
+        if record is not None and record.capability is capability:
+            record.state = _CapabilityIssuanceState.CONSUMED
 
 
 T = TypeVar("T")
@@ -545,7 +651,7 @@ class HPACStoreAuthority:
 
         if subject is not None:
             require_nonempty_str(subject, context="writer.subject")
-        return HPACWriterCapability(
+        capability = HPACWriterCapability(
             self._seal,
             role,
             subject,
@@ -553,6 +659,15 @@ class HPACStoreAuthority:
             _seal=_WRITER_CONSTRUCTOR_SEAL,
             single_use=single_use,
         )
+        # .1R.30R.3.2.1 (N-16-5 repair) — every capability, from this sole
+        # construction site, is registered as canonically issued. A shell
+        # built any other way (object.__new__, copy, a hand-built lookalike)
+        # is never inserted here and therefore never satisfies
+        # require_writer, regardless of which fields it carries.
+        _register_issued_capability(
+            capability, role=role, subject=subject, authority_class=self.authority_class
+        )
+        return capability
 
     def writer(self, role: str, *, subject: Optional[str] = None) -> HPACWriterCapability:
         """Issue a bound fixture writer; real writer ceremony is deferred."""
@@ -594,16 +709,43 @@ class HPACStoreAuthority:
     def require_writer(
         self, writer: HPACWriterCapability, role: str, *, subject: Optional[str] = None
     ) -> None:
-        if not isinstance(writer, HPACWriterCapability) or writer._authority_seal is not self._seal:
+        if not isinstance(writer, HPACWriterCapability):
             raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
-        if writer.role != role or writer.subject != subject:
+        # ``getattr`` with a sentinel, not direct attribute access: an
+        # object.__new__ shell that never ran __init__ has no
+        # ``_authority_seal`` slot value at all, and a bare attribute read
+        # would raise AttributeError instead of failing closed cleanly
+        # (§0; HPAC-PAWA-REQ-103, "object.__new__ ... reconstruction").
+        if getattr(writer, "_authority_seal", _MISSING) is not self._seal:
+            raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
+        # .1R.30R.3.2.1 (N-16-5 repair) — HPAC-PAWA-REQ-102/106/107. Seal
+        # *identity* alone is necessary but not sufficient: it is a plain
+        # readable attribute, so a caller who already holds one legitimately
+        # issued capability can copy that exact seal reference onto a fresh
+        # ``object.__new__`` shell, which then also satisfies ``is``
+        # identity. The decisive additional check is canonical-issuance
+        # *object* membership — a fact that lives only in the process-local
+        # issuance registry, never on the capability itself, and therefore
+        # cannot be copied onto a shell no matter which fields it carries
+        # (.1R.30R.3.2 finding §5).
+        record = _lookup_issued_capability(writer)
+        if record is None:
+            raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
+        # Registry-bound canonical scope dominates the (plain, mutable,
+        # attacker-reachable) object fields: even a legitimately-issued
+        # capability's ``role``/``subject`` slots could otherwise be
+        # reassigned after mint to widen scope.
+        if record.role != role or record.subject != subject:
             raise HPACAuthorityError("writer capability role/subject does not match this operation")
-        if writer.authority_class is not self.authority_class:
+        if record.authority_class is not self.authority_class:
             raise HPACAuthorityError("writer capability assurance-class mismatch")
-        if writer._spent:
+        if record.state is _CapabilityIssuanceState.CONSUMED or getattr(writer, "_spent", True):
             # HPAC-PAWA-REQ-106/107, §49 — a PRODUCTION single-use
-            # capability authorises exactly one bounded mutation; a
-            # second attempt is stale.
+            # capability authorises exactly one bounded mutation; a second
+            # attempt is stale. Registry state is authoritative (it cannot
+            # be reset by external attribute assignment the way a plain
+            # ``_spent`` slot could be); the object's own ``_spent`` flag is
+            # still consulted too, defense in depth.
             raise HPACAuthorityError("writer capability is spent (one-operation lifetime exhausted)")
         self._ensure_root(create=True)
 
@@ -719,8 +861,14 @@ class HPACStoreAuthority:
         if writer._single_use:
             # HPAC-PAWA-REQ-107, §49 — the one bounded mutation has been
             # recorded; the same capability object can never authorise a
-            # second record_write (→ ``capability_stale``).
+            # second record_write (→ ``capability_stale``). Both the
+            # object-local flag (existing) and the registry-side state
+            # (.1R.30R.3.2.1 repair) are set at this same transition point;
+            # the registry copy cannot be reset by external attribute
+            # assignment on the capability object the way ``_spent`` alone
+            # could be.
             writer._mark_spent(_WRITER_CONSTRUCTOR_SEAL)
+            _mark_capability_consumed(writer)
 
     def verify_record(
         self,

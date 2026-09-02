@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` (N-16-5 PAWA
+  `HPACWriterCapability` Non-Bearer / One-Operation Integrity Repair) is
+  **REPAIRED — FRESH SUCCESSOR IV REQUIRED — N-16-5 NOT CLOSED.** Repairs
+  the decisive product defect `.1R.30R.3.2` (Independent Verification,
+  preserved BLOCKED, immutable) found: a caller who already holds one
+  legitimately issued PRODUCTION `HPACWriterCapability` could copy its real
+  `_authority_seal` onto a fresh `object.__new__` shell, which then also
+  passed `require_writer`'s identity check and authorized a second, distinct
+  registry mutation. Root cause: `require_writer`'s only binding check was
+  object identity of a plain, readable instance attribute — any code
+  already holding one issued capability can read and copy that exact
+  object reference onto a shell it constructs itself, and the identity
+  check then genuinely, correctly, passes. Fix: a process-local,
+  non-serializable, in-memory issuance-membership table in
+  `hpac_foundation.py` (`_ISSUED_CAPABILITY_REGISTRY`, keyed by
+  `id(capability)`, verified by object identity so a reused id can never
+  match a different live object) that every capability is registered into
+  at its sole construction site (`_new_capability`); `require_writer` now
+  additionally requires this registry membership (a fact off the
+  capability object, uncopyable onto a shell) and binds scope/spend checks
+  to the registry's frozen values rather than the capability's own mutable
+  slots. No new capability field/slot — the closed `__slots__`
+  (HPAC-PAWA-REQ-091/094) is byte-unchanged. **Contract disposition: NO
+  normative change** — HPAC-PAWA-REQ-102/103's security property is
+  unchanged and is now what the code actually delivers (still an identity
+  check, "not a value comparison"; `HPAC-PAWA-001` stays v1.1
+  byte-unchanged). Independently re-reproduced the defect against the
+  immutable finalized `.1R.30R.3.1` head (`A = aff46ec3`) before editing;
+  the repaired tree rejects the identical adversary directly and
+  end-to-end through the real `production_writer()` →
+  `HumanPrincipalRegistryStore` path. Added the missing adversary
+  regression to the existing `.1R.30R.3.1` product suite (4 new tests,
+  nothing renamed/removed/skipped) plus a fresh dedicated 24-test repair
+  suite (canonical issuance, the decisive shell adversary, bare-shell
+  clean fail-closed, copy/deepcopy/pickle rejection, restart invalidation,
+  one-operation replay, token/scope transplant rejection,
+  fixture/production separation, concurrent-use single-winner, inventory
+  and scope-fence guards). Fixed-SHA attribution: 0 R-only unexplained
+  functional regressions (39 pre-existing/hygiene/flake failures
+  reproduce identically without the repair; 1 stale literal-text guard
+  updated additively to match the strengthened mechanism). Production
+  diff: `src/pcae/core/hpac_foundation.py` only. `.1R.30R.3.2` preserved
+  BLOCKED, immutable, not re-verified by this phase. **N-16-5 remains NOT
+  CLOSED** — a fresh independent verification is required. Recommended
+  next (ID recommended, NOT reserved):
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1`.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2` (Independent Verification of
   the N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation —
   Slice 1) is **BLOCKED.** Independent re-derivation from primary source —

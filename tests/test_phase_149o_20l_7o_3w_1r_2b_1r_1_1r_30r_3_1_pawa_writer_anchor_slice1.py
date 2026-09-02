@@ -786,6 +786,101 @@ def test_55_object_new_reconstruction_rejected(provisioned):
         authority.require_writer(forged, "human_principal_registry_admin")
 
 
+def test_55a_nonissued_capability_shell_is_rejected(provisioned):
+    """Phase .1R.30R.3.2.1 (N-16-5 repair) — the exact adversary
+    .1R.30R.3.2 independently found and reproduced: a caller who already
+    legitimately holds one issued capability copies its *real*
+    ``_authority_seal`` (and every other field) onto an
+    ``object.__new__`` shell it constructs itself. Unlike ``test_55``,
+    every field is populated with genuine values, so ``writer.
+    _authority_seal is self._seal`` is genuinely true — the shell is
+    rejected only because it was never returned by the canonical factory
+    (HPAC-PAWA-REQ-102/106/107), independent of any field it carries."""
+
+    root, _ = provisioned
+    handle = _mint(root, principal_id=HP_A)
+    cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id=HP_A)
+
+    shell = HPACWriterCapability.__new__(HPACWriterCapability)
+    shell._authority_seal = cap._authority_seal
+    shell.role = cap.role
+    shell.subject = cap.subject
+    shell.authority_class = cap.authority_class
+    shell._single_use = True
+    shell._spent = False
+
+    with pytest.raises(Exception):
+        handle.authority.require_writer(shell, "human_principal_registry_admin", subject=HP_A)
+
+
+def test_55b_writer_authority_requires_canonical_issuance_membership(provisioned):
+    """The same adversary, driven through the real production consumption
+    path (HumanPrincipalRegistryStore), not just require_writer in
+    isolation -- matching .1R.30R.3.2 §5.3's live reproduction."""
+
+    root, _ = provisioned
+    handle = _mint(root, principal_id=HP_A)
+    cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id=HP_A)
+    store = HumanPrincipalRegistryStore(handle.authority)
+    store.enroll_principal(cap, principal_id=HP_A, enrollment_provenance_ref="x", enrolled_at=w._now())
+    assert cap._spent is True
+
+    shell = HPACWriterCapability.__new__(HPACWriterCapability)
+    shell._authority_seal = cap._authority_seal
+    shell.role = cap.role
+    shell.subject = cap.subject
+    shell.authority_class = cap.authority_class
+    shell._single_use = True
+    shell._spent = False
+
+    with pytest.raises(HumanPrincipalRegistryError):
+        store.revoke_principal(shell, principal_id=HP_A, revoked_at=w._now())
+
+
+def test_55c_one_operation_capability_cannot_be_duplicated_via_field_copy(provisioned):
+    """A shell built from a *not-yet-spent* legitimate capability's fields
+    (rather than an already-spent one) is equally rejected -- membership,
+    not spend state, is the decisive gate."""
+
+    root, _ = provisioned
+    handle = _mint(root, principal_id=HP_A)
+    cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id=HP_A)
+    assert cap._spent is False
+
+    shell = HPACWriterCapability.__new__(HPACWriterCapability)
+    shell._authority_seal = cap._authority_seal
+    shell.role = cap.role
+    shell.subject = cap.subject
+    shell.authority_class = cap.authority_class
+    shell._single_use = True
+    shell._spent = False
+
+    with pytest.raises(Exception):
+        handle.authority.require_writer(shell, "human_principal_registry_admin", subject=HP_A)
+    # the genuine capability is unaffected and still usable exactly once.
+    handle.authority.require_writer(cap, "human_principal_registry_admin", subject=HP_A)
+
+
+def test_55d_registry_bound_scope_dominates_mutated_object_fields(provisioned):
+    """A legitimately-issued capability whose plain, mutable ``role`` /
+    ``subject`` slots are reassigned after mint (attacker-reachable field
+    mutation -- a distinct but related non-bearer gap) cannot thereby
+    widen its authorized scope: the canonical, registry-bound scope
+    frozen at mint time dominates."""
+
+    root, _ = provisioned
+    handle = _mint(root, principal_id=HP_A)
+    cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id=HP_A)
+
+    # attacker-controlled in-process mutation of the object's own fields.
+    cap.subject = HP_B
+
+    with pytest.raises(Exception):
+        handle.authority.require_writer(cap, "human_principal_registry_admin", subject=HP_B)
+    # the true, registry-bound scope (HP_A) still works.
+    handle.authority.require_writer(cap, "human_principal_registry_admin", subject=HP_A)
+
+
 def test_56_copy_does_not_create_a_second_usable_capability(provisioned):
     root, _ = provisioned
     handle = _mint(root, principal_id=HP_A)

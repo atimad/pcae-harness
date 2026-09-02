@@ -2,6 +2,124 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1 — N-16-5 PAWA
+`HPACWriterCapability` Non-Bearer / One-Operation Integrity Repair.
+**STATUS: REPAIRED — FRESH SUCCESSOR IV REQUIRED — N-16-5 NOT CLOSED.**
+Repairs the product defect `.1R.30R.3.2` (Independent Verification,
+preserved BLOCKED, immutable) independently found and twice reproduced: a
+caller who already holds one legitimately issued PRODUCTION
+`HPACWriterCapability` could copy its real `_authority_seal` (and every
+other field) onto a fresh `object.__new__` shell, which then also passed
+`require_writer`'s identity check and authorized a second, distinct
+registry mutation. Independently re-reproduced against the immutable
+finalized `.1R.30R.3.1` head (`A = aff46ec3`) before any edit, confirming
+the defect; the repaired working tree (`R`) rejects the identical
+adversary, both via `require_writer` directly and end-to-end through the
+real `production_writer()` → `HumanPrincipalRegistryStore` path (matching
+`.1R.30R.3.2` §5.3's exact reproduction). Phase-entry SHA `R0 = 83b7f70b`
+(== finalized `.1R.30R.3.2` head `V`); `A = aff46ec3` (finalized
+`.1R.30R.3.1` head).
+
+**Root cause.** `require_writer`'s only binding check was object identity
+of a plain, readable instance attribute (`writer._authority_seal is
+self._seal`, HPAC-PAWA-REQ-102's own mandated mechanism). Any attacker code
+that already legitimately holds one issued capability can read that exact
+seal object off it and copy the same object reference onto a shell it
+constructs itself — the identity check then genuinely passes, because it
+really is the same object. No additional check *on the capability object*
+can close this gap, because any field stored on the object is, by the same
+argument, readable and copyable.
+
+**Repair.** A process-local, non-serializable, in-memory issuance-membership
+table in `hpac_foundation.py` (`_ISSUED_CAPABILITY_REGISTRY`, keyed by
+`id(capability)`, verified by `record.capability is writer` so a reused id
+can never match a different live object — a strong reference is held for
+the life of each entry, so an id can never be reused while the entry
+stands). Every capability, from the sole construction site
+(`HPACStoreAuthority._new_capability`), is registered at mint with its
+frozen scope (`role`/`subject`/`authority_class`) and lifecycle state
+(`ACTIVE`/`CONSUMED`). `require_writer` now additionally requires this
+registry membership — a fact that lives off the capability object and so
+cannot be copied onto a shell no matter which fields it carries — and binds
+scope/spend checks to the *registry's* recorded values, not the
+capability's own plain mutable slots (closes a related, narrower
+field-mutation gap too: a genuine capability's `role`/`subject` can no
+longer be widened post-mint by direct attribute assignment). Consumption is
+marked in the registry at the same transition point `record_write` already
+used for the object-local `_spent` flag, so a resettable `_spent` alone can
+no longer un-spend a capability either. No new capability field/slot; the
+existing closed `__slots__` (HPAC-PAWA-REQ-091/094) is byte-unchanged. A
+defense-in-depth fix also makes an unset-slot `object.__new__` shell fail
+with a clean `HPACAuthorityError` instead of a raw `AttributeError`
+(`getattr(..., _MISSING)`).
+
+**Contract disposition: NO normative change.** HPAC-PAWA-REQ-102/103's
+security *property* — canonical, process-local, non-bearer, one-operation
+capability authority, recognised by an *identity* check, "not a value
+comparison" — is unchanged and, after this repair, is what the code
+actually delivers: `require_writer` still performs an identity check (now
+two: seal identity *and* registry-object-identity), neither is a value
+comparison, and REQ-103's claim that `object.__new__` reconstruction "fails
+the seal-identity check" is now true again in practice (a reconstructed
+object is rejected, for the correct reason). `HPAC-PAWA-001` stays **v1.1,
+byte-unchanged**; `HPAC-001` v2.1, `RHAMP-001` v1.0, `HBDC-001` v1.2 stay
+byte-unchanged. `git diff 83b7f70b HEAD -- docs/contracts` is empty.
+
+**Production files changed:** `src/pcae/core/hpac_foundation.py` only
+(`_new_capability`, `require_writer`, `record_write`, plus the new
+module-level issuance-registry helpers `_CapabilityIssuanceRecord` /
+`_register_issued_capability` / `_lookup_issued_capability` /
+`_mark_capability_consumed`; none exported in `__all__`). No other
+production file touched.
+
+**Tests.** Added the decisive missing adversary regression directly to the
+`.1R.30R.3.1` product suite (`test_55a`-`test_55d`,
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1.py`
+— unedited existing tests kept, nothing renamed/removed/skipped); a fresh
+24-test dedicated repair suite
+(`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_2_1_pawa_writer_capability_integrity_repair.py`)
+covering canonical issuance, the decisive shell adversary (direct +
+end-to-end), bare-shell clean fail-closed, direct-constructor rejection,
+copy/deepcopy/pickle rejection, restart invalidation, one-operation replay,
+token/scope transplant rejection, fixture-vs-production separation,
+concurrent-use (≤1 success of 4 racing threads), sole-construction-site /
+registry-non-export / no-Slice-2 / contract-and-verifier-byte-identity /
+runtime-unchanged guards. Combined: 99 + 24 = 123 new/changed test
+functions across the two files. Fixed-SHA attribution (`A = aff46ec3` vs
+`R` = this working tree): **0 R-only unexplained functional regressions** —
+39 failures reproduce byte-identical on `A` (pre-existing point-in-time
+contract/diff-since-baseline guards and unrelated historical
+`test_blocking_reproduction_*` demonstrations, a documented pre-existing
+`ThreadPoolExecutor`-class flake in `hpac_lifecycle.py`), 2 are
+uncommitted-working-tree-diff hygiene guards that clear on commit, and 1
+(`test_require_writer_uses_identity_check_on_seal`) was a literal-text
+guard asserting the now-superseded insufficient mechanism's exact old
+source string — updated (strictly additively) to also require the new
+registry-membership hardening text, not weakened.
+
+**Historical `.1R.30R.3.2` preserved BLOCKED, immutable, not re-verified by
+this phase.** N-16-5 remains **NOT CLOSED** — this repair does not itself
+close Slice 1's IV; a fresh independent verification is required.
+**Recommended next phase (ID recommended, NOT reserved — derive/confirm
+under CPIPC before use):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1` — a fresh independent
+verification of this repair, extending this repair's own lineage the same
+way `.3.2` → `.3.2.1` did (commit `c79d98e3`), not a sibling branch off
+`.3.1` and not a re-opening of `.3.2`. Do not begin it here. Do not begin
+Slice 2. Do not implement RHAMP credential sidecars, RHAMP counter-state,
+credential enrollment, or `FIDO2HumanAuthenticator`. Do not modify
+`hpac_verifier` for REAL authentication. Do not widen
+`_ELIGIBLE_MECHANISM_IDS`. Do not implement protected presentation. Do not
+wire `require_real_assurance` through Gate 5/9. Do not begin N-16-6 or
+N-16-7. Do not begin Slice C. Do not implement or call the first external
+effect. Do not enable execution. `DELEGATED .3 FINALIZATION / COMMIT /
+PUSH: UNAUTHORIZED` preserved — this phase's commit/push/finalization is
+performed directly by the primary human-authorized operator.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2 — Independent Verification of the
 N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation
 (Slice 1).
@@ -60,7 +178,7 @@ performed directly by the primary human-authorized operator.
 
 ---
 
-## Previous Phase
+## Prior Phase — 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 — N-16-5 PAWA Production
 Protected-Admin Writer Anchor Implementation (Slice 1).

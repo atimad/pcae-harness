@@ -267,7 +267,15 @@ def test_writer_capability_is_non_bearer() -> None:
 
 def test_require_writer_uses_identity_check_on_seal() -> None:
     text = HPAC_FOUNDATION.read_text(encoding="utf-8")
-    assert "writer._authority_seal is not self._seal" in text
+    assert "is not self._seal" in text
+    # .1R.30R.3.2.1 (N-16-5 repair) -- .1R.30R.3.2 (BLOCKED) independently
+    # found seal identity alone insufficient (a caller already holding one
+    # legitimately issued capability can copy the real seal reference onto
+    # an object.__new__ shell). require_writer now additionally requires
+    # canonical, process-local issuance-registry *object* membership -- a
+    # fact that lives off the capability object and so cannot be copied
+    # onto a shell. This assertion is strictly additive to the original.
+    assert "_lookup_issued_capability(writer)" in text
 
 
 # ── 19-24. HBDC-001 Class-B precedent + consumer-inventory guard ───────────
