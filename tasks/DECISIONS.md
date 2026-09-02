@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- **2026-09-02 — Stop `.1R.30R.4` BLOCKED at the production protected-
+  presentation installation-authority boundary.** Decision A validly
+  reassigned `.30R.4` to protected presentation, but RHAMP-001's mandatory
+  administrator-installed PRODUCTION descriptor/helper cannot be authored by
+  current production authority: `PresentationMechanismDescriptorStore`
+  requires `presentation_mechanism_installer`; HPAC-PAWA-001 v1.1's closed
+  five-operation set and exact factory-consumer inventory omit it; and
+  HPAC-PAWA-REQ-090 requires a normative amendment before a new production
+  consumer. Do not add a sixth mutation, invent a parallel admin factory, use
+  fixture authority, or bypass provenance inside an implementation phase.
+  Preserve all production/contracts byte-identical and recommend
+  `.1R.30R.4R` to reconcile and freeze helper-installation/evidence-writer
+  authority before implementation resumes. N-16-5 remains NOT CLOSED.
+
 - **2026-09-02 — Independently verify `.1R.30R.3.6` and adjudicate the current
   merged RHAMP mechanism verified without rewriting historical `.3.5`.** The
   canonical issuance ACTIVE check and ACTIVE→CONSUMED transition share the

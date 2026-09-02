@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4 — N-16-5 Protected Human-Approval
+Presentation and Real-Assurance Consumption Implementation. **STATUS: BLOCKED.
+N-16-5: NOT CLOSED.**
+
+The Decision-A lineage reassignment makes `.30R.4` the correct protected-
+presentation implementation phase, but primary-source reconstruction found no
+frozen production authority capable of installing its mandatory protected
+presentation descriptor/helper record. RHAMP-001 v1.0 requires an
+administrator-installed PRODUCTION descriptor plus pinned helper integrity;
+`PresentationMechanismDescriptorStore` requires role
+`presentation_mechanism_installer`. HPAC-PAWA-001 v1.1 freezes exactly five
+mutation classes and an exact two-module production-factory consumer inventory,
+neither of which includes presentation installation, and HPAC-PAWA-REQ-090
+requires a contract amendment before any new consumer. Runtime reproduction
+returns `operation_scope_invalid` for
+`production_writer("install_presentation_mechanism")`; a production descriptor
+store cannot mint its fixture installer either.
+
+No production source or normative contract changed. Protected presentation,
+the real verifier kind, REAL attestation, and Gate 5/Gate 9 real-assurance
+consumption remain NOT IMPLEMENTED. Merged RHAMP authentication remains
+IMPLEMENTED + INDEPENDENTLY VERIFIED. Runtime remains `Observed / observe /
+unavailable`, zero plugins/capabilities; first effect ABSENT / UNREACHABLE.
+N-16-6/N-16-7/Slice C untouched; N-23 unchanged.
+
+Recommended successor (not begun; separate authorization required):
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R` — N-16-5 Protected-Presentation Helper
+Installation and Evidence-Writer Authority Contract Reconciliation.
+
+Full evidence in
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_4_N_16_5_PROTECTED_PRESENTATION_REAL_ASSURANCE_BLOCKED.md`.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1 — Independent Verification of
 the N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair.
 **STATUS: INDEPENDENTLY VERIFIED. N-16-5: NOT CLOSED.**

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4` — **BLOCKED before production
+  implementation.** RHAMP-001 requires a protected-administrator-installed
+  PRODUCTION presentation descriptor and pinned helper integrity, but the
+  current descriptor store's `presentation_mechanism_installer` role has no
+  production issuer. HPAC-PAWA-001 v1.1 freezes five mutation classes and an
+  exact production factory-consumer inventory that excludes presentation
+  installation; it requires normative amendment before adding a consumer.
+  Reproduced `production_writer("install_presentation_mechanism")` →
+  `operation_scope_invalid`. No production/contracts change; runtime/effect
+  boundaries unchanged; N-16-5 remains NOT CLOSED. Recommended successor:
+  `.1R.30R.4R` authority contract reconciliation, not begun.
+- Transitioned active task from Idle: awaiting next explicitly authorized governed phase to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4: N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1: Independent Verification of the N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair to Idle: awaiting next explicitly authorized governed phase; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1` independently verifies the
   PAWA multi-write completion one-operation repair. Immutable `.3.4` reproduces
