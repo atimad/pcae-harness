@@ -10,7 +10,7 @@
  "metadata_consistency": "phase_id / phase_name / phase_title / status / summary / recommended_next_phase all name 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2. The canonical BLOCKED phase document (docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_2_INDEPENDENT_VERIFICATION_OF_N_16_5_PAWA_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_SLICE_1.md) names the same phase ID and the same blocking finding (HPACWriterCapability seal-identity forgery). phase_commits are the governed .1R.30R.3.2 commits made before this metadata-staging commit, each subject carrying the ...1R.30R.3.2 token.",
  "internal_evidence_coherence": "All contract citations resolve to the current frozen text, byte-current at V = aff46ec3 (== A = 1793a75a for docs/contracts; git diff --name-only 1793a75a aff46ec3 -- docs/contracts is empty). HPAC-PAWA-001 v1.1 is byte-unchanged. The fresh Slice-1 suite is 95 passed, 0 failed, and was not modified by this IV (git diff aff46ec3 HEAD -- tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1.py is empty). No src/pcae or docs/contracts file was modified by this IV (git diff aff46ec3 HEAD -- src/pcae docs/contracts is empty at finalization, prior to this metadata/report/PROJECT_STATUS/CHANGELOG/docs-BLOCKED-artifact commit). pcae health / check / status coherence all pass.",
  "internal_report_coherence": "Test and validation evidence for this phase is linked to this phase's identity (149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2) -- the unedited re-run of the .1R.30R.3.1 fresh 95-test suite (cited as pre-existing evidence being re-confirmed, not this phase's own new suite) and the standalone adversarial reproduction script (not a committed test file) that demonstrates the finding. No other phase identity appears in any test_results or validation_results field as this phase's own functional-success evidence. Other-phase tokens (.1R.30R.3.1, .1R.30R.2A.3, the historical .1R.30, and the recommended successor .1R.30R.3.2.1) appear only in summary, governance_results, and recommended_next_phase, which is permitted.",
- "report_consistency": "pending governed push reconciliation; origin/main..HEAD reconciled by the governed finalizer after this metadata-staging commit",
+ "report_consistency": "governed push complete (aff46ec3..a0085dea, 8 commits); origin/main..HEAD = 0",
  "origin_main_head_count": 0,
  "test_evidence_classification": "governed_independent_verification_phase_blocked_by_a_reproducible_production_security_finding_found_during_re_derivation_zero_repair_zero_contract_edit_zero_test_weakening",
  "tests_run": 95,
@@ -34,7 +34,7 @@
   "pcae_check": "passed",
   "pcae_status_coherence": "coherent",
   "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing hygiene debt from earlier phases); no current-phase error; single active task",
-  "pcae_push_check": "pending governed push",
+  "pcae_push_check": "nothing_to_push",
   "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins / capabilities; governance posture non-executing; re-asserted at phase entry and finalization",
   "telegram_runtime": "configured and outbound-ready",
   "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -75,6 +75,6 @@
   }
  ],
  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1 -- N-16-5 PAWA HPACWriterCapability Seal-Forgery / One-Operation-Bypass Repair. Requires its own separate explicit human authorization (ID recommended, NOT reserved). Assess and, if needed, narrowly amend HPAC-PAWA-REQ-102/103's mechanism description, then harden require_writer / HPACWriterCapability against the copied-real-seal __new__ adversary (e.g. an unpredictable per-mint token checked against a process-local issuance-registry membership set), add the missing adversary test, then re-run the remaining .1R.30R.3.2 verification matrix against the repaired code. Do not begin it here. Do not begin Slice 2. Do not implement RHAMP credential sidecars, RHAMP counter-state, credential enrollment, or FIDO2HumanAuthenticator. Do not modify hpac_verifier for REAL authentication. Do not widen _ELIGIBLE_MECHANISM_IDS. Do not implement protected presentation. Do not wire require_real_assurance through Gate 5/9. Do not begin N-16-6 or N-16-7. Do not begin Slice C. Do not implement or call the first external effect. Do not enable execution.",
- "pushed_status": "pending",
- "origin_main_head": "pending_push"
+ "pushed_status": "pushed",
+ "origin_main_head": "a0085deac6b38af218cadf59f656bcfaa06c6a33"
 }
