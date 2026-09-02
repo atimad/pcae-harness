@@ -1,0 +1,1774 @@
+# HPAC-PAWA-001 v1.0 — HPAC Production Protected Administration Writer Anchor Contract
+
+## Contract identity and status
+
+**Contract:** HPAC-PAWA-001
+**Version:** 1.0
+**Status:** FROZEN
+**Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2 — HPAC-PAWA-001 v1.0
+Production Protected-Admin Writer Anchor Contract Freeze.
+**Adjudication baseline:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R — HPAC-REQ-022/023
+Production Protected-Admin Writer Anchor: Architecture and Contract Adjudication
+(`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_HPAC_REQ_022_023_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_ARCHITECTURE_AND_CONTRACT_ADJUDICATION.md`);
+independently verified by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1 — Independent
+Verification of the .1R.30R Production Protected-Admin Writer Anchor Adjudication
+(`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_1_INDEPENDENT_VERIFICATION_OF_THE_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_ADJUDICATION.md`;
+verdict **ADJUDICATION VERIFIED**, three non-blocking findings F-1 / F-2 / F-3
+handed to this phase).
+**Independent verification:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4 (of the
+`.1R.30R.3` writer-anchor + registry + mechanism implementation). A dedicated
+contract-freeze IV of this document MAY be folded into `.1R.30R.4` at the
+authorizing operator's discretion, matching the `.1R.29` → `.1R.31` precedent.
+**Scope:** the positive production recognition mechanism for the external
+deployment-owner protected administration authority required by HPAC-REQ-022/023,
+and the conditions under which a bounded **PRODUCTION** `HPACWriterCapability`
+may be minted — the *mechanism* HPAC-001 v2.1 §7 deliberately deferred while
+freezing only the *policy*. HPAC-PAWA-001 defines: deployment-owner recognition
+= filesystem write authority on the protected root + not-configured-agent-principal
++ a root-identity-bound `.authority/` descriptor; the one-time out-of-band
+provisioning / bootstrap procedure and its bounds; the
+`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` closed schema including an explicit
+monotonic `generation` and rollback-prevention rule (finding F-3); the positive
+validation sequence and per-predicate identity matrix (finding F-1); PRODUCTION
+`HPACWriterCapability` minting, operation / principal / credential scope,
+process-local non-bearer lifetime, restart invalidation, one-operation lifetime;
+descriptor rotation / revocation / machine migration / reprovisioning; the
+non-agent-importable admin writer module + consumer-inventory guard obligation;
+the failure taxonomy and its deterministic mapping onto RHAMP-001 v1.0 §49; the
+audit-evidence model; the security-claim boundaries.
+**Production surface (future — not created by this contract; realised by
+`.1R.30R.3`, finding F-2):** `src/pcae/core/hpac_foundation.py` (a new
+`PRODUCTION` writer path exercised through the existing seal discipline; schema
+byte-unchanged), a new non-agent-importable admin writer module (recommended
+`src/pcae/core/hpac_protected_admin_writer.py`), a new out-of-band provisioning
+script (recommended `scripts/hpac_protected_root_admin.py`),
+`src/pcae/core/human_principal_registry.py` (production writer path exercised;
+`CredentialRecord` byte-unchanged), and the new authority descriptor artifact
+under `<HPAC_PROTECTED_ROOT>/.authority/`.
+**Related contracts:** HPAC-001 v2.1
+(`HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md` — the parent; HPAC-PAWA-001 fills
+its §7 mechanism gap and changes none of its text; HPAC-001 stays **v2.1**,
+`HPAC-AUTHORITY-CONSUMPTION` stays `/2.1`), RHAMP-001 v1.0
+(`REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md`
+— RHAMP-REQ-047 points to this anchor as "the trust anchor … external to PCAE";
+RHAMP-001 stays **v1.0, byte-unchanged**; the failure taxonomy maps onto
+RHAMP-001 §49 with **no new `terminal_reason_code`**), HBDC-001 v1.2
+(`HATP_CLASS_B_DEPLOYMENT_CONTRACT.md` — **precedent, not a shared authority
+root**; the two-OS-principal protected-root writer boundary,
+HBDC-REQ-001..021 / HBDC-REQ-056/066, re-applied under HPAC's independent
+namespace), RIHAC-001 v2.0 / RIASC-001 v3.0 (unaffected; §12 cond 7 consumes
+HPAC evidence, wire shape unchanged), HPSE-001 v1.1 / HHCE-001 (independent
+`*-REQ-###` namespace precedent, admin-ceremony pattern precedent only),
+REPRC-001 v1.0 / PBNDE-001 v1.0 / RHAMP-001 v1.0 (the companion-contract shape
+this contract follows exactly — a companion born to avoid a parent cascade),
+CPIPC-001 v1.0 (`CANONICAL_PHASE_ID_PARSING_CONTRACT.md` — successor phase-ID
+grammar).
+
+HPAC-PAWA-001 is a **companion** contract. It introduces **no** HPAC-001 schema
+change, **no** HPAC-001 version bump, **no** RHAMP-001 / RIHAC-001 / RIASC-001 /
+HBDC-001 change, **no** RDGO-001 state-machine change, no gate reorder, no
+first-effect-boundary move, no merge of the
+authentication / presence / verification / informed-intent / approval /
+PB-permission / Runtime-Enforcement / runtime-capability / execution concerns.
+The only version movement is **HPAC-PAWA-001 v1.0 (initial freeze)**.
+
+This is a contract-freeze document. It creates no protected root, installs no
+descriptor, mints no writer capability, writes no registry, implements no writer
+factory, provisioning script, or consumer-inventory guard, touches no hardware,
+and enables execution on no path. Runtime remains
+`not_implemented` / `Observed` / `observe` / `unavailable`; 0 plugins /
+0 capabilities. The first external effect remains **ABSENT**.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
+---
+
+## 0. Normative language
+
+`SHALL`, `SHALL NOT`, `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY` are
+normative (RFC 2119, as used throughout this repository's bound contracts). Every
+normative sentence carries a unique requirement ID `HPAC-PAWA-REQ-###`,
+sequential from 001, no gaps, no duplicates. `HPAC-PAWA-REQ-*` is an independent
+numbering namespace (HPSE-001 / RHAMP-001 precedent). Security invariants carry a
+separate `PAWA-INV-#` label (§92). Unknown, missing, conflicting, malformed, or
+unverifiable facts **fail closed**: no descriptor is trusted, no positive
+recognition succeeds, no `PRODUCTION` `HPACWriterCapability` is minted, no
+registry mutation occurs, and a terminal failure code (§56) is recorded where a
+lifecycle event can be persisted. The absence of a denial is never authority. An
+ambiguity at any authority boundary fails closed.
+
+---
+
+## 1. Position under HPAC-001 v2.1 — companion, not amendment
+
+- **HPAC-PAWA-REQ-001.** HPAC-PAWA-001 fills exactly one HPAC-001 v2.1 gap: the
+  *mechanism* of the §7 positive production protected-admin writer anchor
+  (HPAC-REQ-022's owner-recognition half, HPAC-REQ-023's bootstrap-anchor half).
+  It SHALL NOT redefine, relax, widen, or reinterpret any HPAC-001 requirement,
+  wall, schema, digest rule, assurance level, or trust boundary. Where
+  HPAC-PAWA-001 and HPAC-001 appear to conflict, **HPAC-001 governs** and the
+  implementing phase STOPS (BLOCKED).
+- **HPAC-PAWA-REQ-002.** The HPAC-001 extension points HPAC-PAWA-001 fills are
+  exactly: (a) HPAC-REQ-022's "owned and writable only by an OS/equivalent
+  protected administration principal unavailable to ordinary same-user agent
+  execution" — the concrete recognition predicates (§25–§32); (b) HPAC-REQ-023's
+  "externally established deployment-owner administration principal … terminates
+  bootstrap without circular PCAE self-authorization" — the concrete out-of-band
+  provisioning procedure and the `.authority/` descriptor that anchors it
+  (§11–§24); (c) the `HPACWriterCapability` type's `PRODUCTION` minting path,
+  left `raise HPACAuthorityError("no production HPAC writer is implemented in
+  this foundation phase")` by `hpac_foundation.py` — the scope / lifetime / seal
+  discipline of the production capability (§36–§49); (d) HPAC-REQ-024's
+  "available only in the protected administration context and never as an
+  ordinary `pcae` CLI … A same-UID agent invocation SHALL be denied" — the
+  non-agent-importable module + consumer-inventory guard obligation (§37–§39);
+  (e) HPAC-REQ-080's "only the external protected deployment administration
+  principal may configure" — the configuration-authority binding (§9, §11).
+- **HPAC-PAWA-REQ-003.** Every existing normative contract is byte-unchanged by
+  this freeze. The `.1R.30R.2` finalization SHALL independently prove
+  `git diff --name-only <entry> HEAD -- docs/contracts` names exactly the
+  HPAC-PAWA-001 file and `git diff <entry> HEAD -- src/pcae` is empty.
+- **HPAC-PAWA-REQ-004.** HPAC-PAWA-001 v1.0 makes NON_REAL / `FIXTURE_NON_REAL`
+  authority objects **no more upgradeable** than HPAC-001 v2.1 already makes
+  them. A `FIXTURE_NON_REAL` `HPACStoreAuthority`, its fixture writer, and
+  `ProtectedAdminCapability` remain permanently non-real and never reach the
+  `PRODUCTION` writer path this contract freezes (§41).
+- **HPAC-PAWA-REQ-005.** HPAC-001 stays **v2.1**; `HPAC-AUTHORITY-CONSUMPTION`
+  stays `/2.1`; RHAMP-001 stays **v1.0**. This contract is additive and
+  authority-preserving: it opens a *positive* path where today there is only a
+  wall, without removing, relaxing, widening, or re-meaning any existing wall.
+  Per the REPRC-001 / PBNDE-001 / RHAMP-001 precedent, a **new companion
+  contract** is the correct home; a MINOR or MAJOR to HPAC-001 would force
+  re-independent-verification of an actively-referenced frozen contract and a
+  parent cascade (RIHAC-001 §12 cond 7 names "HPAC-001 v2.1" literally;
+  RHAMP-001 pins "HPAC-001 v2.1").
+
+## 2. Terminology
+
+- **Configured agent principal** — the OS identity under which the autonomous
+  PCAE agent/runtime is *configured to execute* for this deployment, resolved
+  from canonical PCAE agent configuration (HBDC-001 §3's `PCAE_AGENT_PRINCIPAL`
+  for a Class-B deployment; §9 of this contract). It is **not** `os.geteuid()`
+  of whatever process happens to be running (finding F-1).
+- **Deployment-owner protected administration authority** (short: *deployment
+  owner*) — HPAC-REQ-023's "externally established deployment-owner
+  administration principal": the OS identity that owns `<HPAC_PROTECTED_ROOT>`
+  and its `.authority/` subtree out of band, is a **distinct account** from the
+  configured agent principal, and holds real filesystem write authority the
+  configured agent principal provably lacks. It is a **filesystem-ownership
+  role**, not a persistent cryptographic principal identity and not a civil
+  identity.
+- **`<HPAC_PROTECTED_ROOT>`** — `HPACStoreAuthority.production().root`, resolved
+  by `resolve_hpac_protected_root()` from a fixed platform-keyed constant
+  (macOS `/Library/Application Support/PCAE/HPAC/protected-root`, Linux
+  `/etc/pcae/hpac/protected-root`). No override input is accepted (HPAC-REQ-022;
+  `hpac_foundation.py`).
+- **Authority namespace** — `<HPAC_PROTECTED_ROOT>/.authority/` (the existing
+  `_AUTHORITY_DIR`), which already holds the `HPAC-STORE-AUTHORITY/1.0` manifest,
+  `HPAC-WRITER-PROVENANCE/1.0` records, and the writer lock. §12.
+- **Authority descriptor** — the `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` record
+  (§13–§14) that declares the deployment owner and carries the monotonic
+  `generation` (§20).
+- **Positive write probe** — an operation-based proof (§28–§30) that *the
+  current administrative invocation* holds real OS-authorized write capability
+  over the authority namespace *now* — distinct from the *negative* boundary
+  check that the configured agent principal *cannot* write it.
+- **PRODUCTION `HPACWriterCapability`** — an `HPACWriterCapability` whose
+  `authority_class is HPACAuthorityClass.PRODUCTION`, minted only by the §33
+  positive validation sequence, bound as §41–§49 require.
+- **Admin writer module** — the new non-agent-importable module (recommended
+  `src/pcae/core/hpac_protected_admin_writer.py`) that exports the `PRODUCTION`
+  writer factory. §37.
+- **Provisioning** / **bootstrap** — the one-time out-of-band creation of
+  `<HPAC_PROTECTED_ROOT>`, the store-identity manifest, the authority descriptor
+  at `generation` 1, and a durable provenance entry, performed by the deployment
+  owner. §23.
+- **Trusted computing base (TCB)** — §8.
+
+## 3. Scope and non-goals
+
+- **HPAC-PAWA-REQ-006.** HPAC-PAWA-001 governs **only** the production
+  protected-admin *writer anchor* — recognition of the deployment owner and the
+  minting of a bounded `PRODUCTION` `HPACWriterCapability`. It does not redefine
+  human approval identity, RHAMP-001 authentication, the protected presentation
+  mechanism, Permission Broker permission, Runtime Enforcement, runtime
+  capability, adapter admission, or execution authority.
+- **HPAC-PAWA-REQ-007.** HPAC-PAWA-001 does not create real protected state, real
+  OS principals, real filesystem permissions, or a real writer capability. It
+  does not authorize `.1R.30R.3` (implementation), `.1R.30R.5` (protected
+  presentation), N-16-6, N-16-7, or Slice C. Each of those requires its own
+  separately authorized governed phase.
+- **HPAC-PAWA-REQ-008.** HPAC-PAWA-001 does not itself satisfy any governing
+  election / human-authorization condition. A real deployment-owner provisioning
+  remains a real out-of-band administrative act, required regardless of this
+  text existing (HBDC-REQ-069 discipline).
+- **HPAC-PAWA-REQ-009.** HPAC-PAWA-001 does not claim resistance to a fully
+  compromised OS root / admin account (§8, §60). It does not claim cryptographic
+  executed-source attestation. It does not add a signing key, a pinned
+  verification key, an OS keychain / keyring secret, a network service, a cloud
+  token, or an external identity provider (§62, §64).
+
+## 4. Real `mechanism` for deployment-owner recognition — the trust root
+
+- **HPAC-PAWA-REQ-010.** The deployment-owner recognition trust root is
+  **OS filesystem write authority on the out-of-band-provisioned
+  `<HPAC_PROTECTED_ROOT>`**, owned by the deployment owner, provably not
+  writable by the configured agent principal. This is the identical trust root
+  HBDC-001 v1.2 froze and Phase 149O.20C independently verified for the
+  structurally identical HATP Class-B Protected Root writer boundary
+  (HBDC-REQ-001..021; `hatp_deployment_binding_admin.py`: "Real security
+  boundary: OS filesystem write permission on the Protected Root, never an
+  in-process check").
+- **HPAC-PAWA-REQ-011.** Recognition is a **composition** of four required
+  conjuncts (§33), each contributing a distinct security property; removing any
+  one re-opens a named threat (§20 attack matrix). No single conjunct — least of
+  all the descriptor file's mere presence at the correct path — is sufficient
+  (§18, PAWA-INV-3).
+- **HPAC-PAWA-REQ-012.** No cryptographic principal identity, enrolled FIDO2
+  credential, civil identity, `sudo` invocation, `euid == 0`, environment
+  variable, repository / task / Git / session identity, OS username, or
+  "first process / user to run enrollment" is, in whole or in part, the
+  deployment-owner recognition predicate (§34, §35, PAWA-INV-1, PAWA-INV-6).
+
+## 5. What HPAC-PAWA-001 does NOT redefine (walls preserved)
+
+- **HPAC-PAWA-REQ-013.** All HPAC-001 v2.1 walls are preserved verbatim:
+
+  ```
+  root / euid 0             != deployment-owner authority
+  sudo invocation           != deployment-owner authority
+  OS username               != any principal
+  same UID                  != protected-admin authority
+  configured agent identity != deployment-owner authority
+  session identity          != protected-admin authority
+  file under protected root != trusted provenance
+  valid descriptor bytes    != trusted anchor
+  trusted writer capability != AuthenticatedHumanPrincipal
+  writer capability         != approval proof
+  writer capability         != PB permission
+  writer capability         != Runtime Enforcement result
+  writer capability         != runtime capability
+  writer capability         != DispatchEnvelope
+  writer capability         != execution
+  ```
+
+- **HPAC-PAWA-REQ-014.** The `PRODUCTION` writer capability authorizes **only**
+  the bounded administrative mutations of §42. It never approves a runtime
+  operation, never satisfies Gate 5 / 6 / 7 / 8 / 9 / 10, never creates a
+  `DispatchEnvelope`, never overrides a no-go, and never transitions the runtime
+  out of `Observed` / `observe` / `unavailable` (§67, §68, PAWA-INV-8).
+
+## 6. Contract-home and companion-contract determination
+
+- **HPAC-PAWA-REQ-015.** The adjudication (`.1R.30R` §16) and its IV
+  (`.1R.30R.1` §20, §27.3) independently concluded: **NEW COMPANION CONTRACT
+  REQUIRED**, not (A) leave the mechanism implementation-defined [would hide
+  normative trust decisions in code — phase-prompt §35], not (C/D) an HPAC-001
+  MINOR/MAJOR [additive, authority-preserving; a bump cascades], not (E) BLOCKED
+  [no circularity, no MAJOR redesign, no remote infrastructure, no reusable
+  same-UID bearer secret; HBDC-001 is a direct IV'd precedent]. This contract
+  freezes that verdict.
+- **HPAC-PAWA-REQ-016.** File home:
+  `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`,
+  independent `HPAC-PAWA-REQ-###` namespace (HPSE-001 precedent). HPAC-PAWA-001
+  is **not** one of HMIC-001's bound contracts and its bytes do not participate
+  in any `implementation_scope_digest`; that disposition MAY be revisited by a
+  future amendment (HBDC-REQ-047..049 precedent), never silently.
+
+## 7. Contract purpose (normative statement)
+
+- **HPAC-PAWA-REQ-017.** HPAC-PAWA-001 specifies the positive production
+  recognition mechanism for the external deployment-owner protected
+  administration authority required by HPAC-REQ-022/023, and the conditions
+  under which a bounded PRODUCTION `HPACWriterCapability` may be minted. It does
+  NOT redefine: human approval identity; RHAMP authentication; PB permission;
+  Runtime Enforcement; runtime capability; execution authority; adapter
+  admission.
+
+## 8. Trusted computing base
+
+- **HPAC-PAWA-REQ-018.** The OS filesystem protection model for the
+  out-of-band-provisioned `<HPAC_PROTECTED_ROOT>` is part of the trusted
+  computing base. The contract assumes: (a) the configured agent principal lacks
+  write authority to `<HPAC_PROTECTED_ROOT>` and every ancestor up to the point
+  the agent has no write at all; (b) the deployment-owner protected
+  administration context possesses the required OS write authority; (c) a fully
+  compromised OS root / admin boundary is **outside this contract's threat
+  model** unless a parent contract says otherwise.
+- **HPAC-PAWA-REQ-019.** HPAC-PAWA-001 SHALL NOT be represented as, and its
+  implementation SHALL NOT claim, resistance to root compromise, executed-source
+  cryptographic attestation, or hardware assurance. It establishes
+  admin-controlled, agent-unwritable **filesystem authority** only (HBDC-REQ-041
+  discipline).
+- **HPAC-PAWA-REQ-020.** The attacker MAY control: repository content; the agent
+  process; any same-UID process on a single-account host; environment variables;
+  cwd; CLI arguments; writable user configuration (`~/.config/pcae/**`); task
+  metadata; agent identity (`--agent-id`); session metadata; Git state. The
+  attacker MUST NOT be able to mint a `PRODUCTION` `HPACWriterCapability`, write
+  the `HumanPrincipalRegistry`, or create / replace / revoke any protected
+  artifact under `<HPAC_PROTECTED_ROOT>`.
+
+## 9. Configured agent principal — source of truth (finding F-1)
+
+- **HPAC-PAWA-REQ-021.** The configured agent principal SHALL be resolved from
+  **canonical PCAE agent configuration / lock semantics**, never from caller
+  input, an environment variable, a CLI flag, `--agent-id`, repository state, or
+  the live `os.geteuid()` of the running process. For a Class-B deployment this
+  is HBDC-001 §3's `PCAE_AGENT_PRINCIPAL` (a distinct OS account); the
+  implementation SHALL name the exact canonical resolution source in its
+  `.1R.30R.3` contract-production traceability (§73).
+- **HPAC-PAWA-REQ-022.** Identity form: an OS-principal identifier sufficient to
+  parameterize the effective-write-access check — a `(uid, gids)` pair on POSIX,
+  or the platform-appropriate equivalent — resolved from the configured
+  principal, **not** the invoking process's live ids. `_effective_write_access`
+  already accepts `uid` / `gids` as parameters, so the negative boundary check
+  SHALL be evaluated against the **configured agent principal's** ids on the
+  production-writer path, and the *positive* write probe (§28) SHALL be evaluated
+  against the **invoking process's** live capability — different identities, both
+  well-defined (finding F-1).
+- **HPAC-PAWA-REQ-023.** If the configured agent principal is unavailable,
+  ambiguous, or cannot be mapped to an OS principal where the check needs one,
+  the recognition SHALL **fail closed** (`agent_principal_unknown`, §56). It
+  SHALL NOT default to `os.geteuid()`, to "no agent", or to a permissive
+  outcome.
+- **HPAC-PAWA-REQ-024.** A caller SHALL NOT supply `agent_id=None`, an empty
+  principal, or any override to bypass the configured-agent exclusion. Any such
+  input is rejected before recognition (`agent_principal_unknown` /
+  `operation_scope_invalid`).
+- **HPAC-PAWA-REQ-025.** On a **single-account** host where the configured agent
+  principal and the interactive human share one OS uid, the negative boundary
+  check cannot discriminate them: if that uid can write
+  `<HPAC_PROTECTED_ROOT>`, `_validate_production_boundary` raises and **no
+  `PRODUCTION` authority is available at all** — the fail-closed outcome, not a
+  downgrade (PAWA-INV-7). HPAC-PAWA-001 v1.0 REAL production writer issuance
+  requires the two-OS-principal topology (§61).
+
+## 10. Per-predicate identity matrix (finding F-1)
+
+- **HPAC-PAWA-REQ-026.** Every recognition predicate SHALL state exactly which
+  identity it is evaluated against, which authority source establishes that
+  identity, whether it is caller-controlled, and its failure behavior. The
+  normative matrix:
+
+  | Predicate | Subject identity evaluated | Authority source | Caller-controlled? | Failure behavior |
+  |---|---|---|---|---|
+  | canonical-root resolution (§25) | none — a fixed compiled-in path | `resolve_hpac_protected_root()` | **no** — takes no input | `protected_root_missing` / `protected_root_untrusted` |
+  | configured-agent exclusion (§26) | the **configured agent principal** (`PCAE_AGENT_PRINCIPAL`), NOT `os.geteuid()` | canonical PCAE agent configuration / lock (§9) | **no** | `agent_principal_unknown`; `agent_has_protected_write_authority` |
+  | protected-root ownership / ancestors (§26) | the configured agent principal (as the party proven *excluded*); the root's `st_uid` as the party proven *owner* | filesystem `stat` + `_effective_write_access` / `_ancestor_chain_safe` | **no** | `protected_root_untrusted` |
+  | descriptor trust (§27) | the descriptor's declared `deployment_owner_role` + its binding to the current root identity | `.authority/` descriptor bytes + `HPAC-STORE-AUTHORITY/1.0` manifest `{device,inode}` + `HPAC-WRITER-PROVENANCE/1.0` digest | **no** — resolved from protected state, not caller input | `descriptor_missing` / `descriptor_malformed` / `descriptor_wrong_owner` / `descriptor_wrong_mode` / `descriptor_root_identity_mismatch` / `descriptor_installation_mismatch` / `descriptor_generation_stale` / `descriptor_revoked` |
+  | positive write authority (§28) | the **current invoking OS process** | a live `O_EXCL\|O_NOFOLLOW` create-and-unlink probe under `.authority/` | **no** — an operation, not a claim | `write_probe_failed` |
+  | not-configured-agent current context (§31) | the **current invoking OS process** vs. the configured agent principal | canonical PCAE agent configuration (§9) + live process identity | **no** | `current_context_is_agent` |
+  | writer-factory consumer (§32) | the importing / calling **source module** | static consumer inventory (§39) + admin-writer-module import boundary | **no** — a build-time / import-time fact | `unauthorized_factory_consumer` |
+  | descriptor / provisioning owner (§17) | the filesystem `st_uid` / `st_gid` / mode of the descriptor and its directory | filesystem `stat` | **no** | `descriptor_wrong_owner` / `descriptor_wrong_mode` |
+  | deployment / installation identity (§16) | the protected-root `{device, inode}` bound in the store-identity manifest and the descriptor's `installation_id` | `HPAC-STORE-AUTHORITY/1.0` manifest + descriptor | **no** | `descriptor_installation_mismatch` / `descriptor_root_identity_mismatch` |
+
+- **HPAC-PAWA-REQ-027.** The phrase "current user" SHALL NOT appear in the
+  implementation's recognition logic or its contract-production traceability as
+  an authority term. Every predicate names one of: *the configured agent
+  principal*, *the current invoking OS process*, *the protected-root owner*, *the
+  descriptor owner*, *the importing source module*, or *a fixed compiled-in
+  path*.
+
+## 11. Protected root
+
+- **HPAC-PAWA-REQ-028.** The protected root SHALL be exactly
+  `resolve_hpac_protected_root()`'s fixed platform-keyed output. It SHALL be:
+  canonical; outside every repository; outside repository authority; outside the
+  configured agent principal's write authority (root and every ancestor up to a
+  point the agent has no write at all — HBDC-REQ-017); provisioned out of band by
+  the deployment owner (HBDC-REQ-011/012 discipline); resolved without cwd, repo,
+  environment, task, or caller influence; and protected against symlink / path
+  substitution on every component (`reject_symlink` / `_reject_symlink_components`
+  / `O_NOFOLLOW`).
+- **HPAC-PAWA-REQ-029.** No caller-supplied root, no environment variable, no CLI
+  flag, no constructor parameter, and no repository-local file SHALL override the
+  protected root in the production-writer path. `_validate_production_boundary`
+  already raises `"production HPAC authority cannot be redirected"` on any
+  mismatch; HPAC-PAWA-001 SHALL NOT introduce any redirect path. A future MINOR
+  MAY let the deployment owner point at an *already-protected* canonical
+  location validated against trusted installation configuration — **not** caller
+  input; v1.0 does not do even that (the path is compiled in).
+- **HPAC-PAWA-REQ-030.** Agent-side / recognition code SHALL fail closed — not
+  auto-provision, not silently degrade to a partial check — if the protected
+  root is absent, malformed, agent-writable, symlinked, or fails the
+  `{device, inode}` identity binding (HBDC-REQ-021 discipline;
+  `protected_root_missing` / `protected_root_untrusted`).
+
+## 12. `.authority/` namespace
+
+- **HPAC-PAWA-REQ-031.** The dedicated authority namespace is
+  `<HPAC_PROTECTED_ROOT>/.authority/` (the existing `_AUTHORITY_DIR`). Its
+  canonical members relevant to this contract: `manifest.json`
+  (`HPAC-STORE-AUTHORITY/1.0`, exists today), `provenance/<key>.json`
+  (`HPAC-WRITER-PROVENANCE/1.0`, exists today), and a new
+  `deployment-owner.json` (`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0`, §13–§14).
+- **HPAC-PAWA-REQ-032.** The authority namespace SHALL be resolved only as a
+  fixed subpath of the canonical protected root — no symlink traversal on any
+  component; no repository shadow path; no alternate / fallback path; no
+  environment or caller override. Directory mode SHALL exclude group-write and
+  other-write (`mode & (S_IWGRP | S_IWOTH) == 0`; `_ensure_root` sets `0700`);
+  ownership SHALL be the deployment owner; the configured agent principal SHALL
+  hold no write permission (direct, group, or ACL) to it or any descendant
+  (`_relative_record_path` production branch already enforces
+  not-agent-writable descendants).
+- **HPAC-PAWA-REQ-033.** A hard link to any `.authority/` file from an
+  agent-writable directory, or an agent ability to delete / rename the directory
+  entry naming an `.authority/` file, SHALL be treated as a compliance failure
+  equivalent to a direct write (HBDC-REQ-019/020 discipline).
+
+## 13. Descriptor identity
+
+- **HPAC-PAWA-REQ-034.** The deployment-owner protected-administration anchor
+  descriptor has schema identity **`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0`** and
+  canonical path `<HPAC_PROTECTED_ROOT>/.authority/deployment-owner.json`. It is
+  the single canonical descriptor for the deployment; there is no descriptor
+  list, no per-repository descriptor, and no alternate location.
+- **HPAC-PAWA-REQ-035.** The descriptor is canonicalised exactly per
+  HPAC-REQ-089's rule (NFC-normalised, `sort_keys`, `(",",":")` separators,
+  UTF-8; `canonical_json_bytes` / `read_canonical_json_document`) and stored as a
+  single-link regular file, create-only for a given `generation`
+  (`write_atomic_create_only`), read-back verified.
+
+## 14. Closed descriptor schema
+
+- **HPAC-PAWA-REQ-036.** `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` is a **closed**
+  object with exactly these fields, in this set (no additional, no missing;
+  `set(document) != {…}` → `descriptor_malformed`):
+
+  | Field | Type / value |
+  |---|---|
+  | `artifact_schema_version` | const `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` |
+  | `descriptor_digest` | 64 lowercase hex — SHA-256 over the canonical bytes of this object with `descriptor_digest` set to the empty string (self-excluding) |
+  | `anchor_id` | opaque `hpaw-<hex32>` — stable identity of this deployment's anchor across generations |
+  | `installation_id` | opaque `hpawi-<hex32>` — identity of this physical installation; changes on a legitimate machine migration / reprovision (§22) |
+  | `protected_root_identity` | the exact `{device, inode}` object of `<HPAC_PROTECTED_ROOT>` at provisioning time — MUST equal the live root identity and the `HPAC-STORE-AUTHORITY/1.0` manifest's `root_identity` at every validation (§16) |
+  | `authority_namespace` | const `.authority` |
+  | `deployment_owner_role` | a closed token from the vocabulary `{ HPAC_PROTECTED_ADMIN }` (grammar `^[A-Z][A-Z0-9_]*$`; §16.2 HBDC precedent — one member; no wildcard / `all` / `root` value is ever valid) |
+  | `configured_agent_exclusion_binding` | a closed object `{ "excluded_principal_kind": const "PCAE_CONFIGURED_AGENT_PRINCIPAL", "exclusion_basis": const "OS_FILESYSTEM_WRITE_AUTHORITY" }` — records *that* the configured agent principal is the excluded party and *how* the exclusion is established, without embedding a mutable uid a caller could reinterpret |
+  | `generation` | non-negative integer ≥ 1 — the monotonic generation (§20) |
+  | `created_at` | RFC3339 UTC timestamp from a trusted clock at provisioning / rotation time (`_TIMESTAMP_RE`) |
+  | `supersedes` | `null` for `generation` 1; otherwise a closed object `{ "previous_generation": <int ≥ 1, < generation>, "previous_descriptor_digest": <64 hex> }` (§20, §21) |
+  | `provenance_ref` | the `HPAC-WRITER-PROVENANCE/1.0` record key for this descriptor write (§19) |
+  | `state` | a closed token from `{ ACTIVE, REVOKED, SUPERSEDED }` (§51) |
+
+- **HPAC-PAWA-REQ-037.** The descriptor SHALL NOT include any mutable
+  human-readable authority fact a caller could reinterpret: no free-form
+  "authorized" string, no operator name, no email, no civil identity, no uid /
+  gid integer as an authority input (the exclusion binding records *kind* and
+  *basis*, not a mutable id), no boolean "is_admin", no capability field, no
+  path other than the const `authority_namespace`.
+- **HPAC-PAWA-REQ-038.** Validation of the descriptor SHALL check: exact closed
+  field set; `artifact_schema_version` const; recomputed `descriptor_digest`
+  equality; `anchor_id` / `installation_id` grammar; `protected_root_identity`
+  equality with the live root and the store manifest; `authority_namespace`
+  const; `deployment_owner_role` in the closed vocabulary;
+  `configured_agent_exclusion_binding` exact closed shape; `generation` an
+  integer ≥ 1; `created_at` grammar; `supersedes` shape and monotonicity (§20);
+  `provenance_ref` resolves to a valid `HPAC-WRITER-PROVENANCE/1.0` record whose
+  `root_identity_digest` matches the current root; `state == ACTIVE`. Any failure
+  → the corresponding §56 code; no `PRODUCTION` writer.
+
+## 15. Descriptor is not human identity
+
+- **HPAC-PAWA-REQ-039.** The descriptor establishes an **installation /
+  deployment administrative authority anchor** — a filesystem-ownership role and
+  its currentness. It does **not** prove: the current human's civil identity;
+  current human presence; runtime approval intent; that a specific human
+  installed it. It is an administrative trust-root artifact only. The *human
+  principal being enrolled* still performs the full RHAMP-001 FIDO2 ceremony
+  (UP+UV `makeCredential`) — that is credential registration, governed by
+  RHAMP-001, entirely separate from deployment-owner recognition (PAWA-INV-2).
+
+## 16. Root / installation identity binding
+
+- **HPAC-PAWA-REQ-040.** "Root-identity-bound" is concrete and narrow: the
+  descriptor is trusted **only** when it resolves at the canonical path under the
+  canonical protected root whose `{device, inode}` identity matches **both** the
+  live `stat` of `<HPAC_PROTECTED_ROOT>` **and** the
+  `HPAC-STORE-AUTHORITY/1.0` manifest's `root_identity`
+  (`hpac_foundation.py`: `"HPAC root was copied or replaced; root identity
+  binding failed"`), and whose `provenance_ref` record's `root_identity_digest`
+  matches the current root. "Machine identity" as a vague concept SHALL NOT be
+  used.
+- **HPAC-PAWA-REQ-041.** A descriptor (or a whole `<HPAC_PROTECTED_ROOT>`) copied
+  to another installation carries a `protected_root_identity` /
+  `root_identity_digest` / `installation_id` that will not match the new root's
+  live identity → `descriptor_root_identity_mismatch` /
+  `descriptor_installation_mismatch`; it does **not** automatically validate
+  (§22, §53, PAWA-INV-5).
+
+## 17. Descriptor ownership / mode
+
+- **HPAC-PAWA-REQ-042.** The normative property first, adapters second (macOS /
+  Linux — §63): the descriptor file and the `.authority/` directory SHALL be
+  owned by the deployment owner; SHALL NOT be group- or other-writable; SHALL
+  grant the configured agent principal no write access by mode, group, or ACL;
+  and SHALL be readable by the party performing recognition. If the descriptor's
+  or the namespace's permissions become weaker than this contract permits at any
+  validation point, recognition SHALL **fail closed** (`descriptor_wrong_mode` /
+  `descriptor_wrong_owner`) — it SHALL NOT "repair" them and SHALL NOT proceed.
+- **HPAC-PAWA-REQ-043.** POSIX-only semantics SHALL NOT be hardcoded where a
+  cross-platform abstraction is needed; the implementation MAY use
+  `_effective_write_access`'s existing platform-gated ACL sub-check and mode-bit
+  logic, which already span macOS and Linux (HBDC-001 spans both).
+
+## 18. No path-only trust
+
+- **HPAC-PAWA-REQ-044.** Normatively: **correct path + valid closed structure
+  `!=` trusted descriptor.** Trust additionally requires all of: ownership /
+  mode (§17); root-identity binding (§16); current generation (§20);
+  provisioning provenance (§19); `state == ACTIVE`; and — for a `PRODUCTION`
+  writer to be minted — the configured-agent exclusion (§26), the positive write
+  probe (§28), and the not-configured-agent current-context check (§31). "Its
+  writability is the proof" — only the deployment owner can install or replace
+  it; the file itself is **not a bearer secret** (`.1R.30R` §8).
+
+## 19. Descriptor provenance
+
+- **HPAC-PAWA-REQ-045.** Each descriptor write (provisioning or rotation) SHALL
+  emit an `HPAC-WRITER-PROVENANCE/1.0` record (the existing idiom;
+  `record_write`) under `<HPAC_PROTECTED_ROOT>/.authority/provenance/`, binding
+  `store_id`, `authority_class` (`production`), `root_identity_digest`, the
+  descriptor's relative path, the descriptor `record_digest`, and the writer
+  role. The descriptor's `provenance_ref` names this record; validation resolves
+  and verifies it (§14, §38). A new cryptographic signing key SHALL NOT be
+  required (the adjudication rejected Candidate C for v1 — §64).
+- **HPAC-PAWA-REQ-046.** Additionally, provisioning SHALL append a durable
+  provenance / audit event to the deployment tree (the HBDC
+  `append_provenance_event` idiom) recording: `anchor_id`, `installation_id`,
+  `generation` (= 1), `protected_root_identity`, `descriptor_digest`, the
+  trusted-clock timestamp, and the administrative result (§59).
+
+## 20. Descriptor generation (finding F-3)
+
+- **HPAC-PAWA-REQ-047.** `generation` is a **monotonic, installation-local,
+  strictly increasing integer**. Initial generation (created by provisioning,
+  §23) is exactly **1**. Every rotation (§50) SHALL write a descriptor whose
+  `generation` is exactly `previous.generation + 1`. `generation` SHALL be
+  unique per `installation_id`; two descriptors with the same
+  `(installation_id, generation)` and different bytes is a
+  `descriptor_installation_mismatch` fail-closed condition.
+- **HPAC-PAWA-REQ-048.** The **current generation** for an installation is
+  anchored by a protected, monotonically-advanced state record —
+  `<HPAC_PROTECTED_ROOT>/.authority/current-generation.json`, closed schema
+  `HPAC-PAWA-CURRENT-GENERATION/1.0`, fields exactly `{ artifact_schema_version`
+  (const), `record_digest` (self-excluding SHA-256), `installation_id`,
+  `current_generation` (int ≥ 1), `descriptor_digest` (the digest of the
+  descriptor at `current_generation`), `updated_at` `}`. It is written
+  create-only at provisioning (`current_generation = 1`) and updated only by an
+  **atomic replace** performed by the deployment owner during a rotation, whose
+  new `current_generation` SHALL be exactly `old + 1` (monotonic;
+  `descriptor_generation_stale` on any attempt to set it equal-or-lower).
+- **HPAC-PAWA-REQ-049.** Recognition (§33) SHALL load `current-generation.json`,
+  verify its closed schema / digest / `installation_id`, and require the resolved
+  descriptor's `generation` to **equal** `current_generation` and its
+  `descriptor_digest` to equal the recorded one. A descriptor whose `generation`
+  is below `current_generation` → `descriptor_generation_stale`; above → treated
+  as `descriptor_malformed` / `descriptor_installation_mismatch` (a descriptor
+  ahead of the anchored current generation is not a valid state). `generation` is
+  **not advisory**.
+- **HPAC-PAWA-REQ-050.** If safe rollback prevention (§21) cannot be implemented
+  because the protected store cannot provide monotonic atomic-replace with
+  read-back for `current-generation.json`, the implementing phase records it as
+  an implementation prerequisite and **STOPS (BLOCKED)** rather than shipping an
+  advisory generation.
+
+## 21. Descriptor rollback prevention (finding F-3)
+
+- **HPAC-PAWA-REQ-051.** Explicit rule: **a previously superseded valid
+  descriptor SHALL NOT become current again merely because its bytes are
+  restored.** Restoring `deployment-owner.json` at `generation` `N` while
+  `current-generation.json` records `current_generation` `M > N` yields
+  `descriptor_generation_stale` — no `PRODUCTION` writer.
+- **HPAC-PAWA-REQ-052.** Restoring **both** `deployment-owner.json` at
+  `generation` `N` **and** `current-generation.json` at `current_generation`
+  `N` (a full paired rollback) requires filesystem write to `.authority/` — i.e.
+  being the deployment owner (or root — §60, in the TCB). Within the model's
+  trust boundary this is the deployment owner deliberately reverting their own
+  installation; it is not an *agent* rollback (the agent cannot write there). The
+  contract does not claim to prevent the deployment owner from rolling back their
+  own installation, and does not need to: PAWA protects against the *agent*, the
+  *same normal-user domain*, and *repository / caller / env / cwd* influence
+  (§60), not against a party who already holds protected-root write authority.
+- **HPAC-PAWA-REQ-053.** A restored snapshot of an *old whole protected root* is
+  additionally caught by the `{device, inode}` root-identity binding (§16) unless
+  it is a byte-identical restore to the original device/inode — mirroring
+  HBDC-REQ-046.
+
+## 22. Machine migration / reprovisioning
+
+- **HPAC-PAWA-REQ-054.** Legitimate migration / reprovisioning and
+  rollback / replay have **distinct** semantics and SHALL NOT be conflated:
+  - **Legitimate migration** — the deployment owner performs an explicit
+    out-of-band `provision` on the new host / new protected root: a **new
+    `installation_id`**, a fresh `{device, inode}` root identity, `generation`
+    reset to 1, a fresh `current-generation.json`, a fresh provenance chain. The
+    `anchor_id` MAY be carried forward (the same logical deployment) or minted
+    fresh (operator's choice, recorded).
+  - **Rollback / replay** — restoring files without a new `installation_id` and
+    without a new root identity → caught by §16 / §20 / §21 → fail closed.
+- **HPAC-PAWA-REQ-055.** Copying protected files alone is **never** sufficient to
+  establish authority on a new machine (HBDC-REQ-044/045 discipline). A
+  migration is always a deliberate out-of-band administrative act, never a
+  silent acceptance of copied bytes.
+
+## 23. Initial out-of-band bootstrap
+
+- **HPAC-PAWA-REQ-056.** The one-time provisioning procedure SHALL: (a) occur
+  outside ordinary PCAE agent authority — a standalone script (recommended
+  `scripts/hpac_protected_root_admin.py provision`), never a `pcae` CLI
+  subcommand, never agent-invocable, run by an operator logged in as the
+  deployment owner; (b) require OS-protected administrative write authority to
+  the protected-root location and its parent; (c) create `<HPAC_PROTECTED_ROOT>`
+  `0700` if not already provisioned; (d) create the `HPAC-STORE-AUTHORITY/1.0`
+  manifest (create-only) establishing `store_id` and the `{device, inode}` root
+  identity; (e) create the `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` descriptor at
+  `generation` 1 with a fresh `anchor_id` and `installation_id`; (f) create
+  `current-generation.json` at `current_generation` 1; (g) set correct
+  ownership / mode on every created path; (h) append the durable provisioning
+  provenance / audit record (§46); (i) complete **without any existing
+  `HPACWriterCapability`** — `write_atomic_create_only` / `_ensure_directory` are
+  filesystem primitives; the bootstrap is a filesystem provisioning act by the
+  OS deployment owner, outside PCAE's authority model entirely (PAWA-INV-4,
+  non-circular).
+- **HPAC-PAWA-REQ-057.** Provisioning SHALL NOT require, consult, or create a
+  FIDO2 credential, an enrolled human principal, an `AuthenticatedHumanPrincipal`,
+  a RHAMP-001 ceremony, a Permission Broker decision, a Runtime Enforcement
+  result, or any runtime capability. The first-credential FIDO2 enrollment
+  (RHAMP-REQ-048) happens *after* the anchor exists and *consumes* it (§71).
+
+## 24. Bootstrap repeatability
+
+- **HPAC-PAWA-REQ-058.** Bootstrap is **not silently repeatable** over an
+  existing valid installation. A second `provision` against an existing
+  `<HPAC_PROTECTED_ROOT>` with a valid `HPAC-STORE-AUTHORITY/1.0` manifest and a
+  valid `ACTIVE` descriptor SHALL either **fail closed** (`duplicate_bootstrap`,
+  §56) or explicitly enter the distinct rotation / reprovisioning procedure
+  (§50, §52) — never a silent authority reset, never a `generation` reset over a
+  live installation. The manifest and `current-generation.json` are create-only;
+  a create against an existing name raises `HPACDuplicateError`
+  (`hpac_foundation.py`).
+- **HPAC-PAWA-REQ-059.** An idempotent no-op is permitted only when a repeated
+  `provision` is byte-identical to the existing installation's descriptor and
+  generation state (mirroring `ensure_repository_identity` /
+  HBDC-REQ-059's idempotent-preserve discipline); any field difference is a
+  `duplicate_bootstrap` conflict.
+
+## 25. Recognition predicate 1 — canonical root
+
+- **HPAC-PAWA-REQ-060.** Positive validation SHALL require the exact canonical
+  `<HPAC_PROTECTED_ROOT>` — `self.root == resolve_hpac_protected_root().absolute()`
+  (`_validate_production_boundary` already enforces this). No caller-, repo-,
+  env-, or cwd-selected replacement. If a configurable root is ever introduced
+  (not in v1.0), it SHALL be validated against trusted installation
+  configuration, never caller input (§29). Missing / not-a-directory /
+  symlinked / manifest-absent → `protected_root_missing`.
+
+## 26. Recognition predicate 2 — configured-agent exclusion (finding F-1)
+
+- **HPAC-PAWA-REQ-061.** Positive validation SHALL require proof that the
+  **configured PCAE agent principal** (§9, resolved from canonical configuration,
+  **not** `os.geteuid()`) does **not** hold the OS filesystem write authority
+  over `<HPAC_PROTECTED_ROOT>` and its safe-ancestor chain required to mutate the
+  anchor. Concretely: `_effective_write_access(root, configured_agent_uid,
+  configured_agent_gids)` returns `False` and `_ancestor_chain_safe(root,
+  configured_agent_uid, configured_agent_gids)` returns `True`.
+- **HPAC-PAWA-REQ-062.** This SHALL NOT be expressed as `current_euid !=
+  some_agent_uid`, as `os.geteuid() != 0`, or as any comparison of the *invoking
+  process's* live ids against a constant, **unless** that exact mapping is
+  independently canonical for the deployment (it is not, in the general case).
+  The evaluated identity is the *configured* principal; the check is *effective
+  write access*, not a declared-mode-bit or id-equality shortcut.
+- **HPAC-PAWA-REQ-063.** If the configured agent principal cannot be resolved →
+  `agent_principal_unknown` (fail closed, §23 of this contract / F-1). If the
+  configured agent principal *does* hold protected-root write authority →
+  `agent_has_protected_write_authority` (fail closed; this deployment is not
+  eligible for a `PRODUCTION` writer — §61).
+
+## 27. Recognition predicate 3 — descriptor trust
+
+- **HPAC-PAWA-REQ-064.** Positive validation SHALL require: the canonical
+  descriptor resolves at `<HPAC_PROTECTED_ROOT>/.authority/deployment-owner.json`
+  (no-follow, single-link regular file, exact canonical bytes); its closed schema
+  validates (§14, §38); its `protected_root_identity` matches the live root and
+  the store manifest (§16); its `generation` equals the anchored
+  `current_generation` and its digest matches (§20); its ownership / mode satisfy
+  §17; its `provenance_ref` resolves to a valid `HPAC-WRITER-PROVENANCE/1.0`
+  record for the current root (§19); and `state == ACTIVE` (§51). Any failure →
+  the corresponding §56 code.
+
+## 28. Recognition predicate 4 — positive write authority
+
+- **HPAC-PAWA-REQ-065.** Positive validation SHALL require **operation-based
+  proof** that the *current administrative invocation* holds actual
+  OS-authorized write capability over the exact canonical
+  `<HPAC_PROTECTED_ROOT>/.authority/` namespace **now**. This SHALL NOT be
+  defined solely as `os.access(path, W_OK)` (which honours only real-uid mode
+  bits and ignores ACLs / effective ids), nor as an id comparison.
+- **HPAC-PAWA-REQ-066.** The write probe SHALL be an `O_CREAT | O_EXCL |
+  O_NOFOLLOW` create of a randomly-named sentinel
+  (`.probe-<hex>`) directly under `.authority/`, followed by `write` of a small
+  fixed payload, `fsync`, `close`, and `unlink` — mirroring
+  `write_atomic_create_only`'s `os.link(..., follow_symlinks=False)` +
+  directory-`fsync` idiom. Success (create + write + unlink all succeed) proves
+  real write authority, not a mode-bit guess. `EACCES` / `EPERM` / `EROFS` /
+  any failure → `write_probe_failed`; no `PRODUCTION` writer.
+
+## 29. Write-probe target
+
+- **HPAC-PAWA-REQ-067.** The probe target SHALL be a **dedicated ephemeral
+  sentinel object** under `.authority/`, never arbitrary production state, never
+  the descriptor, never `current-generation.json`, never the manifest, never a
+  provenance record. The probe SHALL NOT follow symlinks, SHALL create with
+  `O_EXCL` (no destructive overwrite), and SHALL verify actual
+  create / write / fsync / close / remove semantics. Cleanup failure (the
+  sentinel cannot be unlinked) SHALL be handled explicitly and treated as
+  `write_probe_failed` / `protected_root_untrusted` — never ignored, never left
+  behind silently.
+- **HPAC-PAWA-REQ-068.** The probe SHALL NOT mutate the descriptor, the current
+  generation, the manifest, or any registry / proof / lifecycle / consumption
+  record. It is read-authority evidence only.
+
+## 30. Write-probe TOCTOU
+
+- **HPAC-PAWA-REQ-069.** The recognition sequence SHALL be ordered to prevent
+  obvious check / use substitution: (1) resolve and validate the canonical root
+  and its `{device, inode}` identity; (2) resolve and validate the descriptor
+  and current generation against the **same resolved** root; (3) perform the
+  write probe against the **same resolved** `.authority/` path (no
+  re-resolution); (4) mint the `PRODUCTION` capability **immediately, within the
+  same process and call context**; the capability is process-local and
+  short-lived.
+- **HPAC-PAWA-REQ-070.** The contract SHALL NOT promise absolute TOCTOU
+  elimination. It defines the trusted OS boundary (the filesystem permission
+  model, §8) and fail-closed conditions: the capability's authority SHALL be
+  **re-verified at every `record_write` / `_write`** (`require_writer` +
+  `_ensure_root` + `_validate_production_boundary` already re-run on every
+  mutation), so a mid-flight permission change is caught at the next
+  `_ensure_root`, and the registry's `expected_current` compare-and-write
+  rejects a stale write. A probe → mint → write race cannot *widen* authority.
+
+## 31. Recognition predicate 5 — not configured agent
+
+- **HPAC-PAWA-REQ-071.** Positive validation SHALL require an explicit **negative
+  assertion** that the current administrative context is **not** the configured
+  PCAE agent principal — evaluated against the canonical configured-agent
+  identity source (§9), never a caller-supplied boolean, never `--agent-id`,
+  never an environment variable. On a two-principal deployment this is the
+  configured-principal exclusion (the invoking process runs as the deployment
+  owner, a distinct account); on a single-account host it collapses with §25 to
+  the "no `PRODUCTION` root" fail-closed outcome.
+- **HPAC-PAWA-REQ-072.** There is nothing for a same-UID agent to forge here —
+  the check reads canonical configuration and the live OS process identity; a
+  same-UID agent cannot make `_effective_write_access` return `False` for the
+  configured agent principal while that principal *does* have write, and cannot
+  pass the §28 probe without write.
+
+## 32. Recognition predicate 6 — factory consumer
+
+- **HPAC-PAWA-REQ-073.** `PRODUCTION` capability issuance SHALL be reachable
+  **only** through the protected admin writer module's factory (§36), invoked by
+  an **exact authorized consumer** (§38). There is no general public API, no
+  `pcae` CLI path, no agent-reachable entry point (§37). An import / call from an
+  unauthorized module → `unauthorized_factory_consumer`; the consumer-inventory
+  guard (§39) fails the build for any un-enumerated consumer.
+
+## 33. Positive validation sequence
+
+- **HPAC-PAWA-REQ-074.** The frozen order — every step required; any failure
+  yields **no capability** and the corresponding §56 code:
+
+  1. resolve the canonical `<HPAC_PROTECTED_ROOT>` (no input); reject
+     symlink / non-dir / absent (`protected_root_missing`);
+  2. resolve the canonical configured agent principal from PCAE configuration
+     (§9); unresolvable / ambiguous → `agent_principal_unknown`;
+  3. validate protected-root ownership + **configured-agent** exclusion +
+     safe ancestors (`_validate_production_boundary` re-scoped per F-1);
+     agent-writable / indeterminate → `agent_has_protected_write_authority` /
+     `protected_root_untrusted`;
+  4. load `HPAC-STORE-AUTHORITY/1.0` manifest; verify `{device, inode}` root
+     identity binding (`protected_root_untrusted` on mismatch);
+  5. load the descriptor no-follow; validate the closed schema, digest,
+     `protected_root_identity`, ownership / mode, `provenance_ref`, `state ==
+     ACTIVE` (§14, §27) — corresponding `descriptor_*` code on any failure;
+  6. load `current-generation.json`; require `descriptor.generation ==
+     current_generation` and digest match (`descriptor_generation_stale` /
+     `descriptor_installation_mismatch`);
+  7. validate the current administrative context is **not** the configured agent
+     principal (§31) (`current_context_is_agent`);
+  8. perform the `O_EXCL | O_NOFOLLOW` positive write probe against `.authority/`
+     (§28, §29) (`write_probe_failed`);
+  9. verify the calling module is an authorized factory consumer (§32, §38)
+     (`unauthorized_factory_consumer`);
+  10. mint the process-local, operation-scoped `PRODUCTION`
+      `HPACWriterCapability` (§36, §41) bound to the operation / principal /
+      credential (§42–§44);
+  11. record the issuance audit evidence (§55).
+
+- **HPAC-PAWA-REQ-075.** The sequence SHALL run fresh on **every**
+  `production_writer(...)` call. No result is cached across calls; no long-lived
+  capability is contemplated (§45, §48).
+
+## 34. No sudo / euid shortcut
+
+- **HPAC-PAWA-REQ-076.** The following SHALL NOT appear as the normative positive
+  predicate, in whole or in part:
+
+  ```
+  if os.geteuid() == 0: allow
+  if os.getuid() == 0: allow
+  if "SUDO_USER" in os.environ: allow
+  if os.environ.get("SUDO_UID"): allow
+  ```
+
+  `sudo` / `root` MAY be part of the *underlying OS mechanism* by which the
+  deployment owner holds filesystem write authority, but neither `euid == 0` nor
+  any `SUDO_*` environment variable is, by itself, the positive recognition
+  predicate. `euid == 0` alone mints **nothing** (PAWA-INV-1).
+- **HPAC-PAWA-REQ-077.** `euid` / `sudo` metadata MAY be recorded as a
+  **non-authoritative audit annotation** on the issuance evidence (§55) — it
+  SHALL NOT be consulted by any recognition predicate.
+
+## 35. Wrong privileged principal
+
+- **HPAC-PAWA-REQ-078.** HPAC-REQ-023 is verified (`.1R.30R` §14.6, `.1R.30R.1`
+  §11, §17.2) as an **OS-authority / installation-role construct** — "external
+  OS/equivalent trust anchor", "owns the deployment-scoped protected root" — not
+  a specific-human cryptographic or civil identity. Therefore: **any process that
+  legitimately holds the deployment-owner OS filesystem write authority over the
+  specific admin-owned `<HPAC_PROTECTED_ROOT>` and presents a valid current
+  descriptor and is not the configured agent principal SATISFIES the anchor.**
+  The contract does **not** claim to identify *which* human or *which* privileged
+  account it is, beyond "holds the required filesystem-ownership role for this
+  deployment".
+- **HPAC-PAWA-REQ-079.** A *different* local admin / root without legitimate
+  filesystem write to *this* deployment's protected root fails the §28 probe and
+  the §26 ownership check → no capability. "Being root somewhere" is not "being
+  this deployment's owner".
+- **HPAC-PAWA-REQ-080.** If a future requirement demands *more* than "holds the
+  deployment-owner OS filesystem write authority" — e.g. a specific enrolled
+  administrative human identity for the *writer* path — that is a **MAJOR** and a
+  new adjudication; v1.0 SHALL NOT silently require it and SHALL NOT claim it.
+
+## 36. Production writer factory
+
+- **HPAC-PAWA-REQ-081.** The `PRODUCTION` writer factory's normative role:
+  given a successful §33 sequence, it mints exactly one process-local,
+  operation-scoped `PRODUCTION` `HPACWriterCapability` bound to the resolved
+  `PRODUCTION` `HPACStoreAuthority` instance's `_seal`, via the existing
+  `_WRITER_CONSTRUCTOR_SEAL` discipline — the same seal / non-serializability /
+  per-instance-identity mechanics `HPACWriterCapability` already has
+  (`hpac_foundation.py`). A conceptual symbol is
+  `HPACStoreAuthority.production_writer(operation, *, principal_id=None,
+  credential_id=None)` or a repository-derived equivalent; the contract fixes the
+  **semantics**, not the exact class or method name.
+- **HPAC-PAWA-REQ-082.** The factory SHALL NOT weaken any existing
+  `HPACWriterCapability` semantics. `require_writer` still checks
+  `writer._authority_seal is self._seal` (identity), role / subject match, and
+  `authority_class` match. `__reduce__` still raises. The `PRODUCTION` capability
+  is *strictly narrower* than the fixture writer: operation-scoped and
+  single-use (§49), where the fixture writer was reusable within a process.
+- **HPAC-PAWA-REQ-083.** No **new broad admin token** SHALL be created. The
+  existing `HPACWriterCapability` type is reused; `ProtectedAdminCapability`
+  remains a legacy fixture-only marker and is **not** extended to production.
+
+## 37. Factory module boundary
+
+- **HPAC-PAWA-REQ-084.** The `PRODUCTION` writer factory SHALL be exported from a
+  **separate admin-only production module** (recommended
+  `src/pcae/core/hpac_protected_admin_writer.py`). Ordinary agent / runtime /
+  Gate / `pcae` CLI code SHALL NOT import it — directly or transitively through
+  any agent-reachable module.
+- **HPAC-PAWA-REQ-085.** The module SHALL NOT be a `pcae` CLI subcommand, SHALL
+  NOT be registered in any command dispatch table, SHALL NOT be on any plugin
+  import path, and SHALL NOT be a repository-integration consumer. The
+  provisioning script (§23) and the enrollment / recovery tools (§38) are
+  standalone `scripts/…` entrypoints, mirroring
+  `hatp_deployment_binding_admin.py` / `hatp_certification_admin.py`
+  (HBDC-REQ-056/066; HMIC-REQ-079/081/082).
+- **HPAC-PAWA-REQ-086.** The consumer inventory is **exact** — an enumerated
+  list of specific module dotted-paths. No wildcard, no prefix, no `fnmatch`, no
+  glob, no "any module under `scripts/`".
+
+## 38. Authorized consumers
+
+- **HPAC-PAWA-REQ-087.** The closed categories of authorized `PRODUCTION` writer
+  factory consumers for v1.0:
+  - the bounded **protected principal administration** tool (principal / credential
+    enroll / revoke), run by the deployment owner as a standalone script;
+  - the **first-credential bootstrap / enrollment** tool (RHAMP-REQ-048;
+    `.1R.30R.3`);
+  - the **recovery / re-bootstrap** tool (HPAC-REQ-065, RHAMP-REQ-050;
+    total-principal-loss recovery).
+- **HPAC-PAWA-REQ-088.** The following SHALL NOT be authorized consumers:
+  ordinary agent commands; any `pcae` CLI subcommand; Gate 5 / 6 / 7 / 8 / 9 / 10
+  or any gate coordinator; the runtime adapter; any plugin runtime; repository
+  callbacks / hooks; the ordinary task lifecycle; the session / handoff
+  machinery; `core/agent.py`; `cli.py`; `commands/**`.
+
+## 39. Consumer inventory guard
+
+- **HPAC-PAWA-REQ-089.** `.1R.30R.3` SHALL add exact source / import
+  consumer-inventory tests (the HBDC-REQ-056/066 pattern —
+  `tests/test_hatp_deployment_binding_admin.py::test_module_not_imported_by_cli_or_agent_reachable_code`
+  / `test_admin_script_exists_and_is_not_a_pcae_cli_subcommand`): a text-scan of
+  `src/pcae/cli.py`, `src/pcae/commands/**`, `src/pcae/core/agent.py` (and any
+  other agent-reachable entry) asserting the admin writer module's name and the
+  `production_writer` symbol never appear as an import; and an assertion that the
+  provisioning / enrollment / recovery operations are standalone `scripts/…`
+  files, not `pcae` CLI subcommands.
+- **HPAC-PAWA-REQ-090.** Any **new** production consumer of the `PRODUCTION`
+  writer factory SHALL fail the guard until it is explicitly added to the §38
+  inventory **and** this contract is amended to name its category. No
+  glob / `fnmatch` / prefix broadening of the inventory is ever permitted
+  (PAWA-INV-9).
+
+## 40. `HPACWriterCapability` class
+
+- **HPAC-PAWA-REQ-091.** HPAC-PAWA-001 reuses the existing `HPACWriterCapability`
+  class (`hpac_foundation.py`) unchanged in shape (`__slots__ =
+  ("_authority_seal", "role", "subject", "authority_class")`; `__reduce__`
+  raises). The `PRODUCTION` class meaning under HPAC-PAWA-001: an
+  `HPACWriterCapability` with `authority_class is HPACAuthorityClass.PRODUCTION`,
+  minted only by the §33 sequence, that `HumanPrincipalRegistryStore._writer()`
+  and the §42 stores will accept for exactly one bounded mutation.
+- **HPAC-PAWA-REQ-092.** The `PRODUCTION` capability SHALL NOT be obtainable by
+  `HPACStoreAuthority.writer()` (which continues to
+  `raise HPACAuthorityError` for every non-`FIXTURE_NON_REAL` class),
+  `legacy_fixture_writer()`, `object.__new__`, `copy` / `deepcopy` / `pickle`,
+  or reconstruction from known field values (§47).
+
+## 41. Capability issuance inputs
+
+- **HPAC-PAWA-REQ-093.** The `PRODUCTION` capability's issuance binds **exactly**
+  (least authority): the resolved `PRODUCTION` `HPACStoreAuthority` instance's
+  `_seal`; the `role` (one of the §42 writer roles); the `subject` (the target
+  `principal_id` or `credential_id`, or the enrollment-transaction id where a
+  credential id does not yet exist — §44); the `operation` enum (§42); and,
+  recorded in the issuance audit evidence (§55) but not as capability fields:
+  `anchor_id`, `installation_id`, the descriptor `generation`,
+  `protected_root_identity`, an `operation_id`, the issuance trusted-clock
+  timestamp, and the issuer / factory identity.
+- **HPAC-PAWA-REQ-094.** The capability carries the **minimum** structure needed
+  for `require_writer` to bind it: `_authority_seal`, `role`, `subject`,
+  `authority_class`. It does not carry the descriptor, the generation, a digest,
+  a TTL field, or any serialisable authority payload.
+
+## 42. Operation scope
+
+- **HPAC-PAWA-REQ-095.** A `PRODUCTION` writer capability SHALL NOT authorize
+  arbitrary HPAC writes. The closed set of mutation classes:
+  - `enroll_principal` — create a `PrincipalRecord` (role
+    `human_principal_registry_admin`);
+  - `revoke_principal` — mark a `PrincipalRecord` `revoked`;
+  - `enroll_credential` — create a `CredentialRecord` + its RHAMP-001 sidecar
+    (`RHAMP-FIDO2-CREDENTIAL/1.0`) + counter-state (`RHAMP-COUNTER-STATE/1.0`)
+    for one credential;
+  - `revoke_credential` — mark a `CredentialRecord` `revoked`;
+  - `initialize_credential_sidecar_state` — create the sidecar / counter-state
+    for a credential where the ceremony requires it as a distinct step.
+- **HPAC-PAWA-REQ-096.** A `PRODUCTION` writer capability SHALL NOT authorize:
+  writing an `HPAC-PROOF/2.0`, a lifecycle event, an
+  `HPAC-PRESENTATION-EVIDENCE/2.0`, an `HPAC-AUTHORITY-CONSUMPTION/2.1` record,
+  or any Gate-5 / Gate-9 artifact — those remain the trusted verifier's, bounded
+  by `is_verifier_authenticated_principal` (RHAMP-REQ-125). It SHALL NOT issue a
+  runtime approval, a PB permission, a Runtime Enforcement result, or a
+  `DispatchEnvelope`.
+- **HPAC-PAWA-REQ-097.** The capability binds the **protected-root target** — the
+  fixed registry path plus, for credential operations, the fixed per-credential
+  sidecar / counter-state paths under
+  `<HPAC_PROTECTED_ROOT>/credentials/<credential_id>/`. It is not an
+  "HPAC admin forever" capability.
+
+## 43. Principal scope
+
+- **HPAC-PAWA-REQ-098.** Where a mutation targets a principal, the capability
+  SHALL be bound to the **exact** `principal_id` (via `subject`). A capability
+  minted for principal `A` SHALL NOT write principal `B` (`require_writer`
+  subject mismatch → reject; §56 `target_scope_invalid`).
+
+## 44. Credential scope
+
+- **HPAC-PAWA-REQ-099.** For a credential-specific operation on an **existing**
+  credential (`revoke_credential`, `initialize_credential_sidecar_state`), the
+  capability SHALL be bound to the exact `credential_id`.
+- **HPAC-PAWA-REQ-100.** For `enroll_credential`, where the fresh opaque
+  `hpc-<hex>` `credential_id` does not exist until the write, the capability
+  SHALL be bound to the **enrollment-transaction id** (an `operation_id` reserved
+  before the ceremony) and to the target `principal_id`; the registry write
+  binds the new `credential_id` to that transaction. A capability SHALL NOT be
+  over-bound to a `credential_id` that does not yet exist.
+
+## 45. Process-local
+
+- **HPAC-PAWA-REQ-101.** The `PRODUCTION` `HPACWriterCapability` is
+  **process-local**: not durable, never written to disk, never serialised to
+  JSON, never exported, never transmitted over IPC / socket / network / pipe.
+  Its `_authority_seal` is the specific `HPACStoreAuthority` instance's private
+  `object()` — meaningful only within the minting process.
+
+## 46. Non-bearer
+
+- **HPAC-PAWA-REQ-102.** Possession of an object with structurally identical
+  fields does **not** establish authority. A capability is valid only if it was
+  produced by the canonical `PRODUCTION` writer factory in this process and is
+  recognised by `require_writer`'s **identity** check
+  (`writer._authority_seal is self._seal`), not a value comparison. Structure is
+  not authority.
+
+## 47. Non-serializable
+
+- **HPAC-PAWA-REQ-103.** The following SHALL be rejected or inert as authority:
+  `pickle` / `copy` / `deepcopy` (`__reduce__` raises `TypeError`); JSON
+  serialisation as authority (no serialiser exists; a hand-built dict is not a
+  capability); reconstruction via `object.__new__` + known field values (fails
+  the seal-identity check and the live root re-probe); cross-process transfer
+  (a new process has a fresh `_seal`).
+- **HPAC-PAWA-REQ-104.** An **audit projection** MAY serialise
+  **non-authoritative facts** about an issuance (§55) — `operation_id`,
+  `anchor_id`, `installation_id`, `generation`, mutation class, target id,
+  timestamp, result, a non-authoritative capability identifier / digest. It
+  SHALL NOT serialise the `_authority_seal`, and the projection SHALL NOT be
+  reconstructable into a working capability.
+
+## 48. Restart invalidation
+
+- **HPAC-PAWA-REQ-105.** A process restart invalidates **all** previously minted
+  `PRODUCTION` writer capabilities — a new `HPACStoreAuthority` instance has a
+  fresh `_seal`, so an old capability fails `require_writer`'s identity check. A
+  new administrative operation after a restart SHALL re-run the full §33 sequence
+  (revalidate the anchor) and mint a fresh capability.
+
+## 49. One-operation / short-lived
+
+- **HPAC-PAWA-REQ-106.** The narrowest lifecycle compatible with the current
+  type is frozen: a `PRODUCTION` writer capability authorizes **exactly one
+  administrative operation** (one `enroll_*` / `revoke_*` /
+  `initialize_credential_sidecar_state`) or **one bounded enrollment
+  transaction** (the `enroll_credential` + its sidecar + its counter-state, which
+  are one atomic ceremony). It SHALL NOT be reused for a second operation.
+- **HPAC-PAWA-REQ-107.** The existing `HPACWriterCapability` type does not
+  itself enforce single-use (a fixture writer could drive multiple `_write`
+  calls). `.1R.30R.3` SHALL implement the single-use invariant — e.g. the
+  factory returns a one-shot wrapper, or the admin tool process exits after one
+  operation, or the capability is consumed / marked spent on first
+  `record_write`. The **required invariant** for `.1R.30R.3`: after one
+  successful mutation, the same capability object SHALL NOT authorize a second
+  `record_write` / `_write`; a second attempt → `capability_stale` (§56). If
+  implementing single-use requires a type change beyond the current `__slots__`,
+  `.1R.30R.3` records it as a prerequisite and the change is additive
+  (a spent flag), never a weakening.
+- **HPAC-PAWA-REQ-108.** The enclosing admin tool SHALL be short-lived —
+  one operation per invocation, process exits after. There is no session-wide
+  reusable admin capability.
+
+## 50. Descriptor rotation
+
+- **HPAC-PAWA-REQ-109.** Rotation is a **distinct, explicit** deployment-owner
+  operation (never implicit, never a side effect of re-running `provision` —
+  §24). Rotation: writes a new `deployment-owner.json` at `generation = old + 1`
+  with `supersedes = { previous_generation, previous_descriptor_digest }`; emits
+  its provenance record; then atomically replaces `current-generation.json` to
+  `current_generation = old + 1` with the new descriptor digest; then marks the
+  old descriptor `state = SUPERSEDED` (or removes it — the current-generation
+  anchor is authoritative either way).
+- **HPAC-PAWA-REQ-110.** After rotation: the old `generation` SHALL NOT mint new
+  capabilities (§20, §49 recognition requires `generation == current_generation`).
+  Capabilities already minted against the previous generation, being
+  process-local and single-use, are either already consumed or die with the
+  process; any in-flight `record_write` is additionally caught by the
+  `expected_current` compare-and-write on registry drift. **Prefer fail-closed:**
+  an implementation MAY invalidate in-flight capabilities on a detected rotation
+  rather than let them complete.
+
+## 51. Revocation
+
+- **HPAC-PAWA-REQ-111.** The protected-admin anchor state model is the closed
+  set `{ ACTIVE, REVOKED, SUPERSEDED }`:
+  - `ACTIVE` — the current, valid descriptor; recognition can succeed;
+  - `SUPERSEDED` — replaced by a higher `generation` via rotation (§50);
+  - `REVOKED` — the deployment owner has explicitly revoked the anchor
+    (`revoked_at` set on the descriptor, or the descriptor removed and
+    `current-generation.json` marked revoked); recognition **fails closed**
+    (`descriptor_revoked`) and **no `PRODUCTION` writer is minted** until a new
+    `provision` / rotation re-establishes an `ACTIVE` descriptor.
+- **HPAC-PAWA-REQ-112.** Revocation is a deployment-owner filesystem operation
+  (replace / remove / mark). A revoked anchor: no capability minting; existing
+  process-local single-use capabilities are as §110.
+
+## 52. Recovery / reprovisioning
+
+- **HPAC-PAWA-REQ-113.** Explicit recovery procedures, each an out-of-band
+  deployment-owner act, never from repository or user config:
+  - **protected-root damage** (manifest / descriptor / generation record
+    corrupt) → the deployment owner runs `provision --repair` (or re-`provision`
+    on a fresh location), re-establishing the manifest, descriptor at a fresh
+    `installation_id` / `generation` 1, and current-generation record; the old
+    `{device, inode}` binding does not carry (§16), so this is a deliberate
+    reprovision, not a silent restore;
+  - **lost installation descriptor** → same;
+  - **host migration** → §22 legitimate-migration path;
+  - **deployment-owner administrative reprovisioning** → explicit rotation (§50)
+    or re-provision.
+- **HPAC-PAWA-REQ-114.** There is **no recovery from repository state, user
+  config, an environment variable, or a NON_REAL fixture**. Total-principal-loss
+  recovery (HPAC-REQ-065, RHAMP-REQ-050) repeats the RHAMP-001 bootstrap
+  ceremony, which requires a `PRODUCTION` writer via this anchor — the anchor is
+  a prerequisite, not a fallback (§72).
+
+## 53. Clone / snapshot rule
+
+- **HPAC-PAWA-REQ-115.** A copied snapshot of an old protected root does **not**
+  automatically regain authority if the current installation / generation state
+  says otherwise. The stable, verifiable identity is the protected-root
+  `{device, inode}` bound in `HPAC-STORE-AUTHORITY/1.0` and echoed in the
+  descriptor's `protected_root_identity` and `installation_id` — a copy to a new
+  device / inode fails the binding (§16, §41, HBDC-REQ-046). Only a byte-identical
+  restore to the original device / inode may still validate.
+
+## 54. Audit evidence
+
+- **HPAC-PAWA-REQ-116.** Durable audit facts SHALL be recorded for: **bootstrap /
+  provisioning** (§46); **descriptor rotation** (§50 — provenance record + a
+  durable event); **revocation** (§51 — a durable event); **capability
+  issuance** (§55); **administrative operation result** (the registry write's
+  own provenance + the RHAMP-REQ-051 enrollment-evidence record where the
+  operation is an enrollment).
+- **HPAC-PAWA-REQ-117.** **Audit evidence is not capability.** A provenance
+  record, an issuance-evidence record, or an enrollment-evidence record proves a
+  write happened; it does **not** mint, restore, or stand in for an
+  `HPACWriterCapability`. An audit record SHALL NOT become bearer authority
+  (PAWA-INV-10; RHAMP-REQ-052 discipline).
+
+## 55. Capability issuance audit
+
+- **HPAC-PAWA-REQ-118.** Each successful §33 issuance SHALL record a durable
+  audit event with **exactly** these fields:
+  `{ event_schema_version` (const `HPAC-PAWA-ISSUANCE-EVIDENCE/1.0`),
+  `operation_id`, `operation` (the §42 mutation class), `anchor_id`,
+  `installation_id`, `descriptor_generation`, `protected_root_identity`,
+  `target_principal_id` (or `null`), `target_credential_id` (or `null`),
+  `enrollment_transaction_id` (or `null`), `issued_at` (trusted clock),
+  `issuer` (the factory identity), `result` / `status` (`issued`),
+  `capability_identifier` (a non-authoritative opaque id / digest, **not** the
+  seal), and optionally `context_annotation` (§77 — non-authoritative `euid` /
+  `sudo` note) `}`.
+- **HPAC-PAWA-REQ-119.** The issuance evidence SHALL NOT serialise the
+  `_authority_seal`, any capability secret, or anything from which a working
+  capability could be reconstructed.
+- **HPAC-PAWA-REQ-120.** A **failed** §33 attempt SHALL record the terminal §56
+  code and the same identifying context (minus a `capability_identifier`) where a
+  lifecycle event can be persisted.
+
+## 56. Failure taxonomy
+
+- **HPAC-PAWA-REQ-121.** The closed HPAC-PAWA-001 failure vocabulary. Every
+  terminal failure of provisioning, recognition, or issuance SHALL map
+  **deterministically to exactly one**:
+
+  | # | `pawa_failure_code` | Stage | Trigger |
+  |---:|---|---|---|
+  | 1 | `protected_root_missing` | recognition step 1 | `<HPAC_PROTECTED_ROOT>` absent / not a dir / manifest absent |
+  | 2 | `protected_root_untrusted` | recognition steps 1–4 | symlink / ancestor-writable / `{device,inode}` mismatch / indeterminate permissions on the root |
+  | 3 | `agent_principal_unknown` | recognition step 2 | configured agent principal unresolvable / ambiguous / unmappable |
+  | 4 | `agent_has_protected_write_authority` | recognition step 3 | the configured agent principal holds protected-root write authority (deployment ineligible, §61) |
+  | 5 | `descriptor_missing` | recognition step 5 | no `deployment-owner.json` at the canonical path |
+  | 6 | `descriptor_malformed` | recognition step 5 | closed-schema / canonical-byte / digest / grammar failure |
+  | 7 | `descriptor_wrong_owner` | recognition step 5 | descriptor / `.authority/` not owned by the deployment owner |
+  | 8 | `descriptor_wrong_mode` | recognition step 5 | descriptor / `.authority/` group- or other-writable, or agent-writable by ACL |
+  | 9 | `descriptor_root_identity_mismatch` | recognition steps 4–5 | descriptor `protected_root_identity` / provenance `root_identity_digest` ≠ live root |
+  | 10 | `descriptor_installation_mismatch` | recognition steps 5–6 | descriptor `installation_id` ≠ current-generation record; or `(installation_id, generation)` collision; or `generation` ahead of `current_generation` |
+  | 11 | `descriptor_generation_stale` | recognition step 6 | descriptor `generation` < anchored `current_generation` (rollback) |
+  | 12 | `descriptor_revoked` | recognition step 5 | descriptor `state == REVOKED` or the anchor is revoked |
+  | 13 | `write_probe_failed` | recognition step 8 | the `O_EXCL\|O_NOFOLLOW` create-and-unlink probe under `.authority/` failed |
+  | 14 | `current_context_is_agent` | recognition step 7 | the current administrative context is the configured agent principal |
+  | 15 | `unauthorized_factory_consumer` | recognition step 9 | the calling module is not an enumerated authorized consumer (§38) |
+  | 16 | `operation_scope_invalid` | issuance | the requested `operation` is not in the §42 closed set, or inputs (`principal_id` / `credential_id` / transaction) are malformed / missing / `None`-bypass attempted |
+  | 17 | `target_scope_invalid` | write time | the capability is used for a different `principal_id` / `credential_id` / operation than it was bound to |
+  | 18 | `capability_stale` | write time | the capability is reused after its one operation, after a rotation, or after a restart |
+  | 19 | `duplicate_bootstrap` | provisioning | a second `provision` against a live valid installation with any field difference |
+  | 20 | `reconstruction_attempt` | write time | a forged / deserialised / `object.__new__` capability fails the seal-identity check |
+  | 21 | `internal_fail_closed` | any | an unexpected fail-closed error anywhere in provisioning / recognition / issuance |
+
+- **HPAC-PAWA-REQ-122.** Free-form authority-decision reason strings are
+  prohibited (RHAMP-REQ-129 discipline). The `.1R.30R.3` implementation SHALL
+  finalise the exact code identifiers after source review; the set above is
+  closed and complete for v1.0 (adding a code for a genuinely new terminal path
+  is a MINOR — §80).
+
+## 57. RHAMP terminal-reason mapping
+
+- **HPAC-PAWA-REQ-123.** RHAMP-001 v1.0 §49's `terminal_reason_code` vocabulary
+  is frozen at **41** values and RHAMP-001 SHALL NOT be edited by this phase.
+  Where a PAWA failure occurs **during a RHAMP-001 first-credential enrollment /
+  bootstrap ceremony** and a RHAMP lifecycle event can be persisted, the PAWA
+  failure SHALL map to exactly one existing RHAMP `terminal_reason_code`:
+
+  | PAWA failure(s) | RHAMP-001 §49 `terminal_reason_code` | # |
+  |---|---|---|
+  | `descriptor_missing`, `descriptor_malformed`, `descriptor_wrong_owner`, `descriptor_wrong_mode`, `descriptor_root_identity_mismatch`, `descriptor_installation_mismatch`, `descriptor_generation_stale`, `descriptor_revoked`, `agent_principal_unknown`, `duplicate_bootstrap` | `bootstrap_authority_unproven` | 1 |
+  | `current_context_is_agent`, `agent_has_protected_write_authority`, `unauthorized_factory_consumer`, `write_probe_failed` | `enrollment_not_protected_admin` | 2 |
+  | `protected_root_missing`, `protected_root_untrusted` | `protected_root_invalid` | 40 |
+  | `operation_scope_invalid`, `target_scope_invalid`, `capability_stale`, `reconstruction_attempt`, `internal_fail_closed` | `internal_verification_error` | 41 |
+
+- **HPAC-PAWA-REQ-124.** **No new `terminal_reason_code` is required or
+  authorised.** If a future PAWA failure genuinely has no semantically valid
+  RHAMP mapping, that is a **BLOCKED-on-contract-compatibility** condition for
+  the phase that discovers it — it does not silently edit RHAMP-001 (§1,
+  HPAC-PAWA-REQ-001).
+- **HPAC-PAWA-REQ-125.** Outside a RHAMP ceremony (e.g. a standalone
+  `provision` / rotation / revoke / principal-admin operation), the PAWA
+  `pawa_failure_code` (§56) is the terminal record; it is **not** forced into a
+  RHAMP code where no RHAMP lifecycle event exists.
+
+## 58. PAWA failure != runtime denial
+
+- **HPAC-PAWA-REQ-126.** PAWA failures are **administrative writer failures**.
+  They SHALL NOT become: Permission Broker decisions or reason ids; Runtime
+  Enforcement reason ids or no-go ids; runtime-capability reasons; `Gate7Result`
+  fields; a `DispatchEnvelope` rejection. The PAWA vocabulary (§56) and the
+  RHAMP / PB / RE vocabularies stay separate (PAWA-INV-8; RHAMP-REQ-131
+  discipline).
+
+## 59. Out-of-band bootstrap audit
+
+- **HPAC-PAWA-REQ-127.** Initial provisioning records, durably: `installation_id`,
+  `anchor_id`, `generation` (= 1), `protected_root_identity`, `descriptor_digest`,
+  the trusted-clock timestamp, and the administrative result. It does **not**
+  create runtime human approval, an `AuthenticatedHumanPrincipal`, a proof, a
+  presentation, a PB permission, or any runtime capability (§57 of `.1R.30R`;
+  PAWA-INV-2, PAWA-INV-8).
+
+## 60. Root TCB claim boundary
+
+- **HPAC-PAWA-REQ-128.** Explicit statement: a fully privileged OS administrator
+  **within the trusted protected-root boundary** can alter protected
+  administrative state by design — that party *is* (or can act as) the deployment
+  owner. HPAC-PAWA-001 protects against: the **configured agent principal**; the
+  **same normal-user domain** on a two-principal deployment; **repository /
+  caller / environment / cwd / task / Git / session** influence. It does **not**
+  attempt to defend against a hostile root TCB unless parent architecture says
+  otherwise (HBDC-001 §18 limit, inherited; PAWA-INV-6 scope).
+
+## 61. Same-UID / two-principal requirement
+
+- **HPAC-PAWA-REQ-129.** Deployment requirement: the configured agent principal
+  SHALL be **OS-separable** from the deployment-owner protected-admin authority —
+  a distinct OS account whose write authority to `<HPAC_PROTECTED_ROOT>` the
+  configured agent principal provably lacks (HBDC-REQ-001/002).
+- **HPAC-PAWA-REQ-130.** If the configured agent principal and the deployment
+  owner share identical effective protected-root write authority (a
+  single-account host, or a misconfigured two-account host where the agent has
+  ACL / group write), **REAL `PRODUCTION` writer issuance is INELIGIBLE** —
+  `_validate_production_boundary` raises, recognition fails closed
+  (`agent_has_protected_write_authority` / `protected_root_untrusted`), and **no
+  `PRODUCTION` writer is minted**. Fail closed — never a downgrade to a weaker
+  check (PAWA-INV-7).
+
+## 62. Local / offline
+
+- **HPAC-PAWA-REQ-131.** HPAC-PAWA-001 v1.0 is fully local and offline: **no
+  network service, no cloud token, no external identity provider, no online key
+  verification, no remote attestation**. Provisioning, descriptor read, the
+  write probe, and generation-record I/O are local filesystem operations.
+
+## 63. macOS / Linux abstraction
+
+- **HPAC-PAWA-REQ-132.** HPAC-PAWA-001 freezes **normative security properties**,
+  not implementation-specific commands. On both macOS and Linux: (a) a
+  protected-root admin authority (a deployment owner) exists and owns
+  `<HPAC_PROTECTED_ROOT>`; (b) the configured agent principal provably lacks
+  write authority to it and its safe-ancestor chain; (c) ownership / mode / ACL
+  state is verifiable; (d) a positive `O_EXCL|O_NOFOLLOW` write probe is
+  available; (e) no repo / caller / env / cwd influence on any of the above.
+  Implementation adapters MAY differ per OS under `.1R.30R.3`;
+  `_effective_write_access` / `_ancestor_chain_safe` already span both.
+
+## 64. No keychain / pinned-key requirement
+
+- **HPAC-PAWA-REQ-133.** Because the adjudication rejected Candidate C
+  (admin-signed record + pinned key) and Candidate D (OS keychain / keyring) for
+  v1.0, HPAC-PAWA-001 v1.0 does **not** require: an administrator signing key; a
+  pinned public verification key; an OS keychain secret; a keyring secret; a
+  password / passphrase store. The implementation SHALL NOT reintroduce any of
+  these as an authority input. A future **MAJOR** MAY add a signing model if a
+  remote / multi-host topology is authorised (§80).
+
+## 65. HBDC relationship
+
+- **HPAC-PAWA-REQ-134.** HBDC-001 v1.2 is **precedent, not a shared authority
+  root**. HPAC-PAWA-001 has its **own** protected root and namespace
+  (`<HPAC_PROTECTED_ROOT>/.authority/`, distinct from the HATP trust store), its
+  **own** descriptor (`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0`), its **own** writer
+  capability (`PRODUCTION` `HPACWriterCapability`), its **own** consumer
+  inventory, and its **own** audit lifecycle. There is **no cross-subsystem
+  bearer authority**: an HPAC `PRODUCTION` writer capability never authorizes a
+  HATP write and vice versa (HPAC-REQ-018/084 discipline).
+
+## 66. HBDC direct-reference boundary
+
+- **HPAC-PAWA-REQ-135.** HPAC-PAWA-001 MAY normatively reference HBDC-001 as
+  precedent or source model, but HPAC correctness SHALL NOT depend on mutable
+  HBDC runtime state, an HBDC `DeploymentBinding`, an HBDC certification, or the
+  HATP trust store. Every load-bearing PAWA requirement is stated explicitly in
+  this document; an HBDC citation is evidence of precedent, not a live
+  dependency. (The one genuinely shared *code* primitive —
+  `hatp_class_b_topology_verifier._effective_write_access` /
+  `_ancestor_chain_safe`, already imported by `hpac_foundation.py` — is a shared
+  library, HPAC-REQ-019, not a shared trust root.)
+
+## 67. No runtime human approval
+
+- **HPAC-PAWA-REQ-136.** Hard invariant:
+
+  ```
+  PRODUCTION HPACWriterCapability  !=  AuthenticatedHumanPrincipal
+                                   !=  approval proof
+                                   !=  informed intent
+                                   !=  runtime approval
+  ```
+
+  The deployment-owner protected administration may **enroll / revoke
+  credentials and principals**; it does **not** approve runtime operations
+  (PAWA-INV-2).
+
+## 68. No PB / RE override
+
+- **HPAC-PAWA-REQ-137.** A `PRODUCTION` writer capability: does not satisfy
+  Permission Broker; does not satisfy Runtime Enforcement; does not override a
+  no-go; does not create a `DispatchEnvelope`; does not enable the runtime; does
+  not transition the runtime out of `Observed` / `observe` / `unavailable`. Even
+  a fully successful anchor recognition + registry write leaves every runtime
+  gate exactly where it was (PAWA-INV-8; RHAMP-REQ-159/160).
+
+## 69. No FIDO2 requirement for first bootstrap
+
+- **HPAC-PAWA-REQ-138.** Bootstrap non-circularity: the initial protected-admin
+  anchor installation (§23) **precedes** FIDO2 credential enrollment and does
+  **not** require an existing RHAMP credential, an `AuthenticatedHumanPrincipal`,
+  or any prior PCAE principal. Requiring FIDO2 for the *deployment owner* would
+  recreate the exact circular dependency the adjudication rejects (FIDO2
+  enrollment needs the writer; the writer would need FIDO2). Later routine admin
+  actions MAY, in a future version, require a stronger human ceremony — v1.0's
+  bootstrap does not depend on one unless parent source says otherwise
+  (PAWA-INV-4).
+
+## 70. Future implementation flow
+
+- **HPAC-PAWA-REQ-139.** The conceptual flow `.1R.30R.3` SHALL realise:
+
+  ```
+  out-of-band PAWA provision (deployment owner)
+    -> canonical <HPAC_PROTECTED_ROOT> + .authority/manifest + descriptor@gen1
+       + current-generation.json@1 + provisioning provenance
+  admin operation begins (authorized consumer, run as the deployment owner)
+    -> production_writer(operation, principal_id=/credential_id=/transaction)
+       -> §33 sequence 1..9 (all pass)
+       -> mint process-local, operation-scoped PRODUCTION HPACWriterCapability
+       -> record HPAC-PAWA-ISSUANCE-EVIDENCE/1.0
+    -> HumanPrincipalRegistryStore.<enroll_*|revoke_*>(capability, ...)
+       -> require_writer(role, subject) + writer_transaction
+          (expected_current compare-and-write, read-back verified)
+       -> exactly one bounded mutation
+    -> RHAMP-REQ-051 enrollment evidence where the op is an enrollment
+    -> capability is spent / discarded; the tool process exits
+  ```
+
+## 71. Future FIDO2 enrollment flow
+
+- **HPAC-PAWA-REQ-140.** The RHAMP-001 first-credential enrollment consumes
+  **this same** bounded writer capability boundary and embeds **no** second
+  admin-authority model:
+
+  ```
+  production_writer('enroll_credential', principal_id=P, transaction=T)
+    -> PRODUCTION HPACWriterCapability (bound to P + T)
+    -> RHAMP-001 §13 registration ceremony (protected presentation, UP+UV
+       makeCredential, verify)
+    -> enroll_credential(capability, ...) writes CredentialRecord (fresh
+       hpc-<hex>) + RHAMP-FIDO2-CREDENTIAL/1.0 sidecar + RHAMP-COUNTER-STATE/1.0
+       (atomic, read-back verified)
+    -> RHAMP-REQ-051 enrollment evidence
+    -> NO runtime approval authority is created
+  ```
+
+## 72. Future recovery flow
+
+- **HPAC-PAWA-REQ-141.** HPAC-PAWA-001 MAY authorize, as **administrative**
+  operations only: credential revocation; credential replacement (revoke + fresh
+  enroll under the same principal); credential re-enrollment; and
+  total-credential-loss recovery (repeat the RHAMP-001 bootstrap ceremony under a
+  fresh `PRODUCTION` writer). It SHALL NOT provide a **fallback from a failed
+  runtime approval to a PAWA writer** — a failed approval is a runtime outcome;
+  PAWA never stands in for it (RHAMP-REQ-050 discipline).
+
+## 73. Contract-production traceability
+
+- **HPAC-PAWA-REQ-142.** `.1R.30R.3` (implementation) and `.1R.30R.4` (IV) SHALL
+  map every load-bearing HPAC-PAWA-001 clause to exact production-source and test
+  evidence — no prose-only security guarantee (RHAMP-REQ-164 discipline). At
+  minimum: root resolution (§25); configured-agent-principal resolution source
+  (§9 / F-1); configured-agent exclusion (§26); descriptor schema + closed-field
+  validation (§14); root-identity binding (§16); generation + rollback
+  prevention (§20, §21); the `O_EXCL|O_NOFOLLOW` write probe (§28); the
+  not-configured-agent current-context check (§31); consumer authorization + the
+  consumer-inventory guard (§32, §39); capability minting + seal discipline
+  (§36); operation / principal / credential scope (§42–§44); process-local /
+  non-bearer / non-serializable (§45–§47); restart invalidation (§48); one-
+  operation lifetime (§49); rotation / revocation (§50, §51); bootstrap
+  non-circularity (§23, §69); the issuance / provisioning audit records (§54,
+  §55); the failure taxonomy and its RHAMP mapping (§56, §57).
+
+## 74. Future implementation source boundary
+
+- **HPAC-PAWA-REQ-143.** The expected `.1R.30R.3` production surface,
+  conceptually (this phase implements none of it): the new admin writer module +
+  `production_writer` factory; the new `provision` / rotation / revoke script;
+  the `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` +
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` + `HPAC-PAWA-ISSUANCE-EVIDENCE/1.0` schema
+  helpers; `HumanPrincipalRegistryStore` production writer path (schema
+  byte-unchanged); the RHAMP-001 sidecar / counter-state stores; the
+  protected-admin enrollment + first-credential bootstrap tool; `FIDO2HumanAuthenticator`
+  and the `hpac_verifier` real-assertion path (RHAMP-001 territory, same phase).
+  **This phase implements none of it.**
+
+## 75. Future consumer guards
+
+- **HPAC-PAWA-REQ-144.** `.1R.30R.3` SHALL add guard tests for: importers of the
+  PAWA writer factory module; production consumers of `production_writer`;
+  writers of the authority descriptor / generation record;
+  provisioning / recovery / rotation entrypoints. **No wildcard allowlists**
+  (PAWA-INV-9).
+
+## 76. Future IV requirements
+
+- **HPAC-PAWA-REQ-145.** `.1R.30R.4` (IV of `.1R.30R.3`) SHALL, at minimum,
+  independently verify: descriptor canonicality + closed schema; the
+  configured-agent (not `geteuid()`) exclusion (F-1); the two-principal
+  requirement (§61); write-probe semantics (`O_EXCL|O_NOFOLLOW` create-and-unlink,
+  not `os.access`); path / symlink attacks on the root, `.authority/`, the
+  descriptor, and the probe target; rollback of an old descriptor (F-3);
+  generation rotation and monotonicity; a wrong-`installation_id` descriptor; a
+  cloned descriptor / cloned whole root; a direct factory call from an
+  unauthorized consumer; same-UID / agent-has-write denial; direct
+  `HumanPrincipalRegistryStore` bypass without a valid capability; capability
+  copy / deepcopy / pickle / `object.__new__` reconstruction; restart
+  invalidation; wrong principal scope; wrong credential scope; wrong mutation
+  class; a revoked anchor; a partial / interrupted bootstrap; a machine
+  migration; audit-record non-authority; that RHAMP-001 first-credential
+  enrollment consumes a PAWA capability correctly; that PAWA cannot create a
+  runtime approval; that the runtime posture and first-effect-absent guards are
+  unchanged.
+
+## 77. Implementation successor (finding F-2)
+
+- **HPAC-PAWA-REQ-146.** **`.1R.30R.3`, NOT `.1R.30R.2`, is the fresh
+  implementation successor.** `.1R.30R.2` (this phase) is the **contract-freeze**
+  phase. Implementation needs the frozen contract first (`.1R.30R` §21.1
+  precondition 1). The `.1R.30R` doc's §21.4 heading and §24 summary line, which
+  said `.1R.30R.2` = implementation, are erroneous; the dominant statement
+  (`.1R.30R` §21.5 table, §24 downstream-sequence line, PROJECT_STATUS,
+  completion metadata) and the `.1R.30R.1` IV (§21, §27.4) are correct. This
+  contract records the correction; **no `.1R.30R` doc edit is required or made by
+  this phase.**
+- **HPAC-PAWA-REQ-147.** Recommended `.1R.30R.3` title:
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3 — N-16-5 Production Protected-Admin Writer
+  Anchor + Real FIDO2 Credential Registry and Authentication Mechanism
+  Implementation` (or a repository-derived exact title). It realises the
+  originally intended historical `.1R.30` scope from the adjudicated + frozen
+  baseline; it is **NOT** a resumed `.1R.30`. Historical `.1R.30` remains
+  immutable **BLOCKED**, never reused, never resumed (CPIPC-001 §4;
+  PAWA-INV-11).
+
+## 78. Downstream sequence
+
+- **HPAC-PAWA-REQ-148.** The frozen downstream sequence (phase IDs
+  **recommended, NOT reserved**; each its own explicitly human-authorized phase
+  with its own IV pair):
+
+  | ID | Scope |
+  |---|---|
+  | `.1R.30R.2` | **this phase** — HPAC-PAWA-001 v1.0 contract freeze |
+  | `.1R.30R.3` | fresh writer-anchor + registry + FIDO2 mechanism implementation (the historical `.1R.30` scope, adjudicated + frozen baseline) |
+  | `.1R.30R.4` | independent verification of `.1R.30R.3` |
+  | `.1R.30R.5` | protected human-approval presentation + real approval-proof integration + `require_real_assurance = True` wiring through Gate 5 / Gate 9 (the old `.1R.32` scope) |
+  | `.1R.30R.6` | IV of `.1R.30R.5` + mandatory real-CTAP2-hardware verification (RHAMP-REQ-152) + **N-16-5 closure** |
+
+- **HPAC-PAWA-REQ-149.** **No phase in this sequence is automatically
+  authorized.** Each requires its own separate explicit human authorization.
+
+## 79. N-16-6 / N-16-7 order
+
+- **HPAC-PAWA-REQ-150.** After N-16-5 closes: **N-16-6** (RPAC-REQ-095 fixed-argv
+  external-executable adapter + supply-chain admission), **then N-16-7**
+  (runtime capability enablement `Observed → Approved/Executable`) **strictly
+  last**. **No Slice C** until N-16-3..7 all close. HPAC-PAWA-001 does not begin,
+  reference, or unblock N-16-6 or N-16-7 (RHAMP-REQ-157 discipline).
+
+## 80. Contract versioning
+
+- **HPAC-PAWA-REQ-151.** HPAC-PAWA-001 uses contract `MAJOR.MINOR`. **v1.0 is
+  the initial freeze.** Unknown versions fail closed.
+- **HPAC-PAWA-REQ-152.** A change that does any of the following requires a new
+  **MAJOR** plus explicit human authorization and independent verification:
+  making `sudo` / `euid` / any environment variable sufficient authority;
+  collapsing or removing the configured-agent exclusion; permitting a
+  same-principal agent / deployment-owner topology; introducing a remote /
+  network / cloud authority service or transport; making the writer capability
+  bearer, durable, serialisable, or reusable across operations; broadening the
+  capability into runtime approval / PB permission / RE result / runtime
+  capability / execution; changing the bootstrap trust root away from OS
+  filesystem write authority on the out-of-band-provisioned protected root;
+  removing the `generation` / rollback-prevention protection; adding a signing
+  key / pinned key / keychain requirement as an authority input; widening the
+  authorized-consumer inventory by wildcard / prefix / glob.
+- **HPAC-PAWA-REQ-153.** A **MINOR** may: re-state verified behaviour; add a
+  `pawa_failure_code` for a genuinely new terminal path **without** removing or
+  re-meaning an existing one, provided the RHAMP-001 §49 mapping (§57) still
+  resolves; add an authorized-consumer **category** by explicit enumeration
+  (never wildcard); tighten (never loosen) a bound; clarify a
+  platform-adapter detail; or add an additional macOS / Linux adapter within the
+  frozen normative properties (§63) — provided no meaning above changes.
+- **HPAC-PAWA-REQ-154.** No future HPAC-PAWA-001 version may retrospectively
+  widen an already-minted capability's granted scope or an already-provisioned
+  anchor's authority.
+
+## 81. Existing-contract byte identity
+
+- **HPAC-PAWA-REQ-155.** At finalization, `.1R.30R.2` SHALL independently prove
+  **byte-unchanged**: HPAC-001 v2.1; RHAMP-001 v1.0; RIHAC-001 v2.0; RIASC-001
+  v3.0; HPSE-001 v1.1; HHCE-001; `HPAC-AUTHORITY-CONSUMPTION` (`/2.1`); HBDC-001
+  v1.2; REPRC-001 v1.0; PBNDE-001 v1.0; RDGO-001 v3.1; RPAC-001 v1.0; the RE
+  No-Go Registry; and every other unrelated contract. The **only** new normative
+  file is `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`
+  (HPAC-PAWA-001 v1.0).
+
+## 82. No production source change
+
+- **HPAC-PAWA-REQ-156.** Hard requirement: `git diff <phase-entry> HEAD --
+  src/pcae` is **empty** for `.1R.30R.2`. No production implementation, no
+  non-production source file.
+
+## 83. Normative contract scope
+
+- **HPAC-PAWA-REQ-157.** Hard requirement: `git diff --name-only <phase-entry>
+  HEAD -- docs/contracts` contains **exactly one new file** (this contract) and
+  **no existing contract edit**.
+
+## 84. No test implementation
+
+- **HPAC-PAWA-REQ-158.** This contract-freeze phase adds no functional
+  implementation test and manufactures no functional success evidence. Any
+  contract-traceability test, if the repository's convention wants one, stays
+  contract-only and non-production. The ≥ 24-case IV matrix (§76) and the
+  contract-production traceability obligation (§73) are **specifications for
+  `.1R.30R.3` / `.1R.30R.4`**, not tests authored now.
+
+## 85. Runtime
+
+- **HPAC-PAWA-REQ-159.** Runtime SHALL remain: State `Observed`; Maximum
+  Capability `observe`; Execution Availability `unavailable`; Plugins `0`;
+  Capabilities `0`. This contract changes none of it.
+
+## 86. First external effect
+
+- **HPAC-PAWA-REQ-160.** The first external effect SHALL remain **ABSENT**. No
+  `adapter.dispatch()` production path, no Slice C, no runtime effect adapter, no
+  shell execution authority. The `PRODUCTION` writer capability writes only the
+  protected registry / sidecar / counter-state stores — a **protected local
+  filesystem write**, never an external effect.
+
+## 87. N-16-5 status
+
+- **HPAC-PAWA-REQ-161.** On a clean `.1R.30R.2`: **N-16-5 —
+  WRITER-ANCHOR CONTRACT FROZEN — IMPLEMENTATION PENDING — NOT CLOSED.**
+  Adjudication VERIFIED (`.1R.30R.1`); companion contract FROZEN (this phase);
+  implementation not begun.
+
+## 88. N-16-6 / N-16-7
+
+- **HPAC-PAWA-REQ-162.** N-16-6 and N-16-7 remain **OPEN and untouched**;
+  N-16-7 strictly last.
+
+## 89. N-23-1 / N-23-2
+
+- **HPAC-PAWA-REQ-163.** N-23-1 (INFO) and N-23-2 (INFO / DEFERRED NORMALIZATION
+  DEBT) are carried **unchanged**. HPAC-PAWA-001 does not normalize PBRD / PBNDE
+  semantics.
+
+## 90. Contract-freeze verdict
+
+```
+HPAC PRODUCTION PROTECTED ADMINISTRATION WRITER ANCHOR CONTRACT:
+
+HPAC-PAWA-001 v1.0 — FROZEN
+HPAC-001 v2.1 — UNCHANGED (no bump)
+RHAMP-001 v1.0 — UNCHANGED (byte-identical)
+HBDC-001 v1.2 — UNCHANGED (precedent only; not a shared authority root)
+
+PRODUCTION PROTECTED-ADMIN WRITER ANCHOR: CONTRACT FROZEN — NOT IMPLEMENTED
+
+  TRUST ROOT        = OS filesystem write authority on the out-of-band-
+                      provisioned <HPAC_PROTECTED_ROOT>, the CONFIGURED agent
+                      principal provably excluded (finding F-1)
+  POSITIVE RECOG.   = fixed-root + not-(configured-)agent-writable + safe
+                      ancestors  +  root-identity-bound .authority/
+                      deployment-owner descriptor (closed schema, explicit
+                      monotonic generation + rollback prevention — finding F-3)
+                      +  O_EXCL|O_NOFOLLOW positive write probe  +
+                      not-(configured-)agent current-context  +
+                      authorized-factory-consumer   [all six required, §33]
+  CAPABILITY ISSUER = new PRODUCTION writer factory in a non-agent-importable
+                      module, exact consumer-inventory guarded (no wildcard)
+  CAPABILITY SCOPE  = one operation, one principal/credential, process-local,
+                      non-serializable, non-bearer, restart-invalid,
+                      one-operation lifetime
+  BOOTSTRAP         = one-time out-of-band deployment-owner provision;
+                      create-only; non-recurring; not agent-reachable;
+                      NON-CIRCULAR (no existing HPACWriterCapability, no FIDO2)
+  ROTATION          = explicit; generation += 1; monotonic current-generation
+                      anchor record; old generation cannot mint
+  REVOCATION        = deployment-owner filesystem replace/remove/mark;
+                      state {ACTIVE, SUPERSEDED, REVOKED}; revoked -> fail closed
+  MIGRATION         = new installation_id + fresh root identity + generation 1;
+                      copying files alone is never sufficient
+  FAILURE TAXONOMY  = 21 closed pawa_failure_code values; deterministic map onto
+                      RHAMP-001 v1.0 §49 codes #1 / #2 / #40 / #41 — NO new
+                      terminal_reason_code
+  SAME-UID EXCLUSN  = no write access + no importability + seal identity +
+                      __reduce__ raising + live re-probe; single-account host ->
+                      no PRODUCTION root -> writer unavailable (fail closed)
+
+FINDINGS INCORPORATED:
+  F-1  per-predicate identity matrix (§10); every predicate names the exact
+       identity it evaluates; the negative boundary keys off the CONFIGURED
+       agent principal, not os.geteuid(), on the writer path (§9, §26, §62)
+  F-2  .1R.30R.3 (not .1R.30R.2) is the implementation successor (§77);
+       .1R.30R.2 = contract freeze; historical .1R.30 immutable BLOCKED
+  F-3  explicit monotonic descriptor generation + current-generation anchor
+       record + rollback-prevention rule (§20, §21)
+
+Runtime: not_implemented / Observed / observe / unavailable; 0 plugins /
+0 capabilities. First external effect: ABSENT. N-16-5: NOT CLOSED.
+N-16-6 / N-16-7: OPEN, untouched, N-16-7 last. N-23-1 / N-23-2: carried.
+
+RECOMMENDED NEXT PHASE: 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3 — N-16-5 Production
+Protected-Admin Writer Anchor + Real FIDO2 Credential Registry and
+Authentication Mechanism Implementation. Own explicit human authorization
+required. Do not begin it.
+
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
+```
+
+## 91. Requirement inventory
+
+**Requirement count:** HPAC-PAWA-001 v1.0 defines **163** requirements,
+`HPAC-PAWA-REQ-001` through `HPAC-PAWA-REQ-163` inclusive, sequential, no gaps,
+no duplicates.
+
+**Invariant count:** 11 — `PAWA-INV-1` through `PAWA-INV-11` (§92, below).
+
+## 92. Security invariants (PAWA-INV-1 .. PAWA-INV-11)
+
+- **PAWA-INV-1.** `euid == 0`, a `sudo` invocation, and any `SUDO_*` /
+  environment variable are **never**, in whole or in part, the positive
+  deployment-owner recognition predicate; `euid == 0` alone mints nothing
+  (§34, §35).
+- **PAWA-INV-2.** A `PRODUCTION` `HPACWriterCapability` is **not** an
+  `AuthenticatedHumanPrincipal`, an approval proof, informed intent, or runtime
+  approval; the deployment owner enrolls/revokes credentials, never approves
+  runtime operations (§67).
+- **PAWA-INV-3.** Correct path + valid closed structure is **never** a trusted
+  descriptor: ownership/mode + root-identity binding + current generation +
+  provisioning provenance + `state == ACTIVE` + (for minting) configured-agent
+  exclusion + positive write probe + not-configured-agent context are all
+  additionally required (§18, §33).
+- **PAWA-INV-4.** The one-time out-of-band bootstrap requires **no** existing
+  `HPACWriterCapability` and **no** FIDO2 credential — it is a filesystem
+  provisioning act by the OS deployment owner, outside PCAE's authority model
+  (non-circular; §23, §69).
+- **PAWA-INV-5.** A descriptor or whole protected root copied to another
+  installation does **not** automatically validate — the `{device, inode}`
+  root-identity binding and `installation_id` catch it (§16, §22, §53).
+- **PAWA-INV-6.** HPAC-PAWA-001 protects against the configured agent principal,
+  the same normal-user domain on a two-principal deployment, and
+  repository/caller/environment/cwd/task/Git/session influence; it does **not**
+  defend against a fully compromised OS root/admin account (§8, §60).
+- **PAWA-INV-7.** Where the two-OS-principal topology is absent (or the agent
+  holds protected-root write authority), REAL `PRODUCTION` writer issuance is
+  **ineligible** and no capability is minted — fail closed, never a downgrade
+  (§25, §61).
+- **PAWA-INV-8.** A PAWA failure is an administrative writer failure; it is
+  **never** a PB decision, a Runtime Enforcement reason id, a runtime-capability
+  reason, a `Gate7Result` field, or a `DispatchEnvelope` rejection; the PAWA and
+  runtime vocabularies stay separate (§58, §68).
+- **PAWA-INV-9.** The authorized-consumer inventory is an **exact** enumerated
+  list; no wildcard, prefix, `fnmatch`, or glob broadening is ever valid; a new
+  consumer fails the guard until explicitly enumerated **and** the contract is
+  amended (§38, §39, §75).
+- **PAWA-INV-10.** Audit evidence (provisioning provenance, issuance evidence,
+  enrollment evidence) proves a write happened; it is **never** capability and
+  never bearer authority (§54).
+- **PAWA-INV-11.** Historical `.1R.30` is immutable **BLOCKED** — never reused,
+  never resumed, never relabelled; the fresh implementation successor is
+  `.1R.30R.3` (§77, CPIPC-001 §4).
+
+## 93. Contract self-consistency statement
+
+This contract: (a) introduces no dependency, in either direction, on
+`src/pcae/**` or `scripts/**` — it references existing modules / functions /
+symbols by name in normative text only, and imports / executes nothing;
+(b) does not amend HPAC-001, RHAMP-001, HBDC-001, or any other contract's byte
+content; (c) creates no protected state, OS principals, filesystem permissions,
+descriptors, or writer capabilities; (d) is internally traceable — every
+`HPAC-PAWA-REQ-###` ID is sequential from 001 with no gaps and no duplicates,
+and every `PAWA-INV-#` referenced elsewhere appears in §92 exactly once;
+(e) leaves runtime `not_implemented` / `Observed` / `observe` / `unavailable`
+and the first external effect ABSENT.
+
+## 94. Contract versioning history
+
+HPAC-PAWA-001 was frozen as **v1.0** by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2
+— the positive production protected-admin writer anchor for HPAC-REQ-022/023,
+adjudicated by `.1R.30R` and independently verified by `.1R.30R.1`, made into a
+precise normative companion contract before any writer-anchor implementation
+attempt. v1.0 requires its own independent verification — folded into
+`.1R.30R.4` or run as a dedicated phase — before its own text is relied upon as
+settled.
+
+## 95. Expected contract verdict
+
+```
+HPAC PRODUCTION PROTECTED ADMINISTRATION WRITER ANCHOR CONTRACT:
+HPAC-PAWA-001 v1.0 — FROZEN
+— PRODUCTION WRITER ANCHOR CONTRACT FROZEN — NOT IMPLEMENTED
+— NO PRODUCTION SOURCE CHANGE
+— NO HPAC-001 BUMP — NO RHAMP-001 CHANGE — NO EXISTING-CONTRACT CHANGE
+— F-1 / F-2 / F-3 INCORPORATED
+— RUNTIME Observed / observe / unavailable
+— FIRST EXTERNAL EFFECT ABSENT
+— N-16-5 NOT CLOSED
+```
+
+## 96. Recommended next phase
+
+**149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3 — N-16-5 Production Protected-Admin Writer
+Anchor + Real FIDO2 Credential Registry and Authentication Mechanism
+Implementation.** It requires its own separate explicit human authorization
+(ID recommended, NOT reserved). It SHALL implement: the `PRODUCTION` writer
+factory in a non-agent-importable module + the exact consumer-inventory guard;
+the `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` + `HPAC-PAWA-CURRENT-GENERATION/1.0` +
+`HPAC-PAWA-ISSUANCE-EVIDENCE/1.0` schema helpers and validation; the out-of-band
+`provision` / rotation / revoke script; the §33 positive validation sequence
+(F-1 per-predicate identity); `HumanPrincipalRegistryStore` production writer
+path (`CredentialRecord` byte-unchanged); the RHAMP-001 `RHAMP-FIDO2-CREDENTIAL/1.0`
+sidecar and `RHAMP-COUNTER-STATE/1.0` stores; the protected-admin enrollment +
+first-credential bootstrap tool; `FIDO2HumanAuthenticator` for
+`hpac.fido2.uv_presence.v2`; real CTAP2 assertion verification in `hpac_verifier`
+incl. the `FLAG.UV` check; `_ELIGIBLE_MECHANISM_IDS += {hpac.fido2.uv_presence.v2}`;
+`terminal_reason_code` wiring (41-code vocabulary). **No protected approval UI.
+No real approval-authority production path. No N-16-6 / N-16-7. No Slice C. No
+first external effect. No execution enablement.** Then `.1R.30R.4` (IV) →
+`.1R.30R.5` (protected presentation + real-assurance wiring) → `.1R.30R.6`
+(IV + mandatory real-CTAP2-hardware verification + N-16-5 closure) → N-16-6 →
+N-16-7 (strictly last). **Do not begin `.1R.30R.3`.**
