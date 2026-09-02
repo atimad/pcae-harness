@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3: IV of HPAC-PAWA-001 v1.1 configured
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -28,6 +28,7 @@ Independently verify HPAC-PAWA-001 v1.1 (HPAC-PAWA-AGENT-EXCLUSION/1.0, R1-HYBRI
 - docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_2A_3_INDEPENDENT_VERIFICATION_HPAC_PAWA_001_V1_1_CONFIGURED_AGENT_PRINCIPAL_RESOLUTION_SOURCE_CONTRACT_FREEZE.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/DECISIONS.md
 - tasks/**
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
