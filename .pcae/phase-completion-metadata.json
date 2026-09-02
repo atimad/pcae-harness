@@ -25,6 +25,9 @@
     "no_test_weakening": "0 existing test changes; new suite contains 0 skip/skipif/pytest.skip/xfail"
   },
   "validation_results": {
+    "fast_green": "290 passed, 0 failed, 0 skipped, 0 errors: 10 fresh blocker tests plus 280 unchanged RHAMP/PAWA/presentation/Gate regression tests",
+    "report_notification_tests": "not applicable: no report/notification implementation changed; governed finalization exercises notification",
+    "bootstrap_session_reporting_tests": "health/check/coherence/session/report trust exercised through governed lifecycle",
     "phase_entry": "A=0d5c3ad15a00f57525bb96b08a0e5c0d3a32de86, finalized .30R.3.6.1 head; clean and origin/main..HEAD=0 at entry",
     "lineage": "Decision A .30R.3.3R explicitly reassigns .30R.4 from redundant composite IV to RHAMP-REQ-156 .1R.32 protected-presentation implementation; phase identity is valid and not the blocker",
     "blocking_reproduction": "production_writer('install_presentation_mechanism') rejects with pawa_failure_code operation_scope_invalid because it is not a §42 mutation class; production PresentationMechanismDescriptorStore cannot mint fixture_installer and raises no production HPAC writer",
@@ -38,7 +41,7 @@
     "pcae_check": "passed before finalization",
     "pcae_status_coherence": "coherent before finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing historical omissions; current phase task closed and recorded",
-    "pcae_push_check": "pending governed push",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
