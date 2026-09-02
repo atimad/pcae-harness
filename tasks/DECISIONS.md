@@ -3745,3 +3745,111 @@
   first external effect; no execution enablement. Runtime `Observed` /
   `observe` / `unavailable`. N-16-5 NOT CLOSED. `DELEGATED .3 FINALIZATION /
   COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1 — IV of the .1R.30R Production Protected-Admin Writer Anchor Adjudication (2026-09-02)
+
+**Verdict: ADJUDICATION VERIFIED** (not BLOCKED; 3 non-blocking findings →
+`.1R.30R.2`). Verification-entry SHA `ca0d4287`.
+`git diff 8e655295 HEAD -- src/pcae` and `-- docs/contracts` both empty.
+
+- **Gap reproduced independently.** One `HPACWriterCapability(` construction
+  site in `src/pcae` (`hpac_foundation.py:425`, inside `writer()` which raises
+  for every non-`FIXTURE_NON_REAL` class); no `production_writer` /
+  `deployment_owner` / `ProductionWriter` symbol anywhere;
+  `HumanPrincipalRegistryStore._writer` has no third path. The negative
+  boundary (`_validate_production_boundary` → `_effective_write_access` /
+  `_ancestor_chain_safe`) is present and correct. `.1R.30` correctly STOPPED
+  (BLOCKED) per RHAMP-REQ-049 / RHAMP-INV-005.
+- **HPAC-REQ-023 is an OS-authority / installation-role construct.** Exact
+  text: "externally established deployment-owner administration principal …
+  not by ordinary same-UID machine access … external OS/equivalent trust
+  anchor". Not a specific-human cryptographic identity. → OS filesystem write
+  authority on an admin-owned protected root **satisfies** it; the
+  privileged-wrong-principal / root-in-TCB concern does **not** reach BLOCKED
+  (HBDC-001 §18 root-compromise limit, inherited).
+- **Candidate E composition** justified per-conjunct (fixed-root resolution,
+  not-agent-writable root+ancestors, `{device,inode}` root-identity manifest,
+  root-identity-bound `.authority/` descriptor + provenance, `O_EXCL|O_NOFOLLOW`
+  positive write probe, not-agent-identity, non-agent-importable module,
+  consumer-inventory guard, per-instance seal + `__reduce__` raise + restart
+  invalidation, operation/principal scope) — none redundant or cosmetic.
+  Candidates B (`sudo`/`euid` — `_FORBIDDEN_SELF_ELEVATION_ATTRS` /
+  `_SUSPICIOUS_ENV_KEY_SUBSTRINGS` / HBDC-REQ-004), C (signed record + pinned
+  key — collapses to A, adds a bearer secret), D (keychain/keyring —
+  same-UID-readable, not portable) independently re-rejected.
+- **HBDC-001 Class-B is a valid, structurally-identical, IV'd precedent**
+  (two distinct OS principals HBDC-REQ-001/002; "OS filesystem write permission
+  on the Protected Root, never an in-process check"; fixed platform paths, no
+  agent auto-create HBDC-REQ-011/012; admin write ≠ runtime execution authority
+  HBDC-REQ-010). The `_effective_write_access` / `_ancestor_chain_safe`
+  primitives are already shared (`hpac_foundation.py` imports
+  `hatp_class_b_topology_verifier`). `.1R.30R` proposes mechanical replication
+  under the HPAC namespace — not literal reuse, not loose analogy. HPAC should
+  NOT normatively reference HBDC-001 directly (separate protected root,
+  namespace, consumer set, capability type; avoids HATP-trust coupling
+  HPAC-REQ-018 forbids).
+- **non-agent-importable module + consumer-inventory guard** is an existing
+  enforceable PCAE pattern:
+  `tests/test_hatp_deployment_binding_admin.py::test_module_not_imported_by_cli_or_agent_reachable_code`
+  (HBDC-REQ-056/066) + `test_admin_script_exists_and_is_not_a_pcae_cli_subcommand`.
+- **Contract verdict confirmed: NEW COMPANION CONTRACT REQUIRED** —
+  `HPAC-PAWA-001 v1.0`. HPAC-001 §37 bar: a MINOR would force re-IV of an
+  actively-referenced frozen contract + a parent cascade (RIHAC-001 §12 cond 7
+  / RHAMP-001 pin "HPAC-001 v2.1"; RHAMP-INV-016); a MAJOR removes/relaxes
+  nothing. RHAMP-REQ-047 externalises the anchor mechanics by its own text
+  ("owns the deployment-scoped protected root … unavailable to … same-user
+  agent execution … This is the trust anchor"); RHAMP-REQ-167's "changing the
+  first-credential bootstrap authority model" is NOT triggered — the model is
+  unchanged. → HPAC-001 stays v2.1; RHAMP-001 stays v1.0 byte-unchanged.
+  Precedent: REPRC-001 / PBNDE-001 / RHAMP-001.
+
+**Non-blocking findings for `.1R.30R.2` (HPAC-PAWA-001 v1.0 freeze):**
+
+- **F-1 — per-predicate identity.** `_validate_production_boundary` keys its
+  "not agent-writable" test off `_current_agent_identity()` == live
+  `os.geteuid()`. In a compliant two-principal deployment the writer tool runs
+  **as the admin principal**, so `os.geteuid()` is the admin uid and
+  `_effective_write_access(root, admin_uid, …)` returns `True` → the negative
+  check would **raise** for a legitimate admin invocation. `HPAC-PAWA-001` and
+  `.1R.30R.3` SHALL key the negative boundary check off the **configured** agent
+  principal (HBDC §3 `PCAE_AGENT_PRINCIPAL`), not `os.geteuid()`, on the
+  production-writer path — a localized change (`_effective_write_access` already
+  parameterizes uid/gids); trust root unaffected; verdict unchanged.
+- **F-2 — phase-ID discrepancy RESOLVED.** The `.1R.30R` adjudication doc
+  (§21.4 heading, §24 summary line), `PROJECT_STATUS.md`, and the `.1R.30R`
+  DECISIONS entry each said "fresh implementation successor = `.1R.30R.2`". The
+  §21.5 table, §24 downstream-sequence line, and completion metadata said
+  `.1R.30R.2` = HPAC-PAWA-001 contract freeze, `.1R.30R.3` = implementation.
+  **Resolution from canonical lifecycle rules:** `.1R.30R.1` = the mandated
+  adjudication IV; `.1R.30R.2` = the required contract-freeze phase (companion
+  precedent — each companion had its own freeze phase); implementation begins
+  only after `HPAC-PAWA-001 v1.0` is frozen (`.1R.30R` §21.1 precondition 1) →
+  **`.1R.30R.3` is the implementation successor.** The `.1R.30R` doc's §21.5
+  table + downstream-sequence line were already correct.
+- **F-3 — descriptor generation.** `HPAC-PAWA-001` SHALL freeze an explicit
+  descriptor generation / issued-at + monotonicity rule for the same-root
+  rollback case (`.1R.30R` names it as a failure category but does not fully
+  specify the field).
+
+**Phase-ID chain (recommended, NOT reserved).** `.1R.30R.1` (this IV) →
+`.1R.30R.2` (`HPAC-PAWA-001 v1.0` contract freeze — contract-only) →
+`.1R.30R.3` (N-16-5 production writer-anchor + real FIDO2 credential registry +
+authentication mechanism implementation — realises the originally intended
+`.1R.30` scope from the adjudicated + frozen baseline; **NOT** a resumed
+`.1R.30`) → `.1R.30R.4` (implementation IV) → `.1R.30R.5` (protected
+presentation + `require_real_assurance` wiring) → `.1R.30R.6` (IV + real CTAP2
+hardware + N-16-5 closure) → N-16-6 → N-16-7 (strictly last). No Slice C until
+N-16-3..7 all close.
+
+**Recommended next phase (exactly one):** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2`
+— HPAC-PAWA-001 v1.0 Production Protected-Admin Writer Anchor Contract Freeze.
+Own explicit human authorization required. Do not begin it.
+
+**Scope discipline.** `git diff 8e655295 HEAD -- src/pcae` empty;
+`-- docs/contracts` empty. No writer-anchor mechanism, no contract, no FIDO2,
+no credential/sidecar/counter store, no enrollment tool, no protected
+presentation, no approval proof, no `_ELIGIBLE_MECHANISM_IDS` change, no guard
+reconciliation, no N-16-6/N-16-7/Slice C, no real first external effect, no
+execution enablement. New IV suite adds no `def test_` removal/rename/skip.
+Runtime `Observed` / `observe` / `unavailable`. N-16-5 NOT CLOSED.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.

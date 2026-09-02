@@ -2,6 +2,98 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1 — Independent Verification of the
+.1R.30R Production Protected-Admin Writer Anchor Adjudication.
+**STATUS: COMPLETE — ADJUDICATION VERIFIED (not BLOCKED; 3 non-blocking
+findings → `.1R.30R.2`).** Verification-entry SHA `ca0d4287`.
+`git diff 8e655295 HEAD -- src/pcae` and `-- docs/contracts` are both **empty**.
+
+`.1R.30R.1` independently re-derived — from primary source (HPAC-001 v2.1 §7,
+RHAMP-001 v1.0 §14/§47–§50, HBDC-001 v1.2 §7/§10–§18, CPIPC-001 §4, and
+`hpac_foundation.py` / `human_principal_registry.py` /
+`hatp_class_b_topology_verifier.py` read as read-only evidence) — every
+`.1R.30R` conclusion:
+
+- **HPAC-REQ-022/023 gap** reproduced: the negative boundary
+  (`_validate_production_boundary`) is present and correct; the positive half
+  (recognise the external deployment-owner admin principal + mint a `PRODUCTION`
+  `HPACWriterCapability`) is **absent** — one `HPACWriterCapability(`
+  construction site in `src/pcae` (`hpac_foundation.py:425`, inside `writer()`
+  which refuses every non-fixture class); no `production_writer` /
+  `deployment_owner` symbol anywhere. `.1R.30` correctly STOPPED (BLOCKED) per
+  RHAMP-REQ-049 / RHAMP-INV-005.
+- **HPAC-REQ-023 is an OS-authority / installation-role construct** ("external
+  OS/equivalent trust anchor", "owns the deployment-scoped protected root"),
+  **not** a specific-human cryptographic identity — so OS filesystem write
+  authority on an admin-owned protected root **satisfies** it; the
+  privileged-wrong-principal / root-in-TCB concern does **not** reach BLOCKED.
+- **Candidate E composition** independently justified per-conjunct (none
+  redundant or cosmetic); Candidates B (`sudo`/`euid`), C (signed record +
+  pinned key), D (keychain/keyring) independently re-rejected.
+- **HBDC-001 Class-B** is a valid, structurally-identical, IV'd precedent
+  (two distinct OS principals; OS filesystem write permission is the boundary,
+  never `euid`/`sudo`/env — `_FORBIDDEN_SELF_ELEVATION_ATTRS` /
+  `_SUSPICIOUS_ENV_KEY_SUBSTRINGS`; admin write ≠ runtime execution authority).
+- **non-agent-importable module + consumer-inventory guard** is an existing,
+  enforceable PCAE pattern (`test_module_not_imported_by_cli_or_agent_reachable_code`,
+  HBDC-REQ-056/066).
+- **Contract verdict confirmed:** NEW COMPANION CONTRACT REQUIRED —
+  `HPAC-PAWA-001 v1.0`. HPAC-001 stays v2.1; RHAMP-001 stays v1.0
+  byte-unchanged (RHAMP-REQ-047 externalises the anchor mechanics by its own
+  text; RHAMP-REQ-167's "changing the bootstrap authority model" is NOT
+  triggered — the model is unchanged). REPRC-001 / PBNDE-001 / RHAMP-001
+  companion precedent.
+
+**Non-blocking findings for `.1R.30R.2` (HPAC-PAWA-001 v1.0 freeze):**
+- **F-1** — the negative boundary check must key off the **configured** agent
+  principal (HBDC §3 `PCAE_AGENT_PRINCIPAL`), **not** the live `os.geteuid()`
+  that `_current_agent_identity()` returns today (else a legitimate admin
+  invocation trips `_validate_production_boundary`). Localized implementation
+  change; trust root unaffected. `HPAC-PAWA-001` SHALL state which identity
+  each predicate is evaluated against.
+- **F-2** — the `.1R.30R` doc (and this file's prior block) said in two places
+  that `.1R.30R.2` is the *implementation* successor. **RESOLVED:**
+  `.1R.30R.2` = **HPAC-PAWA-001 v1.0 contract freeze**; `.1R.30R.3` = the
+  **fresh implementation successor** (implementation needs the frozen contract
+  first — `.1R.30R` §21.1 precondition 1). The dominant statement (§21.5 table,
+  §24 downstream-sequence line, completion metadata) was already correct.
+- **F-3** — `HPAC-PAWA-001` SHALL freeze an explicit descriptor generation /
+  monotonicity rule for the same-root rollback case.
+
+**Phase-ID chain (recommended, NOT reserved):** `.1R.30R.1` (this IV) →
+`.1R.30R.2` (`HPAC-PAWA-001 v1.0` contract freeze — contract-only) →
+**`.1R.30R.3`** (N-16-5 production writer-anchor + real FIDO2 credential
+registry + authentication mechanism implementation — realises the originally
+intended `.1R.30` scope from the adjudicated + frozen baseline; **NOT** a
+resumed `.1R.30`) → `.1R.30R.4` (implementation IV) → `.1R.30R.5` (protected
+presentation + `require_real_assurance` wiring) → `.1R.30R.6` (IV + real CTAP2
+hardware + N-16-5 closure) → N-16-6 → N-16-7 (strictly last).
+
+**Recommended next phase (exactly one):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2` — HPAC-PAWA-001 v1.0 Production
+Protected-Admin Writer Anchor Contract Freeze. Own explicit human authorization
+required. Do not begin it.
+
+**N-16-5:** WRITER-ANCHOR ADJUDICATION VERIFIED — CONTRACT FREEZE PENDING —
+IMPLEMENTATION NOT BEGUN — **NOT CLOSED.** N-16-3 CLOSED; N-16-4 CLOSED;
+N-16-6 / N-16-7 OPEN, not begun (N-16-7 strictly last). N-23-1 INFO; N-23-2
+INFO / DEFERRED — carried unchanged. Runtime `not_implemented` / `Observed` /
+`observe` / `unavailable`; 0 plugins / 0 capabilities. The only `adapter.dispatch(`
+call site remains the deterministic simulation harness; no real first external
+effect; no Slice C. No production source, no contract, no FIDO2, no credential
+store, no enrollment, no protected presentation, no approval proof, no
+N-16-6/N-16-7, no execution enablement was performed. `DELEGATED .3
+FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
+New IV suite: `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_1_writer_anchor_adjudication_iv.py`
+(35 tests, all passing; verification-only; adds no `def test_` removal/rename/skip).
+Canonical document:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_1_INDEPENDENT_VERIFICATION_OF_THE_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_ADJUDICATION.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R — HPAC-REQ-022/023 Production
 Protected-Admin Writer Anchor: Architecture and Contract Adjudication.
 **STATUS: COMPLETE — ADJUDICATED (not BLOCKED).** Phase-entry SHA `8e655295`.
