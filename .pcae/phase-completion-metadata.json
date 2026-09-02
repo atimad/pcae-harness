@@ -1,74 +1,81 @@
 {
- "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5",
- "phase_name": "Independent Verification of the N-16-5 Merged RHAMP Real FIDO2 Credential Registration, Counter-State, Bootstrap & Authentication Mechanism Implementation",
- "phase_title": "Independent Verification of the N-16-5 Merged RHAMP Real FIDO2 Credential Registration, Counter-State, Bootstrap & Authentication Mechanism Implementation (BLOCKED -- _multi_write completion re-entry gap; N-16-5 NOT CLOSED)",
- "status": "blocked",
- "commit_attribution": "The canonical BLOCKED phase document, the fresh independent 16-test IV suite, the PROJECT_STATUS.md / CHANGELOG.md / tasks/DECISIONS.md prose, the task lifecycle artifacts, and this completion metadata / report were authored and committed by the human-authorized primary operator for this exact phase (149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5) through the governed pcae lifecycle, under this operator's explicit authorization of this session to perform the full governed BLOCKED-phase lifecycle. No delegated worker (subagent/fork) committed, finalized, or pushed -- delegated forks performed investigation only. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED preserved as a rule on subagents/delegated workers; only the primary human-authorized operator session holds .1R.30R.3.5 lifecycle authority, and this session acted as that operator under explicit authorization.",
- "execution_availability": "unavailable",
- "summary": "Governed independent-verification phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5 (verification only -- no production/contract repair) of the merged RHAMP-REQ-156 .1R.30 bundle delivered by .1R.30R.3.4. RESULT: BLOCKED. A (finalized .1R.30R.3.3R head) = 5a6f9d87; I (finalized .1R.30R.3.4 head) = c9cf99d5; V (.1R.30R.3.5 phase-entry SHA) = c9cf99d5 (no drift since bootstrap; origin/main..HEAD = 0 at entry) -- all independently re-derived from git log/git rev-list, not inherited from the .1R.30R.3.4 report's prose. Independently re-verified clean: production diff inventory (git diff --name-status A I -- src/pcae scripts pyproject.toml returned exactly the claimed 9 new + 4 modified files, no unexpected change); RHAMP-001 v1.0 / HPAC-PAWA-001 v1.1 / HPAC-001 v2.1 / pyproject.toml byte-unchanged (git diff --name-only A I -- docs/contracts empty); CredentialRecord schema byte-unchanged (no diff hunk touches the dataclass or _CREDENTIAL_ALLOWED_FIELDS); the registration call graph and its true ACTIVE-publish boundary (PAWA mint -> handle.consume -> native make_credential -> creation-result validation -> duplicate check -> sidecar create-only -> counter-state create-only -> registry enroll_credential append -> complete_multi_write, correctly ordered); the exact 2-member _ELIGIBLE_MECHANISM_IDS set (no wildcard); the exact closed 41-value terminal_reason_code vocabulary; no require_real_assurance wiring into Gate 5/9 (both byte-identical A to I) and no pcae-protected-local-presentation/1.0 implementation anywhere; runtime confirmed Observed / observe / unavailable, 0 plugins, 0 capabilities; no adapter.dispatch( or effect-adapter pattern introduced; no pre-existing def test_ renamed, removed, skipped, or xfailed beyond pre-existing POSIX platform guards. The unchanged .1R.30R.3.4 suite reran 124/124 passed. A broad deterministic non-xdist RHAMP/FIDO2/PAWA/HPAC lineage sweep showed 25 pre-existing failures at A and the identical 25 at I (independently confirmed via a disposable git worktree at A, since removed) -- zero I-only unexplained regressions. PAWA Slice 1 remains CLOSED, unchanged; no custom cryptography (fido2 CoseKey/CBOR + stdlib hashlib only; fido2>=1.1,<2 pre-existing, not new); no new dependency. BLOCKING FINDING: HPACStoreAuthority.complete_multi_write (src/pcae/core/hpac_foundation.py:739-758) never checks the capability's existing _spent / registry-CONSUMED state before spending it -- unlike require_writer and record_write in the same class, which explicitly defend against exactly this. Reproduced with fresh deterministic tests, not asserted: a second call to complete_multi_write on an already-completed capability does not raise, contradicting the method's own docstring claim of a fail-closed capability_stale rejection on a second call; 8 concurrent threads calling complete_multi_write on the same capability all 'succeed', with no exclusivity enforced at the completion boundary. This is a direct match to this phase's own listed BLOCKED trigger: '_multi_write weakens the verified one-operation / non-bearer semantics' (the spec's required invariant that one PAWA issuance authorizes at most one predeclared bounded multi-artifact transaction, not reusable writer authority). Mitigating factor independently checked, not assumed: no live production exploit path exists today, because record_write's independent require_writer gate already rejects any further durable write once _spent is first set True by any completion, and the sole production call site (hpac_rhamp_enrollment.py:302) invokes complete_multi_write exactly once, synchronously, on a capability local to a single ceremony invocation -- this is a latent contract violation in complete_multi_write itself, not a currently-reachable double-registration. No other BLOCKED trigger in the phase's list fired. Fresh independent .1R.30R.3.5 IV suite added (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py, 16 tests: 14 pass, 2 fail -- both failures are the exact finding above, deliberately left failing/uncorrected per this IV's own no-repair discipline). N-16-5 remains NOT CLOSED. Full evidence in docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_5_N_16_5_MERGED_RHAMP_INDEPENDENT_VERIFICATION.md.",
- "derived_correctness": "Every claim was independently re-derived from primary source, not trusted from the .1R.30R.3.4 report's prose. A/I/V re-derived via git log --format='%H %s' subject-line search for each phase's own 'reconcile governed push state' finalization commit (A = 5a6f9d87, I = c9cf99d5), and V pinned to the .1R.30R.3.5 phase-entry HEAD observed at bootstrap (c9cf99d5, independently confirmed equal to I at that time). Production diff independently derived via git diff --name-status A I -- src/pcae scripts pyproject.toml. Contract byte-identity independently checked via git diff --name-only A I -- docs/contracts (empty) and git diff --stat A I -- pyproject.toml (empty). CredentialRecord identity checked via direct diff-hunk inspection of human_principal_registry.py. The registration call graph was independently traced by reading hpac_rhamp_enrollment.py in full, not reused from the .1R.30R.3.4 report's traceability claims. The _multi_write finding was independently discovered by reading HPACStoreAuthority in hpac_foundation.py in full and comparing complete_multi_write against require_writer/record_write in the same class, then reproduced with fresh deterministic single-call-replay and 8-thread-concurrency tests (not merely asserted from source reading). The mitigating no-live-exploit-path claim was independently verified by tracing record_write's require_writer gate and confirming the sole production call site (hpac_rhamp_enrollment.py:302) invokes complete_multi_write exactly once, synchronously. The .1R.30R.3.4 suite rerun (124/124) and the broad lineage sweep (0 I-only unexplained regressions, verified via a disposable git worktree at A) were independently executed, not read from the prior report. No test file was edited to force a pass; the fresh IV suite's 2 failing tests were left failing.",
- "metadata_consistency": "phase_id / phase_name / phase_title / status / summary all name 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5. The canonical BLOCKED phase document (docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_5_N_16_5_MERGED_RHAMP_INDEPENDENT_VERIFICATION.md) names the same phase ID and the same BLOCKED verdict. phase_commits are the governed .1R.30R.3.5 commits made before this metadata-staging commit, each subject carrying the ...1R.30R.3.5 token. status is 'blocked'; the report title / summary / verdict prose carry the BLOCKED verdict and the Telegram document is the full BLOCKED report.",
- "internal_evidence_coherence": "All contract citations resolve to the current frozen text, byte-current (git diff --name-only 5a6f9d87 c9cf99d5 -- docs/contracts is empty). RHAMP-001 v1.0, HPAC-PAWA-001 v1.1, HPAC-001 v2.1, CPIPC-001 v1.0 byte-unchanged. src/pcae changed by this phase: none (verification only; the BLOCKING finding is a defect identified in existing .1R.30R.3.4-added code, not a change made by this phase). tests/ changed by this phase: one NEW file (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py, 16 tests, no pre-existing test file touched). pcae health / check / status coherence all pass.",
- "internal_report_coherence": "Test and validation evidence for this phase is this phase's own identity (149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5): the new IV suite's file name carries this phase's token. Other-phase tokens (.1R.30R.3.4, .1R.30R.3.3R, RHAMP-REQ-156, the recommended successor .1R.30R.3.6) appear only in summary, governance_results, and recommended_next_phase, which is permitted.",
- "report_consistency": "governed push complete; origin/main..HEAD = 0; pcae push check reports nothing_to_push.",
- "origin_main_head_count": 0,
- "test_evidence_classification": "governed_independent_verification_phase_blocked_multi_write_completion_reentry_gap_no_production_or_contract_repair_fresh_16_test_iv_suite_14_pass_2_fail_reflecting_the_finding_30r34_suite_rerun_124_124_unchanged_zero_i_only_unexplained_regressions_n_16_5_not_closed",
- "tests_run": 16,
- "tests_added_or_updated": "16 tests: 16 new in one fresh independent IV suite (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py) covering independent A/I/V re-derivation, exact production-diff-set assertion, contract/pyproject byte-identity, no-rename/no-skip scan, and the _multi_write scope/replay/concurrency battery the .1R.30R.3.4 suite left untested by name. 14 pass, 2 fail -- both failures are the BLOCKING _multi_write finding, deliberately left failing/uncorrected (this IV performs no production/contract repair). No pre-existing test file was created, modified, removed, renamed, skipped, or xfailed.",
- "test_results": {
-  "fast_green": "not_applicable_this_phase -- verification-only IV phase; the fresh IV suite includes intentionally-not-passing cases reflecting the BLOCKING finding itself, disclosed separately and not counted toward this gate; the governing suite for this gate is the unchanged .1R.30R.3.4 implementation suite rerun: 124 passed, 0 failed",
-  "full_suite": "Fixed-SHA A/B over the HPAC/RHAMP/PAWA/FIDO2/verifier/gate lineage: 25 pre-existing failures at A (via a disposable git worktree, since removed), 25 identical pre-existing failures at I. I-only unexplained functional regressions: 0. One test (test_concurrent_conflicting_successors_have_one_canonical_winner) appeared only in a combined-filter run but passed cleanly in isolation -- test-order/global-state flake, unrelated to the _multi_write finding. Candidate-only unexplained regressions: 0.",
-  "report_notification_tests": "not_applicable_this_phase -- no report-notification or bootstrap-session-reporting code path changed",
-  "bootstrap_session_reporting_tests": "not_applicable_this_phase -- pcae status coherence coherent; health healthy; check passed; session continuity verified at phase entry and finalization"
- },
- "validation_results": {
-  "fast_green": "not_applicable_this_phase -- verification-only IV; the fresh IV suite includes intentionally-not-passing cases reflecting the BLOCKING finding, disclosed separately and not counted toward this gate; governing suite for this gate: the unchanged .1R.30R.3.4 implementation suite rerun, 124 passed, 0 failed",
-  "implementation_scope": "Governed independent-verification phase (operator authority) authorized by the human operator's phase prompt to independently re-verify the merged RHAMP-REQ-156 .1R.30 bundle delivered by .1R.30R.3.4: production diff inventory, contract/CredentialRecord byte-identity, registration call graph, PAWA authority, _multi_write authority/scope/replay/concurrency, sidecar/counter-state schema, makeCredential/getAssertion paths, hpac_verifier REAL branch, mechanism-set exactness, presentation/require_real_assurance absence, Gate 5/9 identity, terminal-reason vocabulary, no-test-weakening, PAWA Slice-1 non-regression, fixed-SHA A/B attribution, and the production-principal fence. Verification only: no production source modified, no normative contract modified, no defect repaired inside this IV.",
-  "runtime_boundary": "not_implemented / Observed / observe / unavailable; 0 plugins / 0 capabilities; unchanged by this phase (pcae runtime inspect re-asserted at phase entry and finalization).",
-  "contract_identity": "RHAMP-001 v1.0, HPAC-PAWA-001 v1.1, HPAC-001 v2.1, CPIPC-001 v1.0, and every other contract byte-unchanged; git diff --name-only 5a6f9d87 c9cf99d5 -- docs/contracts is empty. pyproject.toml byte-unchanged (no new dependency).",
-  "credential_record_identity": "human_principal_registry.py _CREDENTIAL_ALLOWED_FIELDS and the CredentialRecord dataclass are byte-unchanged A to I; no raw_credential_id / cose_public_key / rp_id field added.",
-  "presentation_and_gate_boundary": "approval_presentation.py, runtime_dispatch_gate5.py, runtime_dispatch_gate9.py byte-unchanged since A. No pcae-protected-local-presentation/1.0 acceptance anywhere. The real hpac_verifier assertion branch requires all-PRODUCTION resolved records and no PRODUCTION presentation descriptor kind is accepted, so verify_human_authentication cannot mint a PRODUCTION AuthenticatedHumanPrincipal end-to-end.",
-  "multi_write_authority_finding": "HPACStoreAuthority.complete_multi_write (src/pcae/core/hpac_foundation.py:739-758) has no re-entry/already-spent guard before spending the capability, unlike require_writer/record_write in the same class -- contradicts its own docstring's fail-closed capability_stale claim on a second call, and reproducibly allows a second/concurrent call on an already-completed capability to succeed with no exclusivity at the completion boundary. No live production exploit path today: record_write's independent require_writer gate already rejects further durable writes once _spent is first set True, and the sole production call site (hpac_rhamp_enrollment.py:302) invokes complete_multi_write exactly once, synchronously, per ceremony. Latent contract violation, not a currently-reachable double-registration. This BLOCKS the phase per its own listed trigger ('_multi_write weakens the verified one-operation / non-bearer semantics').",
-  "report_notification_tests": "not_applicable_this_phase -- no notification code path changed",
-  "bootstrap_session_reporting_tests": "not_applicable_this_phase -- pcae status coherence coherent; health healthy; check passed; session continuity verified at entry and finalization"
- },
- "governance_results": {
-  "pcae_health": "healthy",
-  "pcae_check": "passed",
-  "pcae_status_coherence": "coherent",
-  "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing hygiene debt from earlier phases, present at the phase-entry baseline; this phase's own closed tasks correctly appended); no current-phase error; single active task",
-  "pcae_push_check": "nothing_to_push",
-  "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins / capabilities; governance posture non-executing; re-asserted at phase entry and finalization",
-  "telegram_runtime": "configured and outbound-ready",
-  "delegated_3_finalization_commit_push": "UNAUTHORIZED",
-  "implementation_verdict": "RHAMP CREDENTIAL REGISTRATION: VERIFIED. RHAMP COUNTER-STATE: VERIFIED. PAWA PROTECTED-ADMIN BOOTSTRAP: VERIFIED. MULTI-ARTIFACT REGISTRATION ATOMICITY: VERIFIED (registry publish point correctly ordered). _MULTI_WRITE BOUNDED AUTHORITY: NOT VERIFIED (decisive BLOCKING finding). FIDO2HumanAuthenticator: VERIFIED. MAKECREDENTIAL PATH: VERIFIED. GETASSERTION PATH: VERIFIED. RPIDHASH / UP / UV / COSE SIGNATURE / CHALLENGE-REPLAY: VERIFIED. COUNTER LINEARIZATION: VERIFIED. HPAC VERIFIER REAL BRANCH: VERIFIED. DETERMINISTIC CI ISOLATION: VERIFIED. PRODUCTION PRESENTATION FENCE: VERIFIED. CONTRACT-PRODUCTION EQUIVALENCE: VERIFIED. PROTECTED PRESENTATION: NOT IMPLEMENTED. GATE REAL-ASSURANCE CONSUMPTION: NOT IMPLEMENTED. N-16-5: NOT CLOSED. Runtime: Observed / observe / unavailable. First external effect: ABSENT / UNREACHABLE. N-16-6 / N-16-7 OPEN, untouched, N-16-7 strictly last. N-23-1 / N-23-2 carried unchanged. PAWA Slice 1 CLOSED, unchanged. Historical .1R.30 / .1R.30R.3.2 / .1R.30R.3.3 BLOCKED artifacts immutable, not reopened; .1R.30R.3.3R DECISION A and .1R.30R.3.4 IMPLEMENTED-IV-PENDING preserved, not reopened for repair (only the specific _multi_write gap is escalated to the successor). DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED preserved as a subagent/delegated-worker rule.",
-  "recommended_repair_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6 -- narrow repair phase: add the missing already-spent/CONSUMED re-entry guard to HPACStoreAuthority.complete_multi_write (mirroring require_writer's existing pattern) so the method's own documented fail-closed contract holds structurally. Scope limited to that one method plus the 2 currently-failing .1R.30R.3.5 IV tests; does not reopen the registration/counter/getAssertion surfaces already cleanly verified in this phase. Own explicit human authorization required before beginning it."
- },
- "notification_dispatch_result": "pending_phase_complete_promotion",
- "no_go_confirmation": "No RHAMP-001 / HPAC-PAWA-001 / HPAC-001 / CPIPC-001 or any normative contract file was created, modified, or deleted; git diff --name-only 5a6f9d87 c9cf99d5 -- docs/contracts is empty.\nNo new dependency was added; pyproject.toml is byte-unchanged.\nNo CredentialRecord schema change; _CREDENTIAL_ALLOWED_FIELDS and the CredentialRecord dataclass are byte-unchanged.\nNo production source under src/pcae or scripts/ was modified by this phase; the BLOCKING finding identifies a pre-existing defect in .1R.30R.3.4-added code, not a change made here.\nNo pre-existing test file was renamed, removed, skipped, or xfailed; only one new file was added.\nNo protected human-approval presentation was implemented; no pcae-protected-local-presentation/1.0, no renderer_profile, no mechanism_attestation.\nNo require_real_assurance wiring through Gate 5 / Gate 9; both byte-unchanged since A.\nNo PRODUCTION AuthenticatedHumanPrincipal is obtainable end-to-end.\nNo hardware authenticator was accessed, enumerated, or prompted; no CTAP device I/O.\nNo custom cryptography was written or introduced by this phase.\nNo N-16-6 work and no N-16-7 work was begun; N-16-7 stays strictly last.\nNo Slice C and no first external effect was begun, called, or made reachable; runtime remains Observed / observe / unavailable, 0 plugins, 0 capabilities.\nNo execution was enabled; no runtime capability was elevated.\nNo historical BLOCKED or completed verdict/canonical report was rewritten; .1R.30, .1R.30R.3.2, .1R.30R.3.3, .1R.30R.3.3R, .1R.30R.3.4 remain immutable.\nNo repair was performed inside this IV; the BLOCKING finding is escalated to a recommended successor phase, not fixed here.\nNo raw git commit or git push, no --no-verify, no force push, no history rewrite, no hook bypass; governed pcae lifecycle only.\nNo delegated worker (subagent/fork) committed, finalized, or pushed; this primary operator session performed the governed lifecycle under this operator's explicit authorization; DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED preserved as a subagent/delegated-worker rule.",
- "files_changed": [
-  "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_5_N_16_5_MERGED_RHAMP_INDEPENDENT_VERIFICATION.md",
-  "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py",
-  "PROJECT_STATUS.md",
-  "CHANGELOG.md",
-  "tasks/DECISIONS.md"
- ],
- "files_changed_count": 5,
- "phase_commits": [
-  {
-   "hash": "3b7ea39af390fa0ebb18cf346d32b6c8caf6a0b8",
-   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5: open independent-verification phase task, archive superseded idle task"
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6",
+  "phase_name": "N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair",
+  "phase_title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6 — N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair",
+  "status": "completed",
+  "commit_attribution": "Primary human-authorized operator session; no delegated worker finalized, committed, or pushed.",
+  "execution_availability": "unavailable",
+  "summary": "Repaired HPACStoreAuthority.complete_multi_write so canonical issuance identity/scope/ACTIVE validation and ACTIVE-to-CONSUMED transition are atomic under the existing issuance-registry lock. Second, re-entrant, and concurrent completion now permits exactly one success; registry state dominates mutable _spent. Historical .30R.3.5 remains BLOCKED; N-16-5 remains NOT CLOSED pending fresh .30R.3.6.1 IV.",
+  "derived_correctness": "passed",
+  "metadata_consistency": "passed",
+  "internal_evidence_coherence": "passed",
+  "internal_report_coherence": "passed",
+  "report_consistency": "passed",
+  "origin_main_head_count": 0,
+  "test_evidence_classification": "direct repair, historical fixed-SHA reproduction, deterministic governing regression suites, fixed-SHA broad attribution, static byte-identity and no-test-weakening proof",
+  "tests_run": 340,
+  "tests_added_or_updated": "Fresh .30R.3.6 suite: 46 collected/passed; permanent .30R.3.4 product regression added; .30R.3.5 public-boundary exception assertion corrected without weakening its rejection expectation.",
+  "test_results": {
+    "fast_green": "340 passed, 0 failed across the deterministic governing suites",
+    "full_suite": "Fixed-SHA common 39-file attribution: A 1758 passed/48 failed/3 skipped; repair candidate 1761 passed/46 failed/3 skipped; zero unexplained repair-only functional regressions",
+    "report_notification_tests": "not applicable: this repair did not change report or notification implementation; final notification is exercised by governed phase completion",
+    "bootstrap_session_reporting_tests": "status coherence, task-memory doctor, phase-report trust validation, and session continuity checks exercised by governed lifecycle",
+    "governing_suites": "340 passed, 0 failed, deterministic -n 0: .30R.3.4 product, .30R.3.5 IV, fresh .30R.3.6 repair, .30R.3.2.1 repair, .30R.3.2.1.1 IV, Slice-1 PAWA",
+    "historical_blocking_nodes": "2 passed after repair; sequential replay rejected and exactly one of eight concurrent completions succeeds",
+    "post_commit_scope_guards": "2 passed; both pre-commit-only candidate guard failures cleared after governed commit",
+    "fixed_sha_attribution": "A c9cf99d5 common 39-file sweep: 1758 passed, 48 failed, 3 skipped. Repair candidate pre-commit: 1761 passed, 46 failed, 3 skipped. Zero unexplained functional repair-only regressions; only two explained working-tree guard failures, both cleared post-commit.",
+    "no_test_weakening": "0 removed test definitions; 0 renamed-to-evade; 0 new skip/skipif/pytest.skip/xfail; 0 wildcard/fnmatch broadening"
   },
-  {
-   "hash": "c9ad94f8fab2e2d984a1d7949fc3865ec53b47db",
-   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5: N-16-5 Independent Verification of the merged RHAMP Real FIDO2 mechanism implementation -- BLOCKED"
+  "validation_results": {
+    "fast_green": "340 passed, 0 failed across the deterministic governing suites",
+    "report_notification_tests": "not applicable: this repair did not change report or notification implementation; final notification is exercised by governed phase completion",
+    "bootstrap_session_reporting_tests": "status coherence, task-memory doctor, phase-report trust validation, and session continuity checks exercised by governed lifecycle",
+    "historical_reproduction": "At immutable .30R.3.4 SHA c9cf99d5, sequential second completion succeeded and all 8 concurrent calls succeeded; reproduced before editing.",
+    "root_cause": "complete_multi_write performed lock-separated registry lookup and unconditional spend/consume without canonical ACTIVE precondition.",
+    "repair": "Existing _mark_capability_consumed helper now performs canonical identity/scope/class/multi-write/ACTIVE validation plus object spend and ACTIVE-to-CONSUMED under _ISSUANCE_REGISTRY_LOCK.",
+    "contract_identity": "RHAMP-001 v1.0, HPAC-PAWA-001 v1.1, HPAC-001 v2.1, and every normative contract byte-unchanged from R0.",
+    "production_scope": "Only src/pcae/core/hpac_foundation.py changed in production; no capability slot, registry shape, failure code, schema, or dependency change.",
+    "runtime_boundary": "Observed / observe / unavailable; zero plugins and capabilities; first external effect absent/unreachable."
   },
-  {
-   "hash": "caf18395934e50051a35ba5eb007c5cee70c80ba",
-   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5: close IV phase task (BLOCKED), transition to idle"
-  }
- ],
- "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6 -- narrow repair phase adding the missing already-spent/CONSUMED re-entry guard to HPACStoreAuthority.complete_multi_write (mirroring require_writer's existing pattern). ID recommended, NOT reserved; confirm under CPIPC before use; own explicit human authorization required. Do not begin it here. Scope limited to that one method plus the 2 currently-failing .1R.30R.3.5 IV tests; does not reopen the registration/counter/getAssertion surfaces already cleanly verified. Do not begin N-16-6 or N-16-7. Do not begin Slice C. Do not implement or call the first external effect. Do not enable execution. Do not implement protected presentation. Do not wire require_real_assurance through Gate 5/9.",
- "pushed_status": "pushed",
- "origin_main_head": "aea463c24e551c80a6cc2fcc025cd0ca95acfbf9"
+  "governance_results": {
+    "pcae_health": "healthy before finalization",
+    "pcae_check": "passed before finalization",
+    "pcae_status_coherence": "coherent before finalization",
+    "pcae_doctor_task_memory": "warning-only pre-existing historical omissions; current phase task closed and recorded",
+    "pcae_push_check": "nothing_to_push",
+    "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
+    "telegram_runtime": "configured and outbound-ready",
+    "delegated_3_finalization_commit_push": "UNAUTHORIZED",
+    "implementation_verdict": "complete_multi_write terminal lifecycle REPAIRED — IV PENDING; multi-write one-operation semantics REPAIRED — IV PENDING; PAWA non-bearer and verified RHAMP/FIDO2 baselines preserved; .30R.3.5 BLOCKED/immutable; N-16-5 NOT CLOSED."
+  },
+  "notification_dispatch_result": "pending_phase_complete_promotion",
+  "no_go_confirmation": "No normative contract change. No CredentialRecord change. No RHAMP registration/sidecar/counter/CTAP2/FIDO2/hpac_verifier change. No protected presentation or pcae-protected-local-presentation/1.0. No require_real_assurance Gate 5/9 wiring. No N-16-6, N-16-7, or Slice C. No first external effect. No execution enablement. No new dependency, capability field, registry structure, PAWA failure code, or RHAMP terminal reason. Historical .30R.3.5 report remains BLOCKED and immutable. No delegated worker used. No raw git commit/push, hook bypass, force push, or history rewrite.",
+  "files_changed": [
+    "CHANGELOG.md",
+    "PROJECT_STATUS.md",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_6_N_16_5_PAWA_MULTI_WRITE_COMPLETION_ONE_OPERATION_INTEGRITY_REPAIR.md",
+    "src/pcae/core/hpac_foundation.py",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/active/20260902-2258-idle-awaiting-explicit-authorization-for-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-6-1-independent-verification-n-16-5-not-closed.md",
+    "tasks/done/20260902-2225-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-5-blocked-n-16-5-not-closed-next-1r-30r-3-6-repair-own-explicit-human-authorization-required.md",
+    "tasks/done/20260902-2237-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-6-n-16-5-pawa-multi-write-completion-one-operation-integrity-repair.md",
+    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py",
+    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py",
+    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_6_multi_write_completion_integrity_repair.py"
+  ],
+  "files_changed_count": 12,
+  "phase_commits": [
+    {
+      "hash": "761e064e93d012fad091034c6d27542d1515fc06",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6: repair PAWA multi-write completion one-operation integrity"
+    },
+    {
+      "hash": "e92f3961d3e982ff08f4b577dd2fccbcd946d21e",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6: close repair task and transition to idle"
+    }
+  ],
+  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1 — Independent Verification of the N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair. ID recommended, NOT reserved; own explicit human authorization required. Do not begin protected presentation, N-16-6, N-16-7, Slice C, a first external effect, or execution enablement.",
+  "pushed_status": "pending",
+  "origin_main_head": "pending_push"
 }
