@@ -2,6 +2,46 @@
 
 ## Accepted
 
+- **Phase `.1R.30R.2` HPAC-PAWA-001 v1.0 Production Protected-Admin Writer
+  Anchor Contract Freeze (2026-09-02).** Authored `HPAC-PAWA-001 v1.0`
+  (`docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`,
+  `HPAC-PAWA-REQ-001..163`, `PAWA-INV-1..11`) as a **companion** under
+  HPAC-001 v2.1's §7 extension points — the *mechanism* HPAC-001 froze the
+  *policy* for. Contract-only: no `src/pcae`, no HPAC-001 bump, RHAMP-001 v1.0 /
+  HBDC-001 v1.2 byte-unchanged; the one new file is the sole normative delta.
+  Freezes: trust root = OS filesystem write authority on the out-of-band-
+  provisioned `<HPAC_PROTECTED_ROOT>`, the **configured** agent principal
+  (`PCAE_AGENT_PRINCIPAL`, canonical PCAE configuration — **not**
+  `os.geteuid()`) provably excluded; a 6-conjunct / 11-step positive
+  recognition sequence (fixed-root + not-(configured-)agent-writable + safe
+  ancestors + a root-identity-bound `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0`
+  descriptor with a monotonic `generation` + an `O_EXCL|O_NOFOLLOW` write probe
+  + a not-(configured-)agent current-context check + an authorized-factory-
+  consumer check); a `PRODUCTION` writer factory in a non-agent-importable
+  module with an **exact** consumer-inventory guard; a process-local /
+  non-serializable / non-bearer / restart-invalid / one-operation
+  `HPACWriterCapability` bound to one of 5 closed mutation classes and one
+  principal / credential / transaction; a one-time out-of-band **non-circular**
+  bootstrap; explicit rotation / revocation / migration semantics; a closed
+  21-value `pawa_failure_code` taxonomy mapping onto RHAMP-001 §49 codes
+  #1/#2/#40/#41 with **no new `terminal_reason_code`**. **F-1** incorporated
+  (per-predicate identity matrix §10; configured-agent source of truth §9).
+  **F-2**: `.1R.30R.3` (not `.1R.30R.2`) is the fresh implementation successor
+  (§77); historical `.1R.30` stays immutable BLOCKED; no `.1R.30R` / `.1R.30`
+  doc edit. **F-3**: descriptor generation monotonicity + a
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` anchor record + rollback prevention
+  (§20, §21). Contract-versioning verdict re-derived: NEW COMPANION CONTRACT —
+  not implementation-defined (would hide normative trust decisions in code),
+  not an HPAC-001 MINOR/MAJOR (additive, authority-preserving; a bump cascades),
+  not BLOCKED (no circularity, no MAJOR redesign, no remote infra, no reusable
+  same-UID bearer secret; HBDC-001 is a direct IV'd precedent). No STOP /
+  BLOCKED condition reached. Runtime `Observed` / `observe` / `unavailable`;
+  first external effect ABSENT. **N-16-5: WRITER-ANCHOR CONTRACT FROZEN —
+  IMPLEMENTATION PENDING — NOT CLOSED.** Recommend
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3` — writer-anchor + registry + FIDO2
+  mechanism implementation (own explicit human authorization required; ID
+  recommended, NOT reserved).
+
 - **Phase `.1R.30` N-16-5 real FIDO2 mechanism implementation — BLOCKED
   (2026-09-02).** Reconstructed RHAMP-001 v1.0 in full and the HPAC production
   trust foundation (`hpac_foundation.py`, `human_principal_registry.py`,

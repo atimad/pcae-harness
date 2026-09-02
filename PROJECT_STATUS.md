@@ -2,6 +2,146 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2 — HPAC-PAWA-001 v1.0 Production
+Protected-Admin Writer Anchor Contract Freeze.
+**STATUS: COMPLETE — HPAC-PAWA-001 v1.0 FROZEN AS THE SOLE NORMATIVE DELTA.**
+Not BLOCKED. `git diff 91741564 HEAD -- src/pcae` is **empty**;
+`git diff --name-only 91741564 HEAD -- docs/contracts` names **exactly one new
+file** (`docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`)
+and no existing contract. HPAC-001 stays v2.1; RHAMP-001 stays v1.0
+byte-unchanged; HBDC-001 stays v1.2. Phase-entry SHA `5373ee21`.
+
+This phase turned the `.1R.30R` adjudication (verdict: NEW COMPANION CONTRACT),
+as independently verified by `.1R.30R.1` (ADJUDICATION VERIFIED; findings
+F-1 / F-2 / F-3), into a precise normative companion contract —
+**HPAC-PAWA-001 v1.0 — HPAC Production Protected Administration Writer Anchor
+Contract** (`HPAC-PAWA-REQ-001..163`, `PAWA-INV-1..11`), authored under
+HPAC-001 v2.1's existing §7 extension points and changing none of its text.
+
+**Frozen by HPAC-PAWA-001 v1.0:**
+
+- **Trust root** = OS filesystem write authority on the out-of-band-provisioned
+  `<HPAC_PROTECTED_ROOT>`, the **configured** agent principal
+  (`PCAE_AGENT_PRINCIPAL`, canonical PCAE configuration — **not**
+  `os.geteuid()`) provably excluded. Identical trust root to HBDC-001's IV'd
+  Class-B Protected Root; HBDC-001 is **precedent, not a shared authority
+  root**.
+- **Positive recognition** = six required conjuncts, 11-step sequence (§33):
+  fixed-root resolution + not-(configured-)agent-writable root + safe ancestors;
+  a root-identity-bound `.authority/deployment-owner.json`
+  (`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0`, closed schema, `{device,inode}`
+  binding, `HPAC-WRITER-PROVENANCE/1.0` digest, explicit monotonic
+  `generation`); a positive `O_EXCL|O_NOFOLLOW` create-and-unlink write probe
+  under `.authority/`; a not-(configured-)agent current-context check; an
+  authorized-factory-consumer check.
+- **Capability issuer** = a new `PRODUCTION` writer factory in a
+  **non-agent-importable** module (recommended
+  `src/pcae/core/hpac_protected_admin_writer.py`), guarded by an **exact**
+  consumer-inventory test (HBDC-REQ-056/066 pattern; no wildcard / prefix /
+  glob).
+- **Capability scope** = one administrative operation (5 closed mutation
+  classes: `enroll_principal` / `revoke_principal` / `enroll_credential` /
+  `revoke_credential` / `initialize_credential_sidecar_state`); one target
+  principal / credential / enrollment-transaction; process-local;
+  non-serializable (`__reduce__` raises); non-bearer (seal identity, not
+  value); restart-invalid; **one-operation lifetime** (an additive `.1R.30R.3`
+  spent-flag invariant, never a weakening of the existing type).
+- **Bootstrap** = a one-time out-of-band deployment-owner `provision` step —
+  creates the `0700` root, the store-identity manifest, the descriptor at
+  `generation` 1, `current-generation.json`, and a durable provenance entry;
+  create-only; non-recurring; not agent-reachable; **non-circular** (needs no
+  existing `HPACWriterCapability`, no FIDO2, no prior PCAE principal).
+- **Rotation** = explicit; `generation += 1`; a monotonic
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` anchor record; the old generation cannot
+  mint. **Revocation** = deployment-owner filesystem replace/remove/mark; state
+  `{ACTIVE, SUPERSEDED, REVOKED}`; revoked → fail closed. **Migration** = new
+  `installation_id` + fresh root identity + `generation` 1; copying files alone
+  is never sufficient.
+- **Failure taxonomy** = 21 closed `pawa_failure_code` values (§56) mapping
+  **deterministically** onto RHAMP-001 v1.0 §49 codes **#1
+  `bootstrap_authority_unproven` / #2 `enrollment_not_protected_admin` / #40
+  `protected_root_invalid` / #41 `internal_verification_error`** — **no new
+  `terminal_reason_code`**; RHAMP-001 byte-unchanged. PAWA failures are
+  administrative writer failures — **never** PB / RE / runtime-capability
+  reasons.
+- **Same-UID / two-principal requirement:** the configured agent principal
+  SHALL be OS-separable from the deployment owner; where it is not (single-
+  account host, or agent has protected-root write authority), REAL `PRODUCTION`
+  writer issuance is **INELIGIBLE** and no capability is minted — fail closed,
+  never a downgrade.
+- **Walls preserved:** writer capability ≠ `AuthenticatedHumanPrincipal` ≠
+  approval proof ≠ PB permission ≠ Runtime Enforcement result ≠ runtime
+  capability ≠ `DispatchEnvelope` ≠ execution. The deployment owner enrolls /
+  revokes credentials; it never approves runtime operations. Local / offline
+  only; no network, no cloud token, no signing key, no keychain (Candidates
+  B/C/D rejected).
+
+**Findings incorporated:**
+
+- **F-1** — HPAC-PAWA-001 §10 freezes a **per-predicate identity matrix**
+  (every predicate names the exact identity it evaluates — the configured agent
+  principal / the current invoking OS process / the protected-root owner / the
+  descriptor owner / the importing source module / a fixed compiled-in path).
+  §9 fixes the configured agent principal's source of truth = canonical PCAE
+  agent configuration (`PCAE_AGENT_PRINCIPAL`), never `os.geteuid()`, never
+  `--agent-id`, never caller input; unresolvable → `agent_principal_unknown`
+  fail closed; no `agent_id=None` bypass. §26 / §62: the negative boundary
+  check on the writer path keys off the **configured agent principal's** ids;
+  the positive write probe keys off the **invoking process's** live capability.
+- **F-2** — HPAC-PAWA-001 §77 records: **`.1R.30R.3`, not `.1R.30R.2`, is the
+  fresh implementation successor** (implementation needs the frozen contract
+  first). The `.1R.30R` doc's §21.4 heading / §24 summary line are erroneous;
+  the dominant statement (and this file) were already correct. Historical
+  `.1R.30` stays immutable BLOCKED, never reused, never resumed (PAWA-INV-11).
+  **No `.1R.30R` / `.1R.30` doc edit was made.**
+- **F-3** — HPAC-PAWA-001 §14 / §20 / §21 freeze the descriptor `generation`
+  as monotonic, installation-local, strictly increasing (initial = 1; rotation
+  = `previous + 1`); a new protected `HPAC-PAWA-CURRENT-GENERATION/1.0` anchor
+  record (create-only at provisioning, atomic-replace-only on rotation,
+  monotonic); recognition requires `descriptor.generation == current_generation`
+  + digest match; a bytes-only rollback of an old descriptor →
+  `descriptor_generation_stale`. If monotonic atomic-replace is unavailable the
+  implementing phase STOPS (BLOCKED).
+
+**Contract-versioning verdict re-derived:** NEW COMPANION CONTRACT — not (A)
+implementation-defined [would hide normative trust decisions in code], not
+(C/D) an HPAC-001 MINOR/MAJOR [additive, authority-preserving; a bump cascades
+— RIHAC-001 §12 cond 7 names "HPAC-001 v2.1" literally], not (E) BLOCKED [no
+circularity, no MAJOR redesign, no remote infrastructure, no reusable same-UID
+bearer secret; HBDC-001 is a direct IV'd precedent]. Companion precedent:
+REPRC-001 v1.0 / PBNDE-001 v1.0 / RHAMP-001 v1.0.
+
+**No STOP / BLOCKED condition reached** — every valid early-STOP condition in
+the phase prompt was checked (canonical doc §9) and none applies. NO `src/pcae`
+change. NO existing-contract change. NO HPAC-001 bump. NO writer-anchor
+implementation. NO `HumanPrincipalRegistryStore` production writer. NO FIDO2.
+NO credential / counter sidecars. NO enrollment / bootstrap tooling. NO
+protected presentation. NO real approval proof. NO N-16-6 / N-16-7. NO Slice C.
+NO first external effect. NO execution enablement. Runtime `not_implemented` /
+`Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities; first
+external effect **ABSENT**.
+
+**HPAC-PAWA-001 v1.0: FROZEN.** N-16-5 status: **WRITER-ANCHOR CONTRACT FROZEN
+— IMPLEMENTATION PENDING — NOT CLOSED.**
+
+**Recommended next:** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3` — N-16-5 Production
+Protected-Admin Writer Anchor + Real FIDO2 Credential Registry and
+Authentication Mechanism Implementation (own explicit human authorization
+required; ID recommended, NOT reserved). Then `.1R.30R.4` (IV) → `.1R.30R.5`
+(protected presentation + real-assurance wiring) → `.1R.30R.6` (IV + mandatory
+real-CTAP2-hardware verification + N-16-5 closure) → N-16-6 → N-16-7 (strictly
+last). No Slice C until N-16-3..7 all close.
+
+Canonical document:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_2_HPAC_PAWA_001_V1_0_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT_FREEZE.md`.
+Contract: `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1 — Independent Verification of the
 .1R.30R Production Protected-Admin Writer Anchor Adjudication.
 **STATUS: COMPLETE — ADJUDICATION VERIFIED (not BLOCKED; 3 non-blocking

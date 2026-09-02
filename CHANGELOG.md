@@ -2,6 +2,45 @@
 
 ## Unreleased
 
+- Phase `.1R.30R.2` (HPAC-PAWA-001 v1.0 Production Protected-Admin Writer
+  Anchor Contract Freeze) is **COMPLETE — HPAC-PAWA-001 v1.0 FROZEN as the sole
+  normative delta**. Contract-only: `git diff 91741564 HEAD -- src/pcae` empty;
+  `git diff --name-only 91741564 HEAD -- docs/contracts` names exactly the one
+  new file `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`
+  (HPAC-PAWA-001 v1.0, `HPAC-PAWA-REQ-001..163`, `PAWA-INV-1..11`); **no
+  existing contract edited**; HPAC-001 stays v2.1, RHAMP-001 stays v1.0
+  byte-unchanged, HBDC-001 stays v1.2. The contract freezes the `.1R.30R`
+  adjudication (as verified by `.1R.30R.1`): trust root = OS filesystem write
+  authority on the out-of-band-provisioned `<HPAC_PROTECTED_ROOT>`, configured
+  agent principal (`PCAE_AGENT_PRINCIPAL`, not `os.geteuid()`) provably
+  excluded; positive recognition = fixed-root + not-(configured-)agent-writable
+  + safe ancestors + a root-identity-bound `.authority/deployment-owner.json`
+  descriptor (closed `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` schema with a monotonic
+  `generation`) + an `O_EXCL|O_NOFOLLOW` write probe + a not-(configured-)agent
+  current-context check + an authorized-factory-consumer check (11-step
+  sequence); a `PRODUCTION` writer factory in a non-agent-importable module with
+  an exact (no-wildcard) consumer-inventory guard; a process-local /
+  non-serializable / non-bearer / restart-invalid / one-operation
+  `HPACWriterCapability` scoped to one of 5 closed mutation classes and one
+  principal / credential / enrollment-transaction; a one-time out-of-band
+  non-circular bootstrap; explicit rotation (`generation += 1`, monotonic
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` anchor), revocation (`{ACTIVE, SUPERSEDED,
+  REVOKED}`), and machine migration (new `installation_id` + fresh root
+  identity) semantics; a closed 21-value `pawa_failure_code` taxonomy mapping
+  deterministically onto RHAMP-001 §49 codes #1 / #2 / #40 / #41 with **no new
+  `terminal_reason_code`**. **F-1** incorporated via the per-predicate identity
+  matrix (§10) and the configured-agent source of truth (§9). **F-2**: HPAC-PAWA-001
+  §77 records `.1R.30R.3` (not `.1R.30R.2`) as the fresh implementation
+  successor; historical `.1R.30` stays immutable BLOCKED; no `.1R.30R` / `.1R.30`
+  doc edit. **F-3**: descriptor `generation` monotonicity + current-generation
+  anchor record + rollback prevention (§20, §21). No STOP / BLOCKED condition
+  reached. Runtime `not_implemented` / `Observed` / `observe` / `unavailable`;
+  first external effect ABSENT. **N-16-5: WRITER-ANCHOR CONTRACT FROZEN —
+  IMPLEMENTATION PENDING — NOT CLOSED.** Recommended next:
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3` (own explicit human authorization
+  required). Canonical doc:
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_2_HPAC_PAWA_001_V1_0_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT_FREEZE.md`.
+  `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1); HPAC-PAWA-001 v1.0 contract freeze (.1R.30R.2) recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2: HPAC-PAWA-001 v1.0 Production Protected-Admin Writer Anchor Contract Freeze; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1: IV of .1R.30R writer-anchor adjudication to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.1); HPAC-PAWA-001 v1.0 contract freeze (.1R.30R.2) recommended next; session refreshed and governance continuity revalidated.
 - Phase `.1R.30R.1` (Independent Verification of the `.1R.30R` Production
