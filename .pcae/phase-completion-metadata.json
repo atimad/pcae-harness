@@ -1,41 +1,40 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6",
-  "phase_name": "N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair",
-  "phase_title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6 — N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1",
+  "phase_name": "Independent Verification of the N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair",
+  "phase_title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1 — Independent Verification of the N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair",
   "status": "completed",
   "commit_attribution": "Primary human-authorized operator session; no delegated worker finalized, committed, or pushed.",
   "execution_availability": "unavailable",
-  "summary": "Repaired HPACStoreAuthority.complete_multi_write so canonical issuance identity/scope/ACTIVE validation and ACTIVE-to-CONSUMED transition are atomic under the existing issuance-registry lock. Second, re-entrant, and concurrent completion now permits exactly one success; registry state dominates mutable _spent. Historical .30R.3.5 remains BLOCKED; N-16-5 remains NOT CLOSED pending fresh .30R.3.6.1 IV.",
+  "summary": "Independently verified the .30R.3.6 canonical atomic ACTIVE-to-CONSUMED repair: historical .30R.3.4 permits sequential replay and 8/8 concurrent completion, while repaired code rejects replay and permits exactly one of eight concurrent successes. The merged RHAMP mechanism is implemented and independently verified through combined .30R.3.5/.3.6/.3.6.1 evidence; historical .3.5 remains BLOCKED and N-16-5 remains NOT CLOSED.",
   "derived_correctness": "passed",
   "metadata_consistency": "passed",
   "internal_evidence_coherence": "passed",
   "internal_report_coherence": "passed",
   "report_consistency": "passed",
   "origin_main_head_count": 0,
-  "test_evidence_classification": "direct repair, historical fixed-SHA reproduction, deterministic governing regression suites, fixed-SHA broad attribution, static byte-identity and no-test-weakening proof",
-  "tests_run": 340,
-  "tests_added_or_updated": "Fresh .30R.3.6 suite: 46 collected/passed; permanent .30R.3.4 product regression added; .30R.3.5 public-boundary exception assertion corrected without weakening its rejection expectation.",
+  "test_evidence_classification": "independent fixed-SHA reproduction, fresh adversarial IV, deterministic governing regression, clean detached-worktree A/R attribution, byte-identity and no-test-weakening proof",
+  "tests_run": 386,
+  "tests_added_or_updated": "One fresh verification-only .30R.3.6.1 suite with 46 tests; no production source, normative contract, or pre-existing test changed in this IV.",
   "test_results": {
-    "fast_green": "340 passed, 0 failed across the deterministic governing suites",
-    "full_suite": "Fixed-SHA common 39-file attribution: A 1758 passed/48 failed/3 skipped; repair candidate 1761 passed/46 failed/3 skipped; zero unexplained repair-only functional regressions",
-    "report_notification_tests": "not applicable: this repair did not change report or notification implementation; final notification is exercised by governed phase completion",
-    "bootstrap_session_reporting_tests": "status coherence, task-memory doctor, phase-report trust validation, and session continuity checks exercised by governed lifecycle",
-    "governing_suites": "340 passed, 0 failed, deterministic -n 0: .30R.3.4 product, .30R.3.5 IV, fresh .30R.3.6 repair, .30R.3.2.1 repair, .30R.3.2.1.1 IV, Slice-1 PAWA",
-    "historical_blocking_nodes": "2 passed after repair; sequential replay rejected and exactly one of eight concurrent completions succeeds",
-    "post_commit_scope_guards": "2 passed; both pre-commit-only candidate guard failures cleared after governed commit",
-    "fixed_sha_attribution": "A c9cf99d5 common 39-file sweep: 1758 passed, 48 failed, 3 skipped. Repair candidate pre-commit: 1761 passed, 46 failed, 3 skipped. Zero unexplained functional repair-only regressions; only two explained working-tree guard failures, both cleared post-commit.",
-    "no_test_weakening": "0 removed test definitions; 0 renamed-to-evade; 0 new skip/skipif/pytest.skip/xfail; 0 wildcard/fnmatch broadening"
+    "fast_green": "386 passed, 0 failed, 0 skipped, 0 errors across .30R.3.6.1/.3.6/.3.5/.3.4/.3.2.1/.3.2.1.1/Slice-1 governing suites",
+    "full_suite": "Clean 40-file fixed-SHA sweep: A 1776 passed/47 failed/3 skipped/0 errors; R 1777 passed/47 failed/3 skipped/0 errors. All failures common historical debt; one R-only passing permanent regression; zero R-only unexplained failures.",
+    "report_notification_tests": "not applicable: no report or notification implementation changed; final notification is exercised by governed phase completion",
+    "bootstrap_session_reporting_tests": "status coherence, health, check, task-memory doctor, session continuity, and phase-report trust gates exercised by governed lifecycle",
+    "fresh_iv": "46 passed; covers all 46 required independent verification properties",
+    "historical_blocking_nodes": "2 passed unchanged against R",
+    "rhamp_fido2_verifier_smoke": "35 passed",
+    "no_test_weakening": "0 test definitions removed/renamed; 0 skip/skipif/pytest.skip/xfail; 0 wildcard/fnmatch broadening; 0 source/consumer guard weakening"
   },
   "validation_results": {
-    "fast_green": "340 passed, 0 failed across the deterministic governing suites",
-    "report_notification_tests": "not applicable: this repair did not change report or notification implementation; final notification is exercised by governed phase completion",
-    "bootstrap_session_reporting_tests": "status coherence, task-memory doctor, phase-report trust validation, and session continuity checks exercised by governed lifecycle",
-    "historical_reproduction": "At immutable .30R.3.4 SHA c9cf99d5, sequential second completion succeeded and all 8 concurrent calls succeeded; reproduced before editing.",
-    "root_cause": "complete_multi_write performed lock-separated registry lookup and unconditional spend/consume without canonical ACTIVE precondition.",
-    "repair": "Existing _mark_capability_consumed helper now performs canonical identity/scope/class/multi-write/ACTIVE validation plus object spend and ACTIVE-to-CONSUMED under _ISSUANCE_REGISTRY_LOCK.",
-    "contract_identity": "RHAMP-001 v1.0, HPAC-PAWA-001 v1.1, HPAC-001 v2.1, and every normative contract byte-unchanged from R0.",
-    "production_scope": "Only src/pcae/core/hpac_foundation.py changed in production; no capability slot, registry shape, failure code, schema, or dependency change.",
-    "runtime_boundary": "Observed / observe / unavailable; zero plugins and capabilities; first external effect absent/unreachable."
+    "fast_green": "386 passed, 0 failed, 0 skipped, 0 errors across governing suites",
+    "report_notification_tests": "not applicable: no report-notification code changed",
+    "bootstrap_session_reporting_tests": "status coherence, health, check, session continuity, and reporting trust validation exercised",
+    "historical_reproduction": "At immutable A c9cf99d5, sequential completion succeeds twice and all 8 concurrent callers succeed.",
+    "repaired_result": "At R e0f79220, first completion succeeds, second rejects stale, and exactly 1 of 8 concurrent callers succeeds.",
+    "atomicity": "Canonical identity/scope/class/ACTIVE validation, object spend, and ACTIVE-to-CONSUMED transition occur under _ISSUANCE_REGISTRY_LOCK.",
+    "scope": "B-to-R production diff is exactly src/pcae/core/hpac_foundation.py; current IV changes no production source or contract.",
+    "contract_identity": "All normative contracts and CredentialRecord byte-identical B-to-R.",
+    "runtime_boundary": "Observed / observe / unavailable; zero plugins/capabilities; first external effect absent/unreachable."
   },
   "governance_results": {
     "pcae_health": "healthy before finalization",
@@ -46,36 +45,27 @@
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
-    "implementation_verdict": "complete_multi_write terminal lifecycle REPAIRED — IV PENDING; multi-write one-operation semantics REPAIRED — IV PENDING; PAWA non-bearer and verified RHAMP/FIDO2 baselines preserved; .30R.3.5 BLOCKED/immutable; N-16-5 NOT CLOSED."
+    "implementation_verdict": "complete_multi_write lifecycle VERIFIED; ACTIVE-to-CONSUMED atomicity VERIFIED; sequential/concurrent one-success bound VERIFIED; registry dominance VERIFIED; PAWA non-bearer and ordinary one-write VERIFIED; RHAMP enrollment regression VERIFIED; repair scope VERIFIED; current merged RHAMP mechanism IMPLEMENTED + INDEPENDENTLY VERIFIED; historical .30R.3.5 BLOCKED/immutable; N-16-5 NOT CLOSED."
   },
   "notification_dispatch_result": "pending_phase_complete_promotion",
-  "no_go_confirmation": "No normative contract change. No CredentialRecord change. No RHAMP registration/sidecar/counter/CTAP2/FIDO2/hpac_verifier change. No protected presentation or pcae-protected-local-presentation/1.0. No require_real_assurance Gate 5/9 wiring. No N-16-6, N-16-7, or Slice C. No first external effect. No execution enablement. No new dependency, capability field, registry structure, PAWA failure code, or RHAMP terminal reason. Historical .30R.3.5 report remains BLOCKED and immutable. No delegated worker used. No raw git commit/push, hook bypass, force push, or history rewrite.",
+  "no_go_confirmation": "Verification only. No production or normative-contract modification. No defect repair. No historical .30R.3.5 rewrite. No CredentialRecord, RHAMP/FIDO2/verifier/deterministic seam/presentation/Gate/runtime/effect change. No protected presentation, pcae-protected-local-presentation/1.0, require_real_assurance Gate 5/9 wiring, N-16-6, N-16-7, Slice C, first external effect, or execution enablement. No delegated worker. No raw git commit/push, hook bypass, force push, or history rewrite.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_6_N_16_5_PAWA_MULTI_WRITE_COMPLETION_ONE_OPERATION_INTEGRITY_REPAIR.md",
-    "src/pcae/core/hpac_foundation.py",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_6_1_N_16_5_PAWA_MULTI_WRITE_COMPLETION_INTEGRITY_REPAIR_IV.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/active/20260902-2258-idle-awaiting-explicit-authorization-for-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-6-1-independent-verification-n-16-5-not-closed.md",
-    "tasks/done/20260902-2225-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-5-blocked-n-16-5-not-closed-next-1r-30r-3-6-repair-own-explicit-human-authorization-required.md",
-    "tasks/done/20260902-2237-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-6-n-16-5-pawa-multi-write-completion-one-operation-integrity-repair.md",
-    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py",
-    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py",
-    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_6_multi_write_completion_integrity_repair.py"
+    "tasks/active/20260902-2340-idle-awaiting-next-explicitly-authorized-governed-phase.md",
+    "tasks/done/20260902-2302-idle-awaiting-next-governed-phase-authorization.md",
+    "tasks/done/20260902-2325-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-6-1-independent-verification-of-the-n-16-5-pawa-multi-write-completion-one-operation-integrity-repair.md",
+    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_6_1_multi_write_completion_integrity_repair_iv.py"
   ],
-  "files_changed_count": 12,
+  "files_changed_count": 9,
   "phase_commits": [
-    {
-      "hash": "761e064e93d012fad091034c6d27542d1515fc06",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6: repair PAWA multi-write completion one-operation integrity"
-    },
-    {
-      "hash": "e92f3961d3e982ff08f4b577dd2fccbcd946d21e",
-      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6: close repair task and transition to idle"
-    }
+    {"hash": "6a5d5eabb24c69ffd007be497966c9c14d163555", "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1: independently verify PAWA multi-write completion repair"},
+    {"hash": "66e12ecdb9a4c98c8ae273cc106879e35a2c33d0", "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1: close IV task and transition to idle"}
   ],
-  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1 — Independent Verification of the N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair. ID recommended, NOT reserved; own explicit human authorization required. Do not begin protected presentation, N-16-6, N-16-7, Slice C, a first external effect, or execution enablement.",
+  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4 — N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption Implementation. Recommended, not begun; own explicit human authorization required. Do not begin N-16-6, N-16-7, Slice C, a first external effect, or execution enablement.",
   "pushed_status": "pending",
   "origin_main_head": "pending_push"
 }
