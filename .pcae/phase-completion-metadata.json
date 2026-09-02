@@ -10,8 +10,8 @@
  "metadata_consistency": "phase_id / phase_name / phase_title / status / summary / recommended_next_phase all name 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1. The canonical IV phase document (docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_2_1_1_INDEPENDENT_VERIFICATION_OF_N_16_5_PAWA_HPACWRITERCAPABILITY_NON_BEARER_ONE_OPERATION_INTEGRITY_REPAIR.md) names the same phase ID and the same verification. phase_commits are the governed .1R.30R.3.2.1.1 commits made before this metadata-staging commit, each subject carrying the ...1R.30R.3.2.1.1 token.",
  "internal_evidence_coherence": "All contract citations resolve to the current frozen text, byte-current since R0 = 83b7f70b (git diff 83b7f70b HEAD -- docs/contracts is empty). HPAC-PAWA-001 v1.1 is byte-unchanged. src/pcae changed by this phase: none (git diff f3c4424c HEAD -- src/pcae is empty -- this IV performed zero production edits). The fresh 30-test IV suite passes (30 passed, 0 failed); the .1R.30R.3.1 product suite (99) and .1R.30R.3.2.1 repair suite (24) both re-run unedited and pass (123 passed, 0 failed combined). pcae health / check / status coherence all pass.",
  "internal_report_coherence": "Test and validation evidence for this phase is linked to this phase's identity (149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1) -- the fresh 30-test IV suite is entirely new, authored by this phase; the 123 re-run tests (99 + 24) are explicitly identified as pre-existing, unedited re-runs, not this phase's own new evidence. Other-phase tokens (.1R.30R.3.1, .1R.30R.3.2, .1R.30R.3.2.1, the recommended successor .1R.30R.3.3) appear only in summary, governance_results, and recommended_next_phase, which is permitted.",
- "report_consistency": "not yet pushed (HEAD 7470ae0a..3 commits ahead of origin/main); will be reconciled by a follow-up commit after the governed push",
- "origin_main_head_count": 3,
+ "report_consistency": "governed push complete (59e08949..eb071464, 5 commits); origin/main..HEAD = 0",
+ "origin_main_head_count": 0,
  "test_evidence_classification": "governed_independent_verification_phase_zero_src_pcae_change_zero_contract_change_zero_test_weakening_zero_r_only_unexplained_regressions_slice_1_closed",
  "tests_run": 153,
  "tests_added_or_updated": "30 new tests in a fresh, independently-authored IV suite (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_2_1_1_writer_capability_integrity_iv.py). 0 existing tests modified, removed, renamed, skipped, or xfailed anywhere by this phase.",
@@ -34,7 +34,7 @@
   "pcae_check": "passed",
   "pcae_status_coherence": "coherent",
   "pcae_doctor_task_memory": "warning-only historical tasks/DONE.md omissions (pre-existing hygiene debt from earlier phases, this phase's own closed tasks correctly appended); no current-phase error; single active task",
-  "pcae_push_check": "not_ready (unpushed_commits=3, will be re-checked and reconciled after governed push)",
+  "pcae_push_check": "clean",
   "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero registered plugins / capabilities; governance posture non-executing; re-asserted at phase entry and finalization",
   "telegram_runtime": "configured and outbound-ready",
   "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -58,9 +58,25 @@
   {
    "hash": "f47f4136ac3a42263b89e8b1821ff7274a8c39df",
    "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1: independently verify the N-16-5 PAWA HPACWriterCapability Non-Bearer / One-Operation Integrity Repair -- INDEPENDENTLY VERIFIED, Slice 1 CLOSED, N-16-5 CLOSED"
+  },
+  {
+   "hash": "6a69de6259d038870045a382c63a45f7ba1b1d7f",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1: stage canonical completion metadata ahead of governed push"
+  },
+  {
+   "hash": "7470ae0a5eb1cdf83fa2435e98a4b179da13a006",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1: reconcile task-memory hygiene (archived idle task status field, missing tasks/DONE.md entry)"
+  },
+  {
+   "hash": "6cd1433635742f66e3b36bc396ca105e4a78c50b",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1: reconcile not-yet-pushed state in completion metadata"
+  },
+  {
+   "hash": "eb07146404de72b7dec2508fa8bbe73249638385",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1: sync canonical phase-completion-report.md title to the current phase before finalization"
   }
  ],
  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3 -- N-16-5 RHAMP FIDO2 Credential Registry, Counter-State, and Protected-Admin Enrollment Implementation (Slice 2). ID recommended, NOT reserved; confirm under CPIPC before use. Do not begin it here. Do not implement RHAMP credential/counter-state. Do not implement enrollment. Do not implement FIDO2HumanAuthenticator. Do not modify hpac_verifier for REAL authentication. Do not widen _ELIGIBLE_MECHANISM_IDS. Do not implement protected presentation. Do not wire require_real_assurance through Gate 5/9. Do not begin N-16-6 or N-16-7. Do not begin Slice C. Do not implement or call the first external effect. Do not enable execution.",
- "pushed_status": "not_pushed",
- "origin_main_head": "7470ae0a5eb1cdf83fa2435e98a4b179da13a006"
+ "pushed_status": "pushed",
+ "origin_main_head": "eb07146404de72b7dec2508fa8bbe73249638385"
 }
