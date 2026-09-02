@@ -4462,3 +4462,26 @@ N-16-6 / N-16-7 OPEN and untouched. Historical `.1R.30`, `.1R.30R.3.2`,
 a correct BLOCKED verdict, superseded only in its future-decomposition
 recommendation. **N-16-5 remains NOT CLOSED.**
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+## 2026-09-02 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 guard reconciliation
+
+The merged RHAMP `.1R.30` bundle touches `hpac_verifier.py` +
+`hpac_foundation.py` + adds 8 new `src/pcae/core` modules + 1 script, so
+~15 point-in-time scope-fence / consumer-inventory / "byte-unchanged since
+SHA" guards across the `.1R.8` / `.1R.11` / `.1R.17` / `.1R.17R` /
+`.1R.17R.1` / `.1R.18` / `.1R.19R` / `.1R.19R.1` / `.1R.20` /
+`.1R.30R.1` / `.1R.30R.3.1` / `.1R.30R.3.2.1` / `.1R.30R.3.2.1.1` /
+`.1R.30R.3.3R` IV suites + the three HPAC Layer-1/2 foundation
+consumer-inventory guards were reconciled **phase-aware** (RHAMP-REQ-162 /
+`.1R.26` method): the historical window pinned to its owning phase's
+finalized head (immutable), the authorized production-file / consumer set
+widened by **exactly** the 9 files / 10 import tuples this phase adds (no
+wildcard, no glob, subset/`==` orientation preserved), plus a not-weakened
+current-state check where a byte-freeze was replaced. **No `def test_` was
+renamed or removed in any pre-existing test file.** Fixed-SHA A/B
+(baseline A = `5a6f9d87`): every remaining candidate-only failure is a
+pre-existing red guard reproduced identically at A (the `.1R.19R.1` /
+`.1R.20` / `.1R.17R*` `test_no_*_contract_*_since_baseline` guards — RHAMP-001
+and HPAC-PAWA-001 were frozen *after* their baselines — and the
+`3w1r2b1r111r31` `test_blocking_reproduction_*` suite) or a working-tree /
+unpushed-divergence check that clears on the governed push.

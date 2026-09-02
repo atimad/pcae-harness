@@ -379,7 +379,9 @@ def test_n20_4_repair_is_confined_to_the_started_started_edge_in_source():
 def test_n20_4_lifecycle_diff_since_r20_head_is_only_the_remap():
     _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
             "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
-            "src/pcae/core/human_principal_registry.py"}  # .1R.30R.3.1 (N-16-5)
+            "src/pcae/core/human_principal_registry.py",
+            # .1R.30R.3.4 (N-16-5 merged RHAMP bundle)
+            "src/pcae/core/hpac_verifier.py", "src/pcae/core/hpac_rhamp_terminal_reasons.py", "src/pcae/core/hpac_rhamp_client_context.py", "src/pcae/core/hpac_rhamp_credential_sidecar.py", "src/pcae/core/hpac_rhamp_counter_state.py", "src/pcae/core/hpac_rhamp_ctap2.py", "src/pcae/core/human_authenticator_fido2.py", "src/pcae/core/hpac_rhamp_assertion_verify.py", "src/pcae/core/hpac_rhamp_enrollment.py"}  # .1R.30R.3.1 (N-16-5)
     diff = _git("diff", R20_HEAD, "HEAD", "--", "src/pcae",
                 *(f":(exclude){p}" for p in (_R122 | _R126 | _r30)))
     changed = {
@@ -553,7 +555,9 @@ def test_production_diff_since_r19_head_is_exactly_the_n20_4_remap():
     # itself was confined to the lifecycle module.
     _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
             "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
-            "src/pcae/core/human_principal_registry.py"}  # .1R.30R.3.1 (N-16-5)
+            "src/pcae/core/human_principal_registry.py",
+            # .1R.30R.3.4 (N-16-5 merged RHAMP bundle)
+            "src/pcae/core/hpac_verifier.py", "src/pcae/core/hpac_rhamp_terminal_reasons.py", "src/pcae/core/hpac_rhamp_client_context.py", "src/pcae/core/hpac_rhamp_credential_sidecar.py", "src/pcae/core/hpac_rhamp_counter_state.py", "src/pcae/core/hpac_rhamp_ctap2.py", "src/pcae/core/human_authenticator_fido2.py", "src/pcae/core/hpac_rhamp_assertion_verify.py", "src/pcae/core/hpac_rhamp_enrollment.py"}  # .1R.30R.3.1 (N-16-5)
     assert changed - _R122 - _R126 - _r30 == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
 
 

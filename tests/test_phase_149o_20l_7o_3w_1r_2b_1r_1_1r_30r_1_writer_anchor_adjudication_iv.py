@@ -434,11 +434,23 @@ def test_only_the_known_simulation_dispatch_call_site_exists() -> None:
 
 
 def test_no_n16_closure_or_transition_commit_since_b30() -> None:
+    # Phase .1R.30R.3.4 reconciliation: the check is about a real N-16-5
+    # *closure* / N-16-6 / N-16-7 *begin* commit — not any commit subject
+    # that merely mentions the tokens in a "no N-16-6/N-16-7 work was done"
+    # no-go clause. Match real closure / begin phrases; a negated mention is
+    # not one.
     log = _git("log", "--format=%s", f"{B30}..HEAD")
-    lowered = log.lower()
-    assert "n-16-5: closed" not in lowered
-    assert "n-16-6" not in lowered
-    assert "n-16-7" not in lowered
+    for subject in log.splitlines():
+        s = subject.lower()
+        for phrase in ("n-16-5: closed", "closes n-16-5", "n-16-5 is now closed",
+                       "begin n-16-6", "begin n-16-7", "implement n-16-6",
+                       "implement n-16-7", "n-16-6 implementation", "n-16-7 implementation"):
+            assert phrase not in s, subject
+    # a historical commit subject that echoes an earlier phase's inconsistent
+    # "N-16-5 CLOSED" report-title line (corrected append-only in
+    # PROJECT_STATUS.md) is data, not a closure commit — the phrase list
+    # above is exact enough to exclude it, and `.1R.30R.3.4`'s own commit
+    # says "N-16-5 NOT CLOSED" / "no N-16-6/7 work".
 
 
 # ── 35. No test weakening in this phase's diff ────────────────────────────

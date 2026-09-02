@@ -1325,6 +1325,16 @@ _SLICE_A_PLUS_B_SCOPE = _SLICE_A_PLUS_B_PLUS_C_SCOPE | {
     "src/pcae/core/hpac_protected_admin_writer.py",
     "src/pcae/core/hpac_foundation.py",
     "src/pcae/core/human_principal_registry.py",
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (N-16-5 -- merged RHAMP `.1R.30` bundle). Exact filenames, no wildcard.
+    "src/pcae/core/hpac_verifier.py",
+    "src/pcae/core/hpac_rhamp_terminal_reasons.py",
+    "src/pcae/core/hpac_rhamp_client_context.py",
+    "src/pcae/core/hpac_rhamp_credential_sidecar.py",
+    "src/pcae/core/hpac_rhamp_counter_state.py",
+    "src/pcae/core/hpac_rhamp_ctap2.py",
+    "src/pcae/core/human_authenticator_fido2.py",
+    "src/pcae/core/hpac_rhamp_assertion_verify.py",
+    "src/pcae/core/hpac_rhamp_enrollment.py",
 }
 
 

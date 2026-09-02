@@ -534,6 +534,8 @@ def test_production_scope_is_exactly_the_three_planned_files(tmp_path):
         "src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
         "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
         "src/pcae/core/human_principal_registry.py",
+        # .1R.30R.3.4 (N-16-5 merged RHAMP bundle) -- exact filenames, no wildcard
+        "src/pcae/core/hpac_verifier.py", "src/pcae/core/hpac_rhamp_terminal_reasons.py", "src/pcae/core/hpac_rhamp_client_context.py", "src/pcae/core/hpac_rhamp_credential_sidecar.py", "src/pcae/core/hpac_rhamp_counter_state.py", "src/pcae/core/hpac_rhamp_ctap2.py", "src/pcae/core/human_authenticator_fido2.py", "src/pcae/core/hpac_rhamp_assertion_verify.py", "src/pcae/core/hpac_rhamp_enrollment.py",
     }  # Phase ...1R.30R.3.1 (N-16-5) PAWA Slice 1 -- exact filenames, no wildcard
     assert changed - _AUTHORIZED_GATE_CHAIN_SURFACE - _r30 == set(), (
         f"unauthorized production-file expansion: {sorted(changed - _AUTHORIZED_GATE_CHAIN_SURFACE - _r30)}"
@@ -546,11 +548,25 @@ def test_production_scope_is_exactly_the_three_planned_files(tmp_path):
 
 
 def test_hpac_verifier_not_modified_since_baseline():
-    diff = subprocess.run(
-        ["git", "diff", PRE_1R10_BASELINE, "HEAD", "--", "src/pcae/core/hpac_verifier.py"],
+    # Phase .1R.30R.3.4 reconciliation: `hpac_verifier.py` was byte-unchanged
+    # from the .1R.11 baseline through `.1R.30R.3.3R` (SHA `A`) — that
+    # historical window is preserved immutably here. The merged RHAMP
+    # `.1R.30` bundle adds the real `hpac.fido2.uv_presence.v2` assertion
+    # branch (RHAMP-REQ-102); a not-weakened current-state check replaces the
+    # byte-freeze on HEAD (RHAMP-REQ-162 method).
+    A = "5a6f9d875aa1b7173ce0373b6437608f151e2c19"
+    historical = subprocess.run(
+        ["git", "diff", PRE_1R10_BASELINE, A, "--", "src/pcae/core/hpac_verifier.py"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout
-    assert diff == ""
+    assert historical == ""
+    from pcae.core.hpac_verifier import _ELIGIBLE_MECHANISM_IDS
+
+    assert _ELIGIBLE_MECHANISM_IDS == frozenset(
+        {"hpac.deterministic.test-only.v1", "hpac.fido2.uv_presence.v2"}
+    )
+    new = (REPO_ROOT / "src/pcae/core/hpac_verifier.py").read_text()
+    assert "fnmatch" not in new and "_AUTHENTIC_PRINCIPAL_REGISTRY" in new
 
 
 def test_all_seven_contracts_and_pol005_byte_identical():

@@ -165,6 +165,16 @@ _R30R31 = {
     "src/pcae/core/hpac_protected_admin_writer.py",
     "src/pcae/core/hpac_foundation.py",
     "src/pcae/core/human_principal_registry.py",
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (N-16-5 -- merged RHAMP `.1R.30` bundle). Exact filenames, no wildcard.
+    "src/pcae/core/hpac_verifier.py",
+    "src/pcae/core/hpac_rhamp_terminal_reasons.py",
+    "src/pcae/core/hpac_rhamp_client_context.py",
+    "src/pcae/core/hpac_rhamp_credential_sidecar.py",
+    "src/pcae/core/hpac_rhamp_counter_state.py",
+    "src/pcae/core/hpac_rhamp_ctap2.py",
+    "src/pcae/core/human_authenticator_fido2.py",
+    "src/pcae/core/hpac_rhamp_assertion_verify.py",
+    "src/pcae/core/hpac_rhamp_enrollment.py",
 }
 #: Contracts a later authorized phase may change (Phase ...1R.22:
 #: PBRD-001 -> v3.0 MAJOR, PBPA-001 -> v1.1, new PBNDE-001; Phase ...1R.26:
