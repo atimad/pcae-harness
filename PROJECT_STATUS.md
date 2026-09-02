@@ -2,6 +2,69 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3 — N-16-5 RHAMP FIDO2 Credential
+Registry, Counter-State, and Protected-Admin Enrollment Implementation
+(Slice 2). **STATUS: BLOCKED — decomposition blocker. N-16-5: NOT CLOSED.
+Slice 1: CLOSED (unchanged).**
+
+Independent re-derivation from the governing frozen contract establishes that
+Slice 2 **as scoped** cannot be completed without a real CTAP2
+`authenticatorMakeCredential` ceremony — which this phase's mandate forbids
+and assigns elsewhere. RHAMP-001 v1.0 §13 (RHAMP-REQ-043) freezes the
+credential-registration flow as an ordered sequence whose registry write
+**consumes the verified outputs of a `makeCredential` response**
+(`public_key = hex(cbor(COSE_Key))`, sidecar `raw_credential_id` =
+base64url of the CTAP2 credential-id bytes); §14 (RHAMP-REQ-048) and §61
+(RHAMP-REQ-150) put "verification of the `makeCredential` response" and
+"authenticator UP + UV" inside the mandatory "all of" conjunction for
+first-credential bootstrap and every enrollment; §17 (RHAMP-REQ-055..057)
+makes `RHAMP-FIDO2-CREDENTIAL/1.0` a closed, create-only, immutable schema
+over authenticator output **with no placeholder / pending / material-absent
+variant**; §63 (RHAMP-REQ-155) forbids synthetic material ever becoming REAL
+authority in a production registry; and §64 (RHAMP-REQ-156) + the §72 freeze
+verdict bundle "mechanism + registry + bootstrap" into a **single** atomic
+implementation phase that the contract never severs at the operator's
+Slice-2 / Slice-3 boundary. This is exactly this phase's enumerated VALID
+EARLY STOP CONDITION ("RHAMP-001 v1.0 cannot support Slice 2 without contract
+evolution" / "a real FIDO2/CTAP ceremony is required to complete Slice 2"),
+resolved under its §22 ("Return a decomposition blocker for human
+adjudication").
+
+Per this phase's BLOCKED discipline: **no `src/pcae` file created or
+modified** (`git diff 4218e076 HEAD -- src/pcae tests docs/contracts` is
+empty), no guard weakened, no contract edited, no test changed, Slice 3 not
+begun, no CTAP2 / FIDO2 code introduced. `hpac_verifier.py` byte-unchanged;
+`_ELIGIBLE_MECHANISM_IDS` still `frozenset({"hpac.deterministic.test-only.v1"})`;
+Gate 5 / Gate 9 byte-unchanged; RHAMP-001 v1.0, HPAC-PAWA-001 v1.1,
+HPAC-001 v2.1 byte-unchanged. Runtime `Observed` / `observe` / `unavailable`,
+0 plugins, 0 capabilities. First external effect ABSENT / UNREACHABLE.
+N-16-6 / N-16-7 OPEN and untouched (N-16-7 strictly last). N-23-1 / N-23-2
+carried unchanged.
+
+**Current-state N-16-5 correction (append-only, this phase's §42).** The
+historical `.1R.30R.3.2.1.1` canonical report carries an internally
+inconsistent "N-16-5 CLOSED" statement (its own body records no Slice 2 / no
+FIDO2 / no verifier change / first external effect ABSENT; RHAMP-REQ-156 / §72
+make N-16-5 closure a `.1R.33`-equivalent deliverable requiring Slice 2,
+Slice 3, protected presentation, `require_real_assurance` wiring, and ≥ 1
+real-CTAP2-hardware verification). **The historical report is preserved
+byte-unchanged.** Current canonical state is: **N-16-5 NOT CLOSED.**
+
+**Recommended next phase (ID recommended, NOT reserved; confirm under CPIPC;
+own explicit human authorization required):** a decomposition adjudication
+phase first — `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R` — N-16-5 RHAMP
+Slice 2 / Slice 3 Decomposition Adjudication (`makeCredential`-in-registration
+boundary; choose re-merge into RHAMP-REQ-156's `.1R.30` bundle / a governed
+RHAMP-001 v1.1 MINOR defining a staged enrollment / an explicit material-free
+Slice-2 re-scope). Do not begin it. `DELEGATED .3 FINALIZATION / COMMIT /
+PUSH: UNAUTHORIZED` preserved — this phase's commit / push / finalization is
+performed directly by the primary human-authorized operator. Full evidence:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_3_N_16_5_RHAMP_FIDO2_CREDENTIAL_REGISTRY_COUNTER_STATE_AND_PROTECTED_ADMIN_ENROLLMENT_IMPLEMENTATION_SLICE_2.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1 — Independent Verification of
 the N-16-5 PAWA `HPACWriterCapability` Non-Bearer / One-Operation Integrity
 Repair. **STATUS: INDEPENDENTLY VERIFIED. N-16-5 Slice 1: CLOSED.**
@@ -64,6 +127,13 @@ Canonical issuance integrity, non-bearer, object-instance binding,
 one-operation, concurrent use, scope binding, restart invalidation,
 production consumption, consumer boundary, and contract↔repair
 equivalence: all **VERIFIED**. **Slice 1: CLOSED. N-16-5: CLOSED.**
+[CORRECTED append-only by Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3: this
+"N-16-5: CLOSED" was an internally inconsistent current-status statement —
+N-16-5 is **NOT CLOSED** (Slice 2, Slice 3, protected presentation,
+`require_real_assurance` wiring, and mandatory real-CTAP2-hardware
+verification all remain incomplete). See the Current Phase entry. This
+historical entry text is otherwise preserved as the record of what
+`.1R.30R.3.2.1.1` stated.]
 Runtime: `Observed` / `observe` / `unavailable`, 0 plugins, 0 capabilities.
 First external effect: ABSENT/UNREACHABLE. No Slice 2, no RHAMP, no FIDO2,
 no `hpac_verifier`/Gate change, no runtime/effect enablement — all
