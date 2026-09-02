@@ -121,8 +121,8 @@ detail — HPAC-PAWA-REQ-001). Not E (a resolution exists).
 `-- tests` empty. HPAC-PAWA-001 v1.0 **not edited**; historical `.1R.30`
 immutable BLOCKED; `.1R.30R` / `.1R.30R.1` / `.1R.30R.2` records unchanged.
 Runtime `not_implemented / Observed / observe / unavailable`; 0 plugins / 0
-capabilities. First external effect **ABSENT**. No human authenticated; no
-approval; no PB permission; no Runtime Enforcement change; no execution enabled.
+capabilities. FIRST EXTERNAL EFFECT: ABSENT. No human authenticated; no
+approval; no PB permission; no Runtime Enforcement change; no execution was enabled.
 N-16-5 **NOT CLOSED**. N-16-3 / N-16-4 CLOSED. N-16-6 / N-16-7 OPEN, untouched,
 N-16-7 strictly last. N-23-1 / N-23-2 carried unchanged.
 
