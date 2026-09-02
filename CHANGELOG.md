@@ -2,6 +2,56 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1` (Independent
+  Verification of the N-16-5 PAWA `HPACWriterCapability` Non-Bearer /
+  One-Operation Integrity Repair) is **INDEPENDENTLY VERIFIED — N-16-5
+  Slice 1: CLOSED.** Independently re-derived the `.1R.30R.3.2.1` repair
+  from primary source: reproduced the historical forged-seal-shell
+  adversary against a fresh `git worktree` at immutable `A = aff46ec3`
+  (SUCCEEDED — defect confirmed real) and against this working tree `R`
+  (REJECTED — repair holds), with an independently-written script, not
+  reused from any prior phase. Independently re-adjudicated
+  HPAC-PAWA-REQ-102/103: the repair's second, registry-object-identity
+  check is additive strengthening of the same identity-based mechanism,
+  not a mechanism replacement — no normative contract change; HPAC-PAWA-001
+  stays v1.1 byte-unchanged. Investigated one question beyond the existing
+  suites' own coverage: whether a `record_write` provenance-write failure
+  (after the actual registry-document mutation, before the capability's
+  own consumption bookkeeping) could enable a second successful mutation
+  via the same, formally-still-ACTIVE capability. Empirically tested: no
+  bypass is achievable, because every subsequent read of the affected
+  record fails closed on the now-missing provenance. Disclosed as
+  non-blocking finding F-1 (pre-existing, repair-unrelated
+  availability/operability gap — the record wedges pending manual repair,
+  but grants no authority), not a blocker. Also independently verified:
+  registry strong-reference/object-ID-reuse structural safety; field
+  mutation on genuinely-issued (non-shell) capabilities; registration
+  failure fail-closed; validation-failure lifecycle; issuance-evidence
+  document content (direct inspection); registry non-export /
+  issuance-function-inventory (AST-based) / consumer-boundary statics;
+  fork/multiprocessing absence; an independent 6-thread concurrency
+  re-run (exactly 1 success); the one pre-existing test-assertion change
+  confirmed strictly additive; historical `.1R.30R.3.2` preserved
+  byte-unchanged. Fresh, independently-authored 30-test IV suite: 30
+  passed, 0 failed. Re-ran the `.1R.30R.3.1` product suite (99 tests) and
+  the `.1R.30R.3.2.1` repair suite (24 tests) unedited: 123 passed, 0
+  failed — matches the repair phase's own reported count exactly. Zero
+  existing test file touched. Broad fixed-SHA sweep (`pytest -m fast_green
+  -n auto`, full repository): 8968 passed / 342 failed / 5 skipped / 9
+  errors, independently confirmed zero PAWA/`hpac_foundation`-related
+  failures among them (all pre-existing, unrelated historical debt; this
+  phase made zero `src/pcae` changes). Verdict: canonical issuance
+  integrity, non-bearer, object-instance binding, one-operation, concurrent
+  use, scope binding, restart invalidation, production consumption,
+  consumer boundary, and contract↔repair equivalence all VERIFIED. Slice 1
+  CLOSED; N-16-5 CLOSED. Recommended next (not begun, ID recommended not
+  reserved): `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3` (Slice 2 — RHAMP FIDO2
+  Credential Registry, Counter-State, and Protected-Admin Enrollment
+  Implementation). No Slice 2/FIDO2/RHAMP/runtime/effect change; no
+  N-16-6/N-16-7; no Slice C; runtime remains Observed/observe/unavailable;
+  first external effect remains ABSENT. `DELEGATED .3 FINALIZATION / COMMIT
+  / PUSH: UNAUTHORIZED` preserved.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` (N-16-5 PAWA
   `HPACWriterCapability` Non-Bearer / One-Operation Integrity Repair) is
   **REPAIRED — FRESH SUCCESSOR IV REQUIRED — N-16-5 NOT CLOSED.** Repairs
