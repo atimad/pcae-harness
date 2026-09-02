@@ -27,6 +27,9 @@
     "repository_wide_diagnostic": "pytest -n auto has pre-existing UUID-valued worker collection mismatch; serial run reached 1084 passes and two pre-existing advisory-directory guard failures before bounded interruption at 6m41s"
   },
   "validation_results": {
+    "fast_green": "511 passed, 0 failed, 0 skipped, 0 errors in the deterministic broad affected-scope sweep",
+    "report_notification_tests": "not applicable: notification implementation unchanged; governed phase completion exercises configured Telegram dispatch",
+    "bootstrap_session_reporting_tests": "health, check, coherence, session continuity, report trust, and report identity exercised through governed lifecycle",
     "phase_entry": "A=db5f1dd761174d6ac1ca16e49e8871c02f747fdf, finalized historical .30R.4 BLOCKED head; clean and origin/main..HEAD=0 at entry",
     "blocker_reconstruction": "RHAMP requires administrator-installed production descriptor and pinned helper integrity while HPAC-PAWA-001 v1.1 closed mutation and consumer inventories excluded presentation administration",
     "architecture": "Candidate A selected: out-of-band immutable executable bytes plus PAWA metadata registration; installer, launcher, and runtime evidence writer are distinct",
