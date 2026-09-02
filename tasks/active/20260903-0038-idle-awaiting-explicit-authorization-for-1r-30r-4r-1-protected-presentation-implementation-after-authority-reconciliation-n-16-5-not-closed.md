@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting explicit authorization for .1R.30R.4R.1 protected-presentation implementation after authority reconciliation; N-16-5 NOT CLOSED
+Idle: awaiting next explicitly authorized governed phase; N-16-5 NOT CLOSED
 
 ## Status
 
@@ -18,7 +18,7 @@ contract
 
 ## Goal
 
-Idle: awaiting explicit authorization for .1R.30R.4R.1 protected-presentation implementation after authority reconciliation; N-16-5 NOT CLOSED
+Idle: awaiting next explicitly authorized governed phase; N-16-5 NOT CLOSED
 
 ## Allowed Files
 
