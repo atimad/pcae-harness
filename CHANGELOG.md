@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+- Phase `.1R.30R.2A` (Configured-Agent-Principal Resolution Source
+  Contract-Compatibility Adjudication) is **COMPLETE — ADJUDICATED**. Analysis
+  only: `git diff 5b45aa7b HEAD -- src/pcae` empty; `-- docs/contracts` empty
+  (HPAC-PAWA-001 v1.0, HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2 all
+  byte-unchanged). Full primary-source reconstruction for the planned PAWA
+  writer-anchor implementation confirmed HPAC-PAWA-001 v1.0 §33 / finding F-1
+  requires evaluating protected-root write authority against the **configured**
+  PCAE agent principal (not `os.geteuid()`), while no canonical logical-agent →
+  OS-principal `(uid, gids)` bridge exists anywhere in `src/pcae` (agent
+  registry / `.pcae/agent-lock.json` carry non-authorizing logical strings;
+  `_current_agent_identity()` is the live process; `DeploymentBinding` / the
+  store manifest / HBDC environment lock name no agent OS uid). **Verdict: B —
+  HPAC-PAWA-001 v1.1 MINOR required.** Selected resolution **R1**: a new
+  protected, deployment-owner-provisioned, agent-unwritable, installation- and
+  generation-bound `<HPAC_PROTECTED_ROOT>/.authority/agent-exclusion.json`
+  (closed schema `HPAC-PAWA-AGENT-EXCLUSION/1.0`) storing the symbolic OS
+  account name; `(uid, gids)` resolved live from `pwd`/`grp` at each recognition
+  (detects group drift + UID reuse). R2 rejected (needs an HBDC-001 amendment +
+  wrong namespace); R3 rejected as the resolution (permanently non-production;
+  defers an unavoidable blocker — forbidden) but retained as the test-seam
+  strategy; no superior R4. Additive and authority-preserving — no MAJOR
+  trigger, no new `pawa_failure_code`, no descriptor schema change. Atomicity
+  confirmed (inside §33 unit A1). D1 phase decomposition validated and refined
+  (CPIPC-001 §4): `.1R.30R.2A` → `.2A.1` (IV) → `.2A.2` (HPAC-PAWA-001 v1.1
+  freeze) → `.3.1` (Slice 1) → `.3.2` (IV) → `.3.3`/`.3.4` (Slice 2 / IV) →
+  `.3.5`/`.3.6` (Slice 3 / IV) → `.4` (composite IV) → `.5` → `.6`. HPAC-PAWA-001
+  v1.0 **not edited**; historical `.1R.30` / `.1R.30R` / `.1R.30R.1` /
+  `.1R.30R.2` records unchanged. Runtime `Observed` / `observe` / `unavailable`;
+  first external effect ABSENT; N-16-5 NOT CLOSED. **Recommended next:**
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1` — Independent Verification of this
+  adjudication (own explicit human authorization required; do not begin it).
+  `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2); HPAC-PAWA-001 v1.0 frozen; .1R.30R.3 writer-anchor implementation recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A: Configured-Agent-Principal Resolution Source Adjudication; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2: HPAC-PAWA-001 v1.0 Production Protected-Admin Writer Anchor Contract Freeze to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2); HPAC-PAWA-001 v1.0 frozen; .1R.30R.3 writer-anchor implementation recommended next; session refreshed and governance continuity revalidated.
 - Phase `.1R.30R.2` (HPAC-PAWA-001 v1.0 Production Protected-Admin Writer
   Anchor Contract Freeze) is **COMPLETE — HPAC-PAWA-001 v1.0 FROZEN as the sole

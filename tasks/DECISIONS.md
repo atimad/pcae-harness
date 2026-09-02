@@ -3893,3 +3893,135 @@ reconciliation, no N-16-6/N-16-7/Slice C, no real first external effect, no
 execution enablement. New IV suite adds no `def test_` removal/rename/skip.
 Runtime `Observed` / `observe` / `unavailable`. N-16-5 NOT CLOSED.
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+---
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A — Configured-Agent-Principal Resolution Source Contract-Compatibility Adjudication (2026-09-02)
+
+**Decision: Verdict B — HPAC-PAWA-001 v1.1 MINOR required. Selected resolution R1.**
+
+- **Gap CONFIRMED (independently, from source):** HPAC-PAWA-001 v1.0 §33 +
+  finding F-1 (`.1R.30R.1` §11.1) require the production `production_writer`
+  recognition to evaluate protected-root write authority held by the
+  **configured** PCAE agent principal (HPAC-PAWA-REQ-021/022/026/061/062/063) —
+  explicitly **not** `os.geteuid()` of the invoking process. No canonical bridge
+  from PCAE's logical agent identity (`claude-local`, …) to an enforceable OS
+  `(uid, gids)` exists anywhere in `src/pcae`: the agent registry (`policy.py` /
+  `agent.py`) and `.pcae/agent-lock.json` carry logical `agent_id` strings only
+  (`agent.py`: "descriptive only … non-authenticating, non-authorizing");
+  `_current_agent_identity()` returns the **live** `os.geteuid()`/groups;
+  `DeploymentBinding` / `HPAC-STORE-AUTHORITY/1.0` manifest / HBDC-001 §13
+  environment lock record **no agent OS uid**; `grep -rn "getpwnam|PCAE_AGENT_PRINCIPAL|
+  HPACAuthorityClass.PRODUCTION|production_writer" src/pcae | grep -v test` finds
+  no bridge and no PRODUCTION-writer mint path.
+
+- **F-1 predicates are distinct and must not be collapsed:**
+  `agent_has_protected_write_authority` (§26) evaluates the **configured**
+  principal's latent write authority; `current_context_is_agent` (§31) compares
+  the **live** invoking process against the configured principal; the positive
+  write probe (§28) is an operation by the **live** process. `os.geteuid()` is
+  correct for the probe and one operand of §31 — never for §26.
+
+- **Identity model:** store the configured agent principal's **symbolic OS
+  account name** in a protected record; resolve `(uid, gids)` **live** from
+  `pwd`/`grp` at every recognition. This is the only model that detects
+  post-provision privilege-group drift (a static gid snapshot would not) and
+  UID reuse (name→uid mismatch → fail closed). `pwd`/`grp` span macOS + Linux;
+  the OS account database is already inside the TCB (HPAC-PAWA-REQ-018).
+
+- **Selected: R1.** New protected artifact
+  `<HPAC_PROTECTED_ROOT>/.authority/agent-exclusion.json`, closed schema
+  `HPAC-PAWA-AGENT-EXCLUSION/1.0` (final wording frozen by `.1R.30R.2A.2`):
+  `configured_agent_account` (name; **no uid integer**), `installation_id`
+  (== descriptor's), `protected_root_identity` (`{device,inode}`), `generation`,
+  `created_at`, `provenance_ref`, `state`, `record_digest`. Deployment-owner
+  provisioned by `scripts/hpac_protected_root_admin.py` (create-only per
+  generation, written alongside `deployment-owner.json`); agent-unwritable
+  (`.authority/` mode 0700); non-circular bootstrap (no capability, no FIDO2, no
+  prior principal — PAWA-INV-4); rollback caught by the
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` anchor exactly as a superseded descriptor
+  is (§21); **separate record, transitively bound** — the frozen descriptor
+  `configured_agent_exclusion_binding` (kind + basis) is unchanged and the
+  descriptor schema is **not** touched.
+
+- **R2 rejected** (HBDC env-lock binding): would require an **HBDC-001
+  amendment** (a second frozen contract, whose own v1.1/v1.2 amendments are
+  PENDING IV) and violates HPAC-PAWA-REQ-134 (PAWA owns its namespace; no
+  cross-subsystem authority). **R3 rejected as the resolution** (ship with no
+  production mapping; fixture seam only): fail-closed-safe but **permanently
+  non-production** — `.3.1` could only be a partial/non-production
+  implementation and the blocker resurfaces at `.1R.30R.6` (N-16-5 closure),
+  which the phase prompt forbids deferring; the fixture seam is retained as the
+  **test strategy** under R1. **No superior R4** (no existing installation
+  principal record; folding into the closed descriptor contradicts §14 /
+  HPAC-PAWA-REQ-037).
+
+- **Why MINOR not MAJOR:** none of HPAC-PAWA-REQ-152's MAJOR triggers apply
+  (all are weakening/widening/redesign). R1 is additive and
+  authority-preserving — it does not change the trust root (still OS filesystem
+  write authority on the protected root), weakens no wall, and *implements* a
+  recognition input the frozen contract **already requires** and §9/§73 already
+  anticipate the implementing phase naming. No new `pawa_failure_code` (reuses
+  #3 `agent_principal_unknown`, #4 `agent_has_protected_write_authority`); the
+  21-code taxonomy and the PAWA→RHAMP `#1/#2/#40/#41` map are unchanged;
+  HPAC-001 v2.1 and RHAMP-001 v1.0 byte-unchanged. Direct precedent: HPAC-001
+  v2.1 was a MINOR that "adds one closed binding object … widens no authority".
+  Why not A (pure implementation detail): a new protected recognition input is
+  normative and must be named in the contract, not hidden in code
+  (HPAC-PAWA-REQ-001). Why not E (BLOCKED): a production-safe, source-supported,
+  additive resolution exists.
+
+- **Same-UID topology:** operator + agent under one OS account ⇒ resolved
+  configured-agent authority == deployment-owner effective authority ⇒
+  `agent_has_protected_write_authority` ⇒ PRODUCTION writer issuance INELIGIBLE,
+  fail closed (PAWA-INV-7; HPAC-PAWA-REQ-025/129/130). No descriptive agent-ID
+  label is used to try to distinguish processes at an identical OS authority
+  boundary.
+
+- **Atomicity CONFIRMED:** configured-agent resolution + the §26/§31 evaluations
+  are inside the same atomic §33 recognition unit as descriptor /
+  current-generation / write-probe / mint (PAWA-INV-3) — atomic unit A1 of
+  `.1R.30R.3.1`.
+
+- **Dedicated IV = YES** (`.1R.30R.2A.1`): this selects a production trust input
+  and mandates a contract bump — not a trivial implementation detail; precedent
+  `.1R.30R` → `.1R.30R.1`. **Contract-freeze successor = YES** (`.1R.30R.2A.2`,
+  HPAC-PAWA-001 v1.1); its own contract-freeze IV MAY fold into `.1R.30R.3.2`
+  (the `.1R.29`→folded-IV precedent HPAC-PAWA-001 §18 cites).
+
+- **D1 phase decomposition validated (CPIPC-001 §4)** and refined with the
+  `.2A` track inserted ahead of `.3.1`:
+  `.1R.30R.2A` → `.2A.1` (IV) → `.2A.2` (HPAC-PAWA-001 v1.1 freeze) →
+  `.3.1` (Slice 1: PAWA production writer anchor) → `.3.2` (IV) →
+  `.3.3`/`.3.4` (Slice 2: RHAMP credential registry + sidecar/counter + enrollment / IV) →
+  `.3.5`/`.3.6` (Slice 3: real FIDO2 authenticator + native CTAP2 verify +
+  mechanism allowlist + terminal-reason wiring / IV) →
+  `.4` (composite IV + broad fixed-SHA A/B) →
+  `.5` (protected presentation + `require_real_assurance` — unchanged) →
+  `.6` (IV + real-CTAP2-hardware + N-16-5 closure — unchanged). All recommended,
+  NOT reserved; each its own explicit human authorization.
+
+- **`.1R.30R.3.1` conceptual surface delta** (no implementation here): new
+  `src/pcae/core/hpac_pawa_agent_exclusion.py` (`HPAC-PAWA-AGENT-EXCLUSION/1.0`
+  helper + `resolve_configured_agent_identity()`, inside the non-agent-importable
+  fence); `scripts/hpac_protected_root_admin.py` gains `set-agent-exclusion
+  --agent-account <name>`; `hpac_protected_admin_writer.py` §33 step 3 uses the
+  resolved configured-agent `(uid,gids)`, step 7 compares the live process
+  against it; `_current_agent_identity()` is NOT reused for the negative
+  boundary. Production `production_writer(...)` carries **no** caller uid/gids
+  param; a leading-underscore `_configured_agent_identity_source=` fixture seam
+  (guarded test-only) enables identity-A-vs-B / same-principal / group-drift /
+  unknown-account tests.
+
+- **Scope discipline:** `git diff 5b45aa7b HEAD -- src/pcae` empty;
+  `-- docs/contracts` empty. HPAC-PAWA-001 v1.0 not edited; historical `.1R.30`
+  immutable BLOCKED; `.1R.30R` / `.1R.30R.1` / `.1R.30R.2` records unchanged.
+  Runtime `not_implemented` / `Observed` / `observe` / `unavailable`; first
+  external effect ABSENT; N-16-5 NOT CLOSED; N-16-3/N-16-4 CLOSED;
+  N-16-6/N-16-7 OPEN, untouched, N-16-7 strictly last; N-23-1/N-23-2 carried.
+
+**Recommended next phase (exactly one):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1` — Independent Verification of the
+Configured-Agent-Principal Resolution Source Contract-Compatibility
+Adjudication. Own explicit human authorization required. Do not begin it.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
