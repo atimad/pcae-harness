@@ -612,6 +612,16 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         "src/pcae/core/runtime_adapter.py",                     # Slice B (.1R.19) -- 3S.2.1 MUST-FIX #1
         "src/pcae/core/runtime_introspection.py",               # Slice B (.1R.19) -- 3S.2.1 item-9 runtime-inspect repair
         "src/pcae/commands/runtime_inspect.py",  # Slice B (.1R.19) -- 3S.2.1 item-9 runtime-inspect CLI section (observational)
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (N-16-5 -- HPAC-PAWA-001
+        # v1.1 Slice 1 production protected-admin writer anchor). Exact
+        # filenames, no wildcard. The non-agent-importable admin-writer
+        # fence + a seal-guarded PRODUCTION mint primitive + PRODUCTION
+        # subject-scoped writer consumption; no PB / Gate / runtime / effect path.
+        "src/pcae/core/hpac_pawa_schemas.py",
+        "src/pcae/core/hpac_pawa_agent_exclusion.py",
+        "src/pcae/core/hpac_protected_admin_writer.py",
+        "src/pcae/core/hpac_foundation.py",
+        "src/pcae/core/human_principal_registry.py",
     }
     unexpected = set(changed) - _authorized_surface
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"

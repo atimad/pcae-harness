@@ -373,6 +373,13 @@ def test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap():
         "src/pcae/core/runtime_dispatch_permission.py",
         # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0): the positive Gate-7 result.
         "src/pcae/core/runtime_dispatch_gate7.py",
+        # Phase ...1R.30R.3.1 (N-16-5 -- HPAC-PAWA-001 v1.1 Slice 1 production
+        # protected-admin writer anchor). Exact filenames, no wildcard.
+        "src/pcae/core/hpac_pawa_schemas.py",
+        "src/pcae/core/hpac_pawa_agent_exclusion.py",
+        "src/pcae/core/hpac_protected_admin_writer.py",
+        "src/pcae/core/hpac_foundation.py",
+        "src/pcae/core/human_principal_registry.py",
     }
     assert changed - _POST_1R19R_AUTHORIZED == {
         "src/pcae/core/runtime_dispatch_attempt_lifecycle.py"
