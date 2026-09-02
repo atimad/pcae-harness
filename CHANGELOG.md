@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase `.1R.30R.2A.1` (Independent Verification of the Configured-Agent-Principal
+  Resolution Source Contract-Compatibility Adjudication) is **COMPLETE —
+  ADJUDICATION VERIFIED WITH CORRECTIONS** (not BLOCKED). Verification only: no
+  `src/pcae` change, no normative-contract change, no HPAC-PAWA-001 v1.1
+  authoring, no implementation. The F-1 configured-agent-principal source gap was
+  independently reproduced from HPAC-PAWA-001 v1.0 §9/§10/§26/§31/§33 +
+  `hpac_foundation._validate_production_boundary` (live `_current_agent_identity`
+  == `os.geteuid()`); no canonical logical-agent → OS-`(uid,gids)` bridge exists;
+  the three F-1 predicates are distinct; R2/R3/R4 are correctly rejected; the
+  verdict **HPAC-PAWA-001 v1.1 MINOR** holds with no REQ-152 MAJOR trigger and no
+  new `pawa_failure_code`; atomicity and the CPIPC-001 §4 D1 decomposition are
+  verified. Three additive corrections handed to `.1R.30R.2A.2`: **C-1** adopt
+  R1-HYBRID (symbolic account name + `provisioned_uid`, live equality check;
+  groups still live) to close the account-recreation-under-new-uid silent-rebind
+  path; **C-2** bind the exclusion record's digest into
+  `HPAC-PAWA-CURRENT-GENERATION/1.0` (`agent_exclusion_digest`) so independent
+  rollback is impossible; **C-3** recommend a dedicated `.1R.30R.2A.3` contract
+  IV as the default. Plus **S-1**: codify the MINOR versioning rule explicitly in
+  v1.1. New read-only IV suite (56 tests, all passing). Historical `.1R.30`
+  preserved immutable BLOCKED. Runtime `not_implemented` / `Observed` / `observe`
+  / `unavailable`; 0 plugins / 0 capabilities. First external effect ABSENT.
+  N-16-5 NOT CLOSED. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+  preserved.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A); dedicated IV .1R.30R.2A.1 recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1: IV configured-agent resolution source adjudication; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A: Configured-Agent-Principal Resolution Source Adjudication to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A); dedicated IV .1R.30R.2A.1 recommended next; session refreshed and governance continuity revalidated.
 - Phase `.1R.30R.2A` (Configured-Agent-Principal Resolution Source
   Contract-Compatibility Adjudication) is **COMPLETE — ADJUDICATED**. Analysis

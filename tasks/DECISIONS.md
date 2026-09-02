@@ -4025,3 +4025,61 @@ Runtime `Observed` / `observe` / `unavailable`. N-16-5 NOT CLOSED.
 Configured-Agent-Principal Resolution Source Contract-Compatibility
 Adjudication. Own explicit human authorization required. Do not begin it.
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.1 — IV of the Configured-Agent-Principal Resolution Source Adjudication (2026-09-02)
+
+- **Verdict:** ADJUDICATION VERIFIED WITH CORRECTIONS — not BLOCKED.
+  Verification-entry SHA `1dbd41cb` (== J, finalized `.1R.30R.2A` head).
+  `git diff 1dbd41cb HEAD -- src/pcae` empty; `-- docs/contracts` empty.
+- **Independently reproduced** from HPAC-PAWA-001 v1.0 + `src/pcae`: the F-1
+  configured-agent-principal source gap (`_validate_production_boundary` uses
+  live `_current_agent_identity()` == `os.geteuid()`; `agent_id` registry / lock
+  non-authorizing; no `getpwnam` / `PCAE_AGENT_PRINCIPAL` bridge; no
+  `production_writer` mint path); the three distinct F-1 predicates (§10 matrix);
+  the R2 (needs HBDC-001 amendment; REQ-134 namespace), R3 (permanently
+  non-production; defers an unavoidable blocker), and R4 (none superior)
+  rejections; the **HPAC-PAWA-001 v1.1 MINOR** verdict (no REQ-152 MAJOR trigger;
+  no new `pawa_failure_code`; HPAC-001 v2.1 / RHAMP-001 v1.0 byte-unchanged);
+  atomicity (§33 unit A1); the D1 decomposition (CPIPC-001 §4; `.2A` / `.2A.1` /
+  `.2A.2` grammar-valid; historical `.1R.30` immutable BLOCKED, PAWA-INV-11).
+- **Corrections (additive, still MINOR) → `.1R.30R.2A.2`:**
+  - **C-1** — adopt **R1-HYBRID**: store the symbolic OS account name **and** a
+    `provisioned_uid`; at every §33 recognition require
+    `pwd.getpwnam(name).pw_uid == provisioned_uid` (else `agent_principal_unknown`);
+    groups still enumerated live. Closes the account
+    deletion→recreation-under-a-new-uid silent-rebind path; resolves the
+    adjudication's §6-vs-§12.2 internal inconsistency. Authority basis stays live
+    effective-write-access, not the uid.
+  - **C-2** — bind the exclusion record's digest into
+    `HPAC-PAWA-CURRENT-GENERATION/1.0` via an `agent_exclusion_digest` field;
+    resolve the adjudication's "extend the anchor **or** require `generation ==`"
+    to the anchor-digest option (a bare integer equality does not make
+    independent rollback impossible).
+  - **C-3** — recommend a dedicated `.1R.30R.2A.3` contract IV of HPAC-PAWA-001
+    v1.1 as the default (fold into `.1R.30R.3.2` only at explicit operator
+    discretion), because the artifact is a new protected authority input.
+  - **S-1** — the v1.1 freeze SHOULD add an explicit versioning-rule line
+    stating that adding a closed, generation-bound protected recognition-input
+    artifact that resolves (not widens) an already-required authority input is a
+    MINOR.
+- **Selected identity model:** R1-HYBRID (not R1-PURE).
+- **Evidence:** new read-only IV suite
+  `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_2a_1_configured_agent_resolution_source_iv.py`
+  (56 tests, all passing). 11 pre-existing repo-wide failures reproduce
+  identically with this phase's changes stashed — zero attributable regression.
+- **Scope discipline:** no `src/pcae`, no `docs/contracts`, no HPAC-PAWA-001 v1.1
+  authoring, no `agent-exclusion.json` schema helper /
+  `resolve_configured_agent_identity()`, no writer-anchor implementation, no
+  FIDO2 / CTAP, no `_ELIGIBLE_MECHANISM_IDS` change, no guard reconciliation, no
+  hardware access. No N-16-6 / N-16-7 / Slice C; no first external effect; no
+  execution enablement. Runtime `not_implemented` / `Observed` / `observe` /
+  `unavailable`; 0 plugins / 0 capabilities. N-16-5 NOT CLOSED. N-16-3 / N-16-4
+  CLOSED. N-16-6 / N-16-7 OPEN, untouched, N-16-7 strictly last. N-23-1 / N-23-2
+  carried.
+
+**Recommended next phase (exactly one):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.2` — HPAC-PAWA-001 v1.1 Configured-Agent-Principal
+Resolution Source Contract Freeze (incorporating C-1 / C-2 / S-1; then C-3's
+`.1R.30R.2A.3` dedicated contract IV or a folded IV at operator discretion). Own
+explicit human authorization required. Do not begin it.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
