@@ -152,12 +152,23 @@ def test_current_agent_identity_is_live_geteuid() -> None:
 
 
 def test_validate_production_boundary_uses_live_identity() -> None:
+    # Point-in-time guard, reconciled by .1R.30R.3.1 (HPAC-PAWA-001 v1.1
+    # Slice 1): at the .1R.30R.2A.1 verification baseline (pinned by SHA)
+    # `_validate_production_boundary` keyed off the live process and took
+    # NO configured-principal input — the F-1 gap this adjudication IV
+    # recorded. .1R.30R.3.1 closes it: the boundary now keys off the
+    # HPAC-PAWA-AGENT-EXCLUSION/1.0-resolved configured-agent identity on
+    # the production-writer path (F-1 / HPAC-PAWA-REQ-022), falling back to
+    # the live process only when no configured identity is bound.
+    baseline = _git("show", f"{J}:src/pcae/core/hpac_foundation.py")
+    b0 = baseline.split("def _validate_production_boundary", 1)[1].split("def _ensure_root", 1)[0]
+    assert "_current_agent_identity()" in b0
+    assert "_effective_write_access(self.root, agent_uid, agent_gids)" in b0
+    assert "configured_agent" not in b0
     src = HPAC_FOUNDATION.read_text(encoding="utf-8")
     boundary = src.split("def _validate_production_boundary", 1)[1].split("def _ensure_root", 1)[0]
-    assert "_current_agent_identity()" in boundary
-    assert "_effective_write_access(self.root, agent_uid, agent_gids)" in boundary
-    # it takes NO configured-principal input — the F-1 gap
-    assert "configured_agent" not in boundary
+    assert "_current_agent_identity()" in boundary  # still the fallback
+    assert "self._configured_agent_identity" in boundary  # F-1 gap closed
 
 
 def test_effective_write_access_parameterizes_uid_and_gids() -> None:
@@ -178,12 +189,20 @@ def test_no_getpwnam_configured_agent_bridge_in_production() -> None:
         for m in re.finditer(r"getpw(nam|uid)|getgr(nam|gid)|getgrouplist|getgrall", text):
             line = text[: m.start()].count("\n") + 1
             hits.append((path.relative_to(REPO), line))
-    # The only production hits are: a COMMENT in hatp_bootstrap.py, and the
-    # ACL-entry-name resolution in hatp_class_b_topology_verifier.py which
-    # consumes an ALREADY-KNOWN live agent_uid / agent_gids.
+    # Point-in-time guard, reconciled by .1R.30R.3.1: at the .1R.30R.2A.1
+    # baseline the only pwd/grp production hits were a COMMENT in
+    # hatp_bootstrap.py and the ACL-entry-NAME resolution in
+    # hatp_class_b_topology_verifier.py (both consuming already-known live
+    # ids, NOT a configured-agent bridge). .1R.30R.3.1 adds the sanctioned
+    # v1.1 bridge — hpac_pawa_agent_exclusion.py — which reads the
+    # protected HPAC-PAWA-AGENT-EXCLUSION/1.0 record's symbolic_account,
+    # resolves it live (getpwnam + os.getgrouplist), and pins
+    # `live uid == provisioned_uid` (§32A.4 / C-1). It lives inside the
+    # non-agent-importable fence.
     allowed = {
         Path("src/pcae/core/hatp_bootstrap.py"),
         Path("src/pcae/core/hatp_class_b_topology_verifier.py"),
+        Path("src/pcae/core/hpac_pawa_agent_exclusion.py"),  # .1R.30R.3.1 — sanctioned v1.1 resolution source
     }
     assert {p for p, _ in hits} <= allowed, f"unexpected pwd/grp use: {hits}"
 
@@ -196,12 +215,22 @@ def test_topo_verifier_getpwnam_consumes_known_ids_not_a_configured_source() -> 
 
 
 def test_no_pcae_agent_principal_symbol_in_production() -> None:
+    # Point-in-time guard, reconciled by .1R.30R.3.1: `PCAE_AGENT_PRINCIPAL`
+    # is never a production authority symbol (HPAC-PAWA-REQ-191) — that
+    # still holds. `resolve_configured_agent_identity` was the *named*
+    # (unimplemented) resolution entry point at the .1R.30R.2A.1 baseline;
+    # .1R.30R.3.1 implements it in hpac_pawa_agent_exclusion.py inside the
+    # non-agent-importable fence (HPAC-PAWA-REQ-165/208).
+    _RESOLVER_FENCE = {"hpac_pawa_agent_exclusion.py", "hpac_protected_admin_writer.py"}
     for path in SRC.rglob("*.py"):
         if "test" in path.name:
             continue
         text = path.read_text(encoding="utf-8")
         assert "PCAE_AGENT_PRINCIPAL" not in text
-        assert "resolve_configured_agent_identity" not in text
+        if path.name not in _RESOLVER_FENCE:
+            assert "resolve_configured_agent_identity" not in text, path.name
+    baseline_foundation = _git("show", f"{J}:src/pcae/core/hpac_foundation.py")
+    assert "resolve_configured_agent_identity" not in baseline_foundation  # unimplemented at 2A.1
 
 
 def test_agent_lock_id_is_non_authorizing() -> None:

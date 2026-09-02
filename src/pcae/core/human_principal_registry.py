@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Optional
 
 from pcae.core.hpac_foundation import (
+    HPACAuthorityClass,
     HPACAuthorityError,
     HPACResolvedRecord,
     HPACStoreAuthority,
@@ -303,13 +304,14 @@ class HumanPrincipalRegistryStore:
         writer: HPACWriterCapability,
         *,
         expected_current: _ParsedRegistry,
+        subject: Optional[str] = None,
     ) -> None:
         document = {
             "schema_version": REGISTRY_SCHEMA_VERSION,
             "principals": [p.to_document() for p in parsed.principals],
             "credentials": [c.to_document() for c in parsed.credentials],
         }
-        with self._authority.writer_transaction(writer, self._WRITER_ROLE):
+        with self._authority.writer_transaction(writer, self._WRITER_ROLE, subject=subject):
             current = self._load()
             if self._document(current) != self._document(expected_current):
                 raise HumanPrincipalRegistryConflictError(
@@ -322,6 +324,7 @@ class HumanPrincipalRegistryStore:
                 canonical_digest(document),
                 writer,
                 role=self._WRITER_ROLE,
+                subject=subject,
                 replace=True,
             )
             # Read-back verification (HPAC-REQ-015).
@@ -329,12 +332,32 @@ class HumanPrincipalRegistryStore:
             if readback != document:
                 raise HPACMalformedError("HumanPrincipalRegistry read-back verification failed after write")
 
-    def _writer(self, capability: ProtectedAdminCapability | HPACWriterCapability) -> HPACWriterCapability:
+    def _writer(
+        self,
+        capability: ProtectedAdminCapability | HPACWriterCapability,
+        *,
+        subject: Optional[str] = None,
+    ) -> "tuple[HPACWriterCapability, Optional[str]]":
+        """HPAC-PAWA-001 v1.1 §43/§44/§60 — a ``PRODUCTION`` capability is
+        bound to an exact ``principal_id`` / ``credential_id`` via its
+        ``subject``; a capability minted for A cannot write B
+        (``require_writer`` subject mismatch → reject). The
+        ``FIXTURE_NON_REAL`` writer keeps ``subject=None`` semantics
+        unchanged. This is the exact registry writer validation the
+        production consumption boundary requires — there is no alternate,
+        weaker production path.
+        """
+
         try:
             if isinstance(capability, HPACWriterCapability):
-                self._authority.require_writer(capability, self._WRITER_ROLE)
-                return capability
-            return self._authority.legacy_fixture_writer(capability, self._WRITER_ROLE)
+                want = (
+                    subject
+                    if capability.authority_class is HPACAuthorityClass.PRODUCTION
+                    else None
+                )
+                self._authority.require_writer(capability, self._WRITER_ROLE, subject=want)
+                return capability, want
+            return self._authority.legacy_fixture_writer(capability, self._WRITER_ROLE), None
         except HPACAuthorityError as exc:
             raise HumanPrincipalRegistryError(str(exc)) from exc
 
@@ -433,7 +456,7 @@ class HumanPrincipalRegistryStore:
         enrollment_provenance_ref: str,
         enrolled_at: str,
     ) -> PrincipalRecord:
-        writer = self._writer(capability)
+        writer, _subject = self._writer(capability, subject=principal_id)
         parsed = self._load()
         for record in parsed.principals:
             if record.principal_id == principal_id:
@@ -452,13 +475,13 @@ class HumanPrincipalRegistryStore:
             principals=tuple(sorted((*parsed.principals, new_record), key=lambda p: p.principal_id)),
             credentials=parsed.credentials,
         )
-        self._write(updated, writer, expected_current=parsed)
+        self._write(updated, writer, expected_current=parsed, subject=_subject)
         return new_record
 
     def revoke_principal(
         self, capability: ProtectedAdminCapability | HPACWriterCapability, *, principal_id: str, revoked_at: str
     ) -> PrincipalRecord:
-        writer = self._writer(capability)
+        writer, _subject = self._writer(capability, subject=principal_id)
         parsed = self._load()
         existing = None
         for record in parsed.principals:
@@ -482,7 +505,7 @@ class HumanPrincipalRegistryStore:
             principals=tuple(sorted((*remaining, revoked_record), key=lambda p: p.principal_id)),
             credentials=parsed.credentials,
         )
-        self._write(updated, writer, expected_current=parsed)
+        self._write(updated, writer, expected_current=parsed, subject=_subject)
         return revoked_record
 
     def enroll_credential(
@@ -497,7 +520,7 @@ class HumanPrincipalRegistryStore:
         enrollment_provenance_ref: str,
         enrolled_at: str,
     ) -> CredentialRecord:
-        writer = self._writer(capability)
+        writer, _subject = self._writer(capability, subject=credential_id)
         parsed = self._load()
         principal = next((p for p in parsed.principals if p.principal_id == principal_id), None)
         if principal is None or principal.status != "active":
@@ -526,13 +549,13 @@ class HumanPrincipalRegistryStore:
             principals=parsed.principals,
             credentials=tuple(sorted((*parsed.credentials, new_record), key=lambda c: c.credential_id)),
         )
-        self._write(updated, writer, expected_current=parsed)
+        self._write(updated, writer, expected_current=parsed, subject=_subject)
         return new_record
 
     def revoke_credential(
         self, capability: ProtectedAdminCapability | HPACWriterCapability, *, credential_id: str, revoked_at: str
     ) -> CredentialRecord:
-        writer = self._writer(capability)
+        writer, _subject = self._writer(capability, subject=credential_id)
         parsed = self._load()
         existing = next((c for c in parsed.credentials if c.credential_id == credential_id), None)
         if existing is None:
@@ -556,7 +579,7 @@ class HumanPrincipalRegistryStore:
             principals=parsed.principals,
             credentials=tuple(sorted((*remaining, revoked_record), key=lambda c: c.credential_id)),
         )
-        self._write(updated, writer, expected_current=parsed)
+        self._write(updated, writer, expected_current=parsed, subject=_subject)
         return revoked_record
 
 

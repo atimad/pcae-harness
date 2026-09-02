@@ -966,6 +966,18 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         # this guard.
         ("runtime_dispatch_attempt_lifecycle.py", "pcae.core.hpac_foundation"),
         ("runtime_invocation.py", "pcae.core.hpac_foundation"),
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (N-16-5 PAWA Production
+        # Protected-Admin Writer Anchor, Slice 1). The non-agent-importable
+        # admin-writer fence, the HPAC-PAWA-AGENT-EXCLUSION/1.0 resolver, and
+        # the PAWA schema helpers consume the Layer-1/2 foundation for the
+        # seal-guarded PRODUCTION writer mint primitive plus the canonical-JSON
+        # / digest / atomic-create-only utilities. Their own guard test
+        # (test_phase_...1r_30r_3_1...::test_39/40/41) keeps them off every
+        # agent-reachable path; exact filenames, no wildcard.
+        ("hpac_pawa_schemas.py", "pcae.core.hpac_foundation"),
+        ("hpac_pawa_agent_exclusion.py", "pcae.core.hpac_foundation"),
+        ("hpac_protected_admin_writer.py", "pcae.core.hpac_foundation"),
+        ("hpac_protected_admin_writer.py", "pcae.core.human_principal_registry"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

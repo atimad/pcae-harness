@@ -6,11 +6,22 @@ authority, protected canonical store state, and a resolver-produced
 ``HPACResolvedRecord``. Serialized fields, public digests, and paths never
 serialize the in-process authority seal.
 
-This layer deliberately exposes only fixture writer capabilities. They are
-permanently ``FIXTURE_NON_REAL`` and therefore cannot qualify for real-runtime
-human authority. The production resolver accepts no caller path and expects
-an externally provisioned protected root; real enrollment/writer ceremony is
-still deferred.
+``HPACStoreAuthority.writer()`` deliberately exposes only fixture writer
+capabilities. They are permanently ``FIXTURE_NON_REAL`` and therefore cannot
+qualify for real-runtime human authority.
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (HPAC-PAWA-001 v1.1 Slice 1) adds
+the ``PRODUCTION`` writer-capability minting *primitive*
+(``_mint_production_writer_capability`` — a single, seal-guarded low-level
+factory reachable only from the non-agent-importable
+``hpac_protected_admin_writer`` module, HPAC-PAWA-REQ-081/084). ``writer()``
+still raises for every non-``FIXTURE_NON_REAL`` class — there is intentionally
+no public production-writer factory on this class, and a fixture writer can
+never authorize a production store. The §33 positive recognition sequence,
+the ``.authority/`` descriptor / current-generation / agent-exclusion I/O,
+the one-operation lifetime, and the failure taxonomy all live in
+``hpac_protected_admin_writer`` / ``hpac_pawa_agent_exclusion`` /
+``hpac_pawa_schemas``, never here.
 """
 
 from __future__ import annotations
@@ -104,6 +115,17 @@ _AUTHORITY_MANIFEST = "manifest.json"
 _AUTHORITY_CONSTRUCTOR_SEAL = object()
 _WRITER_CONSTRUCTOR_SEAL = object()
 _RESOLUTION_CONSTRUCTOR_SEAL = object()
+#: HPAC-PAWA-001 v1.1 §36/§37 (Phase .1R.30R.3.1) — the only object that
+#: authorises the ``PRODUCTION`` writer-capability mint. Held privately by
+#: the non-agent-importable ``hpac_protected_admin_writer`` module and by
+#: nothing else. A caller without it can never reach the mint.
+_PRODUCTION_WRITER_FACTORY_SEAL = object()
+#: A disclosed, documented **test-only** seam (HPAC-PAWA-REQ-166 / §72 /
+#: §73): builds a ``PRODUCTION``-class authority pinned to an isolated
+#: fixture protected root so the positive §33 boundary can be exercised
+#: without sudo and without touching the real deployment root. A guard
+#: test asserts no non-test module ever imports or uses it.
+_PRODUCTION_TEST_FIXTURE_SEAL = object()
 
 
 class ProtectedAdminCapability:
@@ -220,9 +242,20 @@ def _regular_single_link(path: Path) -> os.stat_result:
 
 
 class HPACWriterCapability:
-    """Opaque, non-serializable, authority-instance-bound writer token."""
+    """Opaque, non-serializable, authority-instance-bound writer token.
 
-    __slots__ = ("_authority_seal", "role", "subject", "authority_class")
+    HPAC-PAWA-001 v1.1 (Phase .1R.30R.3.1) adds two additive, never-caller-
+    resettable slots for the ``PRODUCTION`` one-operation lifetime
+    (HPAC-PAWA-REQ-106/107, §49/§55): ``_single_use`` marks a capability
+    that authorises exactly one bounded mutation, and ``_spent`` is set —
+    only through :meth:`HPACStoreAuthority.record_write` under the seal —
+    after that mutation succeeds. A spent capability fails
+    :meth:`HPACStoreAuthority.require_writer` (→ ``capability_stale``). The
+    shape change is strictly additive; no existing semantics are weakened
+    (HPAC-PAWA-REQ-082).
+    """
+
+    __slots__ = ("_authority_seal", "role", "subject", "authority_class", "_single_use", "_spent")
 
     def __init__(
         self,
@@ -232,6 +265,7 @@ class HPACWriterCapability:
         authority_class: HPACAuthorityClass,
         *,
         _seal: object,
+        single_use: bool = False,
     ) -> None:
         if _seal is not _WRITER_CONSTRUCTOR_SEAL:
             raise HPACAuthorityError("HPAC writer capabilities cannot be caller-constructed")
@@ -239,9 +273,20 @@ class HPACWriterCapability:
         self.role = require_nonempty_str(role, context="writer.role")
         self.subject = subject
         self.authority_class = authority_class
+        self._single_use = bool(single_use)
+        self._spent = False
 
     def __reduce__(self):
         raise TypeError("HPACWriterCapability is process-local and non-serializable")
+
+    def _mark_spent(self, seal: object) -> None:
+        """Set by :meth:`HPACStoreAuthority.record_write` only. Not
+        caller-reachable (the seal is module-private) and not resettable
+        (there is no un-spend path)."""
+
+        if seal is not _WRITER_CONSTRUCTOR_SEAL:
+            raise HPACAuthorityError("HPAC writer-capability spend state cannot be caller-set")
+        self._spent = True
 
 
 T = TypeVar("T")
@@ -298,10 +343,22 @@ class HPACStoreAuthority:
 
     ``fixture()`` accepts a root but permanently labels it non-real.
     ``production()`` accepts no root and resolves the platform constant.
-    There is intentionally no public production-writer factory in this phase.
+    There is intentionally no public production-writer factory on this
+    class; the ``PRODUCTION`` mint primitive
+    (``_mint_production_writer_capability``) is seal-guarded and reachable
+    only from ``hpac_protected_admin_writer`` (HPAC-PAWA-001 v1.1 §36/§37).
     """
 
-    __slots__ = ("root", "authority_class", "_seal", "_store_id", "_root_identity_digest")
+    __slots__ = (
+        "root",
+        "authority_class",
+        "_seal",
+        "_store_id",
+        "_root_identity_digest",
+        "_configured_agent_identity",
+        "_test_fixture_root",
+        "_topology_probe",
+    )
 
     def __init__(
         self,
@@ -317,10 +374,68 @@ class HPACStoreAuthority:
         self._seal = object()
         self._store_id: Optional[str] = None
         self._root_identity_digest: Optional[str] = None
+        #: F-1 (HPAC-PAWA-REQ-021/022): on the production-writer path the
+        #: negative boundary check is evaluated against the *configured
+        #: agent principal's* ``(uid, gids)`` — resolved from
+        #: ``HPAC-PAWA-AGENT-EXCLUSION/1.0`` (§32A), never ``os.geteuid()``.
+        #: ``None`` ⇒ fall back to the live invoking process (pre-PAWA
+        #: behaviour; no production caller relies on that fallback).
+        self._configured_agent_identity: Optional["tuple[int, frozenset[int]]"] = None
+        #: Test-only: skip the ``resolve_hpac_protected_root()`` identity
+        #: pin so an isolated fixture topology can be validated (§72/§73).
+        self._test_fixture_root = False
+        #: Test-only (HPAC-PAWA-REQ-132/166): a deterministic
+        #: ``(effective_write_access, ancestor_chain_safe)`` pair
+        #: substituting for the platform ACL adapter, which is unavailable
+        #: in sandboxed CI. ``None`` in production ⇒ the real
+        #: ``hatp_class_b_topology_verifier`` functions.
+        self._topology_probe: Optional[object] = None
 
     @classmethod
     def fixture(cls, root: Path) -> "HPACStoreAuthority":
         return cls(Path(root), HPACAuthorityClass.FIXTURE_NON_REAL, _seal=_AUTHORITY_CONSTRUCTOR_SEAL)
+
+    def _effective_write_helpers(self):
+        probe = self._topology_probe
+        if probe is not None:
+            return probe.effective_write_access, probe.ancestor_chain_safe
+        from pcae.core.hatp_class_b_topology_verifier import (
+            _ancestor_chain_safe,
+            _effective_write_access,
+        )
+
+        return _effective_write_access, _ancestor_chain_safe
+
+    @classmethod
+    def _production_test_fixture(
+        cls, root: Path, *, _seal: object, _topology_probe: object = None
+    ) -> "HPACStoreAuthority":
+        """Disclosed test-only seam (HPAC-PAWA-REQ-166, §72/§73). A
+        ``PRODUCTION``-class authority pinned to an isolated fixture
+        protected root. Never reachable from ordinary production API — a
+        guard test asserts no non-test module imports
+        ``_PRODUCTION_TEST_FIXTURE_SEAL`` or calls this method."""
+
+        if _seal is not _PRODUCTION_TEST_FIXTURE_SEAL:
+            raise HPACAuthorityError("_production_test_fixture is a test-only seam")
+        authority = cls(Path(root).resolve(), HPACAuthorityClass.PRODUCTION, _seal=_AUTHORITY_CONSTRUCTOR_SEAL)
+        authority._test_fixture_root = True
+        authority._topology_probe = _topology_probe
+        return authority
+
+    def _bind_configured_agent_identity(
+        self, identity: "tuple[int, frozenset[int]]", *, _factory_seal: object
+    ) -> None:
+        """Called by the §33 recognition sequence (after step 2 resolves
+        ``HPAC-PAWA-AGENT-EXCLUSION/1.0``) so every subsequent
+        ``_validate_production_boundary`` / ``_relative_record_path``
+        re-run keys the negative boundary off the configured agent
+        principal, not the live process (F-1)."""
+
+        if _factory_seal is not _PRODUCTION_WRITER_FACTORY_SEAL:
+            raise HPACAuthorityError("configured-agent identity can only be bound by the PAWA writer factory")
+        uid, gids = identity
+        self._configured_agent_identity = (int(uid), frozenset(int(g) for g in gids))
 
     @classmethod
     def production(cls) -> "HPACStoreAuthority":
@@ -349,20 +464,26 @@ class HPACStoreAuthority:
             raise HPACAuthorityError("fixture HPAC root is group/world writable")
 
     def _validate_production_boundary(self) -> None:
-        if self.root != resolve_hpac_protected_root().absolute():
+        if not self._test_fixture_root and self.root != resolve_hpac_protected_root().absolute():
             raise HPACAuthorityError("production HPAC authority cannot be redirected")
-        from pcae.core.hatp_class_b_topology_verifier import (
-            _ancestor_chain_safe,
-            _current_agent_identity,
-            _effective_write_access,
-        )
+        from pcae.core.hatp_class_b_topology_verifier import _current_agent_identity
 
-        agent_uid, agent_gids = _current_agent_identity()
+        _effective_write_access, _ancestor_chain_safe = self._effective_write_helpers()
+
+        # F-1 (HPAC-PAWA-REQ-022): on the production-writer path the
+        # negative boundary keys off the CONFIGURED agent principal, not
+        # the invoking process. The invoking process (the deployment
+        # owner) legitimately DOES hold write authority here — that is
+        # what the §28 positive write probe proves separately.
+        if self._configured_agent_identity is not None:
+            agent_uid, agent_gids = self._configured_agent_identity
+        else:
+            agent_uid, agent_gids = _current_agent_identity()
         writable, reason, _evidence = _effective_write_access(self.root, agent_uid, agent_gids)
         ancestors_safe, diagnostics = _ancestor_chain_safe(self.root, agent_uid, agent_gids)
         if writable is not False or ancestors_safe is not True:
             raise HPACAuthorityError(
-                "production HPAC root is not protected from the current agent "
+                "production HPAC root is not protected from the configured agent principal "
                 f"(root={reason}, ancestors={diagnostics})"
             )
 
@@ -414,12 +535,14 @@ class HPACStoreAuthority:
         self._store_id = store_id
         self._root_identity_digest = canonical_digest(manifest["root_identity"])
 
-    def writer(self, role: str, *, subject: Optional[str] = None) -> HPACWriterCapability:
-        """Issue a bound fixture writer; real writer ceremony is deferred."""
+    def _new_capability(
+        self, role: str, subject: Optional[str], *, single_use: bool = False
+    ) -> HPACWriterCapability:
+        """The single ``HPACWriterCapability`` construction site (shared by
+        the fixture ``writer()`` and the seal-guarded ``PRODUCTION`` mint —
+        HPAC-PAWA-REQ-091). Every capability is bound to *this* authority
+        instance's private ``_seal``."""
 
-        if self.authority_class is not HPACAuthorityClass.FIXTURE_NON_REAL:
-            raise HPACAuthorityError("no production HPAC writer is implemented in this foundation phase")
-        self._ensure_root(create=True)
         if subject is not None:
             require_nonempty_str(subject, context="writer.subject")
         return HPACWriterCapability(
@@ -428,7 +551,38 @@ class HPACStoreAuthority:
             subject,
             self.authority_class,
             _seal=_WRITER_CONSTRUCTOR_SEAL,
+            single_use=single_use,
         )
+
+    def writer(self, role: str, *, subject: Optional[str] = None) -> HPACWriterCapability:
+        """Issue a bound fixture writer; real writer ceremony is deferred."""
+
+        if self.authority_class is not HPACAuthorityClass.FIXTURE_NON_REAL:
+            raise HPACAuthorityError("no production HPAC writer is implemented in this foundation phase")
+        self._ensure_root(create=True)
+        return self._new_capability(role, subject)
+
+    def _mint_production_writer_capability(
+        self, role: str, subject: Optional[str], *, _factory_seal: object
+    ) -> HPACWriterCapability:
+        """HPAC-PAWA-001 v1.1 §36 — the low-level ``PRODUCTION`` mint.
+
+        Reachable **only** from ``hpac_protected_admin_writer`` (which holds
+        ``_PRODUCTION_WRITER_FACTORY_SEAL``). It does not itself run the §33
+        recognition sequence — that is the factory's job, and it is atomic
+        with this call (PAWA-INV-3). This primitive only: verifies the
+        factory seal, requires a ``PRODUCTION``-class authority, re-runs
+        ``_ensure_root`` (re-validating the F-1-scoped boundary and the
+        root-identity binding on every mint — §30/§70), and mints a
+        single-use, operation-scoped capability bound to this instance's
+        ``_seal``."""
+
+        if _factory_seal is not _PRODUCTION_WRITER_FACTORY_SEAL:
+            raise HPACAuthorityError("the PRODUCTION HPAC writer mint is reachable only from the PAWA factory")
+        if self.authority_class is not HPACAuthorityClass.PRODUCTION:
+            raise HPACAuthorityError("a PRODUCTION writer requires a PRODUCTION HPACStoreAuthority")
+        self._ensure_root(create=False)
+        return self._new_capability(role, subject, single_use=True)
 
     def legacy_fixture_writer(
         self, capability: ProtectedAdminCapability, role: str, *, subject: Optional[str] = None
@@ -446,6 +600,11 @@ class HPACStoreAuthority:
             raise HPACAuthorityError("writer capability role/subject does not match this operation")
         if writer.authority_class is not self.authority_class:
             raise HPACAuthorityError("writer capability assurance-class mismatch")
+        if writer._spent:
+            # HPAC-PAWA-REQ-106/107, §49 — a PRODUCTION single-use
+            # capability authorises exactly one bounded mutation; a
+            # second attempt is stale.
+            raise HPACAuthorityError("writer capability is spent (one-operation lifetime exhausted)")
         self._ensure_root(create=True)
 
     @contextmanager
@@ -503,18 +662,23 @@ class HPACStoreAuthority:
                             f"fixture HPAC descendant directory is group/world writable: {current}"
                         )
                 else:
-                    from pcae.core.hatp_class_b_topology_verifier import (
-                        _current_agent_identity,
-                        _effective_write_access,
-                    )
+                    from pcae.core.hatp_class_b_topology_verifier import _current_agent_identity
 
-                    agent_uid, agent_gids = _current_agent_identity()
+                    _effective_write_access, _acs = self._effective_write_helpers()
+
+                    # F-1: descendant not-writable is asserted against the
+                    # configured agent principal on the production-writer
+                    # path (not the deployment owner running the mutation).
+                    if self._configured_agent_identity is not None:
+                        agent_uid, agent_gids = self._configured_agent_identity
+                    else:
+                        agent_uid, agent_gids = _current_agent_identity()
                     writable, reason, _evidence = _effective_write_access(
                         current, agent_uid, agent_gids
                     )
                     if writable is not False:
                         raise HPACAuthorityError(
-                            f"production HPAC descendant is agent-writable or indeterminate: {current}:{reason}"
+                            f"production HPAC descendant is configured-agent-writable or indeterminate: {current}:{reason}"
                         )
         return relative.as_posix()
 
@@ -552,6 +716,11 @@ class HPACStoreAuthority:
             write_atomic_replace(provenance_path, payload)
         else:
             write_atomic_create_only(provenance_path, payload)
+        if writer._single_use:
+            # HPAC-PAWA-REQ-107, §49 — the one bounded mutation has been
+            # recorded; the same capability object can never authorise a
+            # second record_write (→ ``capability_stale``).
+            writer._mark_spent(_WRITER_CONSTRUCTOR_SEAL)
 
     def verify_record(
         self,

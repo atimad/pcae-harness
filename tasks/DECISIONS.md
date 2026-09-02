@@ -4249,3 +4249,78 @@ Writer Anchor Implementation (Slice 1; FIDO2-free; atomic unit A1 lands
 human authorization required. Do not begin it. `.1R.30R.3.2` need not re-verify
 v1.1 beyond normal contract-production equivalence (C-3 discharged here).
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+## 2026-09-02 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 (N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation, Slice 1)
+
+**Decision:** Implement HPAC-PAWA-001 v1.1 Slice 1 exactly. New production
+modules `src/pcae/core/hpac_pawa_schemas.py` (closed
+`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` + v1.1 7-field
+`HPAC-PAWA-CURRENT-GENERATION/1.0` + `HPAC-PAWA-ISSUANCE-EVIDENCE/1.0`
+helpers), `src/pcae/core/hpac_pawa_agent_exclusion.py`
+(`HPAC-PAWA-AGENT-EXCLUSION/1.0` closed 12-field schema + trusted
+load/validate + R1-HYBRID `resolve_configured_agent_identity()`:
+`symbolic_account` from the protected record → live `pwd.getpwnam` +
+`os.getgrouplist` → `(uid, gids)`, `live uid == provisioned_uid` pin,
+fail-closed on every ambiguity), `src/pcae/core/hpac_protected_admin_writer.py`
+(the §33 11-step recognition sequence, the `production_writer` factory, the
+one-operation `ProductionWriterHandle`, the closed 21-value
+`pawa_failure_code` taxonomy + the §57 RHAMP map, the `.authority/`
+protected record I/O, the bounded principal-admin operations, and the
+out-of-band `provision` / `set-agent-exclusion` / `rotate` / `revoke`).
+All three are inside the non-agent-importable consumer-inventory fence
+(guard-tested against `cli.py` / `commands/**` / `core/agent.py`).
+
+**Foundation / registry hook points (additive only):**
+`hpac_foundation.py` gains a single seal-guarded `PRODUCTION` mint
+primitive (`_mint_production_writer_capability`, reachable only via
+`_PRODUCTION_WRITER_FACTORY_SEAL` held by the fence), a `_spent` /
+`_single_use` one-operation state on `HPACWriterCapability` (additive
+slots, never caller-resettable), an F-1 re-scope of
+`_validate_production_boundary` / `_relative_record_path` to the
+configured-agent identity on the production-writer path (falling back to
+the live process only when none is bound), and a disclosed test-only
+`_production_test_fixture` + `_topology_probe` seam (the sandbox ACL
+adapter is unavailable in CI). `writer()` itself still raises for every
+non-`FIXTURE_NON_REAL` class (HPAC-PAWA-REQ-092), and the single
+`HPACWriterCapability(` construction site is unchanged.
+`human_principal_registry.py` `_writer` / `_write` thread a `PRODUCTION`
+subject scope through `require_writer` (§43/§44/§60) — no new authority
+path; the `FIXTURE_NON_REAL` path is byte-identical.
+
+**Test seam (R3 strategy):** `production_writer(...)` carries no
+`symbolic_account` / uid / gid parameter (HPAC-PAWA-REQ-166); the only
+injection points are three leading-underscore, documented,
+guard-checked keyword-only seams (`_protected_root`,
+`_configured_agent_identity_source`, `_topology_probe`).
+
+**Scope fence (verified by the fresh 95-test suite):** FIDO2-free; no
+RHAMP sidecar / counter-state / enrollment ceremony /
+`FIDO2HumanAuthenticator`; `hpac_verifier.py` byte-unchanged;
+`_ELIGIBLE_MECHANISM_IDS` unchanged; no protected presentation; Gate 5 /
+Gate 9 byte-unchanged; runtime `Observed` / `observe` / `unavailable`,
+0 plugins / 0 capabilities; first external effect ABSENT; N-16-6 / N-16-7
+untouched.
+
+**Guard reconciliation (point-in-time, phase-aware, no `def test_`
+renamed/removed/skipped/xfailed):** `.1R.30R.1` IV suite
+(`test_no_src_pcae_change_since_b30` upper bound re-pinned to the
+`.2A.3` finalized head; `test_no_production_writer_factory_symbols…`,
+`test_writer_refuses_non_fixture_class`, `test_registry_writer_gate…`
+split into an immutable-SHA historical assertion + a current-state
+counterpart); `.1R.30R.2A.1` IV suite
+(`test_validate_production_boundary_uses_live_identity`,
+`test_no_getpwnam_configured_agent_bridge_in_production`,
+`test_no_pcae_agent_principal_symbol_in_production` — same split;
+`hpac_pawa_agent_exclusion.py` added as the sanctioned v1.1 bridge);
+the three HPAC Layer-1/2 consumer-inventory guards
+(`…_31` / `…_32` / `…_321`) widened by the exact five-file PAWA set,
+no wildcard; the `.1R.8` / `.1R.17` production-scope subset invariants
+widened by the same five files.
+
+**Attribution:** fixed-SHA A/B (`A` = phase-entry
+`1793a75a`, `B` = candidate). Candidate-only functional regressions: 0.
+Pre-existing, `git stash`-identical failures unrelated to this phase
+(HPAC verifier/foundation IV "blocking reproduction" demonstrations, the
+class-B ACL-adapter-unavailable sandbox failures, the `.1R.22R1`
+contract-drift guards, a `ThreadPoolExecutor` flake) documented in the
+canonical phase doc's regression-attribution section.

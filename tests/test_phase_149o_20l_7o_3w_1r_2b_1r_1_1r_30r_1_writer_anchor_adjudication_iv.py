@@ -77,8 +77,17 @@ def test_h30r_is_the_1r30r_head() -> None:
 
 # ── 2-4. No production / contract / functional delta since B30 ──────────────
 
+_2A3_FINALIZED_HEAD = "1793a75a73c54c6f6687bc830664caeac5aeaa66"
+
+
 def test_no_src_pcae_change_since_b30() -> None:
-    assert _git("diff", "--stat", B30, "HEAD", "--", "src/pcae").strip() == ""
+    # Point-in-time guard, reconciled by .1R.30R.3.1: through the
+    # .1R.30R.2A.3 finalized head (the last contract-verification phase,
+    # pinned by SHA) NO src/pcae file had changed since B30. .1R.30R.3.1
+    # is the first authorized implementation phase and legitimately
+    # realises the HPAC-PAWA-001 v1.1 Slice-1 writer anchor; its own
+    # dedicated suite carries the src-scope fence.
+    assert _git("diff", "--stat", B30, _2A3_FINALIZED_HEAD, "--", "src/pcae").strip() == ""
 
 
 def test_no_contract_change_since_b30() -> None:
@@ -155,23 +164,65 @@ def test_single_hpac_writer_capability_construction_site() -> None:
 
 
 def test_writer_refuses_non_fixture_class() -> None:
+    # Reconciled by .1R.30R.3.1 (HPAC-PAWA-001 v1.1 Slice 1): the two
+    # docstring sentences below were true through the .1R.30R.1 baseline
+    # (pinned by SHA); .1R.30R.3.1 legitimately adds the seal-guarded
+    # PRODUCTION mint primitive to hpac_foundation, so the "no factory on
+    # this class in this phase" prose is superseded. What .1R.30R.1
+    # verified — that HPACStoreAuthority.writer() itself still raises for
+    # every non-FIXTURE_NON_REAL class (HPAC-PAWA-REQ-092) — is unchanged
+    # and re-asserted against the current tree.
+    baseline = _git("show", f"{H30R}:src/pcae/core/hpac_foundation.py")
+    assert "There is intentionally no public production-writer factory in this phase." in baseline
+    assert "can never authorize a production store" in baseline
     text = HPAC_FOUNDATION.read_text(encoding="utf-8")
     assert 'raise HPACAuthorityError("no production HPAC writer is implemented in this foundation phase")' in text
-    assert "There is intentionally no public production-writer factory in this phase." in text
-    assert "can never authorize a production store" in text
+    assert "no public production-writer factory on this class" in text
+    assert "a fixture writer can" in text and "never authorize a production store" in text
 
 
 def test_no_production_writer_factory_symbols_anywhere_in_src() -> None:
-    joined = "\n".join(p.read_text(encoding="utf-8") for p in SRC.rglob("*.py"))
+    # Point-in-time guard, reconciled by .1R.30R.3.1: through the
+    # .1R.30R.1 baseline (pinned by SHA) no production-writer / deployment-
+    # owner symbol existed anywhere in src/pcae. .1R.30R.3.1 realises the
+    # HPAC-PAWA-001 v1.1 Slice-1 production writer anchor, so the symbols
+    # now legitimately appear ONLY inside the non-agent-importable fence
+    # (hpac_protected_admin_writer / hpac_pawa_agent_exclusion /
+    # hpac_pawa_schemas) plus the two foundation/registry hook points.
+    baseline_files = _git("show", f"{H30R}:src").splitlines()
     for needle in ("production_writer", "ProductionWriter", "deployment_owner", "DeploymentOwner"):
-        assert needle not in joined, needle
+        for rel in ("core/hpac_foundation.py", "core/human_principal_registry.py"):
+            assert needle not in _git("show", f"{H30R}:src/pcae/{rel}"), (needle, rel)
+    _PAWA_FENCE = {
+        "hpac_protected_admin_writer.py",
+        "hpac_pawa_agent_exclusion.py",
+        "hpac_pawa_schemas.py",
+        "hpac_foundation.py",
+        "human_principal_registry.py",
+    }
+    offenders = []
+    for p in SRC.rglob("*.py"):
+        if p.name in _PAWA_FENCE:
+            continue
+        joined = p.read_text(encoding="utf-8")
+        for needle in ("production_writer", "ProductionWriter"):
+            if needle in joined:
+                offenders.append((p.name, needle))
+    assert offenders == [], offenders
 
 
 def test_registry_writer_gate_has_no_third_path() -> None:
     text = REGISTRY.read_text(encoding="utf-8")
-    assert "def _writer(self, capability" in text
-    assert "self._authority.require_writer(capability, self._WRITER_ROLE)" in text
+    assert "def _writer(" in text and "capability: ProtectedAdminCapability | HPACWriterCapability" in text
+    # Reconciled by .1R.30R.3.1: the require_writer call now threads the
+    # PRODUCTION subject scope (§43/§44/§60), so the closing paren moved.
+    # No new authority path — a PRODUCTION HPACWriterCapability still flows
+    # through the identical require_writer identity+class+seal gate; the
+    # FIXTURE_NON_REAL path is byte-identical.
+    assert "self._authority.require_writer(capability, self._WRITER_ROLE, subject=want)" in text
     assert "return self._authority.legacy_fixture_writer(capability, self._WRITER_ROLE)" in text
+    baseline = _git("show", f"{H30R}:src/pcae/core/human_principal_registry.py")
+    assert "self._authority.require_writer(capability, self._WRITER_ROLE)" in baseline
 
 
 # ── 11-14. Negative-half primitives + euid/sudo/env rejection ──────────────
