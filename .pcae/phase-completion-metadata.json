@@ -64,6 +64,14 @@
   {
    "hash": "fbca88dca92da491e316f33b177c5925a6e71a2e",
    "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2: close BLOCKED IV phase task, transition to idle"
+  },
+  {
+   "hash": "c79d98e34f4a6bcdfd2b0618d1793f4f958bb77d",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2: renumber recommended successor repair phase to .1R.30R.3.2.1 (extends this IVs own lineage, not a sibling branch off .3.1); rename idle task file to match"
+  },
+  {
+   "hash": "46e37eeaac21272b7ea5f1999a5d3f003be8b8c3",
+   "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2: finish renaming idle task file to the corrected .1R.30R.3.2.1 successor token"
   }
  ],
  "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1 -- N-16-5 PAWA HPACWriterCapability Seal-Forgery / One-Operation-Bypass Repair. Requires its own separate explicit human authorization (ID recommended, NOT reserved). Assess and, if needed, narrowly amend HPAC-PAWA-REQ-102/103's mechanism description, then harden require_writer / HPACWriterCapability against the copied-real-seal __new__ adversary (e.g. an unpredictable per-mint token checked against a process-local issuance-registry membership set), add the missing adversary test, then re-run the remaining .1R.30R.3.2 verification matrix against the repaired code. Do not begin it here. Do not begin Slice 2. Do not implement RHAMP credential sidecars, RHAMP counter-state, credential enrollment, or FIDO2HumanAuthenticator. Do not modify hpac_verifier for REAL authentication. Do not widen _ELIGIBLE_MECHANISM_IDS. Do not implement protected presentation. Do not wire require_real_assurance through Gate 5/9. Do not begin N-16-6 or N-16-7. Do not begin Slice C. Do not implement or call the first external effect. Do not enable execution.",
