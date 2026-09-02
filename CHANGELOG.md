@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A: Configured-Agent-Principal Resolution Source Adjudication to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A); dedicated IV .1R.30R.2A.1 recommended next; session refreshed and governance continuity revalidated.
 - Phase `.1R.30R.2A` (Configured-Agent-Principal Resolution Source
   Contract-Compatibility Adjudication) is **COMPLETE — ADJUDICATED**. Analysis
   only: `git diff 5b45aa7b HEAD -- src/pcae` empty; `-- docs/contracts` empty
