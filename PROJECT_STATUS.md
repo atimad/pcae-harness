@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R — N-16-5
+Protected-Presentation Helper Installation and Evidence-Writer Authority
+Contract Reconciliation. **STATUS: CONTRACTUALLY RECONCILED / READY FOR
+IMPLEMENTATION. N-16-5: NOT CLOSED.**
+
+The `.30R.4` blocker has been independently reconstructed and resolved at the
+contract layer. HPAC-PAWA-001 evolves narrowly from historical v1.1 to current
+v1.2: the existing deployment-owner anchor may perform exactly one protected
+administrative `configure_presentation_mechanism` transaction through the exact
+future consumer `pcae.core.hpac_protected_presentation_admin`. The authority
+registers, rotates, or revokes the exact protected-presentation installation
+record/current-generation anchor; it does not install executable bytes or grant
+generic filesystem/process authority.
+
+HPAC-PPA-001 v1.0 freezes the distinct runtime trust model. A deployment owner
+installs immutable helper bytes out of band; PAWA pins their canonical
+content-addressed path, SHA-256 digest, and generation. The fixed launcher, not
+PAWA, holds a process-local/non-bearer, request-scoped
+`protected_presentation_mechanism` evidence-writer capability. Evidence is
+bound to the exact request, response, helper generation, and one-shot private
+channel; audit material is not reusable authority. Installer, launcher, and
+evidence writer remain distinct, and helper launch transfers no N-16-6
+authority.
+
+Fresh contract reconciliation: 42/42 passed. Broad affected PAWA/RHAMP lineage
+sweep: 511/511 passed. No production source or script changed; historical
+`.30R.4` remains BLOCKED and byte-immutable. Protected presentation and Gate
+5/Gate 9 real-assurance consumption remain NOT IMPLEMENTED. Runtime remains
+`Observed / observe / unavailable`, zero plugins/capabilities; first effect
+ABSENT / UNREACHABLE. N-16-6/N-16-7/Slice C untouched; N-23 unchanged.
+
+Recommended successor (not begun; separate authorization required):
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1` — N-16-5 Protected Human-Approval
+Presentation and Real-Assurance Consumption Implementation After Authority
+Reconciliation.
+
+Full evidence in
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_4R_N_16_5_PROTECTED_PRESENTATION_AUTHORITY_RECONCILIATION.md`.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4 — N-16-5 Protected Human-Approval
 Presentation and Real-Assurance Consumption Implementation. **STATUS: BLOCKED.
 N-16-5: NOT CLOSED.**

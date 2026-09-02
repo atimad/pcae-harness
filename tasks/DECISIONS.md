@@ -3929,6 +3929,23 @@ execution enablement. New IV suite adds no `def test_` removal/rename/skip.
 Runtime `Observed` / `observe` / `unavailable`. N-16-5 NOT CLOSED.
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
 
+## 2026-09-03 — Protected-presentation authority reconciliation
+
+For Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R`, select the minimum coherent
+normative delta: evolve HPAC-PAWA-001 v1.1 to v1.2 and add the narrow companion
+HPAC-PPA-001 v1.0. The existing deployment-owner PAWA anchor may perform only
+the exact `configure_presentation_mechanism` install/rotate/revoke metadata
+transaction through `pcae.core.hpac_protected_presentation_admin`; immutable
+helper executable bytes remain administrator-installed out of band. Runtime
+presentation evidence uses a separate process-local/non-bearer
+`protected_presentation_mechanism` writer capability held by the fixed
+launcher and bound to the exact request, response, helper generation, and
+one-shot channel. Installer authority, launcher authority, evidence-writer
+authority, N-16-6 external-effect authority, and execution authority are
+distinct. RHAMP-001 v1.0, HPAC-001 v2.1, the existing writer-provenance schema,
+and the 21-code PAWA failure vocabulary remain unchanged. Historical `.30R.4`
+remains BLOCKED; the fresh implementation successor is `.30R.4R.1`.
+
 ---
 
 ## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A — Configured-Agent-Principal Resolution Source Contract-Compatibility Adjudication (2026-09-02)

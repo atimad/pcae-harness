@@ -28,6 +28,7 @@ from pcae.core.hpac_protected_admin_writer import (
 
 REPO = Path(__file__).resolve().parents[1]
 PHASE_ENTRY_SHA = "0d5c3ad15a00f57525bb96b08a0e5c0d3a32de86"
+FINALIZED_30R4_SHA = "db5f1dd761174d6ac1ca16e49e8871c02f747fdf"
 PAWA_CONTRACT = REPO / "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
 RHAMP_CONTRACT = REPO / "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md"
 DECISION_A = REPO / "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_3R_N_16_5_RHAMP_SLICE_2_SLICE_3_DECOMPOSITION_ADJUDICATION.md"
@@ -110,7 +111,7 @@ def test_current_presentation_resolver_has_no_real_attestation_branch() -> None:
 
 def test_blocked_phase_changes_no_production_or_normative_contract() -> None:
     subprocess.run(
-        ["git", "diff", "--quiet", PHASE_ENTRY_SHA, "--", "src/pcae", "docs/contracts"],
+        ["git", "diff", "--quiet", PHASE_ENTRY_SHA, FINALIZED_30R4_SHA, "--", "src/pcae", "docs/contracts"],
         cwd=REPO,
         check=True,
     )

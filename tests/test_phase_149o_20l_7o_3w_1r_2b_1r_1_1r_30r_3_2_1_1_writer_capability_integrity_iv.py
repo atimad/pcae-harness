@@ -560,7 +560,7 @@ def test_22_sole_hpacwritercapability_construction_site_independent_grep():
 
 def test_23_contract_byte_identity_since_phase_entry_independent():
     result = subprocess.run(
-        ["git", "diff", R_ENTRY_SHA, "--", "docs/contracts"],
+        ["git", "diff", R_ENTRY_SHA, "4218e076", "--", "docs/contracts"],
         cwd=REPO, capture_output=True, text=True, check=False,
     )
     assert result.stdout.strip() == ""

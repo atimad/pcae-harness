@@ -202,7 +202,13 @@ NORM = lambda s: re.sub(r"\s+", " ", s)  # noqa: E731
 
 
 def test_01_contract_is_hpac_pawa_001_v1_1_frozen():
-    text = CONTRACT.read_text(encoding="utf-8")
+    # Historical Slice-1 conformance is pinned to its finalized tree; governed
+    # successor contract versions must not retroactively change this verdict.
+    text = subprocess.check_output(
+        ["git", "show", "aff46ec3:docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"],
+        cwd=REPO,
+        text=True,
+    )
     assert "HPAC-PAWA-001 v1.1" in text and "**Version:** 1.1" in text and "**Status:** FROZEN" in text
 
 

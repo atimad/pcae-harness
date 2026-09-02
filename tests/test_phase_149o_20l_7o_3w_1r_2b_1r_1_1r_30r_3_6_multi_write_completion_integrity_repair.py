@@ -418,7 +418,7 @@ def test_29_no_rhamp_terminal_reason_was_added():
 
 
 def test_30_normative_contracts_are_byte_unchanged():
-    assert _run("git", "diff", "--quiet", R0, "--", "docs/contracts", check=False).returncode == 0
+    assert _run("git", "diff", "--quiet", R0, "e0f79220", "--", "docs/contracts", check=False).returncode == 0
 
 
 def test_31_credential_record_source_is_byte_unchanged():

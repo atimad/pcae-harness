@@ -361,7 +361,7 @@ def test_23_contract_byte_unchanged_since_phase_entry():
     import subprocess
 
     result = subprocess.run(
-        ["git", "diff", "83b7f70b", "--", "docs/contracts"],
+        ["git", "diff", "83b7f70b", "59e08949", "--", "docs/contracts"],
         cwd=REPO, capture_output=True, text=True, check=False,
     )
     assert result.stdout.strip() == ""

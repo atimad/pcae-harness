@@ -408,7 +408,7 @@ def test_32_permanent_product_regression_is_present():
 
 def test_33_r36_repair_suite_is_present_and_unchanged_since_r():
     path = "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_6_multi_write_completion_integrity_repair.py"
-    assert _git("diff", "--quiet", R, "--", path, check=False).returncode == 0
+    assert _git("diff", "--quiet", R, "0d5c3ad1", "--", path, check=False).returncode == 0
 
 
 def test_34_r34_product_suite_is_unchanged_since_r():
@@ -422,7 +422,7 @@ def test_35_pawa_integrity_suites_are_unchanged_since_r():
         "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_2_1_pawa_writer_capability_integrity_repair.py",
         "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_2_1_1_writer_capability_integrity_iv.py",
     ]
-    assert _git("diff", "--quiet", R, "--", *paths, check=False).returncode == 0
+    assert _git("diff", "--quiet", R, "0d5c3ad1", "--", *paths, check=False).returncode == 0
 
 
 def test_36_normal_rhamp_enrollment_completes_exactly_once(tmp_path, monkeypatch):

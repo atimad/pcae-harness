@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R` reconciles and freezes the
+  protected-presentation authority boundary. HPAC-PAWA-001 advances narrowly
+  from v1.1 to v1.2 with exact mutation
+  `configure_presentation_mechanism`, exact deployment-owner administration,
+  and exact future consumer `pcae.core.hpac_protected_presentation_admin`.
+  New HPAC-PPA-001 v1.0 freezes out-of-band executable installation plus PAWA
+  path/digest/generation registration, and a distinct process-local,
+  non-bearer `protected_presentation_mechanism` runtime evidence writer. The
+  authority cannot install arbitrary executables, launch generic processes,
+  or transfer N-16-6 authority. Fresh contract suite 42/42 and broad affected
+  sweep 511/511 pass. No `src/pcae` or `scripts` change; historical `.30R.4`
+  remains BLOCKED; runtime/effect boundaries remain unchanged; N-16-5 remains
+  NOT CLOSED. Fresh implementation successor `.30R.4R.1` is derived but not
+  begun.
+- Transitioned active task from Idle: awaiting next explicitly authorized governed phase; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R — N-16-5 Protected-Presentation Helper Installation and Evidence-Writer Authority Contract Reconciliation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for .1R.30R.4R protected-presentation authority contract reconciliation; N-16-5 NOT CLOSED to Idle: awaiting next explicitly authorized governed phase; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4: N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption Implementation to Idle: awaiting explicit authorization for .1R.30R.4R protected-presentation authority contract reconciliation; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4` — **BLOCKED before production

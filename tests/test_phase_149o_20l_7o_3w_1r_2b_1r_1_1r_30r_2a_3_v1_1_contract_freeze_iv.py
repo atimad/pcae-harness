@@ -31,6 +31,7 @@ F = "6c62a323cccda56e969128d4b6e01f98d53630ce"
 V = "6c62a323cccda56e969128d4b6e01f98d53630ce"
 B30 = "8e65529596fc351face4b83c4b5d08573326d034"
 J = "1dbd41cb5b9fb428ce7eb0b9ff80d6b48d3fbd4a"  # finalized .1R.30R.2A head
+IV_FINAL = "1793a75a73c54c6f6687bc830664caeac5aeaa66"  # finalized .2A.3 head
 
 PAWA_CONTRACT = CONTRACTS / "HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
 HPAC_CONTRACT = CONTRACTS / "HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md"
@@ -60,11 +61,14 @@ def _norm(text: str) -> str:
 
 
 def _pawa() -> str:
-    return _norm(PAWA_CONTRACT.read_text(encoding="utf-8"))
+    return _norm(_pawa_raw())
 
 
 def _pawa_raw() -> str:
-    return PAWA_CONTRACT.read_text(encoding="utf-8")
+    # Historical IV truth is evaluated against the immutable v1.1 freeze tree,
+    # not whichever governed successor version is current at repository HEAD.
+    rel = PAWA_CONTRACT.relative_to(REPO).as_posix()
+    return _git("show", f"{F}:{rel}")
 
 
 # ── 1. Immutable SHAs ────────────────────────────────────────────────────
@@ -836,34 +840,39 @@ def test_fixed_sha_attribution_zero_production_and_contract_delta() -> None:
 # ── 58. No test weakening in this phase's own diff ──────────────────
 
 def test_this_phase_removes_or_renames_no_test_def() -> None:
-    diff = _git("diff", F, "HEAD", "--", "tests")
+    diff = _git("diff", F, IV_FINAL, "--", "tests")
     removed = re.findall(r"^-\s*def (test_\w+)", diff, re.MULTILINE)
     assert removed == [], removed
     # net test-def count does not decrease in any touched test file
     for path in {
         line.split("\t")[-1]
-        for line in _git("diff", "--name-only", F, "HEAD", "--", "tests").splitlines()
+        for line in _git("diff", "--name-only", F, IV_FINAL, "--", "tests").splitlines()
         if line.strip()
     }:
-        old = _git("show", f"{F}:{path}") if _git(
-            "cat-file", "-t", f"{F}:{path}"
-        ).strip() == "blob" else ""
-        new = (REPO / path).read_text(encoding="utf-8")
+        exists_at_f = subprocess.run(
+            ["git", "-C", str(REPO), "cat-file", "-e", f"{F}:{path}"],
+            capture_output=True,
+        ).returncode == 0
+        old = _git("show", f"{F}:{path}") if exists_at_f else ""
+        new = _git("show", f"{IV_FINAL}:{path}")
         assert new.count("def test_") >= old.count("def test_"), path
 
 
 def test_no_skip_xfail_added_anywhere_in_this_phase_diff() -> None:
-    diff = _git("diff", F, "HEAD", "--", "tests")
-    added = [
-        ln for ln in diff.splitlines()
-        if ln.startswith("+") and not ln.startswith("+++")
-    ]
-    for ln in added:
-        low = ln.lower()
-        assert "pytest.skip" not in low
-        assert "pytest.xfail" not in low
-        assert "@pytest.mark.skip" not in low
-        assert "skipif" not in low
+    paths = _git("diff", "--name-only", F, IV_FINAL, "--", "tests").splitlines()
+    for path in paths:
+        source = _git("show", f"{IV_FINAL}:{path}")
+        tree = ast.parse(source)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                name = ast.unparse(node.func)
+                assert name not in {"pytest.skip", "pytest.xfail"}, path
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                decorators = {ast.unparse(d) for d in node.decorator_list}
+                assert not any(
+                    d.startswith("pytest.mark.skip") or d.startswith("pytest.mark.skipif")
+                    for d in decorators
+                ), path
 
 
 def test_stale_pointintime_guards_reconciled_not_deleted() -> None:

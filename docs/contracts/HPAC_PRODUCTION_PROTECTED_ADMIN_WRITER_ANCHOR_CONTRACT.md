@@ -1,9 +1,9 @@
-# HPAC-PAWA-001 v1.1 — HPAC Production Protected Administration Writer Anchor Contract
+# HPAC-PAWA-001 v1.2 — HPAC Production Protected Administration Writer Anchor Contract
 
 ## Contract identity and status
 
 **Contract:** HPAC-PAWA-001
-**Version:** 1.1
+**Version:** 1.2
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2 — HPAC-PAWA-001 v1.0
 Production Protected-Admin Writer Anchor Contract Freeze (initial freeze,
@@ -17,6 +17,16 @@ resolution source in §2 / §9 / §10 / §33; `HPAC-PAWA-REQ-164..218`;
 `PAWA-INV-12`; no `src/pcae` change; no new `pawa_failure_code`; no descriptor
 schema change; HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2 byte-unchanged;
 the v1.0 freeze record is **not** rewritten — v1.1 is append-only evolution).
+**Evolved to v1.2 by:** Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R — N-16-5 Protected-Presentation
+Helper Installation and Evidence-Writer Authority Contract Reconciliation
+(**MINOR**; adds exactly one protected-presentation configuration mutation
+family, one exact admin-only consumer category, and mechanism/configuration
+transaction issuance scope; executable bytes remain out-of-band
+administrator-installed and runtime presentation evidence remains outside PAWA
+under HPAC-PPA-001 v1.0; no new `pawa_failure_code`, no change to R1-HYBRID,
+non-bearer, one-operation, root, or recognition semantics; no production
+implementation; fresh IV required).
 **v1.0 → v1.1 delta:** §7A (delta table), §32A, §20A, §80 (S-1), §94 (history),
 §95A (R1/R2/R3/R4 disposition). Incorporates the three
 `.1R.30R.2A.1` independent-verification corrections: **C-1** (R1-HYBRID
@@ -91,14 +101,15 @@ HBDC-001 change, **no** RDGO-001 state-machine change, no gate reorder, no
 first-effect-boundary move, no merge of the
 authentication / presence / verification / informed-intent / approval /
 PB-permission / Runtime-Enforcement / runtime-capability / execution concerns.
-The only version movement introduced by the v1.1 evolution is
-**HPAC-PAWA-001 v1.0 → v1.1 (MINOR)**; every other contract is byte-unchanged.
+The current lineage is **HPAC-PAWA-001 v1.0 → v1.1 → v1.2**, both evolutions
+MINOR. The v1.2 companion HPAC-PPA-001 v1.0 is new; every pre-existing contract
+other than HPAC-PAWA-001 remains byte-unchanged.
 
 This is a contract-freeze document. It creates no protected root, installs no
 descriptor, mints no writer capability, writes no registry, implements no writer
 factory, provisioning script, or consumer-inventory guard, touches no hardware,
 resolves no OS account, reads no OS account database, and enables execution on
-no path. The v1.1 evolution adds normative text only — no
+no path. The v1.1 and v1.2 evolutions add normative text only — no
 `hpac_pawa_agent_exclusion.py`, no `resolve_configured_agent_identity()`, no
 `agent-exclusion.json` schema helper, no `pwd` / `grp` call. Runtime remains
 `not_implemented` / `Observed` / `observe` / `unavailable`; 0 plugins /
@@ -1327,13 +1338,20 @@ ambiguity at any authority boundary fails closed.
 ## 38. Authorized consumers
 
 - **HPAC-PAWA-REQ-087.** The closed categories of authorized `PRODUCTION` writer
-  factory consumers for v1.0:
+  factory consumers for v1.0/v1.1:
   - the bounded **protected principal administration** tool (principal / credential
     enroll / revoke), run by the deployment owner as a standalone script;
   - the **first-credential bootstrap / enrollment** tool (RHAMP-REQ-048;
     `.1R.30R.3`);
   - the **recovery / re-bootstrap** tool (HPAC-REQ-065, RHAMP-REQ-050;
     total-principal-loss recovery).
+  HPAC-PAWA-001 v1.2 adds exactly one category: the bounded **protected
+  presentation mechanism configuration** administration tool specified by
+  HPAC-PPA-001 v1.0. Its exact future source consumer is
+  `pcae.core.hpac_protected_presentation_admin`, reached only from the
+  standalone `scripts/hpac_protected_presentation_admin.py` entry point. The
+  script is not itself a wildcard consumer category. No launcher, helper,
+  verifier, Gate, runtime, agent, or plugin is added to this inventory.
 - **HPAC-PAWA-REQ-088.** The following SHALL NOT be authorized consumers:
   ordinary agent commands; any `pcae` CLI subcommand; Gate 5 / 6 / 7 / 8 / 9 / 10
   or any gate coordinator; the runtime adapter; any plugin runtime; repository
@@ -1383,6 +1401,12 @@ ambiguity at any authority boundary fails closed.
   `anchor_id`, `installation_id`, the descriptor `generation`,
   `protected_root_identity`, an `operation_id`, the issuance trusted-clock
   timestamp, and the issuer / factory identity.
+  Under v1.2's sole additional operation family, `subject` is the exact
+  presentation `mechanism_id`; issuance additionally records (but does not add
+  as bearer capability fields) the exact
+  `presentation_configuration_transaction_id` and requested lifecycle action
+  (`install`, `rotate`, or `revoke`). No principal/credential scope is inferred
+  from a mechanism subject.
 - **HPAC-PAWA-REQ-094.** The capability carries the **minimum** structure needed
   for `require_writer` to bind it: `_authority_seal`, `role`, `subject`,
   `authority_class`. It does not carry the descriptor, the generation, a digest,
@@ -1401,6 +1425,14 @@ ambiguity at any authority boundary fails closed.
   - `revoke_credential` — mark a `CredentialRecord` `revoked`;
   - `initialize_credential_sidecar_state` — create the sidecar / counter-state
     for a credential where the ceremony requires it as a distinct step.
+  HPAC-PAWA-001 v1.2 adds exactly one mutation family:
+  - `configure_presentation_mechanism` — perform one bounded, protected
+    metadata-only installation, rotation, or revocation transaction for the
+    exact `mechanism_id` under HPAC-PPA-001 v1.0, using role
+    `presentation_mechanism_installer`. It may write only that contract's
+    installation-generation record, current-generation anchor, HPAC-REQ-090
+    mechanism descriptor, and their ordinary HPAC writer-provenance sidecars.
+    It SHALL NOT create, copy, replace, chmod, chown, or execute helper bytes.
 - **HPAC-PAWA-REQ-096.** A `PRODUCTION` writer capability SHALL NOT authorize:
   writing an `HPAC-PROOF/2.0`, a lifecycle event, an
   `HPAC-PRESENTATION-EVIDENCE/2.0`, an `HPAC-AUTHORITY-CONSUMPTION/2.1` record,
@@ -2061,9 +2093,11 @@ ambiguity at any authority boundary fails closed.
 ## 80. Contract versioning
 
 - **HPAC-PAWA-REQ-151.** HPAC-PAWA-001 uses contract `MAJOR.MINOR`. **v1.0 is
-  the initial freeze; v1.1 is a MINOR evolution** (the
+  the initial freeze; v1.1 and v1.2 are MINOR evolutions**. v1.1 adds the
   `HPAC-PAWA-AGENT-EXCLUSION/1.0` configured-agent-principal resolution source,
-  §32A, plus the `agent_exclusion_digest` current-generation field, §20A).
+  §32A, plus the `agent_exclusion_digest` current-generation field, §20A.
+  v1.2 adds only the closed `configure_presentation_mechanism` metadata
+  mutation family and exact protected-presentation admin consumer, §80.2.
   Unknown versions fail closed. A recognition running under HPAC-PAWA-001 v1.1
   SHALL require the v1.1 artifacts (§20A, §32A); it SHALL NOT silently accept a
   v1.0-era installation missing them (fail closed, `agent_principal_unknown`).
@@ -2087,6 +2121,10 @@ ambiguity at any authority boundary fails closed.
   (never wildcard); tighten (never loosen) a bound; clarify a
   platform-adapter detail; or add an additional macOS / Linux adapter within the
   frozen normative properties (§63) — provided no meaning above changes.
+  It may also add one explicitly enumerated protected-admin **metadata mutation
+  family** whose target is inside the same protected root, provided executable
+  bytes and runtime evidence remain outside PAWA, the capability remains
+  process-local/non-bearer/one-operation, and no MAJOR trigger in §152 fires.
 - **HPAC-PAWA-REQ-154.** No future HPAC-PAWA-001 version may retrospectively
   widen an already-minted capability's granted scope or an already-provisioned
   anchor's authority.
@@ -2129,6 +2167,89 @@ ambiguity at any authority boundary fails closed.
   adding remote authority; widening mutation scope; replacing the OS
   protected-root TCB; adding runtime approval semantics — any of these remains a
   **MAJOR** plus its own adjudication and independent verification.
+
+### 80.2 v1.2 protected-presentation configuration authority
+
+- **HPAC-PAWA-REQ-219.** HPAC-PAWA-001 v1.2 selects the least-powerful
+  executable-installation model: the deployment owner installs immutable helper
+  bytes out of band; PAWA authorizes only registration, rotation, or revocation
+  of the exact metadata that pins those bytes. A PAWA capability SHALL NOT
+  install executable bytes or authorize a generic filesystem/process mutation.
+- **HPAC-PAWA-REQ-220.** The one new operation is exactly
+  `configure_presentation_mechanism`, role
+  `presentation_mechanism_installer`, subject equal to the exact
+  `mechanism_id`, and one nonempty
+  `presentation_configuration_transaction_id`. Its closed lifecycle action is
+  exactly one of `{install, rotate, revoke}`. The lifecycle action is issuance
+  evidence and transaction input, not a reusable capability field.
+- **HPAC-PAWA-REQ-221.** The operation may mutate only the HPAC-PPA-001 v1.0
+  installation-generation record, current-generation anchor, HPAC-REQ-090
+  descriptor, and the existing HPAC provenance sidecars for those records,
+  all beneath the exact mechanism directory. Every other path, including the
+  helper executable path itself, is outside its authority.
+- **HPAC-PAWA-REQ-222.** An install/rotate/revoke that changes more than one
+  authorized metadata artifact is one bounded multi-write administrative
+  transaction under HPAC-PAWA-REQ-106/107 and the independently verified
+  `complete_multi_write` ACTIVE→CONSUMED lifecycle. It is not multiple
+  operations and creates no new lifecycle primitive.
+- **HPAC-PAWA-REQ-223.** The exact future production factory consumer added by
+  v1.2 is `pcae.core.hpac_protected_presentation_admin`. The only entry point
+  allowed to reach it is the standalone
+  `scripts/hpac_protected_presentation_admin.py`. Neither name is a prefix,
+  glob, or category wildcard. The launcher, helper, presentation store,
+  verifier, Gates, runtime, agent, CLI, and plugins remain unauthorized.
+- **HPAC-PAWA-REQ-224.** The protected-presentation administration module and
+  script are non-agent-importable, local, out-of-band deployment-owner tools
+  under §§37–39. They SHALL NOT be registered as a `pcae` CLI command, plugin,
+  runtime provider, Gate consumer, repository hook, or task callback.
+- **HPAC-PAWA-REQ-225.** The capability issuance scope adds no slot or durable
+  authority field. The existing process-local issuance registry binds the
+  canonical capability identity to role, mechanism subject, operation,
+  transaction, authority class, and ACTIVE lifecycle. Object fields alone are
+  never sufficient authority.
+- **HPAC-PAWA-REQ-226.** Initial install requires no pre-existing protected
+  presentation approval. The already-recognized deployment-owner PAWA anchor
+  authorizes the metadata transaction after the helper bytes have been
+  installed out of band. This is the non-circular bootstrap; first-caller-wins,
+  self-install, repository install, environment install, and deterministic
+  fixture promotion are prohibited.
+- **HPAC-PAWA-REQ-227.** Rotation and revocation are explicit new invocations,
+  each with a new PAWA capability and configuration transaction. No live
+  capability survives the one-operation transition; no presentation runtime
+  component may rotate or revoke its own installation.
+- **HPAC-PAWA-REQ-228.** The existing 21-code `pawa_failure_code` vocabulary is
+  sufficient and unchanged. Unrecognized/malformed configuration issuance
+  input maps to `operation_scope_invalid`; wrong mechanism/transaction use maps
+  to `target_scope_invalid`; a reused or generation-stale capability maps to
+  `capability_stale`; protected-root/descriptor/consumer failures keep their
+  existing exact codes; an otherwise unclassified fail-closed administration
+  error maps to `internal_fail_closed`. Runtime helper/evidence failures are
+  RHAMP/HPAC failures, not PAWA failures.
+- **HPAC-PAWA-REQ-229.** Runtime role `protected_presentation_mechanism` and all
+  writes of `HPAC-PRESENTATION-EVIDENCE/2.0` remain explicitly outside PAWA.
+  Possessing or consuming a PAWA installation capability SHALL NOT authorize a
+  presentation, election, proof, approval, PB decision, runtime capability,
+  dispatch, or effect.
+- **HPAC-PAWA-REQ-230.** No §152 MAJOR trigger fires: v1.2 keeps the OS
+  protected-root trust anchor, R1-HYBRID exclusion, two-principal topology,
+  exact enumerated consumer discipline, non-bearer/process-local/restart-dead
+  capability, one-operation bound, generation rollback checks, and closed
+  failure semantics. It adds no remote service, signing-key authority,
+  environment authority, runtime approval, PB/RE authority, runtime capability,
+  execution, or wildcard. Therefore v1.2 is a **MINOR**.
+- **HPAC-PAWA-REQ-231.** HPAC-PPA-001 v1.0 owns the installation-record,
+  current-generation, fixed-helper launch, and runtime evidence-writer
+  semantics. This contract owns only recognition and issuance of the bounded
+  protected-admin metadata mutation. The two contracts SHALL NOT be read as a
+  shared runtime authority.
+- **HPAC-PAWA-REQ-232.** RHAMP-001 v1.0, HPAC-001 v2.1, RIHAC-001 v2.0,
+  RIASC-001 v3.0, RDGO-001 v3.1, and the HPAC writer-provenance schema remain
+  byte-unchanged by v1.2. Their existing descriptor/evidence/consumer extension
+  points are specialized, not redefined, by HPAC-PPA-001 v1.0.
+- **HPAC-PAWA-REQ-233.** This v1.2 freeze changes no production source, creates
+  no helper or installation, writes no descriptor/evidence, modifies no Gate,
+  and enables no runtime capability or external effect. Historical v1.0/v1.1
+  freeze artifacts remain immutable.
 
 ## 81. Existing-contract byte identity
 
@@ -2396,6 +2517,28 @@ operator discretion). Own explicit human authorization required. Do not begin it
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
 ```
 
+### 90.2 v1.2 contract-freeze verdict
+
+```
+HPAC-PAWA-001 v1.2 — FROZEN (MINOR; metadata authority only)
+HPAC-PPA-001 v1.0 — FROZEN companion (installation/evidence specialization)
+HPAC-001 v2.1 / RHAMP-001 v1.0 / RIHAC-001 v2.0 / RIASC-001 v3.0 /
+RDGO-001 v3.1 / HBDC-001 v1.2 — UNCHANGED
+
+INSTALLATION AUTHORITY = existing deployment-owner PAWA anchor
+EXECUTABLE INSTALL MODEL = out-of-band immutable helper bytes + PAWA metadata pin
+PAWA MUTATION = configure_presentation_mechanism
+PAWA ROLE = presentation_mechanism_installer
+PAWA CONSUMER = pcae.core.hpac_protected_presentation_admin only
+ENTRY POINT = scripts/hpac_protected_presentation_admin.py only
+RUNTIME EVIDENCE ROLE = protected_presentation_mechanism (outside PAWA)
+GENERIC EXECUTABLE / RUNTIME / EFFECT AUTHORITY = NONE
+
+Runtime remains Observed / observe / unavailable; first external effect absent.
+N-16-5 remains NOT CLOSED. N-16-6 / N-16-7 remain OPEN and untouched.
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
+```
+
 ## 91. Requirement inventory
 
 **Requirement count (v1.0):** HPAC-PAWA-001 v1.0 defined **163** requirements,
@@ -2406,6 +2549,11 @@ DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
 no duplicates. The v1.1 additions are `HPAC-PAWA-REQ-164` through
 `HPAC-PAWA-REQ-218` (§9.1, §20A, §31, §32A, §32B, §32C, §33, §42A, §57, §61,
 §63, §73–§76, §80.1, §81–§84, §87–§89).
+
+**Requirement count (v1.2):** HPAC-PAWA-001 v1.2 defines **233** requirements,
+`HPAC-PAWA-REQ-001` through `HPAC-PAWA-REQ-233` inclusive, sequential, no gaps,
+no duplicates. The v1.2 additions are `HPAC-PAWA-REQ-219` through
+`HPAC-PAWA-REQ-233` (§80.2).
 
 **Invariant count:** 12 — `PAWA-INV-1` through `PAWA-INV-12` (§92, below).
 
@@ -2467,15 +2615,16 @@ no duplicates. The v1.1 additions are `HPAC-PAWA-REQ-164` through
 
 ## 93. Contract self-consistency statement
 
-This contract, at v1.1: (a) introduces no dependency, in either direction, on
+This contract, at v1.2: (a) introduces no implementation dependency, in either direction, on
 `src/pcae/**` or `scripts/**` — it references existing and planned modules /
 functions / symbols by name in normative text only, and imports / executes
 nothing; (b) does not amend HPAC-001, RHAMP-001, HBDC-001, or any other
-contract's byte content, and does not touch the
+pre-existing contract's byte content; it adds the HPAC-PPA-001 v1.0 companion
+and does not touch the
 `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` schema; (c) creates no protected state, OS
 principals, filesystem permissions, descriptors, exclusion records, account
 resolutions, or writer capabilities; (d) is internally traceable — every
-`HPAC-PAWA-REQ-###` ID is sequential from 001 through 218 with no gaps and no
+`HPAC-PAWA-REQ-###` ID is sequential from 001 through 233 with no gaps and no
 duplicates, and every `PAWA-INV-#` (1..12) referenced elsewhere appears in §92
 exactly once; (e) leaves runtime `not_implemented` / `Observed` / `observe` /
 `unavailable` and the first external effect ABSENT.
@@ -2508,6 +2657,20 @@ v1.1 is append-only. HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2, and the
 independent verification — `.1R.30R.2A.3` (finding **C-3**), foldable into
 `.1R.30R.3.2` only at explicit operator discretion — **before** `.1R.30R.3.1`
 implementation relies on its text.
+
+**v1.2** was frozen by Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R — a **MINOR** evolution resolving the
+historical `.30R.4` implementation blocker. It adds the single metadata-only
+`configure_presentation_mechanism` family, exact role
+`presentation_mechanism_installer`, and exact admin consumer
+`pcae.core.hpac_protected_presentation_admin`; executable helper bytes remain
+out-of-band deployment-owner installed. HPAC-PPA-001 v1.0 is frozen alongside
+it as the narrow companion owning installation/currentness and runtime
+evidence-writer semantics. Runtime role `protected_presentation_mechanism`
+remains outside PAWA. No existing failure code, PAWA recognition predicate,
+capability field, one-operation lifecycle, or security invariant is weakened.
+HPAC-001 v2.1 and RHAMP-001 v1.0 remain byte-unchanged. Historical v1.1 and its
+IV remain immutable.
 
 ## 95A. R1 / R2 / R3 / R4 design disposition (append-only, v1.1)
 
