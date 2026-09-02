@@ -2,6 +2,89 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3 — Independent Verification of the
+HPAC-PAWA-001 v1.1 Configured-Agent-Principal Resolution Source Contract Freeze.
+**STATUS: COMPLETE — HPAC-PAWA-001 v1.1 VERIFIED WITH NON-BLOCKING FINDINGS.**
+Dedicated contract IV (finding C-3). **VERIFICATION ONLY** — no `src/pcae`
+change, no normative-contract edit, no `HPAC-PAWA-AGENT-EXCLUSION/1.0` / resolver
+/ writer-anchor / FIDO2 / protected-presentation implementation. Verification-entry
+SHA `V = 6c62a323` (== finalized `.1R.30R.2A.2` head `F`); `A = 3f23d6fd`
+(finalized `.1R.30R.2A.1` head); `B30 = 8e655295` (immutable `.1R.30` BLOCKED);
+`origin/main..HEAD = 0` at entry. `git diff <V> HEAD -- src/pcae` **empty**;
+`git diff --name-only <V> HEAD -- docs/contracts` **empty** (HPAC-PAWA-001 v1.1
+byte-unchanged from `.2A.2`).
+
+**Verdicts:** HPAC-PAWA-001 v1.1 — **VERIFIED WITH NON-BLOCKING FINDINGS**;
+**R1-HYBRID — VERIFIED**; **v1.1 MINOR — VERIFIED** (no `HPAC-PAWA-REQ-152`
+trigger; S-1 narrow); **PAWA SLICE-1 IMPLEMENTATION READY**; **N-16-5 — PAWA v1.1
+CONTRACT VERIFIED — SLICE-1 IMPLEMENTATION READY — NOT CLOSED**.
+
+Re-derived from primary source: the exact v1.0→v1.1 delta (`HPAC-PAWA-REQ-164..218`,
+`PAWA-INV-12`; no unrelated semantic change); the closed
+`HPAC-PAWA-AGENT-EXCLUSION/1.0` schema (§32A.1, 12 fields, no group snapshot as
+authority); R1-HYBRID (`symbolic_account` protected-only + `provisioned_uid`
+continuity pin + `live getpwnam(name).pw_uid == provisioned_uid` + live
+primary+supplementary groups every §33 recognition); deletion /
+recreate-under-new-uid / UID-reuse / rename all fail closed to
+`agent_principal_unknown` (no silent rebind, no reverse-uid fallback, no
+uid-follow); group drift → `agent_has_protected_write_authority` (normative);
+group removal recovers with **no** reprovision; OS account DB inside PAWA's OS TCB
+(no hostile-root claim); three F-1 predicates DISTINCT (`os.geteuid()` never the
+operand of `agent_has_protected_write_authority`); two-principal invariant not
+weakened; `agent_exclusion_digest` (C-2) → independent rollback IMPOSSIBLE,
+full-set rollback boundary stated not overclaimed, `HPAC-PAWA-CURRENT-GENERATION/1.0`
+closed 7-field set with schema id `/1.0` kept (internal monotonic anchor; §29
+adjudication); 21 `pawa_failure_code` values UNCHANGED (v1.1 → #3/#4/#14/#19/#21);
+§57 RHAMP map + RHAMP-001 v1.0 41-code vocab byte-unchanged;
+`HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` schema §14 byte-unchanged; §33 = 11 steps
+(2/3/7 gain atomic substeps), resolution atomic with the mint (unit A1); write
+probe `O_EXCL|O_NOFOLLOW` unchanged; R1-PURE superseded (C-1) / R2 rejected
+(HBDC amendment, wrong namespace) / R3 rejected as resolution (test-seam only) /
+R4 no superior source; S-1 narrow, no loophole; HPAC-001 v2.1 / RHAMP-001 v1.0 /
+HBDC-001 v1.2 / CPIPC-001 v1.0 byte-unchanged (git, three baselines each); D1
+decomposition CPIPC-001-valid, no ID reserved.
+
+**Findings (non-blocking):** **F-1** (lifecycle/test-evidence) — the `.1R.30R.2A.2`
+freeze doc §9 claimed the `.1R.30R.2A.1` IV suite was "56 passed, 0 failed"
+against v1.1; actual on `F` was **55 passed, 1 failed** (a third stale
+point-in-time guard of the same class as the two the freeze doc enumerated for
+re-baselining here). No contract impact. **Discharged this phase:** all five
+point-in-time guards across the `.1R.30R.1` and `.1R.30R.2A.1` IV suites
+re-baselined (upper bounds re-pinned to each owning phase's finalized head;
+`test_no_contract_change_since_b30` strengthened); no `def test_` renamed,
+removed, skipped, or xfailed; suites now 35/35 and 56/56. No successor repair
+phase required. **F-2** (documentation) — `HPAC-PAWA-REQ-204`'s inline prose
+mixes the §56 PAWA-code ordinal with §57 RHAMP-code ordinals in one sentence; the
+normative §57 table it defers to is correct and byte-unchanged. Notation
+blemish, not a normative defect; no contract edit this phase.
+
+**Tests:** new `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_2a_3_v1_1_contract_freeze_iv.py`
+— **72 passed, 0 failed**. `.1R.30R.1` IV suite **35/0**; `.1R.30R.2A.1` IV suite
+**56/0**. Combined **163 passed, 0 failed**. Broader
+`-k pawa/writer_anchor/configured_agent/contract_identity` selection: the 3
+PAWA-related failures on `F` become passes; the remaining pre-existing HMIC/HBDC
+contract-identity digest failures reproduce identically — zero attributable to
+`.2A.3`. Fixed-SHA A/B (`A = F`): production delta 0, contract delta 0.
+
+**Runtime:** `not_implemented` / `Observed` / `observe` / `unavailable`; 0
+plugins / 0 capabilities — unchanged. **First external effect:** ABSENT AND
+UNREACHABLE. N-16-3 / N-16-4 CLOSED, not reopened. N-16-6 / N-16-7 OPEN,
+N-16-7 strictly last. N-23-1 / N-23-2 carried. No Slice C.
+
+**Recommended next phase (exactly one):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1` — N-16-5 PAWA Production Protected-Admin
+Writer Anchor Implementation (Slice 1; FIDO2-free; atomic unit A1 lands
+`resolve_configured_agent_identity()` + a new
+`src/pcae/core/hpac_pawa_agent_exclusion.py` together with the writer factory).
+Own explicit human authorization required; ID recommended, NOT reserved. Do not
+begin it. `.1R.30R.3.2` need not re-verify v1.1 beyond normal
+contract-production equivalence (C-3 discharged here).
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.2 — HPAC-PAWA-001 v1.1
 Configured-Agent-Principal Resolution Source Contract Freeze.
 **STATUS: COMPLETE — HPAC-PAWA-001 v1.1 FROZEN** (MINOR; sole normative delta).
