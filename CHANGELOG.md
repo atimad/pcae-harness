@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for .1R.30R.4R protected-presentation authority contract reconciliation; N-16-5 NOT CLOSED to Idle: awaiting next explicitly authorized governed phase; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4: N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption Implementation to Idle: awaiting explicit authorization for .1R.30R.4R protected-presentation authority contract reconciliation; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4` — **BLOCKED before production
   implementation.** RHAMP-001 requires a protected-administrator-installed

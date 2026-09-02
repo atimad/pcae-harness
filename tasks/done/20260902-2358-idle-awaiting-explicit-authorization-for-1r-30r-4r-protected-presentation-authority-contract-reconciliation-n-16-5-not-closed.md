@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for .1R.30R.4R protected-presentation auth
 
 ## Status
 
-active
+done
 
 ## Mode
 
