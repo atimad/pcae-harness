@@ -10,7 +10,7 @@ Idle: awaiting operator decomposition adjudication (post-149O.20L.7O.3W.1R.2B.1R
 
 ## Status
 
-active
+done
 
 ## Mode
 
