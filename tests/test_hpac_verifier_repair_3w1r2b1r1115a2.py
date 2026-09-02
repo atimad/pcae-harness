@@ -353,13 +353,25 @@ def test_repair_did_not_introduce_pb_or_runtime_authority_or_gate9_imports():
 
 
 def test_runtime_authority_is_the_only_production_consumer_after_integration():
+    # Phase .1R.30R.3.4 reconciliation: check real `import` statements, not a
+    # bare substring — the merged RHAMP `.1R.30` bundle adds modules that
+    # name `hpac_verifier` only in prose (the real dependency runs the other
+    # way: hpac_verifier lazily imports `verify_real_fido2_assertion`). The
+    # authorized consumer set is unchanged. No `def test_` renamed/removed.
+    import ast as _ast
+
     src_root = _REPO_ROOT / "src" / "pcae"
     consumers = []
     for path in src_root.rglob("*.py"):
         if "__pycache__" in path.parts or path.name == "hpac_verifier.py":
             continue
-        text = path.read_text(encoding="utf-8")
-        if "hpac_verifier" in text:
+        try:
+            tree = _ast.parse(path.read_text(encoding="utf-8"))
+        except SyntaxError:
+            continue
+        modules = {n.module for n in _ast.walk(tree) if isinstance(n, _ast.ImportFrom) and n.module}
+        modules |= {a.name for n in _ast.walk(tree) if isinstance(n, _ast.Import) for a in n.names}
+        if any(m.endswith("hpac_verifier") for m in modules):
             consumers.append(str(path.relative_to(_REPO_ROOT)))
     # .1R.10 added the authorized Gate-5 approval-validation coordinator.
     assert sorted(consumers) == [

@@ -602,7 +602,13 @@ def test_26_repair_doc_declares_no_normative_contract_change():
 def test_27_no_new_capability_field_slot_added():
     from pcae.core.hpac_foundation import HPACWriterCapability as _Cap
 
-    assert _Cap.__slots__ == ("_authority_seal", "role", "subject", "authority_class", "_single_use", "_spent")
+    # Phase .1R.30R.3.4: `_multi_write` is a strictly-additive slot for the
+    # one-capability multi-artifact `enroll_credential` transaction
+    # (HPAC-PAWA-REQ-106; HPAC-PAWA-REQ-082/107 permit an additive flag). No
+    # existing slot removed or re-meant.
+    base = ("_authority_seal", "role", "subject", "authority_class", "_single_use", "_spent")
+    assert set(base) <= set(_Cap.__slots__)
+    assert set(_Cap.__slots__) - set(base) == {"_multi_write"}
 
 
 def test_28_runtime_still_unavailable_independent_rerun():

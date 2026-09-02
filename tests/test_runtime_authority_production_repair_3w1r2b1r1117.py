@@ -622,6 +622,17 @@ def test_production_file_allowlist_matches_frozen_phase_matrix():
         "src/pcae/core/hpac_protected_admin_writer.py",
         "src/pcae/core/hpac_foundation.py",
         "src/pcae/core/human_principal_registry.py",
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (N-16-5 -- merged RHAMP
+        # `.1R.30` bundle). Exact filenames, no wildcard.
+        "src/pcae/core/hpac_verifier.py",
+        "src/pcae/core/hpac_rhamp_terminal_reasons.py",
+        "src/pcae/core/hpac_rhamp_client_context.py",
+        "src/pcae/core/hpac_rhamp_credential_sidecar.py",
+        "src/pcae/core/hpac_rhamp_counter_state.py",
+        "src/pcae/core/hpac_rhamp_ctap2.py",
+        "src/pcae/core/human_authenticator_fido2.py",
+        "src/pcae/core/hpac_rhamp_assertion_verify.py",
+        "src/pcae/core/hpac_rhamp_enrollment.py",
     }
     unexpected = set(changed) - _authorized_surface
     assert unexpected == set(), f"unauthorized production-file expansion: {sorted(unexpected)}"
@@ -688,12 +699,23 @@ def test_consumer_inventory_is_bounded_and_gate9_stays_unwired():
     hpac_consumers = set()
     projection_consumers = set()
     gate9_consumers = set()
+    import ast as _ast
+
     for path in src_root.rglob("*.py"):
         if path.name == "hpac_verifier.py":
             continue
         text = path.read_text(encoding="utf-8")
         relative = str(path.relative_to(repo))
-        if "hpac_verifier" in text:
+        # Phase .1R.30R.3.4 reconciliation: real-import scan, not a bare
+        # substring — the merged RHAMP `.1R.30` bundle adds modules that
+        # name `hpac_verifier` only in prose (the real dependency runs the
+        # other way: hpac_verifier lazily imports `verify_real_fido2_assertion`).
+        try:
+            _mods = {n.module for n in _ast.walk(_ast.parse(text)) if isinstance(n, _ast.ImportFrom) and n.module}
+            _mods |= {a.name for n in _ast.walk(_ast.parse(text)) if isinstance(n, _ast.Import) for a in n.names}
+        except SyntaxError:
+            _mods = set()
+        if any(m.endswith("hpac_verifier") for m in _mods):
             hpac_consumers.add(relative)
         if "ValidatedAuthorityProjection" in text and path.name != "runtime_authority.py":
             projection_consumers.add(relative)

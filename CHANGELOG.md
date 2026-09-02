@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4` (N-16-5 Merged RHAMP Real
+  FIDO2 Credential Registration, Counter-State, Bootstrap & Authentication
+  Mechanism Implementation) — **IMPLEMENTED, IV PENDING.** Implements the
+  merged RHAMP-REQ-156 `.1R.30` bundle (DECISION A / RE-MERGE from
+  `.1R.30R.3.3R`): new `hpac_rhamp_credential_sidecar` /
+  `hpac_rhamp_counter_state` / `hpac_rhamp_client_context` /
+  `hpac_rhamp_ctap2` / `human_authenticator_fido2` /
+  `hpac_rhamp_assertion_verify` / `hpac_rhamp_enrollment` /
+  `hpac_rhamp_terminal_reasons` modules; `hpac_verifier`
+  `_ELIGIBLE_MECHANISM_IDS += {hpac.fido2.uv_presence.v2}` + the real
+  native-CTAP2 assertion branch (RHAMP-REQ-102/103); a strictly-additive
+  `HPACWriterCapability._multi_write` slot + `complete_multi_write` for the
+  one-capability multi-artifact enrollment transaction; `enroll_credential`
+  / `initialize_credential_sidecar_state` promoted to available PAWA §42
+  mutation classes; new `scripts/hpac_principal_admin.py`. RHAMP-001 v1.0 /
+  HPAC-PAWA-001 v1.1 / HPAC-001 v2.1 byte-unchanged; `CredentialRecord`
+  byte-unchanged; no protected presentation; no `require_real_assurance`
+  Gate 5/9 wiring; no N-16-6/N-16-7; no Slice C; no first external effect;
+  no new dependency; runtime `Observed` / `observe` / `unavailable`. Fresh
+  124-test suite (incl. the ≥ 55-case negative matrix); phase-aware guard
+  reconciliation with no `def test_` renamed/removed; fixed-SHA A/B shows 0
+  unexplained candidate-only regressions. **N-16-5 remains NOT CLOSED.**
+  Recommended next: `.1R.30R.3.5` (IV).
+
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R); N-16-5 NOT CLOSED; next = .1R.30R.3.4 merged RHAMP mechanism impl to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4: N-16-5 merged RHAMP FIDO2 mechanism impl; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R: RHAMP Slice 2/3 Decomposition Adjudication to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R); N-16-5 NOT CLOSED; next = .1R.30R.3.4 merged RHAMP mechanism impl; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R` (N-16-5 RHAMP Slice 2 / Slice 3

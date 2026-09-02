@@ -121,11 +121,31 @@ __all__ = [
     "reverify_authenticated_principal",
 ]
 
-#: The only mechanism identity this phase's verifier can ever certify.
-#: A real mechanism (Layer 6, a later phase) is deliberately outside this
-#: allowlist -- adding it here would be exactly the "no real FIDO2 in this
-#: phase" no-go this module must not cross.
-_ELIGIBLE_MECHANISM_IDS = frozenset({"hpac.deterministic.test-only.v1"})
+#: The closed set of mechanism identities this verifier can certify.
+#:
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (merged RHAMP-REQ-156
+#: ``.1R.30`` bundle) widens this frozenset literal by **exactly**
+#: ``{"hpac.fido2.uv_presence.v2"}`` per RHAMP-001 v1.0 §4 (RHAMP-REQ-011 /
+#: RHAMP-REQ-109): one entry, no wildcard, no prefix match, no glob. The
+#: deterministic test mechanism stays isolated by its
+#: ``hpac.deterministic.*`` prefix and is permanently outside the real
+#: allowlist (RHAMP-REQ-013).
+#:
+#: The real ``hpac.fido2.uv_presence.v2`` branch is **only reachable when
+#: every resolved record is ``PRODUCTION``** (RHAMP-REQ-103): a
+#: ``FIXTURE_NON_REAL`` credential carrying that ``mechanism_id`` is rejected
+#: before any real signature math. RHAMP-001 ``.1R.30`` adds the real
+#: verification branch but **not** a real approval-authority production path
+#: — no ``pcae-protected-local-presentation/1.0`` descriptor kind is
+#: accepted until ``.1R.32``, so ``verify_human_authentication`` cannot
+#: reach a ``PRODUCTION`` ``AuthenticatedHumanPrincipal`` end-to-end in this
+#: phase (RHAMP-REQ-156).
+_ELIGIBLE_MECHANISM_IDS = frozenset(
+    {"hpac.deterministic.test-only.v1", "hpac.fido2.uv_presence.v2"}
+)
+#: The subset of :data:`_ELIGIBLE_MECHANISM_IDS` that requires the real
+#: native-CTAP2 signature branch (RHAMP-001 §4). Exact-match only.
+_REAL_ELIGIBLE_MECHANISM_IDS = frozenset({"hpac.fido2.uv_presence.v2"})
 
 _VERIFIER_CONSTRUCTOR_SEAL = object()
 
@@ -427,24 +447,87 @@ def _resolve_credential(
 
 
 def _verify_assertion_material(
-    credential: CredentialRecord, proof: HumanAuthenticationProof
-) -> None:
-    """HPAC-REQ-054 step 6: verify the assertion against the resolved
-    credential's public verification material.
+    credential: CredentialRecord,
+    proof: HumanAuthenticationProof,
+    *,
+    authority_class: HPACAuthorityClass,
+    challenge: Challenge,
+    sidecar_store: object = None,
+    counter_state_store: object = None,
+    invocation_id: Optional[str] = None,
+    attempt_id: Optional[str] = None,
+) -> Optional[object]:
+    """HPAC-REQ-054 step 6 / RHAMP-001 §37: verify the assertion against the
+    resolved credential's public verification material.
 
-    No real cryptographic mechanism exists in this phase (L6, a later
-    phase, per ``...1R.4`` §25). Mirroring
-    ``approval_presentation.py``'s ``_verify_installed_attestation``
-    discipline for the identical "no real verifier implemented" boundary,
-    this categorically rejects every mechanism identity except the fixed
-    deterministic non-real one; it does not attempt real signature math
-    against ``credential.public_key``.
+    Deterministic NON_REAL mechanism (``hpac.deterministic.test-only.v1``):
+    the historical shallow check — categorically no real signature math
+    (mirrors ``approval_presentation.py``'s ``_verify_installed_attestation``
+    discipline for the identical boundary).
+
+    Real mechanism (``hpac.fido2.uv_presence.v2``, Phase .1R.30R.3.4): the
+    native-CTAP2 signature sequence (RHAMP-REQ-102) — rpIdHash, COSE
+    signature over ``authenticatorData ‖ client_data_hash``, ``FLAG.UP`` and
+    ``FLAG.UV``, the reconstructed canonical client-data (§7/§25), and the
+    §20 signature-counter policy against the §21 counter-state record.
+    RHAMP-REQ-103: the real branch is reachable **only** when every resolved
+    record is ``PRODUCTION``; a ``FIXTURE_NON_REAL`` credential carrying the
+    real ``mechanism_id`` is rejected here (``mechanism_unknown``) before any
+    signature math.
+
+    Returns a ``RealFido2AssertionResult`` for the real branch (the caller
+    applies its ``counter_decision`` after step 10, RHAMP-REQ-071.3), or
+    ``None`` for the deterministic branch.
     """
 
     if not credential.public_key:
         raise HPACVerificationError("credential has no public verification material")
     if not proof.assertion:
         raise HPACVerificationError("proof assertion is empty")
+
+    if proof.mechanism_id not in _REAL_ELIGIBLE_MECHANISM_IDS:
+        return None
+
+    # ── real ``hpac.fido2.uv_presence.v2`` branch (RHAMP-REQ-102/103) ──
+    if authority_class is not HPACAuthorityClass.PRODUCTION:
+        # RHAMP-REQ-103 / RHAMP-REQ-113 — a fixture-root credential carrying
+        # the real mechanism_id never reaches real signature verification.
+        raise HPACVerificationError(
+            "a FIXTURE_NON_REAL credential can never reach real FIDO2 assertion "
+            "verification (RHAMP-001 §37 / RHAMP-REQ-103)"
+        )
+    if sidecar_store is None or counter_state_store is None:
+        raise HPACVerificationError(
+            "real FIDO2 assertion verification requires the RHAMP-001 sidecar and "
+            "counter-state stores (RHAMP-REQ-102 steps 1/6)"
+        )
+    if not invocation_id or not attempt_id:
+        raise HPACVerificationError(
+            "real FIDO2 assertion verification requires the lifecycle-bound "
+            "invocation_id / attempt_id (RHAMP-REQ-025)"
+        )
+    from pcae.core.hpac_rhamp_assertion_verify import verify_real_fido2_assertion
+    from pcae.core.hpac_rhamp_terminal_reasons import RhampTerminalError
+
+    try:
+        resolved_sidecar = sidecar_store.resolve_canonical(credential.credential_id)
+        if resolved_sidecar is None:
+            raise HPACVerificationError("no RHAMP-FIDO2-CREDENTIAL/1.0 sidecar for the resolved credential")
+        counter_state = counter_state_store.resolve(credential.credential_id)
+        result = verify_real_fido2_assertion(
+            credential=credential,
+            sidecar=resolved_sidecar.record,
+            proof=proof,
+            challenge=challenge,
+            invocation_id=invocation_id,
+            attempt_id=attempt_id,
+            counter_state=counter_state,
+        )
+    except RhampTerminalError as exc:
+        raise HPACVerificationError(
+            f"real FIDO2 assertion rejected ({exc.terminal_reason_code}): {exc.detail}"
+        ) from exc
+    return result
 
 
 def _verify_mechanism_eligibility(
@@ -507,6 +590,9 @@ def verify_human_authentication(
     verifier_version: str = "hpac-verifier/1.0",
     require_real_assurance: bool = False,
     max_proof_age_seconds: Optional[int] = None,
+    sidecar_store: object = None,
+    counter_state_store: object = None,
+    counter_state_writer: Optional[HPACWriterCapability] = None,
 ) -> AuthenticatedHumanPrincipal:
     """Execute HPAC-REQ-054's fail-closed verification sequence and, on
     success, emit an ephemeral :class:`AuthenticatedHumanPrincipal`.
@@ -610,10 +696,42 @@ def verify_human_authentication(
             "presentation approval_subject_digest does not match proof approval_subject_digest"
         )
 
+    # Lifecycle chain resolved here (a pure provenance-checked read) so the
+    # genesis binding's invocation_id / attempt_id are available to the real
+    # RHAMP-001 §37 client-data reconstruction (RHAMP-REQ-025). The state
+    # machine / cross-binding checks stay at step 9, below, unchanged.
+    try:
+        chain = lifecycle_store.resolve_canonical_chain(proof.proof_id)
+    except HPACLifecycleStateError:
+        raise
+    if not chain:
+        raise HPACVerificationError(f"no lifecycle chain exists for proof_id: {proof.proof_id}")
+    genesis = chain[0].record
+    binding = genesis.binding
+
+    # Assurance class of every resolved record (HPAC-REQ-059/060). Computed
+    # here too (it is also recomputed at the end) so the RHAMP-001 §37 real
+    # branch is gated on PRODUCTION per RHAMP-REQ-103.
+    _pre_assurance_class = _authority_class_of(
+        resolved_principal, resolved_credential, resolved_presentation, resolved_proof
+    )
+
     # Step 6: assertion verification against the resolved credential's
     # public material.  Kept after challenge and presentation binding so
     # HPAC-REQ-054's fail-closed sequence is literal, not merely complete.
-    _verify_assertion_material(resolved_credential.record, proof)
+    # For ``hpac.fido2.uv_presence.v2`` this is the real native-CTAP2
+    # signature sequence (RHAMP-001 §37); for the deterministic mechanism it
+    # is the historical shallow check.
+    _real_assertion_result = _verify_assertion_material(
+        resolved_credential.record,
+        proof,
+        authority_class=_pre_assurance_class,
+        challenge=challenge,
+        sidecar_store=sidecar_store,
+        counter_state_store=counter_state_store,
+        invocation_id=binding.get("invocation_id"),
+        attempt_id=binding.get("attempt_id"),
+    )
 
     # Step 7: UP/UV, both mandatory.
     _check_up_uv(proof)
@@ -655,15 +773,8 @@ def verify_human_authentication(
         if proof_age > max_proof_age_seconds:
             raise HPACVerificationError("proof is older than the configured maximum age")
 
-    # Step 9: full lifecycle chain, canonical (provenance-checked) resolution.
-    try:
-        chain = lifecycle_store.resolve_canonical_chain(proof.proof_id)
-    except HPACLifecycleStateError:
-        raise
-    if not chain:
-        raise HPACVerificationError(f"no lifecycle chain exists for proof_id: {proof.proof_id}")
-    genesis = chain[0].record
-    binding = genesis.binding
+    # Step 9: full lifecycle chain state / cross-binding checks (the chain
+    # itself was resolved before step 6, above).
     if (
         binding["approval_id"] != approval_id
         or binding["principal_id"] != proof.principal_id
@@ -712,6 +823,32 @@ def verify_human_authentication(
     invocation_id = subject.get("invocation_id") if isinstance(subject, dict) else None
     if not invocation_id:
         raise HPACVerificationError("presentation canonical_subject has no invocation_id")
+
+    # RHAMP-REQ-071.3 / §12 — for the real mechanism, atomically apply the
+    # linearized counter-state update **immediately after** step 10 succeeds
+    # and **before** the AuthenticatedHumanPrincipal is returned. A crash
+    # here leaves the proof single-use and the nonce consumed (RHAMP-REQ-072).
+    if _real_assertion_result is not None and current_state == STATE_PROOF_VERIFIED:
+        if counter_state_store is None or counter_state_writer is None:
+            raise HPACVerificationError(
+                "real FIDO2 verification requires a counter-state writer to linearize "
+                "the post-verification counter update (RHAMP-REQ-071/073)"
+            )
+        from pcae.core.hpac_rhamp_counter_state import RhampCounterStateError
+
+        try:
+            _current_counter = counter_state_store.resolve(proof.credential_id)
+            counter_state_store.apply_after_verification(
+                counter_state_writer,
+                credential_id=proof.credential_id,
+                expected_current=_current_counter,
+                decision=_real_assertion_result.counter_decision,
+                updated_at=occurred_at,
+            )
+        except RhampCounterStateError as exc:
+            raise HPACVerificationError(
+                f"real FIDO2 counter-state linearization failed: {exc}"
+            ) from exc
 
     result = AuthenticatedHumanPrincipal(
         principal_id=proof.principal_id,

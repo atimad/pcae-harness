@@ -823,6 +823,28 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
         ("hpac_pawa_agent_exclusion.py", "pcae.core.hpac_foundation"),
         ("hpac_protected_admin_writer.py", "pcae.core.hpac_foundation"),
         ("hpac_protected_admin_writer.py", "pcae.core.human_principal_registry"),
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (N-16-5 merged RHAMP
+        # `.1R.30` bundle — Decision A / RE-MERGE). The RHAMP credential
+        # sidecar / counter-state stores, the native-CTAP2 client-context
+        # builder, the FIDO2 authenticator, the real-assertion verification
+        # core, and the enrollment ceremony consume the Layer-1/2 foundation
+        # utilities (canonical digest / atomic-create-only / symlink-safety /
+        # the registry + proof + authenticator dataclasses). The sidecar /
+        # counter / ctap2 / assertion-verify modules are import-reachable
+        # from `hpac_verifier` (Layer 3, already the one sanctioned
+        # consumer); the enrollment ceremony is inside the non-agent-
+        # importable admin-writer fence (its own guard keeps it off every
+        # agent-reachable path). Exact filenames, no wildcard.
+        ("hpac_rhamp_client_context.py", "pcae.core.hpac_foundation"),
+        ("hpac_rhamp_credential_sidecar.py", "pcae.core.hpac_foundation"),
+        ("hpac_rhamp_counter_state.py", "pcae.core.hpac_foundation"),
+        ("human_authenticator_fido2.py", "pcae.core.hpac_foundation"),
+        ("human_authenticator_fido2.py", "pcae.core.human_authenticator"),
+        ("hpac_rhamp_assertion_verify.py", "pcae.core.human_authentication_proof"),
+        ("hpac_rhamp_assertion_verify.py", "pcae.core.human_authenticator"),
+        ("hpac_rhamp_assertion_verify.py", "pcae.core.human_principal_registry"),
+        ("hpac_rhamp_enrollment.py", "pcae.core.hpac_foundation"),
+        ("hpac_rhamp_enrollment.py", "pcae.core.human_principal_registry"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

@@ -171,11 +171,17 @@ class PawaError(Exception):
 
 
 class PawaOperation(str, Enum):
-    """§42 — the closed set of mutation classes. Slice 1 mints and drives
-    the three registry-record operations; ``enroll_credential`` and
-    ``initialize_credential_sidecar_state`` are recognised as valid
-    members of the closed set but are **Slice 2** (they require the RHAMP
-    ceremony / sidecar — §58: do not fake a Slice-2 operation)."""
+    """§42 — the closed set of mutation classes (HPAC-PAWA-REQ-095).
+
+    Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (merged RHAMP-REQ-156
+    ``.1R.30`` bundle — Decision A / RE-MERGE) enables the two remaining
+    members: ``enroll_credential`` (a ``CredentialRecord`` + its RHAMP-001
+    sidecar + counter-state — one bounded enrollment transaction,
+    HPAC-PAWA-REQ-100/106) and ``initialize_credential_sidecar_state``. The
+    former "Slice 2" boundary is dissolved by the adjudication
+    (``.1R.30R.3.3R``); the sidecar / counter-state schemas live in
+    ``hpac_rhamp_credential_sidecar`` / ``hpac_rhamp_counter_state``, the
+    ceremony in ``hpac_rhamp_enrollment`` — never here."""
 
     ENROLL_PRINCIPAL = "enroll_principal"
     REVOKE_PRINCIPAL = "revoke_principal"
@@ -184,9 +190,18 @@ class PawaOperation(str, Enum):
     INITIALIZE_CREDENTIAL_SIDECAR_STATE = "initialize_credential_sidecar_state"
 
 
+#: Registry-record operations that mint a plain single-use capability.
 _SLICE1_OPERATIONS = frozenset(
     {PawaOperation.ENROLL_PRINCIPAL, PawaOperation.REVOKE_PRINCIPAL, PawaOperation.REVOKE_CREDENTIAL}
 )
+#: Phase .1R.30R.3.4 — the multi-artifact enrollment-transaction operations
+#: (HPAC-PAWA-REQ-106: the ``enroll_credential`` + sidecar + counter-state
+#: writes are one atomic ceremony authorised by one ``_multi_write``
+#: capability, spent once via ``authority.complete_multi_write``).
+_ENROLLMENT_TRANSACTION_OPERATIONS = frozenset(
+    {PawaOperation.ENROLL_CREDENTIAL, PawaOperation.INITIALIZE_CREDENTIAL_SIDECAR_STATE}
+)
+_AVAILABLE_OPERATIONS = _SLICE1_OPERATIONS | _ENROLLMENT_TRANSACTION_OPERATIONS
 
 #: §38 / §86 — the EXACT enumerated factory-consumer inventory. No
 #: wildcard, no prefix, no fnmatch, no glob (PAWA-INV-9). At Slice 1 the
@@ -194,7 +209,17 @@ _SLICE1_OPERATIONS = frozenset(
 #: operations (which the standalone script calls). Future Slice-2 modules
 #: are NOT pre-authorised — each fails the guard until explicitly added
 #: here AND the contract is amended to name its category.
-AUTHORIZED_FACTORY_CONSUMERS = frozenset({"pcae.core.hpac_protected_admin_writer"})
+AUTHORIZED_FACTORY_CONSUMERS = frozenset(
+    {
+        "pcae.core.hpac_protected_admin_writer",
+        # Phase .1R.30R.3.4 — the RHAMP-001 first-credential bootstrap /
+        # enrollment ceremony tool (HPAC-PAWA-REQ-087 category 2;
+        # RHAMP-REQ-048). Exact dotted-path, no wildcard (PAWA-INV-9). It is
+        # itself inside the non-agent-importable fence (a guard test asserts
+        # cli.py / commands/** / core/agent.py never import it).
+        "pcae.core.hpac_rhamp_enrollment",
+    }
+)
 #: A disclosed, explicit **test-only** consumer allowlist (§16 seam,
 #: HPAC-PAWA-REQ-166). Exact names, never a prefix.
 _TEST_FACTORY_CONSUMERS = frozenset(
@@ -684,6 +709,7 @@ class ProductionWriterHandle:
         "operation",
         "principal_id",
         "credential_id",
+        "transaction_id",
         "operation_id",
         "anchor_id",
         "installation_id",
@@ -703,12 +729,14 @@ class ProductionWriterHandle:
         anchor_id: str,
         installation_id: str,
         descriptor_generation: int,
+        transaction_id: Optional[str] = None,
     ) -> None:
         self._capability = capability
         self._authority = authority
         self.operation = operation
         self.principal_id = principal_id
         self.credential_id = credential_id
+        self.transaction_id = transaction_id
         self.operation_id = operation_id
         self.anchor_id = anchor_id
         self.installation_id = installation_id
@@ -728,6 +756,7 @@ class ProductionWriterHandle:
         *,
         principal_id: Optional[str] = None,
         credential_id: Optional[str] = None,
+        transaction_id: Optional[str] = None,
     ) -> HPACWriterCapability:
         if self._consumed or self._capability._spent:
             raise PawaError("capability_stale", "this PRODUCTION writer has already been used")
@@ -737,8 +766,18 @@ class ProductionWriterHandle:
             raise PawaError("target_scope_invalid", "handle bound to a different principal_id")
         if credential_id != self.credential_id:
             raise PawaError("target_scope_invalid", "handle bound to a different credential_id")
+        if transaction_id != self.transaction_id:
+            raise PawaError("target_scope_invalid", "handle bound to a different enrollment transaction_id")
         self._consumed = True
         return self._capability
+
+    @property
+    def capability_subject(self) -> Optional[str]:
+        """The exact ``subject`` the wrapped capability is bound to — the
+        enrollment ``transaction_id`` for ``enroll_credential`` (HPAC-PAWA-REQ-100),
+        else the ``principal_id`` / ``credential_id``."""
+
+        return self._capability.subject
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -750,6 +789,7 @@ def _validate_operation_inputs(
     operation,
     principal_id: Optional[str],
     credential_id: Optional[str],
+    transaction_id: Optional[str] = None,
 ) -> PawaOperation:
     if isinstance(operation, PawaOperation):
         op = operation
@@ -760,18 +800,31 @@ def _validate_operation_inputs(
             raise PawaError("operation_scope_invalid", f"{operation!r} is not a §42 mutation class")
     else:
         raise PawaError("operation_scope_invalid", f"operation must be a str / PawaOperation, got {type(operation)}")
-    if op not in _SLICE1_OPERATIONS:
-        raise PawaError("operation_scope_invalid", f"{op.value} is a Slice-2 operation, not available in Slice 1")
+    if op not in _AVAILABLE_OPERATIONS:
+        raise PawaError("operation_scope_invalid", f"{op.value} is not an available §42 mutation class")
     if principal_id is not None and (not isinstance(principal_id, str) or not principal_id.strip()):
         raise PawaError("operation_scope_invalid", "principal_id must be a non-empty string or None")
     if credential_id is not None and (not isinstance(credential_id, str) or not credential_id.strip()):
         raise PawaError("operation_scope_invalid", "credential_id must be a non-empty string or None")
+    if transaction_id is not None and (not isinstance(transaction_id, str) or not transaction_id.strip()):
+        raise PawaError("operation_scope_invalid", "transaction_id must be a non-empty string or None")
     if op is PawaOperation.ENROLL_PRINCIPAL and (principal_id is None or credential_id is not None):
         raise PawaError("operation_scope_invalid", "enroll_principal requires principal_id and no credential_id")
     if op is PawaOperation.REVOKE_PRINCIPAL and (principal_id is None or credential_id is not None):
         raise PawaError("operation_scope_invalid", "revoke_principal requires principal_id and no credential_id")
     if op is PawaOperation.REVOKE_CREDENTIAL and (credential_id is None):
         raise PawaError("operation_scope_invalid", "revoke_credential requires credential_id")
+    if op is PawaOperation.ENROLL_CREDENTIAL:
+        # HPAC-PAWA-REQ-100 — the fresh opaque hpc-<hex> credential_id does
+        # not exist until the write; the capability binds to the enrollment
+        # transaction id + the target principal_id, NOT to a credential_id.
+        if principal_id is None or transaction_id is None or credential_id is not None:
+            raise PawaError(
+                "operation_scope_invalid",
+                "enroll_credential requires principal_id + transaction_id and no credential_id (HPAC-PAWA-REQ-100)",
+            )
+    if op is PawaOperation.INITIALIZE_CREDENTIAL_SIDECAR_STATE and credential_id is None:
+        raise PawaError("operation_scope_invalid", "initialize_credential_sidecar_state requires credential_id")
     return op
 
 
@@ -780,6 +833,7 @@ def production_writer(
     *,
     principal_id: Optional[str] = None,
     credential_id: Optional[str] = None,
+    transaction_id: Optional[str] = None,
     _protected_root: Optional[Path] = None,
     _configured_agent_identity_source=None,
     _topology_probe: Optional["TopologyProbe"] = None,
@@ -800,7 +854,7 @@ def production_writer(
     """
 
     caller_module = _detect_caller_module(_caller_module)
-    op = _validate_operation_inputs(operation, principal_id, credential_id)
+    op = _validate_operation_inputs(operation, principal_id, credential_id, transaction_id)
     recognized = _run_recognition_sequence(
         protected_root=_protected_root,
         configured_agent_identity_source=_configured_agent_identity_source,
@@ -815,10 +869,20 @@ def production_writer(
         (recognized.configured_agent.uid, recognized.configured_agent.gids),
         _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
     )
-    subject = principal_id if principal_id is not None else credential_id
+    is_txn = op in _ENROLLMENT_TRANSACTION_OPERATIONS
+    if op is PawaOperation.ENROLL_CREDENTIAL:
+        # HPAC-PAWA-REQ-100 — bound to the enrollment transaction id.
+        subject = transaction_id
+    elif principal_id is not None:
+        subject = principal_id
+    else:
+        subject = credential_id
     try:
         capability = recognized.authority._mint_production_writer_capability(
-            _REGISTRY_WRITER_ROLE, subject, _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL
+            _REGISTRY_WRITER_ROLE,
+            subject,
+            _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+            multi_write=is_txn,
         )
     except HPACAuthorityError as exc:
         raise PawaError("internal_fail_closed", f"mint refused: {exc}")
@@ -830,6 +894,7 @@ def production_writer(
         operation=op,
         principal_id=principal_id,
         credential_id=credential_id,
+        transaction_id=transaction_id,
         operation_id=operation_id,
         anchor_id=recognized.anchor_id,
         installation_id=recognized.installation_id,
@@ -848,6 +913,7 @@ def production_writer(
         protected_root_identity=recognized.live_root_identity,
         target_principal_id=principal_id,
         target_credential_id=credential_id,
+        enrollment_transaction_id=transaction_id,
         result="issued",
         capability_identifier="hpaw-cap-" + hashlib.sha256(operation_id.encode()).hexdigest()[:32],
     )
@@ -867,6 +933,7 @@ def _record_issuance_evidence(
     target_credential_id: Optional[str],
     result: str,
     capability_identifier: Optional[str],
+    enrollment_transaction_id: Optional[str] = None,
 ) -> None:
     document = build_issuance_evidence_document(
         operation_id=operation_id,
@@ -877,7 +944,7 @@ def _record_issuance_evidence(
         protected_root_identity=protected_root_identity,
         target_principal_id=target_principal_id,
         target_credential_id=target_credential_id,
-        enrollment_transaction_id=None,
+        enrollment_transaction_id=enrollment_transaction_id,
         issued_at=_now(),
         issuer=_ISSUER,
         result=result,

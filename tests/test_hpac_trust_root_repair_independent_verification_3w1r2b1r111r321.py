@@ -978,6 +978,22 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         ("hpac_pawa_agent_exclusion.py", "pcae.core.hpac_foundation"),
         ("hpac_protected_admin_writer.py", "pcae.core.hpac_foundation"),
         ("hpac_protected_admin_writer.py", "pcae.core.human_principal_registry"),
+        # Phase .1R.30R.3.4 (N-16-5 merged RHAMP `.1R.30` bundle) — the RHAMP
+        # sidecar / counter-state / client-context / FIDO2-authenticator /
+        # real-assertion-verify / enrollment-ceremony modules consume the
+        # Layer-1/2 foundation utilities + dataclasses. Exact filenames, no
+        # wildcard; the enrollment ceremony is inside the non-agent-importable
+        # admin-writer fence.
+        ("hpac_rhamp_client_context.py", "pcae.core.hpac_foundation"),
+        ("hpac_rhamp_credential_sidecar.py", "pcae.core.hpac_foundation"),
+        ("hpac_rhamp_counter_state.py", "pcae.core.hpac_foundation"),
+        ("human_authenticator_fido2.py", "pcae.core.hpac_foundation"),
+        ("human_authenticator_fido2.py", "pcae.core.human_authenticator"),
+        ("hpac_rhamp_assertion_verify.py", "pcae.core.human_authentication_proof"),
+        ("hpac_rhamp_assertion_verify.py", "pcae.core.human_authenticator"),
+        ("hpac_rhamp_assertion_verify.py", "pcae.core.human_principal_registry"),
+        ("hpac_rhamp_enrollment.py", "pcae.core.hpac_foundation"),
+        ("hpac_rhamp_enrollment.py", "pcae.core.human_principal_registry"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

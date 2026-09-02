@@ -529,12 +529,22 @@ def test_hpac_verifier_module_does_not_import_pb_or_runtime_authority_modules():
 
 
 def test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier_module():
+    # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 reconciliation: this guard
+    # is about production *consumers* (modules that `import` hpac_verifier),
+    # not about any file that merely mentions the name in prose. The merged
+    # RHAMP `.1R.30` bundle adds `hpac_rhamp_assertion_verify.py` and
+    # `human_authenticator_fido2.py`, both of which name `hpac_verifier` only
+    # in their module docstrings (the real dependency runs the other way:
+    # hpac_verifier lazily imports `verify_real_fido2_assertion`). The scan
+    # is tightened from a substring match to a real-import match so those
+    # docstring mentions do not register as consumers; the authorized
+    # consumer set is unchanged. No `def test_` renamed/removed.
     consumers = []
     for path in _all_python_sources():
         if path.name == "hpac_verifier.py":
             continue
-        text = path.read_text(encoding="utf-8")
-        if "hpac_verifier" in text:
+        imports = _imported_module_names(path)
+        if any(name.endswith("hpac_verifier") or name == "pcae.core.hpac_verifier" for name in imports):
             consumers.append(str(path.relative_to(_REPO_ROOT)))
     # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.10 added the authorized Gate-5
     # approval-validation coordinator, the "future Gate 5" this module was

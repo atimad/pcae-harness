@@ -615,7 +615,15 @@ def test_39_admin_writer_module_not_imported_by_cli_or_agent_reachable_code():
 
 
 def test_40_exact_factory_consumer_inventory_no_wildcard():
-    assert w.AUTHORIZED_FACTORY_CONSUMERS == frozenset({"pcae.core.hpac_protected_admin_writer"})
+    # Phase .1R.30R.3.4 (merged RHAMP `.1R.30` bundle) reconciliation: the
+    # RHAMP-001 first-credential bootstrap / enrollment ceremony tool
+    # (`hpac_rhamp_enrollment`) is added as an authorized consumer — its
+    # category ("first-credential bootstrap / enrollment tool") is already
+    # named in HPAC-PAWA-REQ-087, so no contract amendment is required
+    # (HPAC-PAWA-REQ-090). Still an EXACT enumerated set, no wildcard.
+    assert w.AUTHORIZED_FACTORY_CONSUMERS == frozenset(
+        {"pcae.core.hpac_protected_admin_writer", "pcae.core.hpac_rhamp_enrollment"}
+    )
     for entry in (*w.AUTHORIZED_FACTORY_CONSUMERS, *w._TEST_FACTORY_CONSUMERS):
         assert "*" not in entry and "?" not in entry and "[" not in entry
     tree = ast.parse((SRC / "core" / "hpac_protected_admin_writer.py").read_text(encoding="utf-8"))
@@ -638,12 +646,16 @@ def test_41_unauthorized_production_importer_rejected(provisioned):
 
 
 def test_42_no_agent_runtime_gate_plugin_consumer_of_the_factory():
+    # Phase .1R.30R.3.4: `hpac_rhamp_enrollment.py` (the authorized
+    # enrollment ceremony tool, also inside the non-agent-importable fence)
+    # legitimately imports the factory. No agent / runtime / Gate / plugin /
+    # CLI module does — that remains asserted here and by test_39.
+    allowed_importers = {"hpac_protected_admin_writer.py", "hpac_rhamp_enrollment.py"}
     joined = "\n".join(
         p.read_text(encoding="utf-8")
         for p in SRC.rglob("*.py")
-        if p.name not in {"hpac_protected_admin_writer.py"}
+        if p.name not in allowed_importers
     )
-    tree = ast.parse(joined) if False else None  # text scan is sufficient here
     assert "import hpac_protected_admin_writer" not in joined
     assert "from pcae.core.hpac_protected_admin_writer" not in joined
 
@@ -953,11 +965,36 @@ def test_62_wrong_principal_rejected_at_registry(provisioned):
 
 
 def test_63_slice2_operations_rejected(provisioned):
+    # Phase .1R.30R.3.4 (Decision A / RE-MERGE, `.1R.30R.3.3R`): the former
+    # "Slice 2" boundary is dissolved. `enroll_credential` and
+    # `initialize_credential_sidecar_state` are now available §42 mutation
+    # classes (HPAC-PAWA-REQ-095). Historical baseline (at SHA `A` they were
+    # rejected as `operation_scope_invalid`) is preserved immutably by the
+    # git-pinned assertion below; the current-state assertion is that they
+    # are recognised, still with strict input validation.
+    import subprocess as _sp
+
+    A = "5a6f9d875aa1b7173ce0373b6437608f151e2c19"
+    baseline = _sp.run(
+        ["git", "-C", str(REPO), "show", f"{A}:src/pcae/core/hpac_protected_admin_writer.py"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    assert "is a Slice-2 operation, not available in Slice 1" in baseline
+
     root, _ = provisioned
-    for op in ("enroll_credential", "initialize_credential_sidecar_state"):
-        with pytest.raises(w.PawaError) as ei:
-            _mint(root, op, principal_id=HP_A, credential_id=HPC_A)
-        assert ei.value.code == "operation_scope_invalid"
+    # enroll_credential: recognised, but requires principal_id + transaction_id
+    # and NO credential_id (HPAC-PAWA-REQ-100) — a bare credential_id is
+    # still rejected as operation_scope_invalid.
+    with pytest.raises(w.PawaError) as ei:
+        _mint(root, "enroll_credential", principal_id=HP_A, credential_id=HPC_A)
+    assert ei.value.code == "operation_scope_invalid"
+    # initialize_credential_sidecar_state: recognised, requires credential_id.
+    with pytest.raises(w.PawaError) as ei2:
+        _mint(root, "initialize_credential_sidecar_state", principal_id=HP_A)
+    assert ei2.value.code == "operation_scope_invalid"
+    # both are now members of the available operation set.
+    assert w.PawaOperation.ENROLL_CREDENTIAL in w._AVAILABLE_OPERATIONS
+    assert w.PawaOperation.INITIALIZE_CREDENTIAL_SIDECAR_STATE in w._AVAILABLE_OPERATIONS
 
 
 def test_64_issuance_evidence_is_recorded_and_non_authoritative(provisioned):
@@ -1145,18 +1182,48 @@ def test_80_no_enrollment_ceremony_or_fido2_authenticator():
 
 
 def test_81_hpac_verifier_byte_unchanged_since_phase_entry():
+    # Phase .1R.30R.3.4 reconciliation: `hpac_verifier.py` was byte-unchanged
+    # from the .3.1 entry through `.1R.30R.3.3R` (SHA `A`) — that historical
+    # window is preserved immutably here. The merged RHAMP `.1R.30` bundle
+    # (this phase) deliberately adds the real `hpac.fido2.uv_presence.v2`
+    # assertion branch (RHAMP-REQ-102) — a not-weakened current-state check
+    # replaces the byte-freeze on HEAD (RHAMP-REQ-162 method).
     entry = "1793a75a73c54c6f6687bc830664caeac5aeaa66"
-    diff = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--stat", entry, "HEAD", "--", "src/pcae/core/hpac_verifier.py"],
+    A = "5a6f9d875aa1b7173ce0373b6437608f151e2c19"
+    historical = subprocess.run(
+        ["git", "-C", str(REPO), "diff", "--stat", entry, A, "--", "src/pcae/core/hpac_verifier.py"],
         capture_output=True, text=True, check=True,
     ).stdout
-    assert diff.strip() == ""
+    assert historical.strip() == "", "hpac_verifier.py must be byte-unchanged from .3.1 entry through .3.3R"
+    import ast as _ast
+
+    new = (SRC / "core" / "hpac_verifier.py").read_text(encoding="utf-8")
+    new_imports = {
+        n.module
+        for n in _ast.walk(_ast.parse(new))
+        if isinstance(n, _ast.ImportFrom) and n.module
+    } | {
+        a.name for n in _ast.walk(_ast.parse(new)) if isinstance(n, _ast.Import) for a in n.names
+    }
+    # not weakened: no glob/fnmatch matching introduced, the deterministic
+    # mechanism id still present, and the identity-registry provenance
+    # boundary (the actual HPAC-REQ-056 trust check) intact.
+    assert "fnmatch" not in new_imports and "glob" not in new_imports
+    assert "hpac.deterministic.test-only.v1" in new
+    assert "_AUTHENTIC_PRINCIPAL_REGISTRY" in new and "is_verifier_authenticated_principal" in new
 
 
 def test_82_eligible_mechanism_ids_unchanged():
+    # Phase .1R.30R.3.4: `_ELIGIBLE_MECHANISM_IDS` is widened by EXACTLY
+    # `{hpac.fido2.uv_presence.v2}` per RHAMP-001 §4 / RHAMP-REQ-011/109 —
+    # a frozenset literal, no wildcard, no prefix.
+    from pcae.core.hpac_verifier import _ELIGIBLE_MECHANISM_IDS
+
+    assert _ELIGIBLE_MECHANISM_IDS == frozenset(
+        {"hpac.deterministic.test-only.v1", "hpac.fido2.uv_presence.v2"}
+    )
     text = (SRC / "core" / "hpac_verifier.py").read_text(encoding="utf-8")
-    assert "hpac.fido2.uv_presence.v2" not in text
-    assert "_ELIGIBLE_MECHANISM_IDS" in text  # still present, just not widened here
+    assert 'startswith("hpac.fido2' not in text and 'fnmatch.' not in text
 
 
 def test_83_no_protected_presentation_implementation():

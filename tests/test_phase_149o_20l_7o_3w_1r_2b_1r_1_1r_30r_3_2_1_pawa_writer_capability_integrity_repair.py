@@ -312,7 +312,13 @@ def test_20_issuance_id_never_exposed_on_capability_object(tmp_path):
     root = _provision(tmp_path)
     handle = _mint(root, principal_id=HP_A, caller=_SLICE1_MODULE)
     cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id=HP_A)
-    assert cap.__slots__ == ("_authority_seal", "role", "subject", "authority_class", "_single_use", "_spent")
+    # Phase .1R.30R.3.4: `_multi_write` is added as a strictly-additive slot
+    # (HPAC-PAWA-REQ-082/107 explicitly permit an additive flag). No slot is
+    # removed; `issuance_id` is still never a capability field.
+    base = ("_authority_seal", "role", "subject", "authority_class", "_single_use", "_spent")
+    assert set(base) <= set(cap.__slots__)
+    assert set(cap.__slots__) - set(base) == {"_multi_write"}
+    assert not hasattr(cap, "issuance_id")
 
 
 def test_21_no_slice2_no_fido2_no_rhamp_sidecar_added():
@@ -324,12 +330,31 @@ def test_21_no_slice2_no_fido2_no_rhamp_sidecar_added():
 def test_22_hpac_verifier_byte_unchanged_since_phase_entry():
     import subprocess
 
-    result = subprocess.run(
-        ["git", "diff", "83b7f70b", "--", "src/pcae/core/hpac_verifier.py",
+    A = "5a6f9d875aa1b7173ce0373b6437608f151e2c19"  # .1R.30R.3.3R finalized head
+    # Historical window (immutable): byte-unchanged from .3.2.1 entry through
+    # `.3.3R`.
+    historical = subprocess.run(
+        ["git", "diff", "83b7f70b", A, "--", "src/pcae/core/hpac_verifier.py",
          "src/pcae/core/runtime_dispatch_gate5.py", "src/pcae/core/runtime_dispatch_gate9.py"],
         cwd=REPO, capture_output=True, text=True, check=False,
     )
-    assert result.stdout.strip() == ""
+    assert historical.stdout.strip() == ""
+    # Phase .1R.30R.3.4 reconciliation: Gate 5 / Gate 9 stay byte-unchanged
+    # from the .3.2.1 entry to HEAD; hpac_verifier gains the real
+    # `hpac.fido2.uv_presence.v2` branch (RHAMP-REQ-102) and nothing else
+    # weakens — `_ELIGIBLE_MECHANISM_IDS` is a frozenset literal widened by
+    # exactly one, no glob/fnmatch.
+    gates = subprocess.run(
+        ["git", "diff", "83b7f70b", "HEAD", "--", "src/pcae/core/runtime_dispatch_gate5.py",
+         "src/pcae/core/runtime_dispatch_gate9.py"],
+        cwd=REPO, capture_output=True, text=True, check=False,
+    )
+    assert gates.stdout.strip() == ""
+    from pcae.core.hpac_verifier import _ELIGIBLE_MECHANISM_IDS
+
+    assert _ELIGIBLE_MECHANISM_IDS == frozenset(
+        {"hpac.deterministic.test-only.v1", "hpac.fido2.uv_presence.v2"}
+    )
 
 
 def test_23_contract_byte_unchanged_since_phase_entry():

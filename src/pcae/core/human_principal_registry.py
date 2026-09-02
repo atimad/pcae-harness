@@ -519,8 +519,19 @@ class HumanPrincipalRegistryStore:
         assurance_capabilities: tuple[str, ...],
         enrollment_provenance_ref: str,
         enrolled_at: str,
+        _production_transaction_subject: Optional[str] = None,
     ) -> CredentialRecord:
-        writer, _subject = self._writer(capability, subject=credential_id)
+        # HPAC-PAWA-001 v1.1 §44 / HPAC-PAWA-REQ-100 (Phase .1R.30R.3.4): the
+        # fresh opaque ``hpc-<hex>`` credential_id does not exist until this
+        # write, so a PRODUCTION ``enroll_credential`` capability is bound to
+        # the enrollment-transaction id, not the credential_id. The
+        # ``FIXTURE_NON_REAL`` writer keeps ``subject=None`` semantics.
+        _bind_subject = (
+            _production_transaction_subject
+            if _production_transaction_subject is not None
+            else credential_id
+        )
+        writer, _subject = self._writer(capability, subject=_bind_subject)
         parsed = self._load()
         principal = next((p for p in parsed.principals if p.principal_id == principal_id), None)
         if principal is None or principal.status != "active":

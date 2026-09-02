@@ -257,7 +257,29 @@ class HPACWriterCapability:
     (HPAC-PAWA-REQ-082).
     """
 
-    __slots__ = ("_authority_seal", "role", "subject", "authority_class", "_single_use", "_spent")
+    #: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (merged RHAMP bundle) adds
+    #: one further additive, never-caller-resettable slot: ``_multi_write``
+    #: marks a ``_single_use`` capability whose **one bounded operation is a
+    #: multi-artifact transaction** — HPAC-PAWA-001 v1.1 §49
+    #: (HPAC-PAWA-REQ-106): the ``enroll_credential`` operation's three
+    #: protected writes are *one atomic ceremony* and share *one*
+    #: capability. For such a capability
+    #: :meth:`HPACStoreAuthority.record_write` does **not** auto-spend on the
+    #: first write; the transaction owner spends it exactly once via
+    #: :meth:`HPACStoreAuthority.complete_multi_write` after the final write
+    #: + read-back. A non-``_multi_write`` ``_single_use`` capability keeps
+    #: the existing spend-on-first-write semantics byte-for-byte
+    #: (HPAC-PAWA-REQ-082 — strictly additive, no existing semantics
+    #: weakened).
+    __slots__ = (
+        "_authority_seal",
+        "role",
+        "subject",
+        "authority_class",
+        "_single_use",
+        "_spent",
+        "_multi_write",
+    )
 
     def __init__(
         self,
@@ -268,6 +290,7 @@ class HPACWriterCapability:
         *,
         _seal: object,
         single_use: bool = False,
+        multi_write: bool = False,
     ) -> None:
         if _seal is not _WRITER_CONSTRUCTOR_SEAL:
             raise HPACAuthorityError("HPAC writer capabilities cannot be caller-constructed")
@@ -277,6 +300,7 @@ class HPACWriterCapability:
         self.authority_class = authority_class
         self._single_use = bool(single_use)
         self._spent = False
+        self._multi_write = bool(multi_write)
 
     def __reduce__(self):
         raise TypeError("HPACWriterCapability is process-local and non-serializable")
@@ -642,7 +666,12 @@ class HPACStoreAuthority:
         self._root_identity_digest = canonical_digest(manifest["root_identity"])
 
     def _new_capability(
-        self, role: str, subject: Optional[str], *, single_use: bool = False
+        self,
+        role: str,
+        subject: Optional[str],
+        *,
+        single_use: bool = False,
+        multi_write: bool = False,
     ) -> HPACWriterCapability:
         """The single ``HPACWriterCapability`` construction site (shared by
         the fixture ``writer()`` and the seal-guarded ``PRODUCTION`` mint —
@@ -658,6 +687,7 @@ class HPACStoreAuthority:
             self.authority_class,
             _seal=_WRITER_CONSTRUCTOR_SEAL,
             single_use=single_use,
+            multi_write=multi_write,
         )
         # .1R.30R.3.2.1 (N-16-5 repair) — every capability, from this sole
         # construction site, is registered as canonically issued. A shell
@@ -678,7 +708,12 @@ class HPACStoreAuthority:
         return self._new_capability(role, subject)
 
     def _mint_production_writer_capability(
-        self, role: str, subject: Optional[str], *, _factory_seal: object
+        self,
+        role: str,
+        subject: Optional[str],
+        *,
+        _factory_seal: object,
+        multi_write: bool = False,
     ) -> HPACWriterCapability:
         """HPAC-PAWA-001 v1.1 §36 — the low-level ``PRODUCTION`` mint.
 
@@ -697,7 +732,31 @@ class HPACStoreAuthority:
         if self.authority_class is not HPACAuthorityClass.PRODUCTION:
             raise HPACAuthorityError("a PRODUCTION writer requires a PRODUCTION HPACStoreAuthority")
         self._ensure_root(create=False)
-        return self._new_capability(role, subject, single_use=True)
+        return self._new_capability(
+            role, subject, single_use=True, multi_write=multi_write
+        )
+
+    def complete_multi_write(self, writer: HPACWriterCapability) -> None:
+        """Phase .1R.30R.3.4 — spend a ``_multi_write`` ``_single_use``
+        capability exactly once, after its multi-artifact enrollment
+        transaction's final write + read-back (HPAC-PAWA-REQ-106/107 — the
+        bounded transaction is "one operation"). A second call, or any
+        subsequent ``require_writer`` / ``record_write``, fails closed
+        (``capability_stale``). A non-``_multi_write`` capability is already
+        spent by ``record_write`` and passing one here is a no-op-safe
+        error path."""
+
+        if not isinstance(writer, HPACWriterCapability):
+            raise HPACAuthorityError("complete_multi_write requires an HPACWriterCapability")
+        if getattr(writer, "_authority_seal", _MISSING) is not self._seal:
+            raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
+        record = _lookup_issued_capability(writer)
+        if record is None:
+            raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
+        if not writer._multi_write:
+            raise HPACAuthorityError("complete_multi_write is only valid for a multi-write transaction capability")
+        writer._mark_spent(_WRITER_CONSTRUCTOR_SEAL)
+        _mark_capability_consumed(writer)
 
     def legacy_fixture_writer(
         self, capability: ProtectedAdminCapability, role: str, *, subject: Optional[str] = None
@@ -858,7 +917,7 @@ class HPACStoreAuthority:
             write_atomic_replace(provenance_path, payload)
         else:
             write_atomic_create_only(provenance_path, payload)
-        if writer._single_use:
+        if writer._single_use and not writer._multi_write:
             # HPAC-PAWA-REQ-107, §49 — the one bounded mutation has been
             # recorded; the same capability object can never authorise a
             # second record_write (→ ``capability_stale``). Both the
@@ -867,6 +926,11 @@ class HPACStoreAuthority:
             # the registry copy cannot be reset by external attribute
             # assignment on the capability object the way ``_spent`` alone
             # could be.
+            #
+            # Phase .1R.30R.3.4: a ``_multi_write`` capability's one bounded
+            # operation is a multi-artifact enrollment transaction
+            # (HPAC-PAWA-REQ-106) — it is spent once by
+            # ``complete_multi_write`` after the final write, not here.
             writer._mark_spent(_WRITER_CONSTRUCTOR_SEAL)
             _mark_capability_consumed(writer)
 

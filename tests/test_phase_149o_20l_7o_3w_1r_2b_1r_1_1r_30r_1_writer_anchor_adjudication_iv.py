@@ -199,6 +199,11 @@ def test_no_production_writer_factory_symbols_anywhere_in_src() -> None:
         "hpac_pawa_schemas.py",
         "hpac_foundation.py",
         "human_principal_registry.py",
+        # Phase .1R.30R.3.4 — the RHAMP-001 first-credential bootstrap /
+        # enrollment ceremony tool consumes `production_writer` from inside
+        # the same non-agent-importable fence (its own guard test asserts
+        # cli.py / commands/** / core/agent.py never import it).
+        "hpac_rhamp_enrollment.py",
     }
     offenders = []
     for p in SRC.rglob("*.py"):

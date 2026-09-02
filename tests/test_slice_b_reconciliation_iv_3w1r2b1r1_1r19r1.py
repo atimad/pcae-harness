@@ -113,6 +113,23 @@ _R30R31_TUPLES = {
     ("hpac_protected_admin_writer.py", "pcae.core.hpac_foundation"),
     ("hpac_protected_admin_writer.py", "pcae.core.human_principal_registry"),
 }
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 (N-16-5 merged RHAMP `.1R.30`
+# bundle) widens each HPAC Layer-1/2 consumer-inventory guard by these exact
+# ten tuples -- no wildcard. The RHAMP sidecar / counter-state / client-
+# context / FIDO2-authenticator / real-assertion-verify / enrollment-ceremony
+# modules; the enrollment ceremony is inside the non-agent-importable fence.
+_R30R34_TUPLES = {
+    ("hpac_rhamp_client_context.py", "pcae.core.hpac_foundation"),
+    ("hpac_rhamp_credential_sidecar.py", "pcae.core.hpac_foundation"),
+    ("hpac_rhamp_counter_state.py", "pcae.core.hpac_foundation"),
+    ("human_authenticator_fido2.py", "pcae.core.hpac_foundation"),
+    ("human_authenticator_fido2.py", "pcae.core.human_authenticator"),
+    ("hpac_rhamp_assertion_verify.py", "pcae.core.human_authentication_proof"),
+    ("hpac_rhamp_assertion_verify.py", "pcae.core.human_authenticator"),
+    ("hpac_rhamp_assertion_verify.py", "pcae.core.human_principal_registry"),
+    ("hpac_rhamp_enrollment.py", "pcae.core.hpac_foundation"),
+    ("hpac_rhamp_enrollment.py", "pcae.core.human_principal_registry"),
+}
 BASE_TUPLES = {
     ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
     ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
@@ -233,10 +250,10 @@ def test_guard_authorized_set_grew_by_exactly_the_two_slice_b_tuples(path, node)
     old_seg = _guard_segment(_git("show", f"{R20_HEAD}:{path}"), node)
     new_set = _authorized_set(new_seg)
     old_set = _authorized_set(old_seg)
-    assert new_set - old_set == set(SLICE_B_TUPLES) | _R30R31_TUPLES, (path, new_set - old_set)
+    assert new_set - old_set == set(SLICE_B_TUPLES) | _R30R31_TUPLES | _R30R34_TUPLES, (path, new_set - old_set)
     assert old_set - new_set == set(), "nothing was dropped from the authorized set"
     assert old_set == BASE_TUPLES
-    assert new_set == BASE_TUPLES | set(SLICE_B_TUPLES) | _R30R31_TUPLES
+    assert new_set == BASE_TUPLES | set(SLICE_B_TUPLES) | _R30R31_TUPLES | _R30R34_TUPLES
     # subset-invariant orientation unchanged
     assert "- AUTHORIZED_CONSUMERS" in new_seg
     assert "unauthorized == set()" in new_seg

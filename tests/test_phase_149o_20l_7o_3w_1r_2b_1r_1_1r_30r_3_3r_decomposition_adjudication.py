@@ -36,8 +36,14 @@ GATE5 = CORE / "runtime_dispatch_gate5.py"
 GATE9 = CORE / "runtime_dispatch_gate9.py"
 
 # Immutable adjudication baseline A == phase-entry SHA V (the finalized
-# .1R.30R.3.3 head). git diff A..HEAD must not touch production / contracts.
+# .1R.30R.3.3 head). The `.3.3R` adjudication phase touched no production /
+# script / contract code — a permanent historical fact, asserted over the
+# CLOSED window BASELINE_A .. R33R_FINALIZED_HEAD (not a live `HEAD`, which
+# would wrongly forbid every LATER governed phase from ever changing
+# production code). Phase .1R.30R.3.4 (the merged RHAMP `.1R.30` bundle)
+# reconciliation (RHAMP-REQ-162 method).
 BASELINE_A = "93266b7d64d514ec5c5456fa04c9ea96a610aa92"
+R33R_FINALIZED_HEAD = "5a6f9d875aa1b7173ce0373b6437608f151e2c19"
 
 
 def _read(path: Path) -> str:
@@ -167,11 +173,15 @@ def test_credential_record_status_is_active_revoked_only() -> None:
 
 
 def test_verifier_has_no_real_signature_branch_yet() -> None:
-    text = _read(VERIFIER)
-    assert '_ELIGIBLE_MECHANISM_IDS = frozenset({"hpac.deterministic.test-only.v1"})' in text
-    assert "hpac.fido2.uv_presence.v2" not in text
-    # the module still documents that it does not do real signature math
-    assert "does not attempt real signature math" in text
+    # Historical fact (immutable): at the `.3.3R` finalized head the verifier
+    # had no real signature branch and `_ELIGIBLE_MECHANISM_IDS` named only
+    # the deterministic mechanism. Phase .1R.30R.3.4 (the merged RHAMP
+    # `.1R.30` bundle) deliberately adds the real `hpac.fido2.uv_presence.v2`
+    # branch (RHAMP-REQ-102) — the check is pinned to the `.3.3R` snapshot.
+    old = _git("show", f"{R33R_FINALIZED_HEAD}:src/pcae/core/hpac_verifier.py")
+    assert '_ELIGIBLE_MECHANISM_IDS = frozenset({"hpac.deterministic.test-only.v1"})' in old
+    assert "hpac.fido2.uv_presence.v2" not in old
+    assert "does not attempt real signature math" in old
 
 
 # --------------------------------------------------------------------------- #
@@ -180,7 +190,7 @@ def test_verifier_has_no_real_signature_branch_yet() -> None:
 
 
 def test_no_production_or_script_diff_since_baseline_a() -> None:
-    changed = _git("diff", "--name-only", BASELINE_A, "HEAD", "--", "src/pcae", "scripts").strip()
+    changed = _git("diff", "--name-only", BASELINE_A, R33R_FINALIZED_HEAD, "--", "src/pcae", "scripts").strip()
     assert changed == "", f"unexpected production/script diff since A: {changed!r}"
 
 
@@ -191,7 +201,7 @@ def test_verifier_and_gates_byte_unchanged_since_baseline_a() -> None:
         "src/pcae/core/runtime_dispatch_gate9.py",
         "src/pcae/core/approval_presentation.py",
     ):
-        diff = _git("diff", BASELINE_A, "HEAD", "--", rel)
+        diff = _git("diff", BASELINE_A, R33R_FINALIZED_HEAD, "--", rel)
         assert diff == "", f"{rel} changed since A"
 
 
@@ -200,7 +210,7 @@ def test_no_existing_test_file_changed_since_baseline_a() -> None:
     # permissible tests/ change is this new adjudication file (untracked until
     # this phase's own commit, hence absent from a diff --name-only A..HEAD).
     changed = [
-        c for c in _git("diff", "--name-only", BASELINE_A, "HEAD", "--", "tests").splitlines() if c
+        c for c in _git("diff", "--name-only", BASELINE_A, R33R_FINALIZED_HEAD, "--", "tests").splitlines() if c
     ]
     allowed = {"tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_3r_decomposition_adjudication.py"}
     assert set(changed) <= allowed, f"unexpected pre-existing test change: {set(changed) - allowed}"
@@ -215,7 +225,7 @@ def test_no_new_first_external_effect_since_baseline_a() -> None:
     # the adjudication adds no src/pcae byte, so it cannot have added a call
     # site; the standing runtime posture (Observed / observe / unavailable) is
     # unchanged because hpac_verifier / the gates are byte-identical (above).
-    diff = _git("diff", "--name-only", BASELINE_A, "HEAD", "--", "src/pcae").strip()
+    diff = _git("diff", "--name-only", BASELINE_A, R33R_FINALIZED_HEAD, "--", "src/pcae").strip()
     assert diff == ""
 
 

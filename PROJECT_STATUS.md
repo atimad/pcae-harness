@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4 — N-16-5 Merged RHAMP Real FIDO2
+Credential Registration, Counter-State, Bootstrap & Authentication Mechanism
+Implementation. **STATUS: IMPLEMENTED — IV PENDING (`.1R.30R.3.5`).
+N-16-5: NOT CLOSED. PAWA Slice 1: CLOSED (unchanged). RHAMP-001 v1.0 /
+HPAC-PAWA-001 v1.1 / HPAC-001 v2.1: byte-unchanged. Runtime: `Observed` /
+`observe` / `unavailable`. First external effect: ABSENT / UNREACHABLE.**
+
+The merged RHAMP-REQ-156 `.1R.30` bundle selected by `.1R.30R.3.3R`
+(DECISION A — RE-MERGE) is implemented as one atomic unit: the
+`RHAMP-FIDO2-CREDENTIAL/1.0` sidecar store and `RHAMP-COUNTER-STATE/1.0`
+counter-state store (§17 / §20–§22), the native CTAP2
+`authenticatorMakeCredential` / `authenticatorGetAssertion` boundary with
+its deterministic NON_REAL CI provider seam (§3 / §9 / §63), the
+`FIDO2HumanAuthenticator` for exactly `hpac.fido2.uv_presence.v2` (§32 /
+§33), the PAWA-authorized protected-admin credential-registration and
+first-credential bootstrap ceremony (§13 / §14 — one bounded enrollment
+transaction on the independently-verified Slice-1 `production_writer`
+boundary, no second admin authority), the real assertion-verification
+branch in `hpac_verifier` (`_ELIGIBLE_MECHANISM_IDS +=
+{hpac.fido2.uv_presence.v2}` as a frozenset literal; rpIdHash + COSE
+signature + `FLAG.UP` + `FLAG.UV` + the §20 signature-counter policy;
+RHAMP-REQ-102/103 — a `FIXTURE_NON_REAL` credential never reaches real
+signature math), the §12 linearized counter-state update
+(RHAMP-REQ-071.3), the 41-value `terminal_reason_code` vocabulary (§49),
+and the standalone `scripts/hpac_principal_admin.py`.
+
+**No protected human-approval presentation, no
+`pcae-protected-local-presentation/1.0`, no `require_real_assurance` wiring
+through Gate 5 / Gate 9, no N-16-6 / N-16-7 work, no Slice C, no first
+external effect, no execution enablement, no new dependency.** A production
+`AuthenticatedHumanPrincipal` is **not** obtainable end-to-end — no
+`PRODUCTION` `pcae-protected-local-presentation/1.0` descriptor kind is
+accepted until `.1R.32`, so `verify_human_authentication` terminates before
+minting one. `CredentialRecord` and every HPAC-001 schema are
+byte-unchanged. The `HPACWriterCapability` gains one strictly-additive
+`_multi_write` slot for the one-capability multi-artifact enrollment
+transaction (HPAC-PAWA-REQ-082/106/107). Gate 5, Gate 9,
+`approval_presentation.py`, `permission_broker.py`, `runtime.py`,
+`runtime_dispatch_gate6/7/10_eligibility.py` are byte-unchanged since the
+`.1R.30R.3.3R` finalized head.
+
+Fresh `.1R.30R.3.4` suite: 124 tests, 124 pass (incl. the RHAMP §46
+≥ 55-case negative matrix). Historical scope-fence guards reconciled
+phase-aware (RHAMP-REQ-162 method) with no `def test_` renamed or removed;
+fixed-SHA A/B (baseline A = `5a6f9d87`) shows 0 unexplained candidate-only
+functional regressions. Recommended next: `.1R.30R.3.5` (IV) → `.1R.30R.4`
+(RHAMP-REQ-156 `.1R.32`) → `.1R.30R.5` (RHAMP-REQ-156 `.1R.33` + N-16-5
+closure) → N-16-6 → N-16-7 (strictly last).
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R — N-16-5 RHAMP Slice 2 / Slice 3
 Decomposition Adjudication. **STATUS: ADJUDICATION COMPLETE — DECISION A
 (RE-MERGE) SELECTED — RHAMP-001 v1.0 PRESERVED BYTE-UNCHANGED — NO CONTRACT,

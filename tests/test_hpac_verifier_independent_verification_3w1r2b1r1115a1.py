@@ -430,7 +430,23 @@ def test_unsupported_mechanism_never_verifies_even_if_otherwise_well_formed(tmp_
     digest = canonical_digest(body)
     forged = HumanAuthenticationProof(proof_digest=digest, **body)
     fx.proof_store.create_canonical(fx.proof_store.fixture_proof_writer(body["mechanism_id"]), forged)
-    with pytest.raises(HPACVerificationError, match="no real assertion-verification mechanism"):
+    # Phase .1R.30R.3.4 reconciliation: `hpac.fido2.uv_presence.v2` is now
+    # an eligible mechanism id (RHAMP-001 §4), so `_verify_mechanism_
+    # eligibility` no longer rejects it at step 3 with "no real assertion-
+    # verification mechanism". The guarantee is unchanged and stronger: this
+    # well-formed-but-fixture-rooted proof STILL never verifies — either the
+    # deliberate credential/challenge binding mismatch (step 4) or, past
+    # that, RHAMP-REQ-103/113 (a FIXTURE_NON_REAL credential can never reach
+    # real FIDO2 signature verification). No `AuthenticatedHumanPrincipal`
+    # of any class is produced.
+    with pytest.raises(
+        HPACVerificationError,
+        match=(
+            "no real assertion-verification mechanism"
+            "|FIXTURE_NON_REAL credential can never reach real FIDO2"
+            "|challenge state does not match proof"
+        ),
+    ):
         fx.verify(proof_id=body["proof_id"])
 
 
