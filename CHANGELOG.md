@@ -2,6 +2,44 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2` (Independent Verification of
+  the N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation —
+  Slice 1) is **BLOCKED.** Independent re-derivation from primary source —
+  not merely trusting `.1R.30R.3.1`'s own claims — found a reproducible
+  bypass of the PRODUCTION `HPACWriterCapability` one-operation / non-bearer
+  invariant (HPAC-PAWA-REQ-102/106/107). `require_writer`'s only binding
+  check is `writer._authority_seal is self._seal` — plain object identity —
+  and `HPACWriterCapability.__new__` bypasses the constructor's seal gate
+  entirely, so a shell object that copies `_authority_seal` off a real,
+  already-held (even already-*spent*) capability passes the check and
+  authorizes a **second** distinct mutation from one §33 recognition/mint
+  event. Independently reproduced end-to-end against the real
+  `production_writer()` → `HumanPrincipalRegistryStore` path (not mocked):
+  legitimate `enroll_principal`, then a forged-capability `revoke_principal`,
+  both succeed. This is exactly one of the IV phase's own enumerated
+  BLOCKED conditions. The contract's own claim (HPAC-PAWA-REQ-103, §56 row
+  20 `reconstruction_attempt`) that `object.__new__` reconstruction "fails
+  the seal-identity check" does not hold for this adversary — the
+  production code faithfully implements HPAC-PAWA-REQ-102's mandated
+  mechanism, but that mechanism does not deliver the guarantee the
+  contract's own prose claims. Classified **product** with a **contract
+  note**: closing the gap likely needs a small HPAC-PAWA-001 amendment
+  alongside the code fix. The existing fresh 95-test Slice-1 suite still
+  passes unedited (`test_55_object_new_reconstruction_rejected` only tries
+  an empty, seal-unset `__new__` shell, not the copied-real-seal adversary)
+  — re-run 95 passed, 0 failed, confirming the gap is real and untested, not
+  a regression against a passing guard. Independently re-confirmed clean:
+  the exact 6-file production diff, contract/Gate/verifier byte-identity,
+  `_ELIGIBLE_MECHANISM_IDS` unwidened, no FIDO2/CTAP import, sole
+  `HPACWriterCapability(` construction site, `writer()` fixture-only hard
+  stop, non-agent-importable consumer fence, and runtime state
+  (Observed / observe / unavailable, 0 plugins / 0 capabilities) all
+  unchanged. No repair, no contract edit, no test/guard weakening performed
+  inside this IV (verification only). **N-16-5 remains NOT CLOSED.**
+  Recommended successor: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — N-16-5
+  PAWA `HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair.
+  Full evidence in
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_2_INDEPENDENT_VERIFICATION_OF_N_16_5_PAWA_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_SLICE_1.md`.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1: N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation (Slice 1) to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1); HPAC-PAWA-001 v1.1 Slice-1 implemented; IV .1R.30R.3.2 recommended next; N-16-5 not closed; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1` (N-16-5 PAWA Production
   Protected-Admin Writer Anchor Implementation — Slice 1) is **COMPLETE —

@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2 — Independent Verification of the
+N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation
+(Slice 1).
+**STATUS: BLOCKED.** Independent re-derivation from primary source found a
+reproducible bypass of the PRODUCTION `HPACWriterCapability` one-operation /
+non-bearer invariant (HPAC-PAWA-REQ-102/106/107): a `__new__`-constructed
+shell that copies a real, already-held (even already-*spent*)
+capability's `_authority_seal` attribute onto itself passes
+`require_writer`'s identity check and authorizes a **second** distinct
+registry mutation from a single §33 recognition/mint event. Independently
+reproduced end-to-end against the real `production_writer()` →
+`HumanPrincipalRegistryStore` path (not mocked): `enroll_principal` then a
+forged-capability `revoke_principal` both succeed. This is exactly one of
+the IV phase's own enumerated BLOCKED conditions ("a PRODUCTION
+`HPACWriterCapability` can be forged... or reused after one successful
+mutation" / "one-operation spend can be bypassed"). **No repair, no contract
+edit, and no test/guard weakening was performed inside this IV** (verification
+only). Full evidence, contract citations (§46/§47/§56 row 20,
+HPAC-PAWA-REQ-102/103), and the reproduction steps are in
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_2_INDEPENDENT_VERIFICATION_OF_N_16_5_PAWA_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_SLICE_1.md`.
+Verification-entry SHA `V = aff46ec3` (== finalized `.1R.30R.3.1` head `I`);
+`A = 1793a75a` (finalized `.1R.30R.2A.3` head); `B30 = 8e655295` (immutable
+`.1R.30` BLOCKED); `origin/main..HEAD = 0` at entry.
+
+**Independently confirmed clean (re-derived, not merely trusted):**
+production diff A→I is exactly the claimed 6 files (`hpac_pawa_schemas.py`,
+`hpac_pawa_agent_exclusion.py`, `hpac_protected_admin_writer.py`,
+`hpac_foundation.py`, `human_principal_registry.py`,
+`scripts/hpac_protected_root_admin.py`); contract byte identity (`git diff
+--name-only A HEAD -- docs/contracts` empty; `hpac_verifier.py` /
+`runtime_dispatch_gate5.py` / `runtime_dispatch_gate9.py` byte-unchanged;
+`_ELIGIBLE_MECHANISM_IDS` unchanged); no FIDO2/CTAP import in the new
+surface; the fresh 95-test Slice-1 suite re-run unedited — 95 passed, 0
+failed (it does not exercise the specific forged-seal adversary above —
+`test_55` only tries an empty, seal-unset `__new__` shell); sole
+`HPACWriterCapability(` construction site; `writer()` fixture-only hard
+stop preserved; non-agent-importable consumer fence intact; runtime remains
+Observed / observe / unavailable, 0 plugins / 0 capabilities.
+
+**Classification & successor.** Class: **product** (the seal-identity check
+in `require_writer` is the only binding, and a plain readable instance
+attribute copied from an already-held capability defeats it) **with a
+contract note** — HPAC-PAWA-REQ-102 mandates exactly this raw
+object-identity mechanism ("not a value comparison"), and REQ-103/§56 row
+20's claim that `object.__new__` reconstruction "fails the seal-identity
+check" does not hold for a caller who already possesses a real seal
+reference, so closing this gap likely needs a small HPAC-PAWA-001 amendment
+alongside the code fix, not a silent code-only patch. **N-16-5 remains NOT
+CLOSED** — Slice 1 is implemented but its own IV is blocked pending repair.
+**Recommended next phase:** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — N-16-5
+PAWA `HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair. Own
+explicit human authorization required; ID recommended, NOT reserved. Do not
+begin it. Do not begin Slice 2. `DELEGATED .3 FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED` preserved — this phase's commit/push/finalization was
+performed directly by the primary human-authorized operator.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1 — N-16-5 PAWA Production
 Protected-Admin Writer Anchor Implementation (Slice 1).
 **STATUS: COMPLETE — HPAC-PAWA-001 v1.1 PRODUCTION PROTECTED-ADMIN WRITER
@@ -100,7 +160,7 @@ PUSH: UNAUTHORIZED` preserved.
 
 ---
 
-## Previous Phase
+## Prior Phase — 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2A.3 — Independent Verification of the
 HPAC-PAWA-001 v1.1 Configured-Agent-Principal Resolution Source Contract Freeze.

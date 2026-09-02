@@ -4324,3 +4324,72 @@ Pre-existing, `git stash`-identical failures unrelated to this phase
 class-B ACL-adapter-unavailable sandbox failures, the `.1R.22R1`
 contract-drift guards, a `ThreadPoolExecutor` flake) documented in the
 canonical phase doc's regression-attribution section.
+
+# 2026-09-02 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2 — Independent Verification of the N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation (Slice 1)
+
+**Result: BLOCKED.** Independent re-derivation from primary source (not
+merely trusting `.1R.30R.3.1`'s own claims) found and twice independently
+confirmed a reproducible bypass of the PRODUCTION `HPACWriterCapability`
+one-operation / non-bearer invariant (HPAC-PAWA-REQ-102/106/107).
+`require_writer`'s only binding check is `writer._authority_seal is
+self._seal` — object identity. `HPACWriterCapability.__new__` bypasses the
+`__init__` constructor-seal gate entirely, and every slot is then a plain,
+directly settable/readable instance attribute. A shell object that copies
+`_authority_seal`/`role`/`subject`/`authority_class` off a real,
+already-held (even already-*spent*) capability, and sets `_spent = False`
+directly, passes `require_writer` and authorizes a second, distinct
+mutation from a single §33 recognition/mint event. Reproduced end-to-end
+against the real `production_writer()` → `HumanPrincipalRegistryStore` path
+(not mocked): legitimate `enroll_principal`, then a forged-capability
+`revoke_principal`, both succeed. This is exactly one of the IV phase's own
+enumerated BLOCKED conditions.
+
+**Contract note.** HPAC-PAWA-REQ-102 (§46) mandates exactly this raw
+object-identity mechanism ("not a value comparison"). HPAC-PAWA-REQ-103
+(§47) and the §56 row-20 (`reconstruction_attempt`) failure-code text claim
+`object.__new__` + known-field-value reconstruction "fails the
+seal-identity check" — this claim is false for a caller who already holds a
+real capability object and can read its genuine seal reference directly
+rather than reconstruct/guess it. The production code faithfully implements
+the mandated mechanism; the mechanism itself does not deliver the guarantee
+the contract's own prose asserts. Classification: **product**, with a
+**contract note** — closing the gap likely needs a small HPAC-PAWA-001
+amendment alongside the code fix, not a silent code-only patch.
+
+**Why the existing suite missed it.**
+`test_55_object_new_reconstruction_rejected` constructs an empty,
+seal-unset `__new__` shell — it "passes" only via an uncaught
+`AttributeError` on the unset slot (caught by a broad
+`pytest.raises(Exception)`), not because forgery is rejected. The
+copied-real-seal adversary actually described by HPAC-PAWA-REQ-102/103
+was never exercised.
+
+**Independently re-confirmed clean (no repair needed here):** the exact
+6-file `.1R.30R.3.1` production diff (`A = 1793a75a` → `I = aff46ec3`);
+contract/`hpac_verifier.py`/Gate-5/Gate-9 byte-identity;
+`_ELIGIBLE_MECHANISM_IDS` unwidened; no FIDO2/CTAP import in the new
+surface; the fresh 95-test Slice-1 suite re-run unedited (95 passed, 0
+failed); sole `HPACWriterCapability(` construction site; `writer()`
+fixture-only hard stop preserved; non-agent-importable consumer fence
+intact; runtime unchanged (Observed / observe / unavailable, 0 plugins /
+0 capabilities); sampled guard reconciliations additive-only.
+
+**Scope discipline.** No repair, no contract edit, no test/guard weakening
+performed inside this IV — verification only, per the phase's own
+governance rules. This IV itself changed zero `src/pcae`, `tests`, or
+`docs/contracts` files (`git diff aff46ec3 HEAD -- src/pcae tests
+docs/contracts` empty); its own file surface is documentation +
+task/governance lifecycle only.
+
+**N-16-5 status:** remains NOT CLOSED — Slice 1 implemented, its own IV
+BLOCKED pending repair. **Recommended successor:**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — N-16-5 PAWA
+`HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair. Requires
+its own separate explicit human authorization; ID recommended, not
+reserved. Do not begin Slice 2; do not implement RHAMP credential sidecars,
+counter-state, enrollment, or `FIDO2HumanAuthenticator`; do not modify
+`hpac_verifier` for REAL authentication; do not widen
+`_ELIGIBLE_MECHANISM_IDS`; do not implement protected presentation; do not
+wire `require_real_assurance` through Gate 5/9; do not begin N-16-6 /
+N-16-7 / Slice C; do not implement or call the first external effect; do
+not enable execution.
