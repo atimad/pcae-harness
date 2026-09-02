@@ -1,6 +1,6 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1 Complete — N-16-5 PAWA HPACWriterCapability Non-Bearer / One-Operation Integrity Repair (REPAIRED)
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1 Complete — Independent Verification of the N-16-5 PAWA HPACWriterCapability Non-Bearer / One-Operation Integrity Repair (INDEPENDENTLY VERIFIED)
 
-**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1
+**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1
 **Type:** governed independent verification — re-derivation from primary source and frozen contract
 **Status:** BLOCKED — a reproducible bypass of the PRODUCTION `HPACWriterCapability` one-operation / non-bearer invariant was found and independently confirmed; no repair, no contract edit, no test/guard weakening performed inside this IV
 **Verification-entry SHA:** `V = aff46ec3` (== finalized `.1R.30R.3.1` head `I`); `A = 1793a75a` (finalized `.1R.30R.2A.3` head); `B30 = 8e655295` (immutable `.1R.30` BLOCKED); `origin/main..HEAD = 0` at entry
