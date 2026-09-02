@@ -1,75 +1,103 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1 Complete — Independent Verification of the N-16-5 PAWA HPACWriterCapability Non-Bearer / One-Operation Integrity Repair (INDEPENDENTLY VERIFIED)
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3 Complete — N-16-5 RHAMP FIDO2 Credential Registry, Counter-State, and Protected-Admin Enrollment Implementation (Slice 2) (BLOCKED — decomposition blocker)
 
-**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1
-**Type:** governed independent verification — re-derivation from primary source and frozen contract
-**Status:** BLOCKED — a reproducible bypass of the PRODUCTION `HPACWriterCapability` one-operation / non-bearer invariant was found and independently confirmed; no repair, no contract edit, no test/guard weakening performed inside this IV
-**Verification-entry SHA:** `V = aff46ec3` (== finalized `.1R.30R.3.1` head `I`); `A = 1793a75a` (finalized `.1R.30R.2A.3` head); `B30 = 8e655295` (immutable `.1R.30` BLOCKED); `origin/main..HEAD = 0` at entry
-**Production source changed:** none (`git diff aff46ec3 HEAD -- src/pcae` empty — verification only)
-**Normative contracts changed:** none (`git diff aff46ec3 HEAD -- docs/contracts` empty)
-**Tests changed:** none (`git diff aff46ec3 HEAD -- tests` empty); the fresh `.1R.30R.3.1` 95-test suite was re-run unedited — 95 passed, 0 failed
-**Runtime:** `not_implemented / Observed / observe / unavailable`; 0 plugins / 0 capabilities; FIRST EXTERNAL EFFECT ABSENT AND UNREACHABLE; execution NOT enabled
+**Phase ID:** 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3
+**Type:** governed implementation phase — RHAMP-001 v1.0 Slice 2
+**Status:** BLOCKED — decomposition blocker. Slice 2 as scoped cannot be
+completed without a real CTAP2 `authenticatorMakeCredential` ceremony, which
+this phase's mandate forbids and assigns elsewhere. Resolved under this
+phase's §22 ("Return a decomposition blocker for human adjudication").
+**Phase-entry SHA:** `V = 4218e076` (== immutable Slice-2 baseline `A` = the
+finalized `.1R.30R.3.2.1.1` head); `origin/main..HEAD = 0` at entry.
+**Production source changed:** none (`git diff 4218e076 HEAD -- src/pcae` empty).
+**Normative contracts changed:** none (`git diff --name-only 4218e076 HEAD --
+docs/contracts` empty; RHAMP-001 v1.0, HPAC-PAWA-001 v1.1, HPAC-001 v2.1
+byte-unchanged).
+**Tests changed:** none (`git diff 4218e076 HEAD -- tests` empty; no fresh
+`.3.3` suite — BLOCKED before test work).
+**Runtime:** `not_implemented / Observed / observe / unavailable`; 0 plugins /
+0 capabilities; FIRST EXTERNAL EFFECT ABSENT AND UNREACHABLE; execution NOT
+enabled.
 
 ## Summary
 
-Independent re-derivation from primary source (not merely trusting
-`.1R.30R.3.1`'s own claims) found and independently confirmed twice a
-reproducible bypass of the PRODUCTION `HPACWriterCapability` one-operation /
-non-bearer invariant (HPAC-PAWA-REQ-102/106/107).
+Independent re-derivation from the governing frozen contract RHAMP-001 v1.0
+establishes that Slice 2 **as scoped** — the durable credential-authority,
+`RHAMP-FIDO2-CREDENTIAL/1.0` sidecar, `RHAMP-COUNTER-STATE/1.0`, credential
+lifecycle / currentness, and PAWA-bound protected-admin enrollment /
+first-credential bootstrap half of RHAMP-001 v1.0 — **cannot be completed
+without a real CTAP2 `authenticatorMakeCredential` ceremony**, which this
+phase's own mandate forbids and assigns elsewhere:
 
-`require_writer`'s only binding check is object identity
-(`writer._authority_seal is self._seal`). `HPACWriterCapability.__new__`
-bypasses the `__init__` constructor-seal gate entirely, and every slot
-(`_authority_seal`, `role`, `subject`, `authority_class`, `_single_use`,
-`_spent`) is then a plain, directly settable/readable instance attribute. A
-shell object built via `HPACWriterCapability.__new__(HPACWriterCapability)`
-that copies `_authority_seal`/`role`/`subject`/`authority_class` off a real,
-already-held (even already-*spent*) capability, and sets `_spent = False`
-directly, passes `require_writer` and authorizes a **second**, distinct
-registry mutation from a single §33 recognition/mint event.
+- **§13 (RHAMP-REQ-043)** freezes the credential-registration flow as an
+  ordered sequence whose registry write **consumes the verified outputs of a
+  `makeCredential` response** — `public_key = hex(cbor(COSE_Key))`, sidecar
+  `raw_credential_id` = base64url of the CTAP2 credential-id bytes.
+- **§14 (RHAMP-REQ-048)** and **§61 (RHAMP-REQ-150)** place "verification of
+  the `makeCredential` response" and "authenticator UP + UV" inside the
+  mandatory **"all of"** conjunction for first-credential bootstrap and every
+  enrollment.
+- **§17 (RHAMP-REQ-055..057)** makes `RHAMP-FIDO2-CREDENTIAL/1.0` a closed,
+  create-only, immutable schema over authenticator output **with no
+  placeholder / pending / material-absent variant**; **§21 (RHAMP-REQ-069)**
+  creates the counter-state record at enrollment.
+- **§49.1 row 3** defines the enrollment terminal-failure code
+  `enrollment_ceremony_evidence_invalid` in terms of makeCredential evidence.
+- **§63 (RHAMP-REQ-155)** forbids synthetic / virtual / deterministic fixture
+  material ever becoming REAL authority in a production registry.
+- **§64 (RHAMP-REQ-156)** and the **§72 freeze verdict** bundle "mechanism +
+  registry + bootstrap" into a **single atomic** implementation phase
+  (RHAMP-001 v1.0's own `.1R.30`) that the contract never severs at the
+  operator's Slice-2 / Slice-3 boundary. The `.1R.30R` architecture
+  adjudication §14.7 itself states "the human principal being enrolled still
+  performs UP+UV `makeCredential` during the ceremony (RHAMP-REQ-048)".
 
-**Reproduced end-to-end** against the real `production_writer()` →
-`HumanPrincipalRegistryStore` path (not mocked): legitimate
-`enroll_principal` (capability spent), then a forged-capability
-`revoke_principal`, both succeed.
+This is exactly this phase's enumerated **VALID EARLY STOP CONDITION**
+("RHAMP-001 v1.0 cannot support Slice 2 without contract evolution" / "a real
+FIDO2/CTAP ceremony is required to complete Slice 2" / "multi-artifact
+enrollment cannot be made fail-closed/coherent"), resolved under its **§22**.
 
-**Contract note.** HPAC-PAWA-REQ-102 (§46) mandates exactly this raw
-object-identity mechanism. HPAC-PAWA-REQ-103 (§47) and the §56 row-20
-(`reconstruction_attempt`) text claim `object.__new__` reconstruction "fails
-the seal-identity check" — false for a caller who already holds a real
-capability object and can read its genuine seal reference directly.
-Classified **product**, with a **contract note**: closing the gap likely
-needs a small HPAC-PAWA-001 amendment alongside the code fix.
+Per this phase's BLOCKED discipline: **no guard weakened, no contract edited,
+no test changed, no `src/pcae` file created or modified** (`git diff
+4218e076 HEAD -- src/pcae tests docs/contracts` is empty), **Slice 3 not
+begun, no CTAP2 / FIDO2 code introduced.** `hpac_verifier.py` byte-unchanged;
+`_ELIGIBLE_MECHANISM_IDS` still `frozenset({"hpac.deterministic.test-only.v1"})`;
+Gate 5 / Gate 9 byte-unchanged. Slice 1 remains **CLOSED**, byte-untouched.
+Runtime `Observed` / `observe` / `unavailable`, 0 plugins, 0 capabilities.
+First external effect **ABSENT / UNREACHABLE**. N-16-6 / N-16-7 **OPEN and
+untouched**, N-16-7 strictly last. N-23-1 / N-23-2 carried unchanged.
 
-**Why the existing suite missed it.**
-`test_55_object_new_reconstruction_rejected` constructs an empty,
-seal-unset `__new__` shell — it "passes" only via an uncaught
-`AttributeError` on the unset slot, not because forgery is rejected. The
-copied-real-seal adversary was never exercised.
+## Current-state N-16-5 correction (append-only, §42)
 
-**Independently re-confirmed clean:** the exact 6-file `.1R.30R.3.1`
-production diff; contract/`hpac_verifier.py`/Gate-5/Gate-9 byte-identity;
-`_ELIGIBLE_MECHANISM_IDS` unwidened; no FIDO2/CTAP import in the new
-surface; sole `HPACWriterCapability(` construction site; `writer()`
-fixture-only hard stop preserved; non-agent-importable consumer fence
-intact; runtime unchanged; sampled guard reconciliations additive-only.
-
-No repair, no contract edit, no test/guard weakening performed inside this
-IV — verification only, per the phase's own governance rules. This IV
-changed zero `src/pcae`, `tests`, or `docs/contracts` files.
-
-Full evidence in
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_2_INDEPENDENT_VERIFICATION_OF_N_16_5_PAWA_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_SLICE_1.md`.
+The historical `.1R.30R.3.2.1.1` canonical report carries an internally
+inconsistent "N-16-5 CLOSED" statement (its own body records no Slice 2 / no
+FIDO2 / no verifier change / first external effect ABSENT; RHAMP-REQ-156 /
+§72 make N-16-5 closure require Slice 2, Slice 3, protected presentation,
+`require_real_assurance` wiring, and ≥ 1 real-CTAP2-hardware verification).
+**The historical report is preserved byte-unchanged.** Current canonical
+state is corrected **append-only** in `PROJECT_STATUS.md`.
 
 ## N-16-5 status
 
-**NOT CLOSED.** Slice 1 is implemented but its own IV is **BLOCKED** pending
-repair.
+**NOT CLOSED.**
 
 ## Recommended next phase
 
-`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` — N-16-5 PAWA
-`HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair. Own
-explicit human authorization required; ID recommended, NOT reserved. Do not
-begin it. Do not begin Slice 2. `DELEGATED .3 FINALIZATION / COMMIT / PUSH:
-UNAUTHORIZED` preserved — this phase's commit/push/finalization was
-performed directly by the primary human-authorized operator.
+A **decomposition adjudication** phase first (an operator-authority phase,
+**not** a delegated implementation phase):
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R` — N-16-5 RHAMP Slice 2 / Slice 3
+Decomposition Adjudication. ID recommended, **NOT reserved**; confirm under
+CPIPC; own explicit human authorization required. Do not begin it. It must
+choose exactly one of: (a) re-merge Slice 2 + Slice 3 into RHAMP-REQ-156's
+single `.1R.30` "mechanism + registry + bootstrap" bundle; (b) a governed
+RHAMP-001 v1.1 MINOR defining a staged / material-deferred enrollment; or
+(c) an explicit material-free re-scope of Slice 2 (stores + primitives +
+PAWA authorization against structurally-NON_REAL fixtures only, with
+`makeCredential` + first real enrollment + bootstrap + publish point moved
+to Slice 3).
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved — this
+phase's commit / push / finalization was performed directly by the primary
+human-authorized operator through the governed PCAE lifecycle only.
+
+Full evidence in
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_3_N_16_5_RHAMP_FIDO2_CREDENTIAL_REGISTRY_COUNTER_STATE_AND_PROTECTED_ADMIN_ENROLLMENT_IMPLEMENTATION_SLICE_2.md`.
