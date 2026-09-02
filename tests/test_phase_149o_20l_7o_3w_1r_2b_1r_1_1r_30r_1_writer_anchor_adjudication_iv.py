@@ -82,13 +82,35 @@ def test_no_src_pcae_change_since_b30() -> None:
 
 
 def test_no_contract_change_since_b30() -> None:
-    assert _git("diff", "--stat", B30, "HEAD", "--", "docs/contracts").strip() == ""
+    # Point-in-time guard, reconciled by .1R.30R.2A.3 (the dedicated HPAC-PAWA-001
+    # v1.1 contract IV) when HPAC-PAWA-001 legitimately reached v1.1. Since B30
+    # the ONLY contract file touched is the HPAC-PAWA-001 writer-anchor contract
+    # itself -- created by .1R.30R.2 (v1.0 freeze) and evolved in place by
+    # .1R.30R.2A.2 (v1.1 MINOR, the sole normative delta). The .1R.30R.1
+    # adjudication IV changed no contract (its own entry -> verification-entry
+    # window is empty); no other contract has moved.
+    changed = {
+        line.split("\t")[-1]
+        for line in _git(
+            "diff", "--name-only", B30, "HEAD", "--", "docs/contracts"
+        ).splitlines()
+        if line.strip()
+    }
+    assert changed <= {
+        "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
+    }, changed
+    assert _git("diff", "--stat", B30, H30R, "--", "docs/contracts").strip() == ""
 
 
 def test_only_iv_artifacts_changed_since_v() -> None:
+    # Point-in-time guard, reconciled by .1R.30R.2A.3: the upper bound is pinned
+    # to the .1R.30R.1 finalized head (the phase's own window). Later governed
+    # phases (.1R.30R.2, .2A, .2A.1, .2A.2, .2A.3) legitimately add their own
+    # artifacts; each carries its own independent verification.
+    V_FINALIZED_HEAD = "91741564035cb441c0e2b16760c1997afddd4394"
     changed = {
         line.split("\t")[-1]
-        for line in _git("diff", "--name-only", H30R, "HEAD").splitlines()
+        for line in _git("diff", "--name-only", H30R, V_FINALIZED_HEAD).splitlines()
         if line.strip()
     }
     allowed_prefixes = (

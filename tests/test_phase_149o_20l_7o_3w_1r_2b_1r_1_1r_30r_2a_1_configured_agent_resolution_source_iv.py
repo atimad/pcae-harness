@@ -94,8 +94,16 @@ def test_no_src_pcae_change_since_phase_entry() -> None:
     assert _git("diff", J, "HEAD", "--", "src/pcae").strip() == ""
 
 
+# The .1R.30R.2A.1 finalized head. Point-in-time guards below are pinned to this
+# phase's own entry -> finalized-head window and reconciled by .1R.30R.2A.3 (the
+# dedicated HPAC-PAWA-001 v1.1 contract IV): after this window .1R.30R.2A.2
+# legitimately evolved HPAC-PAWA-001 v1.0 -> v1.1 (MINOR) in place, which this
+# IV suite would otherwise flag as drift it never authored.
+FINALIZED_2A1_HEAD = "3f23d6fd4a6812cdb4d2f6f7d2c0e2edd2511667"
+
+
 def test_no_contract_change_since_phase_entry() -> None:
-    assert _git("diff", J, "HEAD", "--", "docs/contracts").strip() == ""
+    assert _git("diff", J, FINALIZED_2A1_HEAD, "--", "docs/contracts").strip() == ""
 
 
 def test_2a_adjudication_changed_no_src_or_contract() -> None:
@@ -503,7 +511,9 @@ def test_this_suite_adds_only_test_functions_no_skips_or_xfails() -> None:
 
 
 def test_this_suite_is_the_only_tests_change_since_phase_entry() -> None:
-    changed = _git("diff", "--name-only", J, "HEAD", "--", "tests").split()
+    changed = _git(
+        "diff", "--name-only", J, FINALIZED_2A1_HEAD, "--", "tests"
+    ).split()
     assert changed in ([f"tests/{THIS_FILE.name}"], []), changed
     # file did not exist at the phase entry
     existed = subprocess.run(
@@ -514,7 +524,7 @@ def test_this_suite_is_the_only_tests_change_since_phase_entry() -> None:
 
 
 def test_no_existing_def_test_removed_or_renamed_repo_wide_since_phase_entry() -> None:
-    diff = _git("diff", J, "HEAD", "--", "tests")
+    diff = _git("diff", J, FINALIZED_2A1_HEAD, "--", "tests")
     # only additions to a single new file; no other test file touched
     removed_test_defs = re.findall(r"^-\s*def (test_\w+)", diff, re.MULTILINE)
     assert removed_test_defs == [], removed_test_defs
