@@ -51,7 +51,7 @@ check" does not hold for a caller who already possesses a real seal
 reference, so closing this gap likely needs a small HPAC-PAWA-001 amendment
 alongside the code fix, not a silent code-only patch. **N-16-5 remains NOT
 CLOSED** — Slice 1 is implemented but its own IV is blocked pending repair.
-**Recommended next phase:** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — N-16-5
+**Recommended next phase:** `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` — N-16-5
 PAWA `HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair. Own
 explicit human authorization required; ID recommended, NOT reserved. Do not
 begin it. Do not begin Slice 2. `DELEGATED .3 FINALIZATION / COMMIT / PUSH:

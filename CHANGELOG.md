@@ -36,7 +36,7 @@
   (Observed / observe / unavailable, 0 plugins / 0 capabilities) all
   unchanged. No repair, no contract edit, no test/guard weakening performed
   inside this IV (verification only). **N-16-5 remains NOT CLOSED.**
-  Recommended successor: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — N-16-5
+  Recommended successor: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` — N-16-5
   PAWA `HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair.
   Full evidence in
   `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_2_INDEPENDENT_VERIFICATION_OF_N_16_5_PAWA_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_SLICE_1.md`.

@@ -4383,7 +4383,7 @@ task/governance lifecycle only.
 
 **N-16-5 status:** remains NOT CLOSED — Slice 1 implemented, its own IV
 BLOCKED pending repair. **Recommended successor:**
-`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — N-16-5 PAWA
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` — N-16-5 PAWA
 `HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair. Requires
 its own separate explicit human authorization; ID recommended, not
 reserved. Do not begin Slice 2; do not implement RHAMP credential sidecars,

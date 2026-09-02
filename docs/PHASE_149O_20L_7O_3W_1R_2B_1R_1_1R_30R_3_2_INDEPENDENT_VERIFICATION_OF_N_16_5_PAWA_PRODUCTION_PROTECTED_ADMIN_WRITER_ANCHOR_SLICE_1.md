@@ -219,7 +219,7 @@ in-scope process-boundary the contract's threat model is meant to defend.
 - Not repaired inside this IV, per the phase's own governance rules (no
   repair, no contract edit, no test/guard weakening inside `.1R.30R.3.2`).
 - **Recommended successor repair phase:**
-  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — "N-16-5 PAWA
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` — "N-16-5 PAWA
   `HPACWriterCapability` Seal-Forgery / One-Operation-Bypass Repair" — assess
   and (if needed) narrowly amend HPAC-PAWA-REQ-102/103's mechanism
   description, then harden `require_writer`/`HPACWriterCapability` (e.g. an
@@ -287,7 +287,7 @@ delegated worker.
 
 ## 12. Recommended next phase
 
-`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.1.1` — N-16-5 PAWA `HPACWriterCapability`
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1` — N-16-5 PAWA `HPACWriterCapability`
 Seal-Forgery / One-Operation-Bypass Repair (see §6). Requires its own
 separate explicit human authorization; ID recommended, not reserved. Do not
 begin it here. Do not begin Slice 2. Do not implement RHAMP credential
