@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4: N-16-5 merged RHAMP FIDO2 mechanism impl to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4); N-16-5 NOT CLOSED; next = .1R.30R.3.5 IV; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4` (N-16-5 Merged RHAMP Real
   FIDO2 Credential Registration, Counter-State, Bootstrap & Authentication
   Mechanism Implementation) — **IMPLEMENTED, IV PENDING.** Implements the
