@@ -29,6 +29,8 @@ Idle: awaiting explicit authorization for .1R.30R.4R protected-presentation auth
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
