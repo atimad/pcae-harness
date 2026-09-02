@@ -23,7 +23,10 @@ import pytest
 from pcae.core import hpac_protected_admin_writer as w
 from pcae.core.hpac_foundation import HPACAuthorityError
 from pcae.core.hpac_protected_admin_writer import PawaError, PawaOperation
-from pcae.core.hpac_rhamp_credential_sidecar import HpacRhampCredentialSidecarStore
+from pcae.core.hpac_rhamp_credential_sidecar import (
+    HpacRhampCredentialSidecarStore,
+    RhampCredentialSidecarError,
+)
 from pcae.core.hpac_rhamp_counter_state import HpacRhampCounterStateStore
 from pcae.core.human_principal_registry import HumanPrincipalRegistryStore, new_principal_id
 
@@ -267,7 +270,10 @@ def test_11_multi_write_replay_after_complete_rejected(rig):
         cose_public_key="bb" * 32, transports=("usb",), aaguid=None, created_at="2026-09-02T00:00:00Z",
         writer_provenance_ref="pending", status="active",
     )
-    with pytest.raises(HPACAuthorityError):
+    # The sidecar's public boundary canonically wraps foundation authority
+    # failures; preserve the original security expectation (the write is
+    # rejected) while asserting the actual store-level error type.
+    with pytest.raises(RhampCredentialSidecarError):
         sidecar_store.create_canonical(cap, sidecar, transaction_subject=txn)
 
 

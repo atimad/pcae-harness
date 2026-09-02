@@ -412,11 +412,54 @@ def _lookup_issued_capability(capability: object) -> Optional[_CapabilityIssuanc
     return record
 
 
-def _mark_capability_consumed(capability: "HPACWriterCapability") -> None:
+def _mark_capability_consumed(
+    capability: "HPACWriterCapability",
+    *,
+    authority_class: Optional["HPACAuthorityClass"] = None,
+    require_multi_write: bool = False,
+) -> None:
+    """Transition one canonical issuance to ``CONSUMED`` under its lock.
+
+    ``require_multi_write`` is the .1R.30R.3.6 completion boundary: its
+    ACTIVE check, canonical object/scope checks, object-local spend, and
+    terminal registry transition are one critical section.  The default
+    preserves ``record_write``'s pre-existing post-write transition, where
+    the object-local flag has already been set at the adjacent call site.
+    """
+
     with _ISSUANCE_REGISTRY_LOCK:
         record = _ISSUED_CAPABILITY_REGISTRY.get(id(capability))
-        if record is not None and record.capability is capability:
-            record.state = _CapabilityIssuanceState.CONSUMED
+        if record is None or record.capability is not capability:
+            if require_multi_write:
+                raise HPACAuthorityError(
+                    "writer capability is absent, forged, or bound to another HPAC root"
+                )
+            return
+        if require_multi_write:
+            if (
+                record.role != getattr(capability, "role", _MISSING)
+                or record.subject != getattr(capability, "subject", _MISSING)
+            ):
+                raise HPACAuthorityError(
+                    "writer capability role/subject does not match its canonical issuance"
+                )
+            if record.authority_class is not authority_class:
+                raise HPACAuthorityError("writer capability assurance-class mismatch")
+            if not getattr(capability, "_single_use", False) or not getattr(
+                capability, "_multi_write", False
+            ):
+                raise HPACAuthorityError(
+                    "complete_multi_write is only valid for a multi-write transaction capability"
+                )
+            if (
+                record.state is _CapabilityIssuanceState.CONSUMED
+                or getattr(capability, "_spent", True)
+            ):
+                raise HPACAuthorityError(
+                    "writer capability is spent (one-operation lifetime exhausted)"
+                )
+            capability._mark_spent(_WRITER_CONSTRUCTOR_SEAL)
+        record.state = _CapabilityIssuanceState.CONSUMED
 
 
 T = TypeVar("T")
@@ -750,13 +793,15 @@ class HPACStoreAuthority:
             raise HPACAuthorityError("complete_multi_write requires an HPACWriterCapability")
         if getattr(writer, "_authority_seal", _MISSING) is not self._seal:
             raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
-        record = _lookup_issued_capability(writer)
-        if record is None:
-            raise HPACAuthorityError("writer capability is absent, forged, or bound to another HPAC root")
-        if not writer._multi_write:
-            raise HPACAuthorityError("complete_multi_write is only valid for a multi-write transaction capability")
-        writer._mark_spent(_WRITER_CONSTRUCTOR_SEAL)
-        _mark_capability_consumed(writer)
+        # Phase .1R.30R.3.6 — canonical registry state, not the mutable
+        # ``_spent`` slot, is authoritative.  The helper performs the ACTIVE
+        # check and ACTIVE -> CONSUMED transition under the registry lock so
+        # racing callers cannot both succeed.
+        _mark_capability_consumed(
+            writer,
+            authority_class=self.authority_class,
+            require_multi_write=True,
+        )
 
     def legacy_fixture_writer(
         self, capability: ProtectedAdminCapability, role: str, *, subject: Optional[str] = None

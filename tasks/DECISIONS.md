@@ -2,6 +2,15 @@
 
 ## Accepted
 
+- **Phase `.1R.30R.3.6` canonical issuance lifecycle repair and successor
+  (2026-09-02).** Keep `_multi_write` as one bounded multi-artifact
+  transaction. Reuse the existing process-local issuance registry and its lock:
+  canonical identity/scope/ACTIVE validation and ACTIVE→CONSUMED are one
+  critical section; registry state dominates mutable `_spent`. No new
+  capability field, registry structure, failure code, contract, or RHAMP
+  redesign. Preserve `.1R.30R.3.5` as BLOCKED and require fresh nested IV
+  `.1R.30R.3.6.1` before continuing N-16-5.
+
 - **Phase `.1R.30R.2` HPAC-PAWA-001 v1.0 Production Protected-Admin Writer
   Anchor Contract Freeze (2026-09-02).** Authored `HPAC-PAWA-001 v1.0`
   (`docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`,

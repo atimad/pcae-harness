@@ -36,6 +36,7 @@ from pcae.core import hpac_protected_admin_writer as w
 from pcae.core.hpac_foundation import (
     _PRODUCTION_TEST_FIXTURE_SEAL,
     HPACAuthorityClass,
+    HPACAuthorityError,
     HPACStoreAuthority,
     canonical_digest,
 )
@@ -1479,3 +1480,22 @@ def test_95_assurance_class_of_enrolled_records_is_production(rig):
     assert rc.authority_class is HPACAuthorityClass.PRODUCTION
     sc = rig.sidecar_store.resolve_canonical(res.credential_id)
     assert sc.authority_class is HPACAuthorityClass.PRODUCTION
+
+
+def test_99_multi_write_completion_is_single_success_per_canonical_issuance(tmp_path):
+    """Permanent product regression for HPAC-PAWA-REQ-106/107.
+
+    The one bounded multi-artifact transaction has one terminal completion;
+    replaying completion on the same canonical issuance fails closed.
+    """
+
+    authority = HPACStoreAuthority.fixture(tmp_path / "multi-write-completion")
+    capability = authority._new_capability(
+        "human_principal_registry_admin",
+        "txn-r34-permanent-regression",
+        single_use=True,
+        multi_write=True,
+    )
+    authority.complete_multi_write(capability)
+    with pytest.raises(HPACAuthorityError, match="one-operation lifetime exhausted"):
+        authority.complete_multi_write(capability)

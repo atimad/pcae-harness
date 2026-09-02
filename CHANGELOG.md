@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6` narrowly repairs
+  `HPACStoreAuthority.complete_multi_write` one-operation integrity: canonical
+  issuance scope/lifecycle validation and ACTIVE→CONSUMED transition now share
+  the issuance-registry lock, so exactly one concurrent completion succeeds
+  and mutable `_spent` state cannot restore consumed authority. Only
+  `hpac_foundation.py` changes in production; no contract/schema/capability-slot
+  or failure-code change. Fresh 46-node repair suite plus RHAMP/PAWA governing
+  suites pass 340/340; fixed-SHA attribution has zero unexplained repair-only
+  functional regressions. Historical `.30R.3.5` remains BLOCKED; N-16-5 remains
+  NOT CLOSED pending fresh IV `.30R.3.6.1`. Runtime/effect boundary unchanged.
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5 BLOCKED); N-16-5 NOT CLOSED; next = .1R.30R.3.6 repair (own explicit human authorization required) to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6: N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5` (Independent Verification of
   the N-16-5 Merged RHAMP Real FIDO2 Credential Registration, Counter-State,
   Bootstrap & Authentication Mechanism Implementation) — **BLOCKED.**

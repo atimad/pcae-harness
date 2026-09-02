@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6 — N-16-5 PAWA Multi-Write
+Completion One-Operation Integrity Repair. **STATUS: REPAIRED — FRESH
+SUCCESSOR IV PENDING. N-16-5: NOT CLOSED.**
+
+The single `.1R.30R.3.5` blocker is narrowly repaired in
+`HPACStoreAuthority.complete_multi_write`: canonical issuance membership,
+scope/class, and ACTIVE lifecycle are checked under the existing issuance
+registry lock, and ACTIVE → CONSUMED plus object-local spend now occur in that
+same critical section. A second/re-entrant/concurrent completion cannot report
+success more than once; resetting `_spent` cannot restore authority because
+canonical registry state dominates. No new capability slot, issuance-registry
+shape, failure code, contract, or dependency.
+
+Historical `.1R.30R.3.5` remains BLOCKED and immutable. The two blocking nodes
+now pass; the full `.1R.30R.3.4` product suite, `.1R.30R.3.5` IV suite, fresh
+46-node repair suite, PAWA integrity suites, and Slice-1 suite pass 340/340.
+Fixed-SHA A/R broad attribution finds zero unexplained repair-only functional
+regressions. Contracts, CredentialRecord, RHAMP enrollment/stores/counter,
+FIDO2 authenticator/CTAP2, hpac_verifier, presentation, Gate 5/9, runtime, and
+effect surfaces are byte-unchanged from R0. Runtime remains `Observed` /
+`observe` / `unavailable`, zero plugins/capabilities; first external effect
+ABSENT / UNREACHABLE. N-16-6/N-16-7/Slice C untouched; N-23 unchanged.
+
+Recommended next (ID recommended, NOT reserved; own explicit human
+authorization required):
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.6.1` — Independent Verification of the
+N-16-5 PAWA Multi-Write Completion One-Operation Integrity Repair. Do not
+begin protected presentation, N-16-6, N-16-7, Slice C, a first external
+effect, or execution enablement.
+
+Full evidence in
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_6_N_16_5_PAWA_MULTI_WRITE_COMPLETION_ONE_OPERATION_INTEGRITY_REPAIR.md`.
+
+---
+
+## Previous Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5 — Independent Verification of the
 N-16-5 Merged RHAMP Real FIDO2 Credential Registration, Counter-State,
 Bootstrap & Authentication Mechanism Implementation. **STATUS: BLOCKED.
