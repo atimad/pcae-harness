@@ -2,10 +2,95 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R — N-16-5 RHAMP Slice 2 / Slice 3
+Decomposition Adjudication. **STATUS: ADJUDICATION COMPLETE — DECISION A
+(RE-MERGE) SELECTED — RHAMP-001 v1.0 PRESERVED BYTE-UNCHANGED — NO CONTRACT,
+PRODUCTION, OR SCRIPT CODE CHANGE — N-16-5: NOT CLOSED. Slice 1: CLOSED
+(unchanged).**
+
+The `.1R.30R.3.3` decomposition blocker was independently reconstructed from
+RHAMP-001 v1.0: canonical FIDO2 credential registration is bound to the real
+CTAP2 `authenticatorMakeCredential` ceremony (RHAMP-REQ-043/048/055/056/069/150),
+no material-less / staged / placeholder / administratively-supplied-material
+enrollment mode exists, `CredentialRecord.status` is `{active, revoked}`
+monotonic with no `PENDING` state, and RHAMP-REQ-156 + the §72 freeze verdict
+bundle "mechanism + registry + bootstrap" into **one** atomic implementation
+phase that the contract never severs at the operator Slice-2 / Slice-3 boundary.
+The `makeCredential` dependency graph, the authentication dependency graph, the
+RHAMP-REQ-156 atomicity analysis (interpretation C — the entire RHAMP real
+authentication mechanism), and the `.1R.29` original-intent reconstruction all
+confirm the split is a bisection of a single non-severable contract phase.
+
+Three candidate architectures were evaluated against the frozen contract and
+its own versioning rules (RHAMP-REQ-166..169):
+
+- **A — Re-merge (SELECTED):** fold the former Slice 2 + Slice 3 back into
+  RHAMP-REQ-156's single `.1R.30` bundle (minus the already-CLOSED PAWA writer
+  anchor), implemented as one phase and independently verified as one unit.
+  **Zero contract change.** Best on all eight decision-quality axes (frozen
+  contract fidelity, trust-boundary clarity, fail-closed lifecycle semantics,
+  minimum contract churn, coherent bootstrap, independent verifiability,
+  minimum pseudo-authoritative intermediate state, maintainability).
+- **B — RHAMP-001 v1.1 staged enrollment (REJECTED):** a `PENDING_MATERIAL`
+  lifecycle + two-step publish requires at minimum a MINOR that changes a
+  normative matrix and the frozen 41-code vocabulary, realistically a MAJOR
+  (RHAMP-REQ-167 "changing … its ordering" / "making a NON_REAL object
+  upgradeable") plus an HPAC-001 v2.1 cascade if `PENDING` lands on
+  `CredentialRecord`; introduces a pseudo-authoritative intermediate state;
+  every claimed benefit fails the concrete-benefit test (its only residual
+  benefit is preserving the old phase numbering — an explicit reject
+  condition).
+- **C — material-free Slice-2 re-scope (REJECTED):** no Slice-2 artifact under
+  C is canonical RHAMP registration state (it is pre-implementation
+  scaffolding, not a RHAMP slice); its one genuine benefit (developing the
+  store layer without the CTAP2 ceremony in the diff) is **fully available
+  inside Candidate A** via the RHAMP-REQ-154 deterministic NON_REAL fixture; it
+  adds a phase boundary + an IV pass with no isolation dividend.
+
+**Decision: A. RHAMP-001 v1.0 is preserved byte-for-byte; no future contract
+change is required for N-16-5.** No `src/pcae` / `scripts` / `docs/contracts`
+byte changed (`git diff --name-only 93266b7d HEAD -- src/pcae scripts
+docs/contracts` empty). `hpac_verifier.py` byte-unchanged;
+`_ELIGIBLE_MECHANISM_IDS` still `frozenset({"hpac.deterministic.test-only.v1"})`;
+Gate 5 / Gate 9 / `approval_presentation.py` byte-unchanged. One
+verification-only adjudication test suite added (17 tests, all pass); no
+existing test removed, renamed, skipped, xfailed, or broadened. Runtime
+`Observed` / `observe` / `unavailable`, 0 plugins / 0 capabilities. First
+external effect ABSENT / UNREACHABLE. N-16-6 / N-16-7 OPEN and untouched
+(N-16-7 strictly last). N-23-1 / N-23-2 carried unchanged.
+
+**Corrected remaining N-16-5 closure path** (recommended IDs, NOT reserved;
+each its own explicit human authorization + IV):
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4` — merged RHAMP Real FIDO2 Credential
+Registration, Counter-State, Bootstrap & Authentication Mechanism
+Implementation → `.1R.30R.3.5` (IV) → `.1R.30R.4` (protected human-approval
+presentation + `require_real_assurance` wiring — RHAMP-REQ-156 `.1R.32`) →
+`.1R.30R.5` (IV + mandatory real-CTAP2-hardware verification + **N-16-5
+closure** — RHAMP-REQ-156 `.1R.33`) → N-16-6 → N-16-7 (strictly last). The old
+`.1R.30R.3.4 / .3.5 / .3.6` recommendations are **superseded, not reserved, not
+to be reused blindly**. Do not begin `.1R.30R.3.4`. Do not implement RHAMP
+credential/counter-state/enrollment. Do not implement `FIDO2HumanAuthenticator`.
+Do not modify `hpac_verifier` for REAL authentication. Do not widen
+`_ELIGIBLE_MECHANISM_IDS`. Do not implement protected presentation. Do not wire
+`require_real_assurance` through Gate 5/9. Do not begin N-16-6 or N-16-7. Do not
+begin Slice C. Do not implement or call the first external effect. Do not
+enable execution.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved — this
+phase's commit / push / finalization is performed directly by the primary
+human-authorized operator. Full evidence:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_3R_N_16_5_RHAMP_SLICE_2_SLICE_3_DECOMPOSITION_ADJUDICATION.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3 — N-16-5 RHAMP FIDO2 Credential
 Registry, Counter-State, and Protected-Admin Enrollment Implementation
 (Slice 2). **STATUS: BLOCKED — decomposition blocker. N-16-5: NOT CLOSED.
-Slice 1: CLOSED (unchanged).**
+Slice 1: CLOSED (unchanged). Adjudicated by `.1R.30R.3.3R` — Decision A
+(re-merge); the blocker stands as a correct BLOCKED verdict, superseded only
+in its future-decomposition recommendation.**
 
 Independent re-derivation from the governing frozen contract establishes that
 Slice 2 **as scoped** cannot be completed without a real CTAP2
@@ -63,7 +148,7 @@ performed directly by the primary human-authorized operator. Full evidence:
 
 ---
 
-## Prior Phase
+## Earlier Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2.1.1 — Independent Verification of
 the N-16-5 PAWA `HPACWriterCapability` Non-Bearer / One-Operation Integrity

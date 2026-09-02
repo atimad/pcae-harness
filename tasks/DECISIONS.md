@@ -4393,3 +4393,72 @@ counter-state, enrollment, or `FIDO2HumanAuthenticator`; do not modify
 wire `require_real_assurance` through Gate 5/9; do not begin N-16-6 /
 N-16-7 / Slice C; do not implement or call the first external effect; do
 not enable execution.
+
+---
+
+## 2026-09-02 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R: N-16-5 RHAMP Slice 2 / Slice 3 Decomposition Adjudication — DECISION A (RE-MERGE)
+
+**Context.** The historically BLOCKED phase `.1R.30R.3.3` returned a
+decomposition blocker: RHAMP-001 v1.0 binds canonical FIDO2 credential
+registration to the real CTAP2 `authenticatorMakeCredential` ceremony
+(RHAMP-REQ-043/048/055/056/069/150), defines no material-less / staged /
+placeholder enrollment mode, keeps `CredentialRecord.status` `{active,
+revoked}` monotonic with no `PENDING` state, and (RHAMP-REQ-156 / §72 freeze
+verdict) bundles "mechanism + registry + bootstrap" into one atomic phase
+`.1R.30` — it never severs that phase at the operator Slice-2 (registry +
+counter-state + enrollment, no FIDO2) / Slice-3 (`FIDO2HumanAuthenticator` +
+CTAP2 verify) boundary.
+
+**Decision.** **Candidate A — RE-MERGE.** RHAMP-001 v1.0 is preserved
+byte-for-byte. The former Slice 2 + Slice 3 are re-merged into RHAMP-REQ-156's
+single `.1R.30` bundle (minus the already-CLOSED PAWA writer anchor delivered
+by Slice 1), to be implemented as one phase and independently verified as one
+unit. **No future contract change is required for N-16-5.**
+
+**Rejected — Candidate B (RHAMP-001 v1.1 staged enrollment).** A
+`PENDING_MATERIAL` lifecycle + two-step publish requires at minimum a MINOR
+that changes a normative matrix (§64 decomposition, §13 registration lifecycle)
+and the frozen 41-code `terminal_reason_code` vocabulary; realistically a MAJOR
+(RHAMP-REQ-167 "changing … its ordering" and "making a NON_REAL object
+upgradeable") plus an HPAC-001 v2.1 cascade if `PENDING` lands on
+`CredentialRecord` (RHAMP-REQ-055 forbids the schema change). Introduces a
+pseudo-authoritative intermediate credential state (decision-quality bar #7).
+Every concrete-benefit claim fails: the store writer is still IV'd against real
+material later; RHAMP-REQ-048 already mandates an atomic multi-artifact create;
+RHAMP-REQ-154's deterministic NON_REAL fixture already removes hardware from
+the automated suite inside Candidate A. Its only residual benefit is preserving
+the old phase numbering — an explicit reject condition.
+
+**Rejected — Candidate C (material-free Slice-2 re-scope).** No Slice-2
+artifact under C is canonical RHAMP credential registration state before
+`makeCredential` (every canonical field is authenticator output) — so C is
+pre-implementation scaffolding, not a RHAMP slice, and must not be titled
+"enrollment implementation". The store code is byte-identical whether real or
+fixture material flows through it, and its security-critical properties first
+matter for real authority in Slice 3 where they must be re-verified anyway — so
+C's IV is a duplicated pass, not an isolation dividend. Its one genuine benefit
+(reviewing the store layer without the CTAP2 ceremony in the diff) is fully
+available inside Candidate A.
+
+**Successor sequence** (recommended IDs, NOT reserved; each its own explicit
+human authorization + IV; confirm CPIPC-validity at use):
+`.1R.30R.3.4` (merged RHAMP Real FIDO2 Credential Registration, Counter-State,
+Bootstrap & Authentication Mechanism Implementation) → `.1R.30R.3.5` (IV) →
+`.1R.30R.4` (protected human-approval presentation + `require_real_assurance`
+wiring — RHAMP-REQ-156 `.1R.32`) → `.1R.30R.5` (IV + mandatory
+real-CTAP2-hardware verification + N-16-5 closure — RHAMP-REQ-156 `.1R.33`) →
+N-16-6 → N-16-7 (strictly last). The old `.1R.30R.3.4 / .3.5 / .3.6`
+recommendations are superseded, not reserved, not to be reused blindly.
+
+**Scope discipline.** Adjudication only. Zero `src/pcae` / `scripts` /
+`docs/contracts` byte changed (`git diff --name-only 93266b7d HEAD -- src/pcae
+scripts docs/contracts` empty). One verification-only adjudication test suite
+added (17 tests, all pass); no existing test removed, renamed, skipped,
+xfailed, or broadened. `hpac_verifier.py` / `_ELIGIBLE_MECHANISM_IDS` / Gate 5
+/ Gate 9 / `approval_presentation.py` byte-unchanged. Runtime `Observed` /
+`observe` / `unavailable`; first external effect ABSENT / UNREACHABLE;
+N-16-6 / N-16-7 OPEN and untouched. Historical `.1R.30`, `.1R.30R.3.2`,
+`.1R.30R.3.3` BLOCKED artifacts immutable; the `.1R.30R.3.3` blocker stands as
+a correct BLOCKED verdict, superseded only in its future-decomposition
+recommendation. **N-16-5 remains NOT CLOSED.**
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.

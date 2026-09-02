@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R` (N-16-5 RHAMP Slice 2 / Slice 3
+  Decomposition Adjudication) is **COMPLETE — DECISION A (RE-MERGE) SELECTED.**
+  The `.1R.30R.3.3` decomposition blocker was independently reconstructed from
+  RHAMP-001 v1.0 (canonical FIDO2 credential registration is non-severable from
+  the real CTAP2 `authenticatorMakeCredential` ceremony —
+  RHAMP-REQ-043/048/055/056/069/150; no material-less / staged / placeholder
+  enrollment mode exists; `CredentialRecord.status` is `{active, revoked}`
+  monotonic with no `PENDING` state; RHAMP-REQ-156 + the §72 freeze verdict
+  bundle "mechanism + registry + bootstrap" into one atomic phase). Of three
+  candidate architectures — **A** re-merge (zero contract change), **B**
+  RHAMP-001 v1.1 staged enrollment, **C** material-free Slice-2 re-scope —
+  **Decision A** is selected: RHAMP-001 v1.0 is preserved byte-for-byte and the
+  former Slice 2 + Slice 3 are re-merged into RHAMP-REQ-156's single `.1R.30`
+  bundle (minus the CLOSED PAWA writer anchor), to be implemented as one phase
+  (`.1R.30R.3.4`) and independently verified as one unit (`.1R.30R.3.5`). B is
+  rejected (needs at least a normative-matrix-changing MINOR, realistically a
+  MAJOR + an HPAC-001 v2.1 cascade; introduces a pseudo-authoritative
+  `PENDING_MATERIAL` state; no concrete benefit). C is rejected (produces no
+  canonical RHAMP registration state — scaffolding, not a slice; its one
+  benefit is available inside A via the RHAMP-REQ-154 deterministic NON_REAL
+  fixture; adds a phase + an IV with no isolation dividend). **No future
+  contract change is required for N-16-5.** No `src/pcae` / `scripts` /
+  `docs/contracts` byte changed; `hpac_verifier.py` / `_ELIGIBLE_MECHANISM_IDS`
+  / Gate 5 / Gate 9 / `approval_presentation.py` / all normative contracts
+  byte-unchanged; one verification-only adjudication test suite added (17
+  tests, all pass); no existing test weakened. Runtime `Observed` / `observe`
+  / `unavailable`; first external effect ABSENT / UNREACHABLE; N-16-6 / N-16-7
+  OPEN and untouched (N-16-7 strictly last); N-23-1 / N-23-2 carried. The old
+  `.1R.30R.3.4 / .3.5 / .3.6` recommendations are superseded, not reserved.
+  Historical `.1R.30`, `.1R.30R.3.2`, `.1R.30R.3.3` BLOCKED artifacts remain
+  immutable. **N-16-5 remains NOT CLOSED.** Full evidence:
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_3_3R_N_16_5_RHAMP_SLICE_2_SLICE_3_DECOMPOSITION_ADJUDICATION.md`.
 - Transitioned active task from Idle: awaiting operator decomposition adjudication (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3 BLOCKED); N-16-5 NOT CLOSED, Slice 1 CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3R: RHAMP Slice 2/3 Decomposition Adjudication; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3: N-16-5 RHAMP Slice 2 (BLOCKED decomposition blocker) to Idle: awaiting operator decomposition adjudication (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3 BLOCKED); N-16-5 NOT CLOSED, Slice 1 CLOSED; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.3` (N-16-5 RHAMP FIDO2 Credential
