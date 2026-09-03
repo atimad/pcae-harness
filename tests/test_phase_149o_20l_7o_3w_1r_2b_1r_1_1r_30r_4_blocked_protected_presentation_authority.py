@@ -54,12 +54,18 @@ def test_rhamp_requires_administrator_installed_production_descriptor() -> None:
 
 
 def test_pawa_mutation_vocabulary_has_no_presentation_install_operation() -> None:
+    # Phase .1R.30R.4R.1 reconciliation — the `.30R.4R` reconciliation
+    # resolved the blocker with HPAC-PAWA-001 v1.2's exact
+    # `configure_presentation_mechanism` *metadata-only* mutation family
+    # (HPAC-PAWA-REQ-095). The historically proposed `install_presentation_mechanism`
+    # (a generic executable-install verb) is still NOT a mutation class.
     assert {operation.value for operation in PawaOperation} == {
         "enroll_principal",
         "revoke_principal",
         "enroll_credential",
         "revoke_credential",
         "initialize_credential_sidecar_state",
+        "configure_presentation_mechanism",
     }
     assert "install_presentation_mechanism" not in {
         operation.value for operation in PawaOperation
@@ -77,10 +83,16 @@ def test_pawa_production_writer_rejects_presentation_install_operation() -> None
 
 
 def test_pawa_factory_consumer_inventory_has_no_presentation_installer() -> None:
+    # Phase .1R.30R.4R.1 reconciliation — HPAC-PAWA-001 v1.2 adds exactly one
+    # further consumer category, the standalone protected-presentation
+    # configuration admin module (HPAC-PAWA-REQ-087). `approval_presentation`
+    # itself is still NOT a factory consumer (the blocker the `.30R.4` finding
+    # names).
     assert AUTHORIZED_FACTORY_CONSUMERS == frozenset(
         {
             "pcae.core.hpac_protected_admin_writer",
             "pcae.core.hpac_rhamp_enrollment",
+            "pcae.core.hpac_protected_presentation_admin",
         }
     )
     assert "pcae.core.approval_presentation" not in AUTHORIZED_FACTORY_CONSUMERS
@@ -104,9 +116,15 @@ def test_pawa_contract_requires_normative_amendment_for_new_factory_consumer() -
 
 
 def test_current_presentation_resolver_has_no_real_attestation_branch() -> None:
+    # Phase .1R.30R.4R.1 reconciliation — the real
+    # `pcae-protected-local-presentation/1.0` attestation branch is now
+    # implemented and delegates to the launcher verifier. The deterministic
+    # fail-closed discipline is preserved: any other verifier_kind still
+    # fails closed.
     source = (REPO / "src/pcae/core/approval_presentation.py").read_text(encoding="utf-8")
     assert 'descriptor.verifier_kind != "deterministic-test-fixture"' in source
-    assert "no real protected-presentation attestation verifier is implemented" in source
+    assert "verify_protected_presentation_evidence" in source
+    assert "no real protected-presentation attestation verifier is implemented for this verifier_kind" in source
 
 
 def test_blocked_phase_changes_no_production_or_normative_contract() -> None:

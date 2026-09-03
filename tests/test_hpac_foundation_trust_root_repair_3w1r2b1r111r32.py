@@ -859,6 +859,17 @@ def test_hpac_repair_has_zero_preexisting_production_consumers():
         ("hpac_rhamp_assertion_verify.py", "pcae.core.human_principal_registry"),
         ("hpac_rhamp_enrollment.py", "pcae.core.hpac_foundation"),
         ("hpac_rhamp_enrollment.py", "pcae.core.human_principal_registry"),
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 (N-16-5 protected
+        # human-approval presentation + real-assurance consumption) — the
+        # HPAC-PPA-001 v1.0 installation store, the sole PAWA
+        # configure_presentation_mechanism consumer, and the trusted launcher
+        # mediator. Exact filenames, no wildcard (see the `.1R.30R.3.1` /
+        # `.1R.30R.3.4` precedent above).
+        ("protected_presentation_installation.py", "pcae.core.approval_presentation"),
+        ("protected_presentation_installation.py", "pcae.core.hpac_foundation"),
+        ("protected_presentation.py", "pcae.core.approval_presentation"),
+        ("protected_presentation.py", "pcae.core.hpac_foundation"),
+        ("hpac_protected_presentation_admin.py", "pcae.core.hpac_foundation"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

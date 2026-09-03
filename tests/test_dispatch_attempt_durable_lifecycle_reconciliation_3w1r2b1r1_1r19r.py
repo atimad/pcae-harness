@@ -391,6 +391,14 @@ def test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap():
         "src/pcae/core/human_authenticator_fido2.py",
         "src/pcae/core/hpac_rhamp_assertion_verify.py",
         "src/pcae/core/hpac_rhamp_enrollment.py",
+        # Phase ...1R.30R.4R.1 (N-16-5 -- HPAC-PPA-001 v1.0 protected
+        # human-approval presentation + real-assurance consumption). Exact
+        # filenames, no wildcard.
+        "src/pcae/core/approval_presentation.py",
+        "src/pcae/core/protected_presentation_installation.py",
+        "src/pcae/core/hpac_protected_presentation_admin.py",
+        "src/pcae/core/protected_presentation.py",
+        "src/pcae/protected_presentation_helper.py",
     }
     assert changed - _POST_1R19R_AUTHORIZED == {
         "src/pcae/core/runtime_dispatch_attempt_lifecycle.py"

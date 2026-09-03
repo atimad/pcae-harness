@@ -845,6 +845,23 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
         ("hpac_rhamp_assertion_verify.py", "pcae.core.human_principal_registry"),
         ("hpac_rhamp_enrollment.py", "pcae.core.hpac_foundation"),
         ("hpac_rhamp_enrollment.py", "pcae.core.human_principal_registry"),
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 (N-16-5 protected
+        # human-approval presentation + real-assurance consumption). The
+        # HPAC-PPA-001 v1.0 installation store, the sole PAWA
+        # configure_presentation_mechanism consumer, and the trusted launcher
+        # mediator consume the Layer-1/2 foundation for the canonical-JSON /
+        # digest / atomic-write / symlink-safety utilities plus the existing
+        # HPAC-REQ-090 descriptor / HPAC-REQ-091 evidence stores. The launcher
+        # is import-reachable from `hpac_verifier` (Layer 3, already the one
+        # sanctioned consumer) only for the resolver-side attestation verifier
+        # (no fence import on that path); the admin module is inside the
+        # non-agent-importable fence (its own guard keeps it off every
+        # agent-reachable path). Exact filenames, no wildcard.
+        ("protected_presentation_installation.py", "pcae.core.approval_presentation"),
+        ("protected_presentation_installation.py", "pcae.core.hpac_foundation"),
+        ("protected_presentation.py", "pcae.core.approval_presentation"),
+        ("protected_presentation.py", "pcae.core.hpac_foundation"),
+        ("hpac_protected_presentation_admin.py", "pcae.core.hpac_foundation"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

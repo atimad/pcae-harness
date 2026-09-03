@@ -134,15 +134,26 @@ __all__ = [
 #: The real ``hpac.fido2.uv_presence.v2`` branch is **only reachable when
 #: every resolved record is ``PRODUCTION``** (RHAMP-REQ-103): a
 #: ``FIXTURE_NON_REAL`` credential carrying that ``mechanism_id`` is rejected
-#: before any real signature math. RHAMP-001 ``.1R.30`` adds the real
-#: verification branch but **not** a real approval-authority production path
-#: — no ``pcae-protected-local-presentation/1.0`` descriptor kind is
-#: accepted until ``.1R.32``, so ``verify_human_authentication`` cannot
-#: reach a ``PRODUCTION`` ``AuthenticatedHumanPrincipal`` end-to-end in this
-#: phase (RHAMP-REQ-156).
+#: before any real signature math.
+#:
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 — HPAC-PPA-001 v1.0 makes the
+#: real ``pcae-protected-local-presentation/1.0`` presentation descriptor
+#: kind acceptable (``approval_presentation._verify_installed_attestation``
+#: → ``protected_presentation.verify_protected_presentation_evidence``). A
+#: ``PRODUCTION`` ``AuthenticatedHumanPrincipal`` is therefore now reachable
+#: end-to-end **only** through the coupled real path: a real
+#: ``hpac.fido2.uv_presence.v2`` credential/proof **and** a real
+#: ``pcae-protected-local-presentation/1.0`` presentation evidence with
+#: matching live bindings (HPAC-PPA-REQ-057, RHAMP-REQ-038). N-16-5 remains
+#: NOT CLOSED pending fresh IV + mandatory real-CTAP2-hardware verification.
 _ELIGIBLE_MECHANISM_IDS = frozenset(
     {"hpac.deterministic.test-only.v1", "hpac.fido2.uv_presence.v2"}
 )
+#: HPAC-PPA-REQ-008 — the sole real presentation mechanism id. A resolved
+#: presentation whose ``mechanism_ref.mechanism_id`` is this value went
+#: through the real ``pcae-protected-local-presentation/1.0`` attestation
+#: verifier (deterministic fixtures use a permanently distinct id).
+_REAL_PRESENTATION_MECHANISM_ID = "pcae-protected-local-presentation"
 #: The subset of :data:`_ELIGIBLE_MECHANISM_IDS` that requires the real
 #: native-CTAP2 signature branch (RHAMP-001 §4). Exact-match only.
 _REAL_ELIGIBLE_MECHANISM_IDS = frozenset({"hpac.fido2.uv_presence.v2"})
@@ -813,11 +824,26 @@ def verify_human_authentication(
     assurance_class = _authority_class_of(
         resolved_principal, resolved_credential, resolved_presentation, resolved_proof
     )
-    if require_real_assurance and assurance_class is not HPACAuthorityClass.PRODUCTION:
-        raise HPACVerificationError(
-            "real-runtime assurance was required but resolved records are FIXTURE_NON_REAL "
-            "(fixture-to-real upgrade rejected)"
-        )
+    if require_real_assurance:
+        # HPAC-PPA-REQ-057 / RHAMP-REQ-038 — REAL authentication and REAL
+        # protected presentation with matching live bindings are *jointly*
+        # required; neither alone, and no fixture, can satisfy this.
+        if assurance_class is not HPACAuthorityClass.PRODUCTION:
+            raise HPACVerificationError(
+                "real-runtime assurance was required but resolved records are FIXTURE_NON_REAL "
+                "(fixture-to-real upgrade rejected)"
+            )
+        if proof.mechanism_id not in _REAL_ELIGIBLE_MECHANISM_IDS:
+            raise HPACVerificationError(
+                "real-runtime assurance requires a real authentication mechanism "
+                f"(got {proof.mechanism_id!r})"
+            )
+        real_presentation_mechanism = presentation.mechanism_ref.get("mechanism_id")
+        if real_presentation_mechanism != _REAL_PRESENTATION_MECHANISM_ID:
+            raise HPACVerificationError(
+                "real-runtime assurance requires a real protected-presentation mechanism "
+                f"(got {real_presentation_mechanism!r}); authentication alone is insufficient"
+            )
 
     subject = presentation.canonical_subject.get("subject")
     invocation_id = subject.get("invocation_id") if isinstance(subject, dict) else None

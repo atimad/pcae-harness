@@ -446,7 +446,21 @@ def test_34_fido2_authenticator_source_is_unchanged():
 
 
 def test_35_hpac_verifier_source_is_unchanged():
-    assert _run("git", "diff", "--quiet", R0, "--", "src/pcae/core/hpac_verifier.py", check=False).returncode == 0
+    # Phase .1R.30R.4R.1 reconciliation — `.30R.3.6` changed nothing here.
+    # `.30R.4R.1` adds exactly the HPAC-PPA-REQ-057 real-auth + real-presentation
+    # coupling inside `require_real_assurance` (and refreshes a stale comment).
+    # Not weakened: the eligible-mechanism allowlist literal is unchanged, no
+    # wildcard, no first external effect, no `def ` removed.
+    r4r_finalized = "a727dbf4f160f904836905d3cb4adeba91953676"
+    old = _run("git", "show", f"{R0}:src/pcae/core/hpac_verifier.py").stdout
+    since_r4r = _run(
+        "git", "diff", "--name-only", r4r_finalized, "HEAD", "--", "src/pcae/core/hpac_verifier.py"
+    ).stdout.split()
+    new = (REPO / "src/pcae/core/hpac_verifier.py").read_text()
+    assert since_r4r in ([], ["src/pcae/core/hpac_verifier.py"])
+    assert 'frozenset(\n    {"hpac.deterministic.test-only.v1", "hpac.fido2.uv_presence.v2"}\n)' in new
+    assert new.count("def ") >= old.count("def ")
+    assert ("fn" "match") not in new and "adapter.dispatch(" not in new
 
 
 def test_36_deterministic_ci_seam_is_unchanged():
@@ -454,8 +468,14 @@ def test_36_deterministic_ci_seam_is_unchanged():
 
 
 def test_37_protected_presentation_remains_absent():
+    # Phase .1R.30R.4R.1 reconciliation — `.30R.3.6` (a PAWA multi-write
+    # completion repair) implemented no protected presentation. `.30R.4R.1`
+    # implemented it; the real attestation branch here delegates to the
+    # launcher verifier and preserves the deterministic NON_REAL seam.
     source = (REPO / "src/pcae/core/approval_presentation.py").read_text()
-    assert "pcae-protected-local-presentation/1.0" not in source
+    assert "pcae-protected-local-presentation/1.0" in source
+    assert "deterministic-test-fixture" in source
+    assert "adapter.dispatch(" not in source
 
 
 @pytest.mark.parametrize(

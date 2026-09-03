@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1` implements the N-16-5 protected
+  human-approval presentation and real-assurance consumption layer frozen by
+  `.30R.4R` (HPAC-PAWA-001 v1.2 + HPAC-PPA-001 v1.0). New:
+  `protected_presentation_installation` (`HPAC-PRESENTATION-INSTALLATION/1.0` +
+  `HPAC-PRESENTATION-CURRENT-GENERATION/1.0` closed schemas, content-addressed
+  helper path, pinned-digest / generation / rotation / revocation / currentness,
+  held-descriptor helper-byte integrity check); `hpac_protected_presentation_admin`
+  (the sole `configure_presentation_mechanism` PAWA consumer);
+  `protected_presentation` (the sole trusted launcher/mediator + runtime
+  evidence-writer issuer + resolver-side real attestation verifier);
+  `pcae.protected_presentation_helper` (the PCAE-owned fixed helper);
+  `scripts/hpac_protected_presentation_admin.py`. HPAC-PAWA-001 v1.2 gains one
+  mutation `configure_presentation_mechanism` (bounded multi-write, role
+  `presentation_mechanism_installer`, metadata only — no helper bytes) and one
+  consumer category; a seal-guarded process-local / non-bearer / restart-dead /
+  single-use `protected_presentation_mechanism` runtime evidence-writer held
+  only by the launcher writes exactly one `HPAC-PRESENTATION-EVIDENCE/2.0` per
+  valid explicit `APPROVE`. Installer, launcher and evidence writer are three
+  distinct authorities; `REJECT` / cancel / EOF / crash / timeout / malformed /
+  replay / substitution / post-launch generation change fail closed onto the
+  frozen RHAMP-001 §49 terminal reasons with no new code. `require_real_assurance`
+  now requires a real authentication mechanism **and** a real
+  protected-presentation mechanism jointly; Gate 5 / Gate 9 consume it through
+  their existing frozen `assurance_class is PRODUCTION` check (no Gate source
+  change). The deterministic NON_REAL presentation seam stays permanently
+  non-real. Fresh suite 59/59; targeted affected suites 559/0; fixed-SHA A/B: 0
+  B-only unexplained functional regressions. No `src/pcae` contract, gate,
+  runtime, adapter or dependency change beyond the exact enumerated file set;
+  no `adapter.dispatch` / `DispatchEnvelope` / subprocess / network; runtime
+  remains Observed / observe / unavailable; first external effect ABSENT.
+  N-16-5 remains NOT CLOSED (fresh IV + mandatory real-CTAP2-hardware
+  verification pending); recommended successor `.30R.4R.2` is not begun.
+
 - Transitioned active task from Idle: awaiting next explicitly authorized governed phase; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1: N-16-5 Protected Presentation and Real-Assurance Consumption Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R — N-16-5 Protected-Presentation Helper Installation and Evidence-Writer Authority Contract Reconciliation to Idle: awaiting explicit authorization for .1R.30R.4R.1 protected-presentation implementation after authority reconciliation; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R` reconciles and freezes the

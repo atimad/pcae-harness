@@ -627,8 +627,17 @@ def test_40_exact_factory_consumer_inventory_no_wildcard():
     # category ("first-credential bootstrap / enrollment tool") is already
     # named in HPAC-PAWA-REQ-087, so no contract amendment is required
     # (HPAC-PAWA-REQ-090). Still an EXACT enumerated set, no wildcard.
+    # Phase .1R.30R.4R.1 reconciliation: HPAC-PAWA-001 v1.2 (HPAC-PAWA-REQ-087)
+    # adds exactly one further consumer category — the protected-presentation
+    # mechanism configuration admin tool `hpac_protected_presentation_admin`,
+    # named in the amended contract (so HPAC-PAWA-REQ-090 is satisfied). Still
+    # an EXACT enumerated set, no wildcard.
     assert w.AUTHORIZED_FACTORY_CONSUMERS == frozenset(
-        {"pcae.core.hpac_protected_admin_writer", "pcae.core.hpac_rhamp_enrollment"}
+        {
+            "pcae.core.hpac_protected_admin_writer",
+            "pcae.core.hpac_rhamp_enrollment",
+            "pcae.core.hpac_protected_presentation_admin",
+        }
     )
     for entry in (*w.AUTHORIZED_FACTORY_CONSUMERS, *w._TEST_FACTORY_CONSUMERS):
         assert "*" not in entry and "?" not in entry and "[" not in entry
@@ -656,7 +665,18 @@ def test_42_no_agent_runtime_gate_plugin_consumer_of_the_factory():
     # enrollment ceremony tool, also inside the non-agent-importable fence)
     # legitimately imports the factory. No agent / runtime / Gate / plugin /
     # CLI module does — that remains asserted here and by test_39.
-    allowed_importers = {"hpac_protected_admin_writer.py", "hpac_rhamp_enrollment.py"}
+    # Phase .1R.30R.4R.1: two further fenced modules legitimately import the
+    # factory — `hpac_protected_presentation_admin.py` (the exact HPAC-PAWA-001
+    # v1.2 `configure_presentation_mechanism` consumer category) and
+    # `protected_presentation.py` (the trusted launcher mediator that holds the
+    # `protected_presentation_mechanism` runtime evidence-writer authority,
+    # HPAC-PPA-REQ-041). No agent / runtime / Gate / plugin / CLI module does.
+    allowed_importers = {
+        "hpac_protected_admin_writer.py",
+        "hpac_rhamp_enrollment.py",
+        "hpac_protected_presentation_admin.py",
+        "protected_presentation.py",
+    }
     joined = "\n".join(
         p.read_text(encoding="utf-8")
         for p in SRC.rglob("*.py")
@@ -1270,12 +1290,18 @@ def test_86_no_effect_adapter_or_dispatch_call_in_slice1_source():
 
 
 def test_87_contract_byte_identity_hpac_rhamp_hbdc_unchanged_since_entry():
-    entry = "1793a75a73c54c6f6687bc830664caeac5aeaa66"
+    # Phase .1R.30R.4R.1 reconciliation: `.30R.4R` (HPAC-PAWA-001 v1.1 -> v1.2
+    # MINOR + the new HPAC-PPA-001 v1.0 companion) legitimately changed
+    # docs/contracts after this phase's entry; that delta is verified by the
+    # `.30R.4R` contract-reconciliation suite. `.30R.3.1`'s own scope fence is
+    # that no contract changed *by this phase* — re-anchored to the finalized
+    # `.30R.4R` head. The implementation successor `.30R.4R.1` changes none.
+    r4r_finalized = "a727dbf4f160f904836905d3cb4adeba91953676"
     changed = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only", entry, "HEAD", "--", "docs/contracts"],
+        ["git", "-C", str(REPO), "diff", "--name-only", r4r_finalized, "HEAD", "--", "docs/contracts"],
         capture_output=True, text=True, check=True,
     ).stdout.split()
-    assert changed == [], f"no contract file changes this phase: {changed}"
+    assert changed == [], f"no contract file changes since the .30R.4R finalized head: {changed}"
 
 
 def test_88_no_src_pcae_writer_capability_second_construction_site():

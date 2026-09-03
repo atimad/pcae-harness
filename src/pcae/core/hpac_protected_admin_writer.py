@@ -91,6 +91,8 @@ __all__ = [
     "rotate_descriptor",
     "revoke_anchor",
     "AUTHORIZED_FACTORY_CONSUMERS",
+    "PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS",
+    "mint_protected_presentation_evidence_writer",
 ]
 
 
@@ -188,6 +190,18 @@ class PawaOperation(str, Enum):
     ENROLL_CREDENTIAL = "enroll_credential"
     REVOKE_CREDENTIAL = "revoke_credential"
     INITIALIZE_CREDENTIAL_SIDECAR_STATE = "initialize_credential_sidecar_state"
+    #: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 — HPAC-PAWA-001 v1.2
+    #: (HPAC-PAWA-REQ-095) adds exactly one metadata-only mutation family:
+    #: one bounded install / rotate / revoke configuration transaction for
+    #: the exact presentation ``mechanism_id`` under HPAC-PPA-001 v1.0, using
+    #: writer role ``presentation_mechanism_installer``. It writes only that
+    #: contract's installation-generation record, current-generation anchor,
+    #: HPAC-REQ-090 descriptor, and their writer-provenance sidecars. It
+    #: SHALL NOT create, copy, replace, chmod, chown, or execute helper
+    #: bytes. The schema/store/currentness live in
+    #: ``protected_presentation_installation``, the ceremony in
+    #: ``hpac_protected_presentation_admin`` — never here.
+    CONFIGURE_PRESENTATION_MECHANISM = "configure_presentation_mechanism"
 
 
 #: Registry-record operations that mint a plain single-use capability.
@@ -201,7 +215,18 @@ _SLICE1_OPERATIONS = frozenset(
 _ENROLLMENT_TRANSACTION_OPERATIONS = frozenset(
     {PawaOperation.ENROLL_CREDENTIAL, PawaOperation.INITIALIZE_CREDENTIAL_SIDECAR_STATE}
 )
-_AVAILABLE_OPERATIONS = _SLICE1_OPERATIONS | _ENROLLMENT_TRANSACTION_OPERATIONS
+#: Phase .1R.30R.4R.1 — the v1.2 ``configure_presentation_mechanism`` family.
+#: Its descriptor + installation record + anchor + provenance writes are one
+#: bounded multi-write transaction authorised by one ``_multi_write``
+#: capability, spent once via ``authority.complete_multi_write``
+#: (HPAC-PAWA-REQ-095/106; HPAC-PPA-REQ-023).
+_PRESENTATION_CONFIG_OPERATIONS = frozenset({PawaOperation.CONFIGURE_PRESENTATION_MECHANISM})
+_MULTI_WRITE_OPERATIONS = _ENROLLMENT_TRANSACTION_OPERATIONS | _PRESENTATION_CONFIG_OPERATIONS
+#: HPAC-PPA-REQ-005 — the exact installer writer role for the v1.2 family
+#: (already frozen by ``approval_presentation.PresentationMechanismDescriptorStore``).
+_PRESENTATION_INSTALLER_ROLE = "presentation_mechanism_installer"
+_PRESENTATION_LIFECYCLE_ACTIONS = frozenset({"install", "rotate", "revoke"})
+_AVAILABLE_OPERATIONS = _SLICE1_OPERATIONS | _ENROLLMENT_TRANSACTION_OPERATIONS | _PRESENTATION_CONFIG_OPERATIONS
 
 #: §38 / §86 — the EXACT enumerated factory-consumer inventory. No
 #: wildcard, no prefix, no fnmatch, no glob (PAWA-INV-9). At Slice 1 the
@@ -218,12 +243,25 @@ AUTHORIZED_FACTORY_CONSUMERS = frozenset(
         # itself inside the non-agent-importable fence (a guard test asserts
         # cli.py / commands/** / core/agent.py never import it).
         "pcae.core.hpac_rhamp_enrollment",
+        # Phase .1R.30R.4R.1 — HPAC-PAWA-001 v1.2 (HPAC-PAWA-REQ-087) adds
+        # exactly one category: the bounded protected-presentation-mechanism
+        # configuration administration tool specified by HPAC-PPA-001 v1.0
+        # (HPAC-PPA-REQ-022). Exact dotted-path, no wildcard/prefix/glob
+        # (PAWA-INV-9). Reached only from the standalone
+        # scripts/hpac_protected_presentation_admin.py entry point; itself
+        # inside the non-agent-importable fence.
+        "pcae.core.hpac_protected_presentation_admin",
     }
 )
 #: A disclosed, explicit **test-only** consumer allowlist (§16 seam,
 #: HPAC-PAWA-REQ-166). Exact names, never a prefix.
 _TEST_FACTORY_CONSUMERS = frozenset(
-    {"test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1"}
+    {
+        "test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1",
+        # Phase .1R.30R.4R.1 — the fresh dedicated implementation suite for the
+        # v1.2 configure_presentation_mechanism family (HPAC-PAWA-REQ-166).
+        "test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance",
+    }
 )
 
 _ISSUER = "pcae.core.hpac_protected_admin_writer.production_writer/1.1"
@@ -710,6 +748,8 @@ class ProductionWriterHandle:
         "principal_id",
         "credential_id",
         "transaction_id",
+        "mechanism_id",
+        "presentation_action",
         "operation_id",
         "anchor_id",
         "installation_id",
@@ -730,6 +770,8 @@ class ProductionWriterHandle:
         installation_id: str,
         descriptor_generation: int,
         transaction_id: Optional[str] = None,
+        mechanism_id: Optional[str] = None,
+        presentation_action: Optional[str] = None,
     ) -> None:
         self._capability = capability
         self._authority = authority
@@ -737,6 +779,8 @@ class ProductionWriterHandle:
         self.principal_id = principal_id
         self.credential_id = credential_id
         self.transaction_id = transaction_id
+        self.mechanism_id = mechanism_id
+        self.presentation_action = presentation_action
         self.operation_id = operation_id
         self.anchor_id = anchor_id
         self.installation_id = installation_id
@@ -757,6 +801,7 @@ class ProductionWriterHandle:
         principal_id: Optional[str] = None,
         credential_id: Optional[str] = None,
         transaction_id: Optional[str] = None,
+        mechanism_id: Optional[str] = None,
     ) -> HPACWriterCapability:
         if self._consumed or self._capability._spent:
             raise PawaError("capability_stale", "this PRODUCTION writer has already been used")
@@ -768,6 +813,8 @@ class ProductionWriterHandle:
             raise PawaError("target_scope_invalid", "handle bound to a different credential_id")
         if transaction_id != self.transaction_id:
             raise PawaError("target_scope_invalid", "handle bound to a different enrollment transaction_id")
+        if mechanism_id != self.mechanism_id:
+            raise PawaError("target_scope_invalid", "handle bound to a different presentation mechanism_id")
         self._consumed = True
         return self._capability
 
@@ -790,6 +837,8 @@ def _validate_operation_inputs(
     principal_id: Optional[str],
     credential_id: Optional[str],
     transaction_id: Optional[str] = None,
+    mechanism_id: Optional[str] = None,
+    presentation_action: Optional[str] = None,
 ) -> PawaOperation:
     if isinstance(operation, PawaOperation):
         op = operation
@@ -825,6 +874,34 @@ def _validate_operation_inputs(
             )
     if op is PawaOperation.INITIALIZE_CREDENTIAL_SIDECAR_STATE and credential_id is None:
         raise PawaError("operation_scope_invalid", "initialize_credential_sidecar_state requires credential_id")
+    if op is PawaOperation.CONFIGURE_PRESENTATION_MECHANISM:
+        # HPAC-PAWA-REQ-093/095 — bound to the exact presentation mechanism_id
+        # and one configuration transaction; no principal/credential scope is
+        # inferred from a mechanism subject.
+        if (
+            mechanism_id is None
+            or not isinstance(mechanism_id, str)
+            or not mechanism_id.strip()
+            or transaction_id is None
+            or principal_id is not None
+            or credential_id is not None
+        ):
+            raise PawaError(
+                "operation_scope_invalid",
+                "configure_presentation_mechanism requires mechanism_id + transaction_id and "
+                "no principal_id/credential_id (HPAC-PAWA-REQ-093/095)",
+            )
+        if presentation_action not in _PRESENTATION_LIFECYCLE_ACTIONS:
+            raise PawaError(
+                "operation_scope_invalid",
+                "configure_presentation_mechanism requires a closed lifecycle action "
+                f"(one of {sorted(_PRESENTATION_LIFECYCLE_ACTIONS)})",
+            )
+    elif mechanism_id is not None or presentation_action is not None:
+        raise PawaError(
+            "operation_scope_invalid",
+            "mechanism_id / presentation_action are only valid for configure_presentation_mechanism",
+        )
     return op
 
 
@@ -834,6 +911,8 @@ def production_writer(
     principal_id: Optional[str] = None,
     credential_id: Optional[str] = None,
     transaction_id: Optional[str] = None,
+    mechanism_id: Optional[str] = None,
+    presentation_action: Optional[str] = None,
     _protected_root: Optional[Path] = None,
     _configured_agent_identity_source=None,
     _topology_probe: Optional["TopologyProbe"] = None,
@@ -854,7 +933,9 @@ def production_writer(
     """
 
     caller_module = _detect_caller_module(_caller_module)
-    op = _validate_operation_inputs(operation, principal_id, credential_id, transaction_id)
+    op = _validate_operation_inputs(
+        operation, principal_id, credential_id, transaction_id, mechanism_id, presentation_action
+    )
     recognized = _run_recognition_sequence(
         protected_root=_protected_root,
         configured_agent_identity_source=_configured_agent_identity_source,
@@ -869,17 +950,25 @@ def production_writer(
         (recognized.configured_agent.uid, recognized.configured_agent.gids),
         _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
     )
-    is_txn = op in _ENROLLMENT_TRANSACTION_OPERATIONS
-    if op is PawaOperation.ENROLL_CREDENTIAL:
+    is_txn = op in _MULTI_WRITE_OPERATIONS
+    if op is PawaOperation.CONFIGURE_PRESENTATION_MECHANISM:
+        # HPAC-PAWA-REQ-093 — subject is the exact presentation mechanism_id;
+        # role is the frozen installer role, not the registry role.
+        subject = mechanism_id
+        mint_role = _PRESENTATION_INSTALLER_ROLE
+    elif op is PawaOperation.ENROLL_CREDENTIAL:
         # HPAC-PAWA-REQ-100 — bound to the enrollment transaction id.
         subject = transaction_id
+        mint_role = _REGISTRY_WRITER_ROLE
     elif principal_id is not None:
         subject = principal_id
+        mint_role = _REGISTRY_WRITER_ROLE
     else:
         subject = credential_id
+        mint_role = _REGISTRY_WRITER_ROLE
     try:
         capability = recognized.authority._mint_production_writer_capability(
-            _REGISTRY_WRITER_ROLE,
+            mint_role,
             subject,
             _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
             multi_write=is_txn,
@@ -895,6 +984,8 @@ def production_writer(
         principal_id=principal_id,
         credential_id=credential_id,
         transaction_id=transaction_id,
+        mechanism_id=mechanism_id,
+        presentation_action=presentation_action,
         operation_id=operation_id,
         anchor_id=recognized.anchor_id,
         installation_id=recognized.installation_id,
@@ -916,6 +1007,14 @@ def production_writer(
         enrollment_transaction_id=transaction_id,
         result="issued",
         capability_identifier="hpaw-cap-" + hashlib.sha256(operation_id.encode()).hexdigest()[:32],
+        context_annotation=(
+            # HPAC-PAWA-REQ-093 — record (but do not add as a bearer capability
+            # field) the exact presentation configuration transaction id and
+            # requested lifecycle action.
+            f"configure_presentation_mechanism:{mechanism_id}:{presentation_action}"
+            if op is PawaOperation.CONFIGURE_PRESENTATION_MECHANISM
+            else None
+        ),
     )
     return handle
 
@@ -934,6 +1033,7 @@ def _record_issuance_evidence(
     result: str,
     capability_identifier: Optional[str],
     enrollment_transaction_id: Optional[str] = None,
+    context_annotation: Optional[str] = None,
 ) -> None:
     document = build_issuance_evidence_document(
         operation_id=operation_id,
@@ -949,7 +1049,7 @@ def _record_issuance_evidence(
         issuer=_ISSUER,
         result=result,
         capability_identifier=capability_identifier,
-        context_annotation=None,
+        context_annotation=context_annotation,
     )
     path = _authority_dir(root) / _ISSUANCE_EVIDENCE_DIR / f"{operation_id}.json"
     _ensure_authority_subdir(path.parent)
@@ -1449,3 +1549,66 @@ def revoke_anchor(*, protected_root: Path) -> dict:
     )
     _atomic_replace_record(authority_dir / _CURRENT_GENERATION_NAME, cg_doc)
     return {"state": "REVOKED", "generation": descriptor.generation}
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# HPAC-PPA-001 v1.0 §8 — the runtime protected-presentation evidence-writer
+# factory. Distinct authority from the §42 PAWA installer factory
+# (INSTALLER AUTHORITY != LAUNCHER AUTHORITY != RUNTIME EVIDENCE-WRITER
+# AUTHORITY, .30R.4R). Reachable ONLY from the trusted launcher mediator
+# `pcae.core.protected_presentation` (HPAC-PPA-REQ-041); a guard test
+# asserts no other production module imports or calls it, and
+# `hpac_verifier` / the helper process never reach it.
+# ─────────────────────────────────────────────────────────────────────────
+
+#: HPAC-PPA-REQ-041/052 — the exact finite set of modules that may request a
+#: `protected_presentation_mechanism` runtime evidence-writer capability. No
+#: wildcard, no prefix, no glob (PAWA-INV-9).
+PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS = frozenset({"pcae.core.protected_presentation"})
+_PROTECTED_PRESENTATION_EVIDENCE_WRITER_ROLE = "protected_presentation_mechanism"
+
+
+def mint_protected_presentation_evidence_writer(
+    authority: HPACStoreAuthority,
+    *,
+    mechanism_id: str,
+    _caller_module: Optional[str] = None,
+) -> HPACWriterCapability:
+    """HPAC-PPA-REQ-041/042 — mint one process-local, non-serializable,
+    restart-dead, single-use ``HPACWriterCapability`` for the existing
+    ``protected_presentation_mechanism`` runtime evidence-writer role, bound
+    to this ``HPACStoreAuthority`` instance's private ``_seal`` and to the
+    exact presentation ``mechanism_id``.
+
+    It is NOT a PAWA installer capability and does not extend the §42
+    mutation set (HPAC-PPA-REQ-040). It authorizes exactly one create-only
+    ``HPAC-PRESENTATION-EVIDENCE/2.0`` write; the launcher enforces the
+    one-APPROVE / one-write / single-use invariant (HPAC-PPA-REQ-043..046).
+    """
+
+    caller_module = _detect_caller_module(_caller_module)
+    if (
+        caller_module not in PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS
+        and caller_module
+        not in {"test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance"}
+    ):
+        raise PawaError(
+            "unauthorized_factory_consumer",
+            f"{caller_module!r} is not the trusted protected-presentation launcher (HPAC-PPA-REQ-041)",
+        )
+    if not isinstance(mechanism_id, str) or not mechanism_id.strip():
+        raise PawaError("operation_scope_invalid", "mechanism_id must be a non-empty string")
+    if not isinstance(authority, HPACStoreAuthority) or authority.authority_class is not HPACAuthorityClass.PRODUCTION:
+        raise PawaError(
+            "internal_fail_closed",
+            "the runtime evidence writer requires a PRODUCTION HPACStoreAuthority",
+        )
+    try:
+        return authority._mint_production_writer_capability(
+            _PROTECTED_PRESENTATION_EVIDENCE_WRITER_ROLE,
+            mechanism_id,
+            _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+            multi_write=False,
+        )
+    except HPACAuthorityError as exc:
+        raise PawaError("internal_fail_closed", f"evidence-writer mint refused: {exc}")

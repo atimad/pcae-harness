@@ -243,12 +243,37 @@ def _module_imports(name: str) -> set[str]:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 reconciliation anchor — the
+#: finalized `.30R.4R` head. `.30R.4R` (HPAC-PAWA-001 v1.1 -> v1.2 MINOR +
+#: the new HPAC-PPA-001 v1.0 companion) legitimately changed docs/contracts
+#: after `A_SHA`; its own contract-reconciliation suite verifies that delta.
+#: `.30R.3.4`'s scope fences below are re-anchored to this fixed head and
+#: widened by the EXACT `.30R.4R.1` implementation file set — not weakened.
+_R4R_FINALIZED = "a727dbf4f160f904836905d3cb4adeba91953676"
+_R4R1_FILES = frozenset(
+    {
+        "src/pcae/core/protected_presentation_installation.py",
+        "src/pcae/core/hpac_protected_presentation_admin.py",
+        "src/pcae/core/protected_presentation.py",
+        "src/pcae/protected_presentation_helper.py",
+        "src/pcae/core/hpac_protected_admin_writer.py",
+        "src/pcae/core/approval_presentation.py",
+        "src/pcae/core/hpac_verifier.py",
+        "scripts/hpac_protected_presentation_admin.py",
+    }
+)
+
+
 def test_01_rhamp_001_v1_0_byte_unchanged_since_A():
+    # Re-anchored to the finalized `.30R.4R` head (see `_R4R_FINALIZED`).
+    # RHAMP-001 remains v1.0 byte-unchanged; `.30R.4R.1` changes no contract.
     diff = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only", A_SHA, "HEAD", "--", "docs/contracts"],
+        ["git", "-C", str(REPO), "diff", "--name-only", _R4R_FINALIZED, "HEAD", "--", "docs/contracts"],
         capture_output=True, text=True, check=True,
     ).stdout.strip()
-    assert diff == "", f"a normative contract changed this phase: {diff!r}"
+    assert diff == "", f"a normative contract changed since the .30R.4R finalized head: {diff!r}"
+    rhamp = (CONTRACTS / "REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md").read_text()
+    assert "RHAMP-001 v1.0" in rhamp
 
 
 def test_02_hpac_pawa_001_v1_1_and_hpac_001_v2_1_identity():
@@ -1087,16 +1112,24 @@ def test_69_production_provider_path_distinct_from_fixture():
 
 
 def test_70_no_protected_presentation_implementation():
-    names = {p.name for p in SRC.rglob("*.py")}
-    assert "approval_presentation_protected_local.py" not in names
-    # the real verifier_kind stays unaccepted until .1R.32.
-    ap = (SRC / "core" / "approval_presentation.py").read_text()
-    assert "pcae-protected-local-presentation/1.0" not in ap
+    # Phase .1R.30R.4R.1 reconciliation — the protected-presentation layer is
+    # now implemented by that successor. `.30R.3.4` (the merged-RHAMP
+    # authentication phase) still implemented NONE of it: the RHAMP/FIDO2
+    # authentication modules below remain free of every presentation symbol.
     for n in ("hpac_rhamp_enrollment.py", "human_authenticator_fido2.py", "hpac_rhamp_assertion_verify.py"):
         code = _noncomment(n)
         assert "TrustedApprovalPresentationMechanism" not in code
         assert "renderer_profile" not in code
         assert "mechanism_attestation" not in code
+    # `.30R.4R.1` implemented it under the exact module names HPAC-PPA-REQ-052
+    # freezes; the real branch delegates to the launcher verifier and adds no
+    # first external effect.
+    ap = (SRC / "core" / "approval_presentation.py").read_text()
+    assert "pcae-protected-local-presentation/1.0" in ap
+    assert "verify_protected_presentation_evidence" in ap
+    assert "deterministic-test-fixture" in ap  # the NON_REAL seam is preserved
+    for mod in ("protected_presentation.py", "protected_presentation_installation.py"):
+        assert "adapter.dispatch(" not in (SRC / "core" / mod).read_text()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1114,18 +1147,38 @@ def test_71_no_require_real_assurance_wiring_in_gates():
 
 
 def test_72_approval_presentation_byte_unchanged():
-    diff = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--stat", A_SHA, "HEAD", "--", "src/pcae/core/approval_presentation.py"],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    assert diff.strip() == ""
+    # Phase .1R.30R.4R.1 reconciliation — `.30R.3.4` changed nothing here;
+    # `.30R.4R.1` adds exactly the real `pcae-protected-local-presentation/1.0`
+    # attestation branch, which is *added* trust (the deterministic-test-fixture
+    # discipline is preserved byte-for-byte). Not weakened: no `def ` removed,
+    # the `verifier_kind != "deterministic-test-fixture"` fail-closed check
+    # still present, no wildcard, no first external effect.
+    old = subprocess.check_output(
+        ["git", "-C", str(REPO), "show", f"{_R4R_FINALIZED}:src/pcae/core/approval_presentation.py"], text=True
+    )
+    new = (SRC / "core" / "approval_presentation.py").read_text()
+    assert 'descriptor.verifier_kind != "deterministic-test-fixture"' in new
+    assert new.count("def ") >= old.count("def ")
+    assert new.count('"*"') == old.count('"*"')
+    assert ("fn" "match") not in new
+    assert "adapter.dispatch(" not in new
 
 
 def test_73_verifier_real_branch_needs_production_and_presentation_gates_still_closed():
-    # `verify_human_authentication` cannot reach a PRODUCTION AuthenticatedHumanPrincipal
-    # end-to-end: no PRODUCTION presentation descriptor kind is accepted this phase.
+    # Phase .1R.30R.4R.1 reconciliation — a PRODUCTION AuthenticatedHumanPrincipal
+    # is now reachable end-to-end, but ONLY through the coupled real path: a real
+    # `hpac.fido2.uv_presence.v2` credential/proof AND a real
+    # `pcae-protected-local-presentation/1.0` presentation evidence
+    # (HPAC-PPA-REQ-057). Gate 5 / Gate 9 source is byte-unchanged; N-16-5 is
+    # NOT CLOSED (fresh IV + real-CTAP2-hardware pending).
     ap = (SRC / "core" / "approval_presentation.py").read_text()
-    assert "pcae-protected-local-presentation/1.0" not in ap
+    assert "pcae-protected-local-presentation/1.0" in ap
+    v = (SRC / "core" / "hpac_verifier.py").read_text()
+    assert "HPAC-PPA-REQ-057" in v and "_REAL_PRESENTATION_MECHANISM_ID" in v
+    for gate in ("runtime_dispatch_gate5.py", "runtime_dispatch_gate9.py"):
+        assert subprocess.run(
+            ["git", "-C", str(REPO), "diff", "--quiet", _R4R_FINALIZED, "HEAD", "--", f"src/pcae/core/{gate}"]
+        ).returncode == 0
 
 
 def test_74_runtime_posture_unchanged():

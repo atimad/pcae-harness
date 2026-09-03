@@ -15,6 +15,24 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 A = "db5f1dd761174d6ac1ca16e49e8871c02f747fdf"
+#: Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 reconciliation anchor — the
+#: finalized `.30R.4R` head. The implementation successor `.30R.4R.1` adds
+#: production source under an EXACT enumerated file set and changes NO
+#: normative contract; the point-in-time "no implementation exists yet"
+#: guards below are widened, not weakened, to that fixed head.
+R4R_FINALIZED = "a727dbf4f160f904836905d3cb4adeba91953676"
+_R4R1_IMPLEMENTATION_FILES = frozenset(
+    {
+        "src/pcae/core/protected_presentation_installation.py",
+        "src/pcae/core/hpac_protected_presentation_admin.py",
+        "src/pcae/core/protected_presentation.py",
+        "src/pcae/protected_presentation_helper.py",
+        "src/pcae/core/hpac_protected_admin_writer.py",
+        "src/pcae/core/approval_presentation.py",
+        "src/pcae/core/hpac_verifier.py",
+        "scripts/hpac_protected_presentation_admin.py",
+    }
+)
 PAWA = ROOT / "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
 PPA = ROOT / "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md"
 RHAMP = ROOT / "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md"
@@ -228,12 +246,26 @@ def test_31_all_preexisting_contracts_except_pawa_are_byte_identical_to_a() -> N
 
 
 def test_32_pawa_and_new_companion_are_only_contract_delta() -> None:
-    changed = subprocess.check_output(
-        ["git", "diff", "--name-only", A, "--", "docs/contracts"], cwd=ROOT, text=True
-    ).splitlines()
-    # Untracked PPA is checked separately because git diff does not list it.
-    assert changed == ["docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"]
+    changed = set(
+        subprocess.check_output(
+            ["git", "diff", "--name-only", A, "--", "docs/contracts"], cwd=ROOT, text=True
+        ).splitlines()
+    )
+    # `.30R.4R` delta: the PAWA MINOR + the new companion PPA (PPA was
+    # untracked at `A` and is listed once it is committed). No other contract.
+    assert changed <= {
+        "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
+        "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
+    }
     assert PPA.exists()
+    # Phase .1R.30R.4R.1 reconciliation — the implementation successor changes
+    # NO normative contract byte.
+    assert (
+        subprocess.check_output(
+            ["git", "diff", "--name-only", R4R_FINALIZED, "--", "docs/contracts"], cwd=ROOT, text=True
+        ).strip()
+        == ""
+    )
 
 
 def test_33_requirement_numbering_is_closed_and_sequential() -> None:
@@ -256,15 +288,50 @@ def test_34_exact_future_module_inventory_has_no_wildcard() -> None:
 
 
 def test_35_no_production_or_script_implementation_changed() -> None:
-    assert subprocess.run(
-        ["git", "diff", "--quiet", A, "--", "src/pcae", "scripts"], cwd=ROOT
-    ).returncode == 0
+    # Phase .1R.30R.4R.1 reconciliation — `.30R.4R` (the contract-freeze
+    # phase) changed no production source; its implementation successor
+    # `.30R.4R.1` adds/changes production source under an EXACT enumerated
+    # file set and nothing else (still no wildcard).
+    changed = set(
+        subprocess.check_output(
+            ["git", "diff", "--name-only", R4R_FINALIZED, "HEAD", "--", "src/pcae", "scripts"],
+            cwd=ROOT, text=True,
+        ).split()
+        + subprocess.check_output(
+            ["git", "diff", "--name-only", R4R_FINALIZED, "--", "src/pcae", "scripts"], cwd=ROOT, text=True
+        ).split()
+    )
+    assert changed <= _R4R1_IMPLEMENTATION_FILES, sorted(changed - _R4R1_IMPLEMENTATION_FILES)
 
 
 def test_36_no_gate_wiring_or_protected_implementation_exists_yet() -> None:
     c = text(PPA)
     assert "This contract implements no helper, launcher, writer,\n  descriptor, verifier, Gate wiring" in c
-    assert not (ROOT / "src/pcae/core/protected_presentation.py").exists()
+    # Phase .1R.30R.4R.1 reconciliation — the launcher/mediator now exists.
+    # Not weakened: it exists, adds no first external effect, and carries the
+    # frozen real verifier kind.
+    launcher = ROOT / "src/pcae/core/protected_presentation.py"
+    assert launcher.exists()
+    src = launcher.read_text()
+    tree = ast.parse(src)
+    calls = {
+        node.func.attr
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    }
+    assert "dispatch" not in calls
+    names = {n.id for node in ast.walk(tree) if isinstance(node, ast.Name) for n in [node]}
+    assert "DispatchEnvelope" not in names
+    assert "pcae-protected-local-presentation/1.0" in src
+    # No Gate-5 / Gate-9 source was wired (real assurance is consumed via the
+    # existing frozen assurance-class check — see the .30R.4R.1 phase doc).
+    for gate in ("runtime_dispatch_gate5.py", "runtime_dispatch_gate9.py"):
+        assert (
+            subprocess.run(
+                ["git", "diff", "--quiet", R4R_FINALIZED, "HEAD", "--", f"src/pcae/core/{gate}"], cwd=ROOT
+            ).returncode
+            == 0
+        )
 
 
 def test_37_deterministic_fixture_cannot_promote() -> None:

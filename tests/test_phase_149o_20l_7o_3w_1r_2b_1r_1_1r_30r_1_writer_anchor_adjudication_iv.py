@@ -204,6 +204,13 @@ def test_no_production_writer_factory_symbols_anywhere_in_src() -> None:
         # the same non-agent-importable fence (its own guard test asserts
         # cli.py / commands/** / core/agent.py never import it).
         "hpac_rhamp_enrollment.py",
+        # Phase .1R.30R.4R.1 — the sole HPAC-PAWA-001 v1.2
+        # `configure_presentation_mechanism` consumer consumes
+        # `production_writer` / `ProductionWriterHandle` from inside the same
+        # non-agent-importable fence (its own guard test — the fresh
+        # `.1R.30R.4R.1` suite — asserts cli.py / commands/** / core/agent.py
+        # never import it).
+        "hpac_protected_presentation_admin.py",
     }
     offenders = []
     for p in SRC.rglob("*.py"):

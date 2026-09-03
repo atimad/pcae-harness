@@ -649,15 +649,35 @@ class TrustedApprovalPresentationStore:
         if facts.get("one_shot_notice") is not True or evidence.canonical_subject.get("attempt_limit") != 1:
             raise ApprovalPresentationTrustError("one-shot presentation binding is invalid")
 
-    @staticmethod
     def _verify_installed_attestation(
+        self,
         evidence: TrustedApprovalPresentationEvidence,
         installed: HPACResolvedRecord[PresentationMechanismDescriptor],
     ) -> None:
         descriptor = installed.record
+        if descriptor.verifier_kind == "pcae-protected-local-presentation/1.0":
+            # Phase .1R.30R.4R.1 — the real HPAC-PPA-001 v1.0 verifier kind.
+            # Delegate to the launcher-side attestation verifier (imported
+            # lazily so a resolver-side importer never pulls the
+            # non-agent-importable admin-writer fence, HPAC-PPA-REQ-055).
+            from pcae.core.protected_presentation import (
+                ProtectedPresentationCeremonyError,
+                verify_protected_presentation_evidence,
+            )
+
+            try:
+                verify_protected_presentation_evidence(
+                    authority=self._authority, evidence=evidence, descriptor=descriptor
+                )
+            except ProtectedPresentationCeremonyError as exc:
+                raise ApprovalPresentationTrustError(
+                    f"real protected-presentation attestation rejected "
+                    f"({exc.terminal_reason_code}): {exc.detail}"
+                ) from exc
+            return
         if descriptor.verifier_kind != "deterministic-test-fixture":
             raise ApprovalPresentationTrustError(
-                "no real protected-presentation attestation verifier is implemented in this phase"
+                "no real protected-presentation attestation verifier is implemented for this verifier_kind"
             )
         if descriptor.verifier_configuration_digest != canonical_digest({"fixture": "deterministic"}):
             raise ApprovalPresentationTrustError("deterministic verifier configuration is not the installed fixture configuration")

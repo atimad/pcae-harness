@@ -994,6 +994,14 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         ("hpac_rhamp_assertion_verify.py", "pcae.core.human_principal_registry"),
         ("hpac_rhamp_enrollment.py", "pcae.core.hpac_foundation"),
         ("hpac_rhamp_enrollment.py", "pcae.core.human_principal_registry"),
+        # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 — N-16-5 protected
+        # human-approval presentation + real-assurance consumption. Exact
+        # filenames, no wildcard.
+        ("protected_presentation_installation.py", "pcae.core.approval_presentation"),
+        ("protected_presentation_installation.py", "pcae.core.hpac_foundation"),
+        ("protected_presentation.py", "pcae.core.approval_presentation"),
+        ("protected_presentation.py", "pcae.core.hpac_foundation"),
+        ("hpac_protected_presentation_admin.py", "pcae.core.hpac_foundation"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (
