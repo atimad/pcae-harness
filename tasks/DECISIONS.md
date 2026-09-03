@@ -2,6 +2,17 @@
 
 ## Accepted
 
+- **2026-09-03 — Block `.1R.30R.5R.2.1` at F-3; do not initiate the real
+  human/FIDO2 ceremony or close N-16-5.** Independent source and behavioral IV
+  verifies the H-2 trusted `/dev/tty` election and F-2 held-byte launcher
+  repairs, but the mandatory unchanged `.30R.5R.2` suite is 70 passed / 1
+  failed at both finalized repair head `361114d6` and implementation commit
+  `a85abff6`. Its `test_01` compares live `HEAD` to pre-repair entry
+  `0250e5f7`, so it cannot pass after the repair is committed. Verification-only
+  scope forbids repairing the existing test. Stop before any human/YubiKey
+  interaction, preserve H-1 historical hardware evidence, keep N-16-5 NOT
+  CLOSED, and recommend `.1R.30R.5R.2.1R` as the narrow test-evidence repair.
+
 - **2026-09-03 — Complete `.1R.30R.5R.2` as Option A repair-only; N-16-5
   remains NOT CLOSED pending fresh IV/certification.** Repair H-2 with one
   production trusted-human surface: the fixed helper opens `/dev/tty` directly,

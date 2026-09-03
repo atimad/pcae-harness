@@ -1,0 +1,73 @@
+{
+  "schema": "PCAE-N16-5-PRESENTATION-BOUND-CERTIFICATION/1.0",
+  "phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1",
+  "recorded_at": "2026-09-03T21:38:55+02:00",
+  "verdict": "BLOCKED",
+  "n16_5": "NOT_CLOSED",
+  "anchors": {
+    "pre_repair_a": "0250e5f79340b659f4c34ce391656d8f7219ccc3",
+    "repair_phase_i": "361114d648dea432aa3ef92ecd7e24e748a173aa",
+    "verification_entry_v": "361114d648dea432aa3ef92ecd7e24e748a173aa",
+    "repair_implementation_commit": "a85abff66b5a07f9d83b873d625aea7b1c65b19d"
+  },
+  "software_verification": {
+    "h2_interactive_election": "VERIFIED_REPAIRED",
+    "f2_portable_held_byte_launch": "VERIFIED_REPAIRED",
+    "fresh_iv_suite": {"passed": 85, "failed": 0},
+    "combined_n16_5_sweep": {"passed": 636, "failed": 1},
+    "guard_and_rhamp_sweep": {"passed": 428, "failed": 0},
+    "contracts_changed": false,
+    "production_diff": [
+      "src/pcae/core/protected_presentation.py",
+      "src/pcae/protected_presentation_helper.py"
+    ]
+  },
+  "blocking_findings": [
+    {
+      "id": "F-3",
+      "severity": "BLOCKING",
+      "summary": "The unchanged .30R.5R.2 suite asserts that live HEAD starts with the pre-repair entry 0250e5f7.",
+      "evidence": {
+        "test": "test_01_phase_entry_and_historical_heads_are_primary_git_objects",
+        "repair_phase_head_result": "70 passed, 1 failed",
+        "implementation_commit_result": "70 passed, 1 failed",
+        "repair_phase_head": "361114d648dea432aa3ef92ecd7e24e748a173aa",
+        "expected_prefix": "0250e5f7"
+      },
+      "effect": "The mandatory predecessor repair suite is not green in its finalized state or in any successor verification state. Verification-only scope prohibits repairing it here."
+    }
+  ],
+  "real_ceremony": {
+    "started": false,
+    "reason": "A mandatory deterministic certification precondition failed before human or hardware interaction.",
+    "trusted_human_election_used": false,
+    "explicit_approve_occurred": false,
+    "presentation_evidence_created": false,
+    "fresh_fido2_assertion_performed": false,
+    "production_principal_created": false,
+    "gate5_consumed": false,
+    "test_seam_used": false
+  },
+  "historical_h1": {
+    "software_iv": "PRESERVED",
+    "real_hardware_verification": "PRESERVED",
+    "source_artifact": ".pcae/certification/rhamp_hardware_cert_30r5r1.json"
+  },
+  "boundaries": {
+    "runtime": "not_implemented",
+    "mode": "Observed",
+    "policy": "observe",
+    "effect_availability": "unavailable",
+    "plugins": 0,
+    "capabilities": 0,
+    "first_external_runtime_effect": "ABSENT_UNREACHABLE",
+    "n16_6": "OPEN_UNTOUCHED",
+    "n16_7": "OPEN_UNTOUCHED"
+  },
+  "profiles": {
+    "hpac.fido2.uv_presence.v2": "SUPPORTED_NOT_EXCLUSIVE",
+    "pcae-protected-local-presentation/1.0": "IMPLEMENTED_PENDING_FINAL_REAL_HUMAN_CERTIFICATION_NOT_EXCLUSIVE",
+    "future_mobile_only_profile": "OPEN_PLANNED"
+  },
+  "recommended_successor": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R"
+}

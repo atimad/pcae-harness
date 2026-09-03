@@ -1,7 +1,22 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1` independent verification
+  is **BLOCKED; N-16-5 NOT CLOSED**. H-2 and F-2 independently verify repaired
+  at the software-mechanism level (fresh IV 85/0; guard/RHAMP sweep 428/0), but
+  the mandatory unchanged `.30R.5R.2` suite is 70/1 at finalized repair head
+  `361114d6` and at implementation commit `a85abff6`: its `test_01` incorrectly
+  requires live `HEAD` to start with pre-repair entry `0250e5f7` (finding F-3,
+  BLOCKING). Verification-only scope prohibits repair, so the real local-human
+  and FIDO2 ceremony was not started and no test seam was substituted. Runtime
+  and effect boundaries remain unchanged; H-1 historical real-hardware proof
+  is preserved; FIDO2/local-TTY profiles remain supported-not-exclusive and a
+  future mobile-only profile remains open. Recommended next, not begun:
+  `.1R.30R.5R.2.1R` narrow F-3 repair.
+
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of Protected-Presentation Human Election + Final Presentation-Bound N-16-5 Certification and Closure to Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R narrow F-3 repair; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
+- Transitioned active task from Idle: awaiting next governed phase after the protected-presentation election and portable-launch repair; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of Protected-Presentation Human Election + Final Presentation-Bound N-16-5 Certification and Closure; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 — N-16-5 Protected-Presentation Interactive Human Election and Portable Helper Launch Repair to Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 independent verification and final presentation-bound N-16-5 certification; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2` repairs H-2: the production
   protected-presentation helper now renders the exact neutralized, request-bound

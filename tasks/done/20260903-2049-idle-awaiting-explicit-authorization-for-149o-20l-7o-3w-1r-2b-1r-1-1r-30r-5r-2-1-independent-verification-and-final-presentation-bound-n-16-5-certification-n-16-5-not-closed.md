@@ -10,7 +10,7 @@ Idle: awaiting next governed phase after the protected-presentation election and
 
 ## Status
 
-active
+done
 
 ## Mode
 

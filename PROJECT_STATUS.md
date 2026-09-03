@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of
+Protected-Presentation Human Election + Final Presentation-Bound N-16-5
+Certification and Closure. **STATUS: BLOCKED. H-2/F-2 SOFTWARE REPAIRS:
+INDEPENDENTLY VERIFIED. FINDING F-3: BLOCKING. REAL CEREMONY: NOT STARTED.
+N-16-5: NOT CLOSED.**
+
+**Anchors:** `A = 0250e5f7` (finalized `.30R.5R.1`), `I = V = 361114d6`
+(finalized `.30R.5R.2` and this IV's entry), repair implementation commit
+`a85abff6`. Production diff A..I is exactly the protected-presentation helper
+and existing launcher; normative contracts are byte-identical.
+
+**H-2/F-2 IV:** the fixed `/dev/tty` election is distinct from protocol input,
+accepts exact explicit APPROVE/REJECT, neutralizes terminal controls, and fails
+closed for invalid/empty/EOF/interruption/no-TTY. The fixed-interpreter `-I -c`
+bootstrap executes only the inherited held helper bytes on macOS system Python
+3.9 without shell, PATH, arbitrary argv/executable, cwd import, or generic
+process authority. Binding, substitution, replay/concurrency, evidence-writer,
+currentness/integrity, child-failure, guard, and profile-flexibility checks pass.
+
+**F-3 — BLOCKING:** the unchanged `.30R.5R.2` suite's `test_01` asserts live
+`HEAD.startswith("0250e5f7")`. It is 70/1 at both finalized repair head
+`361114d6` and implementation commit `a85abff6`; combined IV sweep 636/1 has
+only this failure. Fresh IV is 85/0 and guard/RHAMP sweep 428/0. Because this
+phase is verification-only, the existing suite was not repaired. The real
+human/FIDO2 ceremony was not started, no seam was substituted, and N-16-5
+cannot close. Historical H-1 genuine-hardware certification remains preserved.
+
+Runtime remains `not_implemented / Observed / observe / unavailable`, 0
+plugins/capabilities, first effect absent/unreachable; N-16-6/N-16-7 untouched.
+FIDO2 and local-TTY presentation remain supported-not-exclusive profiles;
+future mobile-only authentication/presentation remains open. Recommended next,
+not begun: `.1R.30R.5R.2.1R` narrow F-3 repair, followed by fresh IV and final
+certification. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1_PROTECTED_PRESENTATION_HUMAN_ELECTION_IV_AND_N_16_5_CERTIFICATION.md`.
+
+---
+
+## Prior Phase (.30R.5R.2)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 — N-16-5
 Protected-Presentation Interactive Human Election and Portable Helper Launch
 Repair. **STATUS: COMPLETE — REPAIR ONLY. H-2: REPAIRED, F-2: REPAIRED;
