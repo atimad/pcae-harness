@@ -1,31 +1,23 @@
 # PCAE Phase Completion Report
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1`
-- Status: **BLOCKED**
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R`
+- Status: **COMPLETE — F-3 REPAIRED**
 - N-16-5: **NOT CLOSED**
-- Finding: **F-3 — BLOCKING**
 
-H-2 and F-2 independently verify repaired at the software-mechanism level.
-The unchanged predecessor `.30R.5R.2` suite nevertheless fails its `test_01`
-because it compares live `HEAD` with pre-repair entry `0250e5f7`; the failure
-reproduces at finalized repair head `361114d6` and implementation commit
-`a85abff6` (70 passed, 1 failed at each).
+F-3 is repaired by replacing the predecessor test's moving live-HEAD check
+with the immutable Git relationship `a85abff6^ == 0250e5f7`. The test name and
+all sibling assertions remain. No wildcard, fnmatch, skip, xfail, removal, or
+rename was introduced.
 
-Fresh IV: 85 passed. Combined N-16-5 sweep: 636 passed, 1 F-3 failure.
-Independent guard/RHAMP sweep: 428 passed. Production/contracts/existing tests
-are unchanged by this IV.
+Predecessor suite: 71 passed. Fresh repair suite: 45 passed. Historical
+`.30R.5R.2.1`: 85 passed at immutable V; current 84 passed with only its
+preserved obsolete F-3 demonstration failing. Presentation sweep: 552 passed.
+Historical guard sweep: 428 passed.
 
-The verification-only rule prohibits repair here. The real trusted-terminal
-and genuine FIDO2 ceremony was not started; no test seam or chat decision was
-substituted. No presentation evidence, PRODUCTION principal, Gate 5
-certification, or N-16-5 closure is claimed.
+Production, scripts, dependencies, contracts, and H-1/H-2/F-2 source bytes are
+unchanged. No real terminal or hardware ceremony occurred. Runtime remains
+`not_implemented / Observed / observe / unavailable`, zero plugins/capabilities,
+first effect absent. N-16-6/N-16-7 are untouched.
 
-Runtime remains `not_implemented / Observed / observe / unavailable`, zero
-plugins/capabilities, first effect absent. N-16-6/N-16-7 remain untouched.
-FIDO2 and local-TTY presentation remain supported-not-exclusive; future
-mobile-only profiles remain open.
-
-Recommended next, not begun: `.30R.5R.2.1R`, narrow F-3 repair.
-
-Governed push through `a4358113`, canonical report promotion, and Telegram
-summary/document notification all completed successfully.
+Recommended next, not begun: `.30R.5R.2.1R.1` fresh IV and final N-16-5
+certification.
