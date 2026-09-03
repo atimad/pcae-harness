@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5` (Mandatory Real-CTAP2-Hardware
+  Verification and N-16-5 Closure, == RHAMP `.1R.33`) is **BLOCKED**; **N-16-5
+  remains NOT CLOSED**. A genuine CTAP2 USB security key was exercised through
+  the production `NativeCtap2Provider`; both mandatory ceremonies were rejected
+  with `CTAP2_ERR_INVALID_OPTION (0x2C)` because the provider requests user
+  verification with a bare `uv` option, which CTAP 2.1 authenticators reject
+  (**finding H-1**). Repairing that handshake is a production change outside
+  this certification phase's scope. No production source, script, or normative
+  contract byte changed; no deterministic fixture substituted; no hardware
+  certification claimed. The non-blocking `.30R.4R.2` finding F-1 and three
+  sibling stale `.1R.19R` / `.30R.1` guards (reproduced as pre-existing on the
+  phase-entry SHA) are carried forward to the successor repair phase. Runtime
+  remains `Observed` / `observe` / `unavailable`; first external effect
+  ABSENT; N-16-6 / N-16-7 OPEN / UNTOUCHED.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2); N-16-5 NOT CLOSED; mandatory real-CTAP2-hardware verification recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5: Mandatory Real-CTAP2-Hardware Verification and N-16-5 Closure; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2: IV of N-16-5 protected presentation and real-assurance consumption to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2); N-16-5 NOT CLOSED; mandatory real-CTAP2-hardware verification recommended next; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2` independently verifies the

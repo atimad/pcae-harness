@@ -2,6 +2,33 @@
 
 ## Accepted
 
+- **2026-09-03 — Stop `.1R.30R.5` BLOCKED at the CTAP 2.1 provider
+  incompatibility; N-16-5 stays NOT CLOSED.** A genuine CTAP2 USB security key
+  was exercised through the production `NativeCtap2Provider`. Both mandatory
+  RHAMP-REQ-152 ceremonies (`authenticatorMakeCredential`,
+  `authenticatorGetAssertion`) were rejected by the authenticator with
+  `CTAP2_ERR_INVALID_OPTION (0x2C)` because the provider requests user
+  verification with a bare `"uv"` option — removed from `makeCredential` in
+  CTAP 2.1 and insufficient for `getAssertion` on a `clientPin`-based
+  authenticator (needs a PIN/UV-protocol `pinUvAuthParam`). Finding **H-1**.
+  The production provider has never successfully talked to real CTAP 2.1
+  hardware; the automated suite passes only because
+  `DeterministicCtap2Provider` (`SIMULATION_ONLY`) is lenient — precisely the
+  RHAMP-INV-018 gap. Repairing `hpac_rhamp_ctap2.py` to run the
+  `ClientPin` / `PinProtocolV2` → `pinUvAuthToken` → `pinUvAuthParam`
+  handshake is a `src/pcae/core/` change outside this certification phase's
+  scope (governing prompt §55). Do not silently repair, do not fall back to
+  the deterministic provider, do not fabricate hardware evidence, do not close
+  N-16-5, do not proceed to N-16-6. The non-blocking `.30R.4R.2` finding F-1
+  and three sibling stale `.1R.19R` / `.30R.1` guards (reproduced as
+  pre-existing on the phase-entry SHA `0b973e2e`) are carried forward, not
+  reconciled here, so the BLOCKED phase changes no code. Recommend
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R` — H-1 repair + CTAP-version-aware
+  automated coverage + trusted PIN flow + the full mandatory hardware ceremony
+  + the F-1 / sibling-guard reconciliations + N-16-5 closure adjudication;
+  own explicit human authorization and own protected human approval required;
+  not begun.
+
 - **2026-09-02 — Stop `.1R.30R.4` BLOCKED at the production protected-
   presentation installation-authority boundary.** Decision A validly
   reassigned `.30R.4` to protected presentation, but RHAMP-001's mandatory
