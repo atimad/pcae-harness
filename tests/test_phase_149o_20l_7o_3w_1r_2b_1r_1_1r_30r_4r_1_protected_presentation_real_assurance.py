@@ -225,8 +225,16 @@ def test_02_hpac_ppa_001_v1_0_identity():
 
 def test_03_rhamp_and_hpac_byte_unchanged_since_r4r():
     r4r = "a727dbf4f160f904836905d3cb4adeba91953676"
+    # Point-in-time guard reconciled by .1R.30R.5R: upper bound pinned to the
+    # .1R.30R.4R.1 finalized head; the dedicated .1R.30R.5R CTAP2 PIN/UV
+    # interoperability repair legitimately changes hpac_rhamp_ctap2.py.
+    r4r1_head = "5b6b4013a69ffcb366209b12c495571917bb5ccc"
     for path in ("docs/contracts", "src/pcae/core/hpac_rhamp_ctap2.py",
                  "src/pcae/core/hpac_rhamp_assertion_verify.py", "src/pcae/core/human_authenticator_fido2.py"):
+        assert subprocess.run(["git", "diff", "--quiet", r4r, r4r1_head, "--", path], cwd=REPO).returncode == 0, path
+    # contracts + the assertion-verify / authenticator modules remain byte-unchanged at HEAD too
+    for path in ("docs/contracts", "src/pcae/core/hpac_rhamp_assertion_verify.py",
+                 "src/pcae/core/human_authenticator_fido2.py"):
         assert subprocess.run(["git", "diff", "--quiet", r4r, "HEAD", "--", path], cwd=REPO).returncode == 0, path
 
 
@@ -726,7 +734,15 @@ def test_71_pawa_non_regression(tmp_path):
 
 def test_72_rhamp_fido2_modules_are_byte_unchanged():
     r4r = "a727dbf4f160f904836905d3cb4adeba91953676"
-    for mod in ("hpac_rhamp_ctap2.py", "hpac_rhamp_assertion_verify.py", "hpac_rhamp_counter_state.py",
+    # Point-in-time guard reconciled by .1R.30R.5R: hpac_rhamp_ctap2.py is
+    # pinned to the .1R.30R.4R.1 finalized head (the .1R.30R.5R repair changes
+    # exactly that one file); the other five RHAMP FIDO2 modules stay
+    # byte-unchanged at HEAD.
+    r4r1_head = "5b6b4013a69ffcb366209b12c495571917bb5ccc"
+    assert subprocess.run(
+        ["git", "diff", "--quiet", r4r, r4r1_head, "--", "src/pcae/core/hpac_rhamp_ctap2.py"], cwd=REPO
+    ).returncode == 0
+    for mod in ("hpac_rhamp_assertion_verify.py", "hpac_rhamp_counter_state.py",
                 "hpac_rhamp_credential_sidecar.py", "human_authenticator_fido2.py", "hpac_rhamp_enrollment.py"):
         assert subprocess.run(
             ["git", "diff", "--quiet", r4r, "HEAD", "--", f"src/pcae/core/{mod}"], cwd=REPO
