@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R: N-16-5 CTAP2 PIN/UV repair to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R); N-16-5 NOT CLOSED; H-1 repaired, real-hardware certification IV recommended next; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R` (N-16-5 CTAP2 PIN/UV Protocol
   Interoperability Repair) **repairs finding H-1**: `NativeCtap2Provider`
   (`src/pcae/core/hpac_rhamp_ctap2.py`) no longer sends a bare CTAP 2.1-invalid
