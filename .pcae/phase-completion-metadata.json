@@ -54,7 +54,7 @@
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
     "implementation_verdict": "software implementation INDEPENDENTLY VERIFIED; PAWA presentation configuration VERIFIED; installation/currentness VERIFIED; installer != launcher != evidence-writer separation VERIFIED; fixed helper launch VERIFIED; request/display binding VERIFIED; PPA evidence-writer non-bearer VERIFIED; PPA single-use VERIFIED; create-only evidence VERIFIED; real presentation verifier VERIFIED; deterministic seam isolation VERIFIED; REAL auth + REAL presentation coupling VERIFIED; require_real_assurance VERIFIED; Gate 5 consumption VERIFIED; Gate 9 consumption VERIFIED; PB/policy independence VERIFIED; runtime/effect independence VERIFIED; merged RHAMP authentication VERIFIED / PRESERVED; one NON-BLOCKING finding (F-1); N-16-5 NOT CLOSED; mandatory real-CTAP2-hardware verification outstanding; N-16-6 / N-16-7 OPEN / UNTOUCHED"
   },
-  "notification_dispatch_result": "pending_phase_complete_promotion",
+  "notification_dispatch_result": "dispatched_on_promotion",
   "no_go_confirmation": "No production source byte changed by this phase.\nNo normative contract byte changed by this phase.\nNo defect was repaired inside this independent verification.\nNo Gate 5, Gate 9, runtime, adapter, permission-broker, or policy source touched.\nNo new FIDO2 mechanism, new cryptography, or new dependency.\nNo adapter.dispatch, no DispatchEnvelope, no runtime capability, no PB ALLOW, no policy override.\nNo N-16-6 effect-adapter surface and no N-16-7 runtime-capability enablement.\nNo Slice C.\nNo first external effect and no execution enablement.\nNo hardware accessed and no real-CTAP2-hardware claim made.\nNo closure of N-16-5.\nNo delegated worker committed, finalized, or pushed.\nNo raw git commit or push, --no-verify, force push, history rewrite, or hook bypass.\nNo test definition removed, renamed, skipped, or xfailed and no wildcard or fnmatch broadening.",
   "files_changed": [
     "CHANGELOG.md",
@@ -75,6 +75,6 @@
     {"hash": "166b3664235720cad9344ed6060af757e4b759d1", "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2: close IV task, open post-phase idle task"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5 — Mandatory Real-CTAP2-Hardware Verification and N-16-5 Closure (== RHAMP .1R.33). Performs the mandatory at-least-one real CTAP2 hardware ceremony against a genuine attached security key with a genuine human gesture, folds the finding F-1 .1R.19R guard reconciliation (with the sibling stale .1R.19R and .30R.1 guards), and only if every frozen N-16-5 requirement is then complete closes N-16-5. Then N-16-6, then N-16-7 (strictly last). ID recommended NOT reserved; own explicit human authorization required; do not begin N-16-6, N-16-7, Slice C, a first external effect, or execution enablement.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "fe594e83cd0a8db73a90f753d80df2bc49a189ff"
 }
