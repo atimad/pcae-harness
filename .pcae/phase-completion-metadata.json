@@ -10,8 +10,8 @@
   "metadata_consistency": "All current artifacts identify .30R.5R.2.1R COMPLETE with F-3 REPAIRED and N-16-5 NOT CLOSED; .30R.5R.2.1 remains historically BLOCKED.",
   "internal_evidence_coherence": "Fresh repair suite 45 passed; repaired predecessor suite 71 passed; combined 116 passed from committed successor HEAD. Historical .30R.5R.2.1 at V remains 85 passed; current unchanged suite has 84 software checks pass and only its preserved obsolete F-3 demonstration fail. Presentation sweep 552 passed; guard sweep 428 passed.",
   "internal_report_coherence": "Earlier phase IDs are immutable evidence anchors; .30R.5R.2.1R.1 appears only as a recommended future phase.",
-  "report_consistency": "Pending governed push and final promotion.",
-  "origin_main_head_count": 2,
+  "report_consistency": "Governed phase commits were pushed through 6c47db9c; canonical report promotion and Telegram notification succeeded.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "governed_narrow_historical_evidence_repair",
   "tests_run": 45,
   "tests_added_or_updated": "One predecessor test body repaired in two exact hunks and one fresh 45-case suite added; zero test definitions removed or renamed and zero skip/xfail/wildcard/fnmatch broadening.",
@@ -38,12 +38,12 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE index omissions; current task archived/listed",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "clean after governed push through 6c47db9c",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
-    "telegram_runtime": "configured, enabled, ready; dispatch deferred to final post-push promotion",
-    "notification_status": "pending final post-push promotion"
+    "telegram_runtime": "configured, enabled, ready; final dispatch succeeded",
+    "notification_status": "telegram summary and canonical report sent successfully"
   },
-  "notification_dispatch_result": "pending final post-push promotion",
+  "notification_dispatch_result": "sent -- telegram summary and canonical report delivered successfully",
   "no_go_confirmation": "No production source changed.\nNo script or dependency changed.\nNo normative contract changed.\nNo historical .30R.5R.2.1 artifact changed.\nNo test definition was removed or renamed.\nNo skip, skipif, pytest.skip, or xfail was introduced.\nNo wildcard or fnmatch broadening was introduced.\nNo live HEAD or live completion metadata remains historical phase-entry authority.\nNo real protected-presentation ceremony was started.\nNo YubiKey touch or PIN was requested.\nNo deterministic seam was substituted for certification.\nNo N-16-5 closure was recorded.\nNo N-16-6 or N-16-7 work was begun.\nNo runtime capability, plugin, adapter dispatch, or first effect was introduced.\nNo FIDO2 or local-TTY global mandate was introduced.\nNo future mobile-only profile was foreclosed.\nNo raw git commit/push, bypass, force push, or history rewrite was used.\nNo delegated worker finalized, committed, or pushed.",
   "no_go_confirmations": [
     "No production source changed.",
@@ -81,6 +81,6 @@
     {"hash": "072893ed7024c2a3fa9fe51997e6429b0d494272", "subject": "Close F-3 repair task and stage fresh IV handoff"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1 -- Independent Verification of the F-3 Repair + Final Real Protected-Presentation Human Election and Presentation-Bound N-16-5 Certification and Closure; recommended, not begun; explicit authorization required.",
-  "pushed_status": "pending",
-  "origin_main_head": "57edf6a93f8b4f01ee95d4b74ceddcaea96f53b3"
+  "pushed_status": "pushed",
+  "origin_main_head": "6c47db9c463d5228e91483e58d680c823c9bdfe7"
 }

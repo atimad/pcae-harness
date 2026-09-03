@@ -21,3 +21,6 @@ first effect absent. N-16-6/N-16-7 are untouched.
 
 Recommended next, not begun: `.30R.5R.2.1R.1` fresh IV and final N-16-5
 certification.
+
+Governed push through `6c47db9c`, canonical report promotion, and Telegram
+summary/document notification completed successfully.
