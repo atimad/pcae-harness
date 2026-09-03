@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 independent verification and final presentation-bound N-16-5 certification; N-16-5 NOT CLOSED
+Idle: awaiting next governed phase after the protected-presentation election and portable-launch repair; N-16-5 NOT CLOSED
 
 ## Status
 
@@ -18,7 +18,9 @@ implementation
 
 ## Goal
 
-Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 independent verification and final presentation-bound N-16-5 certification; N-16-5 NOT CLOSED
+Await explicit authorization for the fresh independent verification and final
+presentation-bound N-16-5 certification successor recommended by the completed
+repair phase. Do not begin that successor while this idle task is active.
 
 ## Allowed Files
 
@@ -29,6 +31,8 @@ Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
