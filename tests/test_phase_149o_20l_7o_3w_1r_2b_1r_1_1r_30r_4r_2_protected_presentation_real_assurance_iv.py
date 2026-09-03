@@ -1103,7 +1103,13 @@ def test_69_finding_f1_the_r19r_scope_fence_trips_on_disclaimer_prose_only():
 
 
 def test_70_iv_suite_touches_no_production_source_or_contract():
-    changed = set(_git("diff", "--name-only", "5b6b4013", "--").split())
+    # Point-in-time guard reconciled by .1R.30R.5R: the upper bound is pinned
+    # to the .1R.30R.4R.2 finalized head (0b973e2e). Through that head the
+    # .1R.30R.4R.2 IV phase changed no src/pcae / docs/contracts / scripts
+    # file. Later governed phases (e.g. .1R.30R.5R, the CTAP2 PIN/UV
+    # interoperability repair) legitimately touch src/pcae under their own
+    # dedicated scope fences.
+    changed = set(_git("diff", "--name-only", "5b6b4013", "0b973e2e", "--").split())
     for c in changed:
         assert not c.startswith("src/pcae/"), c
         assert not c.startswith("docs/contracts/"), c

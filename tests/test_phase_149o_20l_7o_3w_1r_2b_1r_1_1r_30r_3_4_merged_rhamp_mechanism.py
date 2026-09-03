@@ -611,7 +611,17 @@ def test_32_no_browser_webauthn_tls_in_new_code():
 
 def test_33_non_discoverable_and_uv_options_requested():
     text = (SRC / "core" / "hpac_rhamp_ctap2.py").read_text()
-    assert '"rk": False' in text and '"uv": True' in text
+    # Non-discoverable (rk=False) is unchanged.
+    assert '"rk": False' in text
+    # Phase .1R.30R.5R / finding H-1: CTAP 2.1 removed the bare "uv"
+    # makeCredential option; UV is now asserted by a command-scoped
+    # pinUvAuthParam threaded through both ceremonies. The old invalid shape
+    # (a bare "uv": True option passed to make_credential/get_assertion) is
+    # gone; this guard is widened, not weakened.
+    assert '"rk": False, "uv": True' not in text
+    assert "pin_uv_param=pin_uv_param" in text
+    assert "pin_uv_protocol=pin_uv_protocol" in text
+    assert "_obtain_pin_uv" in text
 
 
 def test_34_attestation_non_authoritative():

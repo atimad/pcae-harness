@@ -29,14 +29,34 @@ with no constructor override — and a fixed ``PROVIDER_KIND`` that can never
 equal the production kind. Production selection
 (:func:`resolve_production_ctap2_provider`) accepts **no** environment
 variable / caller flag that swaps in a fixture (RHAMP-REQ-048 / §63).
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R — **N-16-5 CTAP2 PIN/UV protocol
+interoperability repair** (finding H-1). CTAP 2.1 removed the bare ``uv``
+option from ``authenticatorMakeCredential`` and requires a PIN/UV-protocol
+``pinUvAuthParam`` for ``authenticatorGetAssertion`` on a ``clientPin``-based
+roaming key. :class:`NativeCtap2Provider` therefore negotiates the
+authenticator's supported PIN/UV protocol (``ClientPin`` / ``PinProtocolV2``
+preferred), acquires a permission-scoped, rp-bound ``pinUvAuthToken`` via a
+**trusted, non-logging, non-persisted local PIN entry** (``getpass`` — never a
+CLI argument, environment variable, repository value, or chat prompt; the PIN
+is discarded the instant the token is obtained and never stored on any RHAMP
+artifact — RHAMP-INV-006 / §18 / §54 intact), derives a **command-scoped**
+``pinUvAuthParam`` over the canonical ``client_data_hash``, and threads it
+through both ceremonies. There is **no bare-``uv`` fallback**; an authenticator
+that cannot perform UV is rejected as incompatible (no UP-only downgrade —
+RHAMP-REQ-034/035). The transient PIN handling is the client-side mechanism by
+which "UV is satisfied inside the authenticator (PIN…)" (RHAMP-REQ-035) is
+actually reachable for a PIN-based key; it introduces no normative-contract
+change (the wire mechanics are a pinned-library detail, like COSE verify).
 """
 
 from __future__ import annotations
 
 import hashlib
+import hmac
 import os
 from dataclasses import dataclass, field
-from typing import Final, Optional, Protocol
+from typing import Callable, Final, Optional, Protocol
 
 from fido2 import cbor
 from fido2.cose import ES256, CoseKey
@@ -57,6 +77,7 @@ __all__ = [
     "DeterministicCtap2Provider",
     "resolve_production_ctap2_provider",
     "verify_assertion_signature_material",
+    "build_virtual_ctap2_test_seam",
 ]
 
 PRODUCTION_PROVIDER_KIND = "native-ctap2"
@@ -64,6 +85,59 @@ PRODUCTION_PROVIDER_KIND = "native-ctap2"
 SUPPORTED_TRANSPORTS: Final[tuple[str, ...]] = ("usb", "nfc")
 
 _ES256_ALG = -7  # COSE alg identifier for ES256 (RHAMP-REQ-043: ES256 only).
+
+#: RHAMP-REQ-017 / §6 — the compiled-in relying-party id every PIN/UV token is
+#: bound to. Never caller-selectable.
+_PIN_UV_TOKEN_RP_ID: Final[str] = RP_ID
+
+
+def _default_pin_prompt() -> str:
+    """RHAMP-REQ-035 / §8 — trusted local PIN acquisition.
+
+    No CLI argument, no environment variable, no repository / config value, no
+    chat prompt. Hidden input via :mod:`getpass`; never logged, never persisted,
+    never echoed, never placed on an exception or a RHAMP artifact. A
+    non-interactive environment fails closed (no default PIN).
+    """
+
+    import getpass
+    import sys
+
+    if not (sys.stdin is not None and sys.stdin.isatty()):
+        raise Ctap2UnavailableError(
+            "a security-key PIN is required for user verification but no "
+            "interactive terminal is available for trusted PIN entry"
+        )
+    try:
+        return getpass.getpass("Enter your security-key PIN in the local trusted prompt: ")
+    except (EOFError, KeyboardInterrupt) as exc:  # user aborted the prompt
+        raise Ctap2CancelledError("PIN entry cancelled") from exc
+
+
+def _map_pin_uv_ctap_error(exc: Exception) -> RhampTerminalError:
+    """Map a ``ClientPin`` / PIN-UV ``CtapError`` onto an existing frozen
+    terminal reason (RHAMP-REQ-149 / §18 / §49 — no new code). The PIN itself
+    never appears in the returned message."""
+
+    from fido2.ctap import CtapError
+
+    if isinstance(exc, RhampTerminalError):
+        return exc
+    code = getattr(exc, "code", None)
+    E = CtapError.ERR
+    if code in (E.ACTION_TIMEOUT, E.USER_ACTION_TIMEOUT):
+        return Ctap2CancelledError("user verification timed out", timed_out=True)
+    if code == E.KEEPALIVE_CANCEL:
+        return Ctap2CancelledError("user verification cancelled")
+    if code in (E.PIN_INVALID, E.PIN_AUTH_INVALID, E.UV_INVALID):
+        return Ctap2UnavailableError("user verification failed (invalid PIN / UV auth)")
+    if code in (E.PIN_BLOCKED, E.PIN_AUTH_BLOCKED, E.UV_BLOCKED):
+        return Ctap2UnavailableError("user verification unavailable (authenticator PIN/UV blocked)")
+    if code == E.PIN_NOT_SET:
+        return Ctap2UnavailableError(
+            "authenticator has no PIN configured and no built-in UV; RHAMP-001 §10 forbids downgrade"
+        )
+    return Ctap2UnavailableError("CTAP2 PIN/UV protocol failure during user verification")
 
 
 class Ctap2UnavailableError(RhampTerminalError):
@@ -219,8 +293,25 @@ class NativeCtap2Provider:
 
     PROVIDER_KIND: Final[str] = PRODUCTION_PROVIDER_KIND
 
-    def __init__(self, *, presence_timeout_s: float = 60.0) -> None:
+    def __init__(
+        self,
+        *,
+        presence_timeout_s: float = 60.0,
+        _connection_factory: Optional[Callable[[], object]] = None,
+        _client_pin_factory: Optional[Callable[[object], object]] = None,
+        _pin_prompt: Optional[Callable[[], str]] = None,
+    ) -> None:
+        """The three underscore-prefixed parameters are **test-only** seams for
+        driving this production class against an in-memory protocol-faithful
+        virtual authenticator (:func:`build_virtual_ctap2_test_seam`). They are
+        never populated by :func:`resolve_production_ctap2_provider` and accept
+        **no** environment variable / caller flag / repository value
+        (RHAMP-REQ-048 / §63)."""
+
         self._presence_timeout_s = presence_timeout_s
+        self._connection_factory = _connection_factory
+        self._client_pin_factory = _client_pin_factory
+        self._pin_prompt = _pin_prompt or _default_pin_prompt
 
     def _devices(self):
         from fido2.hid import CtapHidDevice
@@ -231,6 +322,8 @@ class NativeCtap2Provider:
             raise Ctap2UnavailableError(f"CTAP2 device enumeration failed: {exc}") from exc
 
     def available(self) -> bool:
+        if self._connection_factory is not None:
+            return True
         try:
             return bool(self._devices())
         except Ctap2UnavailableError:
@@ -241,28 +334,111 @@ class NativeCtap2Provider:
 
         return Ctap2(device)
 
+    def _open_ctap2(self):
+        if self._connection_factory is not None:
+            return self._connection_factory()
+        devices = self._devices()
+        if not devices:
+            raise Ctap2UnavailableError("no CTAP2 authenticator attached")
+        return self._ctap2(devices[0])
+
+    def _client_pin(self, ctap2):
+        if self._client_pin_factory is not None:
+            return self._client_pin_factory(ctap2)
+        from fido2.ctap2 import ClientPin
+
+        return ClientPin(ctap2)
+
+    def _obtain_pin_uv(
+        self, ctap2, *, permission_name: str, client_data_hash: bytes
+    ) -> tuple[bytes, int]:
+        """RHAMP-REQ-033..036 / §8..§13 — negotiate the authenticator's
+        supported PIN/UV protocol, acquire a permission-scoped, rp-bound
+        PIN/UV token (built-in UV where advertised, otherwise a trusted local
+        PIN), and derive a **command-scoped** ``pinUvAuthParam`` over
+        ``client_data_hash``. No bare-``uv`` fallback; no UP-only downgrade.
+        Returns ``(pin_uv_param, pin_uv_protocol_version)``."""
+
+        from fido2.ctap import CtapError
+        from fido2.ctap2 import ClientPin as _ClientPin
+
+        info = ctap2.info
+        options = dict(getattr(info, "options", {}) or {})
+        builtin_uv = options.get("uv") is True
+        client_pin_configured = options.get("clientPin") is True
+        if not builtin_uv and not client_pin_configured:
+            raise Ctap2UnavailableError(
+                "authenticator cannot satisfy mandatory user verification (no built-in "
+                "UV, no client PIN configured); RHAMP-001 §10 forbids any downgrade"
+            )
+        try:
+            client_pin = self._client_pin(ctap2)
+        except ValueError as exc:  # no mutually supported PIN/UV protocol
+            raise Ctap2UnavailableError(
+                f"no mutually supported CTAP2 PIN/UV protocol: {exc}"
+            ) from exc
+
+        protocol = client_pin.protocol
+        protocol_version = int(protocol.VERSION)
+        permission = {
+            "make_credential": _ClientPin.PERMISSION.MAKE_CREDENTIAL,
+            "get_assertion": _ClientPin.PERMISSION.GET_ASSERTION,
+        }[permission_name]
+
+        token: Optional[bytes] = None
+        try:
+            if builtin_uv:
+                token = client_pin.get_uv_token(permission, _PIN_UV_TOKEN_RP_ID)
+            else:
+                pin = self._pin_prompt()
+                try:
+                    if not pin:
+                        raise Ctap2UnavailableError(
+                            "no security-key PIN was provided for user verification"
+                        )
+                    token = client_pin.get_pin_token(pin, permission, _PIN_UV_TOKEN_RP_ID)
+                finally:
+                    pin = None  # noqa: F841 — drop the PIN immediately
+                    del pin
+            pin_uv_param = protocol.authenticate(token, client_data_hash)
+        except CtapError as exc:
+            raise _map_pin_uv_ctap_error(exc) from exc
+        except RhampTerminalError:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            raise Ctap2UnavailableError(
+                "CTAP2 PIN/UV protocol failure during user verification"
+            ) from exc
+        finally:
+            token = None
+            del token
+        return pin_uv_param, protocol_version
+
     def make_credential(
         self, *, client_data_hash: bytes, user_id: bytes, user_name: str
     ) -> MakeCredentialResult:
         from fido2.ctap import CtapError
 
-        devices = self._devices()
-        if not devices:
-            raise Ctap2UnavailableError("no CTAP2 authenticator attached for makeCredential")
+        ctap2 = self._open_ctap2()
         rp = {"id": RP_ID, "name": "PCAE HPAC"}
         user = {"id": user_id, "name": user_name, "displayName": user_name}
         key_params = [{"type": "public-key", "alg": ES256.ALGORITHM}]
-        # RHAMP-REQ-032/033/061: non-discoverable (rk absent), UV required,
-        # no attestation preference.
-        options = {"rk": False, "uv": True}
+        pin_uv_param, pin_uv_protocol = self._obtain_pin_uv(
+            ctap2, permission_name="make_credential", client_data_hash=client_data_hash
+        )
+        # RHAMP-REQ-032/033/061 + finding H-1: non-discoverable (rk=False), no
+        # bare "uv" option (removed in CTAP 2.1) — UV is asserted by the
+        # command-scoped pinUvAuthParam. No attestation preference.
+        options = {"rk": False}
         try:
-            ctap2 = self._ctap2(devices[0])
             attestation = ctap2.make_credential(
                 client_data_hash=client_data_hash,
                 rp=rp,
                 user=user,
                 key_params=key_params,
                 options=options,
+                pin_uv_param=pin_uv_param,
+                pin_uv_protocol=pin_uv_protocol,
             )
         except CtapError as exc:
             if exc.code in (
@@ -272,7 +448,10 @@ class NativeCtap2Provider:
                 raise Ctap2CancelledError(str(exc), timed_out=True) from exc
             if exc.code == CtapError.ERR.KEEPALIVE_CANCEL:
                 raise Ctap2CancelledError(str(exc)) from exc
+            # No bare-"uv" retry — fail closed with a canonical reason.
             raise Ctap2UnavailableError(f"device rejected makeCredential: {exc}") from exc
+        except RhampTerminalError:
+            raise
         except Exception as exc:  # noqa: BLE001
             raise Ctap2UnavailableError(f"CTAP2 transport failure during makeCredential: {exc}") from exc
 
@@ -286,6 +465,12 @@ class NativeCtap2Provider:
                 f"makeCredential produced an unsupported COSE algorithm: {cose_key.get(3)!r} (ES256 only)"
             )
         flags = int(auth_data.flags)
+        if not flags & AuthenticatorData.FLAG.UV:
+            # RHAMP-REQ-034/035 — never accept a UP-only makeCredential.
+            raise Ctap2UnavailableError(
+                "makeCredential completed without user verification (FLAG.UV clear); "
+                "RHAMP-001 §10 forbids a UP-only downgrade"
+            )
         return MakeCredentialResult(
             raw_credential_id=bytes(credential_data.credential_id),
             cose_public_key=cbor.encode(cose_key),
@@ -302,17 +487,20 @@ class NativeCtap2Provider:
 
         if not allow_credential_ids:
             raise Ctap2UnavailableError("getAssertion requires a non-empty canonical allowList (no discoverable flow)")
-        devices = self._devices()
-        if not devices:
-            raise Ctap2UnavailableError("no CTAP2 authenticator attached for getAssertion")
+        ctap2 = self._open_ctap2()
         allow_list = [{"type": "public-key", "id": cid} for cid in allow_credential_ids]
+        pin_uv_param, pin_uv_protocol = self._obtain_pin_uv(
+            ctap2, permission_name="get_assertion", client_data_hash=client_data_hash
+        )
         try:
-            ctap2 = self._ctap2(devices[0])
+            # finding H-1: no bare "uv" option — UV is asserted by the
+            # command-scoped pinUvAuthParam; the §37 verifier still enforces FLAG.UV.
             response = ctap2.get_assertion(
                 rp_id=RP_ID,
                 client_data_hash=client_data_hash,
                 allow_list=allow_list,
-                options={"uv": True},
+                pin_uv_param=pin_uv_param,
+                pin_uv_protocol=pin_uv_protocol,
             )
         except CtapError as exc:
             if exc.code in (CtapError.ERR.ACTION_TIMEOUT, CtapError.ERR.USER_ACTION_TIMEOUT):
@@ -320,6 +508,8 @@ class NativeCtap2Provider:
             if exc.code == CtapError.ERR.KEEPALIVE_CANCEL:
                 raise Ctap2CancelledError(str(exc)) from exc
             raise Ctap2UnavailableError(f"device rejected getAssertion: {exc}") from exc
+        except RhampTerminalError:
+            raise
         except Exception as exc:  # noqa: BLE001
             raise Ctap2UnavailableError(f"CTAP2 transport failure during getAssertion: {exc}") from exc
 
@@ -474,6 +664,277 @@ class DeterministicCtap2Provider:
             uv=self._uv,
             sign_count=vcred.sign_count,
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Protocol-faithful virtual CTAP2 authenticator (Phase .1R.30R.5R / finding
+# H-1). NON_REAL. It models enough of the CTAP 2.1 wire contract to reject the
+# exact request shapes a genuine FIDO_2_1 key rejects — a bare ``uv`` option,
+# a missing / wrong ``pinUvAuthParam``, a wrong protocol, a permission
+# mismatch, a wrong rp_id token binding — so the production PIN/UV code path in
+# :class:`NativeCtap2Provider` is exercised without hardware. It is driven only
+# through the test-only seams and can never be returned by
+# :func:`resolve_production_ctap2_provider`.
+# ─────────────────────────────────────────────────────────────────────────
+
+
+class _DeterministicPinUvProtocol:
+    """A deterministic stand-in for ``PinProtocolV2.authenticate`` used by the
+    virtual authenticator and its virtual ClientPin. NOT cryptography that
+    protects anything — a fixed keyed digest so the fixture can recompute and
+    compare ``pinUvAuthParam``."""
+
+    def __init__(self, version: int = 2) -> None:
+        self.VERSION = int(version)
+
+    def authenticate(self, key: bytes, message: bytes) -> bytes:
+        return hmac.new(key, message, hashlib.sha256).digest()
+
+
+@dataclass
+class _VirtualInfo:
+    options: dict
+    pin_uv_protocols: list
+    versions: tuple = ("U2F_V2", "FIDO_2_0", "FIDO_2_1_PRE", "FIDO_2_1")
+    algorithms: tuple = ({"type": "public-key", "alg": _ES256_ALG},)
+
+
+class _VirtualClientPin:
+    """NON_REAL. Models ``ClientPin`` token issuance against a
+    :class:`_VirtualCtap2Authenticator`."""
+
+    SIMULATION_ONLY: Final[bool] = True
+    PROVIDER_KIND_IS_REAL: Final[bool] = False
+
+    def __init__(self, authenticator: "_VirtualCtap2Authenticator") -> None:
+        self._auth = authenticator
+        selected = next((v for v in (2, 1) if v in authenticator._pin_uv_protocols), None)
+        if selected is None:
+            raise ValueError("No compatible PIN/UV protocols supported!")
+        self.protocol = _DeterministicPinUvProtocol(selected)
+
+    def get_pin_token(self, pin, permissions=None, permissions_rpid=None):
+        from fido2.ctap import CtapError
+
+        a = self._auth
+        if a._pin_blocked:
+            raise CtapError(CtapError.ERR.PIN_BLOCKED)
+        if not a._client_pin_configured:
+            raise CtapError(CtapError.ERR.PIN_NOT_SET)
+        if pin != a._pin:
+            raise CtapError(CtapError.ERR.PIN_INVALID)
+        return a._issue_token(permissions, permissions_rpid)
+
+    def get_uv_token(self, permissions=None, permissions_rpid=None, event=None, on_keepalive=None):
+        from fido2.ctap import CtapError
+
+        a = self._auth
+        if not a._builtin_uv:
+            raise CtapError(CtapError.ERR.UV_INVALID)
+        return a._issue_token(permissions, permissions_rpid)
+
+
+class _VirtualCtap2Authenticator:
+    """NON_REAL protocol-faithful model of a CTAP 2.1 roaming key."""
+
+    SIMULATION_ONLY: Final[bool] = True
+    PROVIDER_KIND_IS_REAL: Final[bool] = False
+
+    def __init__(
+        self,
+        *,
+        pin: str = "13795746",
+        client_pin_configured: bool = True,
+        builtin_uv: bool = False,
+        pin_blocked: bool = False,
+        pin_uv_protocols: tuple = (2, 1),
+        up: bool = True,
+        uv: bool = True,
+        aaguid: bytes = b"\x11" * 16,
+        start_sign_count: int = 0,
+        sign_count_step: int = 1,
+        wrong_rp_id_hash: bool = False,
+    ) -> None:
+        assert self.SIMULATION_ONLY is True
+        self._pin = pin
+        self._client_pin_configured = client_pin_configured
+        self._builtin_uv = builtin_uv
+        self._pin_blocked = pin_blocked
+        self._pin_uv_protocols = tuple(pin_uv_protocols)
+        self._up = up
+        self._uv = uv
+        self._aaguid = aaguid
+        self._start_sign_count = start_sign_count
+        self._sign_count_step = sign_count_step
+        self._wrong_rp_id_hash = wrong_rp_id_hash
+        self._credentials: dict[bytes, _VirtualCredential] = {}
+        self._token: Optional[bytes] = None
+        self._token_permissions = None
+        self._token_rpid = None
+
+    @property
+    def info(self) -> _VirtualInfo:
+        options: dict = {"pinUvAuthToken": True}
+        if self._client_pin_configured:
+            options["clientPin"] = True
+        elif "clientPin" not in options and not self._builtin_uv:
+            options["clientPin"] = False
+        if self._builtin_uv:
+            options["uv"] = True
+        return _VirtualInfo(options=options, pin_uv_protocols=list(self._pin_uv_protocols))
+
+    def _issue_token(self, permissions, permissions_rpid) -> bytes:
+        self._token = os.urandom(32)
+        self._token_permissions = permissions
+        self._token_rpid = permissions_rpid
+        return self._token
+
+    def _check_pin_uv(self, pin_uv_param, pin_uv_protocol, client_data_hash, expected_permission, rp_id):
+        from fido2.ctap import CtapError
+        from fido2.ctap2 import ClientPin as _ClientPin
+
+        if pin_uv_param is None:
+            raise CtapError(CtapError.ERR.PUAT_REQUIRED)
+        if pin_uv_protocol not in self._pin_uv_protocols:
+            raise CtapError(CtapError.ERR.INVALID_PARAMETER)
+        if self._token is None:
+            raise CtapError(CtapError.ERR.PIN_AUTH_INVALID)
+        expected = _DeterministicPinUvProtocol().authenticate(self._token, client_data_hash)
+        if pin_uv_param != expected:
+            raise CtapError(CtapError.ERR.PIN_AUTH_INVALID)
+        if self._token_rpid is not None and self._token_rpid != rp_id:
+            raise CtapError(CtapError.ERR.PIN_AUTH_INVALID)
+        if (
+            self._token_permissions is not None
+            and not int(self._token_permissions) & int(expected_permission)
+        ):
+            raise CtapError(CtapError.ERR.PIN_AUTH_INVALID)
+
+    def make_credential(
+        self,
+        client_data_hash,
+        rp,
+        user,
+        key_params,
+        exclude_list=None,
+        extensions=None,
+        options=None,
+        pin_uv_param=None,
+        pin_uv_protocol=None,
+        *,
+        event=None,
+        on_keepalive=None,
+    ):
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from fido2.ctap import CtapError
+
+        if options and "uv" in options:
+            # exactly what a genuine FIDO_2_1 authenticator returns (0x2C).
+            raise CtapError(CtapError.ERR.INVALID_OPTION)
+        from fido2.ctap2 import ClientPin as _ClientPin
+
+        self._check_pin_uv(
+            pin_uv_param, pin_uv_protocol, client_data_hash,
+            _ClientPin.PERMISSION.MAKE_CREDENTIAL, rp["id"],
+        )
+        priv = ec.generate_private_key(ec.SECP256R1())
+        cose = ES256.from_cryptography_key(priv.public_key())
+        cose_bytes = cbor.encode(cose)
+        cred_id = hashlib.sha256(cose_bytes + os.urandom(16)).digest()
+        self._credentials[cred_id] = _VirtualCredential(
+            private_key=priv, cose_public_key=cose_bytes, sign_count=self._start_sign_count
+        )
+        acd = AttestedCredentialData.create(self._aaguid, cred_id, cose)
+        flags = AuthenticatorData.FLAG.AT
+        if self._up:
+            flags |= AuthenticatorData.FLAG.UP
+        if self._uv:
+            flags |= AuthenticatorData.FLAG.UV
+        auth_data = AuthenticatorData.create(RP_ID_HASH, flags, 0, bytes(acd))
+        return _VirtualAttestation(auth_data)
+
+    def get_assertion(
+        self,
+        rp_id,
+        client_data_hash,
+        allow_list=None,
+        extensions=None,
+        options=None,
+        pin_uv_param=None,
+        pin_uv_protocol=None,
+        *,
+        event=None,
+        on_keepalive=None,
+    ):
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from fido2.ctap import CtapError
+        from fido2.ctap2 import ClientPin as _ClientPin
+
+        if options and "uv" in options:
+            raise CtapError(CtapError.ERR.INVALID_OPTION)
+        self._check_pin_uv(
+            pin_uv_param, pin_uv_protocol, client_data_hash,
+            _ClientPin.PERMISSION.GET_ASSERTION, rp_id,
+        )
+        ids = [bytes(e["id"]) for e in (allow_list or [])]
+        selected = next((c for c in ids if c in self._credentials), None)
+        if selected is None:
+            raise CtapError(CtapError.ERR.NO_CREDENTIALS)
+        vcred = self._credentials[selected]
+        vcred.sign_count += self._sign_count_step
+        rp_hash = (
+            RP_ID_HASH if not self._wrong_rp_id_hash
+            else hashlib.sha256(b"attacker.example").digest()
+        )
+        flags = 0
+        if self._up:
+            flags |= AuthenticatorData.FLAG.UP
+        if self._uv:
+            flags |= AuthenticatorData.FLAG.UV
+        auth_data = AuthenticatorData.create(rp_hash, flags, vcred.sign_count)
+        signature = vcred.private_key.sign(
+            bytes(auth_data) + client_data_hash, ec.ECDSA(hashes.SHA256())
+        )
+        return _VirtualAssertion(bytes(auth_data), signature, {"id": selected, "type": "public-key"})
+
+
+@dataclass
+class _VirtualAttestation:
+    auth_data: object
+
+
+@dataclass
+class _VirtualAssertion:
+    auth_data: bytes
+    signature: bytes
+    credential: dict
+
+
+def build_virtual_ctap2_test_seam(
+    *,
+    supplied_pin: Optional[str] = None,
+    **authenticator_kwargs,
+) -> "tuple[NativeCtap2Provider, _VirtualCtap2Authenticator]":
+    """TEST-ONLY. NON_REAL. Returns ``(provider, authenticator)`` where
+    ``provider`` is a genuine :class:`NativeCtap2Provider` wired — via the
+    underscore-prefixed seams only — to an in-memory protocol-faithful
+    :class:`_VirtualCtap2Authenticator`. The production CTAP 2.1 PIN/UV code
+    path runs unchanged; no hardware, no ``getpass``. Never reachable from
+    :func:`resolve_production_ctap2_provider`."""
+
+    auth = _VirtualCtap2Authenticator(**authenticator_kwargs)
+    pin_value = supplied_pin if supplied_pin is not None else auth._pin
+
+    def _prompt() -> str:
+        return pin_value
+
+    provider = NativeCtap2Provider(
+        _connection_factory=lambda: auth,
+        _client_pin_factory=lambda _ctap2: _VirtualClientPin(auth),
+        _pin_prompt=_prompt,
+    )
+    return provider, auth
 
 
 def resolve_production_ctap2_provider() -> NativeCtap2Provider:

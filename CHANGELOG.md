@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R` (N-16-5 CTAP2 PIN/UV Protocol
+  Interoperability Repair) **repairs finding H-1**: `NativeCtap2Provider`
+  (`src/pcae/core/hpac_rhamp_ctap2.py`) no longer sends a bare CTAP 2.1-invalid
+  `"uv"` option. It negotiates the authenticator's PIN/UV protocol via the
+  pinned `fido2` library's `ClientPin` (`PinProtocolV2` preferred, `V1`
+  fallback), acquires a permission-scoped, rp-bound `pinUvAuthToken` (built-in
+  UV where advertised, otherwise a trusted non-logging `getpass` PIN entry that
+  fails closed when non-interactive), derives a command-scoped `pinUvAuthParam`
+  over the canonical `client_data_hash`, and threads it through both
+  `makeCredential` and `getAssertion`. No bare-`uv` fallback, no UP-only
+  downgrade, no new `terminal_reason_code` (enum stays at 41), and the PIN is
+  never stored, logged, or placed on an artifact. A new structurally-NON_REAL
+  protocol-faithful `_VirtualCtap2Authenticator` + `build_virtual_ctap2_test_seam()`
+  exercise the real provider code path without hardware and reject the exact
+  shapes real `FIDO_2_1` hardware rejects. **No normative contract byte
+  changed; no new dependency; production diff = one file.** Runtime remains
+  `Observed` / `observe` / `unavailable`; first external effect ABSENT;
+  N-16-6 / N-16-7 OPEN / UNTOUCHED. Fresh `.30R.5R` repair suite: 48 tests, 0
+  failed. **H-1: REPAIRED — real-hardware certification pending. N-16-5:
+  STILL NOT CLOSED** (Option A — repair only; the mandatory RHAMP-REQ-152
+  hardware ceremony and N-16-5 closure are the dedicated successor
+  `.1R.30R.5R.1`).
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5); N-16-5 NOT CLOSED; H-1 provider repair recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R: N-16-5 CTAP2 PIN/UV repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5: Mandatory Real-CTAP2-Hardware Verification and N-16-5 Closure to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5); N-16-5 NOT CLOSED; H-1 provider repair recommended next; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5` (Mandatory Real-CTAP2-Hardware

@@ -2,9 +2,116 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R — N-16-5 CTAP2 PIN/UV Protocol
+Interoperability Repair (finding H-1). **STATUS: COMPLETE. H-1: REPAIRED —
+FRESH REAL-HARDWARE CERTIFICATION REQUIRED. N-16-5: NOT CLOSED.**
+
+Narrow governed production repair. **Phase-entry SHA `R0` (finalized
+`.1R.30R.5` BLOCKED head) = `9f004ea9`**; `origin/main..HEAD = 0` at entry;
+`R0` is also the fixed-SHA attribution baseline `A`.
+
+**What was repaired.** `NativeCtap2Provider` (`src/pcae/core/hpac_rhamp_ctap2.py`)
+requested user verification with a bare `"uv"` **option** — removed in CTAP 2.1
+from `authenticatorMakeCredential` and invalid for `authenticatorGetAssertion`
+on a `clientPin` key — so every real `FIDO_2_1` authenticator rejected both
+ceremonies with `CTAP2_ERR_INVALID_OPTION` (`0x2C`) before any user gesture
+(finding H-1; the automated suite stayed green only because the deterministic
+NON_REAL fixture honoured the invalid shape — the RHAMP-INV-018 gap). The
+production provider now reads `authenticatorGetInfo`, negotiates the supported
+PIN/UV protocol via the pinned `fido2` library's `ClientPin` (`PinProtocolV2`
+preferred, `PinProtocolV1` fallback), acquires a **permission-scoped, rp-bound**
+(`hpac.pcae.local`) `pinUvAuthToken` — built-in UV where advertised, otherwise a
+**trusted, non-logging, non-persisted local `getpass` PIN entry** (never a CLI
+arg / env var / repo value / chat prompt; non-interactive fails closed) —
+derives a **command-scoped** `pinUvAuthParam` over the canonical
+`client_data_hash`, and threads `pin_uv_param` + `pin_uv_protocol` through both
+ceremonies. **No bare-`uv` option, no bare-`uv` fallback, no UP-only downgrade**
+(an incompatible authenticator and a UV-clear `makeCredential` are both
+rejected). The PIN is dropped (`del pin`) the instant the token is obtained,
+never stored on the provider, never on an exception, never on a RHAMP artifact
+— `RHAMP-INV-006` / §18 / §54 intact.
+
+**No normative contract byte changed** (RHAMP-001 v1.0 / HPAC-PPA-001 v1.0 /
+HPAC-PAWA-001 v1.2 / HPAC-001 v2.1 byte-identical to `R0`; `docs/contracts`
+diff empty). **No new dependency** (`pyproject.toml` diff empty). **Production
+diff = exactly one file**: `src/pcae/core/hpac_rhamp_ctap2.py`
+(`git diff 9f004ea9 HEAD -- src/pcae scripts pyproject.toml`). No new
+`terminal_reason_code` (enum stays at 41 — PIN/UV errors map to existing frozen
+reasons). `DeterministicCtap2Provider` **byte-unchanged**; a new structurally
+NON_REAL (`SIMULATION_ONLY = True`) protocol-faithful `_VirtualCtap2Authenticator`
++ `build_virtual_ctap2_test_seam()` model the CTAP 2.1 wire contract (reject
+bare `uv` → `0x2C`, missing param → `0x36`, wrong protocol/permission/rp_id →
+`0x02`/`0x33`) so the real provider code path runs in automated tests without
+hardware; it is reachable only through underscore-prefixed test seams and never
+by `resolve_production_ctap2_provider()` (which is seam-free / env-free /
+flag-free).
+
+**`RHAMP-FIDO2-CREDENTIAL/1.0` sidecar, `RHAMP-COUNTER-STATE/1.0`,
+`FIDO2HumanAuthenticator`, the RHAMP-REQ-102 verify core, `hpac_verifier` REAL
+branch, protected presentation, Gate 5 / Gate 9, PAWA, PPA, policy / PB, the
+runtime capability model — all byte-unchanged.** Runtime `not_implemented` /
+`Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities; first
+external effect ABSENT / UNREACHABLE. N-16-3 / N-16-4 CLOSED; N-16-6 / N-16-7
+OPEN / UNTOUCHED (N-16-7 strictly last); N-23-1 INFO / N-23-2 INFO-DEFERRED
+carried unchanged.
+
+**Fresh `.30R.5R` repair suite:**
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_ctap2_pin_uv_repair.py`
+— **48 tests, 0 failed** (historical `.30R.5` BLOCKED preserved; H-1 shape
+gone; capability negotiation; V2/V1 selection; trusted PIN flow + non-interactive
+fail-closed; token permission/rp binding; command-scoped param; wrong
+permission/rp_id/protocol/param/challenge rejected; UV-clear rejected;
+positive make/get through the full signature-material check; NON_REAL walls;
+provider separation; contract/runtime/first-effect/N-16-6/7 fences). Software
+baselines re-run green: `.30R.3.4` (148 tests, `test_33` reconciled to the
+repaired shape), `.30R.3.5` IV (0 failed).
+
+**Test reconciliations** (widened, not weakened — exact filenames, `.1R.30R.5R`
+comments, no wildcard, no `def test_` renamed/removed/skipped): only the two
+guards this repair's one-file change *directly* trips —
+`.30R.3.4::test_33_non_discoverable_and_uv_options_requested` (was asserting the
+H-1 bug shape `'"uv": True'`; now asserts `rk=False` + bare-`uv` shape gone +
+`pin_uv_param`/`pin_uv_protocol`/`_obtain_pin_uv` threaded) and
+`.30R.4R.2::test_70_iv_suite_touches_no_production_source_or_contract` (upper
+`git diff` bound pinned to the `.30R.4R.2` finalized head `0b973e2e`).
+
+**Regression attribution (fixed-SHA A/B, A = `9f004ea9`): 0
+repair-attributable functional regressions.** The `Ctap2Provider` protocol
+boundary is unchanged; `DeterministicCtap2Provider` and every consumer
+(enrollment / `human_authenticator_fido2` / assertion-verify / `hpac_verifier` /
+Gate 5-9 / presentation) byte-unchanged and green. Point-in-time / working-tree
+guards from unrelated earlier phases (3 HMIC `git status` guards — clear on
+commit; the `.1R.19R` / `.1R.19R.1` / `.1R.30R.1` "since baseline" guards —
+**already failing at `R0`**, the pre-existing F-1 + three-sibling carried debt,
+now also transitively implicated by the one-file change) are documented
+attributable-but-non-functional and, per prompt §29 / §36 (Option A), folded
+into the dedicated successor IV, which re-baselines all point-in-time guards.
+
+**Certification placement (§36) — Option A: repair only.** No real hardware was
+accessed (RHAMP-REQ-153); a passing protocol-faithful fixture is not a hardware
+certification. **N-16-5 complete-requirement table row 14 (≥ 1 real-CTAP2
+hardware verification) still false → N-16-5 NOT CLOSED.**
+
+**Recommended successor (not begun; own explicit human authorization + own
+protected human approval required):
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1`** — Independent Verification of the
+CTAP2 PIN/UV Repair + Mandatory Real-CTAP2-Hardware Verification (full frozen
+RHAMP-REQ-152 ceremony) + the full phase-aware F-1 / sibling / `.1R.19R` /
+`.1R.19R.1` / `.1R.30R.1` guard reconciliation + N-16-5 closure (== RHAMP
+`.1R.33`). Then N-16-6, then N-16-7 (strictly last). ID recommended NOT
+reserved. **Do not begin N-16-6, N-16-7, Slice C, a first external effect, or
+execution enablement.** `DELEGATED .3 FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED` preserved. Doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_N_16_5_CTAP2_PIN_UV_PROTOCOL_INTEROPERABILITY_REPAIR.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5 — Mandatory Real-CTAP2-Hardware
 Verification and N-16-5 Closure (== RHAMP `.1R.33`). **STATUS: BLOCKED.
-N-16-5: NOT CLOSED.**
+N-16-5: NOT CLOSED.** (Immutable. Finding H-1 raised here; repaired by
+`.1R.30R.5R` above.)
 
 VERIFICATION / CERTIFICATION ONLY — no production source, script,
 `pyproject.toml`, or normative-contract byte changed. Phase-entry SHA `A`
@@ -111,7 +218,7 @@ preserved. Doc:
 
 ---
 
-## Prior Phase
+## Earlier Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2 — Independent Verification of the
 N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption
