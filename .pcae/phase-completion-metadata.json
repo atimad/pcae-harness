@@ -10,8 +10,8 @@
   "metadata_consistency": "All current artifacts consistently identify .30R.5R.2.1 as BLOCKED at F-3, preserve H-2/F-2 software verification, record that the real ceremony did not start, and leave N-16-5 NOT CLOSED.",
   "internal_evidence_coherence": "Fresh IV: 85 passed. Mandatory predecessor repair suite: 70 passed, 1 F-3 failure. Combined N-16-5 sweep: 636 passed, exactly the same F-3 failure. Independent guard/RHAMP sweep: 428 passed. Fixed-SHA reproduction at repair implementation commit: 70 passed, same F-3 failure.",
   "internal_report_coherence": "Every current status and evidence artifact names phase .30R.5R.2.1 and finding F-3; earlier IDs are immutable baselines and .30R.5R.2.1R appears only as a recommended successor.",
-  "report_consistency": "Pending governed push and final report promotion.",
-  "origin_main_head_count": 1,
+  "report_consistency": "Governed phase commits were pushed through a4358113; final canonical report promotion completed and notification dispatch succeeded.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "inherited_regression",
   "tests_run": 1150,
   "tests_added_or_updated": "One fresh 85-case verification-only suite added; zero existing tests changed, removed, renamed, skipped, xfailed, wildcarded, or broadened.",
@@ -37,12 +37,12 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE index omissions; current task archived and listed",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "clean after governed push through a4358113",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
-    "telegram_runtime": "configured, enabled, ready; dispatch deferred to final post-push promotion",
-    "notification_status": "pending final post-push promotion"
+    "telegram_runtime": "configured, enabled, ready; final dispatch succeeded",
+    "notification_status": "telegram summary and canonical report sent successfully"
   },
-  "notification_dispatch_result": "pending final post-push promotion",
+  "notification_dispatch_result": "sent -- telegram summary and canonical report delivered successfully",
   "no_go_confirmation": "No production source changed.\nNo normative contract or dependency changed.\nNo existing test was changed.\nNo test was removed or renamed.\nNo skip, skipif, pytest.skip, or xfail was introduced.\nNo wildcard or fnmatch broadening was introduced.\nNo chat, caller, protocol, argv, or environment approval was accepted.\nNo deterministic election or authentication seam was used for certification.\nNo real human or YubiKey ceremony was started after the blocking precondition failed.\nNo presentation evidence, PRODUCTION principal, or Gate 5 certification was claimed.\nNo N-16-5 closure was recorded.\nNo N-16-6 or N-16-7 work was begun.\nNo runtime capability, plugin, adapter dispatch, or first external effect was introduced.\nNo FIDO2 or local TTY global/exclusive requirement was introduced.\nNo future mobile-only profile was foreclosed.\nNo raw git commit/push, hook bypass, force push, or history rewrite was used.\nNo delegated worker finalized, committed, or pushed.",
   "no_go_confirmations": [
     "No production source changed.",
@@ -78,6 +78,6 @@
     {"hash": "ac642ec20d3457ca229549ad80919ea9f4ac924b", "subject": "Block protected presentation IV at stale phase-entry guard"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R -- narrow F-3 immutable phase-entry evidence repair; recommended, not begun; explicit authorization required.",
-  "pushed_status": "pending",
-  "origin_main_head": "361114d648dea432aa3ef92ecd7e24e748a173aa"
+  "pushed_status": "pushed",
+  "origin_main_head": "a4358113c7233f2a744fbb3b28fdd79db91fe3f3"
 }

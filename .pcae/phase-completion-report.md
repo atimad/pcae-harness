@@ -26,3 +26,6 @@ FIDO2 and local-TTY presentation remain supported-not-exclusive; future
 mobile-only profiles remain open.
 
 Recommended next, not begun: `.30R.5R.2.1R`, narrow F-3 repair.
+
+Governed push through `a4358113`, canonical report promotion, and Telegram
+summary/document notification all completed successfully.
