@@ -10,8 +10,8 @@
   "metadata_consistency": "All identity, status, canonical artifact, project status, governed commits, and test evidence consistently name phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 COMPLETE repair-only with N-16-5 NOT CLOSED.",
   "internal_evidence_coherence": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 evidence links to its 71-case fresh suite: 71 passed. Presentation sweep 205 passed; guards 347 passed; CTAP2 96 passed; broad affected sweep 893 passed after two historical finding-demonstration nodes reproduced identically at A were explicitly deselected. Zero unexplained attributable failure.",
   "internal_report_coherence": "Every test and validation field names phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2. Earlier IDs occur only as immutable baselines; the successor occurs only as recommended future work.",
-  "report_consistency": "Two governed phase commits are local; pending-push staging precedes governed push and final promotion.",
-  "origin_main_head_count": 2,
+  "report_consistency": "Governed phase commits and pending report were pushed through 61b660f8; final promotion completed with origin/main..HEAD=0 and notification dispatch succeeded.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "governed_narrow_production_repair_with_fresh_deterministic_election_launch_integrity_currentness_protocol_tty_binding_replay_concurrency_guard_and_broad_non_regression_evidence",
   "tests_run": 71,
   "tests_added_or_updated": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 adds one fresh 71-case suite and precisely updates nine historical guard suites; no removal, rename, skip, xfail, wildcard, fnmatch, or weakening.",
@@ -34,12 +34,12 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE index omissions; current task archived and listed",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "nothing_to_push after governed push through 61b660f8",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, ready; dispatch deferred to final post-push promotion",
-    "notification_status": "telegram ready; deferred until post-push promotion"
+    "notification_status": "telegram summary and canonical report sent successfully during final promotion"
   },
-  "notification_dispatch_result": "pending_phase_complete_promotion",
+  "notification_dispatch_result": "sent -- telegram summary and canonical report delivered successfully",
   "no_go_confirmation": "No normative contract or dependency changed.\nNo production file outside the helper and existing launcher changed.\nNo caller, protocol, stdin, argv, or environment input can select production approval.\nNo shell, PATH lookup, arbitrary executable, arbitrary argv, or generic process API was introduced.\nNo network, runtime capability, plugin, adapter dispatch, or first external effect was introduced.\nNo test definition was removed or renamed.\nNo skip, skipif, pytest.skip, or xfail was introduced.\nNo wildcard or fnmatch broadening weakened a historical guard.\nNo genuine terminal APPROVE was synthesized or claimed.\nNo N-16-5 closure was recorded.\nNo N-16-6 or N-16-7 work was begun.\nNo FIDO2 or local TTY global/exclusive product rule was introduced.\nNo future mobile-only profile was foreclosed.\nNo raw git commit/push, force push, history rewrite, or hook bypass was used.\nNo delegated worker finalized, committed, or pushed.",
   "no_go_confirmations": [
     "No normative contract or dependency changed.",
@@ -75,6 +75,6 @@
     {"hash": "149a5396cfe999e28b5e632193ce5a5461b69988", "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2: close repair task and transition to idle pending fresh IV"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 -- Independent Verification of Protected-Presentation Human Election + Final Presentation-Bound N-16-5 Certification and Closure. Recommended, not begun; explicit authorization required.",
-  "pushed_status": "not_pushed",
-  "origin_main_head": "0250e5f7"
+  "pushed_status": "pushed",
+  "origin_main_head": "61b660f85fe2de1712b6e1cfed7bffcc595862c2"
 }
