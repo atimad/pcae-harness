@@ -2,10 +2,113 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2 — Independent Verification of the
+N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption
+Implementation After Authority Reconciliation. **STATUS: COMPLETE —
+INDEPENDENTLY VERIFIED (software) WITH ONE NON-BLOCKING FINDING. MANDATORY
+REAL-CTAP2-HARDWARE VERIFICATION STILL OUTSTANDING. N-16-5: NOT CLOSED.**
+
+VERIFICATION ONLY — no production source or normative contract byte changed;
+no defect repaired inside the IV. Independently re-derived anchors: `A` (the
+finalized `.30R.4R` head) = `a727dbf4f160f904836905d3cb4adeba91953676`
+(== `git rev-parse 99bc5705^`); `I` = `V` = `5b6b4013a69ffcb366209b12c495571917bb5ccc`
+(the finalized `.30R.4R.1` head / phase entry). Production diff `A`→`I` is
+exactly the four new modules + `scripts/hpac_protected_presentation_admin.py`
++ the three modified modules (`hpac_protected_admin_writer`,
+`approval_presentation`, `hpac_verifier`); `pyproject.toml` and every Gate,
+`runtime_authority`, `hpac_foundation`, `permission_broker`, and RHAMP/FIDO2
+module byte-unchanged; `docs/contracts` byte-unchanged.
+
+**All sixteen product properties VERIFIED:** PAWA presentation configuration
+(one bounded metadata-only `configure_presentation_mechanism`, exact role /
+subject / closed lifecycle action, multi-write spent once); out-of-band
+executable model (no `chown`/`copy`/`system`/`posix_spawn`/`Popen` in the admin
+or installation modules); exact PAWA consumer inventory (no wildcard);
+installation / current-generation closed self-excluding schemas;
+content-addressed helper path (no env/cwd/PATH); helper digest / symlink-chain
+/ `O_NOFOLLOW` / held-fd integrity; generation / rotation / revocation /
+currentness (monotonic, exact `supersedes`, revoke has no fallback, repeat
+install rejected); **installer ≠ launcher ≠ evidence-writer** (three distinct
+role strings/factories, mutually ineligible at resolution); helper cannot
+self-authorize; fixed `posix_spawn` launch of the trusted interpreter reading
+the held helper fd (no shell / PATH / argv / re-open window); closed child env
+allowlist; launch-time revalidation (`ceremony_superseded`); request / display
+/ response bindings (≥256-bit nonce, every field compared, re-rendered digest
+equality); closed `{APPROVE, REJECT}` vocabulary with fail-closed
+cancel/EOF/crash/timeout/malformed; process-local non-bearer single-use
+evidence writer (`pickle` raises, every non-launcher caller rejected);
+create-only evidence; forged/replayed evidence rejected; real
+`pcae-protected-local-presentation/1.0` attestation verifier (exact kind,
+generation-bound); deterministic seam permanently NON_REAL and unselectable;
+**REAL auth + REAL presentation coupling** (`_authority_class_of` requires
+unanimous PRODUCTION; `require_real_assurance` additionally requires the real
+auth mechanism id **and** the real presentation mechanism id — "authentication
+alone is insufficient"); Gate 5 / Gate 9 consume assurance only through the
+existing frozen `assurance_class is PRODUCTION` check with byte-unchanged Gate
+source; PB / policy / runtime / dispatch independence (no `adapter.dispatch`,
+no `DispatchEnvelope`, no `PermissionBroker`, no `subprocess`/`socket` import
+anywhere in the phase source; the only `src/pcae` process launch is the one
+trusted `posix_spawn`).
+
+**Guard reconciliation** independently reviewed across eleven historical
+suites: authorized consumer/inventory sets widened by exact filenames/tuples
+with `.1R.30R.4R.1` comments and preserved no-wildcard assertions; byte-frozen
+guards replaced with not-weakened checks (`def ` count non-decreasing,
+`_ELIGIBLE_MECHANISM_IDS` literal unchanged, `fnmatch` / `adapter.dispatch(`
+absent, deterministic-fixture fail-closed line preserved); **no `def test_`
+removed or renamed anywhere in `tests/`; no `pytest.skip` / `pytest.xfail` /
+`fnmatch` / wildcard-broadening added** (the one `skipif` is the disclosed
+POSIX platform guard on the fresh `.30R.4R.1` suite).
+
+**Fixed-SHA A/B** (`/tmp/pcae-A` @ `a727dbf4` vs `HEAD`, deterministic
+`-p no:randomly`): `A` 20 failed / `HEAD` 18 failed over the common affected
+lineage; **B-only unexplained functional regressions = 0**; `.30R.4R.1` fixed
+three shared failures it targeted. **One candidate-only failure** —
+`test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap` in the
+`.1R.19R` suite — classified **NON-BLOCKING** (finding F-1): its
+`not any("subprocess" in l …)` content scan matches two *disclaimer* lines in
+`.30R.4R.1`'s authorized new launcher module (docstring "generic subprocess
+API"; comment "posix_spawn avoids fork()"); the module has zero functional
+`subprocess`/`socket`/`adapter.dispatch` use, and `.30R.4R.1` reconciled the
+sibling filename allowlist in the same test but not this content assertion.
+This VERIFICATION-ONLY phase records it and does not repair it. The clean
+targeted affected-suite run: **684 passed, 0 failed**. The `.30R.4R.1`
+implementation suite rerun byte-unchanged: **59 passed**.
+
+**Fresh IV suite:**
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv.py`
+(71 test functions, 75 cases, 0 failed). Doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_4R_2_INDEPENDENT_VERIFICATION_OF_THE_N_16_5_PROTECTED_HUMAN_APPROVAL_PRESENTATION_AND_REAL_ASSURANCE_CONSUMPTION_IMPLEMENTATION.md`.
+
+**Mandatory real-CTAP2-hardware verification — placement adjudicated from
+primary source** (RHAMP-REQ-152/153/156, RHAMP-INV-018, HPAC-PPA-REQ-074): it
+is a **single dedicated controlled hardware session in a distinct successor
+phase**, not this software IV, and no hardware is accessed before it. No
+hardware was accessed here and no real-hardware claim is made. **N-16-5 remains
+NOT CLOSED.**
+
+**Recommended successor: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5`** — Mandatory
+Real-CTAP2-Hardware Verification and N-16-5 Closure (== RHAMP `.1R.33`): the
+≥ 1 real CTAP2 hardware ceremony with a genuine attached key and human gesture,
+the F-1 `.1R.19R` guard reconciliation (with the sibling stale `.1R.19R` /
+`.30R.1` guards), and — only if every frozen N-16-5 requirement is then
+complete — N-16-5 closure. Then N-16-6, then N-16-7 (strictly last). ID
+recommended NOT reserved; own explicit human authorization; do not begin.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+Runtime remains `not_implemented` / `Observed` / `observe` / `unavailable`,
+0 plugins / 0 capabilities. First external effect ABSENT. N-16-6 / N-16-7
+OPEN / UNTOUCHED. N-23-1 INFO / N-23-2 INFO-DEFERRED carried unchanged.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1 — N-16-5 Protected Human-Approval
 Presentation and Real-Assurance Consumption Implementation After Authority
-Reconciliation. **STATUS: IMPLEMENTED — INDEPENDENT VERIFICATION AND MANDATORY
-REAL-CTAP2-HARDWARE VERIFICATION PENDING. N-16-5: NOT CLOSED.**
+Reconciliation. **STATUS: IMPLEMENTED — INDEPENDENTLY VERIFIED (software) BY
+`.1R.30R.4R.2`. MANDATORY REAL-CTAP2-HARDWARE VERIFICATION PENDING. N-16-5:
+NOT CLOSED.**
 
 The frozen protected-presentation and real-assurance-consumption architecture
 established by `.30R.4R` (HPAC-PAWA-001 v1.2 + HPAC-PPA-001 v1.0) is implemented

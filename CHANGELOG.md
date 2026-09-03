@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2` independently verifies the
+  N-16-5 protected human-approval presentation and real-assurance consumption
+  implementation (`.1R.30R.4R.1`). **VERIFICATION ONLY** — no production source
+  or normative contract byte changed; no defect repaired. Independently
+  re-derived anchors `A = a727dbf4` (== `git rev-parse 99bc5705^`), `I = V =
+  5b6b4013`. All sixteen product properties **VERIFIED**: PAWA
+  `configure_presentation_mechanism` bounded metadata-only mutation and exact
+  consumer inventory; out-of-band executable model (no byte copy/chmod/chown/
+  exec in the admin path); closed self-excluding installation / current-
+  generation schemas; content-addressed helper path, pinned-digest / symlink-
+  chain / `O_NOFOLLOW` / held-fd integrity; monotonic generation / rotation /
+  revocation / currentness; **installer ≠ launcher ≠ evidence-writer** (three
+  distinct roles, mutually ineligible); fixed `posix_spawn` launch of the
+  trusted interpreter reading the held helper fd (no shell/PATH/argv/re-open
+  window); closed child env; launch-time revalidation; every request/display/
+  response binding; closed `{APPROVE, REJECT}` with fail-closed cancel/EOF/
+  crash/timeout/malformed; process-local non-bearer single-use create-only
+  evidence writer; forged/replayed evidence rejected; exact real
+  `pcae-protected-local-presentation/1.0` attestation verifier; permanently
+  NON_REAL deterministic seam; **REAL auth + REAL presentation coupling**
+  (`_authority_class_of` unanimous PRODUCTION; `require_real_assurance`
+  additionally requires the real auth and real presentation mechanism ids);
+  Gate 5 / Gate 9 consume assurance only via the byte-unchanged frozen
+  `assurance_class is PRODUCTION` check; PB / policy / runtime / dispatch
+  independence.
+- Guard reconciliation independently reviewed across eleven historical suites:
+  widened-not-weakened, no `def test_` removed or renamed, no
+  `pytest.skip` / `pytest.xfail` / `fnmatch` / wildcard added. Fixed-SHA A/B
+  (`/tmp/pcae-A` @ `a727dbf4` vs HEAD): **B-only unexplained functional
+  regressions = 0**; one candidate-only failure —
+  `.1R.19R::test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap` —
+  classified **NON-BLOCKING** finding F-1 (its content scan matches two
+  disclaimer lines in the authorized new launcher module; zero functional
+  `subprocess`/`socket`/`adapter.dispatch` use). Clean targeted affected-suite
+  run: 684 passed, 0 failed. `.1R.30R.4R.1` suite rerun byte-unchanged: 59
+  passed. Fresh IV suite: 71 test functions / 75 cases, 0 failed.
+- Mandatory real-CTAP2-hardware verification placement adjudicated from primary
+  source (RHAMP-REQ-152/153/156, RHAMP-INV-018, HPAC-PPA-REQ-074): a distinct
+  dedicated controlled-hardware successor phase, not this software IV; no
+  hardware accessed and no real-hardware claim made. **N-16-5 remains NOT
+  CLOSED.** Recommended successor `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5`
+  (mandatory real-CTAP2-hardware verification + F-1 guard reconciliation +
+  N-16-5 closure). Runtime `not_implemented` / `Observed` / `observe` /
+  `unavailable`; first external effect ABSENT; N-16-6 / N-16-7 OPEN /
+  UNTOUCHED. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+  preserved.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1); N-16-5 NOT CLOSED; fresh IV and real-CTAP2-hardware verification recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2: IV of N-16-5 protected presentation and real-assurance consumption; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1: N-16-5 Protected Presentation and Real-Assurance Consumption Implementation to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1); N-16-5 NOT CLOSED; fresh IV and real-CTAP2-hardware verification recommended next; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1` implements the N-16-5 protected
