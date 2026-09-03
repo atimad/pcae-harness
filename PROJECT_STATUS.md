@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry
+Evidence Repair. **STATUS: COMPLETE. F-3: REPAIRED. H-2/F-2 SOFTWARE IV:
+PRESERVED. REAL CEREMONY: NOT STARTED. N-16-5: NOT CLOSED.**
+
+**Immutable lineage:** `A = E = 0250e5f7` (finalized `.30R.5R.1` and actual
+`.30R.5R.2` entry), implementation `a85abff6`, finalized `.30R.5R.2`
+`I = 361114d6`, finalized BLOCKED `.30R.5R.2.1` and repair entry
+`V = R0 = 57edf6a9`. The implementation commit contains the phase task and
+repair and its exact parent is `0250e5f7`; there was no separate task-open
+commit.
+
+**F-3 repaired:** the retained predecessor `test_01` no longer compares live
+`HEAD` to a historical entry. It proves the exact immutable relationship
+`a85abff6^ == 0250e5f7` and exact implementation identity/subject. Every
+sibling assertion and test name remains; no wildcard/fnmatch, skip/xfail,
+removal, rename, live metadata, or broad future-commit allowance was added.
+
+**Verification:** `.30R.5R.2` 71/0; fresh repair suite 45/0; historical
+`.30R.5R.2.1` 85/0 at immutable `V`; current unchanged `.30R.5R.2.1` 84/1
+only at its preserved obsolete F-3 demonstration; presentation/RHAMP/FIDO2/
+verifier/Gate sweep 552/0; historical guard rerun 428/0. Production, contracts,
+dependencies, and H-1/H-2/F-2 sources are byte-unchanged.
+
+No trusted-terminal or YubiKey ceremony occurred. N-16-5 remains NOT CLOSED
+pending fresh IV and the final real presentation-bound ceremony. Runtime stays
+`not_implemented / Observed / observe / unavailable`, zero plugins/capabilities,
+first effect absent; N-16-6/N-16-7 untouched. FIDO2 and local presentation are
+supported-not-exclusive; mobile-only profiles remain open.
+
+Recommended next, not begun: `.30R.5R.2.1R.1` — Independent Verification of
+the F-3 Repair + Final Real Protected-Presentation Human Election and
+Presentation-Bound N-16-5 Certification and Closure. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_F3_IMMUTABLE_PHASE_ENTRY_EVIDENCE_REPAIR.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of
 Protected-Presentation Human Election + Final Presentation-Bound N-16-5
 Certification and Closure. **STATUS: BLOCKED. H-2/F-2 SOFTWARE REPAIRS:

@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for the narrow F-3 phase-entry evidence re
 
 ## Status
 
-active
+done
 
 ## Mode
 

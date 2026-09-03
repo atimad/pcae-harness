@@ -25,7 +25,8 @@ from pcae.core.protected_presentation_installation import verify_helper_bytes
 
 REPO = Path(__file__).resolve().parents[1]
 SRC = REPO / "src" / "pcae"
-ENTRY = "0250e5f7"
+ENTRY = "0250e5f79340b659f4c34ce391656d8f7219ccc3"
+REPAIR_IMPLEMENTATION = "a85abff66b5a07f9d83b873d625aea7b1c65b19d"
 PRESENTATION_HEAD = "5b6b4013"
 IV_ENTRY = "ea40c47e"
 HELPER_PATH = SRC / "protected_presentation_helper.py"
@@ -136,7 +137,9 @@ def _terminal_election(monkeypatch, decision_bytes: bytes, displayed=b"bound dis
 
 
 def test_01_phase_entry_and_historical_heads_are_primary_git_objects():
-    assert _git("rev-parse", "HEAD").strip().startswith(ENTRY)
+    assert _git("rev-parse", f"{REPAIR_IMPLEMENTATION}^").strip() == ENTRY
+    assert _git("rev-parse", REPAIR_IMPLEMENTATION).strip() == REPAIR_IMPLEMENTATION
+    assert "1R.30R.5R.2" in _git("log", "-1", "--format=%s", REPAIR_IMPLEMENTATION)
     assert "1R.30R.5R.1" in _git("log", "-1", "--format=%s", ENTRY)
     assert "1R.30R.4R.1" in _git("log", "-1", "--format=%s", PRESENTATION_HEAD)
     assert "1R.30R.5R" in _git("log", "-1", "--format=%s", IV_ENTRY)

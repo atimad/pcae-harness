@@ -2,6 +2,19 @@
 
 ## Accepted
 
+- **2026-09-04 — Repair F-3 with immutable implementation-parent topology.**
+  The `.30R.5R.2` implementation commit `a85abff6` contains the phase task and
+  repair and has exactly one parent, finalized `.30R.5R.1` `0250e5f7`; that
+  parent is the historical `.30R.5R.2` entry. Preserve the original test name
+  and every sibling assertion, but replace its live `HEAD` comparison with the
+  exact immutable `a85abff6^ == 0250e5f7` relationship plus commit-identity
+  checks. Do not alter the historical `.30R.5R.2.1` finding-demonstration test:
+  preserve its 85/0 result at historical `V`, and classify its current sole
+  failure as expected because the finding it proves has now been repaired.
+  N-16-5 remains NOT CLOSED; no human/FIDO2 ceremony occurs here. Recommend
+  `.30R.5R.2.1R.1` for fresh IV and final certification, not begun.
+  **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
 - **2026-09-03 — Block `.1R.30R.5R.2.1` at F-3; do not initiate the real
   human/FIDO2 ceremony or close N-16-5.** Independent source and behavioral IV
   verifies the H-2 trusted `/dev/tty` election and F-2 held-byte launcher

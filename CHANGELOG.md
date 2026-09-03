@@ -1,5 +1,17 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R` repairs F-3 narrowly.
+  The `.30R.5R.2` phase-entry test now establishes immutable topology
+  `a85abff6^ == 0250e5f7` instead of comparing moving live `HEAD` with the
+  historical entry. Test name and sibling assertions are retained; no
+  wildcard, fnmatch, skip, xfail, removal, or rename. Predecessor suite 71/0;
+  fresh repair suite 45/0; historical `.30R.5R.2.1` remains 85/0 at immutable
+  `V` and byte-unchanged (84/1 at current solely because its preserved finding
+  node asserts F-3 still exists); presentation sweep 552/0; guard sweep 428/0.
+  Production/contracts/dependencies unchanged; no hardware or human ceremony.
+  F-3 REPAIRED; H-2/F-2 software IV preserved; N-16-5 NOT CLOSED. Recommended
+  successor, not begun: `.30R.5R.2.1R.1` fresh IV/final certification.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1` independent verification
   is **BLOCKED; N-16-5 NOT CLOSED**. H-2 and F-2 independently verify repaired
   at the software-mechanism level (fresh IV 85/0; guard/RHAMP sweep 428/0), but
@@ -15,6 +27,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for the narrow F-3 phase-entry evidence repair; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry Evidence Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R narrow F-3 repair; N-16-5 NOT CLOSED to Idle: awaiting explicit authorization for the narrow F-3 phase-entry evidence repair; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of Protected-Presentation Human Election + Final Presentation-Bound N-16-5 Certification and Closure to Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R narrow F-3 repair; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase after the protected-presentation election and portable-launch repair; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of Protected-Presentation Human Election + Final Presentation-Bound N-16-5 Certification and Closure; session refreshed and governance continuity revalidated.
