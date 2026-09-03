@@ -1,58 +1,147 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.2 Complete — Independent Verification of the N-16-5 Protected Human-Approval Presentation and Real-Assurance Consumption Implementation After Authority Reconciliation
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5 Complete — Mandatory Real-CTAP2-Hardware Verification and N-16-5 Closure
 
-- **Status:** COMPLETE — INDEPENDENTLY VERIFIED (software) WITH ONE NON-BLOCKING FINDING
-- **Type:** Independent verification. VERIFICATION ONLY — no production source or normative contract byte changed; no defect repaired inside the IV.
-- **Independently re-derived anchors:** `A` (finalized `.30R.4R` head) = `a727dbf4f160f904836905d3cb4adeba91953676` (== `git rev-parse 99bc5705^`); `I` = `V` = `5b6b4013a69ffcb366209b12c495571917bb5ccc` (finalized `.30R.4R.1` head / phase entry).
-- **N-16-5:** NOT CLOSED — mandatory real-CTAP2-hardware verification still outstanding (a distinct successor phase).
-- **Contracts changed:** none. **Gate 5 / Gate 9 / runtime_authority / hpac_foundation / permission_broker / RHAMP-FIDO2 source changed:** none. **pyproject changed:** none.
+- **Status:** **BLOCKED.** N-16-5: **NOT CLOSED.**
+- **Type:** Governed certification / verification phase (== RHAMP `.1R.33`). VERIFICATION / CERTIFICATION ONLY — no production source, script, `pyproject.toml`, or normative contract byte changed; no defect repaired inside this phase.
+- **Phase-entry SHA `A`** (finalized `.1R.30R.4R.2` head): `0b973e2e1a433dd8983a17fc320f2bee55c430b8`; `origin/main..HEAD = 0` at entry.
+- **Contracts changed:** none (`git diff --name-only A HEAD -- docs/contracts` empty). **`src/pcae` / `scripts` / `pyproject.toml` changed:** none.
 
-## What was verified
+## Why BLOCKED — finding H-1
 
-Independently re-derived from primary sources (HPAC-PPA-001 v1.0, HPAC-PAWA-001 v1.2, RHAMP-001 v1.0) and running code. All sixteen product properties **VERIFIED**:
+A genuine CTAP2 roaming USB security key (Yubico `vid=0x1050 pid=0x0402`;
+`authenticatorGetInfo` `versions=[U2F_V2, FIDO_2_0, FIDO_2_1_PRE, FIDO_2_1]`;
+`clientPin` set; `pinUvAuthToken` true; `options.uv` **absent** — no on-device
+biometric UV; `pin_uv_protocols=[2,1]`; `transports=[nfc,usb]`; ES256 in
+`algorithms`) was attached and exercised through the **production native
+provider path** — `resolve_production_ctap2_provider()` → `NativeCtap2Provider`
+(`PROVIDER_KIND = "native-ctap2"`), the deterministic NON_REAL fixture
+(`DeterministicCtap2Provider`, `SIMULATION_ONLY = True`) never involved. The
+device enumerated and the USB-HID transport was healthy, but **both** mandatory
+RHAMP-REQ-152 ceremonies were rejected by the authenticator with
+`CTAP error 0x2C — CTAP2_ERR_INVALID_OPTION`, **upstream of any user gesture**:
 
-- **PAWA presentation configuration** — one bounded metadata-only `configure_presentation_mechanism`; exact role `presentation_mechanism_installer`, subject `mechanism_id`, closed lifecycle action `{install, rotate, revoke}`; multi-write spent once via `complete_multi_write`; taxonomy stays 21 codes.
-- **Out-of-band executable model** — the admin and installation modules never `chown`/`copy`/`copyfile`/`copytree`/`system`/`posix_spawn`/`execv`/`Popen`; `apply_configuration` only verifies (read-only) pre-installed helper bytes and writes JSON records at `0o600`.
-- **Exact PAWA consumer inventory** — `{hpac_protected_admin_writer, hpac_rhamp_enrollment, hpac_protected_presentation_admin}`, no wildcard; the standalone script reaches only the admin module; no import from `cli.py` / `commands/**` / `core/agent.py`.
-- **Installation / current-generation records** — closed self-excluding schemas that recompute; `supersedes` null@gen1 / closed `{generation, installation_digest}` for gen>1.
-- **Content-addressed helper path** — derived only from the pinned digest; no env / cwd / PATH influence.
-- **Helper integrity** — corrupt bytes / symlinked helper / symlinked ancestor / non-regular / multi-link / wrong owner / group-other-write all fail closed via the held `O_NOFOLLOW` fd; opened-byte SHA-256 == pinned digest.
-- **Generation / rotation / revocation / currentness** — monotonic G→G+1 with exact `supersedes`; a rotated generation's evidence fails resolution; revoke has no fallback; repeat install over a live lineage is rejected.
-- **Installer ≠ launcher ≠ evidence-writer** — three distinct role strings/factories; the evidence-writer role is not a `PawaOperation`; `create_canonical` requires role `protected_presentation_mechanism`, so an installer capability is role/subject-ineligible (HPAC-PPA-REQ-064).
-- **Helper self-authorization impossible** — the helper source holds no configuration / writer / authority symbol.
-- **Fixed helper launch** — the single launch is `os.posix_spawn(sys.executable, [sys.executable, "-I", plat_fd], env, …)` reading the held helper fd via `/dev/fd/N` (darwin) or `/proc/self/fd/N` (linux); no shell, PATH, argv, cwd, network, or path re-open; the held fd stays open for the whole ceremony (no substitution window).
-- **Child environment** — closed `{PCAE_PPLP_REQUEST_FD, PCAE_PPLP_RESPONSE_FD, PATH, LC_ALL}`; no authority/auto-approve/verifier-kind/helper-path selector.
-- **Launch-time revalidation** — currentness re-resolved after the response; a generation switch → `ceremony_superseded` before any persistence.
-- **Request / display / response binding** — ≥256-bit `os.urandom(32)` nonce; closed field sets with self-excluding digests; every response field compared to the request; re-rendered `human_visible_representation_digest` equality; a caller display fact diverging from the canonical subject → `presentation_digest_mismatch`.
-- **Response vocabulary / election** — closed `{APPROVE, REJECT}`; `REJECT` → `approval_rejected_by_human`; cancel/EOF → `ceremony_cancelled`; malformed/crash → `helper_response_untrusted`; timeout → `ceremony_timed_out`; no interactive surface → fail-closed `CANCEL`; the disclosed test-only decision seam forces `test-only` mode, must acknowledge the exact rendered-byte digest, is rejected in a `production` envelope, and no production caller passes it.
-- **PPA evidence-writer non-bearer / single-use / create-only** — `_single_use` true, `_multi_write` false, `PRODUCTION`; `pickle.dumps` raises; every non-launcher caller → `unauthorized_factory_consumer`; `write_atomic_create_only`; a second ceremony mints a fresh writer and a distinct evidence id; a forged/copied/replayed evidence record does not resolve (every read re-validates schema, digest, subject binding, attestation object binding, and writer provenance).
-- **Real presentation verifier** — `VERIFIER_KIND == "pcae-protected-local-presentation/1.0"` exact; re-resolves the current generation, rejects a superseded/revoked descriptor digest (`ceremony_superseded`), rebinds the closed attestation object and `mechanism_attestation_digest`.
-- **Deterministic seam isolation** — the deterministic mechanism id ≠ the real id and its `verifier_kind` stays `deterministic-test-fixture`; the resolver real branch matches only the exact real kind; `_REAL_ELIGIBLE_MECHANISM_IDS == {"hpac.fido2.uv_presence.v2"}` unchanged; no env/caller can select or relabel a fixture.
-- **REAL auth + REAL presentation coupling** — `_authority_class_of` requires all resolved records (principal, credential, presentation, proof) to agree on assurance class, else `cross-store substitution`; `PRODUCTION` requires every record `PRODUCTION`, and the presentation record reaches `PRODUCTION` only through the real attestation branch; `require_real_assurance` additionally requires `proof.mechanism_id in _REAL_ELIGIBLE_MECHANISM_IDS` **and** `presentation.mechanism_ref.mechanism_id == "pcae-protected-local-presentation"` — "authentication alone is insufficient".
-- **Gate 5 / Gate 9 consumption** — Gate 5 → `runtime_authority.validate_approval` → `reverify_authenticated_principal` → `verify_human_authentication`; the frozen NON-REAL hard stop `principal.assurance_class is HPACAuthorityClass.PRODUCTION` is inherited; `runtime_dispatch_gate5.py` / `runtime_dispatch_gate9.py` / `runtime_authority.py` byte-unchanged since `A`.
-- **PB / policy / runtime / dispatch independence** — no `PermissionBroker` / `permission_broker` / `RuntimeEnforcementResult` / `DispatchEnvelope` in the phase source; the only `src/pcae` process launch is the one trusted `posix_spawn`; no `subprocess` / `socket` / `multiprocessing` import in any `.30R.4R.1` production file; `pcae runtime inspect` unchanged.
+| Ceremony | Production call | Device response |
+|---|---|---|
+| `authenticatorMakeCredential` | `NativeCtap2Provider.make_credential(...)` → `ctap2.make_credential(..., options={"rk": False, "uv": True})` | `0x2C — INVALID_OPTION` |
+| `authenticatorGetAssertion` | `NativeCtap2Provider.get_assertion(...)` → `ctap2.get_assertion(..., options={"uv": True})` | `0x2C — INVALID_OPTION` |
 
-## Guard reconciliation review
+**Finding H-1 (BLOCKING).** `NativeCtap2Provider`
+(`src/pcae/core/hpac_rhamp_ctap2.py`) requests user verification with a bare
+`"uv"` **option**. CTAP 2.1 removed the `uv` option from
+`authenticatorMakeCredential` and requires a PIN/UV-protocol `pinUvAuthParam`
+(or a built-in-UV authenticator advertising `options.uv`) for
+`authenticatorGetAssertion`; every `FIDO_2_1` authenticator therefore rejects
+the request as malformed. The production provider has consequently **never
+successfully communicated with real CTAP 2.1 hardware** — the automated suite
+is green only because `DeterministicCtap2Provider` honours the bare `uv` option
+and returns `up=True, uv=True` (verified: the identical call on the fixture
+succeeds). This is exactly the gap **RHAMP-INV-018** exists to catch: N-16-5
+closure requires **both** the automated negative suite green **and** ≥ 1
+real-CTAP2-hardware verification — neither substitutes for the other.
 
-Independently reviewed across eleven historical suites: authorized consumer/inventory sets widened by exact filenames/tuples with `.1R.30R.4R.1` comments and preserved no-wildcard assertions; byte-frozen guards replaced with not-weakened checks (`def ` count non-decreasing, `_ELIGIBLE_MECHANISM_IDS` literal unchanged, `fnmatch` / `adapter.dispatch(` absent, deterministic-fixture fail-closed line preserved). **No `def test_` removed or renamed anywhere in `tests/`. No `pytest.skip` / `pytest.xfail` / `@pytest.mark.xfail` / `fnmatch` / wildcard-broadening added.** The single added `skipif` is the disclosed POSIX platform guard on the fresh `.30R.4R.1` suite.
+Repairing the provider (add the `ClientPin` / `PinProtocolV2` →
+`pinUvAuthToken` → `pinUvAuthParam` handshake to both ceremonies + a trusted
+non-logging PIN flow + CTAP-version-aware automated coverage) is a
+`src/pcae/core/` change **outside this certification phase's scope** (governing
+prompt §55: *"Any production change: STOP and adjudicate whether a defect was
+found. Do not silently repair."*). The defect is adjudicated here; the repair
+belongs to a dedicated successor phase.
 
-## Fixed-SHA A/B and lineage sweep
+No credential was created on the device. No PIN was requested, entered, logged,
+or stored. No canonical RHAMP registry / sidecar / counter-state record was
+written. No deterministic fixture was substituted for certification; no
+hardware evidence was fabricated; **no hardware certification is claimed**; no
+production code was changed. This BLOCKS the phase per multiple frozen VALID
+BLOCKED CONDITIONS (the production provider path cannot complete a spec-valid
+exchange with the authenticator; real `makeCredential` / `getAssertion` cannot
+complete; an unresolved blocking software defect appeared; N-16-5 requirements
+are incomplete after the hardware exercise).
 
-Deterministic (`-p no:randomly`) run at the `A` worktree (`/tmp/pcae-A` @ `a727dbf4`) and at `HEAD` over the affected lineage: `A` 20 failed / 656 passed; `HEAD` 18 failed / 717 passed. **B-only unexplained functional regressions = 0.** `.30R.4R.1` fixed three shared failures it targeted. The 17 shared failures are all pre-existing at `A` (the `_111r31` / `_111r321` "blocking reproduction" demo group, the `test_object_dunder_new_*` pair, the `.30R.1` contract-guard pair, `_1r19r::test_no_contract_change_since_r20_head`). **One candidate-only failure** — `.1R.19R::test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap` — classified **NON-BLOCKING** finding F-1 (below). Clean targeted affected-suite run: **684 passed, 0 failed.** The `.30R.4R.1` implementation suite rerun byte-unchanged: **59 passed**.
+## Software trust chain — independently preserved (re-verified at `A`)
 
-## Finding F-1 (NON-BLOCKING) — incomplete `.1R.19R` guard reconciliation
+`docs/contracts` and all of `src/pcae` byte-unchanged since `A`. The merged
+RHAMP real FIDO2 software mechanism (`.30R.3.4` + `.3.6` / `.3.6.1`), the
+protected human-approval presentation (`.30R.4R.1`, IV'd by `.30R.4R.2`),
+real-assurance consumption through the frozen `assurance_class is PRODUCTION`
+Gate 5 / Gate 9 check, and PB / policy / runtime independence all unchanged and
+independently re-verified. N-16-3 / N-16-4 CLOSED. N-16-6 / N-16-7 OPEN /
+UNTOUCHED. N-23-1 INFO / N-23-2 INFO-DEFERRED carried unchanged. Runtime
+`not_implemented` / `Observed` / `observe` / `unavailable`, 0 plugins /
+0 capabilities; first external effect ABSENT / UNREACHABLE. Historical BLOCKED
+phases (`.1R.30`, `.30R.3.3`, `.30R.3.5`, `.30R.4`) remain immutable
+repaired-and-verified records, not current blockers.
 
-The pre-existing `.1R.19R` guard `test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap` ends with `assert not any("subprocess" in l or "socket" in l or ".dispatch(" in l for l in added)` over every added `src/pcae` line since `e05f0ea3`. `.30R.4R.1`'s authorized new launcher module `protected_presentation.py` contributes exactly two matching lines, both **disclaimer prose** (docstring `… generic subprocess API (HPAC-PPA-REQ-031);`; comment `# subprocess API. posix_spawn avoids fork() …`). The module has **zero** functional `subprocess`/`socket`/`adapter.dispatch` use (AST- and import-verified). `.30R.4R.1` correctly widened the sibling `_POST_1R19R_AUTHORIZED` filename allowlist in the same test but did not neutralize this separate content assertion. Classified as explained, non-functional, candidate-only guard evolution — a `.30R.4R.1` reconciliation completeness gap, not a defect in the architecture. **VERIFICATION ONLY — not repaired here.** The successor SHOULD fold this reconciliation (exclude comment/docstring lines, as `.30R.3.6.1::test_34` already does), with the sibling stale `.1R.19R` / `.30R.1` guards.
+## N-16-5 complete-requirement table
 
-## Mandatory real-CTAP2-hardware verification — placement adjudication
+Rows 1–13 and 15 (all software prerequisites, the ≥ 55-case negative matrix,
+no unresolved BLOCKED descendants) **✅ VERIFIED**. **Row 14** (≥ 1 mandatory
+real-CTAP2 hardware verification) **❌ — finding H-1**. **Row 16** (no
+unresolved blocking finding) **❌ — H-1 open**. Rows 14 and 16 false →
+**N-16-5 CANNOT CLOSE. NOT CLOSED.** Closure not forced. The frozen 15-point
+closure test (governing prompt §49) items 1, 2, 4, 6, 7, 8, 9, 13 are not
+satisfied.
 
-Resolved from primary-source phase sequencing (RHAMP-REQ-152 "in `.1R.33`", RHAMP-REQ-153 "No hardware is accessed … before `.1R.33`'s controlled hardware session", RHAMP-REQ-156 table, RHAMP-INV-018, HPAC-PPA-REQ-074): the mandatory ≥ 1 real CTAP2 hardware verification is a **single dedicated controlled hardware session in a distinct successor phase**, not this software IV. No hardware was accessed here and **no real-hardware claim is made**. **N-16-5 remains NOT CLOSED.**
+## Findings carried forward (test-only, not repaired in this BLOCKED phase)
 
-## Software implementation final verdict
+Same discipline `.30R.3.5` applied to its own uncorrected finding — keeping the
+BLOCKED phase code-change-free:
 
-**INDEPENDENTLY VERIFIED — N-16-5 PROTECTED HUMAN-APPROVAL PRESENTATION AND REAL-ASSURANCE CONSUMPTION IMPLEMENTATION COMPLETE (software).** Merged RHAMP authentication VERIFIED / PRESERVED. N-16-6 / N-16-7 OPEN / UNTOUCHED. Runtime Observed / observe / unavailable. First external effect ABSENT.
+- **F-1 (NON-BLOCKING, from `.30R.4R.2`)** —
+  `.1R.19R::test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap`;
+  its `assert not any("subprocess" in l or "socket" in l or ".dispatch(" in l
+  for l in added)` scan matches two purely descriptive disclaimer lines in the
+  authorized `.30R.4R.1` launcher module (`protected_presentation.py`).
+  Narrow fix: restrict the `added` scan to the one file `.1R.19R` actually
+  repaired (`runtime_dispatch_attempt_lifecycle.py`).
+- **Three sibling stale guards — independently reproduced as FAILING on `A`
+  (`0b973e2e`) with zero working-tree changes → pre-existing, not attributable
+  to this phase:**
+  `.1R.19R::test_no_contract_change_since_r20_head` and
+  `.30R.1::test_no_contract_change_since_b30` (authorized-contract sets predate
+  the `.1R.29` RHAMP + `.30R.3.1` / `.30R.4R.1` PPA/PAWA-anchor contract
+  additions; fix: extend by the exact filenames, no wildcard); and
+  `.30R.1::test_phase_id_discrepancy_present_and_resolution_recorded` (asserts
+  `"1R.30R.2"` in the moving live `.pcae/phase-completion-metadata.json`; fix:
+  pin to the historical `.30R.1`-era metadata blob by SHA).
 
-## Successor
+All four deferred to the successor repair phase — widened-not-weakened, no
+`def test_` renamed/removed, no `skip` / `skipif` / `xfail` / `fnmatch` /
+wildcard added.
 
-`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5` — Mandatory Real-CTAP2-Hardware Verification and N-16-5 Closure (== RHAMP `.1R.33`): the ≥ 1 real CTAP2 hardware ceremony with a genuine attached key and human gesture; the F-1 `.1R.19R` guard reconciliation (with the sibling stale `.1R.19R` / `.30R.1` guards); and — only if every frozen N-16-5 requirement is then complete — N-16-5 closure. Then N-16-6, then N-16-7 (strictly last). ID recommended NOT reserved; own explicit human authorization; do not begin.
+## Fresh `.30R.5` suite
 
-`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved — this phase's governed lifecycle was performed only by the primary human-authorized operator session.
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5_hardware_cert_closure.py`
+— **13 test functions / 15 cases, 0 failed.** Hardware-free and deterministic
+(RHAMP-REQ-154): pins `A`; proves `docs/contracts` and `src/pcae`
+byte-unchanged since `A`; proves `resolve_production_ctap2_provider()` yields
+the real `NativeCtap2Provider` and `DeterministicCtap2Provider.SIMULATION_ONLY`
+is permanently `True`; pins the exact source locus of finding H-1; asserts the
+phase doc records BLOCKED + the `0x2C` finding + the carried-forward
+F-1 / sibling guards; asserts `PROJECT_STATUS.md` names `.30R.5` BLOCKED with
+N-16-5 NOT CLOSED; and asserts the runtime posture, the "nothing changed in
+`src/pcae`" boundary, and the doc/test/status-only change footprint. The
+real-hardware observations are recorded in the canonical phase document, not as
+CI assertions.
+
+## Verdict
+
+**BLOCKED — MANDATORY REAL-CTAP2 HARDWARE VERIFICATION COULD NOT COMPLETE
+(finding H-1). N-16-5: NOT CLOSED.** No production source, script, or normative
+contract changed. No deterministic fixture substituted. No hardware
+certification claimed. Runtime `Observed` / `observe` / `unavailable`; first
+external effect ABSENT; N-16-6 / N-16-7 OPEN / UNTOUCHED.
+
+## Successor (not begun; own explicit human authorization + protected human approval required)
+
+**`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R`** — repair finding H-1 in
+`hpac_rhamp_ctap2.py` (CTAP 2.1 PIN/UV auth-protocol handshake + trusted PIN
+flow + CTAP-version-aware automated coverage); perform the full mandatory
+RHAMP-REQ-152 real hardware ceremony; fold the F-1 + three sibling stale
+`.1R.19R` / `.30R.1` guard reconciliations; and — only if every frozen N-16-5
+requirement is then complete and no blocking finding remains — close N-16-5.
+Then N-16-6, then N-16-7 (strictly last). ID recommended NOT reserved. Do not
+begin N-16-6, N-16-7, Slice C, a first external effect, or execution
+enablement.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved — this
+phase's governed lifecycle was performed only by the primary human-authorized
+operator session.
