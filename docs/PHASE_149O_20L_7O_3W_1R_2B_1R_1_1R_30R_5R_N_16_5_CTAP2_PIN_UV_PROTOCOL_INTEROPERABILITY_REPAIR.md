@@ -148,7 +148,7 @@ Re-run software baselines (unchanged, all green with this change):
 
 ## 5. Test reconciliations (widened, not weakened)
 
-Two point-in-time guards that this repair's one-file production change
+The point-in-time guards that this repair's one-file production change
 directly trips are reconciled here (exact filenames, `.1R.30R.5R` comments,
 no wildcard / fnmatch, no `def test_` renamed / removed / skipped / xfailed):
 
@@ -156,6 +156,12 @@ no wildcard / fnmatch, no `def test_` renamed / removed / skipped / xfailed):
 |---|---|
 | `.1R.30R.3.4::test_33_non_discoverable_and_uv_options_requested` | Was `assert '"rk": False' in text and '"uv": True' in text` — it encoded the H-1 bug. Now asserts the repaired reality: `rk=False` present, the bare-`uv` shape (`"rk": False, "uv": True`) **gone**, and `pin_uv_param` / `pin_uv_protocol` / `_obtain_pin_uv` threaded. Strictly stronger. |
 | `.1R.30R.4R.2::test_70_iv_suite_touches_no_production_source_or_contract` | Open-ended `git diff 5b6b4013 --` (working-tree-inclusive). Upper bound pinned to the `.1R.30R.4R.2` finalized head `0b973e2e` — through that head the IV phase changed no `src/pcae` / `docs/contracts` / `scripts` file. |
+| `.1R.30R.5::test_h1_locus_native_provider_requests_uv_as_a_bare_option` | Anchored the pre-repair invalid shape. Now anchors the **same locus** in its repaired state: bare-`uv` shapes **gone**, `ClientPin` / `pin_uv_param` / `pin_uv_protocol` / `_obtain_pin_uv` present. Same `def` name; widened, not weakened. |
+| `.1R.30R.5::test_no_production_or_script_or_pyproject_change_since_A`, `::test_no_effect_adapter_or_dispatch_introduced_since_A`, `::test_this_phase_touched_only_doc_test_and_status_files` | Open-ended `git diff A(0b973e2e) HEAD` guards from the BLOCKED certification phase. Each keeps the byte-unchanged assertion through the `.1R.30R.5` finalized head `9f004ea9` (its own window) and adds a not-weakened check that `.1R.30R.5R` changes **exactly** `src/pcae/core/hpac_rhamp_ctap2.py`, with no `adapter.dispatch(` / `DispatchEnvelope` / `subprocess` / `os.fork` / `posix_spawn` primitive in the added lines. |
+
+The historical `.1R.30R.5` **document** is byte-unchanged and immutable (§42);
+only its forward-looking point-in-time *test* guards are reconciled, per the
+established repo pattern (trap 11 / `.1R.26`).
 
 ## 6. Regression attribution (fixed-SHA A/B, A = `9f004ea9`)
 

@@ -82,12 +82,20 @@ def test_named_normative_contract_unchanged(contract):
 # ── 3. Production source unchanged — this is a verification phase ──────────
 
 def test_no_production_or_script_or_pyproject_change_since_A():
+    # Through the .1R.30R.5 finalized head this verification phase changed no
+    # production source / script / pyproject byte (reconciled by .1R.30R.5R).
     assert (
         _git(
-            "diff", "--name-only", A, "HEAD", "--", "src/pcae", "scripts", "pyproject.toml"
+            "diff", "--name-only", A, "9f004ea9", "--", "src/pcae", "scripts", "pyproject.toml"
         ).strip()
         == ""
     )
+    # The dedicated .1R.30R.5R repair phase changes exactly one src/pcae file
+    # and no script / pyproject byte.
+    changed = set(
+        _git("diff", "--name-only", A, "HEAD", "--", "src/pcae", "scripts", "pyproject.toml").split()
+    )
+    assert changed <= {"src/pcae/core/hpac_rhamp_ctap2.py"}, changed
 
 
 # ── 4. Production provider resolves (not the deterministic fixture) ───────
@@ -130,17 +138,21 @@ def test_deterministic_fixture_result_never_satisfies_certification():
 # ── 5. Finding H-1 — exact source locus ──────────────────────────────────
 
 def test_h1_locus_native_provider_requests_uv_as_a_bare_option():
-    """The blocking finding: NativeCtap2Provider passes a bare ``uv`` option to
-    both ceremonies. CTAP 2.1 authenticators reject this with 0x2C. This test
-    pins the defect location so the successor repair phase has an anchor; it
-    does NOT assert the behaviour is correct.
+    """Finding H-1's source locus: ``NativeCtap2Provider`` used to pass a bare
+    ``uv`` option to both ceremonies, which CTAP 2.1 authenticators reject with
+    0x2C. Reconciled by .1R.30R.5R (the dedicated repair phase): the bare-``uv``
+    shape is now GONE and the CTAP 2.1 PIN/UV auth-protocol handshake is in
+    place. This guard is widened, not weakened — it still anchors the same
+    locus, now asserting the repaired state.
     """
     src = CTAP2_MODULE.read_text(encoding="utf-8")
-    assert 'options = {"rk": False, "uv": True}' in src  # make_credential
-    assert 'options={"uv": True}' in src  # get_assertion
-    # and there is still no PIN/UV auth-protocol handshake in the module
-    assert "ClientPin" not in src
-    assert "pin_uv_auth_param" not in src and "pinUvAuthParam" not in src
+    # the pre-repair invalid shapes are gone
+    assert 'options = {"rk": False, "uv": True}' not in src  # make_credential
+    assert 'options={"uv": True}' not in src  # get_assertion
+    # the PIN/UV auth-protocol handshake is present
+    assert "ClientPin" in src
+    assert "pin_uv_param" in src and "pin_uv_protocol" in src
+    assert "_obtain_pin_uv" in src
 
 
 # ── 6. N-16-5 remains NOT CLOSED ─────────────────────────────────────────
@@ -181,15 +193,35 @@ def test_runtime_still_observed_and_unavailable():
     assert re.search(r"Capability count:\s+0\b", out)
 
 
+#: finalized .1R.30R.5 BLOCKED head — the upper bound of *this phase's* own
+#: window (reconciled by .1R.30R.5R).
+_30R5_FINALIZED_HEAD = "9f004ea9"
+
+
 def test_no_effect_adapter_or_dispatch_introduced_since_A():
-    diff = _git("diff", A, "HEAD", "--", "src/pcae")
-    assert diff.strip() == ""  # nothing at all changed in src/pcae
+    # Through the .1R.30R.5 finalized head, src/pcae was byte-unchanged since A.
+    assert _git("diff", A, _30R5_FINALIZED_HEAD, "--", "src/pcae").strip() == ""
+    # The dedicated .1R.30R.5R repair phase legitimately changes exactly one
+    # src/pcae file (the CTAP2 PIN/UV handshake); no effect-adapter / dispatch
+    # primitive is introduced anywhere.
+    changed = {
+        l.split(" b/")[-1] for l in _git("diff", A, "HEAD", "--", "src/pcae").splitlines()
+        if l.startswith("diff --git ")
+    }
+    assert changed <= {"src/pcae/core/hpac_rhamp_ctap2.py"}, changed
+    added = [
+        l for l in _git("diff", A, "HEAD", "--", "src/pcae").splitlines()
+        if l.startswith("+") and not l.startswith("+++")
+    ]
+    assert not any("adapter.dispatch(" in l or "DispatchEnvelope" in l for l in added)
+    assert not any("subprocess" in l or "os.fork" in l or "posix_spawn" in l for l in added)
 
 
 def test_this_phase_touched_only_doc_test_and_status_files():
+    # "this phase" = .1R.30R.5; its window ends at its finalized head.
     changed = {
         line.split("\t")[-1]
-        for line in _git("diff", "--name-only", A, "HEAD").splitlines()
+        for line in _git("diff", "--name-only", A, _30R5_FINALIZED_HEAD).splitlines()
         if line.strip()
     }
     allowed_prefixes = ("docs/", "tests/", "tasks/", ".pcae/")
