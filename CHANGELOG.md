@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5: Mandatory Real-CTAP2-Hardware Verification and N-16-5 Closure to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5); N-16-5 NOT CLOSED; H-1 provider repair recommended next; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5` (Mandatory Real-CTAP2-Hardware
   Verification and N-16-5 Closure, == RHAMP `.1R.33`) is **BLOCKED**; **N-16-5
   remains NOT CLOSED**. A genuine CTAP2 USB security key was exercised through

@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5: Mandatory Real-CTAP2-Hardware Verifica
 
 ## Status
 
-active
+done
 
 ## Mode
 
