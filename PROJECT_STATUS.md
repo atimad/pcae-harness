@@ -2,6 +2,141 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1 — Independent Verification of the
+CTAP2 PIN/UV Repair + Mandatory Real-CTAP2-Hardware Verification + N-16-5
+Closure (== RHAMP `.1R.33`). **STATUS: BLOCKED. H-1: INDEPENDENTLY VERIFIED —
+REAL-CTAP2-HARDWARE VERIFIED. N-16-5: NOT CLOSED (finding H-2).**
+
+**Anchors** (re-derived from primary source): `A` = `9f004ea9` (finalized
+`.1R.30R.5` BLOCKED head, attribution baseline); `R` = `ea40c47e` (finalized
+`.1R.30R.5R` repair head); `V` = `ea40c47e` (`.1R.30R.5R.1` phase-entry SHA,
+`origin/main..HEAD = 0` at entry; `V == R`).
+
+**What was verified.** The `.1R.30R.5R` CTAP2 PIN/UV interoperability repair
+(finding H-1) is independently verified from primary source — production diff =
+exactly one file (`src/pcae/core/hpac_rhamp_ctap2.py`), all normative contracts
+byte-unchanged since `A`, `pyproject.toml` unchanged, `terminal_reason_code`
+enum stays at 41, every referenced `fido2 1.2.0` `CtapError.ERR` / `ClientPin` /
+`Ctap2` API is valid, `ClientPin.PROTOCOLS == [V2, V1]` (V2 preferred),
+permission-scoped + rp-bound token, command-scoped `pinUvAuthParam`, trusted
+non-logging tty-guarded `getpass` PIN with `del pin` / `del token`, no bare-`uv`
+production path, no UP-only downgrade, `_VirtualCtap2Authenticator` rejects the
+exact `0x2C` / `0x36` / `0x33` shapes and is structurally NON_REAL, the
+production resolver is seam-free. `.1R.30R.5R` repair suite re-run 48/0; fresh
+`.1R.30R.5R.1` IV suite 48/0; core non-regression sweep (repair / merged
+mechanism / merged IV / verifier / `.1R.30R.5` closure) 231/0.
+
+**Mandatory real-CTAP2-hardware verification (RHAMP-REQ-152) — CTAP2 leg
+CERTIFIED.** Against a genuine attached FIDO_2_1 roaming USB key
+(`aaguid b7d3f68e88a6471e9ecf2df26d041ede`, `clientPin` set,
+`pin_uv_protocols [2,1]`, `options.uv` absent → PIN path) through the real
+`resolve_production_ctap2_provider()` → `NativeCtap2Provider` (deterministic
+fixture never constructed): real `makeCredential` → canonical `CredentialRecord`
++ `RHAMP-FIDO2-CREDENTIAL/1.0` sidecar (real device aaguid) +
+`RHAMP-COUNTER-STATE/1.0`; two real `getAssertion` ceremonies passing the full
+RHAMP §37 verifier sequence with `FLAG.UP` + `FLAG.UV`, real
+`rpIdHash == SHA-256("hpac.pcae.local")`, real ES256 COSE signature, real
+native client context (no browser origin), meaningful monotonic counter
+`6 → 8`; wrong-challenge, wrong client-data binding, replay (counter
+currentness), deterministic no-UV, and canonically-revoked-credential all
+rejected. Genuine physical touch + trusted local PIN on every ceremony. No
+PIN / token / private key logged, stored, or transmitted. Evidence:
+`.pcae/certification/rhamp_hardware_cert_30r5r1.json`. **H-1: REPAIRED —
+REAL-CTAP2-HARDWARE VERIFIED.**
+
+**N-16-5 does NOT close — new blocking finding H-2.** RHAMP-REQ-152 bullet 4
+requires a real *"explicit Approve election"* through the protected
+presentation → assertion → proof → Gate 5 → one `PRODUCTION`
+`AuthenticatedHumanPrincipal`. The production helper
+(`src/pcae/protected_presentation_helper.py::_observe_election`) has **no
+interactive human-election surface** — it returns `CANCEL` for every production
+ceremony unless the disclosed `_test_decision_source` test seam is used.
+`.1R.30R.4R.1` (== RHAMP `.1R.32`) implemented the presentation protocol,
+deterministic rendering, digest-equivalence check, and election *binding*, but
+deferred the interactive input to *"the mandatory real-CTAP2-hardware
+verification phase"* (this one). This phase is **verification only** — adding
+the surface is a `src/pcae` production change outside its authorized scope →
+**adjudicated as finding H-2, not repaired**, exactly as `.1R.30R.5`
+adjudicated H-1. The rest of the chain **composes end-to-end in software**
+(fresh IV suite `test_25`: a `PRODUCTION` `AuthenticatedHumanPrincipal` is
+minted through `verify_human_authentication(require_real_assurance=True)` with a
+real FIDO2 proof + real `pcae-protected-local-presentation/1.0` presentation
+evidence, satisfying the frozen Gate 5
+`assurance_class is HPACAuthorityClass.PRODUCTION` check; an in-process shim
+stands in for **only** the launcher's `posix_spawn` boundary, not the CTAP2
+authenticator or the human election) — H-2 is precisely the missing keystroke.
+
+**Finding F-2 (NON-BLOCKING, environmental).** `_launch_and_exchange`'s
+`os.posix_spawn(python, [python, "-I", "/dev/fd/N"], ...)` does not execute the
+helper on this machine's interpreter (Python 3.9.6 / macOS) — the child exits 0
+having run nothing. ~20 pre-existing `.1R.30R.4R.1` / `.1R.30R.4R.2` ceremony
+tests fail for this reason. **Reproduced identically at the phase-entry SHA `V`
+(`ea40c47e`) — zero failures attributable to `.1R.30R.5R.1`.** Folded into the
+H-2 successor with the carried point-in-time guard debt.
+
+**Carried forward (NOT reconciled — BLOCKED phase kept code-free, per the
+`.1R.30R.5` precedent):** F-1 (`.1R.30R.4R.2` `test_lifecycle_module_diff…`
+content-scan) + the three sibling stale `.1R.19R` / `.1R.30R.1` guards +
+`.1R.19R` / `.1R.19R.1` / `.1R.30R.1` point-in-time guards transitively
+implicated by the `.1R.30R.5R` one-file change + the moving
+completion-metadata guard + the `.1R.30R.4R.2` `test_01` "every commit since
+`5b6b4013` is `.30R.4R.2`" guard (already stale since `.1R.30R.5`). All
+independently reproduced failing on `A` — pre-existing. Full phase-aware,
+widened-not-weakened reconciliation folds into the H-2 successor.
+
+**N-16-5 complete-requirement table:** rows 1–13, 14a (CTAP2 repair IV'd),
+14b (real-CTAP2 hardware makeCredential/getAssertion/UP/UV/rpIdHash/COSE/counter
++ negatives) ✅; **row 14c (presentation-bound `PRODUCTION` principal via a real
+explicit Approve election → Gate 5) ❌ finding H-2; row 16 (no blocking finding)
+❌ H-2 open.** Rows 14c + 16 false → **N-16-5 CANNOT CLOSE.**
+
+**Runtime:** `not_implemented` / `Observed` / `observe` / `unavailable`;
+0 plugins / 0 capabilities; `execution_unavailable`. **First external effect:
+ABSENT / UNREACHABLE** (CTAP2 device I/O and the local presentation helper
+`posix_spawn` are N-16-5 trust mechanisms, not the Slice C runtime first
+external effect). No `src/pcae` / `scripts` / `pyproject` / `docs/contracts`
+byte changed this phase. Gate 5 / Gate 9 byte-unchanged since `.1R.30R.4R`
+(`a727dbf4`). **N-16-3 / N-16-4 CLOSED. N-16-6 / N-16-7 OPEN / UNTOUCHED**
+(N-16-7 strictly last). Historical `.1R.30`, `.1R.30R.3.3`, `.1R.30R.3.5`,
+`.1R.30R.4`, `.1R.30R.5` remain immutable BLOCKED records.
+
+`hpac.fido2.uv_presence.v2` = **one VERIFIED SUPPORTED REAL human-authentication
+profile (CTAP2 leg real-hardware verified)** — NOT globally mandatory PCAE
+authentication, NOT the exclusive mechanism, NOT a mandate for physical FIDO2
+hardware in ordinary (repository-inspection / architecture / planning /
+documentation / deterministic-testing / non-effecting / Observed-mode)
+development, and NOT a foreclosure of a future mobile-only path. **Carried
+INFO / PLANNED (not a current blocker):** *Mechanism-Neutral Human
+Authentication Profiles / Mobile-Only Authentication and Protected Approval
+Architecture* (mobile platform authenticator, device biometrics, device
+credential, NFC-through-mobile, assurance-level abstraction, mobile protected
+presentation) — separate architecture / contract / implementation / IV work;
+MUST NOT block current development or be required before N-16-6 unless
+canonical priorities later place it there.
+
+**Recommended next phase (recommended, NOT reserved; own explicit human
+authorization + own protected human approval required — do not begin):**
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2` — repair **H-2** (add the trusted local
+interactive human-election surface to the presentation helper — explicit
+Approve / Reject from a trusted local TTY, fail-closed, no implicit/timeout
+approval, RHAMP-REQ-097/100) and **F-2** (portable helper launch); perform the
+presentation-bound leg of the RHAMP-REQ-152 ceremony against a genuine key
+(real helper render → real explicit Approve → real `getAssertion` → proof →
+Gate 5 → one `PRODUCTION` principal; PB DENY / policy DENY still DENY); fold the
+full F-1 + three-sibling + `.1R.19R` / `.1R.19R.1` / `.1R.30R.1` +
+moving-metadata + `.30R.4R.2 test_01` point-in-time guard reconciliation
+(test-only, widened-not-weakened, no `def test_` renamed/removed); and — only
+if every frozen N-16-5 requirement is then complete and no blocking finding
+remains — close N-16-5. Then N-16-6, then N-16-7 (strictly last). ID
+recommended NOT reserved; confirm under CPIPC before use. **Do not begin
+N-16-6, N-16-7, Slice C, a first external effect, or execution enablement.**
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved. Doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_1_CTAP2_PIN_UV_REPAIR_IV_REAL_HARDWARE_VERIFICATION_AND_N_16_5_CLOSURE.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R — N-16-5 CTAP2 PIN/UV Protocol
 Interoperability Repair (finding H-1). **STATUS: COMPLETE. H-1: REPAIRED —
 FRESH REAL-HARDWARE CERTIFICATION REQUIRED. N-16-5: NOT CLOSED.**

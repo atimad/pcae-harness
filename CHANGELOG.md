@@ -2,6 +2,56 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1` (Independent Verification of
+  the CTAP2 PIN/UV Repair + Mandatory Real-CTAP2-Hardware Verification +
+  N-16-5 Closure, == RHAMP `.1R.33`) — **BLOCKED. N-16-5: NOT CLOSED.**
+  Anchors `A=9f004ea9` / `R=V=ea40c47e`. The `.1R.30R.5R` CTAP2 PIN/UV repair
+  (finding H-1) is **independently verified from primary source** (one-file
+  production diff, all contracts + `pyproject.toml` byte-unchanged since `A`,
+  41-code enum, valid `fido2 1.2.0` API surface, V2-preferred negotiation,
+  permission-scoped rp-bound token, command-scoped `pinUvAuthParam`, trusted
+  non-logging PIN, no bare-`uv` path, no UP-only downgrade, NON_REAL virtual
+  authenticator, seam-free resolver) and **certified against genuine FIDO_2_1
+  hardware** through the real `NativeCtap2Provider`: real `makeCredential` →
+  canonical `CredentialRecord` + sidecar + counter-state; two real
+  `getAssertion` ceremonies passing the full RHAMP §37 sequence with `FLAG.UP`
+  + `FLAG.UV`, real `rpIdHash`, real ES256 COSE signature, real native client
+  context, meaningful monotonic counter `6 → 8`; wrong-challenge, replay,
+  deterministic no-UV, and revoked-credential all rejected; genuine touch +
+  trusted local PIN on every ceremony (nothing secret logged/stored). Evidence:
+  `.pcae/certification/rhamp_hardware_cert_30r5r1.json`. **H-1: REPAIRED —
+  REAL-CTAP2-HARDWARE VERIFIED.**
+- **N-16-5 does not close — new blocking finding H-2:** the production
+  protected-presentation helper
+  (`src/pcae/protected_presentation_helper.py::_observe_election`) has no
+  interactive human-election surface — it returns `CANCEL` for every production
+  ceremony unless the disclosed `_test_decision_source` test seam is used.
+  `.1R.30R.4R.1` deferred the interactive input to "the mandatory
+  real-CTAP2-hardware verification phase" (this one). RHAMP-REQ-152 bullet 4
+  (a real explicit Approve election → Gate 5 → one `PRODUCTION`
+  `AuthenticatedHumanPrincipal`) is therefore not performable. Adding the
+  surface is a `src/pcae` production change outside this verification phase's
+  authorized scope → **adjudicated, not repaired** (the `.1R.30R.5`
+  precedent). The rest of the chain composes end-to-end in software (fresh IV
+  suite `test_25`).
+- **Finding F-2 (non-blocking, environmental):** `_launch_and_exchange`'s
+  `os.posix_spawn(python, [python, "-I", "/dev/fd/N"])` does not execute the
+  helper on this machine's Python 3.9.6 / macOS — ~20 pre-existing
+  `.1R.30R.4R.1` / `.1R.30R.4R.2` ceremony-test failures, reproduced
+  identically at the phase-entry SHA `ea40c47e` (zero attributable regression).
+- New fresh IV suite
+  `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_1_ctap2_pin_uv_repair_iv.py`
+  — 32 functions / 48 cases, all passing; hardware-free and deterministic
+  (RHAMP-REQ-154). `.1R.30R.5R` repair suite re-run 48/0. Core non-regression
+  sweep 231/0. This BLOCKED phase changed no `src/pcae` / `scripts` /
+  `pyproject.toml` / `docs/contracts` byte and reconciled no test guard — the
+  full F-1 + sibling + `.1R.19R` / `.1R.19R.1` / `.1R.30R.1` +
+  moving-metadata + `.30R.4R.2 test_01` point-in-time guard reconciliation is
+  folded into the H-2 successor (`.1R.30R.5R.2`, recommended NOT reserved).
+  Runtime `not_implemented` / `Observed` / `observe` / `unavailable`; first
+  external effect ABSENT. N-16-3 / N-16-4 CLOSED; N-16-6 / N-16-7 OPEN /
+  UNTOUCHED. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+  preserved.
 - Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R); N-16-5 NOT CLOSED; H-1 repaired, real-hardware certification IV recommended next to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1: CTAP2 PIN/UV Repair IV + Real-Hardware Cert + N-16-5 Closure; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R: N-16-5 CTAP2 PIN/UV repair to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R); N-16-5 NOT CLOSED; H-1 repaired, real-hardware certification IV recommended next; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R` (N-16-5 CTAP2 PIN/UV Protocol

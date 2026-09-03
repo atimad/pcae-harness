@@ -1,0 +1,71 @@
+{
+  "A": {
+    "authenticator_aaguid": "b7d3f68e88a6471e9ecf2df26d041ede",
+    "authenticator_is_fido_2_1": true,
+    "authenticator_options": {
+      "alwaysUv": false,
+      "authnrCfg": true,
+      "clientPin": true,
+      "credMgmt": true,
+      "credentialMgmtPreview": true,
+      "largeBlobs": true,
+      "makeCredUvNotRqd": true,
+      "pinUvAuthToken": true,
+      "plat": false,
+      "rk": true,
+      "setMinPINLength": true,
+      "up": true
+    },
+    "authenticator_pin_uv_protocols": [
+      2,
+      1
+    ],
+    "authenticator_transports": [
+      "nfc",
+      "usb"
+    ],
+    "authenticator_versions": [
+      "U2F_V2",
+      "FIDO_2_0",
+      "FIDO_2_1_PRE",
+      "FIDO_2_1"
+    ],
+    "canonical_counter_state": "initialised last_accepted_meaningful=0",
+    "canonical_credential_record": "status=active, mechanism=hpac.fido2.uv_presence.v2, UP+UV",
+    "canonical_sidecar": "aaguid=b7d3f68e88a6471e9ecf2df26d041ede transports=['usb'] pubkey==registry",
+    "certification_authority_class": "PRODUCTION (disclosed _production_test_fixture seam; CTAP2 provider genuine)",
+    "deterministic_contrast": "DeterministicCtap2Provider returns up=uv=True for the bare-uv call real FIDO_2_1 hw rejected 0x2C pre-repair \u2014 structurally NON_REAL",
+    "missing_uv_rejected": "deterministic no-UV enrollment rejected: enrollment_ceremony_evidence_invalid",
+    "real_client_context": "RHAMP-CLIENT-CONTEXT/1.0 reconstructed from trusted state; no browser origin (\u00a737 step 4)",
+    "real_cose_signature": "ES256 signature verified vs canonical stored COSE key (\u00a737 step 3)",
+    "real_counter_currentness": "meaningful & monotonic 6 -> 8 (RHAMP \u00a720)",
+    "real_flag_up": true,
+    "real_flag_uv": true,
+    "real_get_assertion_1": "OK \u2014 passed full RHAMP \u00a737 sequence",
+    "real_get_assertion_2": "OK \u2014 passed full RHAMP \u00a737 sequence, fresh challenge",
+    "real_make_credential": "OK credential_id=hpc-50ca429c70be415ca2cbb8b041e99ec1 transports=['usb']",
+    "real_observed_sign_count_1": 6,
+    "real_rp_id_hash": "rpIdHash == SHA-256(\"hpac.pcae.local\") verified (\u00a737 step 2)",
+    "replay_rejected": "\u00a720 currentness: SIGNATURE_COUNTER_REGRESSION",
+    "result": "PASS",
+    "revoked_credential_rejected": "credential not active; verifier rejects: HPACVerificationError",
+    "wrong_challenge_rejected": "CLIENT_DATA_HASH_MISMATCH",
+    "wrong_client_data_binding_rejected": "CLIENT_DATA_HASH_MISMATCH"
+  },
+  "B": {
+    "BLOCKED_finding_H2": "protected-presentation helper has NO interactive human-election surface (pcae/protected_presentation_helper.py::_observe_election returns CANCEL unless the disclosed _test_decision_source seam is used); a genuine explicit Approve election through the real protected presentation cannot be performed. RHAMP-REQ-152 bullet 4 unsatisfiable.",
+    "F2_environmental": "the real ceremony also cannot run here: ceremony_cancelled: the protected helper produced no response \u2014 os.posix_spawn of '/dev/fd/N' does not execute the helper on this machine's interpreter (reproduced at the .30R.4R.2 finalized head 0b973e2e with this phase's changes removed \u2014 pre-existing)",
+    "presentation_mechanism_installed": "pcae-protected-local-presentation helper_sha256=d88b75848122\u2026",
+    "result": "BLOCKED (H-2)"
+  },
+  "completed_at": "2026-09-03T17:26:48.158704Z",
+  "dryrun": false,
+  "phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1",
+  "production_provider": "NativeCtap2Provider(native-ctap2), no seam",
+  "part_A_result": "PASS",
+  "part_B_result": "BLOCKED (H-2)",
+  "overall_verdict": "H-1 CTAP2 PIN/UV REPAIR: REAL-HARDWARE VERIFIED. N-16-5: NOT CLOSED (finding H-2 -- protected-presentation helper has no interactive human-election surface; RHAMP-REQ-152 bullet 4 unsatisfiable; a src/pcae change outside this verification phase's authorized scope).",
+  "genuine_hardware_confirmation": "sidecar aaguid b7d3f68e88a6471e9ecf2df26d041ede == live GetInfo aaguid (fixture aaguid is 0x11*16); observed sign_count 6 then 8 (fixture is 0 -> 1) -- the deterministic fixture was never involved",
+  "started_at": "2026-09-03T17:25:46.654409Z",
+  "written_at": "2026-09-03T17:26:48.158755Z"
+}
