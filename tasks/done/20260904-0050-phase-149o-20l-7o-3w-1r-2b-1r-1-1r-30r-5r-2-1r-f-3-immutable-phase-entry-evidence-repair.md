@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry Evi
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -88,6 +88,23 @@ advisory
 ## Documentation Requirements
 
 - Update project memory files when workflow-visible behavior changes.
+
+## Completion Evidence
+
+- `A = E = 0250e5f7`, implementation `a85abff6`, `I = 361114d6`,
+  `V = R0 = 57edf6a9`, all independently derived from Git topology.
+- F-3 repaired with exact `a85abff6^ == 0250e5f7` immutable evidence; test
+  name and sibling assertions retained.
+- Predecessor suite 71/0; fresh repair suite 45/0; combined 116/0 from actual
+  committed successor HEAD `c2ccf6d6`.
+- Historical `.30R.5R.2.1` remains byte-unchanged and 85/0 at historical V;
+  current 84/1 only at its preserved obsolete F-3 demonstration node.
+- Presentation/non-regression sweep 552/0; historical guard sweep 428/0 after
+  one unrelated transient concurrency node passed isolated and complete rerun.
+- Production, scripts, dependencies, contracts, and H-1/H-2/F-2 source bytes
+  unchanged; runtime/effect boundary unchanged; no hardware/real ceremony.
+- F-3 REPAIRED; N-16-5 NOT CLOSED; successor `.30R.5R.2.1R.1` recommended,
+  not begun.
 
 ## Created Timestamp
 
