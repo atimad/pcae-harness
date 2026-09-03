@@ -23,6 +23,9 @@
     "bootstrap_session_reporting_tests": "passed -- health, check, coherence, session continuity, and runtime inspection passed"
   },
   "validation_results": {
+    "fast_green": "85 passed, 0 failed, 0 skipped, 0 errors in the fresh .30R.5R.2.1 IV suite (passed)",
+    "report_notification_tests": "passed -- report and notification implementation unchanged; governed report trust path exercised",
+    "bootstrap_session_reporting_tests": "passed -- health, check, coherence, session continuity, and runtime inspection passed",
     "h2": "independently verified repaired at software-mechanism level",
     "f2": "independently verified repaired at software-mechanism level",
     "f3": "blocking -- predecessor suite cannot pass in a finalized repair/successor state",
@@ -34,7 +37,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE index omissions; current task archived and listed",
-    "pcae_push_check": "pending governed push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, ready; dispatch deferred to final post-push promotion",
     "notification_status": "pending final post-push promotion"
