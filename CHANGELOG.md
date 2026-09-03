@@ -15,6 +15,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R narrow F-3 repair; N-16-5 NOT CLOSED to Idle: awaiting explicit authorization for the narrow F-3 phase-entry evidence repair; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of Protected-Presentation Human Election + Final Presentation-Bound N-16-5 Certification and Closure to Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R narrow F-3 repair; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase after the protected-presentation election and portable-launch repair; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 — Independent Verification of Protected-Presentation Human Election + Final Presentation-Bound N-16-5 Certification and Closure; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 — N-16-5 Protected-Presentation Interactive Human Election and Portable Helper Launch Repair to Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1 independent verification and final presentation-bound N-16-5 certification; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
