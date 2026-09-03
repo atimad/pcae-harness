@@ -22,13 +22,13 @@ Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R); N
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance.py
+- docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_N_16_5_CTAP2_PIN_UV_PROTOCOL_INTEROPERABILITY_REPAIR.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/**
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
