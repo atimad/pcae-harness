@@ -74,6 +74,6 @@
   }
  ],
  "recommended_next_phase": "Repair phase required first: 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 -- repair finding H-2 in src/pcae/protected_presentation_helper.py (add the trusted local interactive human-election surface -- explicit Approve / Reject from a trusted local TTY, fail-closed, no implicit/timeout approval, RHAMP-REQ-097/100) and address finding F-2 (portable helper launch); then perform the presentation-bound leg of the RHAMP-REQ-152 real hardware ceremony against a genuine attached key (real helper render -> real explicit Approve election -> real getAssertion -> proof -> Gate 5 -> one PRODUCTION AuthenticatedHumanPrincipal; PB DENY / policy DENY still DENY); fold the full phase-aware reconciliation of the F-1 + three-sibling + .1R.19R / .1R.19R.1 / .1R.30R.1 + moving-completion-metadata + .1R.30R.4R.2 test_01 point-in-time guard set (test-only, widened-not-weakened); and -- only if every frozen N-16-5 requirement is then complete and no blocking finding remains -- close N-16-5. Then N-16-6, then N-16-7 (strictly last). ID recommended, NOT reserved; confirm under CPIPC before use; own explicit human authorization and own protected human approval required. Do not begin it here. Do not begin N-16-6 or N-16-7. Do not begin Slice C. Do not implement or call the first external effect. Do not enable execution.",
- "pushed_status": "pending",
- "origin_main_head": "pending_push"
+ "pushed_status": "pushed",
+ "origin_main_head": "c24e33be74e838eb7011e1f0a9f3c4d4c82f50e3"
 }
