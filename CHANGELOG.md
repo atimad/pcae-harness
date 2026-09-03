@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1: N-16-5 Protected Presentation and Real-Assurance Consumption Implementation to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1); N-16-5 NOT CLOSED; fresh IV and real-CTAP2-hardware verification recommended next; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1` implements the N-16-5 protected
   human-approval presentation and real-assurance consumption layer frozen by
   `.30R.4R` (HPAC-PAWA-001 v1.2 + HPAC-PPA-001 v1.0). New:
