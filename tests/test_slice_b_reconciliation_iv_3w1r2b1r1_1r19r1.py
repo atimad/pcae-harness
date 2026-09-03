@@ -130,6 +130,15 @@ _R30R34_TUPLES = {
     ("hpac_rhamp_enrollment.py", "pcae.core.hpac_foundation"),
     ("hpac_rhamp_enrollment.py", "pcae.core.human_principal_registry"),
 }
+# Phase .1R.30R.4R.1 (HPAC-PPA-001 protected-presentation implementation),
+# exact new HPAC consumer tuples, no wildcard.
+_R30R4R1_TUPLES = {
+    ("protected_presentation.py", "pcae.core.approval_presentation"),
+    ("protected_presentation.py", "pcae.core.hpac_foundation"),
+    ("protected_presentation_installation.py", "pcae.core.approval_presentation"),
+    ("protected_presentation_installation.py", "pcae.core.hpac_foundation"),
+    ("hpac_protected_presentation_admin.py", "pcae.core.hpac_foundation"),
+}
 BASE_TUPLES = {
     ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
     ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
@@ -250,10 +259,15 @@ def test_guard_authorized_set_grew_by_exactly_the_two_slice_b_tuples(path, node)
     old_seg = _guard_segment(_git("show", f"{R20_HEAD}:{path}"), node)
     new_set = _authorized_set(new_seg)
     old_set = _authorized_set(old_seg)
-    assert new_set - old_set == set(SLICE_B_TUPLES) | _R30R31_TUPLES | _R30R34_TUPLES, (path, new_set - old_set)
+    assert new_set - old_set == (
+        set(SLICE_B_TUPLES) | _R30R31_TUPLES | _R30R34_TUPLES | _R30R4R1_TUPLES
+    ), (path, new_set - old_set)
     assert old_set - new_set == set(), "nothing was dropped from the authorized set"
     assert old_set == BASE_TUPLES
-    assert new_set == BASE_TUPLES | set(SLICE_B_TUPLES) | _R30R31_TUPLES | _R30R34_TUPLES
+    assert new_set == (
+        BASE_TUPLES | set(SLICE_B_TUPLES) | _R30R31_TUPLES
+        | _R30R34_TUPLES | _R30R4R1_TUPLES
+    )
     # subset-invariant orientation unchanged
     assert "- AUTHORIZED_CONSUMERS" in new_seg
     assert "unauthorized == set()" in new_seg
@@ -377,13 +391,7 @@ def test_n20_4_repair_is_confined_to_the_started_started_edge_in_source():
 
 
 def test_n20_4_lifecycle_diff_since_r20_head_is_only_the_remap():
-    _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
-            "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
-            "src/pcae/core/human_principal_registry.py",
-            # .1R.30R.3.4 (N-16-5 merged RHAMP bundle)
-            "src/pcae/core/hpac_verifier.py", "src/pcae/core/hpac_rhamp_terminal_reasons.py", "src/pcae/core/hpac_rhamp_client_context.py", "src/pcae/core/hpac_rhamp_credential_sidecar.py", "src/pcae/core/hpac_rhamp_counter_state.py", "src/pcae/core/hpac_rhamp_ctap2.py", "src/pcae/core/human_authenticator_fido2.py", "src/pcae/core/hpac_rhamp_assertion_verify.py", "src/pcae/core/hpac_rhamp_enrollment.py"}  # .1R.30R.3.1 (N-16-5)
-    diff = _git("diff", R20_HEAD, "HEAD", "--", "src/pcae",
-                *(f":(exclude){p}" for p in (_R122 | _R126 | _r30)))
+    diff = _git("diff", R20_HEAD, R19R_HEAD, "--", "src/pcae")
     changed = {
         ln.split(" b/")[-1] for ln in diff.splitlines() if ln.startswith("diff --git ")
     }
@@ -543,22 +551,16 @@ def test_1r20_historical_blocked_verdict_preserved():
 # ── 36-49. no drift / posture / no-effect ───────────────────────────
 
 def test_no_normative_contract_change_since_baseline():
-    changed = set(_git("diff", "--name-only", BASELINE, "HEAD", "--",
+    # Historical .1R.19R.1 IV window, pinned to its implementation head so
+    # later independently governed contract phases do not rewrite this claim.
+    changed = set(_git("diff", "--name-only", BASELINE, R19R_HEAD, "--",
                        "docs/contracts", "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").split())
-    # Phase ...1R.22 (N-16-3) authorizedly evolves the PB policy contracts.
-    assert changed <= _R122_CONTRACTS, changed - _R122_CONTRACTS
+    assert changed == set(), changed
 
 
 def test_production_diff_since_r19_head_is_exactly_the_n20_4_remap():
-    changed = set(_git("diff", "--name-only", R19_HEAD, "HEAD", "--", "src/").split())
-    # Phase ...1R.22 (N-16-3) authorizedly changes _R122; the .1R.19R repair
-    # itself was confined to the lifecycle module.
-    _r30 = {"src/pcae/core/hpac_pawa_schemas.py", "src/pcae/core/hpac_pawa_agent_exclusion.py",
-            "src/pcae/core/hpac_protected_admin_writer.py", "src/pcae/core/hpac_foundation.py",
-            "src/pcae/core/human_principal_registry.py",
-            # .1R.30R.3.4 (N-16-5 merged RHAMP bundle)
-            "src/pcae/core/hpac_verifier.py", "src/pcae/core/hpac_rhamp_terminal_reasons.py", "src/pcae/core/hpac_rhamp_client_context.py", "src/pcae/core/hpac_rhamp_credential_sidecar.py", "src/pcae/core/hpac_rhamp_counter_state.py", "src/pcae/core/hpac_rhamp_ctap2.py", "src/pcae/core/human_authenticator_fido2.py", "src/pcae/core/hpac_rhamp_assertion_verify.py", "src/pcae/core/hpac_rhamp_enrollment.py"}  # .1R.30R.3.1 (N-16-5)
-    assert changed - _R122 - _R126 - _r30 == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
+    changed = set(_git("diff", "--name-only", R19_HEAD, R19R_HEAD, "--", "src/").split())
+    assert changed == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
 
 
 @pytest.mark.parametrize("rel", [
@@ -661,7 +663,7 @@ def test_pol_005_hard_deny_still_present():
 def test_no_test_weakening_in_the_r19r_diff():
     # Exclude this IV suite itself — it quotes marker names as string data.
     this_file = Path(__file__).name
-    diff = _git("diff", R20_HEAD, "HEAD", "--", "tests/", f":(exclude)tests/{this_file}")
+    diff = _git("diff", R20_HEAD, R19R_HEAD, "--", "tests/", f":(exclude)tests/{this_file}")
     added = [l[1:] for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
 
     def defs(text: str) -> set[str]:
@@ -673,7 +675,7 @@ def test_no_test_weakening_in_the_r19r_diff():
     # Net test-def count is non-decreasing across every touched test file, and
     # the only .1R.20 finding tests that changed name are the documented
     # reconciliation-aware renames (defect-asserting -> repaired-state-asserting).
-    touched = [p for p in _git("diff", "--name-only", R20_HEAD, "HEAD", "--", "tests/").split()]
+    touched = [p for p in _git("diff", "--name-only", R20_HEAD, R19R_HEAD, "--", "tests/").split()]
     reconciliation_aware = {
         "test_finding_n20_1_hpac_consumer_guard_fails_at_head",
         "test_finding_n20_2_1r19_finalized_ab_record_claim_is_inaccurate",

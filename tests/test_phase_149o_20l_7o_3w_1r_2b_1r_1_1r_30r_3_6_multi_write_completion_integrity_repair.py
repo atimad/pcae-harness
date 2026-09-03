@@ -464,7 +464,9 @@ def test_35_hpac_verifier_source_is_unchanged():
 
 
 def test_36_deterministic_ci_seam_is_unchanged():
-    assert _run("git", "diff", "--quiet", R0, "--", "src/pcae/core/hpac_rhamp_ctap2.py", check=False).returncode == 0
+    # Historical .30R.3.6 repair window: later CTAP2 repairs are independently
+    # governed and do not alter this phase's byte-identity claim.
+    assert _run("git", "diff", "--quiet", R0, "e0f79220", "--", "src/pcae/core/hpac_rhamp_ctap2.py", check=False).returncode == 0
 
 
 def test_37_protected_presentation_remains_absent():

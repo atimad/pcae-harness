@@ -101,7 +101,7 @@ def test_no_contract_change_since_b30() -> None:
     changed = {
         line.split("\t")[-1]
         for line in _git(
-            "diff", "--name-only", B30, "HEAD", "--", "docs/contracts"
+            "diff", "--name-only", B30, _2A3_FINALIZED_HEAD, "--", "docs/contracts"
         ).splitlines()
         if line.strip()
     }
@@ -388,7 +388,12 @@ def test_phase_id_discrepancy_present_and_resolution_recorded() -> None:
     assert ".1R.30R.2` | **`HPAC-PAWA-001 v1.0` companion contract freeze**" in adj
     assert ".1R.30R.3 (mechanism + registry + writer-anchor impl)" in adj
     # The completion metadata's recommended_next_phase names the contract freeze.
-    meta = METADATA.read_text(encoding="utf-8")
+    # Historical moving-metadata guard: inspect this IV phase's immutable
+    # finalized blob, never today's live completion metadata.
+    meta = _git(
+        "show",
+        "91741564035cb441c0e2b16760c1997afddd4394:.pcae/phase-completion-metadata.json",
+    )
     assert "1R.30R.2" in meta
     # This IV records the resolution.
     iv = IV_DOC.read_text(encoding="utf-8")

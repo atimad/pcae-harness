@@ -484,6 +484,7 @@ def test_40_provider_source_drops_the_pin_promptly():
 # ── 27-28. No contract change / narrow production diff ────────────────────
 
 _R0 = "9f004ea9"
+_R = "ea40c47e"
 
 
 def test_41_no_normative_contract_change():
@@ -492,7 +493,8 @@ def test_41_no_normative_contract_change():
 
 
 def test_42_production_diff_is_confined_to_the_ctap2_module():
-    changed = set(_git("diff", "--name-only", _R0, "--", "src/pcae", "scripts", "pyproject.toml").split())
+    # Historical repair window pinned to the .30R.5R finalized head.
+    changed = set(_git("diff", "--name-only", _R0, _R, "--", "src/pcae", "scripts", "pyproject.toml").split())
     assert changed <= {"src/pcae/core/hpac_rhamp_ctap2.py"}, changed
 
 
@@ -546,7 +548,7 @@ def test_46_registration_and_verifier_and_presentation_modules_unchanged():
         "src/pcae/core/runtime_dispatch_gate5.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
     ):
-        assert _git("diff", "--stat", _R0, "HEAD", "--", rel).strip() == "", rel
+        assert _git("diff", "--stat", _R0, _R, "--", rel).strip() == "", rel
 
 
 def test_47_runtime_boundary_unchanged():

@@ -222,12 +222,12 @@ def installed(tmp_path):
 
 
 def test_01_r4r1_head_is_the_finalized_implementation_head():
-    # 5b6b4013 (I) is a real ancestor of HEAD; every commit HEAD adds beyond it
-    # is a .30R.4R.2 IV-scoped commit (task lifecycle / this suite / doc).
+    # Historical point-in-time assertion: pin the upper bound to the finalized
+    # .30R.4R.2 head. Later governed repair phases legitimately follow it.
     assert _quiet("merge-base", "--is-ancestor", "5b6b4013", "HEAD") == 0
     log = _git("log", "-1", "--format=%s", "5b6b4013").strip()
     assert "1R.30R.4R.1" in log and "reconcile pushed-state" in log
-    beyond = _git("log", "--format=%s", "5b6b4013..HEAD").strip().splitlines()
+    beyond = _git("log", "--format=%s", "5b6b4013..0b973e2e").strip().splitlines()
     assert all("1R.30R.4R.2" in s for s in beyond), beyond
 
 
@@ -573,8 +573,12 @@ def test_27_launcher_uses_only_posix_spawn_of_the_fixed_interpreter():
     assert "shell=True" not in src
     assert "import subprocess" not in src and "import socket" not in src
     assert "os.posix_spawn(" in src
-    assert "[sys.executable, \"-I\", plat_fd]" in src
-    assert "/dev/fd/" in src and "/proc/self/fd/" in src
+    assert '[sys.executable, "-I", "-c", _HELD_HELPER_BOOTSTRAP]' in src
+    literals = {
+        n.value for n in ast.walk(tree)
+        if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    }
+    assert not any(v.startswith(("/dev/fd/", "/proc/self/fd/")) for v in literals)
 
 
 def test_28_child_env_is_a_closed_minimal_allowlist():
@@ -585,15 +589,22 @@ def test_28_child_env_is_a_closed_minimal_allowlist():
             for k in node.keys:
                 if isinstance(k, ast.Constant) and isinstance(k.value, str) and k.value.isupper():
                     keys.add(k.value)
-    assert keys <= {"PCAE_PPLP_REQUEST_FD", "PCAE_PPLP_RESPONSE_FD", "PATH", "LC_ALL"}
+    assert keys <= {
+        "PCAE_PPLP_REQUEST_FD", "PCAE_PPLP_RESPONSE_FD",
+        "PCAE_PPLP_HELPER_FD", "LC_ALL",
+    }
     # no authority selector / auto-approve / verifier-kind / helper-path env influence
     src = (SRC / "core" / "protected_presentation.py").read_text()
     for banned in ("PCAE_PPLP_DECISION", "PCAE_AUTO_APPROVE", "PCAE_VERIFIER_KIND", "PCAE_HELPER_PATH"):
         assert banned not in src
 
 
-def test_29_no_interactive_surface_this_phase_fails_closed_to_cancel():
+def test_29_no_interactive_surface_this_phase_fails_closed_to_cancel(monkeypatch):
+    # Name retained as immutable historical test identity. Its current
+    # phase-aware assertion verifies the repaired surface's no-TTY behavior.
     from pcae.protected_presentation_helper import _observe_election
+
+    monkeypatch.setattr("pcae.protected_presentation_helper.os.open", lambda *_a, **_kw: (_ for _ in ()).throw(OSError()))
     assert _observe_election({}, b"bytes") == "CANCEL"
 
 

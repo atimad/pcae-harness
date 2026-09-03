@@ -2,7 +2,8 @@
 protected-presentation helper implementation (RHAMP-001 v1.0 §28–§35,
 HPAC-PPA-001 v1.0 §7).
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1.
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1; trusted local interactive
+election repaired by phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.
 
 This is the process the trusted launcher mediator (:mod:`pcae.core.protected_presentation`)
 executes — and the *only* party that renders the closed 13 ``human_visible_facts``,
@@ -20,12 +21,11 @@ network, and no shared stdio with the requesting agent. The fd numbers are
 given only via the closed child-environment allowlist keys
 ``PCAE_PPLP_REQUEST_FD`` / ``PCAE_PPLP_RESPONSE_FD``.
 
-The human decision surface: this phase implements the protocol, the
-deterministic neutralized rendering, the display/digest equivalence check,
-and the explicit-election binding. A real interactive local surface is
-successor work (the mandatory real-CTAP2-hardware verification phase). When
-no interactive surface is available and the launcher has not supplied the
-disclosed test-only decision seam, the helper fails closed with
+The human decision surface is the process's controlling terminal, opened
+directly as ``/dev/tty`` and kept separate from the inherited request/response
+descriptors. The exact neutralized, digest-bound presentation is written to
+that terminal before one exact ``APPROVE`` / ``REJECT`` line is read. Missing
+terminal, EOF, malformed input, interruption, or I/O failure yields
 ``CANCEL`` (RHAMP-REQ-097/100 — never an implicit or timeout approval).
 
 The disclosed **test-only** decision seam (HPAC-PPA §16 discipline;
@@ -123,9 +123,6 @@ def _self_excluding_digest(document: dict, *, field: str) -> str:
 # Untrusted-content neutralization (RHAMP-REQ-095/096)
 # ─────────────────────────────────────────────────────────────────────────
 
-_C0_C1_ALLOWED = {0x09, 0x0A}  # tab, LF only
-
-
 def neutralize_untrusted_text(value: object) -> str:
     """Escape / strip C0 and C1 control characters, neutralize ANSI / OSC /
     terminal-title escape sequences, and neutralize bidirectional-override
@@ -140,9 +137,6 @@ def neutralize_untrusted_text(value: object) -> str:
     out: list[str] = []
     for ch in text:
         cp = ord(ch)
-        if cp in _C0_C1_ALLOWED:
-            out.append(ch)
-            continue
         if cp < 0x20 or 0x7F <= cp <= 0x9F:
             out.append(f"\\x{cp:02x}")
             continue
@@ -216,9 +210,9 @@ def _validate_request(document: object) -> dict:
 
 def _observe_election(request: dict, displayed_bytes: bytes) -> str:
     """Present the neutralized displayed bytes and obtain an explicit human
-    decision. This phase supports the disclosed test-only decision seam and,
-    otherwise, fails closed with ``CANCEL`` (there is no interactive local
-    surface in this phase — RHAMP-REQ-097/100; successor hardware phase)."""
+    decision. The disclosed deterministic seam remains test-only. Production
+    opens the controlling terminal directly; it never consumes request-pipe,
+    inherited-stdin, argv, or environment decision input."""
 
     directive = request.get("test_decision_directive")
     if directive is not None:
@@ -240,7 +234,66 @@ def _observe_election(request: dict, displayed_bytes: bytes) -> str:
         if decision == "CRASH":
             os._exit(3)
         raise ProtectedPresentationHelperError(f"unknown test decision {decision!r}")
-    # No interactive surface available this phase → explicit cancel.
+    return _observe_trusted_terminal_election(displayed_bytes)
+
+
+_TRUSTED_TTY_PATH = "/dev/tty"
+_DECISION_PROMPT = b"PCAE protected decision (type exactly APPROVE or REJECT): "
+_MAX_DECISION_BYTES = 16
+
+
+def _write_all(fd: int, payload: bytes) -> None:
+    view = memoryview(payload)
+    while view:
+        written = os.write(fd, view)
+        if written <= 0:
+            raise OSError("trusted terminal write made no progress")
+        view = view[written:]
+
+
+def _read_one_terminal_line(fd: int):
+    """Read one bounded terminal line. Empty/overlong/EOF is not approval."""
+
+    value = bytearray()
+    while len(value) <= _MAX_DECISION_BYTES:
+        chunk = os.read(fd, 1)
+        if not chunk:
+            return None
+        if chunk == b"\n":
+            return bytes(value)
+        value.extend(chunk)
+    return None
+
+
+def _observe_trusted_terminal_election(displayed_bytes: bytes) -> str:
+    """Render and observe exactly one election on the controlling terminal.
+
+    ``/dev/tty`` is opened by this fixed helper, not supplied by the caller.
+    Ordinary stdin remains unused and the descriptor is never shared with the
+    request/response protocol. All faults fail closed to ``CANCEL``.
+    """
+
+    flags = os.O_RDWR | getattr(os, "O_NOCTTY", 0) | getattr(os, "O_CLOEXEC", 0)
+    try:
+        tty_fd = os.open(_TRUSTED_TTY_PATH, flags)
+    except OSError:
+        return "CANCEL"
+    try:
+        _write_all(tty_fd, displayed_bytes)
+        _write_all(tty_fd, _DECISION_PROMPT)
+        decision = _read_one_terminal_line(tty_fd)
+        _write_all(tty_fd, b"\n")
+    except (OSError, KeyboardInterrupt):
+        return "CANCEL"
+    finally:
+        try:
+            os.close(tty_fd)
+        except OSError:
+            pass
+    if decision == DECISION_APPROVE.encode("ascii"):
+        return DECISION_APPROVE
+    if decision == DECISION_REJECT.encode("ascii"):
+        return DECISION_REJECT
     return "CANCEL"
 
 

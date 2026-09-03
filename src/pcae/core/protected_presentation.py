@@ -2,7 +2,8 @@
 mediator and the runtime evidence-writer issuer, plus the resolver-side
 real-``pcae-protected-local-presentation/1.0`` attestation verifier.
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1.
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R.1; portable held-byte launch
+repaired by phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.
 
 This module is the **sole** launcher / mediator and the **sole** producer
 of ``HPAC-PRESENTATION-EVIDENCE/2.0`` records for the real presentation
@@ -112,6 +113,25 @@ _HUMAN_VISIBLE_FACT_KEYS = (
     "one_shot_notice",
 )
 _DEFAULT_TIMEOUT_SECONDS = 120
+
+# HPAC-PPA-REQ-030/031 — fixed interpreter bootstrap. macOS's system Python
+# 3.9 exits successfully without executing ``python -I /dev/fd/N``. ``-c`` is
+# portable across the supported interpreters and this constant reads and
+# executes only the already-verified, inherited helper fd: no pathname reopen,
+# PATH lookup, caller argv, shell, import from cwd, or substitution window.
+_HELD_HELPER_BOOTSTRAP = (
+    "import os\n"
+    "_fd=int(os.environ['PCAE_PPLP_HELPER_FD'])\n"
+    "_parts=[]\n"
+    "while True:\n"
+    " _part=os.read(_fd,1048576)\n"
+    " if not _part: break\n"
+    " _parts.append(_part)\n"
+    "os.close(_fd)\n"
+    "_source=b''.join(_parts)\n"
+    "exec(compile(_source,'<pcae-protected-presentation-helper>','exec'),"
+    "{'__name__':'__main__','__file__':'<pcae-protected-presentation-helper>'})\n"
+)
 
 
 class ProtectedPresentationCeremonyError(RhampTerminalError):
@@ -428,13 +448,6 @@ def _launch_and_exchange(helper_fd: int, request: dict, *, timeout_seconds: int)
     os.set_inheritable(req_r, True)
     os.set_inheritable(resp_w, True)
     os.set_inheritable(helper_fd, True)
-    # HPAC-PPA-REQ-030 — the interpreter opens the verified helper object from
-    # the held file descriptor (`/dev/fd/N` on macOS, `/proc/self/fd/N` on
-    # Linux). The descriptor is kept open by this process for the entire
-    # ceremony, so there is no path re-open and no substitution window: the
-    # referent inode of an open fd cannot change under it.
-    plat_fd = f"/dev/fd/{helper_fd}" if sys.platform == "darwin" else f"/proc/self/fd/{helper_fd}"
-
     payload = canonical_json_bytes({k: v for k, v in request.items()})
 
     env = {
@@ -442,7 +455,7 @@ def _launch_and_exchange(helper_fd: int, request: dict, *, timeout_seconds: int)
         # the only channel by which the helper learns the private pipes.
         "PCAE_PPLP_REQUEST_FD": str(req_r),
         "PCAE_PPLP_RESPONSE_FD": str(resp_w),
-        "PATH": "/usr/bin:/bin",
+        "PCAE_PPLP_HELPER_FD": str(helper_fd),
         "LC_ALL": "C",
     }
     # HPAC-PPA-REQ-031 — a fixed local one-shot invocation with a fixed
@@ -452,9 +465,17 @@ def _launch_and_exchange(helper_fd: int, request: dict, *, timeout_seconds: int)
     # runtime.
     pid = os.posix_spawn(
         sys.executable,
-        [sys.executable, "-I", plat_fd],
+        [sys.executable, "-I", "-c", _HELD_HELPER_BOOTSTRAP],
         env,
-        file_actions=[(os.POSIX_SPAWN_CLOSE, req_w), (os.POSIX_SPAWN_CLOSE, resp_r)],
+        file_actions=[
+            # Ordinary inherited stdio is structurally ineligible for either
+            # protocol or election input. The helper opens /dev/tty itself.
+            (os.POSIX_SPAWN_CLOSE, 0),
+            (os.POSIX_SPAWN_CLOSE, 1),
+            (os.POSIX_SPAWN_CLOSE, 2),
+            (os.POSIX_SPAWN_CLOSE, req_w),
+            (os.POSIX_SPAWN_CLOSE, resp_r),
+        ],
     )
 
     os.close(req_r)

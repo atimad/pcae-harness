@@ -54,6 +54,7 @@ LIFECYCLE_PATH = CORE / "runtime_dispatch_attempt_lifecycle.py"
 PRE_1R19_BASELINE = "a2b679fe"
 R19_HEAD = "738e8209"
 R20_HEAD = "e05f0ea3"
+R19R_HEAD = "59af5abd5548e0700ff4f4a8348451df23110bf7"
 
 _DIRECT_GUARDS = (
     ("tests/test_hpac_foundation_independent_verification_3w1r2b1r111r31.py",
@@ -356,7 +357,9 @@ def test_dispatch_uncertain_disposition_unchanged(tmp_path):
 
 
 def test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap():
-    diff = _git("diff", R20_HEAD, "--", "src/pcae")
+    # Historical point-in-time guard: compare the .1R.19R entry and finalized
+    # heads, so later authorized module prose cannot trigger this code scan.
+    diff = _git("diff", R20_HEAD, R19R_HEAD, "--", "src/pcae")
     assert "runtime_dispatch_attempt_lifecycle.py" in diff
     # no other src/pcae file touched
     changed = {
@@ -364,45 +367,7 @@ def test_lifecycle_module_diff_since_r20_head_is_only_the_n20_4_remap():
         for line in diff.splitlines()
         if line.startswith("diff --git ")
     }
-    # Later governed phases are authorized to touch other src/pcae files;
-    # this guard only asserts that .1R.19R's own repair was confined to the
-    # lifecycle module. Phase ...1R.22 (N-16-3, PBRD-001 v3.0 §12a)
-    # authorizedly changes permission_broker_foundation.py + runtime_dispatch_permission.py.
-    _POST_1R19R_AUTHORIZED = {
-        "src/pcae/core/permission_broker_foundation.py",
-        "src/pcae/core/runtime_dispatch_permission.py",
-        # Phase ...1R.26 (N-16-4 -- REPRC-001 v1.0): the positive Gate-7 result.
-        "src/pcae/core/runtime_dispatch_gate7.py",
-        # Phase ...1R.30R.3.1 (N-16-5 -- HPAC-PAWA-001 v1.1 Slice 1 production
-        # protected-admin writer anchor). Exact filenames, no wildcard.
-        "src/pcae/core/hpac_pawa_schemas.py",
-        "src/pcae/core/hpac_pawa_agent_exclusion.py",
-        "src/pcae/core/hpac_protected_admin_writer.py",
-        "src/pcae/core/hpac_foundation.py",
-        "src/pcae/core/human_principal_registry.py",
-        # Phase ...1R.30R.3.4 (N-16-5 -- merged RHAMP `.1R.30` bundle). Exact
-        # filenames, no wildcard.
-        "src/pcae/core/hpac_verifier.py",
-        "src/pcae/core/hpac_rhamp_terminal_reasons.py",
-        "src/pcae/core/hpac_rhamp_client_context.py",
-        "src/pcae/core/hpac_rhamp_credential_sidecar.py",
-        "src/pcae/core/hpac_rhamp_counter_state.py",
-        "src/pcae/core/hpac_rhamp_ctap2.py",
-        "src/pcae/core/human_authenticator_fido2.py",
-        "src/pcae/core/hpac_rhamp_assertion_verify.py",
-        "src/pcae/core/hpac_rhamp_enrollment.py",
-        # Phase ...1R.30R.4R.1 (N-16-5 -- HPAC-PPA-001 v1.0 protected
-        # human-approval presentation + real-assurance consumption). Exact
-        # filenames, no wildcard.
-        "src/pcae/core/approval_presentation.py",
-        "src/pcae/core/protected_presentation_installation.py",
-        "src/pcae/core/hpac_protected_presentation_admin.py",
-        "src/pcae/core/protected_presentation.py",
-        "src/pcae/protected_presentation_helper.py",
-    }
-    assert changed - _POST_1R19R_AUTHORIZED == {
-        "src/pcae/core/runtime_dispatch_attempt_lifecycle.py"
-    }, changed
+    assert changed == {"src/pcae/core/runtime_dispatch_attempt_lifecycle.py"}, changed
     # the only added logic is the transition-error remap
     added = [l for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
     assert any("DispatchAttemptTransitionError" in l for l in added)
@@ -448,17 +413,9 @@ def test_repaired_tree_has_no_attributable_added_regression_marker_in_doc():
 # ═══════════════════════════════════════════════════════════════════════
 
 def test_no_contract_change_since_r20_head():
-    changed = set(_git("diff", "--name-only", R20_HEAD, "HEAD", "--", "docs/contracts",
+    changed = set(_git("diff", "--name-only", R20_HEAD, R19R_HEAD, "--", "docs/contracts",
                        "docs/RUNTIME_ENFORCEMENT_NO_GO_REGISTRY.md").split())
-    # Phase ...1R.22 (N-16-3) authorizedly evolves the PB policy contracts.
-    _r122_contracts = {
-        "docs/contracts/PB_RUNTIME_DISPATCH_EXTENSION_CONTRACT.md",
-        "docs/contracts/PERMISSION_BROKER_POLICY_APPLICABILITY_CONTRACT.md",
-        "docs/contracts/PERMISSION_BROKER_NARROW_DISPATCH_ELIGIBILITY_CONTRACT.md",
-        # Phase ...1R.26 (N-16-4): the one NEW companion contract REPRC-001 v1.0.
-        "docs/contracts/RUNTIME_ENFORCEMENT_POSITIVE_RESULT_CONTRACT.md",
-    }
-    assert changed <= _r122_contracts, changed - _r122_contracts
+    assert changed == set(), changed
 
 
 def test_no_slice_a_or_gate_5_9_drift_since_baseline():

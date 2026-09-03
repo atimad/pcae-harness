@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- **2026-09-03 — Complete `.1R.30R.5R.2` as Option A repair-only; N-16-5
+  remains NOT CLOSED pending fresh IV/certification.** Repair H-2 with one
+  production trusted-human surface: the fixed helper opens `/dev/tty` directly,
+  displays the exact neutralized request-bound bytes, and accepts only exact
+  `APPROVE` / `REJECT`; stdin/protocol/env/argv/no-TTY/EOF/invalid/interruption
+  cannot approve and fail closed. Repair F-2 without weakening held-byte
+  integrity: replace the macOS Python 3.9.6-nonfunctional `-I /dev/fd/N`
+  invocation with fixed `sys.executable -I -c <bootstrap>` that reads and
+  executes only the inherited, revalidated helper fd; no pathname reopen,
+  shell, PATH, arbitrary argv, cwd authority, or generic process API. Escape
+  every C0/C1 control plus BiDi controls on the human-visible surface. Pin
+  historical guards to exact immutable era heads or exact filename sets,
+  never wildcard them. RHAMP-REQ-156 and HPAC-PPA-REQ-074 require a fresh
+  post-repair IV and real ceremony, so recommend `.1R.30R.5R.2.1`; do not
+  synthesize a terminal decision or close N-16-5 here. Preserve local TTY and
+  FIDO2 as supported-not-exclusive profiles, leave a mobile-only profile open,
+  and keep N-16-6/N-16-7/runtime untouched.
+
 - **2026-09-03 — Stop `.1R.30R.5` BLOCKED at the CTAP 2.1 provider
   incompatibility; N-16-5 stays NOT CLOSED.** A genuine CTAP2 USB security key
   was exercised through the production `NativeCtap2Provider`. Both mandatory

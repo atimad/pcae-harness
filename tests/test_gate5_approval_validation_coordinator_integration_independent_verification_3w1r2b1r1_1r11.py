@@ -526,7 +526,7 @@ _AUTHORIZED_GATE_CHAIN_SURFACE = {
 def test_production_scope_is_exactly_the_three_planned_files(tmp_path):
     changed = set(
         subprocess.run(
-            ["git", "diff", "--name-only", PHASE_ENTRY_1R10, "HEAD", "--", "src/pcae"],
+                ["git", "diff", "--name-only", PHASE_ENTRY_1R10, "70d1e454c4065543b975dfa61a22d8e404ae3dda", "--", "src/pcae"],
             cwd=REPO_ROOT, capture_output=True, text=True, check=True,
         ).stdout.split()
     )

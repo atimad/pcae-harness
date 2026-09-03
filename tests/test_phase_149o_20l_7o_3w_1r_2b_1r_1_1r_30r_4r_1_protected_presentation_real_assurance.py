@@ -414,7 +414,12 @@ def test_19_launcher_only_reaches_the_current_pinned_helper(installed):
     assert "shell=True" not in src
     # a fixed local one-shot: the trusted interpreter reads the held helper fd.
     assert "os.posix_spawn(" in src
-    assert "/dev/fd/" in src and "/proc/self/fd/" in src
+    assert '[sys.executable, "-I", "-c", _HELD_HELPER_BOOTSTRAP]' in src
+    literals = {
+        n.value for n in ast.walk(tree)
+        if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    }
+    assert not any(v.startswith(("/dev/fd/", "/proc/self/fd/")) for v in literals)
 
 
 def test_20_launch_time_revalidation_rejects_generation_switch(installed, monkeypatch):
@@ -445,7 +450,10 @@ def test_21_child_env_is_a_closed_minimal_allowlist():
             for k in node.keys:
                 if isinstance(k, ast.Constant) and isinstance(k.value, str) and k.value.isupper():
                     env_keys.add(k.value)
-    assert env_keys <= {"PCAE_PPLP_REQUEST_FD", "PCAE_PPLP_RESPONSE_FD", "PATH", "LC_ALL"}
+    assert env_keys <= {
+        "PCAE_PPLP_REQUEST_FD", "PCAE_PPLP_RESPONSE_FD",
+        "PCAE_PPLP_HELPER_FD", "LC_ALL",
+    }
 
 
 def test_22_helper_substitution_at_the_path_is_rejected(installed):

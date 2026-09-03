@@ -2,6 +2,72 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 — N-16-5
+Protected-Presentation Interactive Human Election and Portable Helper Launch
+Repair. **STATUS: COMPLETE — REPAIR ONLY. H-2: REPAIRED, F-2: REPAIRED;
+FRESH IV / REAL PRESENTATION CERTIFICATION PENDING. N-16-5: NOT CLOSED.**
+
+**Anchors re-derived from Git:** `A = R0 = 0250e5f7` (finalized `.30R.5R.1`
+head and phase entry), `P = 5b6b4013` (finalized protected-presentation
+implementation), `V = ea40c47e` (finalized `.30R.5R` repair and `.30R.5R.1`
+entry). The historical `.30R.5R.1` BLOCKED finding and real-hardware H-1
+certification remain immutable.
+
+**H-2 repaired.** The production helper opens `/dev/tty` directly, renders the
+exact neutralized request-bound presentation, and accepts exactly one explicit
+`APPROVE` or `REJECT`. Protocol stdin, inherited stdin, argv, environment,
+empty input, EOF, invalid input, interruption, and missing terminal cannot
+approve and fail closed to `CANCEL`. All C0/C1 terminal controls and BiDi
+overrides are neutralized. The disclosed deterministic decision seam remains
+NON_REAL and unavailable to the production resolver.
+
+**F-2 repaired.** The macOS Python 3.9.6 `-I /dev/fd/N` exit-zero/no-execution
+failure was independently reproduced. The fixed interpreter now executes a
+fixed `-I -c` bootstrap that reads only the inherited, verified helper
+descriptor. Held-byte identity, digest/current-generation revalidation, and
+TOCTOU protection remain intact; no pathname reopen, shell, PATH lookup,
+caller executable/argv, cwd import, or generic process authority was added.
+Production diff is exactly the helper and its existing launcher; all normative
+contracts are byte-unchanged.
+
+**Verification:** fresh `.30R.5R.2` suite 71/0; presentation repair + prior
+implementation/IV 205/0; carried guard sweep 347/0; CTAP2 repair/IV 96/0;
+broad affected PAWA/PPA/RHAMP/FIDO2/verifier/Gate sweep 893 passed with two
+historical adversarial finding demonstrations deselected only after both were
+reproduced identically at `A` (zero unexplained repair-attributable regression).
+The carried F-1, sibling, moving-metadata, contract-set, and point-in-time
+guards are reconciled with immutable upper SHAs or exact filenames—no removed
+or renamed tests, skip/xfail, wildcard, fnmatch, or weakened process guard.
+
+**Certification placement: Option A.** RHAMP-REQ-156 and HPAC-PPA-REQ-074
+require post-implementation fresh independent verification and real
+certification. A bounded real TTY smoke rendered the harmless request and an
+operator interrupt failed closed; no authoritative decision was synthesized,
+so this is not certification. Recommended successor, not begun:
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1` — Independent Verification of
+Protected-Presentation Human Election + Final Presentation-Bound N-16-5
+Certification and Closure. N-16-5 may close there only after a genuine local
+human APPROVE, real PPA evidence, genuine FIDO2 assertion, `PRODUCTION`
+principal, and existing Gate 5 consumption all verify.
+
+`pcae-protected-local-presentation/1.0` is one supported local presentation
+profile, not the exclusive UI or a global desktop-TTY requirement.
+`hpac.fido2.uv_presence.v2` remains one real-hardware-verified supported
+authentication profile, not globally mandatory. A future mechanism-neutral,
+mobile-only authentication/protected-approval profile remains open and is not
+a prerequisite for unrelated development.
+
+**Runtime:** `not_implemented` / `Observed` / `observe` / `unavailable`; 0
+plugins / 0 capabilities; first external effect ABSENT / UNREACHABLE. N-16-3
+and N-16-4 CLOSED; N-16-6 and N-16-7 OPEN / UNTOUCHED; N-16-7 strictly last.
+N-23-1 INFO and N-23-2 INFO / DEFERRED unchanged. **DELEGATED `.3`
+FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.** Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N_16_5_PROTECTED_PRESENTATION_INTERACTIVE_HUMAN_ELECTION_AND_PORTABLE_HELPER_LAUNCH_REPAIR.md`.
+
+---
+
+## Prior Phase (.30R.5R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1 — Independent Verification of the
 CTAP2 PIN/UV Repair + Mandatory Real-CTAP2-Hardware Verification + N-16-5
 Closure (== RHAMP `.1R.33`). **STATUS: BLOCKED. H-1: INDEPENDENTLY VERIFIED —

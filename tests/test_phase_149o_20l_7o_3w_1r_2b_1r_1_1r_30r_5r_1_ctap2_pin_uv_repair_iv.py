@@ -52,6 +52,7 @@ CERT_EVIDENCE = REPO / ".pcae" / "certification" / "rhamp_hardware_cert_30r5r1.j
 A = "9f004ea9"          # finalized .1R.30R.5 BLOCKED head (attribution baseline)
 R = "ea40c47e"          # finalized .1R.30R.5R repair head
 V = "ea40c47e"          # .1R.30R.5R.1 phase-entry SHA (== R)
+H = "0250e5f7"          # finalized .1R.30R.5R.1 BLOCKED head
 
 pytestmark = [
     pytest.mark.fast_green,
@@ -88,13 +89,13 @@ def test_03_production_diff_A_to_R_is_exactly_one_file():
 
 def test_04_no_production_or_contract_change_in_this_phase():
     # .1R.30R.5R.1 itself (V..HEAD) changes no src/pcae / scripts / pyproject / contract byte.
-    assert _git("diff", "--name-only", V, "HEAD", "--", "src/pcae", "scripts", "pyproject.toml", "docs/contracts").strip() == ""
+    assert _git("diff", "--name-only", V, H, "--", "src/pcae", "scripts", "pyproject.toml", "docs/contracts").strip() == ""
 
 
 # ── 3. contract byte identity ────────────────────────────────────────────
 
 def test_05_all_contracts_byte_unchanged_since_A():
-    assert _git("diff", "--name-only", A, "HEAD", "--", "docs/contracts").strip() == ""
+    assert _git("diff", "--name-only", A, H, "--", "docs/contracts").strip() == ""
 
 
 @pytest.mark.parametrize("contract", [
@@ -104,7 +105,7 @@ def test_05_all_contracts_byte_unchanged_since_A():
     "HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md",
 ])
 def test_06_named_normative_contract_unchanged(contract):
-    assert _git("diff", "--stat", A, "HEAD", "--", f"docs/contracts/{contract}").strip() == ""
+    assert _git("diff", "--stat", A, H, "--", f"docs/contracts/{contract}").strip() == ""
 
 
 def test_07_rhamp_001_still_v1_0():
@@ -264,7 +265,7 @@ def test_19_r30r5r_repair_suite_still_passes():
     "core/runtime_dispatch_gate9.py",
 ])
 def test_20_downstream_module_byte_unchanged_since_A(module):
-    assert _git("diff", "--stat", A, "HEAD", "--", f"src/pcae/{module}").strip() == ""
+    assert _git("diff", "--stat", A, H, "--", f"src/pcae/{module}").strip() == ""
 
 
 # ── 8. real-hardware certification evidence recorded ─────────────────────
@@ -303,7 +304,9 @@ def test_22_phase_doc_records_hardware_verified_and_h2_blocked():
 # ── 9. finding H-2 — the missing interactive election surface ────────────
 
 def test_23_helper_observe_election_has_no_interactive_surface():
-    src = HELPER_MODULE.read_text()
+    # Historical H-2 reconstruction reads the immutable BLOCKED-phase blob;
+    # later repair phases must not rewrite this evidence.
+    src = _git("show", f"{H}:src/pcae/protected_presentation_helper.py")
     seg = src.split("def _observe_election", 1)[1].split("\n\ndef ", 1)[0]
     # the ONLY non-CANCEL path is the disclosed test seam
     assert "test_decision_directive" in seg
@@ -540,9 +543,9 @@ def test_27_runtime_still_not_implemented_observed_unavailable():
 
 
 def test_28_no_first_external_effect_primitive_anywhere_new():
-    added = [l for l in _git("diff", A, "HEAD", "--", "src/pcae").splitlines()
+    added = [l for l in _git("diff", A, H, "--", "src/pcae").splitlines()
              if l.startswith("+") and not l.startswith("+++")]
-    changed = {l.split(" b/")[-1] for l in _git("diff", A, "HEAD", "--", "src/pcae").splitlines()
+    changed = {l.split(" b/")[-1] for l in _git("diff", A, H, "--", "src/pcae").splitlines()
                if l.startswith("diff --git ")}
     assert changed <= {"src/pcae/core/hpac_rhamp_ctap2.py"}, changed
     for l in added:
@@ -563,7 +566,7 @@ def test_30_fido2_profile_is_supported_not_exclusive():
 
 
 def test_31_this_phase_touched_only_doc_test_status_and_pcae_files():
-    changed = {l.split("\t")[-1] for l in _git("diff", "--name-only", V, "HEAD").splitlines() if l.strip()}
+    changed = {l.split("\t")[-1] for l in _git("diff", "--name-only", V, H).splitlines() if l.strip()}
     for path in changed:
         assert (path.startswith(("docs/", "tests/", "tasks/", ".pcae/"))
                 or path in {"PROJECT_STATUS.md", "CHANGELOG.md"}), path

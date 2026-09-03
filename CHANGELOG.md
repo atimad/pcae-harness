@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2` repairs H-2: the production
+  protected-presentation helper now renders the exact neutralized, request-bound
+  presentation on its controlling `/dev/tty` and requires one exact human
+  `APPROVE` or `REJECT`; no terminal, EOF, invalid input, interruption, stdin,
+  protocol input, argv, or environment fails closed to `CANCEL` and cannot
+  synthesize approval. The deterministic directive remains NON_REAL.
+- The same phase repairs F-2 by replacing the macOS Python 3.9.6-inoperative
+  `/dev/fd/N` script launch with a fixed isolated interpreter bootstrap that
+  executes only the inherited, digest/current-generation-revalidated helper
+  descriptor. No shell, PATH search, pathname reopen, caller-controlled
+  executable/argv, cwd import, generic subprocess authority, runtime effect,
+  or normative-contract change was introduced.
+- Carried historical guards are reconciled to immutable era SHAs or exact
+  filenames without removed/renamed/skipped/xfailed tests or wildcard/fnmatch
+  broadening. Fresh repair suite: 71 passed; all repair-attributable affected
+  suites are clean. Option A applies: N-16-5 remains NOT CLOSED pending fresh
+  `.30R.5R.2.1` independent verification and the genuine presentation-bound
+  real ceremony. Local TTY presentation and FIDO2 remain supported-not-
+  exclusive profiles; mobile-only evolution remains open; N-16-6/N-16-7 and
+  runtime are untouched.
+
+- Transitioned active task from Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1); N-16-5 NOT CLOSED; H-1 real-hardware verified, finding H-2 (no interactive election surface) blocks closure to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2 — N-16-5 Protected-Presentation Interactive Human Election and Portable Helper Launch Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1: CTAP2 PIN/UV Repair IV + Real-Hardware Cert + N-16-5 Closure to Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1); N-16-5 NOT CLOSED; H-1 real-hardware verified, finding H-2 (no interactive election surface) blocks closure; session refreshed and governance continuity revalidated.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.1` (Independent Verification of
   the CTAP2 PIN/UV Repair + Mandatory Real-CTAP2-Hardware Verification +
