@@ -32,6 +32,8 @@ Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.
 - .pcae/certification/n16_5_presentation_bound_cert_30r5r2_1.json
 - docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1_PROTECTED_PRESENTATION_HUMAN_ELECTION_IV_AND_N_16_5_CERTIFICATION.md
 - tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1_protected_presentation_human_election_iv_and_n16_5_certification.py
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -64,8 +66,9 @@ advisory
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
+- No commit except governed completion-metadata/report finalization for the
+  already-authorized `.30R.5R.2.1` phase
+- No push except the governed `.30R.5R.2.1` finalization push
 - No rollback
 
 ## Acceptance Criteria
