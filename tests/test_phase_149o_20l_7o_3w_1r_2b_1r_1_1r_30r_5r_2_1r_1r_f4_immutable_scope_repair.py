@@ -14,6 +14,13 @@ V = "3fbc12d7ad671ed6c9348cb29ffb5c2d35447e5f"
 R0 = V
 R4R_FINALIZED = "a727dbf4f160f904836905d3cb4adeba91953676"
 R4R1_FINALIZED = "5b6b4013a69ffcb366209b12c495571917bb5ccc"
+# Phase .30R.5R.2.1R.1R.2R.1R.1R.1R (F-9) — this suite's OWN repair phase (this
+# file's docstring phase) ran from R0 and finalized at this commit ("reconcile
+# governed push state", the last commit still carrying this phase's own ID
+# before F-4-IV's phase begins). Tests 31/32/43 assert historical facts about
+# what this repair phase itself changed, so they must be bounded to this fixed
+# range and never to HEAD/the live worktree.
+F4_REPAIR_FINALIZED = "90510428422e451382549ce76111610752aaafb4"
 OWNER = ROOT / "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_contract_reconciliation.py"
 F3_SUITE = ROOT / "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_f3_immutable_phase_entry_evidence_repair.py"
 PREDECESSOR = ROOT / "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1_F3_IV_AND_FINAL_N_16_5_CERTIFICATION.md"
@@ -178,12 +185,12 @@ def test_30_f5_remains_absent() -> None:
 
 
 def test_31_no_protected_root_mutation_in_repo_diff() -> None:
-    changed = git("diff", "--name-only", R0).splitlines()
+    changed = git("diff", "--name-only", R0, F4_REPAIR_FINALIZED).splitlines()
     assert not any(p.startswith((".pcae/protected-root", "protected-root/")) for p in changed)
 
 
 def test_32_no_helper_installation_artifact_added() -> None:
-    assert not any("installation" in p.lower() for p in git("diff", "--name-only", R0).splitlines() if p.startswith(".pcae/certification/"))
+    assert not any("installation" in p.lower() for p in git("diff", "--name-only", R0, F4_REPAIR_FINALIZED).splitlines() if p.startswith(".pcae/certification/"))
 
 
 def test_33_no_real_ceremony() -> None:
@@ -238,5 +245,5 @@ def test_42_mobile_only_future_architecture_preserved() -> None:
 
 
 def test_43_f4_change_is_test_only() -> None:
-    changed = set(git("diff", "--name-only", R0).splitlines())
+    changed = set(git("diff", "--name-only", R0, F4_REPAIR_FINALIZED).splitlines())
     assert all(p.startswith(("tests/", "tasks/", "docs/", ".pcae/")) or p in {"PROJECT_STATUS.md", "CHANGELOG.md"} for p in changed)

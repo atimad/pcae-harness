@@ -4788,3 +4788,28 @@ verified in this phase.
 - Preserve supported-not-exclusive FIDO2/local presentation and open
   mobile-only architecture.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
+# 2026-09-04 — F-9 repairs tests 31/32/43 with the F-4-repair's own bounds
+
+- Closed a governance-lifecycle gap first: the predecessor combined F-7/F-8
+  IV task contract was still in `tasks/active/` despite complete, pushed
+  work and an already-promoted canonical report; finalized via governed
+  `pcae task finish` (no test/source/verdict change).
+- Confirmed the CPIPC successor `...2R.1R.1R.1R` by direct precedent
+  (repair→IV always appends `.1`; IV→residual-repair always appends `R`).
+- Independently confirmed `test_31/32/43` live only in the F-4-repair suite
+  (`..._f4_immutable_scope_repair.py`, created by `a40f8163`), a file
+  distinct from the F-4-IV and F-6-IV files F-7/F-8 already repaired —
+  `F4_IV_FINALIZED`/`F6_IV_FINALIZED` do not apply here.
+- Derived this file's own immutable bounds independently: lower = its
+  existing `R0` (`3fbc12d7`, already correct); upper =
+  `F4_REPAIR_FINALIZED = 90510428` (`reconcile governed push state`, the
+  last commit under this file's own phase ID before F-4-IV's phase began).
+  Reproduced the live defect first (unbounded diff already returns 38 paths
+  vs. 10 true historical paths) before repairing.
+- Repaired all three tests to the fixed two-commit range; no other node
+  touched; test count (43) unchanged; no skip/xfail/wildcard/fnmatch/
+  deletion/rename.
+- Bounded rescan clean. F-5 RETRY stays PENDING FRESH F-9 IV (this is a
+  repair phase, not its own IV). F-5 remains absent; N-16-5 remains open.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**

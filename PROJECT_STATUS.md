@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R — F-9
+Immutable F-7-Repair-Suite Deployment-Evidence Guard Repair. **STATUS:
+REPAIRED / FRESH IV PENDING. TESTS 31/32/43: REPAIRED. F-5 RETRY: PENDING
+FRESH F-9 IV. F-5: OPEN / ABSENT / UNCHANGED. N-16-5: NOT CLOSED.**
+
+The three retained guards in
+`test_..._30r_5r_2_1r_1r_f4_immutable_scope_repair.py`
+(`test_31_no_protected_root_mutation_in_repo_diff`,
+`test_32_no_helper_installation_artifact_added`,
+`test_43_f4_change_is_test_only`) now use the immutable F-4-repair range
+`3fbc12d7..90510428` (this file's own phase-entry baseline through its own
+finalized push-reconciled head) instead of an unbounded `git diff` against
+the live worktree. This range is distinct from, and independent of, the
+`F4_IV_FINALIZED`/`F6_IV_FINALIZED` bounds F-7/F-8 already used elsewhere.
+Historical/current/future cases pass and forbidden in-range evidence remains
+detectable without weakening.
+
+A prior governance-lifecycle gap was also closed: the predecessor combined
+F-7/F-8 IV phase's task contract had never been moved to `tasks/done/`
+despite its work and canonical report being complete; closed via governed
+`pcae task finish` before this repair phase could open (no test, source, or
+verdict changed by that closure).
+
+The final bounded prerequisite-chain rescan found no additional blocking
+historical-moving-authority defect. Because this is a repair phase, not its
+own independent verification, F-5 RETRY remains PENDING FRESH F-9 IV, not
+READY. Production/contracts/dependencies and protected host state are
+unchanged; no administrator, human, or YubiKey interaction occurred. Runtime
+remains Observed / observe / unavailable, first effect absent, and
+N-16-6/N-16-7 untouched. FIDO2 and local presentation remain
+supported-not-exclusive; mobile-only profiles remain open. Recommended next,
+not begun: an independent verification of this repair plus a repeat final
+bounded rescan, which alone may adjudicate F-5 RETRY: READY. Canonical
+report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_F9_DEPLOYMENT_EVIDENCE_GUARD_REPAIR.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1 — Independent
 Verification of the F-7 and F-8 Immutable Historical Evidence Guard Repairs +
 Final N-16-5 Prerequisite Moving-History Clearance. **STATUS: BLOCKED. F-7:

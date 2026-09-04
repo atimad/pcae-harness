@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R` (F-9)
+  repairs exactly `test_31_no_protected_root_mutation_in_repo_diff`,
+  `test_32_no_helper_installation_artifact_added`, and
+  `test_43_f4_change_is_test_only` in the F-4-repair suite to use the
+  file's own immutable range `3fbc12d7..90510428` instead of an unbounded
+  `git diff` against the live worktree — a bound distinct from and
+  independent of the `F4_IV_FINALIZED`/`F6_IV_FINALIZED` bounds F-7/F-8
+  already used elsewhere. Also closes a governance-lifecycle gap: the
+  predecessor combined F-7/F-8 IV task contract had never been moved to
+  `tasks/done/` despite complete work and a promoted canonical report.
+  Bounded rescan clean; F-5 RETRY stays PENDING FRESH F-9 IV (repair phase,
+  not its own IV). No production/script/dependency/contract change; F-5
+  remains absent; N-16-5 remains not closed.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1` independently
   verifies F-7 (F-4-IV tests 44/46/56) and F-8 (F-6-IV tests 36/38/40/44) as
   correctly repaired against their immutable evidence bounds; corrects the
