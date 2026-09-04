@@ -2,11 +2,50 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R —
+Durable Telegram Notification Acceptance Receipts + Phase-Completion
+Notification Auditability Repair. **STATUS: COMPLETE. DURABLE TELEGRAM
+ACCEPTANCE RECEIPT / PHASE-NOTIFICATION AUDITABILITY REPAIR: IMPLEMENTED —
+FRESH INDEPENDENT VERIFICATION REQUIRED. F-5 CONTINUATION EXECUTION: HOLD
+PENDING POST-COMPLETION FULL-SUITE TRIAGE. N-16-5: NOT CLOSED.**
+
+A read-only audit of the immediately preceding IV's Telegram dispatch
+exposed a genuine observability defect: `TelegramSink.send()` received real
+Telegram Bot API responses (`ok`, `message_id`) but collapsed each into an
+in-process boolean and discarded the rest, leaving no durable post-hoc
+proof of API acceptance. Repaired by persisting a purpose-built durable
+acceptance receipt per operation (summary/document independently), with an
+explicit `PREPARED -> API_ACCEPTED / API_REJECTED / TRANSPORT_FAILED /
+OUTCOME_UNCERTAIN` state machine, Telegram's `message_id` when returned,
+and no secrets — deliberately smaller than wiring the still-dormant
+134E.6/134E.7 Delivery Pipeline/Receipt architecture (explicitly reserved
+for a separate, not-yet-implemented 134E.10 integration).
+`report.notification_result["success"]`'s existing boolean contract stays
+byte-unchanged; a new additive `telegram_receipts` key attaches the
+receipt references. `.last-notified.json` remains dedup-only, confirmed
+distinct from the new receipts. 41-case fresh suite; 1438 passed across
+the full notification/phase-report consumer sweep, 2 pre-existing
+unrelated failures deselected (byte-identical against a fixed-SHA
+baseline). No re-dispatch performed: the affected historical IV report
+(`...1.1R.1`) remains historically unchanged, and its original Telegram
+acceptance is honestly represented as NOT INDEPENDENTLY AUDITABLE from
+durable PCAE evidence — neither confirmed delivered nor confirmed failed.
+The separate post-completion full-repository sweep (40587 passed / 979
+failed / 117 errors, frozen at this same unchanged `src/pcae` state) is
+preserved as separate evidence, not classified or repaired here; F-5
+continuation **execution** remains on HOLD pending its own triage (the
+technical repair prerequisite from the prior phase remains READY, not
+begun). Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_DURABLE_TELEGRAM_NOTIFICATION_ACCEPTANCE_RECEIPTS_REPAIR.md`.
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1 —
 Independent Verification of the Configured-Agent-Identity Threading Repair
 for HATP Class-B ACL / Trusted-Executable / Ancestor-Chain Verification.
 **STATUS: COMPLETE. CONFIGURED-AGENT-IDENTITY THREADING REPAIR: INDEPENDENTLY
-VERIFIED. F-5 CONTINUATION: READY (not begun). N-16-5: NOT CLOSED.**
+VERIFIED. F-5 CONTINUATION: READY (not begun, now HOLD pending full-suite
+triage per the succeeding phase above). N-16-5: NOT CLOSED.**
 
 Independently reconstructed the predecessor repair's production diff
 (bounded to one file, one new function), the full production consumer
