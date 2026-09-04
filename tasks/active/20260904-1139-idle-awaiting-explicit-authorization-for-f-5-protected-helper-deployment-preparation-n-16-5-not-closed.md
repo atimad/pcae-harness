@@ -29,6 +29,8 @@ Idle: awaiting explicit authorization for F-5 protected-helper deployment prepar
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
