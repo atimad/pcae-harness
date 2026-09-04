@@ -30,6 +30,9 @@
     "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised"
   },
   "validation_results": {
+    "fast_green": "296 passed, 0 failed: fresh F-8, complete F-6-IV, F-7 repair, and complete F-4-IV",
+    "report_notification_tests": "notification implementation unchanged; governed completion exercises dispatch",
+    "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised",
     "cpipc": "exact requested F-8 repair ID accepted",
     "lineage": "P=U6=7ef7ae0e9b0632ef0bd3c352e4598c03a9b05c69; R7=R0=6de3d6971536b8bca6bd585d47cccc0f8fec5b0a; V6=8dcca97bb1a88a99cac3afe610f3651adcc58295",
     "f8": "REPAIRED / FRESH IV PENDING; F-6-IV tests 36/38/40/44 repaired",
@@ -52,7 +55,7 @@
     "notification_status": "pending final post-push promotion"
   },
   "notification_dispatch_result": "pending",
-  "no_go_confirmation": "No production source, script, dependency, or contract changed. No protected root/helper state was mutated. No PAWA deployment capability was issued. No administrator, human, or YubiKey interaction occurred. No presentation evidence, principal, or Gate certification occurred. N-16-5 remains open; N-16-6/N-16-7 and runtime effects remain untouched.",
+  "no_go_confirmation": "No production source change.\nNo production script change.\nNo dependency change.\nNo normative contract change.\nNo protected-root mutation.\nNo helper installation.\nNo PAWA deployment capability issuance or consumption.\nNo administrator interaction.\nNo protected human election.\nNo YubiKey interaction.\nNo presentation evidence, principal, PB permission, or Gate certification.\nNo N-16-5 closure.\nNo N-16-6 or N-16-7 work.\nNo Slice C, adapter dispatch, runtime capability, or first effect.\nNo exclusive FIDO2/local-TTY mandate or mobile-only foreclosure.",
   "no_go_confirmations": [
     "No production source change.",
     "No production script change.",
