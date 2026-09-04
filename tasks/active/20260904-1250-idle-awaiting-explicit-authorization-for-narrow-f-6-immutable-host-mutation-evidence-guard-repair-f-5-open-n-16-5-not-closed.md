@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260904-1248-idle-awaiting-explicit-authorization-for-30r-5r-2-1r-1r-2r-f-6-immutable-f-4-iv-host-mutation-evidence-guard-repair-f-5-open-n-16-5-not-closed
+20260904-1250-idle-awaiting-explicit-authorization-for-narrow-f-6-immutable-host-mutation-evidence-guard-repair-f-5-open-n-16-5-not-closed
 
 ## Title
 
-Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.2R F-6 immutable F-4-IV host-mutation evidence guard repair; F-5 OPEN; N-16-5 NOT CLOSED
+Idle: awaiting explicit authorization for narrow F-6 immutable host-mutation evidence guard repair; F-5 OPEN; N-16-5 NOT CLOSED
 
 ## Status
 
@@ -18,7 +18,7 @@ independent verification
 
 ## Goal
 
-Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.2R F-6 immutable F-4-IV host-mutation evidence guard repair; F-5 OPEN; N-16-5 NOT CLOSED
+Idle: awaiting explicit authorization for narrow F-6 immutable host-mutation evidence guard repair; F-5 OPEN; N-16-5 NOT CLOSED
 
 ## Allowed Files
 
@@ -84,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-09-04T12:48:15.075197+02:00
+2026-09-04T12:50:45.390927+02:00
