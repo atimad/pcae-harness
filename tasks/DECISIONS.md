@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- **2026-09-04 — Block `.30R.5R.2.1R.1R.2` before F-5 host mutation at
+  finding F-6.** The mandatory pre-deployment sweep found completed F-4-IV
+  `test_43_no_protected_root_mutation_is_in_iv_diff` reads the moving
+  `V..HEAD` filename set and rejects this phase's legitimate task filename
+  merely because its authorized title contains `protected-root`. The exact
+  node passes at immutable finalized F-4-IV head `7124c019` and fails after
+  task opening with no host mutation. Do not rename-to-evade, skip, weaken, or
+  repair this distinct predecessor guard inside deployment preparation. Stop
+  before administrator interaction; leave F-5 absent/open and N-16-5 NOT
+  CLOSED. Recommend a narrow F-6 immutable-evidence repair and fresh IV before
+  retrying F-5 deployment preparation. Preserve supported-not-exclusive local
+  and FIDO2 profiles plus open mobile-only architecture.
+  **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
 - **2026-09-04 — Repair F-3 with immutable implementation-parent topology.**
   The `.30R.5R.2` implementation commit `a85abff6` contains the phase task and
   repair and has exactly one parent, finalized `.30R.5R.1` `0250e5f7`; that

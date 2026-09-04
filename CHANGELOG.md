@@ -1,5 +1,15 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2` is **BLOCKED
+  before host mutation**. The mandatory pre-deployment sweep exposed F-6:
+  completed F-4-IV `test_43` uses moving `V..HEAD` filenames to prove the
+  historical IV made no protected-root mutation, so the legitimate successor
+  task filename alone makes it fail. The node passes at immutable predecessor
+  `7124c019` and fails after task opening; no protected host state changed.
+  No repair, deployment, administrator prompt, helper installation, PAWA
+  configuration, human/YubiKey ceremony, or N-16-5 closure occurred. F-5
+  remains absent/open; production/contracts/dependencies/runtime are unchanged.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.1`
   independently verifies the F-4 immutable historical-scope repair. Primary
   Git topology proves `.30R.4R.1` is exactly `a727dbf4..5b6b4013`; the retained

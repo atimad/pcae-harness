@@ -2,6 +2,38 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2 — Production
+Protected-Root / Protected-Presentation Helper Deployment Preparation.
+**STATUS: BLOCKED BEFORE HOST MUTATION. F-6: OPEN / BLOCKING. F-5: OPEN /
+UNCHANGED. N-16-5: NOT CLOSED.**
+
+The mandatory pre-deployment sweep found that the completed F-4 IV suite's
+`test_43_no_protected_root_mutation_is_in_iv_diff` derives its historical IV
+fact from moving `V..HEAD` filenames. It passes at immutable F-4-IV head
+`7124c019` but fails at the legitimate deployment task-opening commit solely
+because the governed task filename contains `protected-root`. This is finding
+F-6, a distinct immutable historical host-mutation evidence defect. It was not
+repaired or evaded here.
+
+The focused pre-deployment sweep is 522 passed / 1 failed (F-6). The fixed
+production root `/Library/Application Support/PCAE/HPAC/protected-root`
+remains absent. No administrator prompt, root provisioning, helper byte
+installation, PAWA configuration, descriptor, current generation, human
+election, YubiKey interaction, or certification occurred. Production,
+contracts, and dependencies are unchanged.
+
+Runtime remains `not_implemented / Observed / observe / unavailable`, zero
+plugins/capabilities, first effect absent; N-16-6/N-16-7 untouched. FIDO2 and
+local presentation remain supported-not-exclusive and mobile-only profiles
+remain open. Recommended next, not begun: narrow F-6 repair, fresh F-6 IV,
+then a fresh separately authorized F-5 deployment-preparation retry.
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2_F5_DEPLOYMENT_PREPARATION_BLOCKED.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.1 — Independent
 Verification of the F-4 Immutable Historical-Scope Guard Repair. **STATUS:
 COMPLETE. F-4: INDEPENDENTLY VERIFIED REPAIRED. F-5: OPEN / UNCHANGED.
