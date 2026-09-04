@@ -76,6 +76,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for F-8 immutable F-6-IV sibling-adjudication evidence guard repair; F-5 retry NOT READY; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R: F-8 Immutable F-6-IV Sibling-Adjudication Evidence Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R: F-7 Immutable Remaining F-4-IV Evidence Guard Repair to Idle: awaiting explicit authorization for F-8 immutable F-6-IV sibling-adjudication evidence guard repair; F-5 retry NOT READY; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for F-7 immutable remaining F-4-IV evidence guard repair; F-5 retry NOT READY; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R: F-7 Immutable Remaining F-4-IV Evidence Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1: Independent Verification of the F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair to Idle: awaiting explicit authorization for F-7 immutable remaining F-4-IV evidence guard repair; F-5 retry NOT READY; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
@@ -2274,3 +2275,11 @@
   nonblocking latent sibling range guards for fresh IV adjudication.
 - Changed no production source, contract, dependency, or protected host state;
   F-5 remains absent and N-16-5 remains open.
+# 2026-09-04 — F-8 immutable F-6-IV evidence guard repair
+
+- Repaired exactly F-6-IV tests 36/38/40/44 to use the immutable completed
+  F-6-IV endpoint/range instead of current owner files or implicit live HEAD.
+- Added a 96-test F-8 repair suite covering lineage, historical/current/future
+  behavior, negative in-range sensitivity, no weakening, and no-go boundaries.
+- Kept F-7 fresh IV pending, F-5 retry pending combined F-7/F-8 IV, F-5 absent,
+  N-16-5 not closed, and production/runtime state unchanged.

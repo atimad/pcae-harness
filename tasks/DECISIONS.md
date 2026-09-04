@@ -4762,3 +4762,12 @@ verified in this phase.
 - Preserve supported-not-exclusive FIDO2/local presentation and open mobile-only
   architecture.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+# 2026-09-04 — F-8 uses the finalized F-6-IV endpoint as historical authority
+
+- F-6-IV tests 36/38/40 describe the owner-file state adjudicated during the
+  completed F-6 IV, so they read the immutable owner blob at `7ef7ae0e`.
+- F-6-IV test 44 describes the absence of an owner/repair mutation during that
+  same completed IV, so its exact range is `8dcca97b..7ef7ae0e`.
+- Live HEAD, current files, live reports, and successor allowlists are not
+  historical authority. F-5 remains absent and no deployment action is part of
+  this repair.

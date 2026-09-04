@@ -2,6 +2,32 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R — F-8
+Immutable F-6-IV Sibling-Adjudication Evidence Guard Repair. **STATUS:
+COMPLETE. F-8: REPAIRED / FRESH IV PENDING. F-6-IV TESTS 36/38/40/44:
+REPAIRED. F-7: REPAIRED / FRESH IV PENDING. F-5 RETRY: PENDING FRESH F-7/F-8
+IV. F-5: OPEN / ABSENT / UNCHANGED. N-16-5: NOT CLOSED.**
+
+The four retained F-6-IV guards now use the immutable completed F-6-IV
+authority `8dcca97b..7ef7ae0e`: tests 36/38/40 read the historical F-4-IV
+owner blob at the finalized endpoint, and test 44 bounds its path-limited diff
+to that endpoint. Historical/current/future cases pass and forbidden in-range
+evidence remains detectable without weakening.
+
+The final bounded prerequisite scan found no additional blocking historical-
+moving-authority defect. Production/contracts/dependencies and protected host
+state are unchanged; no administrator, human, or YubiKey interaction occurred.
+Runtime remains Observed / observe / unavailable, first effect absent, and
+N-16-6/N-16-7 untouched. FIDO2 and local presentation remain supported-not-
+exclusive; mobile-only profiles remain open. Recommended next, not begun:
+`.30R.5R.2.1R.1R.2R.1R.1R.1` combined fresh F-7/F-8 IV and final prerequisite
+moving-history clearance before any separately authorized F-5 retry. Canonical
+report: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_F8_IMMUTABLE_F6_IV_EVIDENCE_GUARD_REPAIR.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R — F-7 Immutable
 Remaining F-4-IV Evidence Guard Repair. **STATUS: BLOCKED. F-7: REPAIRED /
 FRESH IV PENDING. TESTS 44/46/56: REPAIRED. F-8: OPEN / BLOCKING. F-5 RETRY:

@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for F-8 immutable F-6-IV sibling-adjudicat
 
 ## Status
 
-active
+done
 
 ## Mode
 

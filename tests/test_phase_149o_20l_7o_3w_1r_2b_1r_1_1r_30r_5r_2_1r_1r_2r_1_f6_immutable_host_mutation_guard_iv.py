@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PHASE = "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1"
 P = "2eaf536d05b6852c6bc6692cec139afab1083f84"
 R = V = "8dcca97bb1a88a99cac3afe610f3651adcc58295"
+F6_IV_FINALIZED = "7ef7ae0e9b0632ef0bd3c352e4598c03a9b05c69"
 V4 = "90510428422e451382549ce76111610752aaafb4"
 U4 = "7124c019bf3f46eb07456b81146484609197dbc2"
 IV_COMMITS = [
@@ -226,8 +227,9 @@ def test_35_sibling_1_identified() -> None:
 
 
 def test_36_sibling_1_is_historical_moving_authority() -> None:
-    node = rendered("test_44_no_helper_installation_or_pawa_write_in_iv")
-    assert "git('diff', '--name-only', V)" in node and "in_iv" in function(OWNER.read_text(), "test_44_no_helper_installation_or_pawa_write_in_iv").name
+    historical = show(F6_IV_FINALIZED, OWNER_REL)
+    node = rendered("test_44_no_helper_installation_or_pawa_write_in_iv", source=historical)
+    assert "git('diff', '--name-only', V)" in node and "in_iv" in function(historical, "test_44_no_helper_installation_or_pawa_write_in_iv").name
 
 
 def test_37_sibling_2_identified() -> None:
@@ -235,7 +237,7 @@ def test_37_sibling_2_identified() -> None:
 
 
 def test_38_sibling_2_is_historical_moving_authority() -> None:
-    node = rendered("test_46_no_yubikey_or_certification_evidence_minted")
+    node = rendered("test_46_no_yubikey_or_certification_evidence_minted", source=show(F6_IV_FINALIZED, OWNER_REL))
     assert "git('diff', '--name-only', V, '--', '.pcae/certification')" in node
 
 
@@ -244,8 +246,9 @@ def test_39_sibling_3_identified() -> None:
 
 
 def test_40_sibling_3_is_historical_moving_authority() -> None:
-    node = rendered("test_56_iv_changes_no_product_contract_or_dependency_bytes")
-    assert "git('diff', '--name-only', V, '--'" in node and "iv_changes" in function(OWNER.read_text(), "test_56_iv_changes_no_product_contract_or_dependency_bytes").name
+    historical = show(F6_IV_FINALIZED, OWNER_REL)
+    node = rendered("test_56_iv_changes_no_product_contract_or_dependency_bytes", source=historical)
+    assert "git('diff', '--name-only', V, '--'" in node and "iv_changes" in function(historical, "test_56_iv_changes_no_product_contract_or_dependency_bytes").name
 
 
 def test_41_f5_impact_assessed_for_all_siblings() -> None:
@@ -265,7 +268,7 @@ def test_43_every_disclosed_match_is_classified() -> None:
 
 
 def test_44_no_additional_defect_is_silently_repaired() -> None:
-    assert git("diff", "--name-only", V, "--", OWNER_REL, REPAIR_REL) == ""
+    assert git("diff", "--name-only", V, F6_IV_FINALIZED, "--", OWNER_REL, REPAIR_REL) == ""
 
 
 def test_45_no_production_source_change() -> None:
