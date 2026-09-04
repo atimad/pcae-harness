@@ -10,8 +10,8 @@
   "metadata_consistency": "Status, artifact, decisions, tests, and idle handoff consistently record a pre-deployment BLOCKED verdict, F-6 open, F-5 unchanged, no administrator interaction, and N-16-5 not closed.",
   "internal_evidence_coherence": "Focused pre-deployment sweep 522 passed / 1 failed; immutable predecessor reproduction 1 passed at D0 and the same node 1 failed at current successor; F-4 core immutable guard remains passing.",
   "internal_report_coherence": "Historical F-4-IV completion remains immutable. The new finding is an adjacent live-successor host-mutation evidence node and is not repaired or evaded here.",
-  "report_consistency": "Governed push pending; canonical report promotion pending final reconciliation.",
-  "origin_main_head_count": 6,
+  "report_consistency": "Governed push completed; canonical complete report promoted and Telegram dispatch succeeded.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "pre-deployment deterministic regression; immutable predecessor reproduction; current-successor failure attribution; production/contract byte identity; read-only host-state proof",
   "tests_run": 524,
   "tests_added_or_updated": "No test added or modified. The blocking predecessor node remains unchanged.",
@@ -46,12 +46,12 @@
     "pcae_check": "passed after governed documentation commit",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE omissions; current phase archived/listed",
-    "pcae_push_check": "clean",
+    "pcae_push_check": "clean; origin/main..HEAD = 0 after governed push",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, ready; dispatch deferred to post-push promotion",
-    "notification_status": "pending final post-push promotion"
+    "notification_status": "sent: Telegram summary and document"
   },
-  "notification_dispatch_result": "pending",
+  "notification_dispatch_result": "sent: telegram summary and document",
   "no_go_confirmation": "No production source changed.\nNo production script changed.\nNo dependency changed.\nNo normative contract changed.\nNo protected root was provisioned or mutated.\nNo helper bytes, installation descriptor, or current generation were created.\nNo PAWA deployment capability was issued or consumed.\nNo administrator prompt or human election occurred.\nNo YubiKey interaction occurred.\nNo presentation evidence, principal, PB permission, runtime capability, or effect was created.\nNo predecessor test was repaired, renamed, skipped, or weakened.\nNo closure of N-16-5 occurred.\nNo N-16-6 or N-16-7 work began.",
   "no_go_confirmations": [
     "No production, script, dependency, or normative contract change.",
@@ -82,6 +82,6 @@
     {"hash": "f62ccf29bb4ec2003d2fea99dcefa0426caaba31", "subject": "chore: close blocked F-5 deployment phase"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R — F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair; then fresh IV, then a separately authorized F-5 deployment-preparation retry. None begun.",
-  "pushed_status": "pending",
-  "origin_main_head": ""
+  "pushed_status": "pushed",
+  "origin_main_head": "6386188bb95f28ede0db96e1b7fc08c9271e3592"
 }
