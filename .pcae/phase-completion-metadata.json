@@ -10,7 +10,7 @@
   "metadata_consistency": "Report, status, task lifecycle, and this metadata consistently record INDEPENDENTLY VERIFIED, F-5 CONTINUATION EXECUTION HOLD PENDING FULL-SUITE TRIAGE, and N-16-5 NOT CLOSED.",
   "internal_evidence_coherence": "Fresh independent 23-case adversarial IV suite (tests/test_iv_telegram_receipt_fresh.py): 23 passed, 0 failed. Predecessor's own 41-case suite re-run unchanged as regression evidence only (not independent proof): 41 passed, 0 failed. Targeted regression band across 32 notification/telegram/phase-report/dedup/finalization/completion-metadata files (1364 items): 1351 passed, 2 skipped, 11 failed -- all 11 failing node ids independently reproduced byte-identical against a disposable detached worktree pinned to the fixed pre-repair phase-entry SHA (9c88f1a3): pre-existing wheel/sdist packaging-authority guards (test_cltr_authority_136al/136am/136ap/136aq, test_cltr_cutover_136t/136u) unrelated to this repair -- zero attributable regression.",
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED reports remain immutable and byte-unchanged, including the affected configured-agent IV report itself and the predecessor repair's own canonical report; only this phase's own canonical report and governance/task/status artifacts are added.",
-  "report_consistency": "Staged pending push; canonical report ready for promotion to COMPLETE after push.",
+  "report_consistency": "Pushed; canonical report ready for promotion to COMPLETE.",
   "origin_main_head_count": 0,
   "test_evidence_classification": "durable_telegram_notification_acceptance_receipts_repair_independently_verified",
   "tests_run": 23,
@@ -140,6 +140,6 @@
     }
   ],
   "recommended_next_phase": "Post-Completion Full-Repository Test Sweep Failure/Error Attribution and F-5 Hold Adjudication -- must cluster and attribute the frozen 40587 passed / 979 failed / 117 errors evidence before any F-5 execution can resume. Not begun. Its exact CPIPC-valid ID is left for explicit operator authorization; this phase does not begin it, and does not re-dispatch the affected historical configured-agent IV report.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "dde88a8e88dff09dbec64739566864ceb490d15d"
 }

@@ -76,4 +76,4 @@ zero plugins/capabilities, first effect absent. N-16-6/N-16-7 untouched.
 Recommended next, not begun: Post-Completion Full-Repository Test Sweep
 Failure/Error Attribution and F-5 Hold Adjudication.
 
-Staged pending push. Canonical report promotion pending.
+Pushed to `origin/main`. Canonical report promotion pending.
