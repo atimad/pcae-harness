@@ -2,6 +2,31 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R — F-7 Immutable
+Remaining F-4-IV Evidence Guard Repair. **STATUS: BLOCKED. F-7: REPAIRED /
+FRESH IV PENDING. TESTS 44/46/56: REPAIRED. F-8: OPEN / BLOCKING. F-5 RETRY:
+NOT READY. F-5: OPEN / ABSENT / UNCHANGED. N-16-5: NOT CLOSED.**
+
+All three completed-IV guards now use immutable `90510428..7124c019` evidence.
+Only their missing upper-bound arguments changed; names, path scopes, and
+assertions remain. Historical/current/future-successor cases pass and each
+guard still detects a forbidden in-range change. The mandatory rescan exposed
+F-8: F-6-IV tests 36/38/40/44 inspect today's owner file or its moving diff
+while asserting the historical pre-F-7 state, so the legitimate repair
+invalidates that completed-IV evidence suite. F-8 was not repaired outside scope.
+
+Production/contracts/dependencies and protected host state are unchanged. No
+administrator, human, or YubiKey interaction occurred. Runtime remains
+Observed / observe / unavailable, first effect absent, N-16-6/N-16-7 untouched.
+FIDO2 and local presentation remain supported-not-exclusive; mobile-only
+profiles remain open. Recommended next, not begun: `.30R.5R.2.1R.1R.2R.1R.1R`
+narrow F-8 repair, then fresh IV of F-8/F-7 before F-5. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_F7_REMAINING_F4_IV_EVIDENCE_GUARD_REPAIR.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1 — Independent
 Verification of the F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair.
 **STATUS: BLOCKED. F-6: INDEPENDENTLY VERIFIED REPAIRED. THREE SIBLING

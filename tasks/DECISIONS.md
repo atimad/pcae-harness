@@ -4680,6 +4680,15 @@ verified in this phase.
   N-16-5 while F-4/F-5 remain.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
 
+# 2026-09-04 — Block F-7 completion on F-8 in the predecessor IV harness
+
+- F-7's three authorized nodes are repaired and its fresh suite passes.
+- Classify F-6-IV tests 36, 38, 40, and 44 as F-8: they ask about historical
+  pre-F-7 sibling forms/scope but inspect today's mutable owner source or diff.
+- Do not repair F-8 in F-7. Keep F-5 retry NOT READY and require a narrow F-8
+  repair plus fresh IV first.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
 ## 2026-09-04 — Phase .30R.5R.2.1R.1R F-4 immutable-scope repair
 
 - Confirm the proposed ID as CPIPC-valid and use it without alteration.
@@ -4741,4 +4750,15 @@ verified in this phase.
   followed by fresh IV; do not combine either with protected deployment.
 - Preserve F-5 absent, N-16-5 not closed, supported-not-exclusive FIDO2/local
   presentation, and the open mobile-only future profile.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
+# 2026-09-04 — Bind the three remaining F-4-IV guards to finalized IV history
+
+- Repair only tests 44, 46, and 56 by using their independently derived common
+  completed-IV range `90510428..7124c019`.
+- Retain each test's distinct path scope and predicate; do not introduce a
+  generic resolver or successor exceptions.
+- Keep F-5 absent and its retry pending fresh F-7 IV; N-16-5 remains not closed.
+- Preserve supported-not-exclusive FIDO2/local presentation and open mobile-only
+  architecture.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**

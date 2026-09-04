@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for F-7 immutable remaining F-4-IV evidenc
 
 ## Status
 
-active
+done
 
 ## Mode
 

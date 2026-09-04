@@ -268,7 +268,7 @@ def test_43_no_protected_root_mutation_is_in_iv_diff() -> None:
 
 
 def test_44_no_helper_installation_or_pawa_write_in_iv() -> None:
-    changed = git("diff", "--name-only", V).splitlines()
+    changed = git("diff", "--name-only", V, F4_IV_FINALIZED).splitlines()
     assert not any(p.startswith(("src/pcae", "scripts/", ".pcae/certification/")) for p in changed)
 
 
@@ -278,7 +278,7 @@ def test_45_no_real_helper_ceremony_or_human_election() -> None:
 
 
 def test_46_no_yubikey_or_certification_evidence_minted() -> None:
-    assert git("diff", "--name-only", V, "--", ".pcae/certification") == ""
+    assert git("diff", "--name-only", V, F4_IV_FINALIZED, "--", ".pcae/certification") == ""
 
 
 def test_47_n16_5_remains_not_closed() -> None:
@@ -323,4 +323,4 @@ def test_55_repair_report_does_not_claim_f5_or_n16_5_completion() -> None:
 
 
 def test_56_iv_changes_no_product_contract_or_dependency_bytes() -> None:
-    assert git("diff", "--name-only", V, "--", "src/pcae", "scripts", "pyproject.toml", "docs/contracts") == ""
+    assert git("diff", "--name-only", V, F4_IV_FINALIZED, "--", "src/pcae", "scripts", "pyproject.toml", "docs/contracts") == ""

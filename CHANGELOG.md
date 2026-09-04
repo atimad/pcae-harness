@@ -1,5 +1,14 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R` repairs only
+  F-4-IV tests 44, 46, and 56 by adding immutable finalized endpoint
+  `7124c019` to their `90510428` historical ranges. Predicates and path scopes
+  remain exact; future successors cannot alter the facts and forbidden in-range
+  changes still fail. The phase is **BLOCKED** by new F-8: F-6-IV tests
+  36/38/40/44 incorrectly require today's owner file/diff to retain the pre-F-7
+  sibling
+  forms. F-8 is recorded but not repaired. F-5 remains absent/open and not ready.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1` independently
   verifies F-6 repaired over immutable `90510428..7124c019`, but is **BLOCKED**
   before F-5: disclosed F-4-IV tests 44, 46, and 56 each assert a completed-IV
@@ -67,6 +76,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for F-7 immutable remaining F-4-IV evidence guard repair; F-5 retry NOT READY; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R: F-7 Immutable Remaining F-4-IV Evidence Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1: Independent Verification of the F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair to Idle: awaiting explicit authorization for F-7 immutable remaining F-4-IV evidence guard repair; F-5 retry NOT READY; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for fresh F-6 independent verification; F-5 remains absent; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1: Independent Verification of the F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R: F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair to Idle: awaiting explicit authorization for fresh F-6 independent verification; F-5 remains absent; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
