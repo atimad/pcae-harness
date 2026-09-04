@@ -4712,3 +4712,18 @@ verified in this phase.
 - Preserve supported-not-exclusive FIDO2/local presentation and the open
   mechanism-neutral mobile-only future profile.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+# 2026-09-04 — Bind completed F-4-IV host-mutation evidence to its immutable endpoint
+
+- Decision: retain F-4-IV `test_43` and its exact substring detector, but bind
+  its Git diff to `90510428..7124c019`, the independently reconstructed
+  completed F-4-IV interval.
+- Reason: implicit `V..HEAD` made later legitimate task filenames rewrite a
+  historical fact. Both immutable bounds preserve the original assertion and
+  exclude successors by topology rather than allowlisting.
+- Scope: verification infrastructure only. No production, contract,
+  dependency, protected-root, helper, PAWA, administrator, human, or hardware
+  mutation.
+- Scan disposition: `test_44`, `test_46`, and `test_56` are disclosed latent
+  sibling historical-range issues. They currently pass and are not silently
+  repaired outside the exact F-6 authorization; fresh F-6 IV must adjudicate
+  them before an F-5 retry.

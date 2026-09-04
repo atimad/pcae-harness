@@ -2245,3 +2245,11 @@
   `RollbackExecutionRecord.status`. Zero attributable functional
   regressions. No `src/pcae/` file modified. Recommends
   149O.20L.7O.3G next.
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R — F-6 repair
+
+- Repaired the retained F-4-IV host-mutation evidence guard to use the exact
+  immutable completed-IV range instead of moving successor HEAD.
+- Added historical/current/future/negative repair evidence and disclosed three
+  nonblocking latent sibling range guards for fresh IV adjudication.
+- Changed no production source, contract, dependency, or protected host state;
+  F-5 remains absent and N-16-5 remains open.

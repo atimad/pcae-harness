@@ -13,6 +13,7 @@ PHASE = "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.1"
 P = "3fbc12d7ad671ed6c9348cb29ffb5c2d35447e5f"
 R = "90510428422e451382549ce76111610752aaafb4"
 V = R
+F4_IV_FINALIZED = "7124c019bf3f46eb07456b81146484609197dbc2"
 L = "a727dbf4f160f904836905d3cb4adeba91953676"
 U = "5b6b4013a69ffcb366209b12c495571917bb5ccc"
 OPEN = "99bc57053947b192592c2c7378fd11e66660c60c"
@@ -260,7 +261,10 @@ def test_42_f5_protected_root_remains_absent() -> None:
 
 
 def test_43_no_protected_root_mutation_is_in_iv_diff() -> None:
-    assert not any("protected-root" in p for p in git("diff", "--name-only", V).splitlines())
+    assert not any(
+        "protected-root" in p
+        for p in git("diff", "--name-only", V, F4_IV_FINALIZED).splitlines()
+    )
 
 
 def test_44_no_helper_installation_or_pawa_write_in_iv() -> None:

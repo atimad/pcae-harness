@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R — F-6 Immutable
+F-4-IV Host-Mutation Evidence Guard Repair. **STATUS: COMPLETE. F-6:
+REPAIRED / FRESH IV PENDING. F-5: OPEN / ABSENT / UNCHANGED.
+N-16-5: NOT CLOSED.**
+
+The retained F-4-IV `test_43` now evaluates its historical no-host-mutation
+fact over immutable `90510428..7124c019`, the exact four-commit completed IV
+interval, rather than implicit `V..HEAD`. Historical, current-successor,
+synthetic future-successor, and negative in-range cases preserve the original
+substring detector's strength. No skip, xfail, wildcard, fnmatch, removal, or
+rename was introduced.
+
+A targeted scan covered 1,086 prerequisite test definitions in 25 `.30R*`
+files and classified 48 Git/HEAD pattern lines. No additional currently
+blocking moving-history defect was found. Three latent sibling F-4-IV guards
+(`test_44`, `test_46`, `test_56`) still express historical IV facts through
+implicit `V..HEAD`; they currently pass, were not repaired outside this exact
+scope, and must be adjudicated by fresh F-6 IV.
+
+Production, contracts, dependencies, and host deployment state are unchanged.
+The protected root remains absent; no administrator, human-election, or
+YubiKey interaction occurred. Runtime remains
+`not_implemented / Observed / observe / unavailable`, zero plugins/capabilities,
+first effect absent; N-16-6/N-16-7 untouched. FIDO2 and local presentation
+remain supported-not-exclusive; mobile-only profiles remain open. Recommended
+next, not begun: `.30R.5R.2.1R.1R.2R.1` fresh F-6 IV, which must adjudicate
+the disclosed siblings before any separately authorized F-5 deployment retry.
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_F6_IMMUTABLE_HOST_MUTATION_GUARD_REPAIR.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.2)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2 — Production
 Protected-Root / Protected-Presentation Helper Deployment Preparation.
 **STATUS: BLOCKED BEFORE HOST MUTATION. F-6: OPEN / BLOCKING. F-5: OPEN /
