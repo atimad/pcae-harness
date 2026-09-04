@@ -46,7 +46,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE omissions; current phase archived/listed",
-    "pcae_push_check": "clean; origin/main..HEAD = 0 after governed push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, ready; dispatch deferred to post-push promotion",
     "notification_status": "pending final post-push promotion"
