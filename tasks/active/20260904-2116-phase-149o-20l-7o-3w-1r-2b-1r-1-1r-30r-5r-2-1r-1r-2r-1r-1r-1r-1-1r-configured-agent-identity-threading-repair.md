@@ -22,18 +22,18 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R: Configured-A
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
 - src/pcae/core/hatp_class_b_topology_verifier.py
 - tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py
 - tests/test_phase_149o_20j_5_class_b_acl_only_higher_ancestor_detection_macos_narrow_repair.py
 - tests/test_phase_149o_20j_class_b_deployment_verifier_model_a_environment_lock_independent_implementation_verification.py
 - tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_configured_agent_identity_threading_repair.py
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- tasks/**
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/session.json
+- docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_CONFIGURED_AGENT_IDENTITY_THREADING_REPAIR.md
 
 ## Forbidden Files
 
