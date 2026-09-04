@@ -82,7 +82,11 @@
     "tasks/DONE.md"
   ],
   "files_changed_count": 7,
-  "phase_commits": ["3cec79212b24cb17cb216f744e5266c27d2de019", "863e7de1eb8c9c1bdbe6aa18a48cd534128f074d"],
+  "phase_commits": [
+    {"hash": "3cec79212b24cb17cb216f744e5266c27d2de019", "subject": "F-9 immutable F-7-repair-suite deployment-evidence guard repair"},
+    {"hash": "863e7de1eb8c9c1bdbe6aa18a48cd534128f074d", "subject": "add task contract"},
+    {"hash": "1a41408b", "subject": "close F-9 task lifecycle"}
+  ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1 -- Independent Verification of the F-9 Immutable F-7-Repair-Suite Deployment-Evidence Guard Repair + Final N-16-5 Moving-History Clearance + F-5 Retry Readiness Adjudication. Not begun.",
   "pushed_status": "pending",
   "origin_main_head": 0
