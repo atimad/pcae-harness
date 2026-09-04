@@ -2,11 +2,66 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1 —
+Independent Verification of Durable Telegram Acceptance Receipts and
+Phase-Completion Notification Auditability. **STATUS: COMPLETE. DURABLE
+TELEGRAM ACCEPTANCE RECEIPT / PHASE-NOTIFICATION AUDITABILITY REPAIR:
+INDEPENDENTLY VERIFIED. F-5 CONTINUATION EXECUTION: HOLD PENDING
+POST-COMPLETION FULL-SUITE TRIAGE. N-16-5: NOT CLOSED.**
+
+Independently reproduced the predecessor's confirmed observability defect
+from immutable pre-repair source; independently reconstructed the bounded
+production diff (`notifications.py`/`phase_reports.py`/`tests/conftest.py`
+only, no contract/schema/dependency change) and the full notification call
+graph (PREPARED receipt persisted-to-disk before each network call →
+strict `_classify_telegram_result` → final receipt → `NotificationResult`
+→ `report.notification_result["telegram_receipts"]`); confirmed the
+purpose-built receipt does not bypass the still-dormant, synthetic
+Delivery Receipt/Pipeline architecture (no active canonical real-external
+mechanism exists to bypass); confirmed `compute_report_digest` excludes
+`notification_result` with no digest circularity. Durability precisely
+characterized as atomic tmp-write + `os.replace` (process-exit/restart
+durable, no `fsync` — not overclaimed by the repair). Fresh independent
+23-test adversarial IV suite
+(`tests/test_iv_telegram_receipt_fresh.py`) — 23/23 passed — covering
+pre-attempt ordering (proven via disk reload), strict
+API_ACCEPTED/API_REJECTED/TRANSPORT_FAILED/OUTCOME_UNCERTAIN
+classification, partial summary/document outcomes, receipt-persistence
+failure after API acceptance (never framed as safely resendable), secret
+exclusion (bot token/API URL/chat_id absent from every receipt and the
+`PERSISTENCE-FAILURES.log` fallback, verified by byte grep), dedup/receipt
+separation, legacy report compatibility, no automatic retry, and receipt
+non-authority. Predecessor's own 41-test suite re-run unchanged (41/41
+passed, regression evidence only). Targeted regression band: 1351 passed,
+2 skipped, 11 failed — all 11 independently reproduced byte-identical at
+the fixed pre-repair baseline in a disposable worktree (pre-existing
+wheel/sdist packaging guards, zero attributable regression). One
+disclosed non-blocking finding (F-1: `notification_result.success` /
+`.last-notified.json` dedup still derive from raw Telegram `ok`, not
+gated on the new strict classification — matches the repair's own
+disclosed scope, candidate for a future narrow follow-up, not repaired
+here). No historical re-dispatch performed; the affected configured-agent
+IV report (`...1.1R.1`) remains byte-unchanged and its original Telegram
+acceptance remains NOT INDEPENDENTLY AUDITABLE FROM DURABLE PCAE EVIDENCE.
+The separate post-completion full-repository sweep (40587 passed / 979
+failed / 117 errors) remains preserved unchanged and out of scope; F-5
+continuation execution remains HOLD pending its own triage (technical
+prerequisite remains READY, not begun); N-16-5 remains NOT CLOSED;
+N-16-6/N-16-7 untouched; runtime remains Observed/observe/unavailable, 0
+plugins/capabilities. Recommended (not begun) successor: a Post-Completion
+Full-Repository Test Sweep Failure/Error Attribution and F-5 Hold
+Adjudication phase to cluster/attribute the frozen 40587/979/117 evidence
+before any F-5 execution resumes. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1_INDEPENDENT_VERIFICATION_DURABLE_TELEGRAM_ACCEPTANCE_RECEIPTS.md`.
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R —
 Durable Telegram Notification Acceptance Receipts + Phase-Completion
 Notification Auditability Repair. **STATUS: COMPLETE. DURABLE TELEGRAM
 ACCEPTANCE RECEIPT / PHASE-NOTIFICATION AUDITABILITY REPAIR: IMPLEMENTED —
-FRESH INDEPENDENT VERIFICATION REQUIRED. F-5 CONTINUATION EXECUTION: HOLD
+FRESH INDEPENDENT VERIFICATION REQUIRED (now superseded — see Current
+Phase above: INDEPENDENTLY VERIFIED). F-5 CONTINUATION EXECUTION: HOLD
 PENDING POST-COMPLETION FULL-SUITE TRIAGE. N-16-5: NOT CLOSED.**
 
 A read-only audit of the immediately preceding IV's Telegram dispatch

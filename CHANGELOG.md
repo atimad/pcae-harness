@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1`
+  (independent verification of durable Telegram acceptance receipts and
+  phase-completion notification auditability) independently reproduces
+  the predecessor's confirmed defect from immutable pre-repair source,
+  reconstructs the full notification call graph and production diff
+  from primary source, confirms the purpose-built receipt architecture
+  does not bypass the still-dormant Delivery Receipt mechanism, confirms
+  contract/digest compatibility without circularity, and adds a fresh
+  23-test adversarial IV suite (`tests/test_iv_telegram_receipt_fresh.py`)
+  covering pre-attempt ordering (proven by disk reload, not static line
+  order), durability level (atomic tmp+rename, no fsync -- documented
+  precisely, not overclaimed), strict API_ACCEPTED/API_REJECTED/
+  TRANSPORT_FAILED/OUTCOME_UNCERTAIN classification, partial
+  summary/document outcomes, receipt-persistence failure after API
+  acceptance, secret exclusion, dedup/receipt separation, legacy report
+  compatibility, no automatic retry, and receipt non-authority. Verdict:
+  **INDEPENDENTLY VERIFIED**, with one disclosed non-blocking finding
+  (F-1: `notification_result.success`/dedup still derive from raw `ok`,
+  not yet gated on the new strict classification -- a candidate for a
+  future narrow follow-up, not a contradiction of the repair's own
+  scoped claims). F-5 continuation execution remains HOLD pending the
+  separately preserved full-suite triage (40587 passed / 979 failed /
+  117 errors, unchanged); N-16-5 remains NOT CLOSED; N-16-6/N-16-7
+  untouched; runtime remains Observed/observe/unavailable, 0
+  plugins/capabilities.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R`
   (durable Telegram notification acceptance receipts + phase-completion
   notification auditability repair) repairs the observability defect a
