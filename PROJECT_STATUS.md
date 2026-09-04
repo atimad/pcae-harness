@@ -2,24 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1 —
+Independent Verification of the Configured-Agent-Identity Threading Repair
+for HATP Class-B ACL / Trusted-Executable / Ancestor-Chain Verification.
+**STATUS: COMPLETE. CONFIGURED-AGENT-IDENTITY THREADING REPAIR: INDEPENDENTLY
+VERIFIED. F-5 CONTINUATION: READY (not begun). N-16-5: NOT CLOSED.**
+
+Independently reconstructed the predecessor repair's production diff
+(bounded to one file, one new function), the full production consumer
+inventory of `_current_agent_identity` (3 call sites, all correctly
+classified `LIVE_PROCESS_SUBJECT`), and the already-correct production
+boundary in `hpac_protected_admin_writer.py` that threads
+`resolve_configured_agent_identity()`'s protected-record-derived
+`(uid, gids)` — never `os.geteuid()`, never CLI/env-controlled — into
+`_effective_write_access`/`_ancestor_chain_safe`. Independently reproduced
+the historical defect (ambient root-like identity poisoning the ACL-tool
+trust decision) and proved the repair's fix (the repaired path resolves
+deterministically against the real subject, immune to ambient poisoning,
+while genuine configured-agent write authority via owner/group/other/ACL
+is still detected) from primary source, not predecessor prose. Fresh
+41-case independent IV suite (38 passed, 3 environment-conditional skips);
+zero attributable regressions (37 + 2 pre-existing failures reproduced
+byte-identical against a disposable fixed-SHA baseline worktree at the
+repair-entry commit). Host generation-1 state inspected read-only
+(protected root confirmed root-owned, mode 700); no mutation, no F-5
+retry, no PPA action, no human/YubiKey ceremony performed. Canonical
+report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1_INDEPENDENT_VERIFICATION_CONFIGURED_AGENT_IDENTITY_THREADING_REPAIR.md`.
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R — Configured-
 Agent-Identity Threading Repair for `hatp_class_b_topology_verifier.py`'s ACL
-Ancestor-Chain Trust Check. **STATUS: IMPLEMENTED — FRESH INDEPENDENT
-VERIFICATION REQUIRED.** Repaired the defect the predecessor phase discovered:
-`_acl_grants_agent_write_linux`/`_acl_grants_agent_write_macos` already
-receive the CONFIGURED PCAE agent principal's resolved `(uid, gids)` from
-their caller, but resolved their own ACL-inspection tool (`getfacl`/`ls`) via
-the ambient-identity `_resolve_trusted_executable` instead of that same
-subject — so on the canonical root-owned registration path, root-owned
+Ancestor-Chain Trust Check. **STATUS: IMPLEMENTED — INDEPENDENTLY VERIFIED BY
+THE SUCCEEDING PHASE ABOVE.** Repaired the defect the predecessor phase
+discovered: `_acl_grants_agent_write_linux`/`_acl_grants_agent_write_macos`
+already receive the CONFIGURED PCAE agent principal's resolved `(uid, gids)`
+from their caller, but resolved their own ACL-inspection tool (`getfacl`/
+`ls`) via the ambient-identity `_resolve_trusted_executable` instead of that
+same subject — so on the canonical root-owned registration path, root-owned
 owner-writable system directories misclassified as agent-writable and every
 ancestor's ACL check came back indeterminate. A new sibling primitive,
 `_resolve_trusted_executable_for_subject(name, agent_uid, agent_gids)`, is
 now used instead, with no ambient fallback; the original
 `_resolve_trusted_executable` is left completely untouched (independently
-frozen by two earlier phases' own guard tests). Fresh 30-test suite + zero
-new regressions across the targeted 149O.20J*/topology/ACL/environment-lock
-suite (481 tests) and a broad repo-wide sweep. F-5: OPEN / BLOCKED PENDING
-REPAIR IV. N-16-5: NOT CLOSED. Canonical report:
+frozen by two earlier phases' own guard tests). F-5: OPEN / BLOCKED PENDING
+REPAIR IV (now READY, not begun, per the succeeding phase). N-16-5: NOT
+CLOSED. Canonical report:
 `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_CONFIGURED_AGENT_IDENTITY_THREADING_REPAIR.md`.
 
 ## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1)

@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1`
+  (independent verification of the configured-agent-identity threading
+  repair) independently reconstructs the predecessor repair's diff scope,
+  full production consumer inventory of `_current_agent_identity` (3 call
+  sites, all correctly `LIVE_PROCESS_SUBJECT`), and the already-correct
+  `hpac_protected_admin_writer.py` boundary threading
+  `resolve_configured_agent_identity()`'s protected-record-derived
+  subject (never `os.geteuid()`, never CLI/env-controlled) into
+  `_effective_write_access`/`_ancestor_chain_safe`. Independently
+  reproduces the historical ambient-identity-poisoning defect and proves
+  the repaired path is immune to it while still detecting genuine
+  configured-agent write authority. Fresh 41-case IV suite (38 passed, 3
+  environment-conditional skips); zero attributable regressions (37 + 2
+  pre-existing failures reproduced byte-identical against a fixed-SHA
+  baseline worktree). Host generation-1 state inspected read-only, no
+  mutation. **VERDICT: CONFIGURED-AGENT-IDENTITY THREADING REPAIR:
+  INDEPENDENTLY VERIFIED. F-5 CONTINUATION: READY (not begun). N-16-5:
+  NOT CLOSED.**
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R`
   (configured-agent-identity threading repair) repairs the defect the
   predecessor F-5 retry discovered: `_acl_grants_agent_write_linux`/
