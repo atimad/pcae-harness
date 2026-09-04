@@ -2,6 +2,37 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1 — Independent
+Verification of the F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair.
+**STATUS: BLOCKED. F-6: INDEPENDENTLY VERIFIED REPAIRED. THREE SIBLING
+HISTORICAL-MOVING-AUTHORITY DEFECTS: CONFIRMED. F-5 RETRY: NOT READY. F-5:
+OPEN / ABSENT / UNCHANGED. N-16-5: NOT CLOSED.**
+
+Independent topology confirms the F-6 bounds `90510428..7124c019`, exact four
+commits, and exact ten-file F-4-IV scope. The repaired retained `test_43`
+passes historical/current/future-successor evaluation and still detects a
+forbidden indicator inside its historical interval, without weakening.
+
+The disclosed siblings `test_44`, `test_46`, and `test_56` are each category-B
+historical-moving-authority defects: their names and original F-4-IV lifecycle
+evidence define completed-IV facts, but their Git diffs still run from fixed
+`V4` to implicit live HEAD. They currently pass and a correctly scoped F-5
+retry is not expected to change their selected repository paths, but known
+unsound prerequisite guards prohibit the retry. No sibling was repaired here.
+
+The protected root remains absent and untouched. No administrator, protected
+human, or YubiKey interaction occurred. Production, contracts, dependencies,
+runtime, first effect, N-16-6, and N-16-7 are unchanged. FIDO2 and local
+presentation remain supported-not-exclusive; mobile-only profiles remain open.
+Recommended next, not begun: `.30R.5R.2.1R.1R.2R.1R` narrow F-7 repair of
+exactly tests 44/46/56, then `.1R` fresh IV before any separately authorized
+F-5 retry. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1R_2R_1_F6_IMMUTABLE_HOST_MUTATION_GUARD_IV_BLOCKED.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.2R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R — F-6 Immutable
 F-4-IV Host-Mutation Evidence Guard Repair. **STATUS: COMPLETE. F-6:
 REPAIRED / FRESH IV PENDING. F-5: OPEN / ABSENT / UNCHANGED.

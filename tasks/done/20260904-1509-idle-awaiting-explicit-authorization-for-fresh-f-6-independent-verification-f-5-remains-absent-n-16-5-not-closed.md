@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for fresh F-6 independent verification; F-
 
 ## Status
 
-active
+done
 
 ## Mode
 

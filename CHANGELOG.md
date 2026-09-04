@@ -1,5 +1,12 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1` independently
+  verifies F-6 repaired over immutable `90510428..7124c019`, but is **BLOCKED**
+  before F-5: disclosed F-4-IV tests 44, 46, and 56 each assert a completed-IV
+  fact through implicit live HEAD and are confirmed historical-moving-authority
+  defects. No sibling repair or protected-host mutation occurred. F-5 remains
+  absent/open, retry not ready; N-16-5 remains not closed.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2` is **BLOCKED
   before host mutation**. The mandatory pre-deployment sweep exposed F-6:
   completed F-4-IV `test_43` uses moving `V..HEAD` filenames to prove the
@@ -60,6 +67,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for fresh F-6 independent verification; F-5 remains absent; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1: Independent Verification of the F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R: F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair to Idle: awaiting explicit authorization for fresh F-6 independent verification; F-5 remains absent; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for narrow F-6 immutable host-mutation evidence guard repair; F-5 OPEN; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R: F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.2R F-6 immutable F-4-IV host-mutation evidence guard repair; F-5 OPEN; N-16-5 NOT CLOSED to Idle: awaiting explicit authorization for narrow F-6 immutable host-mutation evidence guard repair; F-5 OPEN; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.

@@ -4727,3 +4727,18 @@ verified in this phase.
   sibling historical-range issues. They currently pass and are not silently
   repaired outside the exact F-6 authorization; fresh F-6 IV must adjudicate
   them before an F-5 retry.
+
+# 2026-09-04 — Independently verify F-6 and block F-5 on three sibling guards
+
+- Decision: independently accept F-6 as repaired using immutable
+  `90510428..7124c019`; retain the repaired test and all sibling tests unchanged.
+- Decision: classify F-4-IV tests 44, 46, and 56 as historical-moving-authority
+  defects because completed-IV facts still use implicit `V4..HEAD`.
+- Consequence: F-5 retry is NOT READY even though correct F-5 repository changes
+  are not expected to trip their selected paths; known prerequisite authority
+  defects must be repaired and freshly verified first.
+- Next scope: one narrow F-7 repair limited to the three adjacent sibling guards,
+  followed by fresh IV; do not combine either with protected deployment.
+- Preserve F-5 absent, N-16-5 not closed, supported-not-exclusive FIDO2/local
+  presentation, and the open mobile-only future profile.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
