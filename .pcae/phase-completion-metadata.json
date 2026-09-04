@@ -10,8 +10,8 @@
   "metadata_consistency": "Report, status, task lifecycle, and this metadata consistently record INDEPENDENTLY VERIFIED, F-5 CONTINUATION READY (not begun), and N-16-5 NOT CLOSED.",
   "internal_evidence_coherence": "Fresh 41-case phase-specific IV suite: 38 passed, 3 skipped (disclosed environment-conditional reasons, e.g. no generation-1 host state readable at content level under this non-privileged uid, or host PATH lacking a given trusted tool). Predecessor repair suite rerun unchanged: 68 passed, 0 failed. Class-B/topology/ACL/environment-lock/conformance regression band (13 files, 578 tests): 541 passed, 37 failed -- all 37 independently reproduced byte-identical (by node id) against a disposable git worktree pinned to the fixed repair-entry SHA (9d04603e), i.e. zero attributable regression; all are stale point-in-time \"zero production consumers\"/\"not in HMIC frozen scope\" guards dating to before the topology module became a real PAWA consumer, unrelated to this repair. PAWA/RHAMP/hpac_verifier/Gate5/Gate9 regression band (13 files, 674 tests): 672 passed, 2 failed -- both independently reproduced byte-identical at the same fixed baseline (hpac_verifier object.__new__ trusted-construction-seal bypass, unrelated to this module).",
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED reports remain immutable and byte-unchanged; only this phase's own canonical report and governance/task/status artifacts are added.",
-  "report_consistency": "Governed push pending; canonical report staged for promotion.",
-  "origin_main_head_count": 5,
+  "report_consistency": "Pushed; canonical report ready for promotion to COMPLETE.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "configured_agent_identity_threading_repair_independently_verified",
   "tests_run": 41,
   "tests_added_or_updated": "41 new tests: 1 fresh phase-specific independent-verification suite file (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1_independent_verification_configured_agent_identity_threading_repair.py); 0 existing test files modified.",
@@ -112,6 +112,6 @@
     }
   ],
   "recommended_next_phase": "Production Protected-Root / Protected-Presentation Registration Continuation Against Existing Generation-1 Deployment State -- a fresh, separately authorized F-5 continuation phase may retry the previously blocked hpac_protected_presentation_admin.py install step against the already-existing generation-1 protected-root/helper state (no reprovisioning). Followed by a separate deployment-state IV before any real approval ceremony, before N-16-5 closure can be adjudicated. Not begun.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "7dd8edd97f3126e522ea482ff15e3448810c1fa1"
 }

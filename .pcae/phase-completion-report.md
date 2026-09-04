@@ -56,4 +56,4 @@ Recommended next, not begun: Production Protected-Root /
 Protected-Presentation Registration Continuation Against Existing
 Generation-1 Deployment State.
 
-Governed push and canonical report promotion pending.
+Pushed to `origin/main`. Canonical report promotion pending.
