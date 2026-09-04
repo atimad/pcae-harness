@@ -10,8 +10,8 @@
   "metadata_consistency": "Status, artifact, decisions, tests, and task handoff consistently record F-4 repaired, F-5 open, no ceremony, and N-16-5 not closed.",
   "internal_evidence_coherence": "Owner plus fresh suite 85/0; focused predecessor/F-3/F-4 group 256/0; broad sweep 1312 passed with three R0-identical historical failures, one skip, and one obsolete F-3 node deselected.",
   "internal_report_coherence": "Historical BLOCKED predecessor remains immutable; successors are recommendations only.",
-  "report_consistency": "Pending governed push and canonical report promotion.",
-  "origin_main_head_count": 2,
+  "report_consistency": "Governed push completed; canonical report promotion pending final reconciliation.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "immutable Git topology and exact historical-range/file-set proof; negative unauthorized-file case; no-test-weakening and fixed-SHA attribution",
   "tests_run": 1576,
   "tests_added_or_updated": "One retained guard repaired and one fresh 43-test suite added; no removal, rename, skip, xfail, wildcard, or fnmatch broadening.",
@@ -43,7 +43,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE omissions; current phase archived/listed",
-    "pcae_push_check": "pending governed push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, ready; dispatch deferred to post-push promotion",
     "notification_status": "pending final post-push promotion"
@@ -72,6 +72,6 @@
     {"hash": "c25dd651e79aae5f6522eed35bdcc1a92184b58d", "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R: close repair task and stage F-4 IV handoff"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.1 — Independent Verification of the F-4 Immutable Historical-Scope Guard Repair. Then separately authorize .1R.1R.2 deployment preparation, .1R.1R.2.1 deployment IV, and .1R.1R.3 final certification; none begun.",
-  "pushed_status": "pending_push",
-  "origin_main_head": "c25dd651e79aae5f6522eed35bdcc1a92184b58d"
+  "pushed_status": "pushed",
+  "origin_main_head": "fb1edc7e1c73937fd937b80ab619f561e83a5b46"
 }
