@@ -118,13 +118,39 @@ def test_pth_comment_line_is_not_executable(tmp_path, monkeypatch):
 def test_pth_ordinary_path_line_still_evaluated_as_path(tmp_path, monkeypatch):
     """Regression guard (item 6): repair must not regress detection of
     an agent-writable path-injection `.pth` file that carries no
-    executable import line at all."""
+    executable import line at all.
+
+    Phase ...1.1R (configured-agent-identity threading repair) note:
+    this scenario deterministically mocks `_effective_write_access`
+    (as its three sibling tests in this file already do) rather than
+    relying on real host ACL-tool-resolution behavior for the
+    fictitious `agent_uid=999999` subject. Before this repair,
+    `_acl_grants_agent_write_macos`/`_linux` resolved their own
+    `ls`/`getfacl` trust via the *ambient* live-process identity
+    instead of the `(agent_uid, agent_gids)` subject actually being
+    evaluated — so on a host where the live process's own PATH
+    happens to contain a user-writable directory ahead of the system
+    tools (e.g. a Homebrew-prefixed `PATH`), tool resolution failed and
+    the ACL check came back indeterminate (`None`), which
+    `_effective_write_access` propagates as "not proven safe" and this
+    check was (accidentally, not by genuine ACL evidence) still
+    satisfied. After the repair, tool resolution is correctly
+    evaluated against the fictitious subject `999999` — who does not
+    own that Homebrew directory — so it resolves the real system tool
+    and correctly finds no ACL grant for uid 999999 on this freshly
+    created file, i.e. `_effective_write_access` now correctly, not
+    accidentally, reports `False`. Mocking `_effective_write_access`
+    directly isolates this test's actual regression concern (item 6:
+    an ordinary path-only `.pth` line is still evaluated, not skipped)
+    from real host ACL/PATH specifics, matching this file's other three
+    `_check_pth_files` scenarios."""
 
     site_dir = tmp_path / "site"
     site_dir.mkdir()
     pth = site_dir / "shadow.pth"
     pth.write_text(str(tmp_path / "shadow"), encoding="utf-8")
     monkeypatch.setattr(env_mod, "_effective_sys_path_dirs", lambda: [site_dir])
+    monkeypatch.setattr(env_mod, "_effective_write_access", lambda *a, **k: (True, "agent_writable", ()))
     result = env_mod._check_pth_files(999999, frozenset())
     assert result.satisfied is False
     assert result.status == "unsafe_pth_file_present"

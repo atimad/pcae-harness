@@ -648,11 +648,33 @@ def test_meta_path_rejects_unexpected_instance_based_finder(monkeypatch):
 
 
 def test_pth_path_injection_is_rejected(tmp_path, monkeypatch):
+    """Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R
+    note: `_effective_write_access` is mocked deterministically here
+    rather than relying on this host's real ACL/PATH state for the
+    fictitious `agent_uid=999999` subject. Before that repair,
+    `_acl_grants_agent_write_macos`/`_linux` resolved their own
+    `ls`/`getfacl` trust via the *ambient* live-process identity
+    instead of the `(agent_uid, agent_gids)` subject actually under
+    test, so on this dev host (a user-writable Homebrew `PATH` entry
+    precedes the system tools) tool resolution failed and the ACL
+    check came back indeterminate (`None`) -- which
+    `_effective_write_access` propagates as "not proven safe", making
+    this assertion pass by accident rather than by genuine ACL
+    evidence. After the repair, tool resolution is correctly evaluated
+    against the fictitious subject `999999` (who does not own that
+    Homebrew directory), so it resolves the real system tool and
+    correctly finds no ACL grant on this freshly created file for uid
+    999999. Mocking `_effective_write_access` directly isolates this
+    test's actual regression concern (an ordinary path-only `.pth`
+    line must still be flagged unsafe when the file is agent-writable)
+    from real host ACL/PATH specifics."""
+
     site_dir = tmp_path / "site"
     site_dir.mkdir()
     pth = site_dir / "evil.pth"
     pth.write_text(str(tmp_path / "shadow"), encoding="utf-8")
     monkeypatch.setattr(env_mod, "_effective_sys_path_dirs", lambda: [site_dir])
+    monkeypatch.setattr(env_mod, "_effective_write_access", lambda *a, **k: (True, "agent_writable", ()))
     result = env_mod._check_pth_files(999999, frozenset())
     assert result.satisfied is False
 

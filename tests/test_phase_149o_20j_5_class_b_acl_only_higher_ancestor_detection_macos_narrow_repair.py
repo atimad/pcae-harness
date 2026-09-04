@@ -394,7 +394,12 @@ def test_unexpected_acl_right_token_fails_closed(tmp_path):
 def test_acl_inspection_tool_unavailable_fails_closed(tmp_path, monkeypatch):
     target = tmp_path / "f"
     target.touch()
-    monkeypatch.setattr(topo, "_resolve_trusted_executable", lambda name: None)
+    # Phase ...1.1R (configured-agent-identity threading repair):
+    # `_acl_grants_agent_write_macos` now resolves its ACL-inspection
+    # tool via `_resolve_trusted_executable_for_subject` (evaluated
+    # against the passed-in agent subject), not the ambient-identity
+    # `_resolve_trusted_executable` — see that function's docstring.
+    monkeypatch.setattr(topo, "_resolve_trusted_executable_for_subject", lambda name, agent_uid, agent_gids: None)
     agent_uid, agent_gids = _agent_identity()
     result = topo._acl_grants_agent_write_macos(target, agent_uid, agent_gids)
     assert result is None

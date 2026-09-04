@@ -186,7 +186,11 @@ def _mode_and_group_write_access(path: Path, agent_uid: int, agent_gids: "frozen
 
 
 def _acl_grants_agent_write_linux(path: Path, agent_uid: int, agent_gids: "frozenset[int]") -> Optional[bool]:
-    tool = _resolve_trusted_executable("getfacl")
+    # Configured-agent-identity threading repair (Phase ...1.1R): the
+    # `getfacl` trust decision must be evaluated against this same
+    # (agent_uid, agent_gids) subject, never the live invoking process
+    # — see `_resolve_trusted_executable_for_subject`'s docstring.
+    tool = _resolve_trusted_executable_for_subject("getfacl", agent_uid, agent_gids)
     if tool is None:
         return None
     try:
@@ -347,7 +351,11 @@ def _acl_grants_agent_write_macos(path: Path, agent_uid: int, agent_gids: "froze
     known-rights vocabulary so an unrecognized right token fails closed
     instead of being silently ignored."""
 
-    ls_tool = _resolve_trusted_executable("ls")
+    # Configured-agent-identity threading repair (Phase ...1.1R): the
+    # `ls` trust decision must be evaluated against this same
+    # (agent_uid, agent_gids) subject, never the live invoking process
+    # — see `_resolve_trusted_executable_for_subject`'s docstring.
+    ls_tool = _resolve_trusted_executable_for_subject("ls", agent_uid, agent_gids)
     if ls_tool is None:
         return None
     try:
@@ -600,6 +608,100 @@ def _resolve_trusted_executable(name: str) -> Optional[Path]:
 
     path_entries = os.environ.get("PATH", "").split(os.pathsep)
     agent_uid, agent_gids = _current_agent_identity()
+    resolved_dir: Optional[Path] = None
+    resolved_target: Optional[Path] = None
+    for entry in path_entries:
+        if not entry:
+            continue
+        candidate_dir = Path(entry)
+        candidate = candidate_dir / name
+        if resolved_target is None:
+            try:
+                if candidate.is_file() and os.access(candidate, os.X_OK):
+                    resolved_target = candidate
+                    resolved_dir = candidate_dir
+                    continue
+            except OSError:
+                continue
+            # Not yet resolved: this directory precedes the eventual
+            # resolution and must be proven non-agent-writable.
+            write = _mode_and_group_write_access(candidate_dir, agent_uid, agent_gids)
+            if write is not False:
+                return None  # agent-writable (or indeterminate) directory precedes resolution -> untrusted
+    if resolved_target is None or resolved_dir is None:
+        return None
+    try:
+        real_target = resolved_target.resolve(strict=True)
+    except OSError:
+        return None
+    if real_target.is_symlink():
+        return None
+    write = _mode_and_group_write_access(real_target, agent_uid, agent_gids)
+    if write is not False:
+        return None
+    write_dir = _mode_and_group_write_access(real_target.parent, agent_uid, agent_gids)
+    if write_dir is not False:
+        return None
+    return real_target
+
+
+def _resolve_trusted_executable_for_subject(
+    name: str, agent_uid: int, agent_gids: "frozenset[int]"
+) -> Optional[Path]:
+    """Configured-agent-identity threading repair (Phase
+    149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R).
+
+    Identical PATH-precedence-aware trusted-tool resolution to
+    `_resolve_trusted_executable` above, but evaluated against an
+    explicit ``(agent_uid, agent_gids)`` subject instead of the live
+    process's ambient `_current_agent_identity()`.
+
+    `_resolve_trusted_executable` is itself independently frozen by
+    Phase 149O.20J.2's own guard
+    (`test_resolve_trusted_executable_base_primitive_unchanged_since_
+    pre_repair`, byte-diff-pickaxed against its pre-repair commit) and
+    by Phase 149O.20J.1's own guard
+    (`test_resolve_trusted_executable_base_primitive_unchanged`,
+    source-content-asserted) as the narrow, ACL-unaware, mode+group-only
+    PATH walk that `_acl_grants_agent_write_linux`/
+    `_acl_grants_agent_write_macos` call to resolve `getfacl`/`ls`
+    without becoming mutually recursive with the ACL check itself. This
+    function is therefore a disclosed sibling — not a modification of
+    that frozen primitive, not a shared-impl refactor of it (which
+    would also perturb its guarded source shape) — carrying the exact
+    same algorithm parameterized instead of ambient, so both guards stay
+    green while the actual defect (below) is repaired.
+
+    THE DEFECT: `_acl_grants_agent_write_linux`/`_acl_grants_agent_write_
+    macos` already receive an explicit `(agent_uid, agent_gids)` subject
+    — the CONFIGURED PCAE agent principal on the production protected-
+    root registration path (never `os.geteuid()`, HPAC-PAWA-REQ-022/
+    F-1). But they previously resolved their own ACL-inspection tool
+    (`getfacl`/`ls`) via the *ambient*-identity `_resolve_trusted_
+    executable`, silently substituting the live invoking process's
+    identity for that one sub-decision. On the canonical root-owned
+    registration path the live process is root (uid 0): root-owned,
+    owner-writable system directories such as `/usr/bin` and `/bin`
+    then misclassify as "agent[=root]-writable", `_resolve_trusted_
+    executable` returns `None` (untrusted) for `ls`/`getfacl`, and every
+    ancestor's ACL check becomes `acl_inspection_unavailable`
+    (indeterminate) — never a silent pass, but also never resolvable,
+    which is what blocked F-5's canonical `root`-executed HPAC-PPA
+    registration attempt. The question the ACL-tool-trust decision must
+    answer is "can the CONFIGURED agent (uid 501-equivalent) tamper with
+    this tool to fool the ACL inspection being performed on its
+    behalf?" — not "can the process currently running the inspection
+    write it?" (root legitimately can, as the trusted deployment owner;
+    that fact carries no bearing on whether the *configured agent* can).
+    This function makes that subject explicit and callers now pass the
+    same subject through end-to-end.
+
+    Missing/mismatched configured identity is never silently
+    substituted here either: this function accepts only whatever
+    `(agent_uid, agent_gids)` its caller already validated (or fails
+    closed itself) — it never falls back to an ambient lookup."""
+
+    path_entries = os.environ.get("PATH", "").split(os.pathsep)
     resolved_dir: Optional[Path] = None
     resolved_target: Optional[Path] = None
     for entry in path_entries:
