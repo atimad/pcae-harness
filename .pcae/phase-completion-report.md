@@ -1,59 +1,62 @@
 # PCAE Phase Completion Report
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1`
-- Status: **COMPLETE — CONFIGURED-AGENT-IDENTITY THREADING REPAIR INDEPENDENTLY VERIFIED**
-- F-5: **OPEN, READY for continuation (not begun)**
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R`
+- Status: **COMPLETE — DURABLE TELEGRAM ACCEPTANCE RECEIPT / PHASE-NOTIFICATION AUDITABILITY REPAIR: IMPLEMENTED — FRESH INDEPENDENT VERIFICATION REQUIRED**
+- F-5: **CONTINUATION EXECUTION: HOLD PENDING POST-COMPLETION FULL-SUITE TRIAGE** (technical repair prerequisite remains READY, not begun)
 - N-16-5: **NOT CLOSED**
 
-Independently verified (verification-only, no production repair performed)
-the predecessor phase's configured-agent-identity threading repair to
-`hatp_class_b_topology_verifier.py`. Independently reconstructed the
-production diff (bounded to that one file, one new function, no `def`
-removed), the full production consumer inventory of
-`_current_agent_identity` (exactly 3 call sites via AST walk, all
-correctly `LIVE_PROCESS_SUBJECT`), and the already-correct
-`hpac_protected_admin_writer.py` boundary that threads
-`hpac_pawa_agent_exclusion.resolve_configured_agent_identity()`'s
-protected-record-derived subject — never `os.geteuid()`, never
-CLI/env-controlled, fails closed on any uid mismatch — into
-`_effective_write_access`/`_ancestor_chain_safe`.
+Repaired the notification-lifecycle observability defect a read-only audit
+of the completed configured-agent-identity IV's Telegram dispatch exposed:
+`TelegramSink.send()` received real Telegram Bot API responses (`ok`,
+`message_id`) but collapsed each into an in-process boolean and discarded
+the rest, leaving no durable post-hoc proof of API acceptance. `.last-
+notified.json` was confirmed dedup-only; the separate `.pcae/delivery-
+receipts/` External Delivery Receipt Model (Phase 134E.7) was confirmed
+not-yet-active lifecycle authority with only synthetic adapters — wiring a
+real Telegram adapter into it is explicitly reserved for a separate,
+not-yet-implemented 134E.10 phase, so this repair instead adds the
+smallest new, purpose-built receipt persistence directly in
+`TelegramSink`.
 
-Independently reproduced the historical ambient-identity-poisoning
-defect from the still-frozen, still-present bare
-`_resolve_trusted_executable`, and independently proved the repaired
-ACL helpers resolve deterministically against their real explicit
-subject even under a poisoned root-like ambient identity, while genuine
-configured-agent write authority (owner/group/other/ACL) is still
-detected.
+Every real Telegram operation now gets a durable `PREPARED` receipt before
+the network call and a final classified receipt afterward
+(`API_ACCEPTED`/`API_REJECTED`/`TRANSPORT_FAILED`/`OUTCOME_UNCERTAIN`),
+atomically written, excluding the bot token/raw URL/chat profile data,
+capturing Telegram's `message_id` when returned. `report.notification_
+result["success"]`'s existing boolean contract is byte-unchanged; a new
+additive `telegram_receipts` key attaches the receipt references.
 
-Fresh 41-case independent IV suite (38 passed, 3 environment-conditional
-skips), written from scratch against primary source, not reusing the
-predecessor's test bodies. Predecessor repair suite rerun unchanged: 68
-passed. Class-B/topology/environment-lock/conformance regression band
-(13 files, 578 tests): 541 passed, 37 failed. PAWA/RHAMP/hpac_verifier/
-Gate5/Gate9 regression band (13 files, 674 tests): 672 passed, 2 failed.
-All 39 failures independently reproduced byte-identical (same node ids)
-against a disposable detached worktree pinned to the fixed
-repair-entry SHA — zero attributable regression; all are stale
-point-in-time consumer-scope guards or an unrelated `hpac_verifier`
-finding, none touching this repair.
+Fresh 41-case suite: 41 passed. Full notification/phase-report/
+finalization consumer sweep (43 files + fresh suite): 1438 passed, 1
+skipped, 2 deselected — both independently reproduced byte-identical
+against a fixed notification-repair phase-entry-SHA baseline worktree.
+Four initially-attributable failures (blunt substring/grep scope-fence
+guards tripped by this repair's own explanatory comment literally naming
+the dormant modules it deliberately did not wire into) were resolved by
+rewording that comment only — zero test files touched besides one new
+autouse isolation fixture in `tests/conftest.py`.
 
-Production diff bounded to exactly `src/pcae/core/hatp_class_b_topology_
-verifier.py`. `docs/contracts/` and `pyproject.toml` byte-unchanged
-since repair entry. Host generation-1 state inspected read-only (root
-ownership + mode 700 confirmed via `stat`); content-level inspection
-correctly returned `Permission denied` for this non-privileged uid; no
-elevated privileges requested; no mutation performed.
+No re-dispatch of the affected historical IV report (`...1.1R.1`) was
+performed; its original Telegram acceptance remains historically
+unchanged and is honestly represented as **NOT INDEPENDENTLY AUDITABLE
+FROM DURABLE PCAE EVIDENCE** — neither confirmed delivered nor confirmed
+failed. No receipt was fabricated for it or its predecessor.
+
+Production diff bounded to `src/pcae/core/notifications.py`,
+`src/pcae/core/phase_reports.py`, and `tests/conftest.py`. `docs/
+contracts/` and `pyproject.toml` byte-unchanged. No host mutation, no F-5
+action, no human/YubiKey ceremony.
+
+The separate post-completion full-repository sweep (40587 passed / 979
+failed / 117 errors), frozen at this same unchanged `src/pcae` state, is
+preserved as separate evidence — not classified, dismissed, or repaired
+by this phase. F-5 continuation execution remains on **HOLD** pending its
+own, separately governed triage.
 
 Runtime remains `not_implemented / Observed / observe / unavailable`,
-zero plugins/capabilities, first effect absent. N-16-6/N-16-7
-untouched.
+zero plugins/capabilities, first effect absent. N-16-6/N-16-7 untouched.
 
-**VERDICT: CONFIGURED-AGENT-IDENTITY THREADING REPAIR: INDEPENDENTLY
-VERIFIED. F-5 CONTINUATION: READY (not begun). N-16-5: NOT CLOSED.**
+Recommended next, not begun: Independent Verification of Durable Telegram
+Acceptance Receipts and Phase-Completion Notification Auditability.
 
-Recommended next, not begun: Production Protected-Root /
-Protected-Presentation Registration Continuation Against Existing
-Generation-1 Deployment State.
-
-Pushed to `origin/main`. Canonical report promotion pending.
+Governed push and canonical report promotion pending.

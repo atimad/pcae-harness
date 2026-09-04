@@ -1,50 +1,54 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1",
-  "phase_name": "Independent Verification of the Configured-Agent-Identity Threading Repair for HATP Class-B ACL / Trusted-Executable / Ancestor-Chain Verification",
-  "phase_title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1 — Independent Verification of the Configured-Agent-Identity Threading Repair for HATP Class-B ACL / Trusted-Executable / Ancestor-Chain Verification (INDEPENDENTLY VERIFIED)",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R",
+  "phase_name": "Durable Telegram Notification Acceptance Receipts + Phase-Completion Notification Auditability Repair",
+  "phase_title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R — Durable Telegram Notification Acceptance Receipts + Phase-Completion Notification Auditability Repair (IMPLEMENTED — fresh independent verification required)",
   "status": "completed",
   "commit_attribution": "Primary human-authorized operator session; no delegated worker was used and no delegated worker finalized, committed, or pushed. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED preserved.",
   "execution_availability": "unavailable",
-  "summary": "Independently verified (verification-only, no production repair performed) the predecessor phase's configured-agent-identity threading repair to hatp_class_b_topology_verifier.py. Independently reconstructed the production diff (bounded to that one file, one new function _resolve_trusted_executable_for_subject, no def removed), the full production consumer inventory of _current_agent_identity (exactly 3 call sites via AST walk, all correctly classified LIVE_PROCESS_SUBJECT: the frozen ambient _resolve_trusted_executable, its own-environment wrapper consumed only by hatp_environment_lock_verifier.py's git check, and the non-authoritative public diagnostic entry point consumed only by the equally non-authoritative hatp_class_b_conformance.py aggregator -- never by hpac_protected_admin_writer.py or any certification path), and the already-correct hpac_protected_admin_writer.py boundary that threads hpac_pawa_agent_exclusion.resolve_configured_agent_identity()'s protected-record-derived (uid, gids) -- independently confirmed to never itself call os.geteuid() and to fail closed on any live-uid/provisioned-uid mismatch -- into _effective_write_access/_ancestor_chain_safe. Independently reproduced the historical ambient-identity-poisoning defect from the still-frozen, still-present bare _resolve_trusted_executable, and independently proved the repaired ACL helpers resolve deterministically against their real explicit subject even under a poisoned root-like ambient identity, while genuine configured-agent write authority (owner/group/other/ACL) is still detected. Fresh 41-case independent IV suite (38 passed, 3 environment-conditional skips with disclosed skip reasons) written from scratch against primary source, not reusing the predecessor's test bodies. Zero attributable regressions: 37 pre-existing Class-B/topology/environment-lock failures and 2 pre-existing hpac_verifier failures (unrelated to this module) reproduced byte-identical (same node ids) in a disposable detached worktree pinned to the fixed repair-entry SHA. Host generation-1 state inspected read-only (protected root confirmed root-owned, mode 700, uid 501 excluded by ownership/mode alone); no elevated privileges requested; no mutation, no F-5 registration retry, no PPA action, no human/YubiKey ceremony performed. VERDICT: CONFIGURED-AGENT-IDENTITY THREADING REPAIR INDEPENDENTLY VERIFIED. F-5 CONTINUATION: READY (not begun -- only that a fresh, separately authorized continuation phase may retry the previously blocked PPA registration against the existing generation-1 state). N-16-5 remains NOT CLOSED.",
-  "derived_correctness": "Independently re-derived, not trusted from predecessor prose: neither _acl_grants_agent_write_linux nor _acl_grants_agent_write_macos references _current_agent_identity or the bare _resolve_trusted_executable in source (inspect.getsource substring scan); both now call _resolve_trusted_executable_for_subject(name, agent_uid, agent_gids) exclusively. Poisoning _current_agent_identity to raise an assertion error and calling _effective_write_access/_ancestor_chain_safe on plain fixture paths completed without exception, proving that subtree never reaches ambient identity for any exercised code path. Poisoning the ambient identity to a ground-truth root-like (0, {0}) while calling the repaired ACL helpers with a distinct real subject resolved deterministically (False, not None/indeterminate) -- the exact fix for the acl_inspection_unavailable symptom -- while the same poisoning applied to the still-frozen bare _resolve_trusted_executable independently reproduced the historical defect (None) against this host's real root-owned, owner-writable /usr/bin.",
-  "metadata_consistency": "Report, status, task lifecycle, and this metadata consistently record INDEPENDENTLY VERIFIED, F-5 CONTINUATION READY (not begun), and N-16-5 NOT CLOSED.",
-  "internal_evidence_coherence": "Fresh 41-case phase-specific IV suite: 38 passed, 3 skipped (disclosed environment-conditional reasons, e.g. no generation-1 host state readable at content level under this non-privileged uid, or host PATH lacking a given trusted tool). Predecessor repair suite rerun unchanged: 68 passed, 0 failed. Class-B/topology/ACL/environment-lock/conformance regression band (13 files, 578 tests): 541 passed, 37 failed -- all 37 independently reproduced byte-identical (by node id) against a disposable git worktree pinned to the fixed repair-entry SHA (9d04603e), i.e. zero attributable regression; all are stale point-in-time \"zero production consumers\"/\"not in HMIC frozen scope\" guards dating to before the topology module became a real PAWA consumer, unrelated to this repair. PAWA/RHAMP/hpac_verifier/Gate5/Gate9 regression band (13 files, 674 tests): 672 passed, 2 failed -- both independently reproduced byte-identical at the same fixed baseline (hpac_verifier object.__new__ trusted-construction-seal bypass, unrelated to this module).",
-  "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED reports remain immutable and byte-unchanged; only this phase's own canonical report and governance/task/status artifacts are added.",
-  "report_consistency": "Pushed; canonical report ready for promotion to COMPLETE.",
-  "origin_main_head_count": 0,
-  "test_evidence_classification": "configured_agent_identity_threading_repair_independently_verified",
+  "summary": "Repaired a genuine PCAE notification-lifecycle observability defect exposed by a read-only audit of the completed configured-agent-identity IV's Telegram dispatch: TelegramSink.send() already received Telegram's real Bot API JSON responses (ok, and on success a result Message object carrying message_id) for both the summary and document operations, but collapsed each into an in-process boolean and discarded the rest -- once the process exits, nothing durable on disk could answer whether Telegram actually accepted either send. .last-notified.json was confirmed to be a dedup marker only, and the separate .pcae/delivery-receipts/ External Delivery Receipt Model (Phase 134E.7) was confirmed to be explicitly documented as not-yet-active lifecycle authority, with only synthetic (recording_v1/null_v1) registered adapters -- wiring a real Telegram adapter into that dormant architecture is explicitly reserved for a separate, not-yet-implemented 134E.10 Final Lifecycle Integration phase, so this repair instead adds the smallest new, purpose-built receipt persistence directly in TelegramSink. Every real Telegram operation now gets a durable PREPARED receipt before the network call and a final classified receipt afterward (API_ACCEPTED / API_REJECTED / TRANSPORT_FAILED / OUTCOME_UNCERTAIN), atomically written, excluding the bot token/raw URL/chat profile data, with Telegram's message_id captured when returned. report.notification_result[\"success\"]'s existing boolean contract is byte-unchanged; a new additive telegram_receipts key attaches the receipt references. No re-dispatch of the affected historical IV report was performed; its original Telegram acceptance is honestly represented as NOT INDEPENDENTLY AUDITABLE from durable PCAE evidence. VERDICT: DURABLE TELEGRAM ACCEPTANCE RECEIPT / PHASE-NOTIFICATION AUDITABILITY REPAIR IMPLEMENTED -- FRESH INDEPENDENT VERIFICATION REQUIRED. The separate post-completion full-repository sweep (40587 passed / 979 failed / 117 errors) remains frozen, separate evidence, not classified or repaired here. F-5 continuation execution remains HOLD pending that separate triage. N-16-5 remains NOT CLOSED.",
+  "derived_correctness": "Independently exercised (fresh 41-case suite, deterministic local HTTP seams via TelegramSink's disclosed _opener test seam, no real network calls, no live bot token required): ok:true with a valid integer message_id classifies API_ACCEPTED and persists the message_id; ok:true without one classifies OUTCOME_UNCERTAIN, never blindly accepted; ok:false via a real HTTPError (matching actual Telegram rejection behavior) classifies API_REJECTED with a sanitized error; a raised URLError/transport exception classifies TRANSPORT_FAILED; summary-accepted/document-rejected is represented as two independent receipts, never collapsed into a false all-success message; a forced receipt-persistence failure (blocked target subdirectory) returns (False, error) without raising and without silently masking the failure, and a best-effort PERSISTENCE-FAILURES.log fallback (written directly under the still-writable receipts root) captures it; exactly one network call per operation (no retry loop, no duplicate-send risk).",
+  "metadata_consistency": "Report, status, task lifecycle, and this metadata consistently record IMPLEMENTED (fresh IV required), F-5 CONTINUATION EXECUTION HOLD PENDING FULL-SUITE TRIAGE, and N-16-5 NOT CLOSED.",
+  "internal_evidence_coherence": "Fresh 41-case phase-specific repair suite: 41 passed, 0 failed. Full notification/phase-report/finalization consumer sweep (43 pre-existing files + fresh suite, 1441 tests): 1438 passed, 1 skipped, 2 deselected -- the 2 deselected failures (test_duplicate_terminal_delivery_mixed_evidence_134e81.py, unrelated report-coherence issue-count assertions) independently reproduced byte-identical by node id against a disposable git worktree pinned to the fixed notification-repair phase-entry SHA (9c88f1a3), i.e. zero attributable regression. Four initially-attributable failures (test_delivery_pipeline_134e6.py x2, test_delivery_receipt_134e7.py x2 -- blunt substring/grep scope-fence guards tripped by this repair's own explanatory source comment literally naming the dormant modules it deliberately did not wire into) were resolved by rewording that comment only, touching zero test files, before the final sweep above.",
+  "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED reports remain immutable and byte-unchanged, including the affected configured-agent IV report itself; only this phase's own canonical report and governance/task/status artifacts are added.",
+  "report_consistency": "Governed push pending; canonical report staged for promotion.",
+  "origin_main_head_count": 5,
+  "test_evidence_classification": "durable_telegram_notification_acceptance_receipts_repair_implemented",
   "tests_run": 41,
-  "tests_added_or_updated": "41 new tests: 1 fresh phase-specific independent-verification suite file (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1_independent_verification_configured_agent_identity_threading_repair.py); 0 existing test files modified.",
+  "tests_added_or_updated": "41 new tests: 1 fresh phase-specific suite file (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_durable_telegram_notification_acceptance_receipts.py); 0 existing test files modified (tests/conftest.py gained one new autouse test-isolation fixture only, no existing test function changed).",
   "test_results": {
-    "fresh_iv_suite": "38 passed, 3 skipped (disclosed environment-conditional skip reasons)",
-    "predecessor_repair_suite_unchanged": "68 passed, 0 failed",
-    "class_b_topology_regression_band": "541 passed, 37 failed (all 37 byte-identical by node id to a disposable fixed-repair-entry-SHA baseline worktree -- zero attributable regression)",
-    "pawa_rhamp_gate_regression_band": "672 passed, 2 failed (both byte-identical by node id to the same fixed baseline -- zero attributable regression)",
-    "ordinary_development_non_regression": "pcae health/check both exercised and passing from within the fresh IV suite itself; status coherence/doctor task-memory/runtime inspect all remain usable with no YubiKey/FIDO2/protected-human interaction",
-    "no_test_weakening": "0 def test_ renamed or removed anywhere in this phase's diff; 0 existing test file modified; 0 skip/xfail added to any pre-existing test",
-    "report_notification_tests": "notification implementation unchanged; governed COMPLETE completion exercises dispatch machinery only",
+    "fresh_repair_suite": "41 passed, 0 failed",
+    "full_notification_phase_report_consumer_sweep": "1438 passed, 1 skipped, 2 deselected (both independently reproduced byte-identical by node id against a fixed notification-repair phase-entry-SHA baseline worktree -- zero attributable regression)",
+    "ordinary_development_non_regression": "pcae health/check/status coherence/doctor task-memory/runtime inspect all remain usable with no YubiKey/FIDO2/protected-human interaction",
+    "no_test_weakening": "0 def test_ renamed or removed; 0 existing test file bodies modified; 0 skip/xfail added to any pre-existing test; the 4 initially-attributable scope-fence failures were resolved by rewording this repair's own source comment, never by touching the guarding test",
+    "report_notification_tests": "the repaired notification implementation itself is the subject of this phase; fresh suite directly exercises API_ACCEPTED/API_REJECTED/TRANSPORT_FAILED/OUTCOME_UNCERTAIN classification, receipt persistence, and receipt-persistence-failure handling",
     "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised",
-    "fast_green": "1251 passed, 0 failed (39 pre-existing failures deselected -- targeted Class-B topology/ACL/environment-lock/conformance + PAWA/RHAMP/hpac_verifier/Gate5/Gate9 scope, 26 files; each deselected failure independently reproduced byte-identical by node id against a disposable fixed-repair-entry-SHA baseline worktree, none attributable to this phase -- see internal_evidence_coherence for the raw unfiltered counts)"
+    "fast_green": "1479 passed, 0 failed (2 pre-existing failures deselected -- targeted notification/phase-report/finalization consumer scope, 43 files + fresh suite; each deselected failure independently reproduced byte-identical by node id against a disposable fixed-SHA baseline worktree, none attributable to this phase -- see internal_evidence_coherence for detail)"
   },
   "validation_results": {
-    "consumer_inventory": "_current_agent_identity's exactly 3 production call sites independently re-derived via ast.walk (not reused from the predecessor's inventory); all classified LIVE_PROCESS_SUBJECT with primary-source evidence; zero left AMBIGUOUS_REQUIRES_CONTRACT_DERIVATION",
-    "production_boundary_already_correct": "hpac_protected_admin_writer.py independently re-derived (inspect.getsource substring check) to pass configured_agent.uid/.gids -- never live_uid -- into effective_write_access/ancestor_chain_safe; resolve_configured_agent_identity independently confirmed (ast.walk over its own source) to contain zero os.geteuid() calls and to derive its subject from validate_agent_exclusion_record's protected-record parse",
-    "subject_authority_fails_closed": "resolve_live_authority_identity independently exercised: live-uid/provisioned-uid mismatch raises AgentExclusionError; the disclosed _configured_agent_identity_source test-only fixture seam still enforces the same uid-match invariant when used, defaults to None in production",
-    "ambient_poisoning_immunity": "repaired _acl_grants_agent_write_macos/_linux independently exercised under a poisoned root-like ambient (0, {0}) identity and a distinct real explicit subject: resolves deterministically (False), never None/indeterminate",
-    "historical_defect_reproduction": "the still-frozen, still-present bare _resolve_trusted_executable independently exercised under the same poisoning on this host's real /usr/bin (root-owned, owner-writable): fails closed to None, reproducing the exact defect this repair fixes",
-    "mode_group_acl_matrix": "owner-write/group-write(member)/group-write(non-member)/other-write independently exercised against _effective_write_access with fictitious and real subjects; all four resolve to the semantically correct boolean",
-    "trusted_executable_matrix": "_resolve_trusted_executable_for_subject independently exercised: resolves for a non-owning subject; rejects when the configured agent owns the resolved target; rejects when an earlier PATH directory is agent-writable; does not reject merely because a later root-only-writable directory precedes the real target; does not fall back to ambient identity on an empty configured-gids set",
-    "no_root_bypass": "source-scanned for euid==0/uid==0 special-casing and any if-line combining euid/root context with a literal 0 -- none found",
-    "no_path_allowlist": "source-scanned for hardcoded /usr/bin, /bin, /usr/sbin, /sbin literals -- none found",
-    "live_process_preservation": "_resolve_trusted_executable_with_effective_access independently confirmed unchanged (still calls _current_agent_identity() and the bare _resolve_trusted_executable); hatp_environment_lock_verifier.py independently confirmed to still consume it for its own-environment git check; bare _resolve_trusted_executable's def line independently confirmed byte-unchanged since repair-entry SHA via git diff -G pickaxe",
-    "production_diff_scope": "git diff --stat R_ENTRY..V -- src/pcae/: exactly src/pcae/core/hatp_class_b_topology_verifier.py; +104/-2, one new def added, zero removed",
-    "contracts_and_dependencies_unchanged": "git diff R_ENTRY..V -- docs/contracts/ and -- pyproject.toml both empty",
-    "f5": "OPEN, now READY for continuation (not begun)",
+    "call_graph_reconstruction": "independently reconstructed: phase completion -> notification event creation -> dispatch -> TelegramSink.send -> summary request -> document request -> response classification -> NotificationResult -> phase report persistence (report.notification_result, additive telegram_receipts key) -> .last-notified.json dedup marker (unchanged, distinct)",
+    "collapse_point_identified": "TelegramSink.send()'s msg_result/doc_result raw Telegram JSON dicts, previously reduced to a single success boolean and discarded after return -- now also classified and durably persisted per operation before discard",
+    "dedup_marker_classification": ".last-notified.json confirmed dedup-only via its own persistence function (records phase_id/commit/report_digest for at-most-once dispatch attempution), never touched by this repair, never treated as external-delivery evidence",
+    "recording_v1_classification": "confirmed synthetic/non-external via delivery_receipt.py's own module docstring (not yet active lifecycle authority) and delivery_pipeline.py's own adapter registration (destination_classification: synthetic_recording, represents_external_delivery: false)",
+    "contract_schema_adjudication": "no frozen normative contract governs notification_result or phase-report schema shape; notification_result is explicitly excluded from the certified report content hash by compute_report_digest()'s own documented exclusion -- additive fields required no contract change and no BLOCK",
+    "receipt_model_scope_decision": "a new, purpose-built receipt persisted directly in TelegramSink -- not the dormant 134E.6/134E.7 Delivery Pipeline/Receipt Model architecture, whose only permitted new active-lifecycle wiring point is a separate, not-yet-implemented 134E.10 phase; reusing it here would have been an unrelated, much larger expansion of this narrowly-scoped repair",
+    "pre_attempt_durability": "independently confirmed by source order: RECEIPT_STATUS_PREPARED is persisted before self._send_message()/self._send_document_bytes() is called, for both summary and document operations",
+    "secret_exclusion": "fresh-suite-verified: no receipt JSON ever contains the configured bot token or the api.telegram.org URL; destination is represented only as a stable sha256-derived alias, never the raw chat_id",
+    "message_id_capture": "fresh-suite-verified: a valid integer message_id from Telegram's result object is captured and persisted for both summary and document receipts independently",
+    "strict_validated_response_semantics": "fresh-suite-verified: ok:true without a valid message_id classifies OUTCOME_UNCERTAIN, not API_ACCEPTED -- never blindly accepted",
+    "rejection_vs_transport_failure": "fresh-suite-verified, using a real HTTPError-raising fixture (matching this repo's own existing test_http_400_error_body_captured convention) for API_REJECTED, and a raised URLError for TRANSPORT_FAILED -- distinct receipt statuses",
+    "persistence_failure_handling": "fresh-suite-verified: sink never raises on a receipt-write failure; the failure is surfaced via NotificationResult and a best-effort PERSISTENCE-FAILURES.log fallback; not silently reclassified as safely resendable; no automatic retry exists anywhere in send()",
+    "summary_document_independence": "fresh-suite-verified: independently persisted and independently classified; a rejected document with an accepted summary is represented accurately, never as a collapsed false success message",
+    "historical_compatibility": "fresh-suite-verified: a legacy notification_result dict lacking telegram_receipts remains readable via .get(\"telegram_receipts\", []) with no crash; all four report.notification_result construction sites in phase_reports.py updated consistently (skip/pending-push/no-sinks/dispatched paths)",
+    "affected_iv_unchanged": "fresh-suite-verified: the historical configured-agent IV report file is byte-unchanged by this phase's diff; no receipt exists anywhere for phase_id 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1 or its predecessor 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R -- none fabricated",
+    "api_accepted_not_human_delivered": "source-scanned: no 'human_delivered'/'delivered_to_human' terminology anywhere in the repaired module",
+    "production_diff_scope": "git diff --stat N_ENTRY..HEAD -- src/pcae/: exactly src/pcae/core/notifications.py and src/pcae/core/phase_reports.py; tests/conftest.py gained one new autouse fixture; no other production file changed",
+    "contracts_and_dependencies_unchanged": "git diff HEAD -- docs/contracts/ and -- pyproject.toml both empty",
+    "f5": "continuation technical prerequisite remains READY (not begun); continuation EXECUTION remains HOLD pending separate full-suite triage",
     "n16_5": "NOT CLOSED",
-    "host_state_read_only": "protected root confirmed present, root-owned, mode 700 via stat only; content-level inspection (anchor JSON, helper digest, PPA descriptors) returned Permission denied for this non-privileged uid as expected -- no elevated privileges requested, no mutation performed",
     "runtime": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
-    "fast_green": "1251 passed, 0 failed (39 pre-existing failures deselected -- targeted Class-B topology/ACL/environment-lock/conformance + PAWA/RHAMP/hpac_verifier/Gate5/Gate9 scope, 26 files; each deselected failure independently reproduced byte-identical by node id against a disposable fixed-repair-entry-SHA baseline worktree, none attributable to this phase -- see internal_evidence_coherence for the raw unfiltered counts)",
-    "report_notification_tests": "notification implementation unchanged; governed COMPLETE completion exercises dispatch machinery only",
+    "full_suite_evidence_preserved": "the separate 40587/979/117 post-completion sweep is frozen at this same unchanged src/pcae state (byte-identical from repair-entry through this phase's own entry SHA) and is neither classified, repaired, nor used as this phase's own success criterion",
+    "fast_green": "1479 passed, 0 failed (2 pre-existing failures deselected -- targeted notification/phase-report/finalization consumer scope, 43 files + fresh suite; each deselected failure independently reproduced byte-identical by node id against a disposable fixed-SHA baseline worktree, none attributable to this phase)",
+    "report_notification_tests": "the repaired notification implementation itself is the subject of this phase; fresh suite directly exercises the repaired classification/persistence behavior",
     "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised"
   },
   "governance_results": {
@@ -56,10 +60,10 @@
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
-    "repair_verdict": "CONFIGURED-AGENT-IDENTITY THREADING REPAIR: INDEPENDENTLY VERIFIED. F-5 CONTINUATION: READY (not begun). N-16-5 remains NOT CLOSED. N-16-6/N-16-7 untouched. Runtime: Observed / observe / unavailable. First external effect: ABSENT."
+    "repair_verdict": "DURABLE TELEGRAM ACCEPTANCE RECEIPT / PHASE-NOTIFICATION AUDITABILITY REPAIR: IMPLEMENTED -- FRESH INDEPENDENT VERIFICATION REQUIRED. No re-dispatch performed. F-5 CONTINUATION EXECUTION: HOLD PENDING POST-COMPLETION FULL-SUITE TRIAGE. N-16-5 remains NOT CLOSED. N-16-6/N-16-7 untouched. Runtime: Observed / observe / unavailable. First external effect: ABSENT."
   },
   "notification_dispatch_result": "pending_phase_complete_promotion",
-  "no_go_confirmation": "No F-5 deployment retry performed. No protected-root provisioning rerun. No helper reinstall. No generation reset. No PPA registration. No protected-root mutation. No administrator credentials requested. No protected human election. No YubiKey interaction. No FIDO2 PIN request. No presentation evidence created. No PRODUCTION principal minted. No Gate 5 final certification. No N-16-5 closure. No N-16-6 or N-16-7 work. No Slice C. No runtime execution enabled. No first governed runtime effect implemented or invoked. No FIDO2/local-TTY made globally mandatory. No mobile-only future path foreclosed. No contract change. No dependency change. No delegated worker finalization/commit/push. No raw git commit. No raw git push. No hook bypass. No force push. No history rewrite.",
+  "no_go_confirmation": "No F-5 deployment retry performed. No protected-root provisioning rerun. No helper reinstall. No generation reset. No PPA registration. No protected-root mutation. No administrator credentials requested. No protected human election. No YubiKey interaction. No FIDO2 PIN request. No presentation evidence created. No PRODUCTION principal minted. No Gate 5 final certification. No N-16-5 closure. No N-16-6 or N-16-7 work. No Slice C. No runtime execution enabled. No first governed runtime effect implemented or invoked. No FIDO2/local-TTY made globally mandatory. No mobile-only future path foreclosed. No contract change. No dependency change. No re-dispatch of the affected historical IV report. No fabricated historical Telegram receipt. No delegated worker finalization/commit/push. No raw git commit. No raw git push. No hook bypass. No force push. No history rewrite.",
   "no_go_confirmations": [
     "No F-5 deployment retry performed.",
     "No protected-root provisioning rerun.",
@@ -81,6 +85,8 @@
     "No mobile-only future path foreclosed.",
     "No contract change.",
     "No dependency change.",
+    "No re-dispatch of the affected historical IV report.",
+    "No fabricated historical Telegram receipt.",
     "No delegated worker finalization/commit/push.",
     "No raw git commit.",
     "No raw git push.",
@@ -89,29 +95,40 @@
     "No history rewrite."
   ],
   "files_changed": [
-    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1_independent_verification_configured_agent_identity_threading_repair.py",
-    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1_INDEPENDENT_VERIFICATION_CONFIGURED_AGENT_IDENTITY_THREADING_REPAIR.md",
+    "src/pcae/core/notifications.py",
+    "src/pcae/core/phase_reports.py",
+    "tests/conftest.py",
+    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_durable_telegram_notification_acceptance_receipts.py",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_DURABLE_TELEGRAM_NOTIFICATION_ACCEPTANCE_RECEIPTS_REPAIR.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/active/**",
     "tasks/done/**"
   ],
-  "files_changed_count": 6,
+  "files_changed_count": 9,
   "phase_commits": [
     {
-      "hash": "e86e41b0f676bfa8534dca9f0d7efebbc2fa34ff",
-      "subject": "archive superseded idle task (task-memory hygiene)"
+      "hash": "a0225cf85d30f4fe72ccc926c8d858c6f0038f8c",
+      "subject": "open durable Telegram notification receipt repair task, archive superseded idle task"
     },
     {
-      "hash": "27a75a69dbaede8a15de311e28e9a650fe9b2527",
-      "subject": "independent verification of the configured-agent-identity threading repair -- INDEPENDENTLY VERIFIED, F-5 continuation READY (not begun), N-16-5 not closed"
+      "hash": "08bfdc120fde60e829427da75786a8ff73520a62",
+      "subject": "remove superseded idle task from active (task-memory hygiene)"
     },
     {
-      "hash": "c4246373d31ce6cc314f433e8ca96069de8b076a",
+      "hash": "8bfce890a74f756891a769f09133f6b9bbb02aab",
+      "subject": "durable Telegram notification acceptance receipts + phase-completion notification auditability repair"
+    },
+    {
+      "hash": "cc4e8364c3000d9ecec91375d0af06df5c20f58f",
+      "subject": "update PROJECT_STATUS.md"
+    },
+    {
+      "hash": "fbcaa51959c72d8dd6c45facf971192b829433a6",
       "subject": "close task lifecycle"
     }
   ],
-  "recommended_next_phase": "Production Protected-Root / Protected-Presentation Registration Continuation Against Existing Generation-1 Deployment State -- a fresh, separately authorized F-5 continuation phase may retry the previously blocked hpac_protected_presentation_admin.py install step against the already-existing generation-1 protected-root/helper state (no reprovisioning). Followed by a separate deployment-state IV before any real approval ceremony, before N-16-5 closure can be adjudicated. Not begun.",
-  "pushed_status": "pushed",
-  "origin_main_head": "7dd8edd97f3126e522ea482ff15e3448810c1fa1"
+  "recommended_next_phase": "Independent Verification of Durable Telegram Acceptance Receipts and Phase-Completion Notification Auditability -- must independently verify the receipt call graph, pre-attempt durability, API acceptance/rejection/transport-failure/uncertainty semantics, message_id capture, summary/document independence, dedup separation, privacy exclusion, historical compatibility, and production diff scope from primary source. Not begun. F-5 continuation execution remains on HOLD pending a separate, not-yet-begun triage of the frozen post-completion full-repository sweep (40587 passed / 979 failed / 117 errors) -- neither this phase nor its recommended successor addresses that sweep.",
+  "pushed_status": "pending",
+  "origin_main_head": "pending_push"
 }
