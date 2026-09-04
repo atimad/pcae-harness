@@ -83,6 +83,7 @@
 
 ## Completed
 
+- Idle: awaiting explicit authorization for fresh F-3 IV and final N-16-5 certification; N-16-5 NOT CLOSED (20260904-0058-idle-awaiting-explicit-authorization-for-fresh-f-3-iv-and-final-n-16-5-certification-n-16-5-not-closed)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry Evidence Repair (20260904-0050-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-f-3-immutable-phase-entry-evidence-repair)
 - Idle: awaiting explicit authorization for the narrow F-3 phase-entry evidence repair; N-16-5 NOT CLOSED (20260903-2143-idle-awaiting-explicit-authorization-for-the-narrow-f-3-phase-entry-evidence-repair-n-16-5-not-closed)
 - Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R narrow F-3 repair; N-16-5 NOT CLOSED (20260903-2139-idle-awaiting-explicit-authorization-for-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-narrow-f-3-repair-n-16-5-not-closed)

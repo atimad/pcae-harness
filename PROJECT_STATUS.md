@@ -2,6 +2,38 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1 — Independent Verification
+of the F-3 Repair + Final Real Protected-Presentation Human Election and
+Presentation-Bound N-16-5 Certification. **STATUS: BLOCKED. F-3:
+INDEPENDENTLY VERIFIED REPAIRED. FINDINGS F-4/F-5: BLOCKING. REAL CEREMONY:
+NOT STARTED. N-16-5: NOT CLOSED.**
+
+F-3's immutable topology proof independently verifies (`a85abff6^ ==
+0250e5f7`); predecessor/repair suites are 116/0 and the fresh suite is 55/0.
+The mandatory historical guard sweep exposed F-4: `.30R.4R` `test_35` still
+compares its historical source scope to live `HEAD` and rejects the later,
+authorized CTAP2 repair. The node fails at finalized `.30R.5R.2`, finalized
+F-3 repair, and current state. F-5: the platform-fixed production HPAC root
+`/Library/Application Support/PCAE/HPAC/protected-root` is absent, so no
+current production helper generation can be validated or launched.
+
+Verification-only scope prohibits either repair. No terminal decision,
+YubiKey interaction, presentation evidence, fresh assertion, PRODUCTION
+principal, or Gate 5 certification occurred. H-1 historical hardware proof and
+H-2/F-2 software IV remain preserved. Runtime remains
+`not_implemented / Observed / observe / unavailable`, zero plugins/capabilities,
+first effect absent; N-16-6/N-16-7 untouched. FIDO2 and local presentation
+remain supported-not-exclusive; mobile-only profiles remain open.
+
+Recommended next, not begun: a narrow immutable-history repair for F-4,
+followed by separately governed production protected-root/helper deployment
+preparation and a fresh final certification retry. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1_F3_IV_AND_FINAL_N_16_5_CERTIFICATION.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry
 Evidence Repair. **STATUS: COMPLETE. F-3: REPAIRED. H-2/F-2 SOFTWARE IV:
 PRESERVED. REAL CEREMONY: NOT STARTED. N-16-5: NOT CLOSED.**

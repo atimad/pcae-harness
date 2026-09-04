@@ -1,5 +1,13 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1` independently verifies
+  F-3 repaired, but is **BLOCKED; N-16-5 NOT CLOSED** before the real ceremony.
+  F-4: a `.30R.4R` historical scope guard still compares to live `HEAD` and
+  rejects the later authorized CTAP2 repair. F-5: the fixed production HPAC
+  root is absent, so no current production protected-helper generation exists.
+  No production/contract/dependency repair, terminal election, or YubiKey
+  interaction occurred. Runtime/effect and mechanism-flexibility walls remain.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R` repairs F-3 narrowly.
   The `.30R.5R.2` phase-entry test now establishes immutable topology
   `a85abff6^ == 0250e5f7` instead of comparing moving live `HEAD` with the
@@ -27,6 +35,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for fresh F-3 IV and final N-16-5 certification; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1 — Independent Verification of the F-3 Repair + Final Real Protected-Presentation Human Election + Presentation-Bound N-16-5 Certification and Closure; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry Evidence Repair to Idle: awaiting explicit authorization for fresh F-3 IV and final N-16-5 certification; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for the narrow F-3 phase-entry evidence repair; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry Evidence Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R narrow F-3 repair; N-16-5 NOT CLOSED to Idle: awaiting explicit authorization for the narrow F-3 phase-entry evidence repair; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.

@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for fresh F-3 IV and final N-16-5 certific
 
 ## Status
 
-active
+done
 
 ## Mode
 

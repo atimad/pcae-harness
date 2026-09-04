@@ -4654,3 +4654,14 @@ scope limited to that one method plus the 2 failing IV tests; does not
 reopen the registration/counter/getAssertion surfaces already cleanly
 verified in this phase.
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+## 2026-09-04 — Phase .30R.5R.2.1R.1 blocked before the real ceremony
+
+- F-3 is independently verified repaired by exact immutable Git topology.
+- Classify the live-HEAD `.30R.4R` source-scope guard as blocking finding F-4;
+  verification-only scope prohibits repairing it here.
+- Classify the absent fixed production HPAC root/current helper installation as
+  blocking finding F-5; no fixture authority can substitute for final
+  production certification.
+- Do not start the protected terminal or YubiKey ceremony and do not close
+  N-16-5 while F-4/F-5 remain.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**

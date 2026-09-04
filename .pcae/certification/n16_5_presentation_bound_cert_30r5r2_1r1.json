@@ -1,0 +1,62 @@
+{
+  "schema": "PCAE-N16-5-PRESENTATION-BOUND-CERTIFICATION/1.0",
+  "phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1",
+  "recorded_at": "2026-09-04T07:37:05Z",
+  "verdict": "BLOCKED",
+  "n16_5": "NOT_CLOSED",
+  "anchors": {
+    "repair_phase_a": "361114d648dea432aa3ef92ecd7e24e748a173aa",
+    "blocked_iv_b": "57edf6a93f8b4f01ee95d4b74ceddcaea96f53b3",
+    "f3_repair_r": "00c077f6ff3389a8c91d503fb5341ec72775f8e0",
+    "verification_entry_v": "00c077f6ff3389a8c91d503fb5341ec72775f8e0",
+    "historical_phase_entry_e": "0250e5f79340b659f4c34ce391656d8f7219ccc3",
+    "repair_implementation": "a85abff66b5a07f9d83b873d625aea7b1c65b19d"
+  },
+  "software_verification": {
+    "f3_immutable_evidence_repair": "INDEPENDENTLY_VERIFIED_REPAIRED",
+    "h2_interactive_election": "SOFTWARE_IV_PRESERVED",
+    "f2_portable_helper": "SOFTWARE_IV_PRESERVED",
+    "fresh_suite": {"passed": 55, "failed": 0},
+    "predecessor_and_f3_suites": {"passed": 116, "failed": 0},
+    "broad_pre_ceremony_sweep": {"passed": 933, "failed": 1, "deselected": 1},
+    "historical_guard_sweep": {"passed": 269, "failed": 1}
+  },
+  "blocking_findings": [
+    {
+      "id": "F-4",
+      "summary": "A .30R.4R historical production-scope guard compares its fixed baseline to live HEAD and rejects the later authorized CTAP2 repair.",
+      "test": "test_35_no_production_or_script_implementation_changed"
+    },
+    {
+      "id": "F-5",
+      "summary": "The fixed macOS production HPAC root is absent, so no current production protected-helper generation exists to validate or launch.",
+      "path": "/Library/Application Support/PCAE/HPAC/protected-root"
+    }
+  ],
+  "real_ceremony": {
+    "started": false,
+    "trusted_human_election_used": false,
+    "explicit_approve_occurred": false,
+    "presentation_evidence_created": false,
+    "fresh_fido2_assertion_performed": false,
+    "production_principal_created": false,
+    "gate5_consumed": false,
+    "test_seam_used": false
+  },
+  "boundaries": {
+    "runtime": "not_implemented",
+    "mode": "Observed",
+    "policy": "observe",
+    "effect_availability": "unavailable",
+    "plugins": 0,
+    "capabilities": 0,
+    "first_external_runtime_effect": "ABSENT_UNREACHABLE",
+    "n16_6": "OPEN_UNTOUCHED",
+    "n16_7": "OPEN_UNTOUCHED"
+  },
+  "profiles": {
+    "hpac.fido2.uv_presence.v2": "REAL_HARDWARE_VERIFIED_SUPPORTED_NOT_EXCLUSIVE",
+    "pcae-protected-local-presentation/1.0": "SUPPORTED_PENDING_REAL_HUMAN_CERTIFICATION_NOT_EXCLUSIVE",
+    "future_mobile_only_profile": "OPEN_PLANNED"
+  }
+}
