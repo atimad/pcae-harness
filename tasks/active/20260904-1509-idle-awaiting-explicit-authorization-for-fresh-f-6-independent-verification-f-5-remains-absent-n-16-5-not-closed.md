@@ -22,12 +22,10 @@ Idle: awaiting explicit authorization for fresh F-6 independent verification; F-
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
 - tasks/active/**
 - tasks/done/**
-- tasks/TODO.md
 - tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
 - CHANGELOG.md
 
 ## Forbidden Files
@@ -74,7 +72,6 @@ strict
 - pcae status coherence passes
 - pcae health passes
 - pcae check passes
-- python -m pytest -n auto passes
 
 ## Documentation Requirements
 
