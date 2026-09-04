@@ -85,7 +85,11 @@
     "tasks/done/20260904-1805-idle-awaiting-explicit-authorization-for-independent-verification-of-f-9-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-f-5-retry-pending-fresh-f-9-iv-n-16-5-not-closed.md"
   ],
   "files_changed_count": 7,
-  "phase_commits": [],
+  "phase_commits": [
+    {"hash": "6c48c5f2d09548ae5d68edf3d4d80897f654350b", "subject": "Independent Verification of the F-9 Immutable F-7-Repair-Suite Deployment-Evidence Guard Repair + Final N-16-5 Moving-History Clearance + F-5 Retry Readiness Adjudication"},
+    {"hash": "cb58545d27ff42e2fb678826ab89abb7660accb4", "subject": "add task contract"},
+    {"hash": "b070d7dc", "subject": "close task lifecycle"}
+  ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1 -- Production Protected-Root / Protected-Presentation Helper Deployment Preparation Retry. F-5 RETRY: READY. Not begun.",
   "pushed_status": "pending",
   "origin_main_head": 0
