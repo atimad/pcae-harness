@@ -1,5 +1,13 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.1`
+  independently verifies the F-4 immutable historical-scope repair. Primary
+  Git topology proves `.30R.4R.1` is exactly `a727dbf4..5b6b4013`; the retained
+  guard remains exact and detects unauthorized historical scope while ignoring
+  later legitimate descendants. F-5 stays absent/open and untouched; N-16-5
+  remains not closed. No production, contract, dependency, helper-deployment,
+  human-election, hardware, runtime, or effect change occurred.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R` repairs F-4 by
   replacing the `.30R.4R.1` historical source-scope guard's moving live-HEAD
   upper bound with immutable finalized phase range `a727dbf4..5b6b4013`.
@@ -42,6 +50,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for fresh F-4 independent verification; F-5 OPEN; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.1 — Independent Verification of the F-4 Immutable Historical-Scope Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R — F-4 Immutable Historical-Scope Guard Repair to Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.1 F-4 independent verification; F-5 OPEN; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for F-4 immutable historical guard repair and production protected-helper deployment preparation; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R — F-4 Immutable Historical-Scope Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1 — Independent Verification of the F-3 Repair + Final Real Protected-Presentation Human Election + Presentation-Bound N-16-5 Certification and Closure to Idle: awaiting explicit authorization for F-4 immutable historical guard repair and production protected-helper deployment preparation; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.

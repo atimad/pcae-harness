@@ -4680,3 +4680,21 @@ verified in this phase.
 - Preserve supported-not-exclusive FIDO2/local-presentation profiles and open
   mobile-only future architecture.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
+## 2026-09-04 — Phase .30R.5R.2.1R.1R.1 F-4 repair independent verification
+
+- Accept the exact CPIPC-valid `.30R.5R.2.1R.1R.1` verification successor.
+- Independently derive `a727dbf4..5b6b4013` as the five-commit historical
+  `.30R.4R.1` interval from parent topology and immutable completion metadata.
+- Adjudicate F-4 **INDEPENDENTLY VERIFIED REPAIRED**: the unchanged exact
+  eight-file subset guard passes historical/current/future-descendant
+  evaluation and still rejects injected unauthorized historical scope.
+- Attribute the broad sweep's three failures as pre-existing because every
+  exact node reproduces identically in an isolated worktree at `P=3fbc12d7`.
+- Keep F-5 absent/open and wholly untouched; do not deploy, perform ceremony,
+  or close N-16-5.
+- Preserve the separately authorized sequence: `.1R.1R.2` deployment
+  preparation, `.1R.1R.2.1` deployment IV, `.1R.1R.3` final certification.
+- Preserve supported-not-exclusive FIDO2/local presentation and the open
+  mechanism-neutral mobile-only future profile.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**

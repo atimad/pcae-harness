@@ -2,30 +2,36 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R — F-4 Immutable
-Historical-Scope Guard Repair. **STATUS: COMPLETE. F-4: REPAIRED; FRESH IV
-PENDING. F-5: OPEN / UNCHANGED. N-16-5: NOT CLOSED.**
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.1 — Independent
+Verification of the F-4 Immutable Historical-Scope Guard Repair. **STATUS:
+COMPLETE. F-4: INDEPENDENTLY VERIFIED REPAIRED. F-5: OPEN / UNCHANGED.
+N-16-5: NOT CLOSED.**
 
-CPIPC validates the exact repair-successor ID. The retained `.30R.4R`
-`test_35` now checks the immutable historical implementation interval
-`a727dbf4..5b6b4013`, not `a727dbf4..HEAD`; the exact eight-file allowlist and
-test identity remain unchanged. Owner + fresh repair suites are 85/0, and the
-predecessor/F-3/current repair group is 214/0. Three broad-sweep historical
-failures reproduce identically at phase-entry R0 and are not repair-attributable.
+Primary Git evidence independently establishes `a727dbf4..5b6b4013` as the
+five-commit `.30R.4R.1` interval: the first phase commit has parent
+`a727dbf4`, immutable completion metadata at `5b6b4013` identifies completed
+`.30R.4R.1` with that entry, and the immediate child starts `.30R.4R.2`.
+The repaired retained `test_35` uses both fixed bounds and yields exactly its
+original eight-file allowlist. Historical/current/future-descendant evaluation
+passes, while injected unauthorized historical files/commits still fail.
 
-Production, scripts, dependencies, and normative contracts are unchanged.
-F-5's fixed production protected root remains absent and was not mutated; no
-helper deployment, terminal election, YubiKey interaction, real evidence,
-principal, or Gate certification occurred. Runtime remains
+Fresh IV is 56/0; owner + IV is 98/0; predecessor/F-3/F-4 focused group is
+312/0. Broad affected scope is 1,433 passed / 3 historical failures / 1
+intentional deselection; all three failures reproduce identically at pre-repair
+`P` and are not F-4-attributable. No test weakening occurred. Production,
+scripts, dependencies, and normative contracts are unchanged.
+
+F-5's fixed production protected root remains absent and was only inspected
+read-only. No helper deployment, terminal election, YubiKey interaction, real
+evidence, principal, or Gate certification occurred. Runtime remains
 `not_implemented / Observed / observe / unavailable`, zero plugins/capabilities,
-first effect absent; N-16-6/N-16-7 untouched. N-16-5 remains NOT CLOSED.
-FIDO2 and local presentation remain supported-not-exclusive; mobile-only
-profiles remain open.
+first effect absent; N-16-6/N-16-7 untouched. FIDO2 and local presentation
+remain supported-not-exclusive; mobile-only profiles remain open.
 
-Recommended sequence, not begun: `.30R.5R.2.1R.1R.1` fresh F-4 IV;
-`.30R.5R.2.1R.1R.2` F-5 deployment preparation; `.1R.1R.2.1` deployment IV;
-then `.1R.1R.3` final real certification. Canonical report:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_F4_IMMUTABLE_HISTORICAL_SCOPE_GUARD_REPAIR.md`.
+Recommended sequence, not begun: `.30R.5R.2.1R.1R.2` F-5 deployment
+preparation; `.30R.5R.2.1R.1R.2.1` deployment IV; then `.30R.5R.2.1R.1R.3`
+final real certification. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_1_F4_IMMUTABLE_HISTORICAL_SCOPE_GUARD_REPAIR_IV.md`.
 
 ---
 
