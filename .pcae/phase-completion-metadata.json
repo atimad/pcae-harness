@@ -82,7 +82,9 @@
     ".pcae/phase-completion-metadata.json"
   ],
   "files_changed_count": 7,
-  "phase_commits": [],
+  "phase_commits": [
+    {"hash": "5d200c7de29024d72ce8749986f002415ce5a459", "subject": "independently verify F-7/F-8, disclose new sibling defect"}
+  ],
   "recommended_next_phase": "A narrow repair phase scoped exactly to test_31_no_protected_root_mutation_in_repo_diff, test_32_no_helper_installation_artifact_added, and test_43_f4_change_is_test_only in the F-7 repair suite, applying the same fixed-upper-bound pattern used to repair F-7/F-8, followed by a fresh bounded re-scan before any F-5 retry can be authorized. Not begun.",
   "pushed_status": "pending",
   "origin_main_head": "HEAD"
