@@ -27,6 +27,9 @@
     "bootstrap_session_reporting_tests": "health, check, coherence, task memory, runtime, push, and phase report lifecycle exercised"
   },
   "validation_results": {
+    "fast_green": "113 passed, 0 failed: unchanged F-6 repair plus complete F-4 IV",
+    "report_notification_tests": "notification implementation unchanged; governed completion exercises configured dispatch",
+    "bootstrap_session_reporting_tests": "health, check, coherence, task memory, runtime, push, and phase report lifecycle exercised",
     "cpipc": "exact requested IV ID accepted",
     "lineage": "P=2eaf536d05b6852c6bc6692cec139afab1083f84; R=V=8dcca97bb1a88a99cac3afe610f3651adcc58295; V4=90510428422e451382549ce76111610752aaafb4; U4=7124c019bf3f46eb07456b81146484609197dbc2",
     "f6": "INDEPENDENTLY VERIFIED REPAIRED",
@@ -43,7 +46,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE omissions; current phase archived/listed",
-    "pcae_push_check": "pending governed push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, ready; dispatch deferred to post-push promotion",
     "notification_status": "pending final post-push promotion"
