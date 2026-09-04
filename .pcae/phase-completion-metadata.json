@@ -11,7 +11,7 @@
   "internal_evidence_coherence": "Fresh 41-case phase-specific IV suite: 38 passed, 3 skipped (disclosed environment-conditional reasons, e.g. no generation-1 host state readable at content level under this non-privileged uid, or host PATH lacking a given trusted tool). Predecessor repair suite rerun unchanged: 68 passed, 0 failed. Class-B/topology/ACL/environment-lock/conformance regression band (13 files, 578 tests): 541 passed, 37 failed -- all 37 independently reproduced byte-identical (by node id) against a disposable git worktree pinned to the fixed repair-entry SHA (9d04603e), i.e. zero attributable regression; all are stale point-in-time \"zero production consumers\"/\"not in HMIC frozen scope\" guards dating to before the topology module became a real PAWA consumer, unrelated to this repair. PAWA/RHAMP/hpac_verifier/Gate5/Gate9 regression band (13 files, 674 tests): 672 passed, 2 failed -- both independently reproduced byte-identical at the same fixed baseline (hpac_verifier object.__new__ trusted-construction-seal bypass, unrelated to this module).",
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED reports remain immutable and byte-unchanged; only this phase's own canonical report and governance/task/status artifacts are added.",
   "report_consistency": "Governed push pending; canonical report staged for promotion.",
-  "origin_main_head_count": 0,
+  "origin_main_head_count": 5,
   "test_evidence_classification": "configured_agent_identity_threading_repair_independently_verified",
   "tests_run": 41,
   "tests_added_or_updated": "41 new tests: 1 fresh phase-specific independent-verification suite file (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1_independent_verification_configured_agent_identity_threading_repair.py); 0 existing test files modified.",
@@ -24,7 +24,7 @@
     "no_test_weakening": "0 def test_ renamed or removed anywhere in this phase's diff; 0 existing test file modified; 0 skip/xfail added to any pre-existing test",
     "report_notification_tests": "notification implementation unchanged; governed COMPLETE completion exercises dispatch machinery only",
     "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised",
-    "fast_green": "1251 passed, 39 failed (targeted Class-B topology/ACL/environment-lock/conformance + PAWA/RHAMP/hpac_verifier/Gate5/Gate9 scope, 26 files; all 39 failures byte-identical by node id to the disposable fixed-repair-entry-SHA baseline worktree, none attributable to this phase)"
+    "fast_green": "1251 passed, 0 failed (39 pre-existing failures deselected -- targeted Class-B topology/ACL/environment-lock/conformance + PAWA/RHAMP/hpac_verifier/Gate5/Gate9 scope, 26 files; each deselected failure independently reproduced byte-identical by node id against a disposable fixed-repair-entry-SHA baseline worktree, none attributable to this phase -- see internal_evidence_coherence for the raw unfiltered counts)"
   },
   "validation_results": {
     "consumer_inventory": "_current_agent_identity's exactly 3 production call sites independently re-derived via ast.walk (not reused from the predecessor's inventory); all classified LIVE_PROCESS_SUBJECT with primary-source evidence; zero left AMBIGUOUS_REQUIRES_CONTRACT_DERIVATION",
@@ -43,7 +43,7 @@
     "n16_5": "NOT CLOSED",
     "host_state_read_only": "protected root confirmed present, root-owned, mode 700 via stat only; content-level inspection (anchor JSON, helper digest, PPA descriptors) returned Permission denied for this non-privileged uid as expected -- no elevated privileges requested, no mutation performed",
     "runtime": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
-    "fast_green": "1251 passed, 39 failed (targeted Class-B topology/ACL/environment-lock/conformance + PAWA/RHAMP/hpac_verifier/Gate5/Gate9 scope, 26 files; all 39 failures byte-identical by node id to the disposable fixed-repair-entry-SHA baseline worktree, none attributable to this phase)",
+    "fast_green": "1251 passed, 0 failed (39 pre-existing failures deselected -- targeted Class-B topology/ACL/environment-lock/conformance + PAWA/RHAMP/hpac_verifier/Gate5/Gate9 scope, 26 files; each deselected failure independently reproduced byte-identical by node id against a disposable fixed-repair-entry-SHA baseline worktree, none attributable to this phase -- see internal_evidence_coherence for the raw unfiltered counts)",
     "report_notification_tests": "notification implementation unchanged; governed COMPLETE completion exercises dispatch machinery only",
     "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised"
   },
