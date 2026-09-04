@@ -2,6 +2,28 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R — Configured-
+Agent-Identity Threading Repair for `hatp_class_b_topology_verifier.py`'s ACL
+Ancestor-Chain Trust Check. **STATUS: IMPLEMENTED — FRESH INDEPENDENT
+VERIFICATION REQUIRED.** Repaired the defect the predecessor phase discovered:
+`_acl_grants_agent_write_linux`/`_acl_grants_agent_write_macos` already
+receive the CONFIGURED PCAE agent principal's resolved `(uid, gids)` from
+their caller, but resolved their own ACL-inspection tool (`getfacl`/`ls`) via
+the ambient-identity `_resolve_trusted_executable` instead of that same
+subject — so on the canonical root-owned registration path, root-owned
+owner-writable system directories misclassified as agent-writable and every
+ancestor's ACL check came back indeterminate. A new sibling primitive,
+`_resolve_trusted_executable_for_subject(name, agent_uid, agent_gids)`, is
+now used instead, with no ambient fallback; the original
+`_resolve_trusted_executable` is left completely untouched (independently
+frozen by two earlier phases' own guard tests). Fresh 30-test suite + zero
+new regressions across the targeted 149O.20J*/topology/ACL/environment-lock
+suite (481 tests) and a broad repo-wide sweep. F-5: OPEN / BLOCKED PENDING
+REPAIR IV. N-16-5: NOT CLOSED. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_CONFIGURED_AGENT_IDENTITY_THREADING_REPAIR.md`.
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1 — Production
 Protected-Root / Protected-Presentation Helper Deployment Preparation Retry.
 **STATUS: BLOCKED. A newly discovered product defect in

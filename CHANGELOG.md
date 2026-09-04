@@ -1,5 +1,19 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R`
+  (configured-agent-identity threading repair) repairs the defect the
+  predecessor F-5 retry discovered: `_acl_grants_agent_write_linux`/
+  `_acl_grants_agent_write_macos` already receive the CONFIGURED PCAE
+  agent principal's resolved `(uid, gids)` from their caller, but
+  resolved their own ACL-inspection tool (`getfacl`/`ls`) via the
+  ambient-identity `_resolve_trusted_executable` instead of that same
+  subject. A new sibling primitive,
+  `_resolve_trusted_executable_for_subject(name, agent_uid, agent_gids)`,
+  now serves `_acl_grants_agent_write_linux`/`_macos` with no ambient
+  fallback; `_resolve_trusted_executable` itself is left completely
+  untouched (frozen by two earlier phases' own guard tests). 30-test
+  fresh suite, zero new regressions. F-5: OPEN / BLOCKED PENDING REPAIR
+  IV. N-16-5: NOT CLOSED.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1` (F-5
   deployment-preparation retry) provisions the HPAC-PAWA production
   protected root (`/Library/Application Support/PCAE/HPAC/protected-root`,
