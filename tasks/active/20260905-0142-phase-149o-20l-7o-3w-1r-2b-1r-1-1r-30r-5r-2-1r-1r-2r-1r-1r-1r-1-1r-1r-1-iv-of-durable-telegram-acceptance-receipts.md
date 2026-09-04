@@ -22,14 +22,12 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1: IV of d
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- tests/test_iv_telegram_receipt_fresh.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tests/test_iv_telegram_receipt_fresh.py
+- tasks/**
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
