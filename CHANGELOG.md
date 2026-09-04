@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1` (F-5
+  deployment-preparation retry) provisions the HPAC-PAWA production
+  protected root (`/Library/Application Support/PCAE/HPAC/protected-root`,
+  via the canonical unmodified `scripts/hpac_protected_root_admin.py
+  provision --agent-account atilamadai`) and installs the exact immutable
+  Git-sourced protected-presentation helper bytes (`933c6646...9ea6182`) at
+  their content-addressed destination, then BLOCKS before HPAC-PPA
+  presentation-mechanism registration on a newly discovered product defect:
+  `hatp_class_b_topology_verifier.py`'s `_resolve_trusted_executable`/
+  `_current_agent_identity` evaluate the live deployment-owner euid (root,
+  under `sudo`) rather than the configured PCAE agent principal, so the
+  ACL-based ancestor-chain trust check can never return determinate when
+  invoked by the one principal (the deployment owner) the architecture
+  requires to invoke it — reproduced independently of `PATH`/`sudo`
+  environment content. No product source, script, or contract change; no
+  workaround attempted. Registration transaction failed at its own
+  precondition check with no partial/ambiguous write (`status` unchanged
+  before/after). F-5: OPEN / BLOCKED (was OPEN / ABSENT). N-16-5: NOT
+  CLOSED. Runtime unchanged (`Observed / observe / unavailable`, zero
+  plugins/capabilities). Repair successor not begun; already-provisioned
+  root/helper-byte state preserved as durable, reusable generation-1
+  lineage.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1` independently
   verifies F-9 (`test_31_no_protected_root_mutation_in_repo_diff`,
   `test_32_no_helper_installation_artifact_added`,

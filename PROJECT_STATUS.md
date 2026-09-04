@@ -2,6 +2,27 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1 — Production
+Protected-Root / Protected-Presentation Helper Deployment Preparation Retry.
+**STATUS: BLOCKED. A newly discovered product defect in
+`hatp_class_b_topology_verifier.py`'s ACL-based ancestor-chain trust check
+(`_resolve_trusted_executable`/`_current_agent_identity` evaluate the live
+deployment-owner euid/root instead of the configured PCAE agent principal)
+structurally prevents the canonical, root-owned HPAC-PPA
+presentation-mechanism registration from ever succeeding on this host. The
+HPAC-PAWA production protected root
+(`/Library/Application Support/PCAE/HPAC/protected-root`) was provisioned
+and the exact, immutable-Git-sourced protected-presentation helper bytes
+(SHA-256 `933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182`)
+were installed at their content-addressed destination via the canonical,
+unmodified admin scripts; the subsequent HPAC-PPA metadata registration
+step failed at its own precondition check with no partial/ambiguous write.
+No product source, script, or contract was modified or repaired. F-5:
+OPEN / BLOCKED. N-16-5: NOT CLOSED.** Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1_PRODUCTION_PROTECTED_ROOT_HELPER_DEPLOYMENT_PREPARATION_RETRY_BLOCKED.md`.
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1 — Independent
 Verification of the F-9 Immutable F-7-Repair-Suite Deployment-Evidence Guard
 Repair + Final N-16-5 Moving-History Clearance + F-5 Retry Readiness
