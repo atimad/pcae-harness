@@ -139,6 +139,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for configured-agent-identity threading repair (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1); F-5 BLOCKED; N-16-5 not closed to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R: Configured-Agent-Identity Threading Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1 combined F-7/F-8 independent verification; F-5 retry pending; N-16-5 not closed to Idle: awaiting explicit authorization for combined F-7/F-8 independent verification; F-5 retry pending; N-16-5 not closed; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R: F-8 Immutable F-6-IV Sibling-Adjudication Evidence Guard Repair to Idle: awaiting explicit authorization for 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1 combined F-7/F-8 independent verification; F-5 retry pending; N-16-5 not closed; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for F-8 immutable F-6-IV sibling-adjudication evidence guard repair; F-5 retry NOT READY; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R: F-8 Immutable F-6-IV Sibling-Adjudication Evidence Guard Repair; session refreshed and governance continuity revalidated.

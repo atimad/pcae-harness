@@ -1,0 +1,90 @@
+# Task Contract
+
+## Task ID
+
+20260904-2116-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-configured-agent-identity-threading-repair
+
+## Title
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R: Configured-Agent-Identity Threading Repair
+
+## Status
+
+active
+
+## Mode
+
+implementation
+
+## Goal
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R: Configured-Agent-Identity Threading Repair
+
+## Allowed Files
+
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- src/pcae/core/hatp_class_b_topology_verifier.py
+- tests/test_phase_149o_20j_1_class_b_deployment_verifier_narrow_defect_repair.py
+- tests/test_phase_149o_20j_5_class_b_acl_only_higher_ancestor_detection_macos_narrow_repair.py
+- tests/test_phase_149o_20j_class_b_deployment_verifier_model_a_environment_lock_independent_implementation_verification.py
+- tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_configured_agent_identity_threading_repair.py
+
+## Forbidden Files
+
+- TBD
+
+
+## Allowed Zones
+
+- TBD
+
+## Forbidden Zones
+
+- TBD
+
+## Allowed Dependencies
+
+- TBD
+
+## Forbidden Dependencies
+
+- TBD
+
+## Enforcement Mode
+
+strict
+
+## Forbidden Changes
+
+- No runtime invocation
+- No prompt execution
+- No source behavior changes outside task/session/handoff governance
+- No execution authorization
+- No commit
+- No push
+- No rollback
+
+## Acceptance Criteria
+
+- TBD
+
+## Acceptance Checks
+
+- pcae status coherence passes
+- pcae health passes
+- pcae check passes
+- python -m pytest -n auto passes
+
+## Documentation Requirements
+
+- Update project memory files when workflow-visible behavior changes.
+
+## Created Timestamp
+
+2026-09-04T21:16:02.554025+02:00
