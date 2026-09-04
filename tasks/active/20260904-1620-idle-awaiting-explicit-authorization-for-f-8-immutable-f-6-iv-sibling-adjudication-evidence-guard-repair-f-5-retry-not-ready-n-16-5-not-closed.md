@@ -29,6 +29,8 @@ Idle: awaiting explicit authorization for F-8 immutable F-6-IV sibling-adjudicat
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -61,8 +63,7 @@ strict
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
+- No raw git commit or raw git push; governed completion lifecycle only
 - No rollback
 
 ## Acceptance Criteria
