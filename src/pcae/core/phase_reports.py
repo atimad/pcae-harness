@@ -765,6 +765,33 @@ def write_phase_report(report: PhaseReport, reports_dir: Path) -> dict[str, str]
     }
 
 
+def _telegram_receipts_summary(notification_results: Any) -> "list[dict[str, Any]]":
+    """Phase ...1.1R.1R — pull the durable per-operation receipt
+    references `TelegramSink.send()` now returns (in
+    `NotificationResult.metadata`) into the persisted report so the
+    canonical phase report can point at real Telegram-API-acceptance
+    evidence, without embedding secrets (item 8) or re-deriving new
+    logic (this only reads fields `TelegramSink` already computed).
+    Empty for non-telegram sinks, absent metadata, or no dispatch --
+    never fabricated (item 21)."""
+
+    if not notification_results:
+        return []
+    summaries: list[dict[str, Any]] = []
+    for r in notification_results:
+        if r.sink_name != "telegram" or not r.metadata:
+            continue
+        summaries.append({
+            "summary_status": r.metadata.get("summary_status"),
+            "summary_message_id": r.metadata.get("summary_message_id"),
+            "summary_receipt_id": r.metadata.get("summary_receipt_id"),
+            "document_status": r.metadata.get("document_status"),
+            "document_message_id": r.metadata.get("document_message_id"),
+            "document_receipt_id": r.metadata.get("document_receipt_id"),
+        })
+    return summaries
+
+
 def _persist_notification_result(paths: dict[str, str], notification_result: dict[str, Any]) -> None:
     """Patch the already-written report JSON artifact(s) with the final
     ``notification_result``, after the fact.
@@ -3543,6 +3570,7 @@ def finalize_phase_report(
                     "outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
                     "reason": pending_reason,
                     "kind": "pending",
+                    "telegram_receipts": [],
                 }
                 _persist_notification_result(paths, report.notification_result)
                 return {
@@ -3610,6 +3638,7 @@ def finalize_phase_report(
             "outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
             "reason": skip_reason,
             "kind": "complete" if is_complete else "partial_warning",
+            "telegram_receipts": [],
         }
         _persist_notification_result(paths, report.notification_result)
         return {
@@ -3677,6 +3706,7 @@ def finalize_phase_report(
             "dispatched": False, "sinks": [], "success": False, "error": None,
             "outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
             "reason": skip_reason, "kind": notification_kind,
+            "telegram_receipts": [],
         }
         _persist_notification_result(paths, report.notification_result)
         return {
@@ -3716,6 +3746,15 @@ def finalize_phase_report(
         "outcome": outcome,
         "reason": outcome_reason,
         "kind": notification_kind,
+        # Phase ...1.1R.1R — additive audit binding (item 19). Never
+        # replaces or redefines `success` above (item 18: that boolean's
+        # existing contract is preserved unchanged); this only attaches
+        # the durable per-operation receipt evidence now captured by
+        # `TelegramSink`, when present. `[]` for historical reports and
+        # for dispatches that used no telegram sink -- readers must
+        # treat an absent/empty list as "no durable receipt evidence",
+        # never as proof of failure (item 21).
+        "telegram_receipts": _telegram_receipts_summary(notification_results),
     }
     _persist_notification_result(paths, report.notification_result)
 

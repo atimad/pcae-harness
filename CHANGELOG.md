@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R`
+  (durable Telegram notification acceptance receipts + phase-completion
+  notification auditability repair) repairs the observability defect a
+  read-only audit of the completed configured-agent-identity IV exposed:
+  `TelegramSink.send()` received real Telegram Bot API responses (`ok`,
+  `message_id`) but collapsed each into an in-process boolean and
+  discarded the rest, leaving no durable post-hoc proof of API
+  acceptance. `TelegramSink` now persists a durable, purpose-built
+  acceptance receipt per operation (summary/document independently)
+  with an explicit `PREPARED -> API_ACCEPTED / API_REJECTED /
+  TRANSPORT_FAILED / OUTCOME_UNCERTAIN` state machine, Telegram's
+  `message_id` when returned, and no secrets -- deliberately smaller
+  than wiring the still-dormant 134E.6/134E.7 Delivery Pipeline/Receipt
+  architecture (explicitly reserved for a separate, not-yet-implemented
+  134E.10 integration). `report.notification_result["success"]`'s
+  existing boolean contract is byte-unchanged; a new additive
+  `telegram_receipts` key attaches the receipt references. 41-case
+  fresh suite; 1438 passed across the full notification/phase-report
+  consumer sweep, 2 pre-existing unrelated failures deselected. No
+  re-dispatch of the affected historical IV report; its original
+  Telegram acceptance remains historically NOT INDEPENDENTLY AUDITABLE
+  from durable PCAE evidence -- neither confirmed delivered nor
+  confirmed failed. F-5 continuation execution remains HOLD pending
+  separate full-suite (40587/979/117) triage. N-16-5: NOT CLOSED.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1`
   (independent verification of the configured-agent-identity threading
   repair) independently reconstructs the predecessor repair's diff scope,

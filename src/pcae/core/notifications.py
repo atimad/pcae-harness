@@ -570,6 +570,188 @@ _TELEGRAM_ENABLED_ENV = "PCAE_TELEGRAM_ENABLED"
 _DEFAULT_MAX_MESSAGE_CHARS = 3500
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Durable notification-receipt model — Phase ...1.1R.1R
+#
+# THE DEFECT THIS REPAIRS: TelegramSink.send() already receives real
+# Telegram Bot API JSON responses (``ok``, and on success a ``result``
+# Message object carrying ``message_id``) for both the summary and
+# document operations, but historically collapsed each into a single
+# in-process boolean and discarded the rest. Once the process exits,
+# nothing durable on disk can answer "did Telegram actually accept
+# this send, and what message_id did it return" -- only an in-memory
+# ``NotificationResult.message`` string, printed to the terminal and
+# never persisted.
+#
+# `.pcae/phase-reports/.last-notified.json` (see `_persist_notification_
+# result` in phase_reports.py) is a DEDUP MARKER only -- it records
+# that PCAE *attempted* dispatch for a given phase/commit/report-digest
+# once, not that Telegram *accepted* anything. The separate
+# `.pcae/delivery-receipts/` architecture (Phase 134E.7's "External
+# Delivery Receipt Model" module) is explicitly documented as "not yet
+# active lifecycle authority" -- nothing in the real notification path
+# calls into it, and its only registered adapters (`recording_v1`/
+# `null_v1`, in its companion delivery-pipeline module) are synthetic/
+# no-op (`destination_classification: synthetic_recording`,
+# `represents_external_delivery: false`). Wiring a real external
+# Telegram adapter into that dormant pipeline would be its own
+# separately-scoped "Final Lifecycle Integration" (134E.10, explicitly
+# marked not implemented there) -- far beyond this narrowly-scoped
+# repair. This module therefore adds the smallest new, purpose-built
+# receipt persistence consistent with that architecture's vocabulary
+# (attempt identity, durable pre-attempt state, explicit outcome
+# classification) without adopting its adapter/pipeline machinery.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+#: Closed receipt-status vocabulary (semantic wall preserved: DISPATCH
+#: ATTEMPT != TELEGRAM API ACCEPTANCE != DURABLE ACCEPTANCE RECEIPT !=
+#: DEVICE PUSH NOTIFICATION != HUMAN OBSERVATION != HUMAN ACKNOWLEDGEMENT.
+#: This model proves only up through TELEGRAM API ACCEPTANCE / DURABLE
+#: ACCEPTANCE RECEIPT -- never anything past that wall.)
+RECEIPT_STATUS_PREPARED = "prepared"
+RECEIPT_STATUS_API_ACCEPTED = "api_accepted"
+RECEIPT_STATUS_API_REJECTED = "api_rejected"
+RECEIPT_STATUS_TRANSPORT_FAILED = "transport_failed"
+RECEIPT_STATUS_OUTCOME_UNCERTAIN = "outcome_uncertain"
+
+VALID_RECEIPT_STATUSES: frozenset[str] = frozenset({
+    RECEIPT_STATUS_PREPARED,
+    RECEIPT_STATUS_API_ACCEPTED,
+    RECEIPT_STATUS_API_REJECTED,
+    RECEIPT_STATUS_TRANSPORT_FAILED,
+    RECEIPT_STATUS_OUTCOME_UNCERTAIN,
+})
+
+_RECEIPTS_OUTPUT_DIR_ENV = "PCAE_NOTIFICATION_RECEIPTS_DIR"
+_DEFAULT_RECEIPTS_DIR = ".pcae/notification-receipts"
+_RECEIPT_SCHEMA_VERSION = "1.0"
+
+
+def _receipts_root() -> Path:
+    import os
+    return Path(os.environ.get(_RECEIPTS_OUTPUT_DIR_ENV, _DEFAULT_RECEIPTS_DIR))
+
+
+def _safe_destination_alias(chat_id: str) -> str:
+    """A stable, non-reversible alias for the configured chat -- never
+    the raw chat_id, and never any Telegram user/chat profile data
+    (name, username), which Telegram's success response can carry but
+    this receipt model deliberately never captures (item 8's privacy
+    boundary)."""
+    import hashlib
+    digest = hashlib.sha256(("telegram-chat:" + str(chat_id)).encode("utf-8")).hexdigest()
+    return f"telegram:chat:{digest[:12]}"
+
+
+def _new_receipt_id() -> str:
+    return f"ntfr-{uuid.uuid4().hex[:16]}"
+
+
+def _coerce_http_status(resp: Any) -> int | None:
+    """Extract an HTTP status code defensively -- a genuine
+    ``http.client.HTTPResponse`` exposes ``.status`` (Python 3.9+) as
+    a real ``int``; anything else (a test double lacking it, or one
+    whose ``.status``/``.getcode()`` returns something else entirely)
+    yields ``None`` rather than persisting a non-serializable or
+    fabricated value."""
+
+    for candidate in (getattr(resp, "status", None), getattr(resp, "getcode", lambda: None)()):
+        if isinstance(candidate, int) and not isinstance(candidate, bool):
+            return candidate
+    return None
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.parent / f".{path.name}.tmp"
+    tmp_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
+    import os
+    os.replace(str(tmp_path), str(path))
+
+
+def _safe_path_component(value: str) -> str:
+    import re
+    return re.sub(r"[^A-Za-z0-9._-]", "-", str(value or ""))
+
+
+def _receipt_path(receipt_id: str, event_id: str) -> Path:
+    safe_event = _safe_path_component(event_id) or "event"
+    return _receipts_root() / safe_event / f"{receipt_id}.json"
+
+
+def _persist_receipt(receipt: dict[str, Any]) -> "tuple[bool, str | None]":
+    """Best-effort durable write. Returns ``(persisted, error)``.
+
+    Never raises -- a receipt-persistence failure must not crash the
+    sink (`NotificationSink.send()` must not raise), and per item 39
+    an API-accepted-but-unpersisted outcome must not be silently
+    treated as safely resendable. Callers surface ``error`` in the
+    returned ``NotificationResult`` so the console/audit trail stays
+    honest even when durable persistence itself is unavailable."""
+
+    path = _receipt_path(receipt["receipt_id"], receipt["event_id"])
+    try:
+        _atomic_write_json(path, receipt)
+        return True, None
+    except OSError as exc:
+        # Last-resort, best-effort plain-text fallback so a persistence
+        # failure is not entirely invisible -- wrapped so it can never
+        # itself raise.
+        try:
+            fallback = _receipts_root() / "PERSISTENCE-FAILURES.log"
+            fallback.parent.mkdir(parents=True, exist_ok=True)
+            with open(fallback, "a", encoding="utf-8") as fh:
+                fh.write(
+                    f"{_utc_now_iso()} receipt_id={receipt.get('receipt_id')} "
+                    f"event_id={receipt.get('event_id')} operation={receipt.get('operation')} "
+                    f"status={receipt.get('status')} error={exc!r}\n"
+                )
+        except OSError:
+            pass
+        return False, str(exc)
+
+
+def _build_receipt(
+    *,
+    receipt_id: str,
+    event: NotificationEvent,
+    operation: str,
+    status: str,
+    destination_alias: str,
+    attempted_at: str,
+    recorded_at: str,
+    telegram_message_id: int | None = None,
+    http_status: int | None = None,
+    sanitized_error: str | None = None,
+    report_digest_prefix: str | None = None,
+) -> dict[str, Any]:
+    """Minimum acceptance-receipt content (item 9), scoped to what this
+    repair proves and nothing past the semantic wall. Never includes
+    the bot token, request headers, or the raw API URL (item 8)."""
+
+    assert operation in ("summary", "document")
+    assert status in VALID_RECEIPT_STATUSES
+    phase_id = (event.metadata or {}).get("phase_id")
+    return {
+        "schema": "PCAE-NOTIFICATION-RECEIPT/1.0",
+        "schema_version": _RECEIPT_SCHEMA_VERSION,
+        "receipt_id": receipt_id,
+        "event_id": event.event_id,
+        "phase_id": phase_id,
+        "report_digest_prefix": report_digest_prefix,
+        "sink": TELEGRAM_SINK_NAME,
+        "operation": operation,
+        "status": status,
+        "represents_external_api_acceptance": status == RECEIPT_STATUS_API_ACCEPTED,
+        "destination_alias": destination_alias,
+        "attempted_at": attempted_at,
+        "recorded_at": recorded_at,
+        "telegram_message_id": telegram_message_id,
+        "http_status": http_status,
+        "sanitized_error": sanitized_error,
+    }
+
+
 class TelegramSink:
     """Outbound Telegram notification sink.
 
@@ -621,9 +803,45 @@ class TelegramSink:
                 error="disabled_or_unconfigured",
             )
 
+        import hashlib
+        destination_alias = _safe_destination_alias(self._chat_id)
+        canonical_markdown = (event.metadata or {}).get("canonical_report_markdown")
+        report_digest_prefix = (
+            hashlib.sha256(canonical_markdown.encode("utf-8")).hexdigest()[:16]
+            if canonical_markdown else None
+        )
+        receipts: dict[str, dict[str, Any]] = {}
+
         # 1. Send summary via sendMessage
         summary_text = self._build_summary(event)
+        summary_receipt_id = _new_receipt_id()
+        summary_attempted_at = _utc_now_iso()
+        # Pre-attempt durability (item 11): a durable PREPARED record
+        # exists before the network call, so a crash mid-request still
+        # leaves evidence that an attempt was made under this identity.
+        _persist_receipt(_build_receipt(
+            receipt_id=summary_receipt_id, event=event, operation="summary",
+            status=RECEIPT_STATUS_PREPARED, destination_alias=destination_alias,
+            attempted_at=summary_attempted_at, recorded_at=summary_attempted_at,
+            report_digest_prefix=report_digest_prefix,
+        ))
         msg_result = self._send_message(summary_text)
+        summary_status, summary_message_id, summary_http_status, summary_error = (
+            self._classify_telegram_result(msg_result)
+        )
+        summary_recorded_at = _utc_now_iso()
+        summary_persisted, summary_persist_err = _persist_receipt(_build_receipt(
+            receipt_id=summary_receipt_id, event=event, operation="summary",
+            status=summary_status, destination_alias=destination_alias,
+            attempted_at=summary_attempted_at, recorded_at=summary_recorded_at,
+            telegram_message_id=summary_message_id, http_status=summary_http_status,
+            sanitized_error=summary_error, report_digest_prefix=report_digest_prefix,
+        ))
+        receipts["summary"] = {
+            "status": summary_status, "message_id": summary_message_id,
+            "receipt_id": summary_receipt_id, "receipt_persisted": summary_persisted,
+            "receipt_persist_error": summary_persist_err,
+        }
 
         if not msg_result["ok"]:
             return NotificationResult(
@@ -633,6 +851,15 @@ class TelegramSink:
                 event_id=event.event_id,
                 attempted_at=_utc_now_iso(),
                 error=f"sendMessage: {msg_result.get('error', 'unknown')}",
+                metadata={
+                    "summary_status": summary_status,
+                    "summary_message_id": summary_message_id,
+                    "summary_receipt_id": summary_receipt_id,
+                    "document_status": None,
+                    "document_message_id": None,
+                    "document_receipt_id": None,
+                    "receipts_dir": str(_receipts_root()),
+                },
             )
 
         # 2. Send the complete canonical report as a document.
@@ -653,19 +880,57 @@ class TelegramSink:
         # file path, so delivery can never diverge from a possibly
         # stale sibling file on disk (Consistency Contract).
         doc_result = {"ok": True}
-        canonical_markdown = (event.metadata or {}).get("canonical_report_markdown")
         attempted_document = False
+        document_status = None
+        document_message_id = None
+        document_receipt_id = None
         if canonical_markdown:
             attempted_document = True
             phase_id = (event.metadata or {}).get("phase_id") or "report"
             filename = f"{_safe_doc_filename(phase_id)}-phase-report.md"
+            document_receipt_id = _new_receipt_id()
+            doc_attempted_at = _utc_now_iso()
+            _persist_receipt(_build_receipt(
+                receipt_id=document_receipt_id, event=event, operation="document",
+                status=RECEIPT_STATUS_PREPARED, destination_alias=destination_alias,
+                attempted_at=doc_attempted_at, recorded_at=doc_attempted_at,
+                report_digest_prefix=report_digest_prefix,
+            ))
             doc_result = self._send_document_bytes(
                 canonical_markdown.encode("utf-8"), filename=filename,
             )
+            document_status, document_message_id, doc_http_status, doc_error = (
+                self._classify_telegram_result(doc_result)
+            )
+            _persist_receipt(_build_receipt(
+                receipt_id=document_receipt_id, event=event, operation="document",
+                status=document_status, destination_alias=destination_alias,
+                attempted_at=doc_attempted_at, recorded_at=_utc_now_iso(),
+                telegram_message_id=document_message_id, http_status=doc_http_status,
+                sanitized_error=doc_error, report_digest_prefix=report_digest_prefix,
+            ))
         elif event.artifact_paths:
             attempted_document = True
             for path in event.artifact_paths[:1]:  # send first artifact as document
+                document_receipt_id = _new_receipt_id()
+                doc_attempted_at = _utc_now_iso()
+                _persist_receipt(_build_receipt(
+                    receipt_id=document_receipt_id, event=event, operation="document",
+                    status=RECEIPT_STATUS_PREPARED, destination_alias=destination_alias,
+                    attempted_at=doc_attempted_at, recorded_at=doc_attempted_at,
+                    report_digest_prefix=report_digest_prefix,
+                ))
                 doc_result = self._send_document(path)
+                document_status, document_message_id, doc_http_status, doc_error = (
+                    self._classify_telegram_result(doc_result)
+                )
+                _persist_receipt(_build_receipt(
+                    receipt_id=document_receipt_id, event=event, operation="document",
+                    status=document_status, destination_alias=destination_alias,
+                    attempted_at=doc_attempted_at, recorded_at=_utc_now_iso(),
+                    telegram_message_id=document_message_id, http_status=doc_http_status,
+                    sanitized_error=doc_error, report_digest_prefix=report_digest_prefix,
+                ))
                 break
 
         # Fallback contract item 4 — document attachment failed: send an
@@ -697,8 +962,44 @@ class TelegramSink:
             metadata={
                 "send_message_ok": msg_result["ok"],
                 "send_document_ok": doc_result.get("ok", False),
+                "summary_status": summary_status,
+                "summary_message_id": summary_message_id,
+                "summary_receipt_id": summary_receipt_id,
+                "document_status": document_status,
+                "document_message_id": document_message_id,
+                "document_receipt_id": document_receipt_id,
+                "receipts_dir": str(_receipts_root()),
             },
         )
+
+    @staticmethod
+    def _classify_telegram_result(
+        result: dict[str, Any],
+    ) -> "tuple[str, int | None, int | None, str | None]":
+        """Classify a raw Telegram API call result into
+        ``(status, message_id, http_status, sanitized_error)``.
+
+        Strict validated-response semantics (item 12): ``ok: true``
+        without the expected ``result.message_id`` shape is
+        ``OUTCOME_UNCERTAIN``, not blindly accepted as
+        ``API_ACCEPTED``. ``ok: false`` is either ``API_REJECTED``
+        (Telegram itself returned a description) or
+        ``TRANSPORT_FAILED`` (no HTTP response was ever received from
+        Telegram at all)."""
+
+        http_status = result.get("_http_status")
+        if result.get("ok"):
+            message_id = (result.get("result") or {}).get("message_id")
+            if isinstance(message_id, int):
+                return RECEIPT_STATUS_API_ACCEPTED, message_id, http_status, None
+            return RECEIPT_STATUS_OUTCOME_UNCERTAIN, None, http_status, "ok_true_without_valid_message_id"
+
+        failure_kind = result.get("_failure_kind")
+        sanitized_error = result.get("error")
+        if failure_kind == "transport_failed":
+            return RECEIPT_STATUS_TRANSPORT_FAILED, None, http_status, sanitized_error
+        # api_rejected or http_error: Telegram's own server responded.
+        return RECEIPT_STATUS_API_REJECTED, None, http_status, sanitized_error
 
     def _build_summary(self, event: NotificationEvent) -> str:
         """Build a concise, structured Telegram text summary.
@@ -953,7 +1254,10 @@ class TelegramSink:
         try:
             opener = self._opener if self._opener else urlopen
             with opener(req) as resp:
-                return _json.loads(resp.read())
+                http_status = _coerce_http_status(resp)
+                parsed = _json.loads(resp.read())
+                parsed["_http_status"] = http_status
+                return parsed
         except HTTPError as exc:
             error_body = ""
             try:
@@ -961,14 +1265,20 @@ class TelegramSink:
                 error_data = _json.loads(error_body)
                 telegram_desc = error_data.get("description", "")
                 if telegram_desc:
-                    return {"ok": False, "error": f"Telegram: {telegram_desc}", "error_body": error_body}
+                    return {
+                        "ok": False, "error": f"Telegram: {telegram_desc}", "error_body": error_body,
+                        "_http_status": exc.code, "_failure_kind": "api_rejected",
+                    }
             except Exception:
                 pass
-            return {"ok": False, "error": f"HTTP {exc.code}: {exc.reason}", "error_body": error_body}
+            return {
+                "ok": False, "error": f"HTTP {exc.code}: {exc.reason}", "error_body": error_body,
+                "_http_status": exc.code, "_failure_kind": "http_error",
+            }
         except URLError as exc:
-            return {"ok": False, "error": str(exc)}
+            return {"ok": False, "error": str(exc), "_http_status": None, "_failure_kind": "transport_failed"}
         except Exception as exc:
-            return {"ok": False, "error": str(exc)}
+            return {"ok": False, "error": str(exc), "_http_status": None, "_failure_kind": "transport_failed"}
 
     def _api_call_multipart(self, url: str, body: bytes, boundary: str) -> dict:
         import json as _json
@@ -982,7 +1292,10 @@ class TelegramSink:
         try:
             opener = self._opener if self._opener else urlopen
             with opener(req) as resp:
-                return _json.loads(resp.read())
+                http_status = _coerce_http_status(resp)
+                parsed = _json.loads(resp.read())
+                parsed["_http_status"] = http_status
+                return parsed
         except HTTPError as exc:
             error_body = ""
             try:
@@ -990,14 +1303,20 @@ class TelegramSink:
                 error_data = _json.loads(error_body)
                 telegram_desc = error_data.get("description", "")
                 if telegram_desc:
-                    return {"ok": False, "error": f"Telegram: {telegram_desc}", "error_body": error_body}
+                    return {
+                        "ok": False, "error": f"Telegram: {telegram_desc}", "error_body": error_body,
+                        "_http_status": exc.code, "_failure_kind": "api_rejected",
+                    }
             except Exception:
                 pass
-            return {"ok": False, "error": f"HTTP {exc.code}: {exc.reason}", "error_body": error_body}
+            return {
+                "ok": False, "error": f"HTTP {exc.code}: {exc.reason}", "error_body": error_body,
+                "_http_status": exc.code, "_failure_kind": "http_error",
+            }
         except URLError as exc:
-            return {"ok": False, "error": str(exc)}
+            return {"ok": False, "error": str(exc), "_http_status": None, "_failure_kind": "transport_failed"}
         except Exception as exc:
-            return {"ok": False, "error": str(exc)}
+            return {"ok": False, "error": str(exc), "_http_status": None, "_failure_kind": "transport_failed"}
 
 
 def _utc_now_iso() -> str:

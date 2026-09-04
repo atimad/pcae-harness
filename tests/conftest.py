@@ -84,6 +84,27 @@ def _isolate_external_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(_NOTIFICATION_CONFIG_DISABLE_ENV, "1")
 
 
+_NOTIFICATION_RECEIPTS_DIR_ENV = "PCAE_NOTIFICATION_RECEIPTS_DIR"
+
+
+@pytest.fixture(autouse=True)
+def _isolate_notification_receipts_dir(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """Phase ...1.1R.1R — a unit test that constructs `TelegramSink` with
+    explicit `bot_token`/`chat_id`/`enabled=True` (bypassing the env-based
+    disable above by design, so the sink's own logic can be exercised
+    deterministically against a fake `_opener`) now also durably persists
+    a notification-receipt JSON file per Telegram operation. Without this
+    isolation, every such ordinary unit test run would write real files
+    into this repository's own `.pcae/notification-receipts/` (relative
+    to cwd) purely as a side effect of running the test suite -- exactly
+    the kind of ordinary-test-mutates-real-repo-state leak `_isolate_
+    external_notifications` above already exists to prevent for live
+    delivery. Individual tests that want to assert on receipt content
+    still override this by setting the same env var themselves (which
+    simply takes precedence for that test)."""
+    monkeypatch.setenv(_NOTIFICATION_RECEIPTS_DIR_ENV, str(tmp_path / "notification-receipts"))
+
+
 # Phase 135K — the shadow CLTR observer (pcae.cltr.shadow) writes to
 # ``.pcae/cltr-shadow/`` (relative to cwd) whenever ``PCAE_CLTR_SHADOW_
 # ENABLED`` is set, from inside ``run_finalization_transaction()``. Tests
