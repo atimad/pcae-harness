@@ -22,9 +22,11 @@ Idle: awaiting explicit authorization for F-4 immutable historical guard repair 
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.json
+- .pcae/phase-completion-report.pending.json
 - tasks/active/**
 - tasks/done/**
-- tasks/TODO.md
 - tasks/DONE.md
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
