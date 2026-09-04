@@ -108,6 +108,6 @@
     }
   ],
   "recommended_next_phase": "Independent Verification of the Configured-Agent-Identity Threading Repair for HATP Class-B ACL / Trusted-Executable / Ancestor-Chain Verification -- must independently reconstruct the principal semantics and consumer classification from primary source. Not begun. Only after a clean fresh repair IV may F-5 continue (retrying only the previously blocked hpac_protected_presentation_admin.py install step against the existing generation-1 protected-root/helper state, no reprovisioning), followed by a separate deployment-state IV before any real approval ceremony, before N-16-5 closure can be adjudicated.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "3cb6683935939f97cd37d974887db2aeba0cba63"
 }
