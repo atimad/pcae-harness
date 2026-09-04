@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260904-2117-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-repair-implemented-fresh-iv-recommended-f-5-blocked-pending-iv-n-16-5-not-closed
+20260904-2225-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1-configured-agent-identity-threading-repair-independently-verified-f-5-continuation-ready-not-begun-n-16-5-not-closed
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R); repair implemented, fresh IV recommended; F-5 blocked pending IV; N-16-5 not closed
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1); configured-agent-identity threading repair INDEPENDENTLY VERIFIED, F-5 continuation READY (not begun), N-16-5 not closed
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R); repair implemented, fresh IV recommended; F-5 blocked pending IV; N-16-5 not closed
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1); configured-agent-identity threading repair INDEPENDENTLY VERIFIED, F-5 continuation READY (not begun), N-16-5 not closed
 
 ## Allowed Files
 
@@ -29,10 +29,6 @@ Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
-- .pcae/session.json
-- tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_configured_agent_identity_threading_repair.py
 
 ## Forbidden Files
 
@@ -86,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-09-04T21:17:58.526924+02:00
+2026-09-04T22:25:30.868170+02:00
