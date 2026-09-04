@@ -59,4 +59,4 @@ zero plugins/capabilities, first effect absent. N-16-6/N-16-7 untouched.
 Recommended next, not begun: Independent Verification of Durable Telegram
 Acceptance Receipts and Phase-Completion Notification Auditability.
 
-Governed push and canonical report promotion pending.
+Pushed to `origin/main`. Canonical report promotion pending.

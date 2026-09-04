@@ -10,8 +10,8 @@
   "metadata_consistency": "Report, status, task lifecycle, and this metadata consistently record IMPLEMENTED (fresh IV required), F-5 CONTINUATION EXECUTION HOLD PENDING FULL-SUITE TRIAGE, and N-16-5 NOT CLOSED.",
   "internal_evidence_coherence": "Fresh 41-case phase-specific repair suite: 41 passed, 0 failed. Full notification/phase-report/finalization consumer sweep (43 pre-existing files + fresh suite, 1441 tests): 1438 passed, 1 skipped, 2 deselected -- the 2 deselected failures (test_duplicate_terminal_delivery_mixed_evidence_134e81.py, unrelated report-coherence issue-count assertions) independently reproduced byte-identical by node id against a disposable git worktree pinned to the fixed notification-repair phase-entry SHA (9c88f1a3), i.e. zero attributable regression. Four initially-attributable failures (test_delivery_pipeline_134e6.py x2, test_delivery_receipt_134e7.py x2 -- blunt substring/grep scope-fence guards tripped by this repair's own explanatory source comment literally naming the dormant modules it deliberately did not wire into) were resolved by rewording that comment only, touching zero test files, before the final sweep above.",
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED reports remain immutable and byte-unchanged, including the affected configured-agent IV report itself; only this phase's own canonical report and governance/task/status artifacts are added.",
-  "report_consistency": "Governed push pending; canonical report staged for promotion.",
-  "origin_main_head_count": 6,
+  "report_consistency": "Pushed; canonical report ready for promotion to COMPLETE.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "durable_telegram_notification_acceptance_receipts_repair_implemented",
   "tests_run": 41,
   "tests_added_or_updated": "41 new tests: 1 fresh phase-specific suite file (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_durable_telegram_notification_acceptance_receipts.py); 0 existing test files modified (tests/conftest.py gained one new autouse test-isolation fixture only, no existing test function changed).",
@@ -129,6 +129,6 @@
     }
   ],
   "recommended_next_phase": "Independent Verification of Durable Telegram Acceptance Receipts and Phase-Completion Notification Auditability -- must independently verify the receipt call graph, pre-attempt durability, API acceptance/rejection/transport-failure/uncertainty semantics, message_id capture, summary/document independence, dedup separation, privacy exclusion, historical compatibility, and production diff scope from primary source. Not begun. F-5 continuation execution remains on HOLD pending a separate, not-yet-begun triage of the frozen post-completion full-repository sweep (40587 passed / 979 failed / 117 errors) -- neither this phase nor its recommended successor addresses that sweep.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "3209ba773d36055df4cac7768c0c9e5c9fdf4f29"
 }
