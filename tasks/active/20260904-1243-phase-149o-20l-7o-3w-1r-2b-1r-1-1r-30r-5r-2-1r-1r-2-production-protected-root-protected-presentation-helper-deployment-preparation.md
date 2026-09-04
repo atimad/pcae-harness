@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260904-1139-idle-awaiting-explicit-authorization-for-f-5-protected-helper-deployment-preparation-n-16-5-not-closed
+20260904-1243-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2-production-protected-root-protected-presentation-helper-deployment-preparation
 
 ## Title
 
-Idle: awaiting explicit authorization for F-5 protected-helper deployment preparation; N-16-5 NOT CLOSED
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2 — Production Protected-Root / Protected-Presentation Helper Deployment Preparation
 
 ## Status
 
@@ -18,7 +18,7 @@ independent verification
 
 ## Goal
 
-Idle: awaiting explicit authorization for F-5 protected-helper deployment preparation; N-16-5 NOT CLOSED
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2 — Production Protected-Root / Protected-Presentation Helper Deployment Preparation
 
 ## Allowed Files
 
@@ -29,8 +29,6 @@ Idle: awaiting explicit authorization for F-5 protected-helper deployment prepar
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -84,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-09-04T11:39:31.049781+02:00
+2026-09-04T12:43:48.343490+02:00
