@@ -29,6 +29,9 @@ Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.2R F-6 immutable F-4-I
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-reports/**
 
 ## Forbidden Files
 
@@ -61,8 +64,7 @@ strict
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
+- No raw git commit or raw git push; governed PCAE lifecycle only
 - No rollback
 
 ## Acceptance Criteria
