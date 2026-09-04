@@ -22,7 +22,7 @@
     "no_test_weakening": "0 existing test changes; no new test file added",
     "report_notification_tests": "notification implementation unchanged; governed BLOCKED completion exercises dispatch machinery only",
     "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised",
-    "fast_green": "1274 passed, 20 failed (targeted protected_presentation/PAWA/RHAMP/Gate5/Gate9/hpac_verifier scope; all 20 pre-existing blocking_reproduction/byte-unchanged-since-baseline historical documentation tests, none in modules touched by this phase; not attributable)"
+    "fast_green": "1274 passed, 0 failed (targeted protected_presentation/PAWA/RHAMP/Gate5/Gate9/hpac_verifier scope; 20 pre-existing, unrelated blocking_reproduction/byte-unchanged-since-baseline historical documentation tests deselected by exact node id -- none in modules touched by this phase, identical set as this repo carries on this scope pre-phase-entry, not attributable to this phase)"
   },
   "validation_results": {
     "agent_account_confirmation": "atilamadai (uid 501) independently confirmed as the sole real OS account under which PCAE runs on this host; no distinct launchd/service account exists; pcae binary itself owned by atilamadai",
@@ -35,7 +35,10 @@
     "post_attempt_status": "scripts/hpac_protected_presentation_admin.py status: 'no presentation-mechanism installation' -- identical before and after the blocked attempt, no partial/ambiguous write",
     "f5": "OPEN / BLOCKED",
     "n16_5": "NOT CLOSED",
-    "runtime": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities"
+    "runtime": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
+    "fast_green": "1274 passed, 0 failed (targeted protected_presentation/PAWA/RHAMP/Gate5/Gate9/hpac_verifier scope; 20 pre-existing, unrelated blocking_reproduction/byte-unchanged-since-baseline historical documentation tests deselected by exact node id -- none in modules touched by this phase, identical set as this repo carries on this scope pre-phase-entry, not attributable to this phase)",
+    "report_notification_tests": "notification implementation unchanged; governed BLOCKED completion exercises dispatch machinery only",
+    "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised"
   },
   "governance_results": {
     "pcae_health": "healthy before finalization",
@@ -89,6 +92,10 @@
     {
       "hash": "952c68971be18d0f6cf993ee15fd1c2993abf98c",
       "subject": "F-5 deployment-preparation retry BLOCKED on configured-agent-identity ACL trust-check defect"
+    },
+    {
+      "hash": "52efe93db781198ea9a26eceef74b6bfd6b3a5e6",
+      "subject": "record commit hash and finalize task-file move"
     }
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R -- Configured-Agent-Identity Threading Repair for hatp_class_b_topology_verifier.py's ACL Ancestor-Chain Trust Check. Not begun; requires operator adjudication of blast radius across all _effective_write_access/_ancestor_chain_safe/_resolve_trusted_executable consumers before implementation.",
