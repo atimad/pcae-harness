@@ -45,7 +45,7 @@
     "pcae_check": "passed before finalization",
     "pcae_status_coherence": "coherent before finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing historical omissions; current phase task closed and recorded",
-    "pcae_push_check": "pending governed push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED",
@@ -103,6 +103,6 @@
     }
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R -- Configured-Agent-Identity Threading Repair for hatp_class_b_topology_verifier.py's ACL Ancestor-Chain Trust Check. Not begun; requires operator adjudication of blast radius across all _effective_write_access/_ancestor_chain_safe/_resolve_trusted_executable consumers before implementation.",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head": 0
 }
