@@ -584,8 +584,16 @@ def test_no_mutation_apis_present_in_repaired_module():
         assert forbidden not in src, forbidden
 
 
+#: This fresh suite's own file necessarily mentions these forbidden
+#: literals as string constants inside its own scanning assertions
+#: (below) -- excluded from the diff scope it scans so it does not
+#: trip on its own source, not because it is exempt from the property.
+_THIS_FILE = "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_" \
+    "configured_agent_identity_threading_repair.py"
+
+
 def test_no_removed_or_skipped_tests_in_repair_diff():
-    result = _git("diff", REPAIR_ENTRY_SHA, "--", "tests/")
+    result = _git("diff", REPAIR_ENTRY_SHA, "--", "tests/", f":!{_THIS_FILE}")
     diff = result.stdout
     for forbidden in ("+@pytest.mark.skip", "+@pytest.mark.xfail", "+pytest.skip(", "-def test_"):
         assert forbidden not in diff, forbidden
@@ -614,7 +622,7 @@ def test_repair_diff_touches_only_expected_test_files():
 
 
 def test_no_ppa_install_or_root_admin_functions_referenced_in_diff():
-    result = _git("diff", REPAIR_ENTRY_SHA, "--", "src/", "tests/")
+    result = _git("diff", REPAIR_ENTRY_SHA, "--", "src/", "tests/", f":!{_THIS_FILE}")
     diff = result.stdout
     for forbidden in ("provision_protected_root(", "configure_presentation_mechanism(", "hpac_protected_presentation_admin"):
         assert forbidden not in diff, forbidden
