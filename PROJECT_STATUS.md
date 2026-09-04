@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1 — Independent
+Verification of the F-9 Immutable F-7-Repair-Suite Deployment-Evidence Guard
+Repair + Final N-16-5 Moving-History Clearance + F-5 Retry Readiness
+Adjudication. **STATUS: COMPLETE. F-9: INDEPENDENTLY VERIFIED REPAIRED.
+N-16-5 PREREQUISITE MOVING-HISTORY CLEARANCE: VERIFIED. F-5 RETRY: READY.
+F-5: OPEN / ABSENT / UNCHANGED. N-16-5: NOT CLOSED.**
+
+Independently reconstructed the original semantics and immutable bounds of
+`test_31_no_protected_root_mutation_in_repo_diff`,
+`test_32_no_helper_installation_artifact_added`, and
+`test_43_f4_change_is_test_only` from primary Git evidence (not trusted from
+F-9 report prose); reproduced the original implicit-HEAD defect; validated
+historical/current/future/negative cases for all three via disposable
+synthetic git repos. Fresh 55-test IV suite + F-9 repair suite (68) +
+F-3/F-4/F-6/F-7/F-8 repair/IV chain (496): 619 passed, 0 failed. Broad
+regression sweep (Gate5/Gate9/hpac_verifier/PAWA/RHAMP/CTAP2): 770 total, 3
+pre-existing failures unrelated to F-9/N-16-5 (2 hpac_verifier
+`object.__new__` forgery-detection findings first disclosed at phase
+`...1R.5.1`; 1 stale self-tracking test in the election-IV suite) — identical
+to the predecessor's already-disclosed 3, no new regression. Final bounded
+N-16-5 prerequisite-chain rescan: no additional blocking
+historical-moving-authority defect found. Production/contracts/dependencies
+and protected host state unchanged since this IV's own phase entry; no
+administrator, human, or YubiKey interaction occurred. Because every F-5
+readiness condition is independently satisfied, F-5 RETRY is adjudicated
+READY (this authorizes only a fresh, separately governed deployment-preparation
+retry phase; no deployment occurs here). Runtime remains Observed / observe /
+unavailable, first effect absent, N-16-6/N-16-7 untouched. FIDO2 and local
+presentation remain supported-not-exclusive; mobile-only profiles remain
+open. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_F9_IV_N16_5_CLEARANCE_F5_RETRY_READY.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R — F-9
 Immutable F-7-Repair-Suite Deployment-Evidence Guard Repair. **STATUS:
 REPAIRED / FRESH IV PENDING. TESTS 31/32/43: REPAIRED. F-5 RETRY: PENDING

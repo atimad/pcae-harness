@@ -2,6 +2,27 @@
 
 ## Accepted
 
+- **2026-09-04 — Independently verify F-9 and adjudicate F-5 RETRY: READY.**
+  Independently reconstructed (not trusted from F-9 report prose) the
+  original implicit-`HEAD` defect and immutable `3fbc12d7..90510428` repair
+  bound for `test_31_no_protected_root_mutation_in_repo_diff`,
+  `test_32_no_helper_installation_artifact_added`, and
+  `test_43_f4_change_is_test_only`; validated historical/current/future/
+  negative cases via disposable synthetic git repos, not the F-9 suite's own
+  self-assertions. Final bounded N-16-5 prerequisite-chain rescan clean; one
+  pre-existing stale self-tracking test (election-IV `test_30`) and two
+  pre-existing `hpac_verifier` `object.__new__` forgery-detection findings
+  (first disclosed at unrelated historical phase `.1R.5.1`) reconfirmed
+  identical to the predecessor's disclosure — not repaired, out of scope.
+  F-9: INDEPENDENTLY VERIFIED REPAIRED. N-16-5 PREREQUISITE MOVING-HISTORY
+  CLEARANCE: VERIFIED. All 20 F-5 readiness conditions independently
+  satisfied — F-5 RETRY: READY (authorizes only a fresh, separately governed
+  deployment-preparation retry phase; no deployment performed here). F-5
+  remains absent/open; N-16-5 remains NOT CLOSED. Preserve
+  supported-not-exclusive FIDO2/local-presentation profiles and open
+  mobile-only architecture.
+  **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
 - **2026-09-04 — Block `.30R.5R.2.1R.1R.2` before F-5 host mutation at
   finding F-6.** The mandatory pre-deployment sweep found completed F-4-IV
   `test_43_no_protected_root_mutation_is_in_iv_diff` reads the moving

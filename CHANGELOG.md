@@ -1,5 +1,22 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1` independently
+  verifies F-9 (`test_31_no_protected_root_mutation_in_repo_diff`,
+  `test_32_no_helper_installation_artifact_added`,
+  `test_43_f4_change_is_test_only`) as correctly repaired against the
+  immutable `3fbc12d7..90510428` bound: original defect independently
+  reproduced, historical/current/future/negative cases independently
+  validated via disposable synthetic git repos, no test weakening. Final
+  bounded N-16-5 prerequisite-chain rescan clean (no additional blocking
+  historical-moving-authority defect); 3 pre-existing failures unrelated to
+  F-9/N-16-5 disclosed (identical to predecessor's disclosure, no new
+  regression). F-9: INDEPENDENTLY VERIFIED REPAIRED. N-16-5 PREREQUISITE
+  MOVING-HISTORY CLEARANCE: VERIFIED. F-5 RETRY: READY (authorizes only a
+  fresh, separately governed deployment-preparation retry; no deployment
+  performed). F-5 remains absent; N-16-5 remains not closed; no
+  production/script/dependency/contract change; no host/hardware/human
+  interaction.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R` (F-9)
   repairs exactly `test_31_no_protected_root_mutation_in_repo_diff`,
   `test_32_no_helper_installation_artifact_added`, and
