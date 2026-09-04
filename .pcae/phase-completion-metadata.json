@@ -10,8 +10,8 @@
   "metadata_consistency": "Status, report, decisions, tests, task closure, and idle handoff consistently record F-6 repaired with fresh IV pending, F-5 absent, and N-16-5 not closed.",
   "internal_evidence_coherence": "Fresh F-6 repair suite 57/0; predecessor F-4 IV plus fresh suite 113/0; broad prerequisite sweep 691/0; exact production/contract/dependency diff empty.",
   "internal_report_coherence": "Historical BLOCKED F-5 attempt and completed F-4 IV remain immutable; test_43 alone is repaired, while three latent sibling ranges are disclosed without repair.",
-  "report_consistency": "Canonical report staged pending governed push and final promotion.",
-  "origin_main_head_count": 3,
+  "report_consistency": "Governed phase commits pushed; canonical complete report ready for final promotion.",
+  "origin_main_head_count": 0,
   "test_evidence_classification": "immutable Git topology and historical blob reconstruction; exact phase range/file set; current/future descendant stability; negative in-range detection; targeted defect-family scan; production/contract byte identity",
   "tests_run": 691,
   "tests_added_or_updated": "Retained test_43 received an immutable upper bound; one fresh 57-test repair suite added; zero removal, rename, skip, xfail, wildcard, glob, or fnmatch broadening.",
@@ -46,7 +46,7 @@
     "pcae_check": "passed",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "warning-only longstanding historical DONE omissions; current phase archived/listed",
-    "pcae_push_check": "pending governed metadata commit and push",
+    "pcae_push_check": "clean; origin/main..HEAD = 0 after governed push",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured, enabled, ready; dispatch deferred to post-push promotion",
     "notification_status": "pending final post-push promotion"
@@ -84,6 +84,6 @@
     {"hash": "01291cb96c68d3af5db2bde0476db9002e838804", "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R: close repair task and stage F-6 IV handoff"}
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1 — Independent Verification of the F-6 Immutable F-4-IV Host-Mutation Evidence Guard Repair; adjudicate disclosed siblings before any fresh F-5 retry. Not begun.",
-  "pushed_status": "not_pushed",
-  "origin_main_head": "2eaf536d05b6852c6bc6692cec139afab1083f84"
+  "pushed_status": "pushed",
+  "origin_main_head": "93f4ed3d615735908ef7a608cb325ab900511e65"
 }
