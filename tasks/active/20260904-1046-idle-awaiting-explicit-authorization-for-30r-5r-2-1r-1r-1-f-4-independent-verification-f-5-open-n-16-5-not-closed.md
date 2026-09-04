@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.1 F-4 independent verification; F-5 OPEN; N-16-5 NOT CLOSED
+Idle: awaiting explicit authorization for fresh F-4 independent verification; F-5 OPEN; N-16-5 NOT CLOSED
 
 ## Status
 
@@ -18,7 +18,7 @@ verification-infrastructure repair
 
 ## Goal
 
-Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.1 F-4 independent verification; F-5 OPEN; N-16-5 NOT CLOSED
+Idle: awaiting explicit authorization for fresh F-4 independent verification; F-5 OPEN; N-16-5 NOT CLOSED
 
 ## Allowed Files
 
@@ -29,6 +29,7 @@ Idle: awaiting explicit authorization for .30R.5R.2.1R.1R.1 F-4 independent veri
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
