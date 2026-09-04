@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1 — Independent
+Verification of the F-7 and F-8 Immutable Historical Evidence Guard Repairs +
+Final N-16-5 Prerequisite Moving-History Clearance. **STATUS: BLOCKED. F-7:
+INDEPENDENTLY VERIFIED REPAIRED. F-8: INDEPENDENTLY VERIFIED REPAIRED. ONE NEW
+HISTORICAL-MOVING-AUTHORITY DEFECT: CONFIRMED / REPAIR REQUIRED (F-7 REPAIR
+SUITE TESTS 31/32/43). F-5 RETRY: NOT READY. F-5: OPEN / ABSENT / UNCHANGED.
+N-16-5: NOT CLOSED.**
+
+F-7 (F-4-IV tests 44/46/56) and F-8 (F-6-IV tests 36/38/40/44) both
+independently reconstruct correctly against their repaired immutable
+evidence bounds; historical/current/future cases pass and forbidden
+in-range evidence remains detectable without weakening. The lineage
+correction: the true F-7 repair head is `8b18babd` (the prior report's
+`R7=R0=6de3d697` was two commits too late).
+
+The final bounded prerequisite-chain scan is NOT clean: `test_31`, `test_32`,
+and `test_43` in the F-7 repair suite itself use an unbounded
+`git diff --name-only <fixed>` (fixed commit vs. live worktree) — the same
+moving-history defect class just repaired in F-7/F-8. Per the phase's own
+BLOCKED-condition rule this was disclosed, not repaired, here.
+Production/contracts/dependencies and protected host state are unchanged; no
+administrator, human, or YubiKey interaction occurred. Runtime remains
+Observed / observe / unavailable, first effect absent, and N-16-6/N-16-7
+untouched. FIDO2 and local presentation remain supported-not-exclusive;
+mobile-only profiles remain open. Recommended next, not begun: a narrow
+repair phase scoped exactly to those three tests, followed by a fresh
+bounded re-scan before any F-5 retry can be authorized. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1_F7_F8_IV_MOVING_HISTORY_CLEARANCE_BLOCKED.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R — F-8
 Immutable F-6-IV Sibling-Adjudication Evidence Guard Repair. **STATUS:
 COMPLETE. F-8: REPAIRED / FRESH IV PENDING. F-6-IV TESTS 36/38/40/44:
@@ -15,13 +48,12 @@ to that endpoint. Historical/current/future cases pass and forbidden in-range
 evidence remains detectable without weakening.
 
 The final bounded prerequisite scan found no additional blocking historical-
-moving-authority defect. Production/contracts/dependencies and protected host
-state are unchanged; no administrator, human, or YubiKey interaction occurred.
+moving-authority defect (later found incomplete by the successor IV above).
+Production/contracts/dependencies and protected host state are unchanged; no
+administrator, human, or YubiKey interaction occurred.
 Runtime remains Observed / observe / unavailable, first effect absent, and
 N-16-6/N-16-7 untouched. FIDO2 and local presentation remain supported-not-
-exclusive; mobile-only profiles remain open. Recommended next, not begun:
-`.30R.5R.2.1R.1R.2R.1R.1R.1` combined fresh F-7/F-8 IV and final prerequisite
-moving-history clearance before any separately authorized F-5 retry. Canonical
+exclusive; mobile-only profiles remain open. Canonical
 report: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_F8_IMMUTABLE_F6_IV_EVIDENCE_GUARD_REPAIR.md`.
 
 ---

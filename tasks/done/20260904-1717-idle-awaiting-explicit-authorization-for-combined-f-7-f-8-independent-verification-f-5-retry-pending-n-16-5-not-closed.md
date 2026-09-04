@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for combined F-7/F-8 independent verificat
 
 ## Status
 
-active
+done
 
 ## Mode
 

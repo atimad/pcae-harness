@@ -4771,3 +4771,20 @@ verified in this phase.
 - Live HEAD, current files, live reports, and successor allowlists are not
   historical authority. F-5 remains absent and no deployment action is part of
   this repair.
+# 2026-09-04 — F-7/F-8 IV verifies both, discloses one new sibling defect
+
+- F-7 and F-8 both independently reconstruct correctly against their repaired
+  immutable evidence bounds; no weakening or live-authority dependency found.
+- Corrected the F-7 repair-head lineage attribution to `8b18babd` (the F-8
+  report's `R7=R0=6de3d697` pointed two commits too late, at the stage-blocked
+  completion-metadata commit).
+- The final bounded prerequisite scan is NOT clean: F-7's own repair suite
+  (`test_31_no_protected_root_mutation_in_repo_diff`,
+  `test_32_no_helper_installation_artifact_added`,
+  `test_43_f4_change_is_test_only`) uses an unbounded `git diff` against the
+  live worktree — the same defect class just repaired elsewhere.
+- Per verification-only scope, do not repair it here; disclose it and BLOCK.
+  F-5 retry stays NOT READY; N-16-5 remains not closed.
+- Preserve supported-not-exclusive FIDO2/local presentation and open
+  mobile-only architecture.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**

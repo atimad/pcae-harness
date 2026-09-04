@@ -1,5 +1,14 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1` independently
+  verifies F-7 (F-4-IV tests 44/46/56) and F-8 (F-6-IV tests 36/38/40/44) as
+  correctly repaired against their immutable evidence bounds; corrects the
+  F-7 repair-head lineage attribution (`R7=8b18babd`, not the prior report's
+  `6de3d697`). The phase is **BLOCKED** before F-5: the final bounded scan
+  finds a new historical-moving-authority defect in the F-7 repair suite's
+  own tests 31/32/43 (unbounded `git diff` vs. live worktree). Not repaired
+  here. F-5 remains absent/open and not ready; N-16-5 not closed.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R` repairs only
   F-4-IV tests 44, 46, and 56 by adding immutable finalized endpoint
   `7124c019` to their `90510428` historical ranges. Predicates and path scopes
