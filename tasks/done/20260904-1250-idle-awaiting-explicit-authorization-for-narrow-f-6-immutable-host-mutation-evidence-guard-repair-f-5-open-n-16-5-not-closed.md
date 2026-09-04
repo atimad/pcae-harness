@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for narrow F-6 immutable host-mutation evi
 
 ## Status
 
-active
+done
 
 ## Mode
 
