@@ -96,6 +96,10 @@
     {
       "hash": "52efe93db781198ea9a26eceef74b6bfd6b3a5e6",
       "subject": "record commit hash and finalize task-file move"
+    },
+    {
+      "hash": "6b30c8407939ff059294d07dfbae5110238cff13",
+      "subject": "fix fast_green field placement and honest 0-failed deselect"
     }
   ],
   "recommended_next_phase": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R -- Configured-Agent-Identity Threading Repair for hatp_class_b_topology_verifier.py's ACL Ancestor-Chain Trust Check. Not begun; requires operator adjudication of blast radius across all _effective_write_access/_ancestor_chain_safe/_resolve_trusted_executable consumers before implementation.",
