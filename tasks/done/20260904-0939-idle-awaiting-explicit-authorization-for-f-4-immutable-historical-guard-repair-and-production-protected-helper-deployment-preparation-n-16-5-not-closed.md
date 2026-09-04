@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for F-4 immutable historical guard repair 
 
 ## Status
 
-active
+done
 
 ## Mode
 

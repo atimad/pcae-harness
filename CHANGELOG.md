@@ -1,5 +1,12 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R` repairs F-4 by
+  replacing the `.30R.4R.1` historical source-scope guard's moving live-HEAD
+  upper bound with immutable finalized phase range `a727dbf4..5b6b4013`.
+  The exact eight-file set and test identity remain; no wildcard/fnmatch,
+  skip/xfail, or production/contract/dependency change. F-5 remains absent and
+  untouched; no helper deployment, human/YubiKey ceremony, or N-16-5 closure.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1` independently verifies
   F-3 repaired, but is **BLOCKED; N-16-5 NOT CLOSED** before the real ceremony.
   F-4: a `.30R.4R` historical scope guard still compares to live `HEAD` and
@@ -35,6 +42,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting explicit authorization for F-4 immutable historical guard repair and production protected-helper deployment preparation; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R — F-4 Immutable Historical-Scope Guard Repair; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1 — Independent Verification of the F-3 Repair + Final Real Protected-Presentation Human Election + Presentation-Bound N-16-5 Certification and Closure to Idle: awaiting explicit authorization for F-4 immutable historical guard repair and production protected-helper deployment preparation; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting explicit authorization for fresh F-3 IV and final N-16-5 certification; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1 — Independent Verification of the F-3 Repair + Final Real Protected-Presentation Human Election + Presentation-Bound N-16-5 Certification and Closure; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R — F-3 Immutable Phase-Entry Evidence Repair to Idle: awaiting explicit authorization for fresh F-3 IV and final N-16-5 certification; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.

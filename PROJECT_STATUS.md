@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R — F-4 Immutable
+Historical-Scope Guard Repair. **STATUS: COMPLETE. F-4: REPAIRED; FRESH IV
+PENDING. F-5: OPEN / UNCHANGED. N-16-5: NOT CLOSED.**
+
+CPIPC validates the exact repair-successor ID. The retained `.30R.4R`
+`test_35` now checks the immutable historical implementation interval
+`a727dbf4..5b6b4013`, not `a727dbf4..HEAD`; the exact eight-file allowlist and
+test identity remain unchanged. Owner + fresh repair suites are 85/0, and the
+predecessor/F-3/current repair group is 214/0. Three broad-sweep historical
+failures reproduce identically at phase-entry R0 and are not repair-attributable.
+
+Production, scripts, dependencies, and normative contracts are unchanged.
+F-5's fixed production protected root remains absent and was not mutated; no
+helper deployment, terminal election, YubiKey interaction, real evidence,
+principal, or Gate certification occurred. Runtime remains
+`not_implemented / Observed / observe / unavailable`, zero plugins/capabilities,
+first effect absent; N-16-6/N-16-7 untouched. N-16-5 remains NOT CLOSED.
+FIDO2 and local presentation remain supported-not-exclusive; mobile-only
+profiles remain open.
+
+Recommended sequence, not begun: `.30R.5R.2.1R.1R.1` fresh F-4 IV;
+`.30R.5R.2.1R.1R.2` F-5 deployment preparation; `.1R.1R.2.1` deployment IV;
+then `.1R.1R.3` final real certification. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_F4_IMMUTABLE_HISTORICAL_SCOPE_GUARD_REPAIR.md`.
+
+---
+
+## Prior Phase (.30R.5R.2.1R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1 — Independent Verification
 of the F-3 Repair + Final Real Protected-Presentation Human Election and
 Presentation-Bound N-16-5 Certification. **STATUS: BLOCKED. F-3:

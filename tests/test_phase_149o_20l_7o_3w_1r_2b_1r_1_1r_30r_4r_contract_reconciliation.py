@@ -21,6 +21,9 @@ A = "db5f1dd761174d6ac1ca16e49e8871c02f747fdf"
 #: normative contract; the point-in-time "no implementation exists yet"
 #: guards below are widened, not weakened, to that fixed head.
 R4R_FINALIZED = "a727dbf4f160f904836905d3cb4adeba91953676"
+#: Immutable finalized `.30R.4R.1` head. Historical implementation-scope
+#: assertions must end here rather than at moving live `HEAD`.
+R4R1_FINALIZED = "5b6b4013a69ffcb366209b12c495571917bb5ccc"
 _R4R1_IMPLEMENTATION_FILES = frozenset(
     {
         "src/pcae/core/protected_presentation_installation.py",
@@ -294,11 +297,11 @@ def test_35_no_production_or_script_implementation_changed() -> None:
     # file set and nothing else (still no wildcard).
     changed = set(
         subprocess.check_output(
-            ["git", "diff", "--name-only", R4R_FINALIZED, "HEAD", "--", "src/pcae", "scripts"],
+            ["git", "diff", "--name-only", R4R_FINALIZED, R4R1_FINALIZED, "--", "src/pcae", "scripts"],
             cwd=ROOT, text=True,
         ).split()
         + subprocess.check_output(
-            ["git", "diff", "--name-only", R4R_FINALIZED, "--", "src/pcae", "scripts"], cwd=ROOT, text=True
+            ["git", "diff", "--name-only", R4R_FINALIZED, R4R1_FINALIZED, "--", "src/pcae", "scripts"], cwd=ROOT, text=True
         ).split()
     )
     assert changed <= _R4R1_IMPLEMENTATION_FILES, sorted(changed - _R4R1_IMPLEMENTATION_FILES)

@@ -4665,3 +4665,18 @@ verified in this phase.
 - Do not start the protected terminal or YubiKey ceremony and do not close
   N-16-5 while F-4/F-5 remain.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
+## 2026-09-04 — Phase .30R.5R.2.1R.1R F-4 immutable-scope repair
+
+- Confirm the proposed ID as CPIPC-valid and use it without alteration.
+- Define F-4's original invariant as the exact production/script file scope of
+  historical phase `.30R.4R.1`, not all descendants after `.30R.4R`.
+- Bind that invariant to immutable Git range `a727dbf4..5b6b4013`; retain the
+  exact eight-file allowlist and test name, with no broad successor exemption.
+- Keep F-5 wholly separate: no protected-root/helper installation or state
+  mutation, no real ceremony, and N-16-5 remains NOT CLOSED.
+- Sequence future work as fresh F-4 IV, F-5 deployment preparation, deployment
+  IV, then final certification; none is begun.
+- Preserve supported-not-exclusive FIDO2/local-presentation profiles and open
+  mobile-only future architecture.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
