@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R
+— Checkpointed Incrementally-Resumable RHAMP Execution-Time Class-Identity /
+State-Trace Coverage Advancement, Method Validation, and F-5 Hold
+Adjudication. **STATUS: COMPLETE. CHECKPOINT METHOD: VERIFIED. RESUME
+MODEL: A. CONTAMINATION ROOT CAUSE: UNRESOLVED. CONTAMINATION STAGE:
+TEST-EXECUTION. CONTAMINATION LOCATION: NOT ESTABLISHED. CURRENT F-5
+READINESS: NOT YET ESTABLISHED. F-5 EXECUTION HOLD: REMAINS. N-16-5: NOT
+CLOSED.**
+
+Redesigned the predecessor's non-resumable continuous single-process trace
+(Model C, ~80/571 files, ~140-min full-suite projection — explicitly
+rejected as a resume basis per this phase's own method-validity rule) into
+**Model A**: 31 independent 25-file batch-vs-victim compositions over a
+frozen 761-file corpus, each checkpointed after a fresh clean-process run.
+Checkpoint mechanism independently verified (restart-readable,
+corruption-refused, corpus/tracer-drift-refused) before any coverage
+invocation. Ran 26 batch invocations (~49 min) + 2 tracer-validation
+controls + 1 aborted 600s timeout (≈59.2 of 60 min; 29 of 30 invocations —
+budget exhausted, the phase's legitimate stop condition): **18/31 batches
+CLEAN, 7/31 INCONCLUSIVE (timeout), 5/31 not attempted, and 1/31
+(batch-013) shows a new high-confidence lead** — `id()` of both implicated
+classes (`HPACStoreAuthority`, `HumanPrincipalRegistryStore`) drifted
+session-start-to-finish (module/qualname unchanged; unique among all 19
+batches with complete trace pairs), correlated with the victim module's
+first-ever non-clean outcome (2 `ERROR`s) anywhere in this diagnostic
+lineage. Not yet causally proven (no bisection/trigger-removal/fresh-process
+control performed — budget exhausted). No production/existing-test/contract/
+dependency modification; no host mutation; no F-5 action; runtime remains
+`not_implemented`/`Observed`/`unavailable`, 0 plugins/capabilities.
+Recommended (not begun) successor: resume the same campaign/corpus/
+checkpoint chain, prioritizing bounded causal isolation of batch-013 before
+the remaining pending/inconclusive batches. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_CHECKPOINTED_RHAMP_TRACE_COVERAGE_ADVANCEMENT.md`.
+
+## Prior Phase (.1R.1R.1R.1R.1R.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R
 — RHAMP Cross-Test Contamination Diagnostic Completion, Phase-Completion
 Recovery, and F-5 Hold Re-Adjudication. **STATUS: COMPLETE. CONTAMINATION

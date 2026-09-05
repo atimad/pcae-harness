@@ -1,5 +1,21 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R`
+  (checkpointed incrementally-resumable RHAMP execution-time class-identity/
+  state-trace coverage advancement, method validation, and F-5 hold
+  adjudication) redesigns the predecessor's non-resumable continuous
+  single-process trace (Model C) into Model A: 31 independent 25-file
+  batch-vs-victim compositions over a frozen 761-file corpus, checkpointed
+  after every fresh-process invocation; checkpoint mechanism verified
+  (restart-readable, corruption/corpus/tracer-drift-refused) before any
+  coverage invocation. Ran 26 batch invocations + 2 tracer-validation
+  controls + 1 aborted timeout (~59.2/60 min, 29/30 invocations -- budget
+  exhausted): 18/31 batches clean, 7/31 inconclusive (timeout), 5/31 not
+  attempted, and batch-013 shows a new high-confidence lead -- `id()` drift
+  of both implicated classes correlated with the victim's first-ever
+  non-clean outcome in this diagnostic lineage, unique among 19 batches
+  with complete trace pairs. Not yet causally proven. `CONTAMINATION ROOT
+  CAUSE: UNRESOLVED. F-5 EXECUTION HOLD: REMAINS. N-16-5: NOT CLOSED.`
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R`
   (RHAMP cross-test contamination diagnostic completion, phase-completion
   recovery, and F-5 hold re-adjudication) performs the predecessor's own
