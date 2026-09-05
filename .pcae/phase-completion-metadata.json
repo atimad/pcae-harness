@@ -112,6 +112,6 @@
     }
   ],
   "recommended_next_phase": "Independent Verification of Production Protected-Presentation Generation-1 Deployment State -- fresh, independent re-verification of the protected root/ancestors, anchor/install/generation, helper exact bytes/provenance, PPA installation/current-generation descriptors, currentness, revocation, descriptor/helper/verifier-config binding, PAWA capability provenance/consumption, substitution and unprivileged-mutation resistance, installer/launcher/evidence-writer/human-approver separation, ordinary-development independence, and runtime unavailability. Not begun. N-16-6/N-16-7 untouched.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "58a32942dc9fa49a4407a8a238ed6f61004543b8"
 }
