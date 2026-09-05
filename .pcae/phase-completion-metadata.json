@@ -11,7 +11,7 @@
   "internal_evidence_coherence": "The canonical Phase Report's readiness table, .pcae/evidence/PHASE_1R_1R_HOST_VERIFICATION.json, .pcae/evidence/PHASE_1R_1R_PRIVILEGED_COMMAND_AUDIT.json, and the fresh 14-test IV suite's test_recorded_privileged_findings_match_all_frozen_expectations all cross-reference the identical anchor_id/installation_id/generation/helper-digest/PPA-absence facts.",
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED/INDEPENDENTLY-VERIFIED reports remain immutable and byte-unchanged, including the immediate predecessor's own canonical report; only this phase's own canonical report, durable evidence artifacts, fresh test file, and governance/task/status artifacts are added.",
   "report_consistency": "Staged pending push; canonical report to be promoted to COMPLETE after push.",
-  "origin_main_head_count": 5,
+  "origin_main_head_count": 7,
   "test_evidence_classification": "new_iv_suite_no_production_change",
   "tests_run": 14,
   "tests_added_or_updated": "14 tests: 1 new fresh phase-specific IV test file, all passing: tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_privileged_ro_gen1_ppa_absence_f5_hold.py. 0 existing test files modified.",
