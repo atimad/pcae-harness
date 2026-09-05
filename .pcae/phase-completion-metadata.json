@@ -41,7 +41,7 @@
     "pcae_check": "passed before finalization",
     "pcae_status_coherence": "coherent before finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing historical DONE.md-omission backlog (predates this phase); current phase task closed and recorded",
-    "pcae_push_check": "clean (nothing_to_push)",
+    "pcae_push_check": "nothing_to_push",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED (not applicable -- no delegated worker used)",
@@ -100,6 +100,6 @@
     }
   ],
   "recommended_next_phase": "A further, even more tightly bounded RHAMP cross-test contamination bisection phase testing additional candidate compositions drawn from the remaining files outside all three now-falsified clusters (CLTR-reload cluster, 55-file RHAMP/PAWA thematic cluster, multiprocessing/subprocess-spawn cluster), explicitly broadening the candidate-mechanism list beyond reload/sys.modules surgery (now fully ruled out codebase-wide) to other execution-time global-state mechanisms. Not begun.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "67565ae2e3f9db87e7d2f02faaa57da5ea50bc5e"
 }
