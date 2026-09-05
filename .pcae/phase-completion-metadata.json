@@ -117,6 +117,6 @@
     }
   ],
   "recommended_next_phase": "Re-run the host generation-1/PPA-absence checks under adequate filesystem permissions and, if confirmed, formally re-adjudicate F-5 EXECUTION HOLD to CLEARED and derive the Production Protected-Presentation Registration Continuation successor. Not begun. N-16-6/N-16-7 untouched.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "6e13953f803b9c226513a2cf201f9fdcf1f04bf0"
 }
