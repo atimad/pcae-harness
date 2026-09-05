@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting next governed phase (post .1R.1R); F-5 EXECUTION HOLD: CLEARED; N-16-5 not closed
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R); F-5 EXECUTION HOLD: CLEARED; N-16-5 not closed
 
 ## Status
 
@@ -18,7 +18,7 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post .1R.1R); F-5 EXECUTION HOLD: CLEARED; N-16-5 not closed
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R); F-5 EXECUTION HOLD: CLEARED; N-16-5 not closed
 
 ## Allowed Files
 
