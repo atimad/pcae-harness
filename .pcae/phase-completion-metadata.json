@@ -11,7 +11,7 @@
   "internal_evidence_coherence": "This phase's canonical doc, the appended experiment-log section, the new RHAMP_XTEST_INVOCATION_LOG_PHASE_1R.jsonl, and the updated checkpoint's root_cause block all cross-reference the same 14-invocation bisection path, the same trigger file/node, and the same four-way-proof outcomes; the fresh phase-specific IV suite (20 tests) independently asserts the checkpoint chain linkage, coverage reconciliation to 31, the trigger claim's source-verifiability, its repository-wide uniqueness, and the F-5-hold reason string.",
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED/INDEPENDENTLY-VERIFIED reports remain immutable and byte-unchanged, including the immediate predecessor's own canonical report; only this phase's own canonical report, durable evidence artifacts, and governance/task/status artifacts are added.",
   "report_consistency": "Staged pending push; canonical report to be promoted to COMPLETE after push.",
-  "origin_main_head_count": 0,
+  "origin_main_head_count": 6,
   "test_evidence_classification": "inherited_regression",
   "tests_run": 1,
   "tests_added_or_updated": "1 new fresh phase-specific IV test file (20 tests, all passing): tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_batch013_causal_isolation_iv.py. 0 existing test files modified. 14 pytest invocations run this phase for the diagnostic campaign itself (4 bisection controls, 8 further bisection steps, 1 clean-context band, 1 configured-agent band), tracked separately as diagnostic budget, not phase-specific IV.",

@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting next governed phase (post-.1R.1R); CONTAMINATION ROOT CAUSE: IDENTIFIED; F-5 HOLD: REMAINS (narrow host permission check); N-16-5 not closed
+Idle: awaiting next governed phase (post batch-013 causal isolation); CONTAMINATION ROOT CAUSE: IDENTIFIED; F-5 HOLD: REMAINS (narrow host permission check); N-16-5 not closed
 
 ## Status
 
@@ -18,15 +18,13 @@ diagnostic
 
 ## Goal
 
-Idle: awaiting next governed phase (post-.1R.1R); CONTAMINATION ROOT CAUSE: IDENTIFIED; F-5 HOLD: REMAINS (narrow host permission check); N-16-5 not closed
+Idle: awaiting next governed phase (post batch-013 causal isolation); CONTAMINATION ROOT CAUSE: IDENTIFIED; F-5 HOLD: REMAINS (narrow host permission check); N-16-5 not closed
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- tasks/**
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
 
