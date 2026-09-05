@@ -1,0 +1,836 @@
+{
+  "batch-000": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 46320115216
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 46331395088
+        }
+      }
+    },
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 39837867536
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 39837924368
+        }
+      }
+    }
+  ],
+  "batch-001": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 37126184464
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 37137103888
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 37126184464
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 37137103888
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-002": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 51414146576
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 51414203408
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 51414146576
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 51414203408
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-003": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 46286839312
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 46297676816
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 46286839312
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 46297676816
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-004": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 39239802384
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 39251001360
+        }
+      }
+    }
+  ],
+  "batch-005": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 52841356816
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 52841448464
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 52841356816
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 52841448464
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-006": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 51655286288
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 51666549776
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 51655286288
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 51666549776
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-007": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 49418886672
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 49418978320
+        }
+      }
+    }
+  ],
+  "batch-008": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 40206917136
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 40206973968
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 40206917136
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 40206973968
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-009": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 38446571024
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 38446662672
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 38446571024
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 38446662672
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-010": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 36153122320
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 36164484112
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 36153122320
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 36164484112
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-011": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 50682437136
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 50693340176
+        }
+      }
+    }
+  ],
+  "batch-012": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 30643920400
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 30643993616
+        }
+      }
+    }
+  ],
+  "batch-013": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 40374689296
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 40374729744
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 40371263760
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 40371286032
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-014": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 45548248592
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 45559151632
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 45548248592
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 45559151632
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-015": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 52259134992
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 52270070800
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 52259134992
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 52270070800
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-016": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 53176704528
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 53176764432
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 53176704528
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 53176764432
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-017": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 40526929424
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 40527021072
+        }
+      }
+    }
+  ],
+  "batch-018": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 45078814224
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 45089717264
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 45078814224
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 45089717264
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-019": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 42253786640
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 42253859856
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 42253786640
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 42253859856
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-020": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 42354449936
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 42354506768
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 42354449936
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 42354506768
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-021": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 36589198864
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 36600134672
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 36589198864
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 36600134672
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-022": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 42622852624
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 42622909456
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 42622852624
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 42622909456
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-023": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 32160161296
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 32171490320
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 32160161296
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 32171490320
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-024": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 51588161040
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 51599539216
+        }
+      }
+    },
+    {
+      "event": "session_finish",
+      "observation": {
+        "tag": "session_finish",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 51588161040
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 51599539216
+        }
+      },
+      "exitstatus": 1
+    }
+  ],
+  "batch-025": [
+    {
+      "event": "session_start",
+      "tracer_version": 1,
+      "observation": {
+        "tag": "session_start",
+        "hpac_foundation.HPACStoreAuthority": {
+          "module": "pcae.core.hpac_foundation",
+          "qualname": "HPACStoreAuthority",
+          "id": 53232606736
+        },
+        "human_principal_registry.HumanPrincipalRegistryStore": {
+          "module": "pcae.core.human_principal_registry",
+          "qualname": "HumanPrincipalRegistryStore",
+          "id": 53243477008
+        }
+      }
+    }
+  ]
+}

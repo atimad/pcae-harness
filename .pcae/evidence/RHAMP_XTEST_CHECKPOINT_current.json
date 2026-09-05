@@ -1,0 +1,73 @@
+{
+  "campaign_id": "RHAMP-XTEST-IDENTITY-TRACE/1",
+  "candidate_narrowing_state": "18/31 new batches (Model A, batch-with-victim composition) verified CLEAN (id()-stable, no victim failure). 1/31 batch (batch-013, 25 files: phase-146g/146h1/146h3/146l/147g-q/148c7-g2/149d-149o_10 cluster) shows a high-confidence NEW signal: class-object id() drift for both implicated classes correlated with 2 victim-module ERRORs -- the highest-priority candidate for the next phase's bounded causal isolation. 7/31 batches INCONCLUSIVE (240s per-invocation timeout hit before completion -- batches 0,4,7,11,12,17,25; these contain slow files, not yet attributable to contamination one way or the other; pending re-run with a longer per-invocation timeout or smaller sub-batches). 5/31 batches not yet attempted (budget exhausted).",
+  "checkpoint_id": "sha256:91d566ac423978edd",
+  "completed_unit_ids": [
+    "RHAMP-XTEST-CORPUS-1/batch-001/83eb830e86bafd2a",
+    "RHAMP-XTEST-CORPUS-1/batch-002/075479601236c34f",
+    "RHAMP-XTEST-CORPUS-1/batch-003/b2c173ec0314d9dc",
+    "RHAMP-XTEST-CORPUS-1/batch-005/64fa995ee624f4da",
+    "RHAMP-XTEST-CORPUS-1/batch-006/e67f76c5c955bae2",
+    "RHAMP-XTEST-CORPUS-1/batch-008/3b5ed3ebbb046e22",
+    "RHAMP-XTEST-CORPUS-1/batch-009/0ca713e353d7de8e",
+    "RHAMP-XTEST-CORPUS-1/batch-010/4ec0c77536fbdc7d",
+    "RHAMP-XTEST-CORPUS-1/batch-014/e5aef12ce649aeb8",
+    "RHAMP-XTEST-CORPUS-1/batch-015/55618e7a5fe8deee",
+    "RHAMP-XTEST-CORPUS-1/batch-016/ca2e79f0e78b7ccf",
+    "RHAMP-XTEST-CORPUS-1/batch-018/8f667b64c1fb4d4b",
+    "RHAMP-XTEST-CORPUS-1/batch-019/534e0ea948e3a7b5",
+    "RHAMP-XTEST-CORPUS-1/batch-020/2447124cd76dfc31",
+    "RHAMP-XTEST-CORPUS-1/batch-021/037a8fa98c13e772",
+    "RHAMP-XTEST-CORPUS-1/batch-022/67fa2dc6ada460b8",
+    "RHAMP-XTEST-CORPUS-1/batch-023/3599bf06d81a7558",
+    "RHAMP-XTEST-CORPUS-1/batch-024/3fca2e1e840387eb"
+  ],
+  "corpus_digest": "sha256:0c3b4a9b50537452b375e8ebcaa0c323b5f41fdf6abf3e8d7637c0b8524b3463",
+  "corpus_id": "RHAMP-XTEST-CORPUS/1",
+  "coverage_count": 18,
+  "coverage_percentage": 58.06,
+  "coverage_total": 31,
+  "created_at": "2026-09-05T11:29:16Z",
+  "cumulative_experimental_seconds": 2942.79,
+  "current_F5_hold": "REMAINS",
+  "current_location_status": "NOT_ESTABLISHED",
+  "current_root_cause_status": "UNRESOLVED",
+  "evidence_manifest_digest": "sha256:e8bedc2598c46f9490205037fef09d80c4ca055eb8eac19793e4e24454d81f58",
+  "experiment_count": 26,
+  "failed_unit_ids": [
+    "RHAMP-XTEST-CORPUS-1/batch-013/d164660ae659233b"
+  ],
+  "identified_state_deltas": [
+    {
+      "caveat": "Correlation only, not yet causally proven: no victim-alone control at this exact commit with id()-tracking, no within-batch bisection to the specific triggering file(s) among the 25, no trigger-removal control, no fresh-process repeat performed this phase (budget exhausted before these could run). The victim's own 2 ERRORs could still independently be an unrelated fixture/config issue in this composition rather than caused by the same object-identity substitution as the 37 failures; this was not disambiguated.",
+      "classification": "RELEVANT DELTA OBSERVED",
+      "signal": "id(HPACStoreAuthority) and id(HumanPrincipalRegistryStore) both differ between session_start and session_finish (module/qualname strings unchanged); unique among all 18 completed + 1 failed batches with complete start/finish trace pairs -- the other 18 all show id()-stable start==finish for both classes",
+      "unit_id": "RHAMP-XTEST-CORPUS-1/batch-013/d164660ae659233b",
+      "victim_outcome": "37 failed, 930 passed, 79 errors -- includes 2 victim-module ERRORs (test_94_counter_missing_fails_closed_not_zero, test_95_assurance_class_of_enrolled_records_is_production)"
+    }
+  ],
+  "inconclusive_unit_ids": [
+    "RHAMP-XTEST-CORPUS-1/batch-000/5b88766b4de0698e",
+    "RHAMP-XTEST-CORPUS-1/batch-004/93a8e996325fdd11",
+    "RHAMP-XTEST-CORPUS-1/batch-007/7fe0f9a4c23344e6",
+    "RHAMP-XTEST-CORPUS-1/batch-011/bd83781fe6ae0b2e",
+    "RHAMP-XTEST-CORPUS-1/batch-012/8575bd05b69a4803",
+    "RHAMP-XTEST-CORPUS-1/batch-017/97e5019cf5d8fbe3",
+    "RHAMP-XTEST-CORPUS-1/batch-025/33caa49a7c1cf2a8"
+  ],
+  "pending_unit_count": 13,
+  "phase_id_that_wrote_checkpoint": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R",
+  "plugin_digest": "pytest-xdist==3.8.0",
+  "previous_checkpoint_digest": "sha256:f874f5ca89625bf43825951512fc4d9c205c80e6450027e608b773ec4362819c",
+  "pytest_config_digest": "sha256:bb9f08ef71e2408e13cbab443addd1326523a07ab382723a15441bd66ce8e2fd",
+  "pytest_version": "8.4.2",
+  "python_version": "3.9.6",
+  "resume_model": "A",
+  "schema_version": "1.0",
+  "self_digest": "sha256:3f8ef56abe51e29072bae0fdf13d82a2a1c555788c76745f4c491872368dcf09",
+  "tracer_digest": "sha256:1b7c72e9181a7a463f5e73cf64c4a38949ad8b86d5211ae75b69a8f0f1c30244",
+  "tracer_version": 1,
+  "updated_at": "2026-09-05T12:31:48Z",
+  "victim_baseline_identity_digest": "sha256:1f19a4e67b82eaa977126d79751ec2db1ebc9cb6efc0c986c593cf1f5b66a816",
+  "victim_unit_id": "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py"
+}

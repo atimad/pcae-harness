@@ -1,0 +1,20 @@
+{
+  "stop_reason": "invocation budget exhausted",
+  "invocation_count": 26,
+  "cumulative_experimental_seconds": 2942.79,
+  "coverage_count": 18,
+  "coverage_total": 31,
+  "failed_unit_ids": [
+    "RHAMP-XTEST-CORPUS-1/batch-013/d164660ae659233b"
+  ],
+  "inconclusive_unit_ids": [
+    "RHAMP-XTEST-CORPUS-1/batch-000/5b88766b4de0698e",
+    "RHAMP-XTEST-CORPUS-1/batch-004/93a8e996325fdd11",
+    "RHAMP-XTEST-CORPUS-1/batch-007/7fe0f9a4c23344e6",
+    "RHAMP-XTEST-CORPUS-1/batch-011/bd83781fe6ae0b2e",
+    "RHAMP-XTEST-CORPUS-1/batch-012/8575bd05b69a4803",
+    "RHAMP-XTEST-CORPUS-1/batch-017/97e5019cf5d8fbe3",
+    "RHAMP-XTEST-CORPUS-1/batch-025/33caa49a7c1cf2a8"
+  ],
+  "identified_state_deltas": []
+}
