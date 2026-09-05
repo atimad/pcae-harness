@@ -1,5 +1,47 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R`
+  (RHAMP cross-test contamination diagnosis, evidence reconciliation, and
+  F-5 readiness re-adjudication) canonicalizes a separate, non-governed
+  post-completion reconciliation of the predecessor phase's evidence
+  (original 40587/979/117 sweep's exact SHA/command/node-inventory
+  recorded honestly as UNRESOLVED/UNAVAILABLE, not invented; the later
+  full-suite reproduction relabeled as a separate identified run, not the
+  original sweep; two guard tests reclassified from "unrelated" to
+  CAIR-triggered HISTORICAL-MOVING-AUTHORITY defects, confirmed via
+  `git show --stat` of the CAIR commit); durably preserves the surviving
+  `/tmp` triage evidence under `.pcae/evidence/` with SHA-256 manifest
+  parity; re-diagnoses the dominant RHAMP fixture-chain contamination
+  (79/117 sweep errors: `isinstance(root, HPACStoreAuthority)` spuriously
+  `False` against a genuine instance -- a class-identity divergence);
+  constructs and definitively falsifies two evidence-motivated candidate
+  contamination compositions (the 15 `importlib.reload`-using CLTR-
+  authority files + victim: victim fully clean; the 55-file RHAMP/PAWA/
+  HATP/CLTR thematic self-cluster: `2148 passed, 1 skipped`, fully
+  clean), and independently shows a third (full alphabetical prefix minus
+  slow/integration tests) infeasible within any bounded diagnostic
+  budget; finds zero test files anywhere in the suite that reload or
+  duplicate `hpac_foundation`'s module identity. **CONTAMINATION ROOT
+  CAUSE: UNRESOLVED. CONTAMINATION LOCATION: NOT ESTABLISHED. CURRENT F-5
+  READINESS: NOT YET ESTABLISHED. F-5 EXECUTION HOLD: REMAINS** (does not
+  rewrite the predecessor's own historical "F-5 CONTINUATION HOLD:
+  CLEARED" verdict; records this later, explicitly instructed
+  re-adjudication). Independently reconfirms configured-agent-identity
+  threading repair, the RHAMP/PAWA/protected-presentation relevant band,
+  the `hpac_verifier` forged-object finding (fail-closed by construction
+  via exact-object-registry membership, not isinstance/equality), and the
+  public-reconciliation finding (unreachable from the planned F-5 PPA
+  scripts) all clean/nonblocking on their own -- insufficient alone to
+  clear the hold while the contamination mechanism remains unidentified.
+  No production/existing-test/contract/dependency modification; no host
+  mutation; no F-5 action; no YubiKey/human ceremony; no historical
+  Telegram re-dispatch; runtime remains Observed/observe/unavailable, 0
+  plugins/capabilities; first governed runtime external effect remains
+  absent/unreachable. N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.
+  Recommended (not begun) successor: a further-bounded RHAMP cross-test
+  contamination bisection phase testing additional candidate compositions
+  outside the two already falsified.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R`
   (post-completion full-repository test sweep failure/error attribution
   and F-5 hold adjudication) reproduces the frozen post-completion

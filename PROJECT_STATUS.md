@@ -2,11 +2,58 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R —
-Post-Completion Full-Repository Test Sweep Failure/Error Attribution and
-F-5 Hold Adjudication. **STATUS: COMPLETE. FULL-REPOSITORY POST-
-COMPLETION SWEEP ATTRIBUTION: COMPLETE. F-5 CONTINUATION HOLD: CLEARED.
-N-16-5: NOT CLOSED.**
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R
+— RHAMP Cross-Test Contamination Diagnosis, Evidence Reconciliation, and
+F-5 Readiness Re-Adjudication. **STATUS: COMPLETE. CONTAMINATION ROOT
+CAUSE: UNRESOLVED. CONTAMINATION LOCATION: NOT ESTABLISHED. CURRENT F-5
+READINESS: NOT YET ESTABLISHED. F-5 EXECUTION HOLD: REMAINS. N-16-5: NOT
+CLOSED.**
+
+A separate, non-governed post-completion reconciliation of the
+predecessor phase's evidence identified material limitations (the
+original 40587/979/117 sweep's exact SHA/command/node-inventory is
+UNRESOLVED/UNAVAILABLE from surviving evidence — not invented) and two
+corrections (the later full-suite reproduction, `1092 failed, 40538
+passed, 24 skipped, 117 errors in 8831.59s`, is a separate identified
+run, not the original sweep; `test_31_current_phase_changes_no_
+production_or_contract`/`test_05_production_diff_is_exactly_the_two_
+authorized_files` are CAIR-triggered HISTORICAL-MOVING-AUTHORITY defects,
+not "unrelated"). This phase canonicalized that reconciliation as a
+governed phase and re-diagnosed the dominant RHAMP cross-test
+contamination (79/117 sweep errors from one fixture chain in
+`test_..._30r_3_4_merged_rhamp_mechanism.py`: `isinstance(root,
+HPACStoreAuthority)` spuriously `False` against a genuine
+`HPACStoreAuthority` instance — a class-identity divergence, not a logic
+defect). Two evidence-motivated candidate contamination compositions
+were constructed and definitively falsified (the 15 `importlib.reload`-
+using CLTR-authority test files + victim: victim fully clean; the
+55-file RHAMP/PAWA/HATP/CLTR thematic self-cluster including the victim
+and all its siblings: `2148 passed, 1 skipped`, fully clean); a third
+(full 571-file alphabetical prefix minus slow/integration tests) was
+independently shown infeasible to complete within any bounded diagnostic
+budget (~7% progress in ~10-11 minutes, extrapolating to 2.5+ hours).
+Exhaustive search found zero test files that reload or duplicate
+`hpac_foundation`'s module identity. Because contamination root cause
+remains causally unidentified, **F-5 EXECUTION HOLD: REMAINS** — this
+does not rewrite the predecessor's own historical "F-5 CONTINUATION
+HOLD: CLEARED" verdict, which stands as a record of what was concluded
+at that time; it records this later, explicitly instructed
+re-adjudication. Configured-agent-identity threading repair, the
+RHAMP/PAWA/protected-presentation relevant band (independently
+reconfirmed clean via the 55-file cluster run), the `hpac_verifier`
+forged-object finding (independently reconfirmed fail-closed/nonblocking
+via direct current-source reading of `is_verifier_authenticated_
+principal`'s exact-object-registry check), and the public-reconciliation
+finding (independently reconfirmed unreachable from the planned F-5 PPA
+scripts) all remain clean/adjudicated non-blocking on their own — none
+of that is sufficient to clear the hold while the contamination mechanism
+itself is unidentified. No production/existing-test/contract/dependency
+modification; no host mutation; no F-5 action; runtime remains
+`not_implemented`/`Observed`/`unavailable`, 0 plugins/capabilities.
+Recommended (not begun) successor: a further-bounded RHAMP cross-test
+contamination bisection phase testing additional candidate compositions
+outside the two already falsified. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_RHAMP_CROSS_TEST_CONTAMINATION_DIAGNOSIS_EVIDENCE_RECONCILIATION_AND_F5_READINESS_RE_ADJUDICATION.md`.
 
 Full reproduction at this phase's entry SHA (`python -m pytest -q
 -p no:cacheprovider`, single-process, no xdist): 1092 failed, 40538

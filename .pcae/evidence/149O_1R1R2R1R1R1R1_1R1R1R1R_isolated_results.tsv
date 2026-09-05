@@ -1,0 +1,280 @@
+failed,	no tests ran in 0.02s
+short	no tests ran in 0.02s
+tests/test_advisory_runtime_architecture.py	1 failed, 122 passed in 0.16s
+tests/test_advisory_runtime_contract.py	1 failed, 157 passed in 0.17s
+tests/test_b1_b7_n1_n2_production_authority_repair_independent_verification_3w1r2b1r1_1r8.py	1 failed, 46 passed in 2.44s
+tests/test_bootstrap_todo_consistency.py	4 failed, 14 passed in 1.85s
+tests/test_chgr_packaging.py	2 failed, 1 passed in 1.04s
+tests/test_cltr_135o_integration.py	4 failed, 1 passed in 0.17s
+tests/test_cltr_authority_136aa_shared_core_independent.py	1 failed, 218 passed in 0.34s
+tests/test_cltr_authority_136ab_authority_core.py	3 failed, 66 passed in 1.59s
+tests/test_cltr_authority_136ad_request_readiness.py	3 failed, 116 passed in 1.64s
+tests/test_cltr_authority_136ag_authorization_candidate_independent.py	3 failed, 185 passed in 1.85s
+tests/test_cltr_authority_136ah_publication.py	2 failed, 85 passed in 1.17s
+tests/test_cltr_authority_136ai_publication_independent.py	2 failed, 272 passed in 1.45s
+tests/test_cltr_authority_136aj_recovery_concurrency.py	3 failed, 107 passed in 1.58s
+tests/test_cltr_authority_136ak_recovery_concurrency_independent.py	2 failed, 170 passed in 2.42s
+tests/test_cltr_authority_136al_notification_authority_binding.py	2 failed, 54 passed in 1.14s
+tests/test_cltr_authority_136am_notification_authority_binding_independent.py	2 failed, 107 passed in 2.34s
+tests/test_cltr_authority_136an_marker_authority_binding.py	2 failed, 51 passed in 1.15s
+tests/test_cltr_authority_136ao_marker_authority_binding_independent.py	2 failed, 98 passed in 2.32s
+tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py	2 failed, 55 passed in 1.14s
+tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py	2 failed, 107 passed in 2.31s
+tests/test_cltr_authority_136ar_compatibility_state.py	3 failed, 115 passed in 1.58s
+tests/test_cltr_authority_136as_compatibility_state_independent.py	2 failed, 186 passed in 2.42s
+tests/test_cltr_authority_136at_quarantine_record.py	3 failed, 118 passed in 1.64s
+tests/test_cltr_authority_136au_quarantine_record_independent.py	2 failed, 197 passed in 2.66s
+tests/test_cltr_authority_136aw_final_review.py	1 failed, 107 passed in 0.52s
+tests/test_cltr_authority_136z_shared_core.py	3 failed, 223 passed in 2.67s
+tests/test_cltr_cutover_136k_authority_core_independent_verification.py	2 failed, 100 passed in 4.72s
+tests/test_cltr_cutover_136t_notification_marker_receipt_binding_schema.py	2 failed, 105 passed, 1 skipped in 1.92s
+tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py	1 failed, 154 passed, 1 skipped in 1.18s
+tests/test_cltr_cutover_136v_compatibility_state_quarantine_record_schema.py	2 failed, 121 passed in 1.98s
+tests/test_cltr_migration_135p_verification.py	4 failed, 20 passed in 0.35s
+tests/test_dispatch_attempt_durable_lifecycle_3w1r2b1r1_1r19.py	1 failed, 61 passed in 0.51s
+tests/test_dispatch_attempt_durable_lifecycle_iv_3w1r2b1r1_1r20.py	2 failed, 65 passed in 14.38s
+tests/test_duplicate_terminal_delivery_mixed_evidence_134e81.py	2 failed, 16 passed in 0.08s
+tests/test_finalization_transaction_134e10.py	5 failed, 33 passed in 0.23s
+tests/test_gate10_pre_effect_eligibility_coordinator_3w1r2b1r1_1r17.py	1 failed, 64 passed in 3.15s
+tests/test_gate10_pre_effect_eligibility_coordinator_independent_verification_3w1r2b1r1_1r18.py	4 failed, 101 passed in 17.68s
+tests/test_gate10_slice_a_reconciliation_independent_verification_3w1r2b1r1_1r17r_1.py	5 failed, 43 passed in 1.14s
+tests/test_gate10_slice_a_scope_fence_reconciliation_3w1r2b1r1_1r17r.py	4 failed, 38 passed in 1.00s
+tests/test_gate6_permission_broker_production_consumption_integration_independent_verification_3w1r2b1r1_1r13.py	1 failed, 39 passed in 0.51s
+tests/test_gate7_positive_runtime_enforcement_implementation_3w1r2b1r1_1r26.py	2 failed, 76 passed in 3.59s
+tests/test_gate7_positive_runtime_enforcement_independent_verification_3w1r2b1r1_1r27.py	3 failed, 50 passed in 0.80s
+tests/test_gate7_positive_runtime_enforcement_independent_verification_after_reconciliation_3w1r2b1r1_1r27r.py	2 failed, 67 passed in 100.36s (0:01:40)
+tests/test_hatp_mandatory_cutover.py	1 failed, 86 passed in 0.14s
+tests/test_hpac_foundation_independent_verification_3w1r2b1r111r31.py	8 failed, 27 passed in 0.96s
+tests/test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py	5 failed, 48 passed in 1.39s
+tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py	2 failed, 27 passed in 2.03s
+tests/test_n16_3_reconciliation_iv_3w1r2b1r1_1r22r1.py	5 failed, 42 passed in 53.59s
+tests/test_n16_3_scope_fence_reconciliation_3w1r2b1r1_1r22r.py	8 failed, 35 passed in 4.24s
+tests/test_narrow_eligibility_policy_iv_3w1r2b1r1_1r23.py	2 failed, 53 passed in 1.15s
+tests/test_phase_147o1_authority_evaluation_production_wiring.py	3 failed, 24 passed in 0.21s
+tests/test_phase_147o2_authority_evaluation_production_wiring_independent_verification.py	2 failed, 9 passed in 15.41s
+tests/test_phase_148f_permission_broker_production_consumption_independent_verification.py	1 failed, 10 passed in 3.39s
+tests/test_phase_148g2_permission_broker_operational_hardening_independent_verification.py	1 failed, 18 passed in 3.45s
+tests/test_phase_149d_rwmpc_contract_independent_verification.py	1 failed, 27 passed in 0.18s
+tests/test_phase_149g_rwmpc_wave1_independent_verification.py	34 passed in 3.47s
+tests/test_phase_149j_rollback_approval_evidence_contract_independent_verification.py	1 failed, 48 passed in 0.11s
+tests/test_phase_149m_rollback_approval_evidence_implementation_independent_verification.py	2 failed, 51 passed in 0.60s
+tests/test_phase_149o_10_1_hsce_001_narrow_contract_repair.py	3 failed, 40 passed in 0.27s
+tests/test_phase_149o_10_2_hsce_001_atomic_no_clobber_reverification.py	4 failed, 62 passed in 0.44s
+tests/test_phase_149o_10_hatp_signing_ceremony_evidence_store_contract_independent_verification.py	3 failed, 26 passed in 0.43s
+tests/test_phase_149o_12a_signed_evidence_model_store_implementation.py	4 failed, 39 passed in 0.28s
+tests/test_phase_149o_12b_hatp_signing_ceremony_implementation.py	6 failed, 36 passed in 0.44s
+tests/test_phase_149o_12c_hsce_attack_matrix.py	25 passed in 1.80s
+tests/test_phase_149o_13_hatp_signing_ceremony_evidence_store_independent_verification.py	2 failed, 109 passed in 1.74s
+tests/test_phase_149o_14_hatp_ag3_ag5_mandatory_production_consumption_architecture.py	4 failed, 26 passed in 12.01s
+tests/test_phase_149o_15_hatp_mandatory_production_consumption_contract_freeze.py	5 failed, 32 passed in 1.28s
+tests/test_phase_149o_16_hatp_mandatory_consumption_contract_independent_verification.py	8 failed, 17 passed in 0.39s
+tests/test_phase_149o_17_hmrc_implementation_plan_completeness.py	3 failed, 13 passed in 0.14s
+tests/test_phase_149o_18b_hatp_mandatory_evidence_consumption_adapter.py	35 passed in 0.26s
+tests/test_phase_149o_18c_ag3_mandatory_consumption_integration.py	7 failed, 17 passed in 0.92s
+tests/test_phase_149o_18d_ag5_mandatory_consumption_integration.py	6 failed, 19 passed in 0.88s
+tests/test_phase_149o_18e_cli_legacy_authority_migration_integration.py	4 failed, 20 passed in 0.36s
+tests/test_phase_149o_18f_hmrc_assembled_attack_matrix.py	40 passed in 4.56s
+tests/test_phase_149o_19_2_hatp_mandatory_independent_verification_certification_contract_freeze.py	6 failed, 29 passed in 0.95s
+tests/test_phase_149o_19_3_hmic_contract_independent_verification.py	4 failed, 31 passed in 2.57s
+tests/test_phase_149o_19_3r_1_hmic_frozen_identity_repair_independent_reverification.py	3 failed, 26 passed in 1.54s
+tests/test_phase_149o_19_3r_hmic_frozen_file_set_contract_repair.py	6 failed, 27 passed in 1.04s
+tests/test_phase_149o_19_4_hmic_implementation_plan_completeness.py	2 failed, 18 passed in 1.03s
+tests/test_phase_149o_19_5b_hmic_identity_derivation.py	3 failed, 77 passed in 0.78s
+tests/test_phase_149o_19_5e_1_hmic_v1_1_validator_admin_identity_contract_evolution.py	6 failed, 28 passed in 1.47s
+tests/test_phase_149o_19_5e_2_hmic_v1_1_contract_independent_verification.py	12 failed, 14 passed in 0.33s
+tests/test_phase_149o_19_5e_3_hmic_v1_1_24_file_production_identity_alignment.py	5 failed, 24 passed in 5.41s
+tests/test_phase_149o_19_5e_4_hmic_v1_1_24_file_alignment_independent_verification.py	1 failed, 39 passed in 1.24s
+tests/test_phase_149o_19_5e_hmic_protected_admin_certification_revocation.py	33 passed in 3.50s
+tests/test_phase_149o_19_5f_hmic_activation_readiness_integration.py	2 failed, 47 passed in 1.74s
+tests/test_phase_149o_19_5g_hmic_assembled_attack_matrix_hardening.py	3 failed, 65 passed in 4.71s
+tests/test_phase_149o_19_hmrc_mandatory_consumption_independent_verification.py	1 failed, 87 passed in 5.62s
+tests/test_phase_149o_1f_1_hatp_production_trust_store_path_hardening.py	30 passed in 0.10s
+tests/test_phase_149o_1f_2_hatp_repository_identity_trust_store_foundation_independent_reverification.py	2 failed, 88 passed in 0.29s
+tests/test_phase_149o_1f_hatp_repository_identity_trust_store_foundation_independent_verification.py	1 failed, 21 passed in 0.19s
+tests/test_phase_149o_1h_3_hatp_sub_microsecond_timestamp_truncation_repair.py	6 failed, 51 passed in 0.16s
+tests/test_phase_149o_1h_4_hatp_timestamp_canonicalization_final_independent_reverification.py	18 failed, 96 passed in 0.37s
+tests/test_phase_149o_1h_5_hatp_timestamp_lexical_guard_widening.py	28 failed, 102 passed in 0.36s
+tests/test_phase_149o_1h_6_hatp_timestamp_canonicalization_final_independent_verification.py	38 failed, 134 passed, 1 skipped in 0.59s
+tests/test_phase_149o_1h_hatp_proof_models_canonical_serialization_independent_verification.py	3 failed, 163 passed in 0.22s
+tests/test_phase_149o_20b_hatp_class_b_deployment_contract_freeze.py	4 failed, 24 passed in 0.11s
+tests/test_phase_149o_20c_hatp_class_b_deployment_contract_independent_verification.py	9 failed, 37 passed in 0.21s
+tests/test_phase_149o_20d_1_hmic_v1_2_hbdc_content_identity_binding_repair.py	5 failed, 48 passed, 1 skipped in 2.76s
+tests/test_phase_149o_20d_hmic_v1_2_hbdc_bound_contract_identity_evolution.py	9 failed, 36 passed, 1 skipped in 2.29s
+tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py	9 failed, 37 passed, 9 errors in 0.33s
+tests/test_phase_149o_20f_hmic_v1_2_hbdc_25_file_5_contract_production_identity_alignment.py	13 failed, 33 passed in 6.71s
+tests/test_phase_149o_20g_hmic_v1_2_hbdc_25_file_5_contract_production_identity_alignment_independent_verification.py	7 failed, 33 passed in 8.19s
+tests/test_phase_149o_20i_hatp_class_b_conformance.py	2 failed, 28 passed in 0.28s
+tests/test_phase_149o_20i_hatp_class_b_topology_verifier.py	1 failed, 36 passed in 0.17s
+tests/test_phase_149o_20i_hatp_environment_lock_verifier.py	1 failed, 30 passed in 0.14s
+tests/test_phase_149o_20j_2_class_b_deployment_verifier_narrow_defect_repair_independent_verification.py	6 failed, 50 passed in 0.34s
+tests/test_phase_149o_20j_3_class_b_full_ancestor_chain_verification_narrow_repair.py	5 failed, 22 passed in 0.25s
+tests/test_phase_149o_20j_4_class_b_full_ancestor_chain_verification_repair_independent_verification.py	4 failed, 21 passed in 0.41s
+tests/test_phase_149o_20j_5_class_b_acl_only_higher_ancestor_detection_macos_narrow_repair.py	4 failed, 35 passed in 0.57s
+tests/test_phase_149o_20j_6_class_b_acl_only_higher_ancestor_detection_repair_independent_verification.py	3 failed, 64 passed in 1.07s
+tests/test_phase_149o_20j_7_class_b_writesecurity_chown_acl_right_reclassification_narrow_repair.py	4 failed, 68 passed in 1.07s
+tests/test_phase_149o_20j_8_class_b_writesecurity_chown_acl_right_reclassification_repair_independent_verification.py	3 failed, 103 passed in 2.39s
+tests/test_phase_149o_20j_class_b_deployment_verifier_model_a_environment_lock_independent_implementation_verification.py	6 failed, 56 passed, 1 skipped in 1.18s
+tests/test_phase_149o_20k_1_hmic_class_b_verifier_source_scope_contract_independent_verification.py	8 failed, 28 passed in 0.29s
+tests/test_phase_149o_20k_2_hmic_class_b_verifier_production_source_set_alignment.py	15 failed, 40 passed in 4.53s
+tests/test_phase_149o_20k_3_hmic_class_b_verifier_production_source_set_alignment_independent_verification.py	15 failed, 35 passed in 0.96s
+tests/test_phase_149o_20k_hmic_class_b_verifier_source_scope_contract_evolution.py	9 failed, 31 passed in 1.44s
+tests/test_phase_149o_20l_1_full_hbdc_readiness_contract_schema_evolution.py	3 failed, 73 passed in 1.42s
+tests/test_phase_149o_20l_1a_hmrc_v1_1_hmic_contract_identity_alignment_repair.py	7 failed, 26 passed in 0.27s
+tests/test_phase_149o_20l_1b_hmrc_v1_1_hmic_contract_identity_alignment_independent_verification.py	7 failed, 35 passed in 1.54s
+tests/test_phase_149o_20l_2_full_hbdc_readiness_contract_schema_independent_verification.py	9 failed, 54 passed in 0.94s
+tests/test_phase_149o_20l_3_full_hbdc_production_readiness_integration.py	7 failed, 54 passed in 0.34s
+tests/test_phase_149o_20l_4_full_hbdc_production_readiness_integration_independent_verification.py	7 failed, 44 passed in 2.27s
+tests/test_phase_149o_20l_5_class_b_real_host_provisioning_authorization_and_planning.py	1 failed, 11 passed in 0.17s
+tests/test_phase_149o_20l_6_class_b_provisioning_authorization_record_capture.py	1 failed, 17 passed in 0.70s
+tests/test_phase_149o_20l_6a_class_b_provisioning_authorization_record_independent_verification.py	8 failed, 29 passed in 126.54s (0:02:06)
+tests/test_phase_149o_20l_7_class_b_real_host_provisioning_execution_stopped_before_mutation.py	1 failed, 23 passed in 41.66s
+tests/test_phase_149o_20l_7a_class_b_dell_target_re_selection_and_read_only_preflight.py	1 failed, 25 passed in 41.79s
+tests/test_phase_149o_20l_7b_1_dell_boundary_p_proposition_materialization_amendment.py	1 failed, 35 passed in 0.10s
+tests/test_phase_149o_20l_7b_dell_class_b_boundary_p_authorization_record_capture.py	2 failed, 25 passed in 0.08s
+tests/test_phase_149o_20l_7c_dell_class_b_boundary_p_authorization_independent_verification.py	3 failed, 79 passed in 5.79s
+tests/test_phase_149o_20l_7d_10_independent_verification.py	5 failed, 20 passed in 4.08s
+tests/test_phase_149o_20l_7d_11_repaired_source_dell_redeployment_action_9_re_adjudication_execution.py	1 failed, 33 passed in 3.82s
+tests/test_phase_149o_20l_7d_1_dell_github_read_only_deployment_credential_provisioning.py	1 failed, 17 passed in 0.21s
+tests/test_phase_149o_20l_7d_3_action_6_file_mode_continuation_baseline_proposition_amendment.py	1 failed, 30 passed in 7.22s
+tests/test_phase_149o_20l_7d_5_dell_class_b_provisioning_continuation_execution.py	3 failed, 29 passed in 3.48s
+tests/test_phase_149o_20l_7d_6_action_9_unexpected_residual_diagnosis.py	3 failed, 18 passed in 0.14s
+tests/test_phase_149o_20l_7d_8_class_b_verifier_source_repair_independent_verification.py	3 failed, 25 passed in 2.56s
+tests/test_phase_149o_20l_7d_9_repaired_source_redeployment_action_9_amendment_proposition.py	1 failed, 48 passed in 0.47s
+tests/test_phase_149o_20l_7d_dell_class_b_real_host_provisioning_execution.py	1 failed, 18 passed in 0.19s
+tests/test_phase_149o_20l_7e_dell_class_b_real_host_provisioning_independent_verification.py	3 failed, 33 passed in 2.14s
+tests/test_phase_149o_20l_7g_deploymentbinding_producer_contract_schema_evolution.py	3 failed, 65 passed in 0.11s
+tests/test_phase_149o_20l_7h_deploymentbinding_producer_contract_independent_verification.py	5 failed, 67 passed in 0.34s
+tests/test_phase_149o_20l_7i_deploymentbinding_producer_implementation.py	4 failed, 37 passed in 0.42s
+tests/test_phase_149o_20l_7j_deploymentbinding_producer_implementation_independent_verification.py	3 failed, 17 passed in 1.15s
+tests/test_phase_149o_20l_7k_hmic_frozen_source_scope_amendment_for_deploymentbinding_producer.py	4 failed, 20 passed in 0.22s
+tests/test_phase_149o_20l_7l_1_hmic_consumer_status_and_dependency_header_repair.py	5 failed, 15 passed in 0.15s
+tests/test_phase_149o_20l_7l_2_hmic_consumer_status_and_dependency_header_repair_independent_verification.py	2 failed, 14 passed in 0.17s
+tests/test_phase_149o_20l_7l_3_attack_matrix_and_ast_guard_narrow_repair.py	4 failed, 52 passed in 5.26s
+tests/test_phase_149o_20l_7l_4_attack_matrix_and_ast_guard_independent_verification.py	7 failed, 35 passed in 6.35s
+tests/test_phase_149o_20l_7l_5_contract_preamble_and_ast_guard_relative_import_narrow_repair.py	5 failed, 58 passed in 7.14s
+tests/test_phase_149o_20l_7l_6_contract_preamble_and_relative_import_guard_repair_independent_verification.py	11 failed, 54 passed in 6.75s
+tests/test_phase_149o_20l_7l_hmic_frozen_source_scope_amendment_independent_verification.py	6 failed, 54 passed in 4.86s
+tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py	4 failed, 34 passed in 2.61s
+tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py	4 failed, 47 passed in 9.17s
+tests/test_phase_149o_20l_7n_2_dell_redeployment_human_election_chgr_publication.py	2 failed, 11 passed in 2.02s
+tests/test_phase_149o_20l_7n_3_dell_current_source_redeployment_authority_independent_verification.py	4 failed, 31 passed in 3.89s
+tests/test_phase_149o_20l_7n_5_dell_current_source_redeployment_independent_verification.py	1 failed, 39 passed in 0.20s
+tests/test_phase_149o_20l_7n_dell_current_source_redeployment_proposition_authority_preparation.py	2 failed, 31 passed in 0.36s
+tests/test_phase_149o_20l_7o_2a_1_repositoryidentity_write_path_remediation_proposition_independent_verification.py	1 failed, 16 passed in 0.63s
+tests/test_phase_149o_20l_7o_2a_2_repositoryidentity_write_path_remediation_human_election_chgr_publication.py	1 failed, 15 passed in 1.95s
+tests/test_phase_149o_20l_7o_2a_3_repositoryidentity_write_path_remediation_authority_independent_verification.py	3 failed, 21 passed in 3.76s
+tests/test_phase_149o_20l_7o_2a_4_repositoryidentity_write_path_remediation_execution.py	2 failed, 25 passed in 2.00s
+tests/test_phase_149o_20l_7o_2a_5_repositoryidentity_write_path_remediation_independent_real_host_verification.py	2 failed, 24 passed in 1.99s
+tests/test_phase_149o_20l_7o_2c_deploymentbinding_first_use_field_resolution_architecture.py	2 failed, 27 passed in 0.19s
+tests/test_phase_149o_20l_7o_2d_1_hatp_principal_signer_enrollment_contract_independent_verification.py	3 failed, 17 passed in 0.10s
+tests/test_phase_149o_20l_7o_2d_2_hatp_principal_signer_enrollment_contract_repair.py	1 failed, 34 passed in 0.12s
+tests/test_phase_149o_20l_7o_2d_3_hatp_principal_signer_enrollment_contract_repair_independent_verification.py	1 failed, 18 passed in 0.08s
+tests/test_phase_149o_20l_7o_2d_hatp_principal_signer_enrollment_contract_architecture.py	5 failed, 20 passed in 0.09s
+tests/test_phase_149o_20l_7o_2g_1_hmic_target_set_reconciliation.py	2 failed, 10 passed in 0.13s
+tests/test_phase_149o_20l_7o_2h_0_hmic_certificationrecord_contract_version_closed_schema_alignment_repair.py	4 failed, 29 passed in 0.96s
+tests/test_phase_149o_20l_7o_2h_1_hmic_trust_enrollment_signing_authority_scope_alignment_independent_verification.py	11 failed, 32 passed in 3.21s
+tests/test_phase_149o_20l_7o_2h_hmic_trust_enrollment_signing_closure_limb_d.py	5 failed, 31 passed in 0.56s
+tests/test_phase_149o_20l_7o_2k_3_hatp_hmic_certificationrecord_real_host_creation_source_parity_revalidated.py	6 passed in 0.11s
+tests/test_phase_149o_20l_7o_2k_4_post_certificationrecord_dag_re_derivation.py	10 passed in 0.49s
+tests/test_phase_149o_20l_7o_2l_2_hatp_trust_enrollment_admin_entrypoint_independent_verification.py	20 passed in 0.16s
+tests/test_phase_149o_20l_7o_2l_3_hatp_hardware_credential_admin_recovery_authority_narrow_repair.py	27 passed in 0.71s
+tests/test_phase_149o_20l_7o_2l_4_hatp_hardware_credential_admin_recovery_authority_repair_independent_verification.py	1 failed, 44 passed in 0.49s
+tests/test_phase_149o_20l_7o_2m_2_hac_dell_hmic_v1_7_38_governed_redeployment_and_source_parity_restoration.py	1 failed, 24 passed in 0.09s
+tests/test_phase_149o_20l_7o_2m_3_hac_dell_hmic_v1_7_38_certificationrecord_creation_create_only.py	6 passed in 0.08s
+tests/test_phase_149o_20l_7o_2m_4_hac_dell_hmic_v1_7_38_certification_activation_successor_binding_only.py	9 passed in 0.09s
+tests/test_phase_149o_20l_7o_2n_10_hrac_001_independent_verification.py	1 failed, 31 passed in 0.08s
+tests/test_phase_149o_20l_7o_2n_14_hrwp_protocol_vocabulary_and_provider_dispatch_prerequisite_independent_verification.py	1 failed, 36 passed in 26.88s
+tests/test_phase_149o_20l_7o_2n_1_fido2_enrollment_pre_hardware_governance_confirmation_ordering_narrow_repair.py	17 passed in 0.26s
+tests/test_phase_149o_20l_7o_2n_2_fido2_ordering_independent_verification.py	13 passed in 0.18s
+tests/test_phase_149o_20l_7o_2n_3_hac_dell_repaired_fido2_admin_redeployment_and_hatp_hardware_runtime_dependency_realization.py	1 failed, 27 passed in 0.09s
+tests/test_phase_149o_20l_7o_2n_4_hac_dell_repaired_fido2_admin_hmic_v1_7_38_certificationrecord_creation_create_only.py	6 passed in 0.09s
+tests/test_phase_149o_20l_7o_2n_5_hac_dell_hmic_v1_7_38_certification_activation_successor_binding_only.py	9 passed in 0.09s
+tests/test_phase_149o_20l_7o_2n_6_hac_dell_fido2_availability_multi_authenticator_architecture.py	9 passed in 0.11s
+tests/test_phase_149o_20l_7o_2s_2_fgsc_001_lifecycle_implementation.py	39 passed in 3.66s
+tests/test_phase_149o_20l_7o_2s_4_fgsc_001_staleness_carveout_repair.py	6 passed in 2.64s
+tests/test_phase_149o_20l_7o_2s_5_fgsc_001_staleness_carveout_independent_verification.py	13 passed in 5.18s
+tests/test_phase_149o_20l_7o_2u_1_reference_adapter_contract_freeze.py	1 failed, 6 passed in 0.11s
+tests/test_phase_149o_20l_7o_2u_v0_3_release_plan.py	1 failed, 7 passed in 0.28s
+tests/test_phase_149o_20l_7o_2x_1_independent_verification.py	1 failed, 36 passed in 2.99s
+tests/test_phase_149o_20l_7o_3f_1_independent_rollback_permission_verification.py	19 passed in 1.13s
+tests/test_phase_149o_20l_7o_3f_rollback_permission_broker_default_path.py	21 passed in 0.55s
+tests/test_phase_149o_20l_7o_3m_1_independent_rollback_readiness_evidence_consumption_verification.py	2 failed, 24 passed in 2.09s
+tests/test_phase_149o_20l_7o_3m_rollback_readiness_evidence_automatic_consumption.py	18 passed in 0.58s
+tests/test_phase_149o_20l_7o_3v_1_contract_verification.py	6 failed, 38 passed in 0.19s
+tests/test_phase_149o_20l_7o_3v_1r_1_contract_verification.py	6 failed, 45 passed in 0.12s
+tests/test_phase_149o_20l_7o_3v_1r_contract_repair.py	3 failed, 18 passed in 0.11s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1.py	99 passed in 0.98s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_2_1_1_writer_capability_integrity_iv.py	30 passed in 0.94s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_3r_decomposition_adjudication.py	1 failed, 16 passed in 0.17s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py	125 passed in 2.81s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py	16 passed in 0.55s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_6_1_multi_write_completion_integrity_repair_iv.py	46 passed in 2.38s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_6_multi_write_completion_integrity_repair.py	46 passed in 1.54s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance.py	59 passed in 3.10s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv.py	75 passed in 8.05s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5_hardware_cert_closure.py	3 failed, 12 passed in 0.48s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1_protected_presentation_human_election_iv_and_n16_5_certification.py	2 failed, 83 passed in 0.93s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1_f3_iv_and_n16_5_certification.py	4 failed, 51 passed in 0.49s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_1_f4_immutable_scope_iv.py	1 failed, 55 passed in 0.84s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1_f6_immutable_host_mutation_guard_iv.py	3 failed, 62 passed in 0.96s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1_independent_verification_configured_agent_identity_threading_repair.py	3 failed, 35 passed, 3 skipped in 1.01s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_configured_agent_identity_threading_repair.py	4 failed, 26 passed in 0.38s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_f9_iv_and_n16_5_clearance.py	3 failed, 52 passed in 1.89s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_f9_deployment_evidence_guard_repair.py	3 failed, 65 passed in 1.22s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_f8_immutable_f6_iv_evidence_guard_repair.py	4 failed, 92 passed in 1.59s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_f7_remaining_f4_iv_evidence_guard_repair.py	3 failed, 76 passed in 1.57s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_f6_immutable_host_mutation_guard_repair.py	4 failed, 53 passed in 1.01s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_f4_immutable_scope_repair.py	2 failed, 41 passed in 0.64s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_f3_immutable_phase_entry_evidence_repair.py	4 failed, 41 passed in 3.97s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_protected_presentation_interactive_election_repair.py	1 failed, 70 passed in 1.02s
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_ctap2_pin_uv_repair.py	48 passed in 0.57s
+tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py	7 failed, 11 passed in 1.61s
+tests/test_phase_149o_2_hatp_hardware_provider_implementation.py	62 passed, 1 skipped in 0.14s
+tests/test_phase_149o_3_hatp_hardware_provider_independent_verification.py	7 failed, 235 passed, 1 skipped in 10.99s
+tests/test_phase_149o_4_hatp_rae_integration.py	1 failed, 51 passed in 0.37s
+tests/test_phase_149o_5_hatp_rae_integration_independent_verification.py	1 failed, 46 passed in 0.79s
+tests/test_phase_149o_7_hatp_class_b_activation_independent_verification.py	2 failed, 19 passed in 0.24s
+tests/test_phase_149o_9_hatp_signing_ceremony_evidence_store_contract_freeze.py	1 failed, 59 passed in 0.17s
+tests/test_phase_149o_rollback_approval_evidence_canonical_provenance_hardening_independent_verification.py	4 failed, 13 passed in 0.26s
+tests/test_phase_id_repository_wide_conformance.py	2 failed, 4 passed in 3.41s
+tests/test_phase_report_trust_hard_fail.py	29 passed in 4.76s
+tests/test_phase_reports.py	1 failed, 147 passed in 1.45s
+tests/test_pipeline.py	14 passed in 2.93s
+tests/test_policy.py	54 passed in 0.12s
+tests/test_production_dry_lifecycle_verification_3s2_1.py	37 passed in 0.62s
+tests/test_project_state_context.py	24 passed in 225.15s (0:03:45)
+tests/test_push_phase_report_identity_137f1.py	14 passed in 3.48s
+tests/test_rendering_134e5.py	1 failed, 97 passed, 1 warning in 0.40s
+tests/test_repository_skills.py	53 passed in 0.90s
+tests/test_repository_skills_integration_verification_115n.py	62 passed in 3.50s
+tests/test_repository_skills_verification_115k.py	49 passed in 1.95s
+tests/test_repository_transition_validator_decision_evaluation_integration.py	32 passed in 0.08s
+tests/test_repository_transition_validator_phase_complete_integration.py	8 passed in 1.44s
+tests/test_repository_transition_validator_task_finish_integration.py	11 passed in 2.83s
+tests/test_runtime_adapter_e2e_3s.py	21 passed in 0.19s
+tests/test_runtime_authority_pb_repair_3w1r.py	1 failed, 15 passed in 0.20s
+tests/test_runtime_authority_pb_reverification_3w1r1.py	1 failed, 96 passed in 0.59s
+tests/test_runtime_authority_pb_verification_3w1.py	3 failed, 80 passed in 0.31s
+tests/test_runtime_authority_production_repair_3w1r2b1r1117.py	1 failed, 37 passed, 3 skipped in 4.48s
+tests/test_runtime_dispatch_1r26r1_harness_repair_3w1r2b1r1_1r26r1r.py	4 failed, 18 passed in 3.43s
+tests/test_runtime_dispatch_1r26r1_skip_detection_repair_3w1r2b1r1_1r26r1r1r.py	4 failed, 27 passed in 0.93s
+tests/test_runtime_dispatch_1r26r1_skip_detection_repair_independent_verification_3w1r2b1r1_1r26r1r1r1.py	3 failed, 40 passed in 3.30s
+tests/test_runtime_dispatch_1r26r_reconciliation_independent_verification_3w1r2b1r1_1r26r1.py	3 failed, 23 passed in 93.53s (0:01:33)
+tests/test_runtime_dispatch_1r26r_scope_fence_reconciliation.py	6 failed, 14 passed in 2.72s
+tests/test_runtime_dispatch_contract_normalization_3w1r2b1r1_1r15_4.py	36 passed in 0.60s
+tests/test_runtime_dispatch_contract_normalization_independent_verification_3w1r2b1r1_1r15_5.py	2 failed, 46 passed in 1.03s
+tests/test_runtime_dispatch_narrow_eligibility_3w1r2b1r1_1r22.py	1 failed, 42 passed in 0.19s
+tests/test_runtime_human_principal_contract_freeze_blocking_repair_3w1r2b1r.py	10 failed, 5 passed in 0.09s
+tests/test_runtime_human_principal_contract_freeze_verification_3w1r2b1.py	23 failed, 16 passed in 0.33s
+tests/test_runtime_human_principal_cross_contract_freeze_repair_3w1r2b1r1.py	2 failed, 17 passed in 0.08s
+tests/test_runtime_human_principal_cross_contract_freeze_repair_independent_verification_3w1r2b1r11.py	5 failed, 22 passed in 0.09s
+tests/test_runtime_introspection_prototype.py	74 passed in 0.11s
+tests/test_runtime_snapshot.py	35 passed in 1.19s
+tests/test_schema_runtime_packaging.py	3 failed, 1 passed in 1.47s
+tests/test_session.py	145 passed in 18.97s
+tests/test_shell_gate.py	1 failed, 117 passed in 71.69s (0:01:11)
+tests/test_shell_gate_matrix.py	287 passed in 0.61s
+tests/test_strategic_lineage.py	24 passed in 0.52s
+tests/test_task_finish_notification_ordering.py	22 passed in 5.31s
+tests/test_task_finish_report_trust_notification.py	19 passed in 4.69s
+tests/test_telegram_notifications.py	47 passed in 1.00s
