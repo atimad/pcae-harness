@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260905-1909-idle-awaiting-next-governed-phase-post-1r-1r-1r-f-5-deployed-iv-pending-n-16-5-not-closed
+20260905-2143-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-ppa-gen-1-deployment-state-iv
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R); F-5: DEPLOYED / IV PENDING; N-16-5 not closed
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1: PPA Gen-1 Deployment State IV
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,16 +18,16 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R); F-5: DEPLOYED / IV PENDING; N-16-5 not closed
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1: PPA Gen-1 Deployment State IV
 
 ## Allowed Files
 
-- tasks/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- .pcae/evidence/PHASE_1R_1R_1R_1_DEPLOYMENT_STATE_IV.json
+- tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_ppa_deployment_state_iv.py
+- docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_PPA_DEPLOYMENT_STATE_IV.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/**
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 
@@ -83,4 +83,4 @@ strict
 
 ## Created Timestamp
 
-2026-09-05T19:09:57.354708+02:00
+2026-09-05T21:43:12.420376+02:00
