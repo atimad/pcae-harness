@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R`
+  (checkpointed RHAMP execution-time class-identity/state-trace campaign
+  continuation, batch-013 causal isolation, production-reachability
+  determination, and F-5 hold re-adjudication) continued the SAME
+  checkpointed campaign (`RHAMP-XTEST-IDENTITY-TRACE/1` /
+  `RHAMP-XTEST-CORPUS/1`), no reset. Bisected batch-013's frozen 25-file
+  manifest to a single test node (14/30 invocations, ~171s of a fresh
+  60min budget): `tests/test_phase_147h_authority_evaluation_independent_verification.py`
+  `TestForbiddenDependenciesIndependent::test_no_forbidden_root_is_importable_transitively_via_authority_evaluation_alone`
+  deletes `pcae.core.*` from `sys.modules` without invalidating stale
+  class-object references held elsewhere -- DUPLICATE MODULE IMPORT /
+  STALE REFERENCE, four-way causally proven, unique among all 761 corpus
+  files, absent from `src/pcae` and the PPA scripts. `CONTAMINATION ROOT
+  CAUSE: IDENTIFIED. CONTAMINATION STAGE: TEST-EXECUTION. CONTAMINATION
+  LOCATION: TEST-HARNESS ONLY.` A bounded clean-context PAWA/PPA/RHAMP/
+  hpac_verifier/Gate5/Gate9 band and configured-agent-identity band both
+  remain meaningful. `F-5 EXECUTION HOLD: REMAINS` -- 11/12 clearance
+  criteria satisfied; the host generation-1/PPA-absence re-check hit
+  `PermissionError` on `_PROTECTED_ROOT` in this diagnostic process (not
+  new evidence of a violation). `N-16-5: NOT CLOSED.`
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R`
   (checkpointed incrementally-resumable RHAMP execution-time class-identity/
   state-trace coverage advancement, method validation, and F-5 hold

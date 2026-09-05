@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R
+— Checkpointed RHAMP Execution-Time Class-Identity / State-Trace Campaign
+Continuation, Batch-013 Causal Isolation, Production-Reachability
+Determination, and F-5 Hold Re-Adjudication. **STATUS: COMPLETE.
+CHECKPOINT METHOD: VERIFIED (continuation). CAMPAIGN COVERAGE UNCHANGED:
+18/31 CLEAN, 1/31 NON-CLEAN (batch-013, now root-caused), 7/31
+INCONCLUSIVE, 5/31 NEVER ATTEMPTED. CONTAMINATION ROOT CAUSE: IDENTIFIED.
+CONTAMINATION STAGE: TEST-EXECUTION. CONTAMINATION LOCATION: TEST-HARNESS
+ONLY. CURRENT F-5 READINESS: NOT YET ESTABLISHED (11/12 criteria
+satisfied). F-5 EXECUTION HOLD: REMAINS. N-16-5: NOT CLOSED.**
+
+Continued the SAME checkpointed campaign (`RHAMP-XTEST-IDENTITY-TRACE/1` /
+`RHAMP-XTEST-CORPUS/1`) from the predecessor's checkpoint chain -- no
+reset, the 18 clean batches not re-run. Bisected batch-013's frozen
+25-file manifest down to a single test node (14 invocations, ~171s of a
+fresh 30/60min budget, stopped voluntarily once the causal bar was met):
+`tests/test_phase_147h_authority_evaluation_independent_verification.py`
+`TestForbiddenDependenciesIndependent::test_no_forbidden_root_is_importable_transitively_via_authority_evaluation_alone`
+deletes `pcae.core.*` from `sys.modules` (via `_FORBIDDEN_IMPORT_ROOTS`
+including `"pcae.core"`) without invalidating stale class-object
+references held elsewhere; a later re-import constructs distinct
+same-named class objects -- DUPLICATE MODULE IMPORT / STALE REFERENCE.
+Four-way causal proof (victim-alone clean / minimized-trigger+victim
+contaminated / composition-minus-trigger clean / fresh-process-repeat
+identical) all confirmed. Uniquely present among all 761 corpus files
+(mechanically re-verified); absent from `src/pcae` and from the PPA
+registration scripts -- TEST-HARNESS ONLY. A bounded clean-context
+PAWA/PPA/RHAMP/`hpac_verifier`/Gate5/Gate9 band (700 passed, 2 pre-existing
+nonblocking failures) and a bounded configured-agent-identity band (35
+passed) both remain meaningful. F-5 hold remains only because this
+diagnostic phase's own process lacked filesystem permission to positively
+confirm the host's generation-1/PPA-absence state
+(`_PROTECTED_ROOT` raised `PermissionError`) -- not new evidence of a
+violation. No production/existing-test/contract/dependency/host
+modification. Recommended (not begun) successor: re-run the two blocked
+host checks under adequate permissions and, if confirmed, formally clear
+F-5. Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_BATCH013_CAUSAL_ISOLATION.md`.
+
+## Prior Phase (.1R.1R.1R.1R.1R.1R.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R
 — Checkpointed Incrementally-Resumable RHAMP Execution-Time Class-Identity /
 State-Trace Coverage Advancement, Method Validation, and F-5 Hold
