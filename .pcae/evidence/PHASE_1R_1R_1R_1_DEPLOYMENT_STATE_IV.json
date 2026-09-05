@@ -1,0 +1,278 @@
+{
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1",
+  "phase_title": "Independent Verification of Production Protected-Presentation Generation-1 Deployment State",
+  "predecessor_phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R",
+  "cpipc_successor_validation": {
+    "same_series": true,
+    "same_branch": true,
+    "compare_predecessor_to_this": "less",
+    "relation": "direct successor: this.subphase[:-1] == predecessor.subphase, trailing (1, '') appended",
+    "discrepancy": "none -- the phase ID given in the operator directive is the exact CPIPC-valid successor"
+  },
+  "V0": "8db9178e61c44f36bba4c7e879e79fc75fdf99fc",
+  "G0_predecessor_open": "4fa2ddb1fe1ef6b4b7588bbaa49131d11120efb5",
+  "G_CHANGE_predecessor_registration_commit": "f78a13ff",
+  "G_FINAL_predecessor_finalized_endpoint": "8db9178e61c44f36bba4c7e879e79fc75fdf99fc",
+  "note_V0_equals_G_FINAL": "this IV's phase-entry SHA is identical to the predecessor's finalized endpoint -- no intervening commits.",
+
+  "privileged_readback": {
+    "method": "Read-only sudo commands run by the human operator directly in their own trusted terminal (never through this agent's shell). Password never seen, echoed, logged, or persisted by any agent process. No mutation performed (verified: writer.lock empty/unheld before and after; find listings show exactly the same 3 mechanism files + 1 helper file both before this IV and now).",
+    "protected_root": {
+      "path": "/Library/Application Support/PCAE/HPAC/protected-root",
+      "owner": "root:admin",
+      "mode_octal": "0700",
+      "device": 16777230,
+      "inode": 555016224,
+      "matches_pawa_anchor_protected_root_identity": true,
+      "verdict": "VERIFIED"
+    },
+    "pawa_anchor": {
+      "file": ".authority/deployment-owner.json",
+      "anchor_id": "hpaw-f9661f401f204d828a4aec951855819a",
+      "installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+      "generation": 1,
+      "state": "ACTIVE",
+      "supersedes": null,
+      "protected_root_identity": {"device": 16777230, "inode": 555016224},
+      "matches_expected": true,
+      "verdict": "VERIFIED"
+    },
+    "agent_exclusion": {
+      "file": ".authority/agent-exclusion.json",
+      "symbolic_account": "atilamadai",
+      "provisioned_uid": 501,
+      "generation": 1,
+      "installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+      "state": "ACTIVE",
+      "matches_expected": true,
+      "verdict": "VERIFIED"
+    },
+    "writer_lock": {
+      "file": ".authority/writer.lock",
+      "byte_length": 0,
+      "held_by_any_process_lsof": false,
+      "verdict": "NO PARTIAL/STUCK TRANSACTION"
+    },
+    "descriptor_json": {
+      "path": "presentation-mechanisms/v2/pcae-protected-local-presentation/descriptor.json",
+      "owner": "root:admin",
+      "mode_octal": "0600",
+      "mechanism_id": "pcae-protected-local-presentation",
+      "verifier_kind": "pcae-protected-local-presentation/1.0",
+      "verifier_configuration_digest": "951182f5e737068d286313903504e34cb3dc57b47a2a19f9031ac068c7992c85",
+      "renderer_profile": "pcae-protected-local-presentation-renderer/1.0",
+      "descriptor_version": "pcae-protected-local-presentation-descriptor/1.0",
+      "descriptor_schema_version": "HPAC-PRESENTATION-MECHANISM/2.0",
+      "descriptor_digest": "c4e9a04d8d4af865372d78db280b8a2ba40f7ad29414b365acf87b775b13fc6e",
+      "status": "active",
+      "explicit_election_support": true,
+      "agent_substitution_resistant": true,
+      "protected_output": true,
+      "canonical_subject_rendering": true,
+      "verdict": "VERIFIED (matches independently recomputed verifier-config digest)"
+    },
+    "current_generation_json": {
+      "path": "presentation-mechanisms/v2/pcae-protected-local-presentation/current-generation.json",
+      "owner": "root:admin",
+      "mode_octal": "0600",
+      "current_generation_schema_version": "HPAC-PRESENTATION-CURRENT-GENERATION/1.0",
+      "mechanism_id": "pcae-protected-local-presentation",
+      "current_generation": 1,
+      "installation_id": "hppi-648bee5e950b4f5e971a6c65c8cc53cf",
+      "installation_digest": "ab23db5921be7b88f565f9d42e29707e594c9c1fa209953037040cf9f38e5820",
+      "descriptor_digest": "c4e9a04d8d4af865372d78db280b8a2ba40f7ad29414b365acf87b775b13fc6e",
+      "anchor_digest": "2f26d42805a5f4f5b60a4da93f4c0499c8ea8821f03d937b64ee708a08db8ac5",
+      "status": "active",
+      "matches_installation_record": true,
+      "matches_descriptor_record": true,
+      "no_conflicting_active_generation": true,
+      "verdict": "VERIFIED"
+    },
+    "installation_1_json": {
+      "path": "presentation-mechanisms/v2/pcae-protected-local-presentation/installations/1/installation.json",
+      "owner": "root:admin",
+      "mode_octal": "0600",
+      "installation_schema_version": "HPAC-PRESENTATION-INSTALLATION/1.0",
+      "installation_id": "hppi-648bee5e950b4f5e971a6c65c8cc53cf",
+      "generation": 1,
+      "mechanism_id": "pcae-protected-local-presentation",
+      "helper_implementation_id": "pcae-protected-local-presentation",
+      "helper_implementation_version": "pcae-protected-local-presentation-helper/1.0",
+      "helper_path": "/Library/Application Support/PCAE/HPAC/protected-root/presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182/pcae-protected-local-presentation",
+      "helper_sha256": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+      "descriptor_digest": "c4e9a04d8d4af865372d78db280b8a2ba40f7ad29414b365acf87b775b13fc6e",
+      "verifier_configuration_digest": "951182f5e737068d286313903504e34cb3dc57b47a2a19f9031ac068c7992c85",
+      "renderer_profile": "pcae-protected-local-presentation-renderer/1.0",
+      "installation_digest": "ab23db5921be7b88f565f9d42e29707e594c9c1fa209953037040cf9f38e5820",
+      "lifecycle_action": "install",
+      "status": "active",
+      "supersedes": null,
+      "verdict": "VERIFIED"
+    },
+    "helper": {
+      "path": "/Library/Application Support/PCAE/HPAC/protected-root/presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182/pcae-protected-local-presentation",
+      "owner": "root:admin",
+      "mode_octal": "0644",
+      "hard_links": 1,
+      "regular_file_not_symlink": true,
+      "byte_length": 16295,
+      "sha256_installed": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+      "matches_immutable_generation_1_source": true,
+      "matches_pre_registration_helper_evidence": true,
+      "verdict": "VERIFIED byte-for-byte identity"
+    },
+    "write_set_full_tree_listing": {
+      "presentation-mechanisms_tree": [
+        "presentation-mechanisms",
+        "presentation-mechanisms/v2",
+        "presentation-mechanisms/v2/pcae-protected-local-presentation",
+        "presentation-mechanisms/v2/pcae-protected-local-presentation/current-generation.json",
+        "presentation-mechanisms/v2/pcae-protected-local-presentation/installations",
+        "presentation-mechanisms/v2/pcae-protected-local-presentation/installations/1",
+        "presentation-mechanisms/v2/pcae-protected-local-presentation/installations/1/installation.json",
+        "presentation-mechanisms/v2/pcae-protected-local-presentation/descriptor.json"
+      ],
+      "presentation-helper_tree": [
+        "presentation-helper",
+        "presentation-helper/installations",
+        "presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+        "presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182/pcae-protected-local-presentation"
+      ],
+      "exactly_3_mechanism_files_no_other_generation": true,
+      "exactly_1_helper_content_addressed_directory": true,
+      "no_orphan_no_stray_files": true,
+      "verdict": "WRITE-SET CONFINEMENT VERIFIED"
+    },
+    "unprivileged_mutation_resistance": {
+      "method": "sudo -u atilamadai test -w <path> (permission check only, no write performed)",
+      "agent_can_write_current_generation_json": false,
+      "agent_can_write_protected_root": false,
+      "verdict": "VERIFIED"
+    }
+  },
+
+  "capability_provenance_and_terminal_consumption": {
+    "method": "source-level (HPACWriterCapability is process-local, single-use, non-serializable by construction; apply_configuration() consumes it inside the one bounded configure_presentation_mechanism transaction; no persisted reusable capability artifact exists on disk -- the only durable artifacts are the 3 mechanism files above, none of which is a capability token)",
+    "no_persisted_capability_token_found_in_write_set": true,
+    "replay_not_attempted": "correctly out of scope (would require a second production mutation)",
+    "verdict": "TERMINAL CONSUMPTION VERIFIED (structural + absence-of-reusable-artifact evidence; no live replay attempt performed, none required)"
+  },
+
+  "role_separation": {
+    "installer": "hpac_protected_presentation_admin.configure_presentation_mechanism (sole PAWA consumer, scripts/hpac_protected_presentation_admin.py)",
+    "launcher": "pcae.core.protected_presentation (sole posix_spawn mediator)",
+    "evidence_writer": "mint_protected_presentation_evidence_writer (seal-guarded, role protected_presentation_mechanism)",
+    "human_approver": "protected_presentation_helper._observe_election (trusted local terminal)",
+    "distinct_roles_confirmed_from_source": true,
+    "registration_did_not_grant_launcher_or_evidence_writer_installation_authority": true,
+    "verdict": "VERIFIED (source-level)"
+  },
+
+  "require_real_assurance_and_gate_consumption": {
+    "hpac_verifier_zero_production_consumers_note": "hpac_verifier.py's own module docstring states it has zero production consumers today; is_verifier_authenticated_principal is the documented boundary future/existing consumers (runtime_authority.py, runtime_dispatch_gate5.py) are required to use, and both do (grep-confirmed at lines runtime_dispatch_gate5.py:236-241, runtime_authority.py:433-445 and 948-1094).",
+    "forged_object_negative_test": {
+      "method": "object.__new__(AuthenticatedHumanPrincipal) + manual setattr of every slot including assurance_class=PRODUCTION, executed independently in this IV (not just re-running the existing failing unit tests)",
+      "isinstance_check": true,
+      "is_real_runtime_eligible_raw_property": true,
+      "is_verifier_authenticated_principal_real_boundary": false,
+      "gate5_call_site_runtime_dispatch_gate5_py_line_240": "if not is_verifier_authenticated_principal(authenticated_principal): return None, (\"authenticated_principal_not_verifier_issued\",)",
+      "conclusion": "The forged object is isinstance-true and is_real_runtime_eligible=True at the raw dataclass level (a real, documented HPAC-REQ-056 construction-boundary gap -- CURRENT PRODUCT DEFECT), but the actual Gate 5 consumption boundary (is_verifier_authenticated_principal, an identity-keyed process-local registry populated only by verify_human_authentication's own return path) rejects it before any approval/lifecycle logic runs. Gate 9 only consumes registry-provenanced Gate5Result/etc. and never touches the raw principal directly (unchanged from prior IV findings). The forged object CANNOT traverse the real production authority boundary.",
+      "verdict": "NOT A BLOCKER -- defense-in-depth holds; underlying dataclass-construction gap remains open product debt, tracked, not repaired in this verification-only phase"
+    }
+  },
+
+  "predecessor_five_failure_reclassification": {
+    "reproduced_identically": "468 passed, 5 failed -- same 5 node IDs, same targeted-suite set, confirmed by a fresh independent pytest run in this IV",
+    "nodes": [
+      {
+        "node_id": "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1_protected_presentation_human_election_iv_and_n16_5_certification.py::test_31_current_phase_changes_no_production_or_contract",
+        "classification": "HISTORICAL / POINT-IN-TIME GUARD",
+        "evidence": "asserts current diff against a fixed historical ENTRY SHA equals a fixed 2-file set; HEAD has legitimately advanced past that anchor via later, unrelated completed phases",
+        "host_state_dependence": false,
+        "f5_n16_5_relevance": "none"
+      },
+      {
+        "node_id": "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1_protected_presentation_human_election_iv_and_n16_5_certification.py::test_30_repair_suite_contains_a_stale_live_head_assertion_finding_f3",
+        "classification": "HISTORICAL / POINT-IN-TIME GUARD",
+        "evidence": "content-scan guard asserting a specific historical assertion string is present in a repair suite's source text as it existed at an earlier phase; the repair suite has since been edited/repaired by intervening phases (guard content changed, no functional weakening: whitelisted skip/xfail/fnmatch names still absent)",
+        "host_state_dependence": false,
+        "f5_n16_5_relevance": "none"
+      },
+      {
+        "node_id": "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_protected_presentation_interactive_election_repair.py::test_05_production_diff_is_exactly_the_two_authorized_files",
+        "classification": "HISTORICAL / POINT-IN-TIME GUARD",
+        "evidence": "fixed ENTRY=0250e5f7... anchor; git diff --name-only ENTRY..HEAD -- src/pcae now also includes hatp_class_b_topology_verifier.py, notifications.py, phase_reports.py, independently traced via git log ENTRY..HEAD to commits 8407dd24 (Phase ...1R: configured-agent-identity threading repair) and 8bfce890 (Phase ...1R.1R: durable Telegram notification receipts) -- two distinct already-completed, unrelated phases, not PPA registration and not host-state change",
+        "host_state_dependence": false,
+        "f5_n16_5_relevance": "none"
+      },
+      {
+        "node_id": "tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py::test_object_dunder_new_bypasses_trusted_construction_seal",
+        "classification": "CURRENT PRODUCT DEFECT",
+        "evidence": "object.__new__ bypasses AuthenticatedHumanPrincipal.__init__'s seal check; documented, pre-existing, unrelated to PPA registration or host state",
+        "host_state_dependence": false,
+        "f5_n16_5_relevance": "none (independently confirmed non-blocking: see require_real_assurance_and_gate_consumption.forged_object_negative_test above -- the real Gate 5 boundary rejects the forged object)"
+      },
+      {
+        "node_id": "tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py::test_forged_via_object_new_would_report_real_runtime_eligible",
+        "classification": "CURRENT PRODUCT DEFECT",
+        "evidence": "same underlying gap as above, demonstrated via the is_real_runtime_eligible property",
+        "host_state_dependence": false,
+        "f5_n16_5_relevance": "none (same independent Gate 5 boundary confirmation applies)"
+      }
+    ],
+    "attribution_method": "NOT source-diff-absence alone -- each node independently re-executed, and for the 3 historical guards the exact intervening unrelated commits were traced via git log; for the 2 forgery nodes the actual Gate 5 production consumption boundary was independently re-exercised at the source level (a fresh standalone script, not just re-running the existing unit tests) and shown to reject the forged object.",
+    "no_hidden_f5_n16_5_blocker": true
+  },
+
+  "ordinary_development_independence": {
+    "pcae_health": "passed (healthy)",
+    "pcae_check": "passed",
+    "pcae_status_coherence": "checked, no hardware/ceremony required",
+    "pcae_doctor_task_memory": "checked, no hardware/ceremony required",
+    "pcae_runtime_inspect": "Observed/observe/unavailable, 0 plugins, 0 capabilities",
+    "verdict": "VERIFIED"
+  },
+
+  "no_host_mutation_by_this_iv": {
+    "authorized_mutating_host_commands": 0,
+    "unauthorized_mutating_host_commands": 0,
+    "all_privileged_commands_were_read_only": "stat, ls, cat, find, shasum, lsof, plutil -extract, sudo -u <agent> test -w (permission probe only)",
+    "verdict": "CONFIRMED"
+  },
+
+  "runtime_final_check": {
+    "implementation": "not_implemented",
+    "state": "Observed",
+    "maximum_capability": "observe",
+    "execution_availability": "unavailable",
+    "plugins": 0,
+    "capabilities": 0,
+    "first_governed_runtime_effect": "ABSENT / UNREACHABLE"
+  },
+
+  "final_verdicts": {
+    "privileged_deployment_state_inspection": "COMPLETE",
+    "authorized_mutating_host_commands": 0,
+    "protected_root_topology": "VERIFIED",
+    "pawa_generation_1_state": "VERIFIED",
+    "generation_1_helper_provenance": "VERIFIED",
+    "generation_1_helper_byte_identity": "VERIFIED",
+    "ppa_installation_descriptor": "VERIFIED",
+    "ppa_current_generation_state": "VERIFIED",
+    "ppa_currentness": "VERIFIED",
+    "ppa_revocation_state": "VERIFIED (status=active throughout, no stale/conflicting generation, no revocation record present)",
+    "descriptor_helper_config_profile_bindings": "VERIFIED",
+    "pawa_deployment_capability_provenance": "VERIFIED",
+    "pawa_deployment_capability_terminal_consumption": "VERIFIED",
+    "ppa_transaction_state": "COMPLETE",
+    "substitution_resistance": "VERIFIED (design-level: reject_symlink_chain / _reject_symlink_chain on every ancestor; no symlinked component found in live tree)",
+    "unprivileged_mutation_resistance": "VERIFIED",
+    "role_separation": "VERIFIED",
+    "predecessor_five_failure_attribution": "COMPLETE",
+    "production_protected_presentation_generation_1_deployment_state": "INDEPENDENTLY VERIFIED",
+    "f5": "DEPLOYMENT VERIFIED -- FINAL REAL ASSURANCE CERTIFICATION PENDING",
+    "n16_5": "NOT CLOSED"
+  },
+
+  "successor_derived_not_begun": "Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5 Certification and Closure Adjudication -- next CPIPC-valid phase ID beyond this one, in the same series/branch, appended trailing subphase. Not begun: no human approval, no YubiKey, no FIDO2 PIN, no presentation evidence, no PRODUCTION principal minted, no Gate 5 certification performed this phase."
+}

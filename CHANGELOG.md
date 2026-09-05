@@ -1,5 +1,34 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1`
+  (independent verification of production protected-presentation
+  generation-1 deployment state) independently re-derived and checked
+  the actual deployment state via privileged read-only inspection only
+  (`sudo` in the operator's own terminal; password never
+  seen/echoed/logged). Protected-root topology, PAWA generation-1 state,
+  generation-1 helper provenance and byte identity, PPA installation
+  descriptor, PPA current-generation state, currentness, revocation
+  state, descriptor/helper/config/profile bindings, PAWA capability
+  provenance and terminal consumption, substitution resistance,
+  unprivileged mutation resistance, and role separation: all VERIFIED.
+  Write-set confinement independently reconstructed to exactly the 3
+  authorized mechanism files plus 1 helper file. All five predecessor
+  test failures independently re-adjudicated rather than attributed by
+  source-diff absence: 3 traced via `git log` to two specific unrelated
+  already-completed phases; 2 are a pre-existing `hpac_verifier`
+  `AuthenticatedHumanPrincipal` raw-construction defect
+  (`object.__new__` bypass, HPAC-REQ-056) independently re-exercised
+  against the real Gate 5 consumption boundary
+  (`is_verifier_authenticated_principal`), which correctly rejects the
+  forged object — non-blocking. Fresh 36-test IV suite, 36 passed. Zero
+  host mutation this phase. `PRODUCTION PROTECTED-PRESENTATION
+  GENERATION-1 DEPLOYMENT STATE: INDEPENDENTLY VERIFIED.` `F-5:
+  DEPLOYMENT VERIFIED — FINAL REAL ASSURANCE CERTIFICATION PENDING.`
+  `N-16-5: NOT CLOSED` (final real-human + genuine-YubiKey certification
+  ceremony remains). No human approval, no YubiKey, no FIDO2 PIN, no
+  presentation evidence, no PRODUCTION principal, no Gate 5
+  certification performed this phase.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (production protected-presentation registration continuation against
   existing generation-1 deployment state) executed the canonical PPA
