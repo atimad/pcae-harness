@@ -22,10 +22,7 @@
     "candidate_composition_3_quicktier_571_file_prefix": "aborted after ~10-11 minutes at ~7% progress; independently confirmed infeasible within any bounded budget",
     "configured_agent_identity_regression": "7 failed, 61 passed, 3 skipped -- all 7 classified HISTORICAL-MOVING-AUTHORITY (CAIR-triggered) or expected host-permission fail-closed behavior; zero functional contradiction",
     "fresh_phase_iv_suite": "20 passed in 0.37s (tests/test_..._contamination_diagnosis_iv.py)",
-    "no_test_weakening": "0 def test_ renamed or removed; 0 existing test file bodies modified; 0 skip/xfail added to any pre-existing test; no production code modified in this phase",
-    "report_notification_tests": "not re-run in this diagnostic phase (no notification/receipt production code touched); test_telegram_notifications.py is included, untouched, and clean within the 55-file thematic cluster invocation (2148 passed, 1 skipped)",
-    "bootstrap_session_reporting_tests": "pcae session bootstrap/health/check/status coherence/doctor task-memory exercised throughout this phase's own lifecycle (orientation, mid-phase re-acquisition after phase-complete released the lock, final checks) -- all passed/coherent at each checkpoint",
-    "fast_green": "not re-run as a distinct gate in this diagnostic phase; the fresh phase-specific IV suite (20 tests) and the 55-file RHAMP/PAWA/HATP/CLTR thematic cluster (2148 passed, 1 skipped) together cover this phase's own N-16-5-relevant fast-green-equivalent signal"
+    "no_test_weakening": "0 def test_ renamed or removed; 0 existing test file bodies modified; 0 skip/xfail added to any pre-existing test; no production code modified in this phase"
   },
   "validation_results": {
     "cpipc_successor_valid": "confirmed via src/pcae/core/phase_id.py parse()/same_series()/same_branch()/compare(): predecessor and this phase's ID are same series/branch, this phase strictly ordered after predecessor; no discrepancy to record",
@@ -34,7 +31,10 @@
     "no_existing_test_modified": "git diff --name-only D0 -- tests/ shows only the one new additive file added by this phase",
     "runtime_unchanged": "pcae runtime inspect: not_implemented / Observed / observe / unavailable, 0 plugins, 0 capabilities -- unchanged throughout",
     "no_host_mutation": "no scripts/hpac_protected_root_admin.py provision or scripts/hpac_protected_presentation_admin.py install run against real protected state; generation-1 host state carried forward unchanged, no contradiction found",
-    "diagnostic_budget_accounting": "5 completed targeted pytest invocations + 1 aborted/infeasible large-scale attempt (of 30 max); ~24 minutes cumulative wall-clock diagnostic time (of 60 min max); full accounting in .pcae/evidence/149O_1R1R2R1R1R1R1_1R1R1R1R_experiment_log.md"
+    "diagnostic_budget_accounting": "5 completed targeted pytest invocations + 1 aborted/infeasible large-scale attempt (of 30 max); ~24 minutes cumulative wall-clock diagnostic time (of 60 min max); full accounting in .pcae/evidence/149O_1R1R2R1R1R1R1_1R1R1R1R_experiment_log.md",
+    "report_notification_tests": "not re-run in this diagnostic phase (no notification/receipt production code touched); test_telegram_notifications.py is included, untouched, and clean within the 55-file thematic cluster invocation (2148 passed, 1 skipped)",
+    "bootstrap_session_reporting_tests": "pcae session bootstrap/health/check/status coherence/doctor task-memory exercised throughout this phase's own lifecycle (orientation, mid-phase re-acquisition after phase-complete released the lock, final checks) -- all passed/coherent at each checkpoint",
+    "fast_green": "not re-run as a distinct gate in this diagnostic phase; the fresh phase-specific IV suite (20 tests) and the 55-file RHAMP/PAWA/HATP/CLTR thematic cluster (2148 passed, 1 skipped) together cover this phase's own N-16-5-relevant fast-green-equivalent signal"
   },
   "governance_results": {
     "pcae_health": "healthy before finalization",
@@ -89,7 +89,20 @@
     "tasks/done/**"
   ],
   "files_changed_count": 7,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "4b59c8e4577fef7002f7e1f9f747a669f5ed33da",
+      "subject": "open RHAMP cross-test contamination diagnosis task and finalization task, archive superseded idle task"
+    },
+    {
+      "hash": "e3ea06d63edc6f7c09d027119fead8711cd859bf",
+      "subject": "RHAMP cross-test contamination diagnosis, evidence reconciliation, and F-5 readiness re-adjudication -- CONTAMINATION ROOT CAUSE: UNRESOLVED, F-5 EXECUTION HOLD: REMAINS, N-16-5 not closed"
+    },
+    {
+      "hash": "1dbfea4a579ee363b665c1781f6aa46ef29edef7",
+      "subject": "stage completion metadata and canonical report -- CONTAMINATION ROOT CAUSE: UNRESOLVED, F-5 EXECUTION HOLD: REMAINS"
+    }
+  ],
   "recommended_next_phase": "A further-bounded RHAMP cross-test contamination bisection phase testing additional candidate compositions drawn from the ~500 files not covered by either composition falsified in this phase, informed by collection-order and global-registry-mutation analysis rather than blind full-prefix bisection (independently confirmed infeasible within any single-phase budget). Not begun.",
   "pushed_status": "pending",
   "origin_main_head": "PENDING"
