@@ -12,7 +12,7 @@
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED/INDEPENDENTLY-VERIFIED reports remain immutable and byte-unchanged, including the immediate predecessor's own canonical report and every earlier repair/IV report in the chain; only this phase's own canonical report, durable evidence log, and governance/task/status artifacts are added.",
   "report_consistency": "Staged pending push; canonical report to be promoted to COMPLETE after push.",
   "origin_main_head_count": 0,
-  "test_evidence_classification": "rhamp_cross_test_contamination_diagnostic_completion_unresolved_f5_hold_remains",
+  "test_evidence_classification": "inherited_regression",
   "tests_run": 5,
   "tests_added_or_updated": "0 new test files. 0 existing test files modified. 5 pytest invocations run this phase (1 new bounded composition, 1 execution-time identity-trace plugin run, 1 clean-context band, 1 rerun of the predecessor's existing fresh IV suite unchanged, plus static source analysis consuming no budget).",
   "test_results": {
