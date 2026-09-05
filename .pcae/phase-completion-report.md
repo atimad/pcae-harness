@@ -1,44 +1,51 @@
 # PCAE Phase Completion Report
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R`
-- Status: **COMPLETE — CONTAMINATION ROOT CAUSE: UNRESOLVED**
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R`
+- Status: **COMPLETE — CHECKPOINT METHOD: VERIFIED — CONTAMINATION ROOT CAUSE: UNRESOLVED**
 - F-5: **EXECUTION HOLD: REMAINS**
 - N-16-5: **NOT CLOSED**
 
-Phase-completion recovery of the predecessor phase, which validly
-finalized UNRESOLVED after consuming only 2 of its 30 authorized
-diagnostic pytest invocations. This phase inherited the unused envelope
-(28 invocations / 58 minutes) and continued the causality-guided campaign
-without reopening or rewriting the predecessor.
+Redesigned the predecessor's non-resumable continuous single-process
+execution-time trace (RESUME MODEL C) into **RESUME MODEL A**: 31
+independent 25-file batch-vs-victim compositions over a frozen 761-file
+corpus, each checkpointed after a fresh clean-process run. The predecessor's
+"resume at file ~80" proposal was explicitly rejected as an invalid basis
+for cross-process resumability, per this phase's own method-validity rule.
 
-New evidence: individually traced every `importlib.reload(` call site in
-`tests/` (none targets `hpac_foundation`/`human_principal_registry`, and
-the one related-module reload runs exclusively inside a `subprocess.run`
-child process); confirmed the only `monkeypatch.setattr(HPACStoreAuthority,
-...)` usages patch a method attribute, not a class rebind; falsified a new
-adjacent-file bounded composition; built and ran a new **execution-time**
-(not collection-time) class-identity trace across ~14% of the full suite
-(20-minute watchdog cap, zero identity changes) — empirically reconfirming
-that a full single-process pass (~140 min) exceeds any single phase's
-diagnostic budget; reran the clean-context PAWA/PPA/RHAMP/configured-agent
-band (only pre-existing guard-class failures, zero new signature); reran
-the predecessor's fresh IV suite unchanged (16 passed).
+Checkpoint mechanism independently verified before any coverage invocation:
+restart-readable, corruption-refused, corpus-drift-refused,
+tracer-drift-refused. Tracer independently verified non-interfering
+(victim-alone with/without tracer: identical outcome). Inherited coverage:
+0/31 — the predecessor's three ad hoc clusters could not be re-verified
+file-for-file against the new batch boundaries with confidence, so none
+was imported as checkpointed coverage.
 
-Stopped at Stop Condition B — a quantified, budget-driven technical
-blocker, not "more candidates remain": the reload/sys.modules/monkeypatch
-mechanism class is now exhaustively closed both statically (whole
-codebase) and dynamically (~14% of real execution, zero deviation), and
-the only way to extend that closure or capture the actual failure
-requires wall-clock time this phase's diagnostic ceiling cannot provide.
+Ran 26 batch invocations (~49.0 min) + 2 tracer-validation controls +
+1 aborted 600s-timeout attempt: **29 of 30 invocations, ~59.2 of 60
+minutes** — both budgets effectively exhausted (Stop Condition B).
+Results: **18/31 batches CLEAN**, **7/31 INCONCLUSIVE** (timeout),
+**5/31 not attempted**, and **1/31 (batch-013) shows a new high-confidence
+lead**: `id()` of both implicated classes (`HPACStoreAuthority`,
+`HumanPrincipalRegistryStore`) drifted session-start-to-finish
+(module/qualname unchanged — unique among all 19 batches with complete
+trace pairs), correlated with the victim module's first-ever non-clean
+outcome anywhere in this diagnostic lineage (2 `ERROR`s). Not yet causally
+proven — no bisection, trigger-removal control, or fresh-process repeat
+performed (budget exhausted).
+
+**CONTAMINATION ROOT CAUSE: UNRESOLVED. CONTAMINATION STAGE:
+TEST-EXECUTION. CONTAMINATION LOCATION: NOT ESTABLISHED. CURRENT F-5
+READINESS: NOT YET ESTABLISHED. F-5 EXECUTION HOLD: REMAINS. N-16-5: NOT
+CLOSED.**
 
 No production/existing-test/contract/dependency modification. No host
-mutation. No F-5 action. No YubiKey/FIDO2/human ceremony. No historical
-Telegram re-dispatch. Full accounting:
-`.pcae/evidence/149O_1R1R1R1R1R1R_experiment_log.md`. Canonical doc:
-`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_DIAGNOSTIC_COMPLETION_AND_F5_READADJUDICATION.md`.
+mutation. No F-5 action. No YubiKey/human ceremony. No historical
+Telegram re-dispatch. Runtime unchanged: `not_implemented`/`Observed`/
+`unavailable`, 0 plugins/capabilities.
 
-**Recommended next phase (not begun):** a checkpointed,
-incrementally-resumable execution-time class-identity/state-trace phase
-that persists progress across phases instead of restarting from file 1 —
-changing the diagnostic method rather than repeating an undifferentiated
-bisection.
+Recommended (not begun) successor: resume campaign
+`RHAMP-XTEST-IDENTITY-TRACE/1` / corpus `RHAMP-XTEST-CORPUS/1` from this
+exact checkpoint chain, prioritizing bounded causal isolation of batch-013
+before the remaining pending/inconclusive batches.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
