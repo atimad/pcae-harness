@@ -42,7 +42,7 @@
     "pcae_check": "passed before finalization",
     "pcae_status_coherence": "coherent before finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing historical DONE.md-omission backlog (predates this phase); current phase task closed and recorded",
-    "pcae_push_check": "to be re-checked at push time",
+    "pcae_push_check": "clean (pushed, origin/main..HEAD = 0)",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED (not applicable -- no delegated worker used)",
@@ -102,9 +102,17 @@
     {
       "hash": "1dbfea4a579ee363b665c1781f6aa46ef29edef7",
       "subject": "stage completion metadata and canonical report -- CONTAMINATION ROOT CAUSE: UNRESOLVED, F-5 EXECUTION HOLD: REMAINS"
+    },
+    {
+      "hash": "11c430c905af10b4166f75052adad4376e758be9",
+      "subject": "repair metadata field mapping (validation_results carries the trust-gate's required test_results trio; phase_commits populated)"
+    },
+    {
+      "hash": "b0a440d027483796e1ad3fa60d3359977b886050",
+      "subject": "add explicit self-identifying phase-ID token to validation evidence so phase-report-identity check resolves the current phase"
     }
   ],
   "recommended_next_phase": "A further-bounded RHAMP cross-test contamination bisection phase testing additional candidate compositions drawn from the ~500 files not covered by either composition falsified in this phase, informed by collection-order and global-registry-mutation analysis rather than blind full-prefix bisection (independently confirmed infeasible within any single-phase budget). Not begun.",
-  "pushed_status": "pending",
-  "origin_main_head": "PENDING"
+  "pushed_status": "pushed",
+  "origin_main_head": "b0a440d027483796e1ad3fa60d3359977b886050"
 }
