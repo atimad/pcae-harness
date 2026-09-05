@@ -1,72 +1,59 @@
 {
-  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R",
-  "phase_name": "Post-Completion Full-Repository Test Sweep Failure/Error Attribution and F-5 Hold Adjudication",
-  "phase_title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R — Post-Completion Full-Repository Test Sweep Failure/Error Attribution and F-5 Hold Adjudication (F-5 CONTINUATION HOLD: CLEARED)",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R",
+  "phase_name": "RHAMP Cross-Test Contamination Diagnosis, Evidence Reconciliation, and F-5 Readiness Re-Adjudication",
+  "phase_title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R — RHAMP Cross-Test Contamination Diagnosis, Evidence Reconciliation, and F-5 Readiness Re-Adjudication (F-5 EXECUTION HOLD: REMAINS)",
   "status": "completed",
   "commit_attribution": "Primary human-authorized operator session performed all inspection, analysis, and finalization/commit/push directly. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED preserved (no delegated worker used in this phase).",
   "execution_availability": "unavailable",
-  "summary": "Clustered and attributed the frozen post-completion full-repository sweep (40587 passed / 979 failed / 117 errors) recorded by the predecessor Telegram-receipt IV phase. Independently confirmed src/pcae, scripts, pyproject.toml, and docs/contracts are byte-unchanged from the Telegram repair's production commit (8bfce890) through this phase's entry SHA, so the reproduction is source-byte-equivalent to the frozen original regardless of the exact historical SWEEP_SHA (not resolvable from durable local evidence -- pytest's nodeids/lastfailed caches merge across sessions and do not reliably pin an invocation time; no raw sweep log survives; recorded as bound to the byte-identical range rather than invented). Ran a full reproduction at this phase's entry SHA (python -m pytest -q -p no:cacheprovider, single-process, no xdist): 1092 failed, 40538 passed, 24 skipped, 117 errors in 8831.59s -- errors match the frozen original exactly (117=117). Independently reconstructed the original invocation mode first: a bare pytest console-script run produces 15 collection errors (ModuleNotFoundError: no module named 'tests'/'prototypes'), all of which vanish under python -m pytest with zero other change -- classified environment/invocation-dependent, and confirms the original sweep used a python -m pytest-equivalent invocation (matching its exact 117-error count with no such collection failures). All 278 distinct failing/erroring files re-run individually in isolation: 68 files / 368 raw nodes collapse to 31 genuine failures when isolated (cross-test-order contamination, root cause unresolved but non-blocking -- dominant single case: 79 of the 117 total errors, 68%, from one fixture chain in the merged-RHAMP-mechanism test file where isinstance(root, HPACStoreAuthority) evaluates False only under certain full-suite collection orders; the same 125/125 tests in that file pass cleanly in complete isolation); 210 files / 841 raw nodes reproduce deterministically. All 16 N-16-5/F-5-priority files (RHAMP, FIDO2, PAWA, protected presentation, hpac_verifier, notifications/phase-reports, HATP Class-B topology -- 140 raw nodes) individually investigated with disposable fixed-SHA worktrees where needed: zero repair-attributable regressions, zero new blockers. Findings: (1) an already-disclosed/adjudicated hpac_verifier construction-boundary gap (HPAC-REQ-056, object.__new__ bypasses the isinstance-level seal) whose own test docstring states it is 'expected to FAIL against the current implementation' -- independently confirmed non-exploitable via the real Gate 5 consumption path, which never trusts isinstance and instead requires exact-object membership in the verifier's process-local registry plus fresh reverification (Gate 5 integration doc, explicit 'Forged (object.__new__)... -> authenticated_principal_not_verifier_issued' handling); (2) three historical-moving-authority self-checks (a frozen HMIC scope-list test superseded by a later deliberate widening in Phase 149O.20K.2, predating CAIR; two frozen git-diff-against-live-HEAD assertions from an earlier immutable repair phase, broken by CAIR's and TEL's own later, legitimate file changes -- the exact anti-pattern this repository's own F-3/F-4/F-6/F-7/F-9 family already names); (3) a stale recorded HMIC digest, independently reproduced as already-mismatching (with a different mismatching value) at the pre-CAIR baseline in a disposable worktree; (4) one phase_reports.py reconcile-rc failure, independently reproduced byte-identical at the pre-Telegram-repair baseline in a disposable worktree -- confirmed pre-existing, not repair-attributable. The remaining 194 non-priority files / 701 raw nodes were materiality-scoped per this phase's own governing rules; representative sampling of the largest clusters (HATP timestamp-canonicalization parser-domain tests, HPAC contract-freeze 'blocking finding' prose tests, a frozen production-file-allowlist test) confirmed the same historical/point-in-time and historical-moving-authority patterns, none touching N-16-5/F-5-relevant subsystems, none repair-attributable (e.g. human_approval_trusted_provenance.py last touched at Phase 149O.1H.5, long before this repair chain). Both prior repair verdicts (configured-agent-identity threading; durable Telegram acceptance receipt) remain INDEPENDENTLY VERIFIED with no contradiction found. Generation-1 host state carried forward unchanged (not re-derived from live inspection; no failing test in the reviewed material set required it). No production or test file modified in this phase; no host mutation; no F-5 execution; no historical Telegram re-dispatch; no human/YubiKey/FIDO2 ceremony. VERDICT: FULL-REPOSITORY POST-COMPLETION SWEEP ATTRIBUTION: COMPLETE. F-5 CONTINUATION HOLD: CLEARED. N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.",
-  "derived_correctness": "Every priority-file classification is backed by an independently reproduced isolated single-file/single-test pytest run, and every pre-existing/historical claim is backed by a disposable git-worktree reproduction at the named fixed baseline SHA (CAIR_ENTRY 5568b5ab or TEL_ENTRY 9c88f1a3), not by trusting the frozen original sweep's own prose. The cross-test-order contamination class is demonstrated (not merely asserted) via a scripted isolated rerun of all 280 distinct failing/erroring files, comparing full-sweep raw counts per file against isolated counts per file. The claimed byte-identity of src/pcae/scripts/pyproject.toml/docs/contracts across the whole candidate SWEEP_SHA range is demonstrated via git diff --name-only (empty output), not asserted.",
-  "metadata_consistency": "Report, status, task lifecycle, and this metadata consistently record FULL-REPOSITORY POST-COMPLETION SWEEP ATTRIBUTION: COMPLETE, F-5 CONTINUATION HOLD: CLEARED, and N-16-5 NOT CLOSED.",
-  "internal_evidence_coherence": "N-16-5/F-5-priority regression band across all 16 flagged files run together in one invocation (864 collected): 856 passed, 0 failed, 8 deselected -- the 8 deselected are exactly the 8 confirmed pre-existing/already-adjudicated/historical-moving-authority findings named in the canonical report and summary above; no contamination reappeared when these 16 files were run together (only appears under full-40k-file collection order).",
-  "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED/INDEPENDENTLY-VERIFIED reports remain immutable and byte-unchanged, including the predecessor Telegram-receipt IV report and every earlier repair/IV report in the chain; only this phase's own canonical report and governance/task/status artifacts are added.",
-  "report_consistency": "Pushed; canonical report ready for promotion to COMPLETE.",
+  "summary": "Canonicalized, as a governed phase, a separate non-governed post-completion reconciliation of the predecessor phase's evidence: recorded the original 40587/979/117 sweep's exact SHA/command/node-inventory honestly as UNRESOLVED/UNAVAILABLE from surviving evidence (not invented); relabeled the later full-suite reproduction (1092 failed, 40538 passed, 24 skipped, 117 errors in 8831.59s) as a separate identified run, not the original sweep; reclassified test_31_current_phase_changes_no_production_or_contract and test_05_production_diff_is_exactly_the_two_authorized_files as CAIR-triggered HISTORICAL-MOVING-AUTHORITY defects (independently reconfirmed via git show --stat 8407dd24), not unrelated. Durably preserved the surviving /tmp/pcae-triage-149o-1r1r1r/ evidence under .pcae/evidence/ with SHA-256 manifest parity between originals and copies. Re-diagnosed the dominant RHAMP fixture-chain contamination (79 of 117 sweep errors, one fixture chain in test_..._30r_3_4_merged_rhamp_mechanism.py): isinstance(root, HPACStoreAuthority) spuriously evaluates False against a genuine HPACStoreAuthority instance (repr confirms type().__module__/__qualname__ match) -- a class-identity divergence, independently re-confirmed via the exact traceback in the durable log. Victim-alone baseline reconfirmed clean (125 passed in 2.82s). Constructed and definitively falsified two evidence-motivated candidate contamination compositions: (1) the 15 importlib.reload-using CLTR-authority test files (the only files anywhere in the suite found, via exhaustive grep, to reload/mutate sys.modules at all) plus the victim -- victim fully clean, 0 failures/errors; (2) the full 55-file 'clean-in-isolation' RHAMP/PAWA/HATP/CLTR thematic self-cluster (including the victim and every one of its .30R.3.*/.30R.4R.*/.30R.5R.* siblings) run together without the other ~500 suite files -- 2148 passed, 1 skipped, fully clean. A third candidate (the full 571-file alphabetical prefix minus slow/integration/phase_closure-marked tests) was independently shown infeasible to complete within any bounded diagnostic budget (~7% progress in ~10-11 minutes, extrapolating to 2.5+ hours). Exhaustive grep across all of tests/ found zero test files that reload or duplicate pcae.core.hpac_foundation's module identity, ruling out the most direct 'a test deliberately reloads the victim's dependency' mechanism. Independently re-verified: configured-agent-identity threading repair (targeted regression, 7 residual failures all classified HISTORICAL-MOVING-AUTHORITY or expected host-permission fail-closed behavior, zero functional contradiction); the RHAMP/PAWA/protected-presentation relevant band (fully clean via the 55-file cluster run); the hpac_verifier forged-object finding (independently reconfirmed fail-closed-by-construction via direct current-source reading of is_verifier_authenticated_principal's exact-object-registry/context membership check, not isinstance/equality -- the diagnosed contamination mode could, at worst, cause a spurious rejection, never a spurious acceptance, for this specific consumption path); the public-reconciliation finding (independently reconfirmed unreachable from the planned F-5 PPA continuation scripts via direct import-graph inspection, zero hits). No production/existing-test/contract/dependency modification; no host mutation; no F-5 action; no YubiKey/human ceremony; no historical Telegram re-dispatch. VERDICT: CONTAMINATION ROOT CAUSE: UNRESOLVED. CONTAMINATION LOCATION: NOT ESTABLISHED. CURRENT F-5 READINESS: NOT YET ESTABLISHED. F-5 EXECUTION HOLD: REMAINS (clearance criterion 1 -- causal identification of the contamination root cause -- is not met; this does not rewrite the predecessor's own historical 'F-5 CONTINUATION HOLD: CLEARED' verdict, which remains historical evidence of what was concluded at that earlier time). N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.",
+  "derived_correctness": "Both falsified candidate compositions and the one confirmed-infeasible composition are backed by preserved raw pytest transcripts (recorded in the durable experiment log with exact commands, timings, and full result lines), not by assertion. The victim's exact traceback (isinstance divergence) is quoted verbatim from the durably preserved full_sweep_reproduction_at_head.log, whose SHA-256 is independently verified to match between the /tmp original and the durable .pcae/evidence/ copy. The CAIR-triggered classification is independently re-derived via git show --stat on the named commit, not merely asserted from the predecessor's prose. The hpac_verifier fail-closed property and the public-reconciliation unreachability are both derived from direct current src/pcae/scripts source reading performed in this phase, not carried forward from the predecessor's claim alone.",
+  "metadata_consistency": "Report, PROJECT_STATUS.md, CHANGELOG.md, task lifecycle, and this metadata consistently record CONTAMINATION ROOT CAUSE: UNRESOLVED, CONTAMINATION LOCATION: NOT ESTABLISHED, CURRENT F-5 READINESS: NOT YET ESTABLISHED, F-5 EXECUTION HOLD: REMAINS, and N-16-5 NOT CLOSED.",
+  "internal_evidence_coherence": "The fresh phase-specific IV suite (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_contamination_diagnosis_iv.py, 20 tests) independently re-derives the SHA-256 of every durable evidence file against the values recorded in the canonical report, re-parses the phase ID against CPIPC, re-checks the required closed-vocabulary verdicts are present and the CLEARED verdict is absent, and re-verifies no production/scripts/pyproject.toml/docs/contracts/existing-test diff from D0 -- all 20 pass.",
+  "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED/INDEPENDENTLY-VERIFIED reports remain immutable and byte-unchanged, including the immediate predecessor's own canonical report and every earlier repair/IV report in the chain; only this phase's own canonical report, fresh IV test, durable evidence copies, and governance/task/status artifacts are added.",
+  "report_consistency": "Staged pending push; canonical report to be promoted to COMPLETE after push.",
   "origin_main_head_count": 0,
-  "test_evidence_classification": "post_completion_full_repository_sweep_attributed_f5_hold_cleared",
-  "tests_run": 41771,
-  "tests_added_or_updated": "0 tests: 0 new test files; 0 existing test files modified (diagnostic/attribution-only phase -- a full-repository read-only pytest sweep was executed and 280 files individually isolated as investigation, not test authorship).",
+  "test_evidence_classification": "rhamp_cross_test_contamination_diagnosis_unresolved_f5_hold_remains",
+  "tests_run": 20,
+  "tests_added_or_updated": "1 new test file (20 tests): tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_contamination_diagnosis_iv.py. 0 existing test files modified.",
   "test_results": {
-    "full_suite_reproduction": "1092 failed, 40538 passed, 24 skipped, 117 errors in 8831.59s (python -m pytest -q -p no:cacheprovider at this phase's entry SHA; errors match the frozen original sweep exactly, 117=117)",
-    "isolated_file_rerun": "280 distinct files individually re-run standalone: 68 files / 368 raw nodes collapse to 31 (cross-test-order contamination); 210 files / 841 raw nodes reproduce deterministically",
-    "priority_regression_band": "856 passed, 0 failed, 8 deselected (all 16 N-16-5/F-5-priority files run together; 8 pre-existing/already-adjudicated findings deselected, individually classified in the canonical report)",
-    "collection_error_reproduction": "15 ModuleNotFoundError collection errors under bare `pytest` console-script invocation, 0 under `python -m pytest` -- environment/invocation-dependent, not a product or test defect",
+    "victim_alone_baseline": "125 passed in 2.82s (tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py, fresh process, D0)",
+    "candidate_composition_1_cltr_reload_cluster_plus_victim": "42 failed, 2932 passed, 1 skipped in 38.69s -- 0 of the 42 failures touch the victim module; falsified as the trigger",
+    "candidate_composition_2_thematic_55_file_cluster": "2148 passed, 1 skipped in 370.64s -- fully clean; falsified as the trigger's location",
+    "candidate_composition_3_quicktier_571_file_prefix": "aborted after ~10-11 minutes at ~7% progress; independently confirmed infeasible within any bounded budget",
+    "configured_agent_identity_regression": "7 failed, 61 passed, 3 skipped -- all 7 classified HISTORICAL-MOVING-AUTHORITY (CAIR-triggered) or expected host-permission fail-closed behavior; zero functional contradiction",
+    "fresh_phase_iv_suite": "20 passed in 0.37s (tests/test_..._contamination_diagnosis_iv.py)",
     "no_test_weakening": "0 def test_ renamed or removed; 0 existing test file bodies modified; 0 skip/xfail added to any pre-existing test; no production code modified in this phase",
-    "report_notification_tests": "test_telegram_notifications.py (47) and test_phase_reports.py (147 non-deselected) both pass cleanly in the priority regression band; the one phase_reports.py finding is independently reproduced pre-existing at the pre-Telegram-repair baseline",
-    "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised throughout",
-    "fast_green": "856 passed, 0 failed (N-16-5/F-5-priority regression band across all 16 flagged files, 8 pre-existing/already-adjudicated failures deselected -- each independently classified and evidenced in the canonical report; see full_suite_reproduction for the honest unfiltered full-repository count, which is the substantive subject of this phase, not its pass/fail gate)"
+    "report_notification_tests": "not re-run in this diagnostic phase (no notification/receipt production code touched); test_telegram_notifications.py is included, untouched, and clean within the 55-file thematic cluster invocation (2148 passed, 1 skipped)",
+    "bootstrap_session_reporting_tests": "pcae session bootstrap/health/check/status coherence/doctor task-memory exercised throughout this phase's own lifecycle (orientation, mid-phase re-acquisition after phase-complete released the lock, final checks) -- all passed/coherent at each checkpoint",
+    "fast_green": "not re-run as a distinct gate in this diagnostic phase; the fresh phase-specific IV suite (20 tests) and the 55-file RHAMP/PAWA/HATP/CLTR thematic cluster (2148 passed, 1 skipped) together cover this phase's own N-16-5-relevant fast-green-equivalent signal"
   },
   "validation_results": {
-    "cpipc_successor_valid": "confirmed via src/pcae/core/phase_id.py parse()/normalize(): both predecessor and candidate IDs are grammatically valid CPIPC-001 tokens; candidate confirmed unique in docs/tasks/.pcae; matches this repository's established R-suffix successor convention",
-    "sweep_sha_bound": "not resolvable to one exact commit from durable local evidence; independently bound instead to the source-byte-identical range [8bfce890 (TEL_CHANGE) .. T_ENTRY (9b49d9a4)] for src/pcae/scripts/pyproject.toml/docs/contracts via git diff --name-only (empty); corroborated by the predecessor's own PROJECT_STATUS.md prose ('frozen at this same unchanged src/pcae state')",
-    "contamination_demonstrated": "68 of 278 failing/erroring files (368 of 1209 raw nodes) shown to collapse to 31 genuine failures under isolated single-file rerun; dominant case (79/117 errors) traced to an isinstance-identity failure in one fixture chain in the merged-RHAMP-mechanism test file, confirmed 125/125 clean in complete isolation",
-    "hpac_verifier_finding_adjudicated": "test docstring itself discloses 'expected to FAIL against the current implementation'; independently cross-checked against the Gate 5 integration doc (registry-identity + reverification, never isinstance, explicit object.__new__ forgery -> authenticated_principal_not_verifier_issued handling) -- confirmed non-exploitable via the real consumption path",
-    "historical_moving_authority_confirmed": "HMIC frozen-scope test: git log -S confirms hatp_class_b_topology_verifier.py was added to the live frozen-scope tuple by a much earlier, unrelated governed phase, predating CAIR_ENTRY; two frozen git-diff-against-live-HEAD assertions independently confirmed to break solely because CAIR/TEL legitimately touched additional files after their own referenced fixed SHA",
-    "digest_drift_preexisting": "TestLocalHMICReconstruction::test_local_digest_matches_recorded_digest independently reproduced in a disposable worktree at CAIR_ENTRY (5568b5ab): already mismatching (with a third, different digest value) before CAIR or TEL",
-    "phase_reports_finding_preexisting": "test_public_reconciliation_requires_report_marker_checkpoint_and_receipt independently reproduced byte-identical (rc=1, same checkpoint_state) in a disposable worktree at TEL_ENTRY (9c88f1a3): failed before the Telegram durable-receipt repair existed",
-    "configured_agent_repair_contradiction_check": "no failing/error node in the priority or sampled sets touches _current_agent_identity/_effective_write_access/_mode_and_group_write_access/ACL subject evaluation/trusted-executable/PATH-precedence semantics; no contradiction found",
-    "telegram_repair_contradiction_check": "the frozen original sweep predates the Telegram repair by construction; the one deterministic phase_reports.py failure in current reproduction is independently proven pre-existing at TEL_ENTRY, not a new regression",
-    "f5": "CONTINUATION HOLD: CLEARED (technical prerequisite was already READY from the prior CAIR IV; this phase clears the broader post-completion adjudication hold, distinct from and layered on top of that prerequisite)",
-    "n16_5": "NOT CLOSED",
-    "n16_6_n16_7": "untouched",
-    "runtime": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities; first governed runtime external effect remains absent/unreachable",
-    "generation_1_host_state": "carried forward unchanged from prior phases (protected root PRESENT, generation 1, PAWA anchor PRESENT, helper PRESENT, PPA presentation/current-generation ABSENT); not re-derived from live inspection in this phase, no contradiction found",
-    "no_production_or_test_diff": "git diff --name-only T_ENTRY HEAD -- src/pcae scripts pyproject.toml is empty; no existing test file modified",
-    "no_host_mutation": "no scripts/hpac_protected_root_admin.py or scripts/hpac_protected_presentation_admin.py admin command run; no sudo; no descriptor write; no generation change; no helper reinstall",
-    "no_f5_action": "no F-5 deployment step performed; no PPA registration performed",
-    "no_ceremony": "no YubiKey/FIDO2/human-approval ceremony requested or performed",
-    "no_redispatch": "no historical Telegram notification re-dispatched",
-    "fast_green": "856 passed, 0 failed (N-16-5/F-5-priority regression band, 8 pre-existing/already-adjudicated failures deselected -- see test_results.fast_green)",
-    "report_notification_tests": "exercised cleanly in the priority regression band; see test_results.report_notification_tests",
-    "bootstrap_session_reporting_tests": "health/check/coherence/task-memory/runtime/push/report lifecycle exercised"
+    "cpipc_successor_valid": "confirmed via src/pcae/core/phase_id.py parse()/same_series()/same_branch()/compare(): predecessor and this phase's ID are same series/branch, this phase strictly ordered after predecessor; no discrepancy to record",
+    "d0": "e6bd2c718eca485104da8638ed8122035f692ed3",
+    "no_production_scripts_contracts_dependency_diff": "git diff --name-only D0 -- src/pcae scripts pyproject.toml docs/contracts is empty",
+    "no_existing_test_modified": "git diff --name-only D0 -- tests/ shows only the one new additive file added by this phase",
+    "runtime_unchanged": "pcae runtime inspect: not_implemented / Observed / observe / unavailable, 0 plugins, 0 capabilities -- unchanged throughout",
+    "no_host_mutation": "no scripts/hpac_protected_root_admin.py provision or scripts/hpac_protected_presentation_admin.py install run against real protected state; generation-1 host state carried forward unchanged, no contradiction found",
+    "diagnostic_budget_accounting": "5 completed targeted pytest invocations + 1 aborted/infeasible large-scale attempt (of 30 max); ~24 minutes cumulative wall-clock diagnostic time (of 60 min max); full accounting in .pcae/evidence/149O_1R1R2R1R1R1R1_1R1R1R1R_experiment_log.md"
   },
   "governance_results": {
     "pcae_health": "healthy before finalization",
     "pcae_check": "passed before finalization",
     "pcae_status_coherence": "coherent before finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing historical DONE.md-omission backlog (predates this phase); current phase task closed and recorded",
-    "pcae_push_check": "nothing_to_push",
+    "pcae_push_check": "to be re-checked at push time",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; zero plugins/capabilities",
     "telegram_runtime": "configured and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED (not applicable -- no delegated worker used)",
-    "repair_verdict": "FULL-REPOSITORY POST-COMPLETION SWEEP ATTRIBUTION: COMPLETE. F-5 CONTINUATION HOLD: CLEARED. Configured-agent-identity threading repair and durable Telegram acceptance receipt repair both remain INDEPENDENTLY VERIFIED, no contradiction found. N-16-5 remains NOT CLOSED. N-16-6/N-16-7 untouched. Runtime: Observed / observe / unavailable. First external effect: ABSENT."
+    "repair_verdict": "CONTAMINATION ROOT CAUSE: UNRESOLVED. CONTAMINATION LOCATION: NOT ESTABLISHED. CURRENT F-5 READINESS: NOT YET ESTABLISHED. F-5 EXECUTION HOLD: REMAINS. N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched."
   },
   "notification_dispatch_result": "pending_phase_complete_promotion",
-  "no_go_confirmation": "No production code modified. No existing test modified, skipped, or xfailed. No historical re-dispatch performed. No F-5 deployment retry performed. No protected-root provisioning rerun. No helper reinstall. No generation reset. No PPA registration. No protected-root mutation. No administrator credentials requested. No protected human election. No YubiKey interaction. No FIDO2 PIN request. No presentation evidence created. No PRODUCTION principal minted. No Gate 5 final certification. No N-16-5 closure. No N-16-6 or N-16-7 work. No runtime execution enabled. No first governed runtime effect implemented or invoked. No contract change. No dependency change. No delegated worker finalization/commit/push. No raw git commit. No raw git push. No hook bypass. No force push. No history rewrite.",
+  "no_go_confirmation": "No production code modified. No existing test modified, skipped, or xfailed. No historical Telegram re-dispatch performed. No F-5 registration or deployment retry performed. No protected-root provisioning rerun. No helper reinstall. No generation reset. No PPA registration. No protected-root mutation. No administrator credentials requested. No protected human election. No YubiKey interaction. No FIDO2 PIN request. No presentation evidence created. No PRODUCTION principal minted. No Gate 5 final certification. No N-16-5 closure. No N-16-6 or N-16-7 work. No runtime execution enabled. No first governed runtime effect implemented or invoked. No contract change. No dependency change. No delegated worker finalization/commit/push. No raw git commit. No raw git push. No hook bypass. No force push. No history rewrite.",
   "no_go_confirmations": [
     "No production code modified.",
     "No existing test modified, skipped, or xfailed.",
-    "No historical re-dispatch performed.",
-    "No F-5 deployment retry performed.",
+    "No historical Telegram re-dispatch performed.",
+    "No F-5 registration or deployment retry performed.",
     "No protected-root provisioning rerun.",
     "No helper reinstall.",
     "No generation reset.",
@@ -93,44 +80,17 @@
     "No history rewrite."
   ],
   "files_changed": [
-    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_POST_COMPLETION_FULL_REPOSITORY_TEST_SWEEP_ATTRIBUTION_AND_F5_HOLD_ADJUDICATION.md",
+    "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_RHAMP_CROSS_TEST_CONTAMINATION_DIAGNOSIS_EVIDENCE_RECONCILIATION_AND_F5_READINESS_RE_ADJUDICATION.md",
+    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_contamination_diagnosis_iv.py",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
+    ".pcae/evidence/**",
     "tasks/active/**",
     "tasks/done/**"
   ],
-  "files_changed_count": 4,
-  "phase_commits": [
-    {
-      "hash": "ed1f66c1af7f58e47f8c94cc5062cd9fac4fb48d",
-      "subject": "open post-completion full-repository test sweep attribution + F-5 hold adjudication task, archive superseded idle task"
-    },
-    {
-      "hash": "54a5307d16ece1d49314c40fc3f252b83b3b39ae",
-      "subject": "post-completion full-repository test sweep attribution -- F-5 CONTINUATION HOLD: CLEARED, N-16-5 not closed"
-    },
-    {
-      "hash": "8b369ba34da7492a95d59edf1160817c5d11ef89",
-      "subject": "update PROJECT_STATUS.md and CHANGELOG.md -- F-5 CONTINUATION HOLD: CLEARED"
-    },
-    {
-      "hash": "682a862674c2938a099c140ecb5a1ed6bf541486",
-      "subject": "close task lifecycle, remove stale duplicated active task files (task-memory hygiene)"
-    },
-    {
-      "hash": "60416d86194203eb73284f470eb0addea16b9022",
-      "subject": "expand idle-task allowed-file zone, stage completion metadata and canonical report -- F-5 CONTINUATION HOLD: CLEARED"
-    },
-    {
-      "hash": "f12114ace254b5efa318c36af0543964a22e6397",
-      "subject": "remove other-phase-identity token from validation-evidence field"
-    },
-    {
-      "hash": "1fe513ad2d146b9b480abbcc59f3fa9a1c230923",
-      "subject": "expand truncated phase-ID token in completed task title/goal so phase-report-identity check resolves the full ID"
-    }
-  ],
-  "recommended_next_phase": "Production Protected-Presentation Registration Continuation Against Existing Generation-1 Deployment State -- retry the previously blocked canonical PPA registration step against the existing durable generation-1 state after revalidating current state. Must not reprovision root, reset generation, reinstall helper, or erase deployment evidence. Not begun.",
-  "pushed_status": "nothing_to_push",
-  "origin_main_head": "1fe513ad2d146b9b480abbcc59f3fa9a1c230923"
+  "files_changed_count": 7,
+  "phase_commits": [],
+  "recommended_next_phase": "A further-bounded RHAMP cross-test contamination bisection phase testing additional candidate compositions drawn from the ~500 files not covered by either composition falsified in this phase, informed by collection-order and global-registry-mutation analysis rather than blind full-prefix bisection (independently confirmed infeasible within any single-phase budget). Not begun.",
+  "pushed_status": "pending",
+  "origin_main_head": "PENDING"
 }
