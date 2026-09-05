@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260905-0145-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1-telegram-receipt-repair-independently-verified-full-suite-triage-successor-recommended-f-5-hold-n-16-5-not-closed
+20260905-0506-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-f-5-hold-cleared-n-16-5-not-closed
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1); Telegram receipt repair INDEPENDENTLY VERIFIED; full-suite triage successor recommended; F-5 hold; N-16-5 not closed
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R); F-5 hold CLEARED; N-16-5 not closed
 
 ## Status
 
@@ -18,15 +18,17 @@ implementation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1); Telegram receipt repair INDEPENDENTLY VERIFIED; full-suite triage successor recommended; F-5 hold; N-16-5 not closed
+Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R); F-5 hold CLEARED; N-16-5 not closed
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/**
 
 ## Forbidden Files
 
@@ -80,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-09-05T01:45:35.349810+02:00
+2026-09-05T05:06:12.185931+02:00
