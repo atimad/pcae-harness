@@ -1,51 +1,61 @@
 # PCAE Phase Completion Report
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R`
-- Status: **COMPLETE — CHECKPOINT METHOD: VERIFIED — CONTAMINATION ROOT CAUSE: UNRESOLVED**
-- F-5: **EXECUTION HOLD: REMAINS**
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R`
+- Status: **COMPLETE — CONTAMINATION ROOT CAUSE: IDENTIFIED — CONTAMINATION LOCATION: TEST-HARNESS ONLY**
+- F-5: **EXECUTION HOLD: REMAINS** (11/12 clearance criteria satisfied; narrow permission-blocked host re-check pending)
 - N-16-5: **NOT CLOSED**
 
-Redesigned the predecessor's non-resumable continuous single-process
-execution-time trace (RESUME MODEL C) into **RESUME MODEL A**: 31
-independent 25-file batch-vs-victim compositions over a frozen 761-file
-corpus, each checkpointed after a fresh clean-process run. The predecessor's
-"resume at file ~80" proposal was explicitly rejected as an invalid basis
-for cross-process resumability, per this phase's own method-validity rule.
+Continued the SAME checkpointed campaign `RHAMP-XTEST-IDENTITY-TRACE/1` /
+`RHAMP-XTEST-CORPUS/1` from the predecessor's checkpoint chain — no reset;
+the 18 clean batches were not re-run. Bisected batch-013's frozen 25-file
+manifest down to a single test node using 14 of a fresh 30-invocation /
+60-minute budget (~171.4s used), stopping voluntarily once the causal bar
+was met (legitimate stop condition A).
 
-Checkpoint mechanism independently verified before any coverage invocation:
-restart-readable, corruption-refused, corpus-drift-refused,
-tracer-drift-refused. Tracer independently verified non-interfering
-(victim-alone with/without tracer: identical outcome). Inherited coverage:
-0/31 — the predecessor's three ad hoc clusters could not be re-verified
-file-for-file against the new batch boundaries with confidence, so none
-was imported as checkpointed coverage.
+**ROOT CAUSE: IDENTIFIED.**
+`tests/test_phase_147h_authority_evaluation_independent_verification.py`
+`TestForbiddenDependenciesIndependent::test_no_forbidden_root_is_importable_transitively_via_authority_evaluation_alone`
+(lines 780-791) deletes every `sys.modules` entry matching
+`pcae.authority_evaluation*` or any of `_FORBIDDEN_IMPORT_ROOTS` (which
+includes the literal string `"pcae.core"`), then reimports
+`pcae.authority_evaluation` — removing `pcae.core.hpac_foundation` and
+`pcae.core.human_principal_registry` from `sys.modules` without
+invalidating stale class-object references other already-imported code
+still holds. A later fresh reimport (triggered by the victim) constructs
+new, distinct, same-named class objects — **DUPLICATE MODULE IMPORT /
+STALE REFERENCE**, exactly matching the `id()`-drift signature the tracer
+recorded.
 
-Ran 26 batch invocations (~49.0 min) + 2 tracer-validation controls +
-1 aborted 600s-timeout attempt: **29 of 30 invocations, ~59.2 of 60
-minutes** — both budgets effectively exhausted (Stop Condition B).
-Results: **18/31 batches CLEAN**, **7/31 INCONCLUSIVE** (timeout),
-**5/31 not attempted**, and **1/31 (batch-013) shows a new high-confidence
-lead**: `id()` of both implicated classes (`HPACStoreAuthority`,
-`HumanPrincipalRegistryStore`) drifted session-start-to-finish
-(module/qualname unchanged — unique among all 19 batches with complete
-trace pairs), correlated with the victim module's first-ever non-clean
-outcome anywhere in this diagnostic lineage (2 `ERROR`s). Not yet causally
-proven — no bisection, trigger-removal control, or fresh-process repeat
-performed (budget exhausted).
+Full four-way causal proof: A (victim alone) clean → B (minimized trigger
++ victim) contaminated → C (composition minus trigger, `--deselect`)
+clean → D (fresh-process repeat of B) identical. Uniqueness independently
+re-verified twice (interactive grep + this phase's own mechanical IV
+test): among all 761 corpus test files, only this one node deletes
+`pcae.core` entries from `sys.modules`. Zero occurrences in `src/pcae`;
+zero `sys.modules` manipulation in the PPA registration scripts.
+**CONTAMINATION STAGE: TEST-EXECUTION. CONTAMINATION LOCATION:
+TEST-HARNESS ONLY.**
 
-**CONTAMINATION ROOT CAUSE: UNRESOLVED. CONTAMINATION STAGE:
-TEST-EXECUTION. CONTAMINATION LOCATION: NOT ESTABLISHED. CURRENT F-5
-READINESS: NOT YET ESTABLISHED. F-5 EXECUTION HOLD: REMAINS. N-16-5: NOT
-CLOSED.**
+A bounded clean-context readiness band (Gate5/Gate9/`hpac_verifier`/
+merged-RHAMP-IV/protected-presentation-real-assurance-IV/3 PAWA IV files,
+15 files): 700 passed, 2 failed (the pre-existing, previously-adjudicated
+`hpac_verifier` forged-object nonblocking findings, unchanged), `id()`
+stable throughout. Configured-agent-identity-threading-repair band: 35
+passed, 3 skipped, 3 failed (1 pre-existing frozen-HEAD point-in-time
+guard + 2 `PermissionError` on `_PROTECTED_ROOT` filesystem access in this
+diagnostic process — not new evidence of a violation).
 
-No production/existing-test/contract/dependency modification. No host
-mutation. No F-5 action. No YubiKey/human ceremony. No historical
-Telegram re-dispatch. Runtime unchanged: `not_implemented`/`Observed`/
-`unavailable`, 0 plugins/capabilities.
+**F-5 EXECUTION HOLD: REMAINS** — 11 of 12 governed clearance criteria are
+satisfied; criterion 11 (no current generation-1 invariant violation)
+could not be positively confirmed in this process due to the
+`PermissionError`, so per governed item 34 ("relevant verification remains
+unreliable") the hold remains, narrowly, pending exactly that one re-check
+under adequate host filesystem permissions.
 
-Recommended (not begun) successor: resume campaign
-`RHAMP-XTEST-IDENTITY-TRACE/1` / corpus `RHAMP-XTEST-CORPUS/1` from this
-exact checkpoint chain, prioritizing bounded causal isolation of batch-013
-before the remaining pending/inconclusive batches.
-
+No production/existing-test/contract/dependency modification; no host
+mutation; no F-5 action; no YubiKey/human ceremony; no historical Telegram
+re-dispatch. N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` preserved.
+
+Full canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_BATCH013_CAUSAL_ISOLATION.md`.
