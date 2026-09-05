@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (privileged read-only generation-1 protected-root / PPA-absence
+  verification and F-5 execution-hold clearance adjudication) obtained
+  minimum-necessary local administrator privilege via macOS's native
+  Authorization Services dialog (no TTY available in this session for
+  `sudo` directly) and independently verified, against real host state,
+  everything the predecessor phase could not: the protected root
+  (`root:admin`, `0700`, real directory); the canonical §33
+  topology-recognition sequence (`SUCCESS` -- configured-agent-identity
+  threading repair reconfirmed against production; a first attempt
+  correctly failed closed on this dev shell's agent-writable-PATH
+  contamination, re-run under a clean system PATH succeeded); the PAWA
+  anchor/installation/generation (all match frozen expectations,
+  cross-digest-consistent); the generation-1 helper (installed bytes
+  byte-for-byte identical to the immutable Git blob `d80abf74` at commit
+  `2e416e9b`, SHA-256 `933c664...9ea6182`); and, after deriving the
+  complete PPA registration write-set from primary source (the phase
+  prompt's assumed `.authority/presentation-*.json` paths do not match
+  production -- the real path is
+  `presentation-mechanisms/v2/pcae-protected-local-presentation/`),
+  confirmed total absence of any PPA installation/current-generation/
+  partial-transaction artifact and of `.authority/writer.lock` (no
+  writer_transaction has ever executed against this store beyond the
+  one-time bootstrap). 5 privileged commands, all READ-ONLY, 0
+  mutations. `READINESS CRITERIA: 12/12 PASS.` `CURRENT F-5 READINESS:
+  SUPPORTED BY CURRENT VERIFIED HOST STATE.` `F-5 EXECUTION HOLD:
+  CLEARED.` `N-16-5: NOT CLOSED` (clearance is not registration
+  authority; no PPA registration performed). Next = Production
+  Protected-Presentation Registration Continuation Against Existing
+  Generation-1 Deployment State (derived, not begun).
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R`
   (checkpointed RHAMP execution-time class-identity/state-trace campaign
   continuation, batch-013 causal isolation, production-reachability

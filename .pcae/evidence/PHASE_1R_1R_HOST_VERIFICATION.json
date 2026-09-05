@@ -1,0 +1,134 @@
+{
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R",
+  "phase_title": "Privileged Read-Only Generation-1 Protected-Root / PPA-Absence Verification and F-5 Execution-Hold Clearance Adjudication",
+  "predecessor_phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R",
+  "h0": "423df35af49c2c52ce4939f4d1af03b7f92d974a",
+  "inspection_timestamp_utc": "2026-09-05T15:59:00Z",
+  "host_platform": "macOS (Darwin 25.6.0)",
+  "protected_root": {
+    "path": "/Library/Application Support/PCAE/HPAC/protected-root",
+    "type": "directory",
+    "owner": "root",
+    "group": "admin",
+    "mode_octal": "0700",
+    "symlink": false
+  },
+  "ancestor_chain_trust": {
+    "checked": ["/", "/Library", "/Library/Application Support", "/Library/Application Support/PCAE", "/Library/Application Support/PCAE/HPAC"],
+    "none_writable_by_configured_agent_uid_501": true,
+    "canonical_topology_recognition_result": "SUCCESS"
+  },
+  "pawa": {
+    "anchor_id": "hpaw-f9661f401f204d828a4aec951855819a",
+    "installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+    "generation": 1,
+    "symbolic_account": "atilamadai",
+    "provisioned_uid": 501,
+    "agent_exclusion_state": "ACTIVE",
+    "current_generation_agent_exclusion_digest": "bf0a7a9022f14cfee4d261b83cf932565de85839f59e0dbe135228e9fcad0b2f",
+    "agent_exclusion_record_digest": "bf0a7a9022f14cfee4d261b83cf932565de85839f59e0dbe135228e9fcad0b2f",
+    "digests_match": true,
+    "current_generation_descriptor_digest": "05d32613cccc8664bba8bb832d4f683f5c71e19578776dabe1e1ade64a97a678",
+    "deployment_owner_descriptor_digest": "05d32613cccc8664bba8bb832d4f683f5c71e19578776dabe1e1ade64a97a678",
+    "descriptor_digests_match": true,
+    "protected_root_identity": {"device": 16777230, "inode": 555016224},
+    "identity_consistent_across_manifest_deployment_owner_agent_exclusion": true
+  },
+  "canonical_topology_recognition": {
+    "method": "direct call to pcae.core.hpac_protected_admin_writer._run_recognition_sequence (NOT production_writer -- no writer capability minted, no issuance evidence recorded)",
+    "caller_module": "pcae.core.hpac_protected_admin_writer",
+    "executed_as": "root, via osascript do-shell-script with administrator privileges, PATH restricted to /usr/bin:/bin:/usr/sbin:/sbin",
+    "note": "first attempt with the ambient dev-shell PATH (containing uid-501-writable directories preceding /bin) correctly failed closed with acl_inspection_unavailable -- expected behavior of the ACL-tool-trust resolution guard, not a defect. Re-run under a clean system-only PATH succeeded.",
+    "result": "SUCCESS",
+    "anchor_id": "hpaw-f9661f401f204d828a4aec951855819a",
+    "installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+    "generation": 1,
+    "configured_agent_uid": 501,
+    "configured_agent_gids": [12, 20, 33, 61, 79, 80, 81, 98, 100, 204, 250, 395, 398, 399, 400, 701],
+    "live_root_identity_digest": "e460eb1b6a163563085f549f02cd9d070c1f1f802301a6b17bcda5aa2a21ffba",
+    "ambient_root_defect_reappeared": false
+  },
+  "helper": {
+    "immutable_source": {
+      "commit_full_sha": "2e416e9bfe8e8711e4c4149b51e617d36e3ed463",
+      "blob_full_sha": "d80abf747fa70c78c97faf04876024869edf9447",
+      "blob_path": "src/pcae/protected_presentation_helper.py",
+      "byte_length": 16295,
+      "sha256": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+      "reproduced_via": "git cat-file -p <blob> (independent of the installed helper)"
+    },
+    "installed": {
+      "path": "/Library/Application Support/PCAE/HPAC/protected-root/presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182/pcae-protected-local-presentation",
+      "type": "regular file",
+      "owner": "root",
+      "group": "admin",
+      "mode_octal": "0644",
+      "byte_length": 16295,
+      "sha256": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+      "byte_for_byte_identical_to_immutable_source": true,
+      "comparison_method": "cmp -s (byte-for-byte), executed as root via osascript"
+    }
+  },
+  "ppa_write_set": {
+    "derived_from": "src/pcae/core/protected_presentation_installation.py::ProtectedPresentationInstallationStore, src/pcae/core/approval_presentation.py::PresentationMechanismDescriptorStore",
+    "mechanism_dir": "<protected-root>/presentation-mechanisms/v2/pcae-protected-local-presentation/",
+    "artifacts": [
+      {"name": "descriptor.json", "path": "<mechanism_dir>/descriptor.json", "create_only_on_install": true},
+      {"name": "installation.json", "path": "<mechanism_dir>/installations/<generation>/installation.json", "create_only_always": true},
+      {"name": "current-generation.json (anchor)", "path": "<mechanism_dir>/current-generation.json", "create_only_on_install": true},
+      {"name": "writer-provenance sidecars", "path": ".authority/provenance/<sha256(relative_path)>.json", "one_per_written_record": true},
+      {"name": "writer.lock", "path": ".authority/writer.lock", "created_on_first_writer_transaction_of_any_kind": true}
+    ],
+    "note": "the phase prompt's assumed paths ('.authority/presentation-installation.json', '.authority/presentation-current-generation.json') do not match production source; the actual write set above was derived from primary source and used for the absence scan."
+  },
+  "ppa_absence_scan": {
+    "mechanism_dir_presentation_mechanisms_v2_pcae_protected_local_presentation": "ABSENT (entire directory tree does not exist)",
+    "descriptor_json": "ABSENT",
+    "installation_json_any_generation": "ABSENT",
+    "current_generation_anchor_json": "ABSENT",
+    "writer_lock": "ABSENT (no writer_transaction of any kind -- PAWA or PPA -- has ever executed against this store; provisioning used a separate one-time out-of-band bootstrap path)",
+    "authority_provenance_directory_contents": ["cb48eb2168fc4ec824500a5749fb18033359735fd451bbdb20d7bde2b1abb921.json (PAWA descriptor provenance)", "96c40576ca3570a507d552f19c41226cf04fc74f3c455a790c843953c84642b4.json (PAWA agent-exclusion provenance)"],
+    "unexpected_presentation_or_install_named_artifacts": "NONE (only presentation-helper/ and its one canonical content-addressed file)",
+    "verdict": "PPA REGISTRATION STATE: ABSENT (complete write set, zero partial artifacts)"
+  },
+  "deployment_capability_state": {
+    "durable_capability_record": "none exists by architecture -- HPACWriterCapability is process-local, single-use, non-serializable, restart-invalid (PROJECT_STATUS.md architecture note); no durable file could evidence a partially-consumed capability",
+    "verdict": "no unsafe partial consumption possible; nothing to check beyond the absence scan above"
+  },
+  "ppa_transaction_state": "CLEAN / ABSENT",
+  "rhamp_contamination": {
+    "reopened": false,
+    "production_trigger_grep": "grep -rn 'del sys.modules\\|importlib.reload' src/pcae/ scripts/ -> 0 occurrences (reconfirmed, not re-investigated)",
+    "location_preserved": "TEST-HARNESS ONLY"
+  },
+  "no_host_mutation": true,
+  "no_production_test_contract_dependency_change_since_h0": true,
+  "runtime_final_check": {
+    "implementation": "not_implemented",
+    "state": "Observed",
+    "maximum_capability": "observe",
+    "execution_availability": "unavailable",
+    "plugins": 0,
+    "capabilities": 0
+  },
+  "final_verdicts": {
+    "privileged_readonly_host_inspection": "COMPLETE",
+    "mutating_pcae_host_commands": 0,
+    "generation_1_protected_root_state": "VERIFIED",
+    "protected_root_topology_trust": "VERIFIED",
+    "pawa_anchor_state": "VERIFIED",
+    "pawa_installation_state": "VERIFIED",
+    "pawa_generation": 1,
+    "configured_agent_binding": "VERIFIED",
+    "agent_exclusion_binding": "VERIFIED",
+    "generation_1_helper_integrity": "VERIFIED",
+    "ppa_installation": "ABSENT VERIFIED",
+    "ppa_current_generation": "ABSENT VERIFIED",
+    "ppa_partial_transaction": "ABSENT VERIFIED",
+    "ppa_pre_registration_state": "CLEAN",
+    "readiness_criteria": "12/12 PASS",
+    "current_f5_readiness": "SUPPORTED BY CURRENT VERIFIED HOST STATE",
+    "f5_execution_hold": "CLEARED",
+    "n16_5": "NOT CLOSED"
+  }
+}

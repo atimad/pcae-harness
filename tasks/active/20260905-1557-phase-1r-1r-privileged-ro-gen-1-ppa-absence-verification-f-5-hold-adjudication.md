@@ -29,6 +29,7 @@ Privileged read-only verification of generation-1 protected root and PPA-absence
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tests/**
+- docs/**
 
 ## Forbidden Files
 

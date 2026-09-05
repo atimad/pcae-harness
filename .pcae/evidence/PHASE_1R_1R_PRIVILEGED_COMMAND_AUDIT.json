@@ -1,0 +1,53 @@
+{
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R",
+  "authentication_mechanism": "macOS native Authorization Services dialog via `osascript -e \"do shell script ... with administrator privileges\"` -- password entered by the human directly into the OS system dialog, never through this session's terminal, chat, argv, environment, or any log.",
+  "commands": [
+    {
+      "seq": 1,
+      "purpose": "list protected-root directory tree with type/owner/mode metadata (item 9-11)",
+      "command_summary": "find <protected-root> -maxdepth 6 -exec stat -f \"%N type=%HT owner=%Su group=%Sg mode=%Mp%Lp size=%z\" {} \\;",
+      "classification": "READ-ONLY",
+      "exit_code": 0,
+      "result_summary": "full tree listed: presentation-helper/installations/<sha256>/pcae-protected-local-presentation (regular file, root:admin, 0644, 16295 bytes) and .authority/{agent-exclusion.json, current-generation.json, manifest.json, deployment-owner.json, provenance/*.json} -- no presentation-mechanisms/ directory present",
+      "pcae_protected_state_mutation": "NONE"
+    },
+    {
+      "seq": 2,
+      "purpose": "read JSON metadata files, hash and stat the installed helper, list unexpected artifacts (items 13-27)",
+      "command_summary": "cat current-generation.json / agent-exclusion.json / manifest.json / deployment-owner.json; test -e on the two PPA marker names; stat + shasum -a 256 the installed helper; recursive find + a *presentation*/*install* name scan",
+      "classification": "READ-ONLY",
+      "exit_code": 0,
+      "result_summary": "all 4 JSON documents read; PPA current-generation.json and installation.json both ABSENT; installed helper sha256 933c664...ea6182 matches expected; no unexpected presentation/install artifacts beyond the one known helper file",
+      "pcae_protected_state_mutation": "NONE"
+    },
+    {
+      "seq": 3,
+      "purpose": "byte-for-byte compare installed helper against the immutable Git-reproduced blob (item 22)",
+      "command_summary": "cmp -s <installed helper> <local git-cat-file -p reproduction>",
+      "classification": "READ-ONLY",
+      "exit_code": 0,
+      "result_summary": "IDENTICAL",
+      "pcae_protected_state_mutation": "NONE"
+    },
+    {
+      "seq": 4,
+      "purpose": "run the canonical §33 topology-recognition sequence against real host state (items 12, 28, 31) -- first attempt, ambient dev-shell PATH",
+      "command_summary": "python3 <ro_topology_recognition.py calling _run_recognition_sequence directly>",
+      "classification": "READ-ONLY",
+      "exit_code": 0,
+      "result_summary": "RECOGNITION FAILED: protected_root_untrusted / acl_inspection_unavailable -- caused by uid-501-writable directories preceding /bin in the inherited ambient PATH, correctly triggering the ACL-tool-trust resolution's fail-closed guard (expected behavior of the repaired resolver, not a defect)",
+      "pcae_protected_state_mutation": "NONE"
+    },
+    {
+      "seq": 5,
+      "purpose": "run the canonical §33 topology-recognition sequence against real host state, re-run with a clean system-only PATH (items 12, 28, 31)",
+      "command_summary": "env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin python3 <same script>",
+      "classification": "READ-ONLY (its own internal implementation includes a canonical, self-cleaning O_EXCL|O_NOFOLLOW create+fsync+unlink write-probe of .authority/ as an intrinsic part of the recognition semantics itself -- no descriptor/anchor/generation/PPA file created, modified, or removed; production_writer was deliberately NOT called, so no writer capability was minted and no issuance evidence was recorded)",
+      "exit_code": 0,
+      "result_summary": "RECOGNITION SUCCESS: anchor_id/installation_id/generation/configured_agent.uid all match expected; no ambient-root defect reappeared",
+      "pcae_protected_state_mutation": "NONE (self-cleaning probe only, intrinsic to canonical recognition)"
+    }
+  ],
+  "mutating_pcae_host_commands": 0,
+  "password_handling": "never displayed, echoed, logged, or persisted by this process; entered by the human directly into the native macOS authorization dialog"
+}
