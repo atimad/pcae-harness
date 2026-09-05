@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (production protected-presentation registration continuation against
+  existing generation-1 deployment state) executed the canonical PPA
+  `install` transaction exactly once, successfully, via `sudo` in the
+  operator's own terminal (password never seen/echoed/logged), after
+  root-causing and clearing two non-blocking environmental obstacles
+  (a contaminated dev-shell `PATH` correctly tripping the ACL-tool-trust
+  guard, then a sanitized `PATH` resolving the wrong Python interpreter)
+  -- neither required any `src/pcae` change. `PPA REGISTRATION
+  TRANSACTION: COMPLETE.` `UNAUTHORIZED MUTATING HOST COMMANDS: 0.`
+  Write set confined to exactly the three authorized files
+  (`descriptor.json`, `installations/1/installation.json`,
+  `current-generation.json`); `installation_digest`/`anchor_digest` both
+  independently recompute; descriptor/installation digests
+  cross-consistent. Generation-1 helper re-hashed after registration:
+  unchanged (`933c664...9ea6182`). Protected root/ancestor chain
+  re-`stat`'d directly: `uid=0`, `0700`/`0755` throughout, configured
+  agent (uid 501) has zero write access anywhere in the chain --
+  `PROTECTED-ROOT / PAWA GENERATION: PRESERVED` (still 1). PAWA
+  deployment capability consumed. Bounded regression band: 468 passed, 5
+  pre-existing/unattributable failed (zero `src/pcae` diff since phase
+  entry). `F-5 PROTECTED-PRESENTATION REGISTRATION: COMPLETE --
+  DEPLOYMENT-STATE IV PENDING.` `F-5: DEPLOYED / IV PENDING.` `N-16-5:
+  NOT CLOSED.` Next = Independent Verification of Production
+  Protected-Presentation Generation-1 Deployment State (not begun);
+  N-16-6/N-16-7 untouched.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (privileged read-only generation-1 protected-root / PPA-absence
   verification and F-5 execution-hold clearance adjudication) obtained

@@ -2,34 +2,33 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R
-— Privileged Read-Only Generation-1 Protected-Root / PPA-Absence
-Verification and F-5 Execution-Hold Clearance Adjudication. **STATUS:
-COMPLETE. Minimum-necessary local administrator privilege obtained via
-macOS's native Authorization Services dialog (no TTY available for
-`sudo` in this session); 5 privileged commands, all classified
-READ-ONLY, 0 mutations of PCAE protected state. GENERATION-1
-PROTECTED-ROOT STATE: VERIFIED. PROTECTED-ROOT TOPOLOGY TRUST: VERIFIED
-(canonical §33 recognition sequence SUCCEEDS against real host state —
-the configured-agent-identity threading repair independently
-reconfirmed; first attempt failed closed correctly due to this dev
-shell's PATH containing agent-writable dirs before `/bin`, re-run under
-a clean system PATH succeeded). PAWA ANCHOR/INSTALLATION/GENERATION-1:
-VERIFIED. GENERATION-1 HELPER INTEGRITY: VERIFIED (installed bytes
-byte-for-byte identical to the immutable Git blob `d80abf74` at commit
-`2e416e9b`, SHA-256 `933c664...9ea6182`). PPA INSTALLATION / CURRENT
-GENERATION / PARTIAL TRANSACTION: ALL ABSENT VERIFIED (complete write
-set derived from primary source; the entire
-`presentation-mechanisms/v2/pcae-protected-local-presentation/` subtree
-and `.authority/writer.lock` are absent — no PAWA or PPA
-writer_transaction has ever executed against this store beyond the
-one-time out-of-band bootstrap). PPA PRE-REGISTRATION STATE: CLEAN.
-READINESS CRITERIA: 12/12 PASS. CURRENT F-5 READINESS: SUPPORTED BY
-CURRENT VERIFIED HOST STATE. F-5 EXECUTION HOLD: CLEARED. N-16-5: NOT
-CLOSED (clearance is not registration authority — no PPA registration
-performed). Next = Production Protected-Presentation Registration
-Continuation Against Existing Generation-1 Deployment State (not
-begun).**
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+— Production Protected-Presentation Registration Continuation Against
+Existing Generation-1 Deployment State. **STATUS: COMPLETE. Canonical
+PPA `install` transaction executed exactly once successfully via `sudo`
+in the operator's own terminal (password never seen/echoed/logged by
+this session), after two non-blocking, fully root-caused environmental
+obstacles (a contaminated dev-shell PATH tripping the ACL-tool-trust
+guard as designed, then a sanitized PATH resolving the wrong Python
+interpreter) — neither required any `src/pcae` change.
+PPA REGISTRATION TRANSACTION: COMPLETE. UNAUTHORIZED MUTATING HOST
+COMMANDS: 0. Write set confined to exactly the three authorized files
+(`descriptor.json`, `installations/1/installation.json`,
+`current-generation.json` under
+`presentation-mechanisms/v2/pcae-protected-local-presentation/`);
+`installation_digest`/`anchor_digest` both independently recompute;
+descriptor/installation digests cross-consistent. GENERATION-1 HELPER
+AFTER REGISTRATION: UNCHANGED VERIFIED (re-hashed, still
+`933c664...9ea6182`). PROTECTED-ROOT / PAWA GENERATION: PRESERVED
+(generation still 1; root/ancestor chain re-`stat`'d as `uid=0`,
+`0700`/`0755`, configured agent uid 501 has zero write access anywhere
+in the chain). PAWA DEPLOYMENT CAPABILITY: CONSUMED. Bounded regression
+band: 468 passed, 5 pre-existing/unattributable failed (zero `src/pcae`
+diff since phase entry). F-5 PROTECTED-PRESENTATION REGISTRATION:
+COMPLETE — DEPLOYMENT-STATE IV PENDING. F-5: DEPLOYED / IV PENDING.
+N-16-5: NOT CLOSED. Next = Independent Verification of Production
+Protected-Presentation Generation-1 Deployment State (not begun);
+N-16-6/N-16-7 untouched.**
 
 Continued the SAME checkpointed campaign (`RHAMP-XTEST-IDENTITY-TRACE/1` /
 `RHAMP-XTEST-CORPUS/1`) from the predecessor's checkpoint chain -- no

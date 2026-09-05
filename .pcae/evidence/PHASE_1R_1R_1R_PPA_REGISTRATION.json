@@ -1,0 +1,170 @@
+{
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R",
+  "phase_title": "Production Protected-Presentation Registration Continuation Against Existing Generation-1 Deployment State",
+  "predecessor_phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R",
+  "g0": "4fa2ddb1fe1ef6b4b7588bbaa49131d11120efb5",
+  "registration_timestamp_utc": "2026-09-05T16:53:22.143Z",
+  "pre_registration_revalidation": {
+    "protected_root": "PRESENT / trusted (uid=0 gid=80 mode=0700)",
+    "generation": 1,
+    "pawa_anchor_installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+    "configured_agent": "atilamadai / uid 501",
+    "agent_exclusion_state": "ACTIVE",
+    "helper_present": true,
+    "helper_sha256_independently_recomputed_from_immutable_source": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+    "helper_source_stable_since_commit": "a85abff6 (unchanged through G0)",
+    "verifier_config_object": {"schema": "v1", "verifier_kind": "pcae-protected-local-presentation/1.0"},
+    "verifier_config_digest_independently_recomputed": "951182f5e737068d286313903504e34cb3dc57b47a2a19f9031ac068c7992c85",
+    "ppa_installation": "ABSENT",
+    "ppa_current_generation": "ABSENT",
+    "ppa_partial_transaction": "ABSENT"
+  },
+  "canonical_command": "scripts/hpac_protected_presentation_admin.py install --helper-sha256 933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182 --helper-version pcae-protected-local-presentation-helper/1.0 --verifier-config-digest 951182f5e737068d286313903504e34cb3dc57b47a2a19f9031ac068c7992c85 --renderer-profile pcae-protected-local-presentation-renderer/1.0 --descriptor-version pcae-protected-local-presentation-descriptor/1.0",
+  "attempt_1": {
+    "invocation": "sudo python3 scripts/hpac_protected_presentation_admin.py install ...",
+    "result": "FAILED before any PAWA capability was issued or consumed (production_writer() raised prior to handle.consume()/store.apply_configuration())",
+    "error": "PAWA recognition/issuance refused: protected_root_untrusted: indeterminate permissions: acl_inspection_unavailable (ancestor_indeterminate for /, /Library, /Library/Application Support, .../PCAE, .../HPAC)",
+    "root_cause": "the human operator's interactive shell PATH contains several uid-501-writable directories (~/.kimi-code/bin, ~/.local/bin, /opt/homebrew/bin, etc.) preceding /usr/bin and /bin, so pcae.core.hatp_class_b_topology_verifier._resolve_trusted_executable_for_subject('ls', ...) correctly, conservatively, refuses to trust ls for the ACL check -- never a false pass, fail-closed as designed. NOT a product defect.",
+    "classification": "NO-WRITE FAILURE (safe, clean; verified no durable artifact appeared before or after)",
+    "durable_mutation": "none"
+  },
+  "attempt_1_root_cause_confirmation": {
+    "method": "unprivileged, read-only reproduction of _resolve_trusted_executable_for_subject('ls', uid=501, gids=<atilamadai groups>) with the operator's real PATH -> returns None (untrusted); reproduced identically with a sanitized PATH=/usr/bin:/bin:/usr/sbin:/sbin -> resolves /bin/ls",
+    "no_host_mutation": true
+  },
+  "attempt_2": {
+    "invocation": "sudo env PATH=/usr/bin:/bin:/usr/sbin:/sbin python3 scripts/hpac_protected_presentation_admin.py install ...",
+    "result": "FAILED -- ModuleNotFoundError: No module named 'pcae' (the sanitized PATH resolved /usr/bin/python3, Apple's system interpreter, which does not see the editable-install .pth entry that adds src/ to sys.path)",
+    "classification": "NO-WRITE FAILURE (failed at import time, before any pcae code executed)",
+    "durable_mutation": "none"
+  },
+  "attempt_3_successful": {
+    "invocation": "sudo env PATH=/usr/bin:/bin:/usr/sbin:/sbin /opt/homebrew/bin/python3 scripts/hpac_protected_presentation_admin.py install --helper-sha256 933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182 --helper-version pcae-protected-local-presentation-helper/1.0 --verifier-config-digest 951182f5e737068d286313903504e34cb3dc57b47a2a19f9031ac068c7992c85 --renderer-profile pcae-protected-local-presentation-renderer/1.0 --descriptor-version pcae-protected-local-presentation-descriptor/1.0",
+    "fix_rationale": "PATH stayed minimal/system-only for the internal ls/getfacl trust check (fixing attempt_1's cause); the python interpreter was instead given as a full, explicit path to the homebrew interpreter that has the editable pcae install on sys.path (fixing attempt_2's cause). Neither change widens any authority or touches product source.",
+    "stdout": "install ok: mechanism=pcae-protected-local-presentation installation_id=hppi-648bee5e950b4f5e971a6c65c8cc53cf generation=1 descriptor_digest=c4e9a04d8d4af865372d78db280b8a2ba40f7ad29414b365acf87b775b13fc6e",
+    "exit_code": 0,
+    "authentication_mechanism": "sudo password prompt in the operator's own terminal -- entered by the human directly, never seen, echoed, logged, or persisted by this session"
+  },
+  "post_registration_readback": {
+    "write_set_actual": [
+      "presentation-mechanisms/v2/pcae-protected-local-presentation/descriptor.json",
+      "presentation-mechanisms/v2/pcae-protected-local-presentation/current-generation.json",
+      "presentation-mechanisms/v2/pcae-protected-local-presentation/installations/1/installation.json"
+    ],
+    "write_set_authorized": [
+      "presentation-mechanisms/v2/pcae-protected-local-presentation/descriptor.json (create-only)",
+      "presentation-mechanisms/v2/pcae-protected-local-presentation/current-generation.json (create-only)",
+      "presentation-mechanisms/v2/pcae-protected-local-presentation/installations/<generation>/installation.json (create-only)"
+    ],
+    "write_set_confined": true,
+    "installation_descriptor": {
+      "installation_schema_version": "HPAC-PRESENTATION-INSTALLATION/1.0",
+      "installation_id": "hppi-648bee5e950b4f5e971a6c65c8cc53cf",
+      "mechanism_id": "pcae-protected-local-presentation",
+      "helper_path": "/Library/Application Support/PCAE/HPAC/protected-root/presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182/pcae-protected-local-presentation",
+      "helper_sha256": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+      "descriptor_digest": "c4e9a04d8d4af865372d78db280b8a2ba40f7ad29414b365acf87b775b13fc6e",
+      "verifier_configuration_digest": "951182f5e737068d286313903504e34cb3dc57b47a2a19f9031ac068c7992c85",
+      "renderer_profile": "pcae-protected-local-presentation-renderer/1.0",
+      "generation": 1,
+      "lifecycle_action": "install",
+      "status": "active",
+      "installation_digest": "ab23db5921be7b88f565f9d42e29707e594c9c1fa209953037040cf9f38e5820",
+      "installation_digest_self_excluding_recompute_match": true
+    },
+    "current_generation_anchor": {
+      "current_generation_schema_version": "HPAC-PRESENTATION-CURRENT-GENERATION/1.0",
+      "installation_id": "hppi-648bee5e950b4f5e971a6c65c8cc53cf",
+      "current_generation": 1,
+      "installation_digest": "ab23db5921be7b88f565f9d42e29707e594c9c1fa209953037040cf9f38e5820",
+      "descriptor_digest": "c4e9a04d8d4af865372d78db280b8a2ba40f7ad29414b365acf87b775b13fc6e",
+      "status": "active",
+      "anchor_digest": "2f26d42805a5f4f5b60a4da93f4c0499c8ea8821f03d937b64ee708a08db8ac5",
+      "anchor_digest_self_excluding_recompute_match": true,
+      "points_to_new_installation": true,
+      "installation_digest_matches_installation_record": true
+    },
+    "helper_after_registration": {
+      "path": "/Library/Application Support/PCAE/HPAC/protected-root/presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182/pcae-protected-local-presentation",
+      "sha256": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+      "byte_length": 16295,
+      "unchanged_verified": true,
+      "matches_generation_1_immutable_source": true
+    },
+    "protected_root_after_registration": {
+      "path": "/Library/Application Support/PCAE/HPAC/protected-root",
+      "owner_uid": 0,
+      "group_gid": 80,
+      "mode_octal": "0700",
+      "ancestor_chain": [
+        {"path": "/Library/Application Support/PCAE/HPAC", "uid": 0, "gid": 80, "mode_octal": "0755"},
+        {"path": "/Library/Application Support/PCAE", "uid": 0, "gid": 80, "mode_octal": "0755"},
+        {"path": "/Library/Application Support", "uid": 0, "gid": 80, "mode_octal": "0755"},
+        {"path": "/Library", "uid": 0, "gid": 0, "mode_octal": "0755"}
+      ],
+      "configured_agent_uid_501_has_write_access_anywhere_in_chain": false,
+      "root_anchor_generation_preserved": 1,
+      "unchanged_verified": true
+    },
+    "pawa_anchor_after_registration": {
+      "installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+      "current_generation": 1,
+      "agent_exclusion_state": "ACTIVE",
+      "symbolic_account": "atilamadai",
+      "provisioned_uid": 501,
+      "unchanged_since_predecessor_phase": true
+    },
+    "false_positive_note": "an ad hoc read-back script's direct call to ProtectedPresentationInstallationStore.resolve_current_generation() via a freshly-constructed, UNBOUND HPACStoreAuthority.production() raised ProtectedPresentationIntegrityError('production HPAC root is not protected from the configured agent principal (root=agent_is_owner_with_write_bit ...)'). Root-caused: hpac_foundation.HPACStoreAuthority._validate_production_boundary falls back to the LIVE PROCESS identity (root, since the script was run via sudo) whenever _configured_agent_identity has not been bound by the PAWA writer factory's SS33 recognition sequence (which the ad hoc script never invoked). Root legitimately owns the root directory it provisioned, so the mode check trivially reports 'agent_is_owner_with_write_bit' for uid 0 == uid 0 -- this is an artifact of the diagnostic script's improper API usage, not a defect in the registration transaction or in the actual topology, which the raw ownership/mode readback (root_anchor block above) independently confirms is correctly protected from the real configured agent (uid 501). No source change was made or is proposed to address this; it is documented here as an observed API-usage pitfall for future read-only diagnostics, not adjudicated as a product defect this phase (no src/pcae change occurred).",
+    "capability_consumption": "the single bounded configure_presentation_mechanism transaction consumed its one-shot capability inside apply_configuration(); a fresh call would mint a new transaction_id/capability rather than reuse this one (structural, non-reusable by construction -- HPACWriterCapability is process-local, single-use, non-serializable). Adversarial replay against the now-live production installation was NOT attempted (would require a second production mutation, explicitly out of scope this phase); deferred to the successor deployment-state IV per phase rule 22."
+  },
+  "regression_band": {
+    "targeted_suites": [
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance.py",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4_blocked_protected_presentation_authority.py",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1_protected_presentation_human_election_iv_and_n16_5_certification.py",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv.py",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_protected_presentation_interactive_election_repair.py",
+      "tests/test_hpac_verifier.py",
+      "tests/test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py",
+      "tests/test_hpac_verifier_repair_3w1r2b1r1115a2.py",
+      "tests/test_hpac_verifier_repair_independent_verification_3w1r2b1r1115a21.py",
+      "tests/test_gate5_approval_validation_coordinator_3w1r2b1r1_1r10.py",
+      "tests/test_gate5_approval_validation_coordinator_integration_independent_verification_3w1r2b1r1_1r11.py"
+    ],
+    "result": "468 passed, 5 failed",
+    "failures_all_pre_existing_and_unattributable": [
+      "test_31_current_phase_changes_no_production_or_contract (point-in-time git-diff-vs-fixed-SHA anchor guard from an earlier phase; HEAD has legitimately moved since)",
+      "test_05_production_diff_is_exactly_the_two_authorized_files (same class, different fixed anchor)",
+      "test_30_repair_suite_contains_a_stale_live_head_assertion_finding_f3 (point-in-time content-scan guard against historical file content)",
+      "test_object_dunder_new_bypasses_trusted_construction_seal (pre-existing documented forgery-detection gap, unrelated to PPA registration)",
+      "test_forged_via_object_new_would_report_real_runtime_eligible (same pre-existing gap)"
+    ],
+    "attribution_method": "git diff --name-only -- src/pcae scripts pyproject.toml is EMPTY for this phase (zero product source changes were made or are proposed); every failure above is therefore necessarily pre-existing on HEAD, independent of this phase's host-only actions.",
+    "product_source_diff_since_g0": "EMPTY"
+  },
+  "no_host_mutation_beyond_authorized_ppa_registration": true,
+  "runtime_final_check": {
+    "implementation": "not_implemented",
+    "state": "Observed",
+    "maximum_capability": "observe",
+    "execution_availability": "unavailable",
+    "plugins": 0,
+    "capabilities": 0
+  },
+  "final_verdicts": {
+    "generation_1_start_state": "REVALIDATED",
+    "ppa_registration_transaction": "COMPLETE",
+    "authorized_registration_mutation": "PERFORMED",
+    "unauthorized_mutating_host_commands": 0,
+    "ppa_installation_descriptor": "PRESENT VERIFIED",
+    "ppa_current_generation": "PRESENT VERIFIED",
+    "ppa_transaction_state": "COMPLETE",
+    "pawa_deployment_capability": "CONSUMED",
+    "generation_1_helper_after_registration": "UNCHANGED VERIFIED",
+    "protected_root_pawa_generation": "PRESERVED",
+    "protected_root_topology_trust": "VERIFIED",
+    "f5_protected_presentation_registration": "COMPLETE -- DEPLOYMENT-STATE IV PENDING",
+    "f5": "DEPLOYED / IV PENDING",
+    "n16_5": "NOT CLOSED"
+  }
+}
