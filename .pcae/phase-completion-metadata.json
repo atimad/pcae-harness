@@ -109,6 +109,6 @@
     }
   ],
   "recommended_next_phase": "Production Protected-Presentation Registration Continuation Against Existing Generation-1 Deployment State -- retry only the previously blocked canonical PPA install configuration transaction against the existing generation-1 protected root/anchor/installation/agent-exclusion/helper bytes verified this phase. Not begun. N-16-6/N-16-7 untouched.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "61998a7663e8d8fc5fc0aad9687cfbc76d9977af"
 }
