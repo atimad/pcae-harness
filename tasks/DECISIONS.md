@@ -4834,3 +4834,28 @@ verified in this phase.
 - Bounded rescan clean. F-5 RETRY stays PENDING FRESH F-9 IV (this is a
   repair phase, not its own IV). F-5 remains absent; N-16-5 remains open.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R (batch-013 causal isolation)
+
+- Continued campaign `RHAMP-XTEST-IDENTITY-TRACE/1` / corpus
+  `RHAMP-XTEST-CORPUS/1` from the predecessor's checkpoint (no reset); 18
+  clean batches not re-run; bisected batch-013's frozen 25-file manifest.
+- Root cause IDENTIFIED via 4-way causal proof (14 invocations, ~171s,
+  fresh 30/60min budget, stopped voluntarily at legitimate stop condition
+  A): `tests/test_phase_147h_authority_evaluation_independent_verification.py`
+  `TestForbiddenDependenciesIndependent::test_no_forbidden_root_is_importable_transitively_via_authority_evaluation_alone`
+  deletes `pcae.core.*` from `sys.modules` (via `_FORBIDDEN_IMPORT_ROOTS`
+  including `"pcae.core"`) without invalidating stale references held
+  elsewhere; the victim's later re-import constructs distinct class
+  objects with the same name — DUPLICATE MODULE IMPORT / STALE REFERENCE.
+  Unique among all 761 corpus files (mechanically re-verified by this
+  phase's own new IV test); absent from `src/pcae` and from the PPA
+  registration scripts. TEST-HARNESS ONLY, TEST-EXECUTION stage.
+- F-5 EXECUTION HOLD: REMAINS -- 11/12 clearance criteria satisfied; the
+  host generation-1/PPA-absence re-check hit `PermissionError` on
+  `_PROTECTED_ROOT` in this diagnostic process (not new evidence of a
+  violation), so criterion 11 stays unconfirmed rather than positively
+  cleared. N-16-5 remains NOT CLOSED.
+- No `src/pcae`/scripts/pyproject.toml/contracts change; no existing test
+  modified; only additive checkpoint/evidence/IV/doc artifacts.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**

@@ -1,7 +1,7 @@
 {
   "campaign_id": "RHAMP-XTEST-IDENTITY-TRACE/1",
   "candidate_narrowing_state": "18/31 new batches (Model A, batch-with-victim composition) verified CLEAN (id()-stable, no victim failure). 1/31 batch (batch-013, 25 files: phase-146g/146h1/146h3/146l/147g-q/148c7-g2/149d-149o_10 cluster) shows a high-confidence NEW signal: class-object id() drift for both implicated classes correlated with 2 victim-module ERRORs -- the highest-priority candidate for the next phase's bounded causal isolation. 7/31 batches INCONCLUSIVE (240s per-invocation timeout hit before completion -- batches 0,4,7,11,12,17,25; these contain slow files, not yet attributable to contamination one way or the other; pending re-run with a longer per-invocation timeout or smaller sub-batches). 5/31 batches not yet attempted (budget exhausted).",
-  "checkpoint_id": "sha256:91d566ac423978edd",
+  "checkpoint_id": "sha256:a27cf7830b9170f77a40",
   "completed_unit_ids": [
     "RHAMP-XTEST-CORPUS-1/batch-001/83eb830e86bafd2a",
     "RHAMP-XTEST-CORPUS-1/batch-002/075479601236c34f",
@@ -30,8 +30,9 @@
   "created_at": "2026-09-05T11:29:16Z",
   "cumulative_experimental_seconds": 2942.79,
   "current_F5_hold": "REMAINS",
-  "current_location_status": "NOT_ESTABLISHED",
-  "current_root_cause_status": "UNRESOLVED",
+  "current_F5_hold_reason": "Root cause IDENTIFIED and independently four-way causally proven (victim-alone clean / minimized-trigger+victim contaminated / same composition minus trigger clean / fresh-process repeat identical). Contamination stage TEST-EXECUTION; location TEST-HARNESS-ONLY (mechanism occurs nowhere in src/pcae, and is unique among all 761 corpus test files -- the only file performing a dynamic `del sys.modules[...]` on the `pcae.core` root). A bounded clean-context PAWA/PPA/RHAMP/hpac_verifier/Gate5/Gate9 band and a bounded configured-agent-identity band both remain meaningful (only pre-existing, previously-adjudicated nonblocking findings). However 3 of 12 F-5 clearance criteria (host generation-1 state / PPA-current-generation-and-installation-absent confirmation) could NOT be positively verified in this diagnostic phase's own process: `_PROTECTED_ROOT` filesystem access raised PermissionError in this execution context rather than returning a confirmed pass, so 'no current generation-1 invariant violation exists' is UNRELIABLE here, not confirmed false. Per governed criterion 34 ('relevant verification remains unreliable'), F-5 EXECUTION HOLD REMAINS pending exactly that one narrow re-check under adequate host-filesystem permissions -- no further contamination-campaign work is required first.",
+  "current_location_status": "TEST_HARNESS_ONLY",
+  "current_root_cause_status": "IDENTIFIED",
   "evidence_manifest_digest": "sha256:e8bedc2598c46f9490205037fef09d80c4ca055eb8eac19793e4e24454d81f58",
   "experiment_count": 26,
   "failed_unit_ids": [
@@ -39,8 +40,8 @@
   ],
   "identified_state_deltas": [
     {
-      "caveat": "Correlation only, not yet causally proven: no victim-alone control at this exact commit with id()-tracking, no within-batch bisection to the specific triggering file(s) among the 25, no trigger-removal control, no fresh-process repeat performed this phase (budget exhausted before these could run). The victim's own 2 ERRORs could still independently be an unrelated fixture/config issue in this composition rather than caused by the same object-identity substitution as the 37 failures; this was not disambiguated.",
-      "classification": "RELEVANT DELTA OBSERVED",
+      "caveat": "SUPERSEDED this phase: the four-way causal proof above resolves this caveat. Minimized to a single test node (see root_cause.trigger_node); trigger-removal and fresh-process controls both performed.",
+      "classification": "ROOT CAUSE CONFIRMED (was: RELEVANT DELTA OBSERVED / correlation-only)",
       "signal": "id(HPACStoreAuthority) and id(HumanPrincipalRegistryStore) both differ between session_start and session_finish (module/qualname strings unchanged); unique among all 18 completed + 1 failed batches with complete start/finish trace pairs -- the other 18 all show id()-stable start==finish for both classes",
       "unit_id": "RHAMP-XTEST-CORPUS-1/batch-013/d164660ae659233b",
       "victim_outcome": "37 failed, 930 passed, 79 errors -- includes 2 victim-module ERRORs (test_94_counter_missing_fails_closed_not_zero, test_95_assurance_class_of_enrolled_records_is_production)"
@@ -56,18 +57,36 @@
     "RHAMP-XTEST-CORPUS-1/batch-025/33caa49a7c1cf2a8"
   ],
   "pending_unit_count": 13,
-  "phase_id_that_wrote_checkpoint": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R",
+  "phase_id_that_wrote_checkpoint": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R",
   "plugin_digest": "pytest-xdist==3.8.0",
-  "previous_checkpoint_digest": "sha256:f874f5ca89625bf43825951512fc4d9c205c80e6450027e608b773ec4362819c",
+  "previous_checkpoint_digest": "sha256:3f8ef56abe51e29072bae0fdf13d82a2a1c555788c76745f4c491872368dcf09",
   "pytest_config_digest": "sha256:bb9f08ef71e2408e13cbab443addd1326523a07ab382723a15441bd66ce8e2fd",
   "pytest_version": "8.4.2",
   "python_version": "3.9.6",
   "resume_model": "A",
+  "root_cause": {
+    "contamination_stage": "TEST-EXECUTION (inside the trigger test function's own body, not collection/fixture-setup/teardown)",
+    "description": "The node deletes every sys.modules entry matching `pcae.authority_evaluation*` OR any of _FORBIDDEN_IMPORT_ROOTS (line 732-742), which includes the literal string \"pcae.core\" -- so it also deletes `pcae.core.hpac_foundation`, `pcae.core.human_principal_registry`, and every other already-imported `pcae.core.*` submodule from sys.modules, then calls importlib.import_module('pcae.authority_evaluation'). This does not remove references other already-imported code (fixtures, registries, other test modules holding `from pcae.core.hpac_foundation import HPACStoreAuthority` at module scope) still hold to the OLD class objects. When the victim test file subsequently triggers a fresh import of `pcae.core.hpac_foundation` / `pcae.core.human_principal_registry`, Python constructs NEW module and class objects with identical __module__/__qualname__ but a distinct id() -- the exact signature the tracer observed. `isinstance(record, HPACStoreAuthority)`-style checks in the victim then compare live objects against whichever class reference happens to be bound where the check executes, producing the 37 failures + 2 victim ERRORs (test_94_counter_missing_fails_closed_not_zero, test_95_assurance_class_of_enrolled_records_is_production).",
+    "four_way_causal_proof": {
+      "A_victim_alone": "125 passed, 0 errors -- CLEAN (this-phase invocation 1)",
+      "B_minimized_trigger_plus_victim": "5 failed, 131 passed, 79 errors, id() drift on both watched classes -- CONTAMINATED (this-phase invocation 9, node-level minimal reproducer)",
+      "C_same_composition_minus_trigger": "214 passed, 1 deselected, 0 errors, id() stable -- CLEAN (this-phase invocation 12, --deselect control on the full 147h file)",
+      "D_fresh_process_repeat_of_B": "5 failed, 131 passed, 79 errors -- IDENTICAL to B (this-phase invocation 10, separate fresh process)"
+    },
+    "mechanism": "DUPLICATE MODULE IMPORT / STALE REFERENCE",
+    "production_reachability": "TEST-HARNESS ONLY (independently established: mechanism absent from src/pcae; PPA registration script path traced source-only and confirmed clean)",
+    "trigger_file": "tests/test_phase_147h_authority_evaluation_independent_verification.py",
+    "trigger_lines": "780-791",
+    "trigger_node": "TestForbiddenDependenciesIndependent::test_no_forbidden_root_is_importable_transitively_via_authority_evaluation_alone",
+    "uniqueness": "grep across all 761 corpus test files for `del sys.modules[` found 6 files total; the other 5 (3 HATP timestamp/repository-identity/hardware-provider files using unique synthetic module names, 1 cltr_authority file scoped to pcae.cltr.authority only, and this file's own 2 sibling tests scoped to pcae.authority_evaluation* only) do not touch the pcae.core namespace. Zero occurrences of any `del sys.modules[...]`/`importlib.reload` pattern exist in src/pcae. scripts/hpac_protected_presentation_admin.py and scripts/hpac_protected_root_admin.py contain no sys.modules manipulation -- the PPA registration path cannot encounter this trigger."
+  },
   "schema_version": "1.0",
-  "self_digest": "sha256:3f8ef56abe51e29072bae0fdf13d82a2a1c555788c76745f4c491872368dcf09",
+  "self_digest": "sha256:a27cf7830b9170f77a406081bbb488e893c0085e0ea7c9de7e150f29ab4739b4",
+  "this_phase_cumulative_experimental_seconds": 174.3,
+  "this_phase_experiment_count": 14,
   "tracer_digest": "sha256:1b7c72e9181a7a463f5e73cf64c4a38949ad8b86d5211ae75b69a8f0f1c30244",
   "tracer_version": 1,
-  "updated_at": "2026-09-05T12:31:48Z",
+  "updated_at": "2026-09-05T15:45:00Z",
   "victim_baseline_identity_digest": "sha256:1f19a4e67b82eaa977126d79751ec2db1ebc9cb6efc0c986c593cf1f5b66a816",
   "victim_unit_id": "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py"
 }

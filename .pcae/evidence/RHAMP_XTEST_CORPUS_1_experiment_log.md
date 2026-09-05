@@ -162,3 +162,111 @@ No diagnostic subprocess left running: `ps aux | grep -i pytest` (post-run)
 returns nothing; the driver process (`run_campaign.py`) exited cleanly after
 the 26th invocation and its exit was observed before this report was
 written.
+
+## Phase 149O...1R.1R.1R (batch-013 causal isolation) -- 14 invocations, ~171.4s
+
+Continuation of the SAME campaign/corpus/checkpoint chain (no reset). Fresh
+budget for this phase: 30 invocations / 60 minutes; used 14 invocations /
+~171.4s (~2.9 min) -- stopped voluntarily at legitimate stop condition A
+(root cause identified AND reachability adjudicated), not by exhaustion.
+
+Bisection path (all against the frozen victim
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py`,
+single process, `-p rhamp_xtest_tracer2` -- a reconstructed tracer, the
+predecessor's own tracer script having been scratch-only like its other
+ephemeral driver code; same `tracer_version=1` semantics, `id()`/module/
+qualname of `HPACStoreAuthority` and `HumanPrincipalRegistryStore` at
+collection-finish vs session-finish):
+
+1. Victim alone: 125 passed -- baseline CLEAN (control A).
+2. Full batch-013 (25 files + victim): 36 failed, 931 passed, 79 errors,
+   id() drift both classes -- REPRODUCED (vs. predecessor's 37/930/79;
+   1-test difference attributable to the separately-classified HISTORICAL-
+   MOVING-AUTHORITY defect class, not this signal).
+3. First half (files 1-13 + victim): reproduces, 79 errors, id() drift.
+4. First 6 of that half (146g/146h1/146h3/146l/147g/147h + victim):
+   reproduces, 79 errors.
+5. 146g+146h1+146h3 + victim: 177 passed -- CLEAN.
+6. 146l+147g+147h + victim: 5 failed, 269 passed, 79 errors, id() drift --
+   REPRODUCES.
+7. 146l alone + victim: 170 passed -- CLEAN.
+8. 147g alone + victim: 218 passed -- CLEAN.
+9. **147h alone + victim: 5 failed, 131 passed, 79 errors, id() drift --
+   REPRODUCES (file-level minimal reproducer).**
+10. 147h + victim, fresh process repeat: identical (5 failed, 131 passed,
+    79 errors) -- control D.
+11. Single node
+    `test_phase_147h_authority_evaluation_independent_verification.py::TestForbiddenDependenciesIndependent::test_no_forbidden_root_is_importable_transitively_via_authority_evaluation_alone`
+    alone + victim: 5 failed, 42 passed, 79 errors, id() drift -- REPRODUCES
+    (node-level minimal reproducer).
+12. 147h file with that one node `--deselect`ed + victim: 214 passed, 1
+    deselected, id() stable -- CLEAN (control C, trigger-removal).
+13. Bounded clean-context band (Gate5 x2, Gate9 x4, hpac_verifier x4,
+    merged-RHAMP-IV, protected-presentation-real-assurance-IV, PAWA v1.1
+    contract-freeze-IV, PAWA writer-anchor-slice1, PAWA writer-capability-
+    integrity-IV -- 15 files, fresh process, no batch-013 files present):
+    700 passed, 2 failed (the pre-existing, previously-adjudicated
+    `test_object_dunder_new_bypasses_trusted_construction_seal` /
+    `test_forged_via_object_new_would_report_real_runtime_eligible` --
+    "NONBLOCKING THROUGH ACTUAL CONSUMPTION PATH", unchanged), id() stable.
+14. Configured-agent-identity-threading-repair IV suite (bounded band):
+    35 passed, 3 skipped, 3 failed -- all 3 failures are pre-existing
+    point-in-time guards (`test_iv_entry_sha_is_current_head` compares
+    against a frozen historical HEAD; the other two raise `PermissionError`
+    reading `/Library/Application Support/PCAE/HPAC/protected-root/.authority/*`
+    in this execution context rather than returning a definite pass/fail --
+    see F-5 hold reasoning below), unrelated to the identity-drift signal.
+
+### Root cause: IDENTIFIED
+
+`tests/test_phase_147h_authority_evaluation_independent_verification.py`
+lines 780-791
+(`TestForbiddenDependenciesIndependent::test_no_forbidden_root_is_importable_transitively_via_authority_evaluation_alone`)
+deletes every `sys.modules` entry matching `pcae.authority_evaluation*` OR
+any of `_FORBIDDEN_IMPORT_ROOTS` (line 732-742) -- which includes the
+literal string `"pcae.core"` -- then calls
+`importlib.import_module("pcae.authority_evaluation")`. This deletes
+`pcae.core.hpac_foundation` and `pcae.core.human_principal_registry` from
+`sys.modules` without invalidating references other already-imported code
+holds to the OLD class objects. A subsequent fresh import (triggered later
+by the victim) constructs NEW module/class objects with identical
+`__module__`/`__qualname__` but a distinct `id()` -- exactly the drift the
+tracer observed. **Mechanism: DUPLICATE MODULE IMPORT / STALE REFERENCE.**
+Full four-way causal proof (A/B/C/D) in invocations 1, 9, 12, 10 above.
+
+**Uniqueness (repository-wide):** `grep -rl "del sys.modules\[" tests/`
+finds 6 files total. The other 5 use unique synthetic module names (3 HATP
+files) or scope to `pcae.cltr.authority`/`pcae.authority_evaluation` only
+(1 cltr file, this file's own 2 sibling tests) -- none touch `pcae.core`.
+Zero occurrences of `del sys.modules`/`importlib.reload` in `src/pcae`.
+`scripts/hpac_protected_presentation_admin.py` and
+`scripts/hpac_protected_root_admin.py` contain no `sys.modules`
+manipulation. **Contamination stage: TEST-EXECUTION. Location: TEST-HARNESS
+ONLY** -- this specific causal defect fully explains the batch-013 signal
+and cannot occur via any supported production/PPA-registration code path;
+per governed item 23, the remaining 5 never-attempted + 7 inconclusive
+batches were not scanned this phase (their own failure counts are already
+independently attributed to the separately-classified HISTORICAL-MOVING-
+AUTHORITY defect class, not this identity-drift signal, and no batch besides
+013 showed the signal among the 19 with complete trace pairs).
+
+### F-5 EXECUTION HOLD: REMAINS (narrow reason)
+
+11 of 12 governed clearance criteria (item 33) are satisfied by the evidence
+above. The blocker is criterion 11 (no current generation-1 invariant
+violation): `test_host_protected_root_generation_and_helper_digest_unchanged`
+and `test_ppa_current_generation_and_installation_absent_on_host` both threw
+`PermissionError` on `.stat()` of
+`/Library/Application Support/PCAE/HPAC/protected-root/.authority/*` in this
+diagnostic phase's own process/user context, rather than returning a
+definite pass -- so this phase cannot positively confirm the host's
+generation-1 / PPA-absent state. Per item 34 ("relevant verification remains
+unreliable"), the hold REMAINS pending exactly that one narrow re-check
+under adequate filesystem permissions; no further contamination-campaign
+diagnostic work is required first.
+
+### Stop condition
+
+**A -- root cause identified and reachability adjudicated** (item 60).
+Diagnostic budget used this phase: 14/30 invocations, ~171s/3600s -- stopped
+voluntarily, not by exhaustion.
