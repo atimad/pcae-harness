@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R —
+Post-Completion Full-Repository Test Sweep Failure/Error Attribution and
+F-5 Hold Adjudication. **STATUS: COMPLETE. FULL-REPOSITORY POST-
+COMPLETION SWEEP ATTRIBUTION: COMPLETE. F-5 CONTINUATION HOLD: CLEARED.
+N-16-5: NOT CLOSED.**
+
+Full reproduction at this phase's entry SHA (`python -m pytest -q
+-p no:cacheprovider`, single-process, no xdist): 1092 failed, 40538
+passed, 24 skipped, 117 errors in 8831.59s — errors match the frozen
+original sweep (40587 passed / 979 failed / 117 errors) exactly
+(117 = 117); `src/pcae`/`scripts`/`pyproject.toml`/`docs/contracts`
+independently confirmed byte-unchanged since the Telegram repair's
+production commit through this phase's entry, so the reproduction is
+source-byte-equivalent to the frozen original regardless of the exact
+historical SWEEP_SHA (not resolvable from durable local evidence; see
+canonical report). All 278 distinct failing/erroring files re-run in
+isolation: 68 files / 368 raw nodes collapse to 31 in isolation
+(cross-test-order contamination — dominant single case: 79 of 117
+total errors from one fixture chain in the merged-RHAMP-mechanism test
+file, `HPACStoreAuthority` isinstance-identity failure only under
+full-suite collection order, 125/125 clean standalone); 210 files / 841
+raw nodes reproduce deterministically. All 16 N-16-5/F-5-priority files
+(RHAMP, FIDO2, PAWA, protected presentation, `hpac_verifier`,
+notifications/phase-reports, HATP Class-B topology — 140 raw nodes)
+individually investigated: zero repair-attributable regressions, zero
+new blockers — findings are an already-disclosed/adjudicated
+`hpac_verifier` construction-boundary gap (independently confirmed
+non-exploitable via the real Gate 5 registry-identity + reverification
+consumption path), historical-moving-authority self-checks (frozen
+scope-lists/digests/diffs compared against legitimately-evolved live
+state), and one `phase_reports.py` reconcile failure independently
+reproduced byte-identical at the pre-Telegram-repair baseline
+(pre-existing). Configured-agent-identity threading repair and durable
+Telegram acceptance receipt repair both remain **INDEPENDENTLY
+VERIFIED** — no contradiction found. Generation-1 host state (protected
+root PRESENT, PAWA anchor PRESENT, helper PRESENT, PPA
+presentation/current-generation ABSENT) carried forward unchanged. No
+production or test file modified; no host mutation; no F-5 execution;
+no historical Telegram re-dispatch; runtime remains
+Observed/observe/unavailable, 0 plugins/capabilities, first governed
+runtime external effect remains absent/unreachable. Recommended (not
+begun) successor: Production Protected-Presentation Registration
+Continuation Against Existing Generation-1 Deployment State. Canonical
+report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_POST_COMPLETION_FULL_REPOSITORY_TEST_SWEEP_ATTRIBUTION_AND_F5_HOLD_ADJUDICATION.md`.
+
+## Prior Phase (.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1 —
 Independent Verification of Durable Telegram Acceptance Receipts and
 Phase-Completion Notification Auditability. **STATUS: COMPLETE. DURABLE

@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R`
+  (post-completion full-repository test sweep failure/error attribution
+  and F-5 hold adjudication) reproduces the frozen post-completion
+  sweep (40587 passed / 979 failed / 117 errors) at this phase's entry
+  SHA -- 1092 failed, 40538 passed, 24 skipped, 117 errors (errors match
+  exactly); confirms `src/pcae`/`scripts`/`pyproject.toml`/`docs/contracts`
+  byte-unchanged since the Telegram repair's production commit, making
+  the reproduction source-byte-equivalent to the original regardless of
+  the unresolvable exact SWEEP_SHA; isolates all 278 failing/erroring
+  files individually, finding 68 files / 368 raw nodes are cross-test-
+  order contamination (collapsing to 31 in isolation -- dominant case:
+  79 of 117 errors from one fixture chain, clean 125/125 standalone)
+  and 210 files / 841 raw nodes reproduce deterministically; individually
+  investigates all 16 N-16-5/F-5-priority files (RHAMP, FIDO2, PAWA,
+  protected presentation, `hpac_verifier`, notifications/phase-reports,
+  HATP Class-B topology) finding zero repair-attributable regressions
+  and zero new blockers (an already-disclosed/adjudicated
+  `hpac_verifier` construction-boundary gap confirmed non-exploitable
+  via the real Gate 5 path, historical-moving-authority self-checks,
+  and one `phase_reports.py` failure independently reproduced
+  pre-existing at the pre-Telegram-repair baseline); preserves both
+  prior repair verdicts as INDEPENDENTLY VERIFIED with no contradiction
+  found. No production or test file modified; no host mutation; no F-5
+  execution; no historical Telegram re-dispatch. **F-5 CONTINUATION
+  HOLD: CLEARED.** N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched;
+  runtime remains Observed/observe/unavailable, 0 plugins/capabilities.
+  Recommended (not begun) successor: Production Protected-Presentation
+  Registration Continuation Against Existing Generation-1 Deployment
+  State.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1`
   (independent verification of durable Telegram acceptance receipts and
   phase-completion notification auditability) independently reproduces
