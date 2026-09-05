@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting next governed phase (post-149O...1.1R.1R...1.1R.30R.5R.2.1R IV); F-5: DEPLOYMENT VERIFIED / cert pending; N-16-5 not closed
+Idle: awaiting next governed phase (post PPA deployment-state IV); F-5 DEPLOYMENT VERIFIED / cert pending; N-16-5 not closed
 
 ## Status
 
@@ -18,7 +18,7 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-149O...1.1R.1R...1.1R.30R.5R.2.1R IV); F-5: DEPLOYMENT VERIFIED / cert pending; N-16-5 not closed
+Idle: awaiting next governed phase (post PPA deployment-state IV); F-5 DEPLOYMENT VERIFIED / cert pending; N-16-5 not closed
 
 ## Allowed Files
 
