@@ -101,6 +101,6 @@
     }
   ],
   "recommended_next_phase": "A checkpointed, incrementally-resumable execution-time class-identity/state-trace phase that persists last-completed node id and observed baseline identities to a durable evidence checkpoint, so a budget-bounded phase resumes coverage from ~file 80/571 onward instead of restarting at file 1 -- changing the diagnostic method rather than repeating an undifferentiated bisection. Not begun.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "39adb9b8b7ea8bf150802e0407427688127fa153"
 }
