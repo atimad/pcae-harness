@@ -108,6 +108,6 @@
     }
   ],
   "recommended_next_phase": "Checkpointed RHAMP Execution-Time Class-Identity / State Trace Continuation -- Resume From Canonical Campaign Checkpoint. MUST resume campaign RHAMP-XTEST-IDENTITY-TRACE/1, corpus RHAMP-XTEST-CORPUS/1, and this exact checkpoint chain; prioritize bounded causal isolation of batch-013 (bisect its 25 files against the victim, trigger-removal control, fresh-process repeat) before resuming the remaining 5 never-attempted + 7 inconclusive-timeout batches. Not begun.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "b4ea6e512c9d4bfe8905b2648b6d92690e9a3dc7"
 }
