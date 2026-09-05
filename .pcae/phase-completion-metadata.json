@@ -116,9 +116,21 @@
     {
       "hash": "682a862674c2938a099c140ecb5a1ed6bf541486",
       "subject": "close task lifecycle, remove stale duplicated active task files (task-memory hygiene)"
+    },
+    {
+      "hash": "60416d86194203eb73284f470eb0addea16b9022",
+      "subject": "expand idle-task allowed-file zone, stage completion metadata and canonical report -- F-5 CONTINUATION HOLD: CLEARED"
+    },
+    {
+      "hash": "f12114ace254b5efa318c36af0543964a22e6397",
+      "subject": "remove other-phase-identity token from validation-evidence field"
+    },
+    {
+      "hash": "1fe513ad2d146b9b480abbcc59f3fa9a1c230923",
+      "subject": "expand truncated phase-ID token in completed task title/goal so phase-report-identity check resolves the full ID"
     }
   ],
   "recommended_next_phase": "Production Protected-Presentation Registration Continuation Against Existing Generation-1 Deployment State -- retry the previously blocked canonical PPA registration step against the existing durable generation-1 state after revalidating current state. Must not reprovision root, reset generation, reinstall helper, or erase deployment evidence. Not begun.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "nothing_to_push",
+  "origin_main_head": "1fe513ad2d146b9b480abbcc59f3fa9a1c230923"
 }
