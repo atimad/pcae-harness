@@ -25,6 +25,7 @@
     "no_test_weakening": "0 def test_ renamed or removed; 0 existing test file bodies modified; 0 skip/xfail added to any pre-existing test; no production code modified in this phase"
   },
   "validation_results": {
+    "phase_id_self_reference": "Fresh phase-specific IV suite tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_contamination_diagnosis_iv.py (20 tests, all passed) is this phase's own additive evidence, self-identified as Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R -- RHAMP Cross-Test Contamination Diagnosis, Evidence Reconciliation, and F-5 Readiness Re-Adjudication.",
     "cpipc_successor_valid": "confirmed via src/pcae/core/phase_id.py parse()/same_series()/same_branch()/compare(): predecessor and this phase's ID are same series/branch, this phase strictly ordered after predecessor; no discrepancy to record",
     "d0": "e6bd2c718eca485104da8638ed8122035f692ed3",
     "no_production_scripts_contracts_dependency_diff": "git diff --name-only D0 -- src/pcae scripts pyproject.toml docs/contracts is empty",
