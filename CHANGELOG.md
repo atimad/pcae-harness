@@ -1,5 +1,38 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1`
+  (final real-human / genuine-YubiKey protected-presentation N-16-5
+  certification and closure adjudication — retry after canonical production
+  credential bootstrap) **BLOCKED**. Independently revalidated all
+  certification preconditions via operator-run privileged read-only
+  inspection of the protected root (`sudo cat`/`ls`/`find`; 0 mutations, 0
+  Python, non-secret content) + agent digest recomputation — principal
+  `hp-8cee9b36b6784608ae48261af86289b8` (active, mechanism-neutral),
+  credential `hpc-2e7bbfa0c1b2480ba84ab5792159179d` (active, not revoked,
+  bound, `hpac.fido2.uv_presence.v2` / `rp_id=hpac.pcae.local`, aaguid
+  `b7d3f68e88a6471e9ecf2df26d041ede`), counter state canonical (generation 0,
+  unchanged), generation-1 presentation deployment current/trusted — all
+  PASS. Stopped before any ceremony step by new blocking finding **H-3**: the
+  real N-16-5 certification chain
+  (`run_protected_presentation_ceremony` → proof / lifecycle records →
+  `verify_human_authentication(require_real_assurance=True)` → PRODUCTION
+  `AuthenticatedHumanPrincipal` → Gate 5) has no production authority path —
+  `HPACStoreAuthority.production()` fails closed at the F-11 boundary when run
+  as the deployment owner, `production_writer()` exposes a closed
+  `PawaOperation` set that never covers challenge / assertion / proof /
+  Gate-5 / counter-verify, and those writer roles are mintable only via the
+  disclosed test-only seals against a test fixture (`.30R.5R.1::test_25`, "an
+  IV observation, not a certification"). Closing the gap needs a `src/pcae`
+  change (a new `PawaOperation` / production certification orchestrator),
+  which is out of this phase's scope — adjudicated, not repaired (§28
+  anticipates "N-16-5 remains open"). Zero ceremony: no `makeCredential`, no
+  `getAssertion`, no protected APPROVE/REJECT, no presentation evidence, no
+  proof, no Gate 5, no principal minted, no protected-root writes; counter
+  untouched. **N-16-5 still NOT CLOSED. F-5: DEPLOYMENT VERIFIED —
+  CERTIFICATION BLOCKED.** No `src/pcae`/`scripts`/`tests`/contract/dependency
+  change. Runtime unchanged; no first governed runtime external effect.
+  N-16-6/N-16-7 OPEN/UNTOUCHED. See
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1_FINAL_N_16_5_CERTIFICATION_RETRY_BLOCKED.md`.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R`
   (deployment-owner first production human-principal / genuine-YubiKey
   FIDO2 credential bootstrap and canonical registry establishment)

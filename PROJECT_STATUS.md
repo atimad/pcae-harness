@@ -2,6 +2,73 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1
+— Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5
+Certification and Closure Adjudication — Retry After Canonical Production
+Credential Bootstrap. **STATUS: BLOCKED. N-16-5: NOT CLOSED.** Retry of the
+final N-16-5 real-assurance certification against the now-populated registry
+(predecessor bootstrap `…5R.2.…1.1R` resolved C-1). **All certification
+preconditions independently revalidated and PASS** via operator-run
+privileged read-only inspection of the protected root (`sudo cat`/`ls`/`find`;
+0 mutations, 0 Python, non-secret content) + agent-side digest recomputation:
+principal `hp-8cee9b36b6784608ae48261af86289b8` active + mechanism-neutral;
+credential `hpc-2e7bbfa0c1b2480ba84ab5792159179d` active, not revoked, bound
+to that principal, `hpac.fido2.uv_presence.v2` / `rp_id=hpac.pcae.local` /
+`usb` / aaguid `b7d3f68e88a6471e9ecf2df26d041ede` (raw-cred-id and COSE-key
+digests recompute to the bootstrap-evidence values; registry `public_key` ==
+sidecar `cose_public_key`); counter state canonical (generation 0, unchanged
+since bootstrap); generation-1 protected-presentation deployment current and
+trusted (`current_generation:1` active, all three metadata files'
+digests cross-consistent, `helper_sha256 933c6646…`, helper source
+byte-unchanged since before install); topology trusted (`drwx------
+root:admin 0700`); runtime `not_implemented`/`Observed`/`observe`/`unavailable`
+0/0. H-1 (CTAP2 PIN/UV) and H-2 (interactive election surface — now
+`_observe_trusted_terminal_election` on `/dev/tty`) are both resolved.
+**Stopped before any ceremony step by NEW BLOCKING FINDING H-3:** the real
+end-to-end certification chain (`run_protected_presentation_ceremony` →
+`HumanAuthenticationProofStore.create_canonical` → `HPACLifecycleStore`
+challenge/assertion/verified records →
+`verify_human_authentication(require_real_assurance=True)` → PRODUCTION
+`AuthenticatedHumanPrincipal` → Gate 5) has **no production authority path**.
+`HPACStoreAuthority.production()` used directly fails closed at
+`_validate_production_boundary` (predecessor's F-11: run as the deployment
+owner, the live euid owns the 0700 root); `_configured_agent_identity` is
+bound only inside `production_writer()`'s §33 sequence; `production_writer()`
+accepts a closed `PawaOperation` set (`ENROLL_PRINCIPAL`, `REVOKE_PRINCIPAL`,
+`REVOKE_CREDENTIAL`, `ENROLL_CREDENTIAL`, `INITIALIZE_CREDENTIAL_SIDECAR_STATE`,
+`CONFIGURE_PRESENTATION_MECHANISM`) that never covers challenge coordination,
+assertion recording, proof verification, Gate-5 binding, or counter-state
+verification, and mints only the frozen registry/installer roles;
+`_mint_production_writer_capability` is called from three `src` sites, none
+minting the certification-chain roles (`hpac_challenge_coordinator`,
+`hpac_assertion_recorder`, `human_authentication_proof_verifier`,
+`hpac_gate5_binder`, `hpac_rhamp_counter_state_verifier`). The chain composes
+only in test code via the disclosed test-only seals
+(`_production_test_fixture`, directly-imported `_PRODUCTION_WRITER_FACTORY_SEAL`,
+`_test_decision_source`) — `.30R.5R.1::test_25`, "an IV observation, not a
+certification". A genuine path needs a `src/pcae` change (a new
+`PawaOperation` / production certification orchestrator with its own
+recognition), which is **out of this phase's scope** (§60, §64 boundary 53,
+STOP conditions); manufacturing it via a test seal or a piggybacked
+transaction would make the resulting principal a fixture/forged object, not a
+genuine authentication (the §18/§29 "not vacuously / not through a test seam"
+principle, and the predecessor's own F-11 reasoning). Adjudicated, **NOT
+repaired** (`.1R.30R.5`/`.1R.30R.5R.1` precedent; §28 anticipates this exact
+failure: "N-16-5 remains open"). **NO ceremony performed:** 0 `makeCredential`,
+0 `getAssertion`, 0 protected APPROVE/REJECT, 0 presentation evidence, 0
+challenges, 0 proofs, 0 Gate 5, 0 principals minted, 0 secrets requested, 0
+writes to the protected root; counter untouched (generation 0). **N-16-5: NOT
+CLOSED. F-5: DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED.** No
+`src/pcae`/`scripts`/`tests`/contract/dependency change. Runtime unchanged; no
+first governed runtime external effect. N-16-6 / N-16-7 remain OPEN /
+UNTOUCHED (N-16-7 strictly last). Recommended next: a narrow `src/pcae`
+repair phase adding a genuine production authority path for the certification
+chain (+ IV), then re-attempt this exact certification phase unchanged.
+Full report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1_FINAL_N_16_5_CERTIFICATION_RETRY_BLOCKED.md`.
+
+---
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R
 — Deployment-Owner First Production Human-Principal / Genuine-YubiKey
 FIDO2 Credential Bootstrap and Canonical Registry Establishment.
