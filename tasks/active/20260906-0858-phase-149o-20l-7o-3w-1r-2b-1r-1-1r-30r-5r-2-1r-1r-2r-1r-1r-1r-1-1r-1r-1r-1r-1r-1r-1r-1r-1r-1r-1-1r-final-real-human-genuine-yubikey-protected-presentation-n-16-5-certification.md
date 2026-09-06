@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260905-2145-idle-awaiting-next-governed-phase-post-149o-1-1r-1r-1-1r-30r-5r-2-1r-iv-f-5-deployment-verified-cert-pending-n-16-5-not-closed
+20260906-0858-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-final-real-human-genuine-yubikey-protected-presentation-n-16-5-certification
 
 ## Title
 
-Idle: awaiting next governed phase (post PPA deployment-state IV); F-5 DEPLOYMENT VERIFIED / cert pending; N-16-5 not closed
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R: Final Real-Human/Genuine-YubiKey Protected-Presentation N-16-5 Certification
 
 ## Status
 
@@ -18,15 +18,17 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post PPA deployment-state IV); F-5 DEPLOYMENT VERIFIED / cert pending; N-16-5 not closed
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R: Final Real-Human/Genuine-YubiKey Protected-Presentation N-16-5 Certification
 
 ## Allowed Files
 
-- .pcae/phase-completion-metadata.json
-- .pcae/phase-completion-report.md
+- tasks/active/**
+- tasks/done/**
+- tasks/TODO.md
+- tasks/DONE.md
+- tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/**
 
 ## Forbidden Files
 
@@ -80,4 +82,4 @@ strict
 
 ## Created Timestamp
 
-2026-09-05T21:45:24.661750+02:00
+2026-09-06T08:58:24.969488+02:00
