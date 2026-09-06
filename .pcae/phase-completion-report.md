@@ -1,33 +1,42 @@
-# PCAE Phase Completion Report
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R Complete — Deployment-Owner First Production Human-Principal / Genuine-YubiKey FIDO2 Credential Bootstrap and Canonical Registry Establishment
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R`
-- Status: **BLOCKED — PRODUCTION FIDO2 CREDENTIAL REGISTRY EMPTY (finding C-1)**
-- F-5: **DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED**
-- N-16-5: **NOT CLOSED**
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R`
+- Status: **COMPLETE — C-1 RESOLVED**
+- F-5: **DEPLOYMENT VERIFIED — FINAL CERTIFICATION PENDING**
+- N-16-5: **NOT CLOSED** (unchanged; no certification ceremony performed)
 
-Final real-human / genuine-YubiKey protected-presentation N-16-5
-certification and closure-adjudication phase. The operator connected a
-genuine YubiKey on request; the real, unmodified `NativeCtap2Provider`
-confirmed it present (FIDO_2_1, clientPin, pinUvAuthToken). Two
-privileged READ-ONLY commands, executed only via macOS's native
-Authorization Services GUI dialog (never this session's terminal/chat),
-found the production human-principal registry empty (0 principals, 0
-credentials). Credential enrollment is architecturally confined to the
-standalone, deployment-owner-run `scripts/hpac_principal_admin.py`
-(non-agent-importable fence) — outside this phase's authorized scope —
-so per the phase's own "NO AD-HOC CREDENTIAL ENROLLMENT" rule the
-ceremony was stopped before any human-election/PIN/touch/assertion step.
+Predecessor phase `...1.1R` stopped BLOCKED (C-1: empty production
+principal/credential registries). This phase performed exactly the
+missing deployment-owner bootstrap: `scripts/hpac_protected_root_admin.py
+enroll-principal` created `PrincipalRecord hp-8cee9b36b6784608ae48261af86289b8`,
+then `scripts/hpac_principal_admin.py enroll-first-credential` performed
+one real CTAP2 `makeCredential` against the genuine YubiKey (aaguid
+`b7d3f68e88a6471e9ecf2df26d041ede`), atomically writing `CredentialRecord
+hpc-2e7bbfa0c1b2480ba84ab5792159179d` + FIDO2 sidecar + counter-state
+(generation 0), bound to `hpac.fido2.uv_presence.v2` / `rp_id
+hpac.pcae.local`. Both run once each, by the primary human operator, in
+their own trusted terminal, with real sudo authentication and real
+YubiKey touch + PIN. No delegated worker executed either ceremony.
 
-**PRIVILEGED READ-ONLY COMMANDS: 2.**
-**MUTATING PROTECTED-ROOT COMMANDS: 0.**
-**GENUINE YUBIKEY: VERIFIED PRESENT.**
-**PRODUCTION CREDENTIAL REGISTRY: EMPTY — BLOCKING FINDING C-1.**
-**N-16-5 CLOSURE CRITERIA: 5/27 PASS, 1 FAIL, 21 NOT ATTEMPTED (moot given C-1).**
+**PRINCIPAL: ESTABLISHED (hp-8cee9b36b6784608ae48261af86289b8).**
+**CREDENTIAL: ESTABLISHED (hpc-2e7bbfa0c1b2480ba84ab5792159179d).**
+**C-1: RESOLVED.**
+**REAL N-16-5 CERTIFICATION CEREMONY: NOT PERFORMED.**
 **N-16-5: NOT CLOSED.**
 **RUNTIME: not_implemented / Observed / observe / unavailable, 0 plugins/capabilities.**
 **FIRST GOVERNED RUNTIME EXTERNAL EFFECT: ABSENT / UNREACHABLE.**
 
-Recommended next phase: a narrowly-scoped, deployment-owner-run
-first-credential enrollment/bootstrap ceremony via
-`scripts/hpac_principal_admin.py`, then re-attempt this exact
-certification scope unchanged. N-16-6/N-16-7 remain OPEN/UNTOUCHED.
+Independent post-write confirmation via raw filesystem read-back as root
+(bypassing the Python authority layer): 1 principal, 1 credential, no
+duplicates/orphans, all fields cross-check exactly. Two environmental
+(non-code) invocation issues were hit and resolved (`sudo` PATH
+inheritance tripping the fail-closed ACL-trust-tool resolver; `env -i`
+clearing `HOME` and breaking `fido2` resolution) — see phase report
+finding F-10. One genuine architectural gap found and left unrepaired as
+out of scope (F-11): no canonical read-only, boundary-safe inspection
+path exists for the HPAC registries outside an active `production_writer()`
+transaction.
+
+Recommended next phase: a fresh N-16-5 certification retry against the
+now-populated production registry (derived, not begun).
+N-16-6/N-16-7 remain OPEN/UNTOUCHED.
