@@ -11,7 +11,7 @@
   "internal_evidence_coherence": "The canonical Phase Report and .pcae/certification/n16_5_final_certification_30r5r2_1r1r2r1r1r1r1_1r_x9_credential_absent_block.json cross-reference the identical C0, CPIPC-validation facts, hardware descriptor, privileged-command count/results, blocking-finding C-1 text, and closure-criteria PASS/FAIL/moot counts.",
   "internal_report_coherence": "Historical BLOCKED/COMPLETE/IMPLEMENTED/INDEPENDENTLY-VERIFIED reports, including the immediate predecessor's own canonical report, remain immutable and byte-unchanged; only this phase's own canonical report, evidence artifact, and governance/task/status artifacts are added.",
   "report_consistency": "Staged pending push; canonical report to be promoted to COMPLETE (BLOCKED-verdict) after push.",
-  "origin_main_head_count": 6,
+  "origin_main_head_count": 0,
   "test_evidence_classification": "not_applicable_blocked_no_ceremony_no_code_changed",
   "tests_run": 0,
   "tests_added_or_updated": "0 tests: this phase performed no production/test code changes -- it is a real-hardware/credential-readiness certification attempt that stopped before any ceremony step once the credential-registry blocker was found. No new test file, no existing test file modified.",
@@ -111,6 +111,6 @@
     }
   ],
   "recommended_next_phase": "A narrowly-scoped, deployment-owner-run first-credential enrollment/bootstrap ceremony phase (invoking scripts/hpac_principal_admin.py directly, per RHAMP-001 v1.0 §13/§14/§31) to create exactly one canonical production RHAMP-FIDO2-CREDENTIAL/1.0 + counter-state record bound to the genuine YubiKey now confirmed present; then re-attempt this exact certification scope (149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R) unchanged, or its direct CPIPC successor if this phase's own completion advances the counter. Not begun. N-16-6/N-16-7 remain OPEN/UNTOUCHED and strictly out of scope.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "5edf006afc3494b1254a5da44a3dc7f4265e13bc"
 }
