@@ -10,7 +10,7 @@
   "metadata_consistency": "This metadata, the canonical Phase Report doc, PROJECT_STATUS.md, CHANGELOG.md, and .pcae/certification/n16_5_final_certification_30r5r2_1r1r2r1r1r1r1_1r1.json consistently record: PRINCIPAL hp-8cee9b36b6784608ae48261af86289b8 (VERIFIED, active, mechanism-neutral); CREDENTIAL hpc-2e7bbfa0c1b2480ba84ab5792159179d (VERIFIED, active, not revoked, bound); COUNTER generation 0 (VERIFIED, unchanged); GEN-1 PRESENTATION DEPLOYMENT (VERIFIED current/trusted); BLOCKING FINDING H-3 (no production authority path for the certification chain); N-16-5 NOT CLOSED; F-5 DEPLOYMENT VERIFIED -- CERTIFICATION BLOCKED; N-16-6 / N-16-7 OPEN / UNTOUCHED; runtime not_implemented / Observed / observe / unavailable 0/0; first governed runtime external effect ABSENT / UNREACHABLE.",
   "internal_evidence_coherence": "The canonical Phase Report and .pcae/certification/n16_5_final_certification_30r5r2_1r1r2r1r1r1r1_1r1.json cross-reference the identical R0 (afacc333263f9c079f3e5f0faf1b4ef81e114955), principal_id, credential_id, mechanism_id, rp_id, aaguid, recomputed digests, counter baseline, generation-1 deployment digests, H-3 root-cause chain, reconciled closure table (7 PASS / 1 FAIL / rest NOT PERFORMABLE or NOT ATTEMPTED), and all-zero human/hardware interaction audit.",
   "internal_report_coherence": "Historical BLOCKED / COMPLETE / IMPLEMENTED / INDEPENDENTLY-VERIFIED reports, including the immediate predecessor's own canonical report, remain immutable and byte-unchanged; only this phase's own canonical report doc, evidence artifact, and governance / task / status artifacts are added.",
-  "report_consistency": "Staged pending push; canonical report to be promoted after push.",
+  "report_consistency": "Pushed to origin/main at 47e70826a001fc51af9898b72ba7f6adf242bffa; canonical report promotion in progress.",
   "origin_main_head_count": 0,
   "test_evidence_classification": "not_applicable_no_code_changed",
   "tests_run": 0,
@@ -111,6 +111,6 @@
     }
   ],
   "recommended_next_phase": "A narrowly-scoped src/pcae repair phase that adds a genuine production authority path for the N-16-5 certification chain (a dedicated PawaOperation and/or a production challenge/proof/lifecycle/Gate-5 certification orchestrator reachable outside the test fixture, with its own recognition sequence), plus its independent verification; then re-attempt this exact final certification phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1 unchanged against the (unchanged) canonical principal / credential / counter / generation-1 deployment. N-16-6 / N-16-7 remain OPEN / UNTOUCHED and out of scope; N-16-7 strictly last.",
-  "pushed_status": "pending",
-  "origin_main_head": "pending_push"
+  "pushed_status": "pushed",
+  "origin_main_head": "47e70826a001fc51af9898b72ba7f6adf242bffa"
 }
