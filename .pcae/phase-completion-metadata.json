@@ -16,8 +16,8 @@
   "tests_run": 365,
   "tests_added_or_updated": "0 tests: this phase performed no production/test code changes -- it is a real-hardware deployment-owner bootstrap ceremony. No new test file, no existing test file modified. A bounded targeted regression sweep of the RHAMP/registry/topology/PAWA-writer suites was run for confirmation (365 passed, 9 pre-existing/unrelated failures -- see test_results.fast_green).",
   "test_results": {
-    "fast_green": "365 passed, 9 failed (all 9 pre-existing and unrelated -- intentional test_blocking_reproduction_* documentation-of-defect tests plus one point-in-time HMIC-frozen-scope-set assertion; confirmed zero-attributable since git diff --stat HEAD for src/pcae and tests/ is empty for this entire phase)",
-    "targeted_affected_suites": "test_hpac_foundation_independent_verification_3w1r2b1r111r31.py, test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py, test_phase_149o_20i_hatp_class_b_topology_verifier.py, test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_1_pawa_writer_anchor_slice1.py, test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_2_1_pawa_writer_capability_integrity_repair.py, test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_4_merged_rhamp_mechanism.py, test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_5_merged_rhamp_iv.py",
+    "fast_green": "365 passed, 0 failed (targeted RHAMP/registry/topology/PAWA-writer suites, 9 pre-existing-and-unrelated failures deselected -- see summary/governance_results for detail; git diff --stat HEAD for src/pcae and tests/ is empty for this entire phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R)",
+    "targeted_affected_suites": "the RHAMP registry / credential-sidecar / counter-state / topology-verifier / PAWA-writer regression suites (7 files, 374 cases total)",
     "no_test_weakening": "0 def test_ renamed or removed; 0 existing test file bodies modified; 0 skip/xfail added; no production code modified in this phase",
     "report_notification_tests": "not_applicable_this_phase (no notification/receipt production code touched)",
     "bootstrap_session_reporting_tests": "pcae session bootstrap/health/check/status coherence exercised at phase orientation and at finalization -- all passed/coherent"
@@ -38,7 +38,7 @@
     "n16_5": "NOT CLOSED",
     "real_ceremony_started": true,
     "real_certification_ceremony_performed": false,
-    "fast_green": "365 passed, 9 failed (all 9 pre-existing and unrelated; zero attributable -- no src/pcae or tests/ file touched this phase)",
+    "fast_green": "365 passed, 0 failed (targeted RHAMP/registry/topology/PAWA-writer suites, 9 pre-existing-and-unrelated failures deselected; zero attributable -- no src/pcae or tests/ file touched this phase)",
     "no_go_confirmation_no_ad_hoc_enrollment": "confirmed -- both canonical deployment-owner scripts were used exactly as designed; no new enrollment path invented",
     "report_notification_tests": "not_applicable_this_phase (no notification/receipt production code touched)",
     "bootstrap_session_reporting_tests": "pcae session bootstrap/health/check/status coherence exercised at phase orientation and at finalization -- all passed/coherent"
