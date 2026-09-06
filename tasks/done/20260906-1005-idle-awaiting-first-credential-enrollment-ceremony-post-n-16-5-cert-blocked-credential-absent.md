@@ -10,7 +10,7 @@ Idle: awaiting first-credential enrollment ceremony (post N-16-5 cert BLOCKED, c
 
 ## Status
 
-active
+done
 
 ## Mode
 

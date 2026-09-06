@@ -1,5 +1,20 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R`
+  (deployment-owner first production human-principal / genuine-YubiKey
+  FIDO2 credential bootstrap and canonical registry establishment)
+  resolved C-1: `scripts/hpac_protected_root_admin.py enroll-principal`
+  created `PrincipalRecord hp-8cee9b36b6784608ae48261af86289b8`, then
+  `scripts/hpac_principal_admin.py enroll-first-credential` performed one
+  real CTAP2 `makeCredential` against the genuine YubiKey, atomically
+  writing `CredentialRecord hpc-2e7bbfa0c1b2480ba84ab5792159179d` + FIDO2
+  sidecar + counter-state. Both run once each by the primary human
+  operator in their own terminal (real sudo + touch + PIN); independent
+  post-write confirmation via raw filesystem read-back as root. No
+  `src/pcae`/`scripts`/`tests`/contract change. F-5: DEPLOYMENT VERIFIED —
+  FINAL CERTIFICATION PENDING. N-16-5 still NOT CLOSED (no certification
+  ceremony performed). See
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_DEPLOYMENT_OWNER_FIRST_PRODUCTION_CREDENTIAL_BOOTSTRAP.md`.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R`
   (final real-human / genuine-YubiKey protected-presentation N-16-5
   certification and closure adjudication) confirmed a genuine YubiKey now

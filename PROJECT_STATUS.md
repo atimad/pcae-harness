@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R
+— Deployment-Owner First Production Human-Principal / Genuine-YubiKey
+FIDO2 Credential Bootstrap and Canonical Registry Establishment.
+**STATUS: COMPLETE.** Performed the exact deployment-owner-only bootstrap
+the predecessor identified as missing (C-1): `scripts/hpac_protected_root_admin.py
+enroll-principal` created canonical `PrincipalRecord` `hp-8cee9b36b6784608ae48261af86289b8`
+(mechanism-neutral, canonically-generated ID), then `scripts/hpac_principal_admin.py
+enroll-first-credential` performed one real CTAP2 `makeCredential` against
+the genuine YubiKey (aaguid `b7d3f68e88a6471e9ecf2df26d041ede`), atomically
+writing `CredentialRecord` `hpc-2e7bbfa0c1b2480ba84ab5792159179d` +
+FIDO2 sidecar + counter-state (generation 0), all bound to
+`hpac.fido2.uv_presence.v2` / `rp_id=hpac.pcae.local`. Both ceremonies run
+once each, by the primary human operator, in their own trusted terminal
+with real sudo + touch + PIN — no delegated-worker execution. Independent
+post-write confirmation via raw filesystem read-back as root (registry:
+1 principal, 1 credential, no orphans/duplicates; sidecar/counter/evidence
+files cross-check exactly). Two environmental (non-code) invocation
+issues hit and resolved during the ceremony: `sudo` inheriting an
+agent-writable-prefixed `PATH` tripped the fail-closed ACL-trust-tool
+resolver (fixed with a minimal `PATH`), and the resulting `env -i`
+clearing `HOME` broke `fido2` resolution (fixed with an explicit
+`PYTHONPATH`) — see phase report finding F-10. A genuine architectural
+gap was also found and left unrepaired as out-of-scope (F-11): no
+canonical read-only, boundary-safe inspection path exists for the HPAC
+registries outside an active `production_writer()` transaction. **C-1:
+RESOLVED. F-5: DEPLOYMENT VERIFIED — FINAL CERTIFICATION PENDING. N-16-5:
+NOT CLOSED** (unchanged — no certification ceremony performed here; no
+protected APPROVE/REJECT, no presentation evidence, no
+`AuthenticatedHumanPrincipal`, no Gate 5). Runtime confirmed unchanged
+(`Observed`/`observe`/`unavailable`/0 plugins). Recommended next phase: a
+fresh N-16-5 certification retry against this now-populated registry
+(derived, not begun — see phase report). N-16-6/N-16-7 untouched. Full
+report: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_DEPLOYMENT_OWNER_FIRST_PRODUCTION_CREDENTIAL_BOOTSTRAP.md`.
+
+---
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R
 — Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5
 Certification and Closure Adjudication. **STATUS: BLOCKED.** Orientation
