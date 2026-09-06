@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R`
+  (final real-human / genuine-YubiKey protected-presentation N-16-5
+  certification and closure adjudication) confirmed a genuine YubiKey now
+  present (real `NativeCtap2Provider`, FIDO_2_1, clientPin,
+  pinUvAuthToken) and, via 2 read-only privileged commands (macOS
+  Authorization Services GUI dialog only, 0 mutations), found the
+  production human-principal registry empty (0 credentials) — no
+  canonical currently-valid production certification credential exists.
+  Credential enrollment is architecturally confined to the standalone,
+  deployment-owner-run `scripts/hpac_principal_admin.py`
+  (non-agent-importable fence), outside this phase's authorized scope, so
+  per the phase's own "NO AD-HOC CREDENTIAL ENROLLMENT" rule the ceremony
+  was stopped before any human-election/PIN/touch/assertion step.
+  **N-16-5: NOT CLOSED. F-5: DEPLOYMENT VERIFIED — CERTIFICATION
+  BLOCKED.** Recommended next phase: a narrow first-credential
+  enrollment/bootstrap ceremony, then re-attempt this exact certification
+  scope. N-16-6/N-16-7 untouched.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1`
   (independent verification of production protected-presentation
   generation-1 deployment state) independently re-derived and checked

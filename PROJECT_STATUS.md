@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R
+— Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5
+Certification and Closure Adjudication. **STATUS: BLOCKED.** Orientation
+confirmed the predecessor's INDEPENDENTLY VERIFIED deployment state and
+CPIPC direct-successor validity (C0 `e44becc9`). The operator connected a
+genuine YubiKey; the real `NativeCtap2Provider` confirmed 1 device
+present (FIDO_2_1, clientPin, pinUvAuthToken) — genuine hardware:
+**VERIFIED PRESENT**. Privileged read-only inspection (macOS
+Authorization Services GUI dialog only, 2 read-only commands, 0
+mutations) of the production human-principal registry found it **empty**
+(0 principals, 0 credentials): the credential from the prior
+`.1R.30R.5R.1` hardware-capability IV was never written into the
+production registry as a canonical enrollment. `hpac_rhamp_enrollment.py`
+is architecturally inside the non-agent-importable fence — enrollment
+authority originates solely from `scripts/hpac_principal_admin.py`, run
+by the deployment owner, not this phase's authorized MAY-list. Per the
+phase's explicit "NO AD-HOC CREDENTIAL ENROLLMENT" rule: **STOPPED before
+ceremony** — no `makeCredential`/`getAssertion`, no helper launch, no
+human election, no PIN/touch request performed. N-16-5 closure criteria:
+5/27 PASS (carried/mechanism-selection only), 1 FAIL (blocker C-1: no
+canonical production credential), 21 moot. **N-16-5: NOT CLOSED. F-5:
+DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED.** Recommended next phase: a
+narrow deployment-owner-run first-credential enrollment/bootstrap
+ceremony via `scripts/hpac_principal_admin.py`, then re-attempt this
+exact certification scope. N-16-6/N-16-7 untouched.
+
+---
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1
 — Independent Verification of Production Protected-Presentation
 Generation-1 Deployment State. **STATUS: COMPLETE.** Strictly
