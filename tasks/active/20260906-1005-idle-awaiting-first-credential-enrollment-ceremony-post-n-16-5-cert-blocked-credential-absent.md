@@ -22,13 +22,11 @@ Idle: awaiting first-credential enrollment ceremony (post N-16-5 cert BLOCKED, c
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/**
 
 ## Forbidden Files
 
