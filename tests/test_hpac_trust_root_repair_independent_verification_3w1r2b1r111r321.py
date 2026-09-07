@@ -1002,6 +1002,16 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         ("protected_presentation.py", "pcae.core.approval_presentation"),
         ("protected_presentation.py", "pcae.core.hpac_foundation"),
         ("hpac_protected_presentation_admin.py", "pcae.core.hpac_foundation"),
+        # N16-5-H3-IMPL — HPAC-PAWA-001 v1.3 §38A: the N-16-5 certification
+        # coordinator reads the canonical lifecycle events / proof record /
+        # active principal + bound credential / trusted presentation evidence
+        # through the existing canonical stores. Non-agent-importable (its own
+        # §39A guard). Exact filename, no wildcard.
+        ("hpac_certification_coordinator.py", "pcae.core.hpac_foundation"),
+        ("hpac_certification_coordinator.py", "pcae.core.hpac_lifecycle"),
+        ("hpac_certification_coordinator.py", "pcae.core.human_authentication_proof"),
+        ("hpac_certification_coordinator.py", "pcae.core.approval_presentation"),
+        ("hpac_certification_coordinator.py", "pcae.core.human_principal_registry"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

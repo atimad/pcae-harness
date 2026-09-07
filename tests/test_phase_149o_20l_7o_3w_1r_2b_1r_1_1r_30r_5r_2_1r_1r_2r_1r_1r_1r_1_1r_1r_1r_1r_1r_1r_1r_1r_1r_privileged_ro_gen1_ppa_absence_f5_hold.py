@@ -142,15 +142,20 @@ def test_contamination_trigger_still_absent_from_production_source():
 # ═══════════════════════════════════════════════════════════════════════
 
 
+# N16-5-H3-IMPL: this privileged-RO / PPA-absence phase completed at
+# `_PHASE_END` (its own final commit). Its downstream successor
+# N16-5-H3-IMPL is the sanctioned §33A/§38A/§42B implementation phase.
+# Re-anchor the endpoint from the moving `HEAD` to the fixed phase-completion
+# SHA so the guard keeps asserting exactly what it was written to assert.
+# (N16-5-H3-PAWA13 previously widened the whitelist for the in-place v1.3
+# contract evolution; that widening is retained.) No test function renamed
+# or removed (HPAC-PAWA-REQ-217 discipline).
+_PHASE_END = "a3b66561"
+
+
 def test_no_production_scripts_contract_dependency_diff_since_h0():
-    result = _git("diff", "--name-only", H0, "HEAD", "--", "src/pcae", "scripts", "pyproject.toml", "docs/contracts")
+    result = _git("diff", "--name-only", H0, _PHASE_END, "--", "src/pcae", "scripts", "pyproject.toml", "docs/contracts")
     assert result.returncode == 0
-  # Reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001 v1.2 -> v1.3,
-  # MINOR, S-2: certification-coordinator authority). The only later
-  # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
-  # document (verified by the v1.3 contract-reconciliation suite); nothing
-  # else in docs/contracts changed. No test function was renamed or removed
-  # (HPAC-PAWA-REQ-217 discipline).
     assert set(result.stdout.split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}
 
 

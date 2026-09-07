@@ -862,6 +862,22 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
         ("protected_presentation.py", "pcae.core.approval_presentation"),
         ("protected_presentation.py", "pcae.core.hpac_foundation"),
         ("hpac_protected_presentation_admin.py", "pcae.core.hpac_foundation"),
+        # N16-5-H3-IMPL (149O...30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R):
+        # HPAC-PAWA-001 v1.3 §38A — the N-16-5 real-human-authentication
+        # certification coordinator (the ONE enumerated §38A consumer of the
+        # dedicated `certification_writer` factory) orchestrates the canonical
+        # authentication lifecycle: it reads the challenge / assertion /
+        # proof / verified lifecycle events, the canonical proof record, the
+        # active PrincipalRecord + bound CredentialRecord, and the trusted
+        # presentation evidence — all through the existing canonical stores on
+        # the freshly-recognized §33A PRODUCTION authority. It is
+        # non-agent-importable (its own §39A guard keeps it off every
+        # agent-reachable path). Exact filename, no wildcard.
+        ("hpac_certification_coordinator.py", "pcae.core.hpac_foundation"),
+        ("hpac_certification_coordinator.py", "pcae.core.hpac_lifecycle"),
+        ("hpac_certification_coordinator.py", "pcae.core.human_authentication_proof"),
+        ("hpac_certification_coordinator.py", "pcae.core.approval_presentation"),
+        ("hpac_certification_coordinator.py", "pcae.core.human_principal_registry"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

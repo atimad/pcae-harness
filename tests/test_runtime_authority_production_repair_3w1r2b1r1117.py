@@ -730,7 +730,14 @@ def test_consumer_inventory_is_bounded_and_gate9_stays_unwired():
     # `trusted_projection_gate5_binding` accessor) only. `gate9_consumers`
     # stays empty -- no Gate-9 atomic-consumption wiring
     # (`.1R.11`-verified; Gate 9 frozen per `.1R.9`).
+    # N16-5-H3-IMPL: HPAC-PAWA-001 v1.3 §38A adds one sanctioned,
+    # non-agent-importable `hpac_verifier` consumer — the N-16-5
+    # certification coordinator — which routes the proof path THROUGH
+    # `verify_human_authentication` (HPAC-PAWA-REQ-247), calls no Gate-9
+    # primitive, and consumes no ValidatedAuthorityProjection. Exact
+    # filename, no wildcard.
     assert hpac_consumers == {
+        "src/pcae/core/hpac_certification_coordinator.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
     }

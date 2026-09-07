@@ -802,8 +802,18 @@ def test_65_predecessor_guard_edits_did_not_add_skip_or_xfail() -> None:
             assert new.count(tok) <= old.count(tok), f"{path}: {tok} count increased"
 
 
+# N16-5-H3-IMPL (149O...30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R):
+# this contract-IV phase completed at its own final commit; its `.1R`
+# successor N16-5-H3-IMPL is the sanctioned §33A/§38A/§42B implementation
+# phase. Re-anchor this guard's endpoint from the moving `HEAD` to the fixed
+# IV-completion SHA so it keeps asserting exactly what it was written to
+# assert — that THIS IV made no source / contract edit — without falsely
+# implicating the downstream implementation phase.
+_IV_COMPLETION = "74e52d59738007c4b9f6dbeb28f83990ba82e9a8"
+
+
 def test_66_this_iv_edits_no_normative_contract_or_source() -> None:
-    changed = set(_git("diff", "--name-only", V0, "HEAD").split())
+    changed = set(_git("diff", "--name-only", V0, _IV_COMPLETION).split())
     for p in changed:
         assert not p.startswith("src/pcae/")
         assert not p.startswith("scripts/")
@@ -817,9 +827,19 @@ def test_66_this_iv_edits_no_normative_contract_or_source() -> None:
 
 
 def test_67_no_certification_production_module_exists() -> None:
-    assert not (ROOT / "src/pcae/core/hpac_certification_coordinator.py").exists()
-    assert not (ROOT / "scripts/hpac_certification_admin.py").exists()
-    admin_writer = text(ROOT / "src/pcae/core/hpac_protected_admin_writer.py")
+    # N16-5-H3-IMPL re-anchor: assert the certification production surface did
+    # not exist AS OF THIS IV's COMPLETION (the IV was verification-only). Its
+    # `.1R` successor N16-5-H3-IMPL is the phase that builds it; checking the
+    # live tree would falsely fail once the sanctioned implementation lands.
+    def _absent_at(rev: str, path: str) -> bool:
+        import subprocess as _sp
+
+        return _sp.run(["git", "cat-file", "-e", f"{rev}:{path}"], cwd=ROOT,
+                       capture_output=True).returncode != 0
+
+    assert _absent_at(_IV_COMPLETION, "src/pcae/core/hpac_certification_coordinator.py")
+    assert _absent_at(_IV_COMPLETION, "scripts/hpac_certification_admin.py")
+    admin_writer = _git("show", f"{_IV_COMPLETION}:src/pcae/core/hpac_protected_admin_writer.py")
     assert "def certification_writer" not in admin_writer
 
 

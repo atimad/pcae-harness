@@ -155,6 +155,61 @@ not repair). The two `test_hpac_verifier` `object.__new__` forgery failures
 **pre-existing at I0** (Py 3.14 `__slots__` interaction), reproduced under `git
 stash` — NOT attributable, NOT repaired here.
 
+## 8A. Guard reconciliation — COMPLETE (increment after `1843095e`)
+
+Method: `git worktree add /tmp/pcae-i0 74e52d59`; the affected guard band (46
+suites) run at I0 and at HEAD (`-n 4`, memory-safe); `comm -23` of the FAILED
+node lists. **Result: HEAD band 58 failed / I0 band 67 failed — 9 previously-
+failing guards recovered, ZERO new attributable code regressions.** The single
+HEAD-only band difference —
+`…1R.1_independent_verification_configured_agent_identity_threading_repair.py::test_ordinary_pcae_health_and_check_do_not_require_hardware_ceremony`
+— is a **transient dirty-working-tree artifact** (`pcae health` exits 1 while
+the reconciliation edits are uncommitted: "Source files changed without
+documentation file updates"); it returns 0 and the test passes once this
+increment is committed.
+
+Ten guard suites reconciled, each **phase-aware, widen-not-weaken, no
+`def test_` renamed / removed / disabled, no skip/xfail, no
+wildcard/glob/prefix/fnmatch**:
+
+| Guard | Historical invariant | Reconciliation (all commented `N16-5-H3-IMPL`) |
+|---|---|---|
+| `test_hpac_verifier.py::test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier_module` | exact set `{runtime_authority, runtime_dispatch_gate5}` imports `hpac_verifier` | + `hpac_certification_coordinator.py` (exact); §42B REQ-247 **requires** the proof path route through `verify_human_authentication`, never around it |
+| `test_hpac_verifier_independent_verification_3w1r2b1r1115a1.py::test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier` | same (set form) | same |
+| `test_hpac_verifier_repair_3w1r2b1r1115a2.py::test_runtime_authority_is_the_only_production_consumer_after_integration` | same (sorted list) | same |
+| `test_hpac_verifier_repair_independent_verification_3w1r2b1r1115a21.py::test_runtime_authority_is_the_only_production_consumer_outside_verifier` | same (offenders set) | same |
+| `test_hpac_foundation_independent_verification_3w1r2b1r111r31.py::test_new_hpac_modules_have_zero_preexisting_production_consumers` | `AUTHORIZED_CONSUMERS` subset invariant (`unauthorized == set()`) | + 5 exact tuples `(hpac_certification_coordinator.py, pcae.core.{hpac_foundation,hpac_lifecycle,human_authentication_proof,approval_presentation,human_principal_registry})` |
+| `test_hpac_foundation_trust_root_repair_3w1r2b1r111r32.py::test_hpac_repair_has_zero_preexisting_production_consumers` | same | same 5 tuples |
+| `test_hpac_trust_root_repair_independent_verification_3w1r2b1r111r321.py::test_foundation_has_no_production_consumers_or_gate_wiring` | same | same 5 tuples |
+| `test_slice_b_reconciliation_iv_3w1r2b1r1_1r19r1.py::test_guard_authorized_set_grew_by_exactly_the_two_slice_b_tuples` (×3 params) | the three r31/r32/r321 `AUTHORIZED_CONSUMERS` sets grew since `R20_HEAD` by exactly `SLICE_B ∪ R30R31 ∪ R30R34 ∪ R30R4R1` | added `_N16_5_H3_IMPL_TUPLES` (the same 5) to both the delta and the total assertion; `no wildcard`/`fails-closed-for-any-other-importer` sibling checks still green |
+| `test_phase_…30R.3.1…::test_42_no_agent_runtime_gate_plugin_consumer_of_the_factory` | `allowed_importers` filename set; no other file imports `hpac_protected_admin_writer` | + `hpac_certification_coordinator.py` (exact); §38A authorizes exactly this one further fenced importer |
+| `test_b1_b7_n1_n2_…_1r8.py::test_isolation_no_gate_coordinator_or_gate9_consumption_wiring` | `hpac_consumers == {runtime_authority, runtime_dispatch_gate5}` | + `hpac_certification_coordinator.py`; calls no Gate-9 primitive, consumes no projection |
+| `test_runtime_authority_production_repair_3w1r2b1r1117.py::test_consumer_inventory_is_bounded_and_gate9_stays_unwired` | same | same |
+| `…pawa_v1_3_contract_iv.py::test_66_this_iv_edits_no_normative_contract_or_source` / `::test_67_no_certification_production_module_exists` | the v1.3 **contract IV** (verification-only) made no source edit; the certification module did not exist | endpoint re-anchored from moving `HEAD` to the fixed IV-completion SHA `74e52d59` (== I0); the guard keeps verifying the IV's own scope |
+| `…ppa_deployment_state_iv.py::test_no_iv_production_mutation_since_v0` / `::test_historical_guard_05_extra_files_traced_to_two_unrelated_completed_phases` | the PPA-Gen-1 deployment-state IV made no production mutation | endpoint re-anchored to that IV's completion SHA `e44becc9` |
+| `…privileged_ro_gen1_ppa_absence_f5_hold.py::test_no_production_scripts_contract_dependency_diff_since_h0` | that phase changed only the in-place v1.3 contract (PAWA13 widening retained) | endpoint re-anchored to that phase's completion SHA `a3b66561` |
+| `…1R_configured_agent_identity_threading_repair.py::test_no_f5_registration_retry_performed_by_this_repair` | the threading repair touched no F-5 provisioning/registration script | endpoint re-anchored to that repair's completion SHA `67d542ef` |
+| `…1R_f4_immutable_scope_repair.py::test_27_no_scripts_change` | the F-4 immutable-scope repair changed no `scripts/` file | endpoint re-anchored to that repair's completion SHA `90510428` |
+| `…n16_5_h3_pawa13_v1_3_contract_reconciliation.py::test_38_no_src_or_scripts_change_since_h0` | the HPAC-PAWA-001 v1.3 FREEZE phase (contract-only MINOR) changed no source | endpoint re-anchored to the freeze-completion SHA `4977a2e5` |
+
+Cascade recoveries (no edit needed — they run a reconciled base guard):
+`…1R.20::test_finding_n20_1_hpac_consumer_guard_is_repaired_at_head` (×3),
+`…1R.20::test_finding_n20_3_1r19_own_meta_guard_recovers_at_head`,
+`…1R.18::test_widened_guard_module_passes_at_head[…hpac_foundation_trust_root_repair…]`,
+`…1R.19r1::test_meta_guard_passes_at_head[…]`,
+`…ppa_deployment_state_iv::test_targeted_suites_still_reproduce_exactly_the_five_predecessor_failures`.
+
+**Pre-existing at I0, NOT attributable, NOT repaired here** (reproduced in the
+I0 worktree): the two `test_hpac_verifier_independent_verification` `object.__new__`
+forgery tests (Py 3.14 `__slots__`); the `test_hpac_foundation_independent_verification`
+/ `test_hpac_trust_root_repair_independent_verification` `test_blocking_reproduction_*`
+suite (the BLOCKED trust-foundation defect); the `_EXPECTED_FIVE_FAILURES` set;
+`…1R.18::test_widened_guard_module_passes_at_head[test_b1_b7…]` /
+`[test_runtime_authority_production_repair…]` (those modules had a separate
+pre-existing scope-fence failure at I0); and the many stale
+"no-src-change-since-X" fences from the intervening Telegram-receipt / F-4 /
+threading phases that were already failing at I0.
+
 ## 9. Remaining work (as of commit `df915e32`)
 
 1. Guard reconciliation increment (the 6 attributable guards above; phase-aware; A/B worktree method).

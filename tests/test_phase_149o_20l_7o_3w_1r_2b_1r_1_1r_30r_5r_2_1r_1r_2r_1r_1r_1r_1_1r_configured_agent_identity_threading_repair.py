@@ -123,12 +123,22 @@ def test_predecessor_blocked_report_task_preserved():
     assert "BLOCKED" in result.stdout
 
 
+# N16-5-H3-IMPL: the configured-agent-identity threading repair completed at
+# `_REPAIR_END` (its own final `…1.1R` commit). Its downstream successor
+# N16-5-H3-IMPL is the sanctioned §33A/§38A/§42B implementation phase, which
+# legitimately adds `scripts/hpac_certification_admin.py`. Re-anchor this
+# guard's endpoint from the moving `HEAD` to the fixed repair-completion SHA
+# so it keeps asserting exactly what it was written to assert — that THE
+# REPAIR touched no F-5 provisioning/registration script.
+_REPAIR_END = "67d542ef"
+
+
 def test_no_f5_registration_retry_performed_by_this_repair():
     """Strictly source-level: this repair's own diff never touches
     `scripts/hpac_protected_root_admin.py` or `scripts/hpac_protected_
     presentation_admin.py` (the F-5 provisioning/registration tools)."""
 
-    result = _git("diff", "--name-only", REPAIR_ENTRY_SHA, "--", "scripts/")
+    result = _git("diff", "--name-only", REPAIR_ENTRY_SHA, _REPAIR_END, "--", "scripts/")
     changed = [line for line in result.stdout.splitlines() if line]
     assert changed == [], f"repair must not touch F-5 provisioning/registration scripts: {changed}"
 

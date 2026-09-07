@@ -671,11 +671,19 @@ def test_42_no_agent_runtime_gate_plugin_consumer_of_the_factory():
     # `protected_presentation.py` (the trusted launcher mediator that holds the
     # `protected_presentation_mechanism` runtime evidence-writer authority,
     # HPAC-PPA-REQ-041). No agent / runtime / Gate / plugin / CLI module does.
+    # N16-5-H3-IMPL: HPAC-PAWA-001 v1.3 §38A adds exactly one further fenced
+    # importer — `hpac_certification_coordinator.py`, the ONE enumerated
+    # authorized consumer of the dedicated `certification_writer` factory
+    # (which lives in the same non-agent-importable §37 module). It is NOT an
+    # agent / runtime / Gate / plugin / CLI module and its own §39A guard
+    # (test_60/test_61 in the N16-5-H3-IMPL suite) keeps it off every
+    # agent-reachable path. Exact filename, no wildcard.
     allowed_importers = {
         "hpac_protected_admin_writer.py",
         "hpac_rhamp_enrollment.py",
         "hpac_protected_presentation_admin.py",
         "protected_presentation.py",
+        "hpac_certification_coordinator.py",
     }
     joined = "\n".join(
         p.read_text(encoding="utf-8")

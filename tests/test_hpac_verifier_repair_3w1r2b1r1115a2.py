@@ -374,7 +374,14 @@ def test_runtime_authority_is_the_only_production_consumer_after_integration():
         if any(m.endswith("hpac_verifier") for m in modules):
             consumers.append(str(path.relative_to(_REPO_ROOT)))
     # .1R.10 added the authorized Gate-5 approval-validation coordinator.
+    # N16-5-H3-IMPL: HPAC-PAWA-001 v1.3 §38A adds one further sanctioned,
+    # non-agent-importable consumer — the N-16-5 certification coordinator —
+    # which imports `verify_human_authentication` so the proof path is routed
+    # THROUGH the verifier, never around it (HPAC-PAWA-REQ-247). Exact
+    # filename, no wildcard; its own §39A guard keeps it off every
+    # agent-reachable path.
     assert sorted(consumers) == [
+        "src/pcae/core/hpac_certification_coordinator.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
     ]

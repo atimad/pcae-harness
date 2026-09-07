@@ -107,8 +107,17 @@ def test_predecessor_canonical_report_preserved_byte_identical():
     assert result.stdout.strip() == V0
 
 
+# N16-5-H3-IMPL: this PPA Gen-1 deployment-state IV completed at `_IV_END`
+# (its own final `…1` commit). Its downstream successor N16-5-H3-IMPL is the
+# sanctioned §33A/§38A/§42B implementation phase. Re-anchor the endpoint from
+# the moving `HEAD` to the fixed IV-completion SHA so the guard keeps
+# asserting exactly what it was written to assert — that THIS IV made no
+# production mutation — without implicating the later implementation phase.
+_IV_END = "e44becc9"
+
+
 def test_no_iv_production_mutation_since_v0():
-    diff = _git("diff", "--name-only", V0, "HEAD", "--", "src/pcae", "scripts", "pyproject.toml")
+    diff = _git("diff", "--name-only", V0, _IV_END, "--", "src/pcae", "scripts", "pyproject.toml")
     assert diff.stdout.strip() == ""
 
 
@@ -443,7 +452,9 @@ def test_targeted_suites_still_reproduce_exactly_the_five_predecessor_failures()
 
 def test_historical_guard_05_extra_files_traced_to_two_unrelated_completed_phases():
     entry = "0250e5f79340b659f4c34ce391656d8f7219ccc3"
-    diff = _git("diff", "--name-only", entry, "HEAD", "--", "src/pcae")
+    # N16-5-H3-IMPL: endpoint re-anchored to this IV's completion (`_IV_END`);
+    # see the note on `test_no_iv_production_mutation_since_v0`.
+    diff = _git("diff", "--name-only", entry, _IV_END, "--", "src/pcae")
     extra = set(diff.stdout.split()) - {
         "src/pcae/protected_presentation_helper.py",
         "src/pcae/core/protected_presentation.py",

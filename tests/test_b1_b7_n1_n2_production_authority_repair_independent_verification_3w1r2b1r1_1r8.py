@@ -831,7 +831,14 @@ def test_isolation_no_gate_coordinator_or_gate9_consumption_wiring():
         "src/pcae/core/runtime_dispatch_gate8.py",
         "src/pcae/core/runtime_dispatch_gate9.py",
     }, f"unexpected ValidatedAuthorityProjection consumer: {sorted(projection_consumers)}"
+    # N16-5-H3-IMPL: HPAC-PAWA-001 v1.3 §38A adds one further sanctioned,
+    # non-agent-importable `hpac_verifier` consumer — the N-16-5
+    # certification coordinator — which imports `verify_human_authentication`
+    # so the proof path goes THROUGH the verifier, never around it
+    # (HPAC-PAWA-REQ-247). It calls no Gate-9 primitive and consumes no
+    # ValidatedAuthorityProjection. Exact filename, no wildcard.
     assert hpac_consumers == {
+        "src/pcae/core/hpac_certification_coordinator.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
     }

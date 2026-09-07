@@ -54,7 +54,18 @@
   and re-resolves the trusted presentation on the freshly-recognized §33A
   authority; `reach_gate5_assurance` builds every read store on the matching
   writer's authority instance so no resolved record crosses an authority-seal
-  boundary.
+  boundary. Guard reconciliation (phase-aware, widen-not-weaken, no `def
+  test_` renamed/removed/disabled, no skip/xfail, no wildcard): the ONE new
+  sanctioned §38A consumer `hpac_certification_coordinator` added to the
+  `hpac_verifier` / HPAC-Layer-1/2-foundation consumer-inventory guards
+  (`test_hpac_verifier*`, `test_hpac_foundation*`, `test_hpac_trust_root*`,
+  `.30R.3.1::test_42`, `1117`, `b1_b7 1r8`, `.1R.19r1` meta-guard); eight
+  completed-predecessor "no src/scripts change since X" scope-fences
+  re-anchored from the moving `HEAD` to each phase's own fixed completion SHA.
+  A/B (I0 `74e52d59` worktree vs HEAD, 46-suite band): 67 → 58 failed, 0 new
+  attributable code regression (9 previously-failing guards recovered); the
+  two `object.__new__` verifier-forgery failures reproduce at I0 (Py 3.14),
+  pre-existing.
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R`
   (alias **N16-5-H3-PAWA13-IV**) — **Independent Verification of HPAC-PAWA-001

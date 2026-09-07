@@ -550,7 +550,19 @@ def test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier_modu
     # approval-validation coordinator, the "future Gate 5" this module was
     # designed to serve (.1R.9 §16.1). It consumes only the public
     # provenance predicate `is_verifier_authenticated_principal`.
+    #
+    # N16-5-H3-IMPL (149O...30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R):
+    # HPAC-PAWA-001 v1.3 §38A adds exactly one further sanctioned consumer —
+    # the N-16-5 certification coordinator — which imports
+    # `verify_human_authentication` PRECISELY so it does NOT bypass the
+    # verifier: §42B (HPAC-PAWA-REQ-247) makes "directly minting a PRODUCTION
+    # AuthenticatedHumanPrincipal outside
+    # verify_human_authentication(require_real_assurance=True)" a prohibited
+    # act for the proof-verifier role. The coordinator is non-agent-importable
+    # (its own §39A guard keeps it off every agent-reachable path). Exact
+    # filename, no wildcard.
     assert sorted(consumers) == [
+        "src/pcae/core/hpac_certification_coordinator.py",
         "src/pcae/core/runtime_authority.py",
         "src/pcae/core/runtime_dispatch_gate5.py",
     ]

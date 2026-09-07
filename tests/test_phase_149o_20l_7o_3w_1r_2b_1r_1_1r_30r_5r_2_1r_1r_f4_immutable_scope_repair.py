@@ -169,7 +169,14 @@ def test_26_no_src_change() -> None:
 
 
 def test_27_no_scripts_change() -> None:
-    assert git("diff", "--name-only", R0, "--", "scripts") == ""
+    # N16-5-H3-IMPL: the F-4 immutable-scope repair completed at `_R_END`
+    # (its own final `…30R.5R.2.1R.1R` commit). Its downstream successor
+    # N16-5-H3-IMPL is the sanctioned §33A/§38A/§42B implementation phase and
+    # legitimately adds `scripts/hpac_certification_admin.py`. Re-anchor this
+    # guard's endpoint from the moving `HEAD` to the fixed repair-completion
+    # SHA so it keeps asserting exactly what it was written to assert.
+    _R_END = "90510428"
+    assert git("diff", "--name-only", R0, _R_END, "--", "scripts") == ""
 
 
 def test_28_no_dependency_change() -> None:

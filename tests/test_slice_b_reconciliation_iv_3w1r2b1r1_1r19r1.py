@@ -139,6 +139,22 @@ _R30R4R1_TUPLES = {
     ("protected_presentation_installation.py", "pcae.core.hpac_foundation"),
     ("hpac_protected_presentation_admin.py", "pcae.core.hpac_foundation"),
 }
+# N16-5-H3-IMPL (149O...30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R)
+# widens each HPAC Layer-1/2 consumer-inventory guard by these exact five
+# tuples — no wildcard. HPAC-PAWA-001 v1.3 §38A: the N-16-5 certification
+# coordinator (the ONE enumerated §38A consumer of the dedicated
+# `certification_writer` factory) reads the canonical authentication
+# lifecycle events / proof record / active principal + bound credential /
+# trusted presentation evidence through the existing canonical stores. It is
+# non-agent-importable (its own §39A guard keeps it off every agent-reachable
+# path).
+_N16_5_H3_IMPL_TUPLES = {
+    ("hpac_certification_coordinator.py", "pcae.core.hpac_foundation"),
+    ("hpac_certification_coordinator.py", "pcae.core.hpac_lifecycle"),
+    ("hpac_certification_coordinator.py", "pcae.core.human_authentication_proof"),
+    ("hpac_certification_coordinator.py", "pcae.core.approval_presentation"),
+    ("hpac_certification_coordinator.py", "pcae.core.human_principal_registry"),
+}
 BASE_TUPLES = {
     ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
     ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
@@ -261,12 +277,13 @@ def test_guard_authorized_set_grew_by_exactly_the_two_slice_b_tuples(path, node)
     old_set = _authorized_set(old_seg)
     assert new_set - old_set == (
         set(SLICE_B_TUPLES) | _R30R31_TUPLES | _R30R34_TUPLES | _R30R4R1_TUPLES
+        | _N16_5_H3_IMPL_TUPLES
     ), (path, new_set - old_set)
     assert old_set - new_set == set(), "nothing was dropped from the authorized set"
     assert old_set == BASE_TUPLES
     assert new_set == (
         BASE_TUPLES | set(SLICE_B_TUPLES) | _R30R31_TUPLES
-        | _R30R34_TUPLES | _R30R4R1_TUPLES
+        | _R30R34_TUPLES | _R30R4R1_TUPLES | _N16_5_H3_IMPL_TUPLES
     )
     # subset-invariant orientation unchanged
     assert "- AUTHORIZED_CONSUMERS" in new_seg

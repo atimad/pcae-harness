@@ -305,9 +305,18 @@ def test_37_96_specialized_not_redefined() -> None:
 
 # --- 10. no implementation / no ceremony / instance neutrality --------
 
+# N16-5-H3-IMPL: the HPAC-PAWA-001 v1.3 FREEZE phase (this suite's phase)
+# completed at `_FREEZE_END` and made no source / scripts change — a
+# contract-only MINOR. Its `.1R` grandchild N16-5-H3-IMPL is the sanctioned
+# §33A/§38A/§42B implementation phase. Re-anchor this guard's endpoint from
+# the moving `HEAD` to the fixed freeze-completion SHA so it keeps asserting
+# exactly what it was written to assert — that THE FREEZE touched no source.
+_FREEZE_END = "4977a2e5db362e9e86f898cf438578f00e8051f5"
+
+
 def test_38_no_src_or_scripts_change_since_h0() -> None:
     out = subprocess.check_output(
-        ["git", "diff", "--name-only", H0, "--", "src/pcae", "scripts", "pyproject.toml"],
+        ["git", "diff", "--name-only", H0, _FREEZE_END, "--", "src/pcae", "scripts", "pyproject.toml"],
         cwd=ROOT,
     ).decode().strip()
     assert out == "", out
