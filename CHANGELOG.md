@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R`
+  (alias **N16-5-H3-IMPL**) — **N-16-5 Production Certification Authority-Path
+  Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair** (IN PROGRESS).
+  I0 = `74e52d59`; HPAC-PAWA-001 v1.3 git blob `9c816716` frozen (must stay
+  byte-unchanged). CPIPC: candidate = predecessor + exactly one `.1R`, same
+  series/branch, strict order, direct successor, unique — canonical id ==
+  proposed id, alias display-only, NO discrepancy. Implements the §37
+  non-agent-importable fence's dedicated `certification_writer(...)` factory
+  (distinct from `production_writer`; reuses §33 steps 1–9 verbatim with only
+  the enumerated consumer set swapped to the single §38A consumer
+  `pcae.core.hpac_certification_coordinator`), the closed §42B five-role
+  allowlist by exact set membership (`hpac_lifecycle_terminator` / unknown /
+  wildcard / prefix → existing `operation_scope_invalid`), a single-use
+  `CertificationWriterHandle`, and §43A session/subject binding. OQ-1
+  (`human_authentication_proof_verifier` subject) resolved additively
+  (HPAC-PAWA-REQ-260): the certification proof-writer capability binds to the
+  reserved `proof_id`; `HumanAuthenticationProofStore.create_canonical` gains
+  one additive `certification_proof_subject` keyword and `resolve_canonical`
+  accepts `writer_subject ∈ {mechanism_id, proof_id}` — the fixture
+  `subject == mechanism_id` path is byte-unchanged and not weakened. NO
+  contract / schema / `PawaOperation` / `pawa_failure_code` / RHAMP-terminal /
+  companion-contract change; NO test-seal promotion; NO generic writer
+  authority; NO ceremony / YubiKey / PIN / APPROVE / makeCredential /
+  getAssertion. N-16-5 NOT CLOSED. Outcome target: H-3 REPAIRED / IV PENDING
+  (never self-VERIFIED).
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R`
   (alias **N16-5-H3-PAWA13-IV**) — **Independent Verification of HPAC-PAWA-001
   v1.3 Certification-Coordinator Authority Contract** (HPAC-PAWA-REQ-274).

@@ -168,10 +168,35 @@ class HumanAuthenticationProofStore:
         self,
         writer: HPACWriterCapability,
         proof: HumanAuthenticationProof,
+        *,
+        certification_proof_subject: Optional[str] = None,
     ) -> HumanAuthenticationProof:
+        """Create the canonical ``proof.json`` under the
+        ``human_authentication_proof_verifier`` role.
+
+        The fixture path binds the writer capability to ``proof.mechanism_id``
+        (its historical ``subject`` convention). HPAC-PAWA-001 v1.3 §33A /
+        §43A binds the *certification* proof-verifier capability to the
+        reserved ``proof_id`` instead (one verification transaction shared
+        with ``HPACLifecycleStore.record_verified_canonical``). Passing
+        ``certification_proof_subject`` — which the N-16-5 certification
+        coordinator does with the exact ``proof_id`` — checks the capability
+        against that subject. This is strictly ADDITIVE (HPAC-PAWA-REQ-260):
+        the fixture ``subject == mechanism_id`` path is unchanged and not
+        weakened; the override must equal ``proof.proof_id`` or the write is
+        refused."""
+
+        if certification_proof_subject is not None:
+            if certification_proof_subject != proof.proof_id:
+                raise HumanAuthenticationProofTrustError(
+                    "certification_proof_subject must equal proof.proof_id"
+                )
+            require_subject = certification_proof_subject
+        else:
+            require_subject = proof.mechanism_id
         try:
             self._authority.require_writer(
-                writer, self._WRITER_ROLE, subject=proof.mechanism_id
+                writer, self._WRITER_ROLE, subject=require_subject
             )
         except HPACAuthorityError as exc:
             raise HumanAuthenticationProofTrustError(str(exc)) from exc
@@ -181,7 +206,7 @@ class HumanAuthenticationProofStore:
             proof.proof_digest,
             writer,
             role=self._WRITER_ROLE,
-            subject=proof.mechanism_id,
+            subject=require_subject,
         )
         return created
 
@@ -210,12 +235,25 @@ class HumanAuthenticationProofStore:
         if proof is None:
             return None
         try:
-            return self._authority.resolve_record(
+            resolved = self._authority.resolve_record(
                 record=proof,
                 record_path=self._path(proof_id),
                 record_digest=proof.proof_digest,
                 roles=frozenset({self._WRITER_ROLE}),
-                subject=proof.mechanism_id,
+                subject=None,
             )
         except HPACAuthorityError as exc:
             raise HumanAuthenticationProofTrustError(str(exc)) from exc
+        # The canonical proof-writer capability's ``subject`` is either the
+        # ``mechanism_id`` (the fixture-path convention) or the reserved
+        # ``proof_id`` (HPAC-PAWA-001 v1.3 §33A / §43A — the N-16-5
+        # certification proof-verifier capability). Both are immutable,
+        # digest-bound, non-forgeable fields of *this exact* proof record, so
+        # accepting either is not a weakening: a forged provenance would have
+        # to name one of them, which requires a genuine
+        # ``human_authentication_proof_verifier`` capability bound to it.
+        if resolved.writer_subject not in {proof.mechanism_id, proof.proof_id}:
+            raise HumanAuthenticationProofTrustError(
+                "HPAC writer subject binding mismatch (not the proof's mechanism_id or proof_id)"
+            )
+        return resolved
