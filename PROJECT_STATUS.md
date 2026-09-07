@@ -2,6 +2,75 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-H3-IV**) — Independent Verification of the N-16-5 Production
+Certification Authority-Path Implementation Against HPAC-PAWA-001 v1.3 — H-3
+Repair. **STATUS: COMPLETE. H-3: INDEPENDENTLY VERIFIED. F-5: DEPLOYMENT
+VERIFIED HISTORICALLY — CURRENT CERTIFICATION READINESS NOT YET RECONFIRMED
+(real protected root absent on this host; live principal / credential /
+counter / gen-1 re-read deferred to N16-5-FINAL-CERT). N-16-5: NOT CLOSED.
+N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).** Governed
+verification-only phase — no `src/pcae` / contract / schema / dependency
+change. **V0 = `ef9a3c7b`. I_ENTRY = `74e52d5973` (independently derived,
+matches claimed I0).** HPAC-PAWA-001 v1.3 blob `9c816716` byte-identical at
+I_ENTRY and HEAD; `docs/contracts` + `schemas` + `pyproject.toml` diff since
+I_ENTRY EMPTY. Exact 4-file production diff reconstructed from immutable git
+(`scripts/hpac_certification_admin.py`,
+`src/pcae/core/hpac_certification_coordinator.py`,
+`src/pcae/core/hpac_protected_admin_writer.py`,
+`src/pcae/core/human_authentication_proof.py`) — EXPECTED == ACTUAL, no
+unexplained file; `hpac_foundation.py` byte-unchanged. VERIFIED: same
+`_PRODUCTION_WRITER_FACTORY_SEAL` trust root (no second seal / mint
+primitive); `certification_writer` dedicated with a closed single-consumer
+inventory (disjoint from the §36 set); §33 steps 1–9 shared verbatim; exact
+closed five-role allowlist (`in`-membership only; `hpac_lifecycle_terminator`
+/ wildcard / prefix DENY-verified); §33A fail-closed; §39A consumer-inventory
++ fixture-seam guards; private one-underscore seams non-authoritative and no
+`_mint_production_writer_capability` test seal required (`test_100`);
+`certification_proof_subject` a validated `== proof_id` binding (not caller
+authority); one-shot / session / subject binding + restart-dead seal;
+principal/credential currentness read from trusted store; challenge /
+assertion / proof / counter production paths; presentation-evidence writer
+stays outside the family; `verify_human_authentication(require_real_assurance=
+True)` remains the SOLE PRODUCTION `AuthenticatedHumanPrincipal` issuer and is
+not relaxed; actual Gate-5 path reached and the coordinator's import graph has
+no dispatch / adapter / runtime_authority / PB / Gate-6-10 module (terminates
+at the bounded Gate-5 assurance result); PB / policy walls; deterministic
+non-elevation; ordinary-actor non-authority; forged principal DENY-verified;
+NO new `PawaOperation` (6) / `pawa_failure_code` (21) / RHAMP terminal code /
+schema field / dependency. Guard reconciliation (predecessor's) independently
+verified widen-not-weaken: exact-filename additions + completed-predecessor
+point-in-time guards re-anchored to fixed SHAs (`90510428` / `67d542ef` /
+`a3b66561` / `e44becc9` / `74e52d59`, all ancestors of I_ENTRY); NO
+wildcard / glob / prefix; NO `def test_` renamed or removed; NO skip / xfail
+added (one `skipif(os.name != "posix")` platform guard only). Regression
+attribution A/B (worktree at I_ENTRY vs HEAD, 16-file reconciled guard set):
+**23 = 23 failed, identical sets, 0 attributable regressions** — all
+pre-existing point-in-time / blocking-reproduction / Python-3.14
+`object.__new__` guards, reproduced identically at I_ENTRY. Packaging verified
+structurally + import-graph (offline wheel build not performable — hatchling
+unavailable offline, environmental like predecessor F-2; the admin script is
+deliberately standalone / not wheel-packaged per §37/§38A/§85). Host-env
+distinction RESOLVED: real protected root ABSENT on this host, all mutation
+tests used disposable `tmp_path` PRODUCTION test-fixture roots — **0 live
+protected-root access, 0 live-state mutation, 0 makeCredential / getAssertion
+/ APPROVE / REJECT / YubiKey touch / FIDO2 PIN / real presentation evidence /
+real Gate-5**. Runtime not_implemented / Observed / observe / unavailable;
+0 plugins / 0 capabilities; first governed runtime external effect ABSENT /
+UNREACHABLE. Fresh independent IV suite
+`tests/test_phase_n16_5_h3_iv_independent_verification.py` 19/0 (does not
+import predecessor fixtures); predecessor N16-5-H3-IMPL suite reproduced
+106/0. Evidence `.pcae/certification/n16_5_h3_iv_independent_verification.json`;
+report `docs/PHASE_…_N16_5_H3_IV.md` COMPLETE. **Next (derived, NOT begun; own
+explicit human authorization + own human authentication; id recommended NOT
+reserved, never a reused completed certification id): N16-5-FINAL-CERT —
+Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5 Certification
+and Closure Adjudication.** REPORTING-UX-1 not repaired here (canonical phase
+ID remains authoritative). DELEGATED `.3` FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED — preserved.
+
+<details><summary>superseded — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R (N16-5-H3-IMPL)</summary>
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R
 (alias **N16-5-H3-IMPL**) — N-16-5 Production Certification Authority-Path
 Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair. **STATUS: COMPLETE.
@@ -82,6 +151,8 @@ authorization + human authentication; id NOT reserved) → then N16-5-FINAL-CERT
 (fresh CPIPC-valid successor id; the real-human / genuine-YubiKey N-16-5
 certification). N-16-6 / N-16-7 remain OPEN / UNTOUCHED; N-16-7 strictly last.
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
+</details>
 
 ---
 
