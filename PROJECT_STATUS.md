@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R
+(alias **N16-5-H3-IMPL**) — N-16-5 Production Certification Authority-Path
+Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair. **STATUS: IN PROGRESS.
+H-3: IMPLEMENTATION IN PROGRESS. H-3 CONTRACT: VERIFIED. F-5: DEPLOYMENT
+VERIFIED — CERTIFICATION BLOCKED. N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN /
+UNTOUCHED (N-16-7 strictly last).** Governed PRODUCTION IMPLEMENTATION phase.
+**I0 = `74e52d5973`.** HPAC-PAWA-001 v1.3 git blob `9c816716` frozen — must
+remain byte-unchanged (`docs/contracts` normative diff expected EMPTY). CPIPC:
+candidate = predecessor + exactly one `.1R`, same series (`149O`), same branch,
+strict order (`compare` = `less`), direct successor, unique, no active
+conflicting phase; canonical id == proposed id; alias `N16-5-H3-IMPL` is
+display-only; **NO CPIPC discrepancy**. Scope: implement the §37
+non-agent-importable fence's dedicated `certification_writer(...)` factory
+(distinct from `production_writer`; §33 steps 1–9 reused verbatim — only the
+enumerated consumer set swapped to the single §38A consumer
+`pcae.core.hpac_certification_coordinator`), the closed §42B five-role allowlist
+(`hpac_challenge_coordinator`, `hpac_assertion_recorder`,
+`human_authentication_proof_verifier`, `hpac_gate5_binder`,
+`hpac_rhamp_counter_state_verifier`) by **exact set membership**
+(`hpac_lifecycle_terminator` / unknown / wildcard / prefix →
+`operation_scope_invalid`, existing code #16), a single-use
+`CertificationWriterHandle`, §43A session/subject binding (subject = `proof_id`
+for the 4 lifecycle roles, `credential_id` for the counter role), the new
+`pcae.core.hpac_certification_coordinator` module (sole §38A consumer,
+orchestrator, retains capabilities internally), the standalone
+`scripts/hpac_certification_admin.py` entry, the §39A consumer-inventory guard
+and fixture-seam guard, reuse of the existing
+`mint_protected_presentation_evidence_writer` +
+`verify_human_authentication(require_real_assurance=True)` + real Gate 5, and a
+hard stop at the bounded Gate-5 assurance result (§41 / §68A / PAWA-INV-13).
+**NO** contract / schema / `PawaOperation` / `pawa_failure_code` /
+RHAMP-`terminal_reason_code` / companion-contract change; **NO** test-seal
+promotion; **NO** generic production writer authority; **NO** ceremony /
+YubiKey / PIN / APPROVE / makeCredential / getAssertion; **NO** mutation of the
+current `PrincipalRecord hp-8cee9b36b6784608ae48261af86289b8`, `CredentialRecord
+hpc-2e7bbfa0c1b2480ba84ab5792159179d`, counter state (gen 0), or generation-1
+protected-presentation deployment. Progress so far (committed): `a22f830e`
+phase-task open; `45693ecd` allowed-file zone; `12bb6d07` I0 + contract
+identity + CPIPC + reconstructed implementation delta map
+(`docs/PHASE_…_N16_5_H3_IMPL.md`); `5519faa4` `certification_writer` factory +
+§33A + `CertificationWriterHandle` + closed 5-role allowlist in
+`hpac_protected_admin_writer.py` (`_run_recognition_sequence` consumer set
+parameterised, §33 steps 1–9 verbatim); `0a194b13` OQ-1 additive
+proof-writer subject reconciliation (`create_canonical` +
+`certification_proof_subject` kwarg; `resolve_canonical` accepts
+`writer_subject ∈ {mechanism_id, proof_id}`; fixture path byte-unchanged).
+Remaining: `hpac_certification_coordinator` module + `scripts/…` entry + the
+≥100-item H-3 implementation test suite + §39A/fixture-seam guards + packaging /
+clean-install smoke + bounded regression + A/B attribution + governed
+finalization. **Outcome target: H-3 REPAIRED / IV PENDING (never
+self-VERIFIED); N-16-5 NOT CLOSED; derive but do not begin N16-5-H3-IV.**
+Runtime: Observed / observe / unavailable. Plugins 0. Capabilities 0. First
+governed runtime external effect: ABSENT / UNREACHABLE.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
+---
+
+### Superseded — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R
 (alias **N16-5-H3-PAWA13-IV**) — Independent Verification of HPAC-PAWA-001 v1.3
 Certification-Coordinator Authority Contract. **STATUS: HPAC-PAWA-001 v1.3 —
