@@ -285,28 +285,49 @@ contract IV**, not authored now (`HPAC-PAWA-REQ-273`).
 
 ## 11. Point-in-time guard reconciliation
 
-Mechanical maintenance only (`HPAC-PAWA-REQ-217` discipline; no `def test_`
-renamed / removed / skipped / xfailed):
+**Method (memory trap 11 / `HPAC-PAWA-REQ-217` discipline):** a 65-file guard-set
+was run at the phase-entry SHA `b2530066` and again at the reconciled HEAD; the
+FAILED node lists were `comm`-diffed. Candidate-only (attributable) failures
+were reconciled phase-aware — the authorized set widened by **exactly** the one
+`HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md` file, subset / `==`
+orientation kept, **no wildcard / glob / `fnmatch`**, **no `def test_` renamed,
+removed, or disabled**. Baseline-common failures (protected-root-exists and
+unrelated `src/pcae` point-in-time guards from later `.5R.2.1R…` micro-phases)
+were classified as pre-existing and **not** touched.
 
-- `…4r_2…::test_07_contract_identities_are_the_frozen_versions` — v1.2 header
-  requirement widened to `("# HPAC-PAWA-001 v1.2", "# HPAC-PAWA-001 v1.3")`.
-- `…4r_contract_reconciliation.py::test_32` — the "no normative contract byte
-  changed since `.30R.4R.1`" clause widened to allow the in-place v1.3 evolution
-  of the same PAWA document.
-- `…4r_contract_reconciliation.py::test_33` — the point-in-time count widened to
-  `(range(1,234) | range(1,276))`; the property under test (closed, sequential,
-  no gaps, no duplicates) is unchanged.
-- `…3_3r_decomposition_adjudication.py::test_rhamp_001_byte_unchanged_since_baseline_a`
-  — **pre-existing failure at H0** (stale from HPAC-PAWA-001 v1.2 / `.30R.4R`,
-  reproduced identically under `git stash`); reconciled to the guard's true
-  intent — RHAMP-001 itself byte-unchanged, later `docs/contracts` delta bounded
-  to the PAWA + PPA evolutions.
+**Result: 0 attributable functional regressions.** Guard-set at entry: 149
+failed / 2890 passed. Guard-set at reconciled HEAD: 146 failed / 2893 passed
+(3 pre-existing failures incidentally repaired; **zero** candidate-only
+remaining). All 146 residual failures reproduce identically at `b2530066`.
 
-Fresh suite `…v1_3_contract_reconciliation.py` 54/0; reconciled PAWA-adjacent
-suites (`…2a_1`, `…2a_3`, `…3_1`, `…3_3r`, `…3_4`, `…4_blocked`, `…4r_1`,
-`…4r_2`, `…4r`, `…30r_1`) 417/0 after reconciliation; targeted `-k "contract or
-hpac or pawa or rhamp or lifecycle or verifier or presentation or bootstrap"`
-sweep — see `.pcae` evidence.
+~24 "no normative contract change since `<baseline>`" guards across ~19 IV /
+repair suites were widened by the one PAWA file (e.g. `…3_1::test_87`,
+`…3_4::test_01`, `…30r_5::test_all_contracts_byte_unchanged_since_A` +
+parametrized case, `…4r_1::test_03`, `…5r_2_protected_presentation_interactive_election_repair::test_04`,
+the `…5r_2_1r_1r*` `f4` / `f6` / `f7` / `f8` / `f9` immutable-scope /
+host-mutation / evidence-guard suites, the two `contamination` suites, the two
+`ppa_deployment` / `ppa_registration` suites, `…privileged_ro_gen1_ppa_absence_f5_hold`).
+Three downstream **byte-freeze meta-guards** (`…f9_iv…::test_37` / `test_38`,
+`…f9_deployment_evidence_guard_repair::test_44`) were converted from byte-identity
+to **not-weakened** checks (`def test_` count non-decreasing; no dynamic-match
+helper / disabled-test token introduced), and the `batch013` / `privileged_ro`
+"only additions" guards were widened to allow later-phase modifications while
+still forbidding any test-function removal.
+
+Also reconciled: `…4r_2…::test_07_contract_identities_are_the_frozen_versions`
+(v1.2 header requirement widened to accept `# HPAC-PAWA-001 v1.3`);
+`…4r_contract_reconciliation::test_32` / `test_33` (contract-set + REQ-count
+`range(1,234) | range(1,276)`); `…3_3r::test_rhamp_001_byte_unchanged_since_baseline_a`
+(**pre-existing at H0**, stale from `.30R.4R` — reconciled to the guard's true
+intent: RHAMP-001 byte-unchanged, later `docs/contracts` delta bounded to the
+PAWA + PPA evolutions); `…5r_ctap2_pin_uv_repair::test_41` +
+`…5r_1_ctap2_pin_uv_repair_iv::test_19`.
+
+Fresh suite `…v1_3_contract_reconciliation.py` **54 / 0**; targeted affected
+suites (`…v1_3_contract_reconciliation`, `…4r_contract_reconciliation`,
+`…2a_3_v1_1_contract_freeze_iv`, `…3_1`, `…3_3r`, `…3_4`, `…4r_1`, `…4r_2`,
+`…ppa_deployment_state_iv`, `test_hpac_verifier`, `test_hpac_lifecycle`)
+**621 / 0**.
 
 ## 12. Required final verdicts
 

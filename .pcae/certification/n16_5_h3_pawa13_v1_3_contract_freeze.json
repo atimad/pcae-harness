@@ -116,12 +116,23 @@
     "kind": "static / read-only contract-text verification; no functional implementation test; no manufactured success evidence"
   },
   "point_in_time_guard_reconciliation": {
-    "discipline": "HPAC-PAWA-REQ-217 — mechanical maintenance; no def test_ renamed / removed / skipped / xfailed",
-    "reconciled": [
-      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv.py::test_07_contract_identities_are_the_frozen_versions",
-      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_contract_reconciliation.py::test_32_pawa_and_new_companion_are_only_contract_delta",
-      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_contract_reconciliation.py::test_33_requirement_numbering_is_closed_and_sequential",
-      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_3r_decomposition_adjudication.py::test_rhamp_001_byte_unchanged_since_baseline_a (pre-existing failure at H0, stale from v1.2 / .30R.4R, reproduced identically under git stash; reconciled to the guard's true intent)"
+    "discipline": "HPAC-PAWA-REQ-217 / memory trap 11 — phase-aware: widen authorized set by exactly the one PAWA file; subset/== orientation; no wildcard/glob/fnmatch; no def test_ renamed, removed, or disabled",
+    "method": "65-file guard-set run at phase-entry b2530066 and at reconciled HEAD; FAILED node lists comm-diffed",
+    "guardset_at_entry": {"failed": 149, "passed": 2890},
+    "guardset_at_reconciled_head": {"failed": 146, "passed": 2893},
+    "attributable_functional_regressions": 0,
+    "pre_existing_failures_incidentally_repaired": 3,
+    "residual_failures_all_reproduce_at_b2530066": true,
+    "count_guards_widened_by_the_one_pawa_file": "~24 across ~19 IV / repair suites",
+    "byte_freeze_meta_guards_converted_to_not_weakened": [
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_f9_iv_and_n16_5_clearance.py::test_37_f9_suite_unchanged",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_f9_iv_and_n16_5_clearance.py::test_38_owner_suite_unchanged_since_iv_entry",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_f9_deployment_evidence_guard_repair.py::test_44_f8_nodes_unchanged"
+    ],
+    "targeted_affected_suites": {"passed": 621, "failed": 0},
+    "fresh_v1_3_contract_suite": {"passed": 54, "failed": 0},
+    "pre_existing_at_h0_reconciled_to_true_intent": [
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_3r_decomposition_adjudication.py::test_rhamp_001_byte_unchanged_since_baseline_a"
     ]
   },
   "no_ceremony_no_mutation_attestation": {
