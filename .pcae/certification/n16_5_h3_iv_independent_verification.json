@@ -1,0 +1,208 @@
+{
+  "phase_alias": "N16-5-H3-IV",
+  "canonical_phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R",
+  "title": "Independent Verification of the N-16-5 Production Certification Authority-Path Implementation Against HPAC-PAWA-001 v1.3 -- H-3 Repair",
+  "cpipc": {
+    "predecessor": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R",
+    "candidate": "predecessor + exactly one .1R",
+    "same_series": true,
+    "same_branch": "main",
+    "strict_order": "less",
+    "direct_successor": true,
+    "unique": true,
+    "no_active_conflicting_phase": true,
+    "canonical_equals_proposed": true,
+    "alias_display_only": true,
+    "discrepancy": "NONE"
+  },
+  "shas": {
+    "V0_iv_phase_entry": "ef9a3c7b5e8a2b6f44850b057b73ee99ef682ebe",
+    "I_ENTRY_impl_phase_entry": "74e52d59738007c4b9f6dbeb28f83990ba82e9a8",
+    "I_FINAL_impl_last_commit": "ef9a3c7b5e8a2b6f44850b057b73ee99ef682ebe",
+    "impl_content_commits": ["12bb6d07", "5519faa4", "0a194b13", "af5c5952", "f8dfab4c", "0febf447", "df915e32", "1843095e", "7a5cca9a", "90ac45c5"]
+  },
+  "production_diff_I_ENTRY_to_HEAD": {
+    "expected_files": [
+      "scripts/hpac_certification_admin.py",
+      "src/pcae/core/hpac_certification_coordinator.py",
+      "src/pcae/core/hpac_protected_admin_writer.py",
+      "src/pcae/core/human_authentication_proof.py"
+    ],
+    "actual_files": [
+      "scripts/hpac_certification_admin.py",
+      "src/pcae/core/hpac_certification_coordinator.py",
+      "src/pcae/core/hpac_protected_admin_writer.py",
+      "src/pcae/core/human_authentication_proof.py"
+    ],
+    "match": "EXPECTED == ACTUAL",
+    "unexplained_production_file": "NONE",
+    "insertions": 1031,
+    "deletions": 6,
+    "hpac_foundation_py_touched": false
+  },
+  "contract_identity": {
+    "hpac_pawa_001_v1_3_blob_at_I_ENTRY": "9c816716bae2262831945ac24b1771cf79de4c55",
+    "hpac_pawa_001_v1_3_blob_at_HEAD": "9c816716bae2262831945ac24b1771cf79de4c55",
+    "hpac_pawa_001_v1_3": "BYTE-UNCHANGED",
+    "docs_contracts_diff_since_I_ENTRY": "EMPTY",
+    "schemas_diff_since_I_ENTRY": "EMPTY",
+    "pyproject_toml_diff_since_I_ENTRY": "EMPTY",
+    "hpac_001_rhamp_001_hbdc_001_hpac_ppa_001": "UNCHANGED"
+  },
+  "trust_root": {
+    "verdict": "EXISTING ROOT REUSED",
+    "seal_object": "_PRODUCTION_WRITER_FACTORY_SEAL (imported from hpac_foundation, shared with production_writer and mint_protected_presentation_evidence_writer)",
+    "second_trust_root_or_seal": "NONE",
+    "new_object_call_in_added_code": "NONE",
+    "mint_primitive": "_mint_production_writer_capability (unchanged; hpac_foundation.py byte-unchanged since I_ENTRY)",
+    "generic_production_writer_authority": "NOT INTRODUCED (HPACStoreAuthority.writer() still raises for every non-FIXTURE_NON_REAL class)"
+  },
+  "certification_writer_factory": {
+    "verdict": "INDEPENDENTLY VERIFIED",
+    "dedicated": true,
+    "distinct_from_production_writer": true,
+    "consumer_inventory": "CLOSED -- frozenset({'pcae.core.hpac_certification_coordinator'}); disjoint from AUTHORIZED_FACTORY_CONSUMERS",
+    "role_argument": "constrained to exact membership in the closed five-role allowlist before any mint",
+    "ss33_steps_1_9": "PRESERVED -- shared _run_recognition_sequence, only the enumerated consumer/test-consumer sets parameterised",
+    "ss33_callers": ["production_writer", "certification_writer"]
+  },
+  "five_role_allowlist": {
+    "verdict": "VERIFIED",
+    "set": ["hpac_challenge_coordinator", "hpac_assertion_recorder", "human_authentication_proof_verifier", "hpac_gate5_binder", "hpac_rhamp_counter_state_verifier"],
+    "assert_len_5_in_source": true,
+    "gate": "exact `in` / `not in` membership against CERTIFICATION_ROLE_ALLOWLIST; no startswith/endswith/match/search/fnmatch/regex",
+    "terminator_hpac_lifecycle_terminator": "DENY VERIFIED (explicit assert not-in + operation_scope_invalid #16)",
+    "unknown_wildcard_prefix_nearmiss": "DENY VERIFIED (operation_scope_invalid #16)"
+  },
+  "consumer_inventory_and_import_fence": {
+    "verdict": "CLOSED VERIFIED",
+    "coordinator_and_factory_symbol_in_cli_commands_agent": "ABSENT",
+    "only_caller_of_certification_writer": "src/pcae/core/hpac_certification_coordinator.py (plus the definition module)",
+    "admin_script": "scripts/hpac_certification_admin.py -- standalone, not a pcae CLI subcommand, not a console_scripts entry point",
+    "ss39a_guard_tests": "test_60 / test_61 / test_62 (predecessor suite) + test_iv30 / test_iv31 / test_iv32 (this IV) all green"
+  },
+  "test_only_seams": {
+    "verdict": "NON-AUTHORITY VERIFIED",
+    "seams": ["_protected_root", "_configured_agent_identity_source", "_topology_probe", "_caller_module"],
+    "disclosed": "one-leading-underscore keyword-only; ceremony_mode -> 'test-only' when any is set",
+    "guard": "_CERTIFICATION_TEST_CONSUMERS == frozenset({'test_phase_..._n16_5_h3_impl'}); a guard asserts no non-test module is a member and no non-test caller passes any seam",
+    "ambient_identity_and_caller_string": "insufficient -- test_18 / test_19 (predecessor) green",
+    "mint_production_writer_capability_test_seal_required_for_new_chain": "NO -- test_100 composes the full chain with no _mint_production_writer_capability / _PRODUCTION_WRITER_FACTORY_SEAL test seal"
+  },
+  "certification_proof_subject": {
+    "verdict": "NARROW BINDING VERIFIED",
+    "function": "HumanAuthenticationProofStore.create_canonical (additive keyword, HPAC-PAWA-REQ-260)",
+    "sole_caller": "hpac_certification_coordinator.CertificationSession.record_verified_proof (passes self.proof_id)",
+    "semantics": "if provided, must equal proof.proof_id else HumanAuthenticationProofTrustError; the fixture subject==mechanism_id path is byte-unchanged",
+    "resolve_canonical": "accepts writer_subject in {proof.mechanism_id, proof.proof_id} -- both digest-bound immutable fields of that same proof record",
+    "caller_controlled_authority": "NO"
+  },
+  "oq1_resolution": {
+    "verdict": "additive, within v1.3 subject-binding semantics -- no new normative semantics",
+    "multi_write": "proof-verifier capability minted _multi_write, spent once via authority.complete_multi_write after both writes + read-back (one verification transaction, §42B / §49A)"
+  },
+  "one_shot_session_subject": {
+    "one_shot": "VERIFIED -- CertificationWriterHandle._consumed + foundation _single_use/_spent; second consume -> capability_stale",
+    "double_layer_single_use": "VERIFIED -- non-multi-write spent on first record_write; multi-write spent by complete(); __reduce__ raises",
+    "session_binding": "VERIFIED -- consume() requires matching certification_session_id -> target_scope_invalid otherwise; a second certification_writer call re-runs the full §33A sequence (restart-dead seal)",
+    "subject_binding": "VERIFIED -- proof_id for the 4 lifecycle roles, credential_id for the counter role; wrong subject -> target_scope_invalid",
+    "remint_delegation_escalation": "DENIED VERIFIED",
+    "principal_credential_currentness": "VERIFIED -- _validate_certification_session_binding reads the canonical PrincipalRecord (active) + CredentialRecord (active, bound); revoked/unresolvable -> operation_scope_invalid"
+  },
+  "production_paths": {
+    "challenge": "VERIFIED -- HPACLifecycleStore.open_challenge_canonical via the recognized authority; forged challenge rejected (test_116 / test_iv covered)",
+    "assertion": "VERIFIED -- HPACLifecycleStore.record_assertion_canonical; recording != validity",
+    "proof": "VERIFIED -- HumanAuthenticationProofStore.create_canonical + HPACLifecycleStore.record_verified_canonical; forged proof rejected",
+    "counter": "VERIFIED -- HpacRhampCounterStateStore.apply_after_verification via verify_human_authentication; caller cannot supply ACCEPT (test_118)",
+    "presentation_evidence_writer": "OUTSIDE the five-role family; existing mint_protected_presentation_evidence_writer reused unchanged (test_115)",
+    "principal_issuer": "verify_human_authentication(require_real_assurance=True) remains the SOLE PRODUCTION AuthenticatedHumanPrincipal issuer; coordinator does not construct one and does not relax require_real_assurance",
+    "actual_gate5": "VERIFIED -- reach_gate5_assurance calls verify_human_authentication and returns the verifier-issued principal (bounded Gate-5 assurance result); no Gate-6+/adapter.dispatch/DispatchEnvelope in the call graph",
+    "gate5_effect_termination": "VERIFIED -- coordinator imports no dispatch/adapter/runtime_authority/permission_broker/gate6-10 module (AST import-graph, test_iv33)"
+  },
+  "walls": {
+    "deterministic_non_elevation": "VERIFIED -- test_101 / test_102 / test_110 / test_111; coordinator production status does not elevate authority_class",
+    "pb_wall": "VERIFIED -- coordinator imports/manufactures no PB permission; test_113",
+    "policy_wall": "VERIFIED -- no policy exception; test_113",
+    "ordinary_actor_non_authority": "VERIFIED -- launcher/helper/verifier/Gate/runtime/agent/CLI/plugin/test-fixture cannot acquire any of the five roles (test_122 / test_123 / test_iv22 / test_iv30)",
+    "forged_authenticated_human_principal": "DENY VERIFIED (test_48-class / object.__new__ forgery rejected at the real Gate-5 boundary; test_117)"
+  },
+  "regression_attribution": {
+    "method": "A/B -- worktree at I_ENTRY (74e52d59) vs HEAD, same 16-file reconciled guard set, comm-diff of FAILED node lists",
+    "A_failed": 23,
+    "B_failed": 23,
+    "candidate_only_regressions": 0,
+    "incidentally_repaired": "net 0 in this 16-file subset; predecessor recorded 3 pre-existing incidentally repaired across its wider 65-file set",
+    "classes": "point-in-time diff-scope guards (fixed baseline vs moving HEAD), blocking-reproduction guards from .1R.31/.1R.321 (documented pre-existing trust-foundation defect), and two Python-3.14 object.__new__ verifier guards -- all reproduce identically at I_ENTRY",
+    "def_test_renamed_or_removed": "NONE across all 18 predecessor-touched test files",
+    "skip_xfail_added": "NONE (one skipif(os.name != 'posix') platform guard in the new predecessor suite -- not a weakening)"
+  },
+  "guard_reconciliation": {
+    "verdict": "INDEPENDENTLY VERIFIED -- widen-not-weaken",
+    "pattern_a": "add the exact filename hpac_certification_coordinator.py (no wildcard/glob/prefix) to consumer-inventory allowlists it legitimately belongs in (it does import those modules and is non-agent-importable via its own §39A guard)",
+    "pattern_b": "re-anchor completed-predecessor point-in-time guards from moving HEAD to their own fixed phase-completion SHAs (90510428, 67d542ef, a3b66561, e44becc9, 74e52d59) -- all verified ancestors of I_ENTRY",
+    "wildcard_glob_prefix_broadening": "NONE"
+  },
+  "packaging": {
+    "verdict": "VERIFIED (structural + import-graph)",
+    "note": "an offline wheel build was NOT performable on this host (hatchling build backend unavailable offline -- environmental, not an IV defect, mirroring the predecessor F-2 posix_spawn class)",
+    "production_modules_in_package_tree": "all three under src/pcae/core/ -- included in any wheel",
+    "admin_script": "scripts/hpac_certification_admin.py intentionally NOT wheel-packaged (standalone, §37/§38A, mirrors hatp_certification_admin.py) -- §85 allowance recorded",
+    "coordinator_imports": "only pcae.core.* + stdlib; no tests/, no pytest (test_64 / test_iv34 green)"
+  },
+  "host_environment_distinction": {
+    "verdict": "RESOLVED",
+    "classification": "the predecessor implementation + this IV ran on a host where the real HPAC protected root is ABSENT; all mutation tests used disposable tmp_path-provisioned PRODUCTION test-fixture roots",
+    "live_protected_root_accessed": false,
+    "live_state_mutations": 0
+  },
+  "live_state_continuity": {
+    "verdict": "PRIOR VERIFIED ONLY -- current re-confirmation deferred to N16-5-FINAL-CERT",
+    "principal_hp_8cee9b36": "prior governed phases independently verified active/mechanism-neutral; not re-read this phase (protected root absent on this host)",
+    "credential_hpc_2e7bbfa0": "prior verified active/not-revoked/bound; not re-read this phase",
+    "counter": "prior verified generation 0 / last_accepted_meaningful 0 / last_observed_raw 0 / review_flag false; not mutated",
+    "generation_1_protected_presentation_deployment": "prior verified current/trusted; not re-read this phase"
+  },
+  "runtime": {
+    "status": "not_implemented",
+    "state": "Observed",
+    "maximum_capability": "observe",
+    "execution_availability": "unavailable",
+    "plugins": 0,
+    "capabilities": 0,
+    "first_governed_runtime_external_effect": "ABSENT / UNREACHABLE"
+  },
+  "boundaries": {
+    "makeCredential": 0,
+    "getAssertion": 0,
+    "protected_APPROVE": 0,
+    "protected_REJECT": 0,
+    "yubikey_touch": 0,
+    "fido2_pin": 0,
+    "real_presentation_evidence": 0,
+    "real_certification_challenge_against_live_credential": 0,
+    "real_authentication_proof_against_live_credential": 0,
+    "real_gate5_certification": 0,
+    "protected_root_writes": 0
+  },
+  "tests": {
+    "fresh_iv_suite": "tests/test_phase_n16_5_h3_iv_independent_verification.py -- 19 passed, 0 failed",
+    "predecessor_h3_impl_suite_reproduced": "106 passed, 0 failed",
+    "reconciled_guard_suites_16_files": "705 passed, 23 failed (0 attributable -- identical failure set at I_ENTRY), 3 skipped",
+    "targeted_k_regression": "1265 passed, 29 failed (all pre-existing point-in-time/blocking-reproduction guards from other completed phases)"
+  },
+  "verdicts": {
+    "H3": "INDEPENDENTLY VERIFIED",
+    "F5": "DEPLOYMENT VERIFIED HISTORICALLY -- CURRENT CERTIFICATION READINESS NOT YET RECONFIRMED (defer live principal/credential/counter/gen-1 re-read to N16-5-FINAL-CERT on the real host)",
+    "N16_5": "NOT CLOSED",
+    "N16_6": "OPEN / UNTOUCHED",
+    "N16_7": "OPEN / UNTOUCHED / STRICTLY LAST",
+    "REPORTING_UX_1": "not repaired here (canonical phase ID remains authoritative)",
+    "delegated_3_finalization_commit_push": "UNAUTHORIZED (preserved)"
+  },
+  "required_next_phase": {
+    "alias": "N16-5-FINAL-CERT",
+    "title": "Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5 Certification and Closure Adjudication -- After H-3 Production Authority Repair Verification",
+    "id": "fresh CPIPC-valid successor -- recommended NOT reserved, NOT begun; own explicit human authorization + own human authentication",
+    "reuses_completed_certification_id": false
+  }
+}

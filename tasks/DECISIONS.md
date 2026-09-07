@@ -4983,3 +4983,33 @@ verified in this phase.
   fixture `subject == mechanism_id` path (HPAC-PAWA-REQ-260 — an additive
   prerequisite, never a weakening). Recorded before implementing that leg.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.**
+
+## 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R (N16-5-H3-IV)
+
+- **H-3 INDEPENDENTLY VERIFIED.** Independent reconstruction of the exact
+  4-file production diff (`I_ENTRY 74e52d59 .. HEAD`) against byte-unchanged
+  HPAC-PAWA-001 v1.3: the `certification_writer` factory reuses the SAME
+  `_PRODUCTION_WRITER_FACTORY_SEAL` trust root (no second seal / mint
+  primitive; `hpac_foundation.py` byte-unchanged); §33 steps 1–9 shared
+  verbatim; closed exact five-role allowlist (terminator / wildcard / prefix
+  denied); closed single-consumer inventory; one-shot / session / subject
+  binding; `certification_proof_subject` is a validated equality binding, not
+  caller authority; `verify_human_authentication` remains the sole PRODUCTION
+  principal issuer; the coordinator reaches no runtime / dispatch / Gate-6+
+  path and terminates at the bounded Gate-5 assurance result.
+- **Regression attribution:** A/B (worktree at `I_ENTRY` vs HEAD) — 23 = 23
+  failed, identical sets, **0 attributable regressions**; all failures are
+  pre-existing point-in-time / blocking-reproduction / Python-3.14
+  `object.__new__` guards. No test function renamed or removed; no
+  skip / xfail added. Guard reconciliation is widen-not-weaken (exact
+  filename additions; completed-predecessor guards re-anchored to fixed SHAs).
+- **F-5:** DEPLOYMENT VERIFIED HISTORICALLY — current certification readiness
+  NOT YET RECONFIRMED (real protected root absent on this host; live
+  principal / credential / counter / gen-1 re-read deferred to
+  N16-5-FINAL-CERT). **N-16-5: NOT CLOSED.** N-16-6 / N-16-7 OPEN / UNTOUCHED.
+- Fresh independent IV suite `tests/test_phase_n16_5_h3_iv_independent_verification.py`
+  (19/0), predecessor suite reproduced (106/0). No `src/pcae` / contract /
+  schema / dependency change this phase.
+- **Next (derived, NOT begun):** N16-5-FINAL-CERT — fresh CPIPC-valid
+  successor id, own human authorization + own human authentication.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.**
