@@ -1,5 +1,58 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R`
+  (alias **N16-5-H3-PAWA13-IV**) — **Independent Verification of HPAC-PAWA-001
+  v1.3 Certification-Coordinator Authority Contract** (HPAC-PAWA-REQ-274).
+  Verification-only: no contract edit, no H-3 implementation, no ceremony, no
+  host mutation, N-16-5 stays open. **HPAC-PAWA-001 v1.3 — INDEPENDENTLY
+  VERIFIED. H-3 CONTRACT BLOCKER: INDEPENDENTLY VERIFIED RESOLVED; H-3
+  PRODUCTION IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED.** The v1.2 → v1.3
+  authority model was independently reconstructed from git history (v1.2
+  baseline blob `ab5b471d`; v1.3 freeze `76523d8c`; guard baseline `b2530066`),
+  primary-source production modules, and the referenced frozen contracts —
+  the predecessor freeze verdict was not inherited. V0 = `4977a2e5`. CPIPC
+  lineage: candidate = predecessor + exactly one `.1R`, same series/branch,
+  strict order, direct successor, unique, no active conflicting phase; the
+  CPIPC-derived canonical id is identical to the proposed id; the alias is
+  display-only. Verified: the normative delta (new §7B/§33A/§38A/§39A/§42B/§42C/
+  §43A/§44A/§49A/§68A/§80.3/§90.3; REQ-234–275; PAWA-INV-13; no unrelated
+  authority expansion); **MINOR (S-2)** survives the full §152 MAJOR-trigger
+  walk and matches the v1.2 §80.2 precedent; REQ ids `{1..275}` closed,
+  invariants 1..13; `REQ-087/088/223/224` v1.2 text preserved verbatim; the
+  closed five-role allowlist equals the positive-chain writer roles read from
+  `hpac_lifecycle.py` / `human_authentication_proof.py` /
+  `hpac_rhamp_counter_state.py`; `hpac_lifecycle_terminator` / unknown /
+  wildcard / prefix DENY; authorized factory-consumer set CLOSED; §33A reuses
+  §33 steps 1–9 verbatim (no conjunct weakened), fresh per call, fail-closed;
+  dedicated `certification_writer` factory, no generic writer authority, no
+  remint / delegation / escalation, non-bearer / process-local / restart-dead /
+  single-use per ceremony; §68A walls + PAWA-INV-13 (no APPROVE/UP/UV
+  manufacture, no deterministic elevation, no PB/policy/RE/runtime/execution
+  authority, Gate-5 termination, first external effect ABSENT/UNREACHABLE); no
+  new `PawaOperation` (6 members, primary source), no new `pawa_failure_code`
+  (21, every v1.3 denial maps via §42C), no new `terminal_reason_code` / no
+  RHAMP-001 edit (41 codes), no schema field / artifact, no companion contract;
+  cross-contract byte identity (HPAC-001 v2.1 / RHAMP-001 v1.0 / HBDC-001 v1.2 /
+  HPAC-PPA-001 v1.0 / schemas) and semantic consistency; mechanism / principal
+  neutrality; no instance ids frozen. Historical guard reconciliation
+  independently verified — `git diff b2530066..HEAD -- src/pcae scripts
+  pyproject.toml` empty, exactly one `docs/contracts` file changed, 25 test
+  files touched with **no `def test_` removed / renamed / disabled and no
+  skip/xfail added**, the point-in-time and 3 byte-freeze meta-guards
+  reconciled phase-aware and widened-not-weakened, 0 attributable functional
+  regressions. Fresh IV suite **74/0**. Prospective finding **REPORTING-UX-1**
+  (nonblocking): the `pcae architecture-status` current-phase display parser
+  does not recognise alias-enhanced `## Current Phase` formatting while
+  canonical phase identity and report trust remain correct — display-only, not
+  repaired here. No `src/pcae` / `scripts` / `pyproject.toml` / contract /
+  other-contract byte change; runtime `not_implemented` / `Observed` /
+  `observe` / `unavailable`, 0/0. Report
+  `docs/PHASE_…_1R_INDEPENDENT_VERIFICATION_HPAC_PAWA_001_V1_3_CERTIFICATION_COORDINATOR_AUTHORITY_CONTRACT.md`;
+  evidence `.pcae/certification/n16_5_h3_pawa13_v1_3_contract_iv.json`. Next =
+  N-16-5 H-3 production implementation (**N16-5-H3-IMPL**; derived, not begun) →
+  implementation IV (**N16-5-H3-IV**) → fresh final real-human /
+  genuine-YubiKey N-16-5 certification (**N16-5-FINAL-CERT**; fresh CPIPC-valid
+  successor id).
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R`
   (alias **N16-5-H3-PAWA13**) — **HPAC-PAWA-001 v1.2 → v1.3 Certification-Coordinator
   Authority Contract Reconciliation / Freeze**. Contract-only. **HPAC-PAWA-001
