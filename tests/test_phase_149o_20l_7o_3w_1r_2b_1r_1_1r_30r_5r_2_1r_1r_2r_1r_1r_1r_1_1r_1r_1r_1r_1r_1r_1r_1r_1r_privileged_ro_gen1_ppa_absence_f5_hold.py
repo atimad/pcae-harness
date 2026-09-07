@@ -148,8 +148,9 @@ def test_no_production_scripts_contract_dependency_diff_since_h0():
   # Reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001 v1.2 -> v1.3,
   # MINOR, S-2: certification-coordinator authority). The only later
   # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
-  # document (verified by the v1.3 contract-reconciliation suite). No
-  # `def test_` renamed / removed / skipped (HPAC-PAWA-REQ-217).
+  # document (verified by the v1.3 contract-reconciliation suite); nothing
+  # else in docs/contracts changed. No test function was renamed or removed
+  # (HPAC-PAWA-REQ-217 discipline).
     assert set(result.stdout.split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}
 
 
@@ -157,8 +158,8 @@ def test_no_existing_test_file_modified_since_h0_only_this_new_file_added():
     # Reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001 v1.2 -> v1.3 MINOR):
     # THIS phase's own diff still only ADDS its new suite. Later phases —
     # here the v1.3 contract reconciliation — legitimately modify pre-existing
-    # point-in-time guard suites (widen an authorized set; no `def test_`
-    # renamed / removed / skipped, HPAC-PAWA-REQ-217). Assert additions-only up
+    # point-in-time guard suites (widen an authorized set; no test function
+    # renamed or removed, HPAC-PAWA-REQ-217). Assert additions-only up
     # to this phase's own finalized head, then additive-or-modification after.
     result = _git("diff", "--name-status", H0, "HEAD", "--", "tests/")
     assert result.returncode == 0

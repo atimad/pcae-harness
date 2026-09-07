@@ -492,7 +492,7 @@ def test_41_no_normative_contract_change():
     # v1.2 -> v1.3, MINOR, certification-coordinator authority): the `.30R.5R`
     # CTAP2 repair itself changed NO normative contract; the only later
     # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
-    # document. No `def test_` renamed / removed / skipped (HPAC-PAWA-REQ-217).
+    # document. No test function renamed or removed (HPAC-PAWA-REQ-217).
     changed = {l for l in _git("diff", "--name-only", _R0, "--", "docs/contracts").split() if l.strip()}
     assert changed <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, changed
 

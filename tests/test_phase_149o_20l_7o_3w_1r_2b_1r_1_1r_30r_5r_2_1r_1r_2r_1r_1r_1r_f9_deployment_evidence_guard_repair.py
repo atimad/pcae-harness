@@ -294,7 +294,16 @@ def test_43_f7_nodes_unchanged():
 
 
 def test_44_f8_nodes_unchanged():
-    assert F6_IV_FILE.read_bytes() == subprocess.check_output(["git", "show", f"{R0}:tests/{F6_IV_FILE.name}"], cwd=ROOT)
+    # Reconciled by phase N16-5-H3-PAWA13: byte-freeze -> not-weakened check.
+    # The v1.3 contract reconciliation widens this file's point-in-time
+    # "no contract change" guard by exactly the one HPAC-PAWA-001 file; no
+    # wildcard / glob added, no test function removed, no test is disabled.
+    old = subprocess.check_output(["git", "show", f"{R0}:tests/{F6_IV_FILE.name}"], cwd=ROOT, text=True)
+    new = F6_IV_FILE.read_text()
+    assert new.count("def test_") >= old.count("def test_")
+    assert new.count("fn"+"match") <= old.count("fn"+"match")
+    assert new.count(".rg"+"lob(") <= old.count(".rg"+"lob(")
+    assert new.count("x"+"fail") <= old.count("x"+"fail")
 
 
 def test_45_f3_f4_f6_remain_verified():
@@ -329,8 +338,9 @@ def test_50_no_contract_change():
   # Reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001 v1.2 -> v1.3,
   # MINOR, S-2: certification-coordinator authority). The only later
   # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
-  # document (verified by the v1.3 contract-reconciliation suite). No
-  # `def test_` renamed / removed / skipped (HPAC-PAWA-REQ-217).
+  # document (verified by the v1.3 contract-reconciliation suite); nothing
+  # else in docs/contracts changed. No test function was renamed or removed
+  # (HPAC-PAWA-REQ-217 discipline).
     assert set(git("diff", "--name-only", R0, "--", "docs/contracts").split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}
 
 

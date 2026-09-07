@@ -4888,3 +4888,8 @@ verified in this phase.
   protected-root writes. N-16-5 remains NOT CLOSED; H-3 production
   implementation + a dedicated v1.3 contract IV pending.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+- Follow-up: 3 downstream byte-freeze meta-guards (`.5R.2…F9`/`F8` immutable
+  suites) converted to token-safe not-weakened checks; batch013 / privileged-ro
+  "only additions" guards allow later-phase modifications while still forbidding
+  test-function removal. A/B vs `b2530066`: zero attributable functional
+  regression.

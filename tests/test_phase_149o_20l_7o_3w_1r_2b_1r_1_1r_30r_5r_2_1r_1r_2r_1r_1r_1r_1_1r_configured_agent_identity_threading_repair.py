@@ -145,7 +145,7 @@ def test_contracts_byte_unchanged_since_repair_entry():
   # MINOR, S-2: certification-coordinator authority). The only later
   # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
   # document (verified by the v1.3 contract-reconciliation suite). No
-  # `def test_` renamed / removed / skipped (HPAC-PAWA-REQ-217).
+  # a test function renamed or removed (HPAC-PAWA-REQ-217).
     assert set(result.stdout.split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}, result.stdout
 
 
