@@ -24,7 +24,18 @@
   companion-contract change; NO test-seal promotion; NO generic writer
   authority; NO ceremony / YubiKey / PIN / APPROVE / makeCredential /
   getAssertion. N-16-5 NOT CLOSED. Outcome target: H-3 REPAIRED / IV PENDING
-  (never self-VERIFIED).
+  (never self-VERIFIED). Adds `pcae.core.hpac_certification_coordinator` (the
+  sole §38A consumer — `HpacCertificationCoordinator` / `CertificationSession`;
+  mints one single-use writer per role per ceremony and threads it into exactly
+  one existing canonical store call; the proof-verifier role is a `_multi_write`
+  verification transaction spent once; `reach_gate5_assurance` delegates to
+  `verify_human_authentication(require_real_assurance=True)` and terminates at
+  the bounded assurance result — it constructs no principal, manufactures no
+  Gate result, and touches no runtime), and the standalone bounded
+  `scripts/hpac_certification_admin.py` (`describe` / `status` only; no
+  approval-injection / PIN / `--fake-real` / arbitrary role / arbitrary
+  subcommand / `--protected-root`; the real ceremony is deferred to
+  **N16-5-FINAL-CERT**).
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R`
   (alias **N16-5-H3-PAWA13-IV**) — **Independent Verification of HPAC-PAWA-001

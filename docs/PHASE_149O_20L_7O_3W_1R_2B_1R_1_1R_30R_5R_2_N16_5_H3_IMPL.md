@@ -99,6 +99,25 @@ The full canonical `challenge → assertion → proof → verified → gate5-bin
   - Verified: `tests/test_hpac_verifier.py` + `tests/test_hpac_lifecycle.py` + `tests/test_hpac_authentication_proof.py` + the two verifier IV suites — 69 passed; the only 2 failures (`test_object_dunder_new_bypasses_trusted_construction_seal`, `test_forged_via_object_new_would_report_real_runtime_eligible`) are **pre-existing at I0** (reproduced identically under `git stash`), unrelated to this phase (a Py3.14 `__slots__`/`object.__new__` interaction), documented in the regression-attribution section.
   - Additive-only, per HPAC-PAWA-REQ-260. No contract change.
 
-## 7. Verdicts (to be completed at finalization)
+## 7. Implementation progress (running)
 
-_pending — see the canonical Phase Report and §115 verdict block._
+| Increment | Commit | State |
+|---|---|---|
+| Phase task open + allowed-file zone | `a22f830e`, `45693ecd` | done |
+| I0 + contract identity + CPIPC + delta map | `12bb6d07` | done |
+| `certification_writer` factory + §33A + `CertificationWriterHandle` + closed 5-role allowlist (`hpac_protected_admin_writer.py`) | `5519faa4` | done |
+| OQ-1 additive proof-writer subject reconciliation (`human_authentication_proof.py`) | `0a194b13` | done |
+| Prospective PROJECT_STATUS (`H-3: IMPLEMENTATION IN PROGRESS`) | `af5c5952` | done |
+| `pcae.core.hpac_certification_coordinator` (sole §38A consumer / orchestrator; `HpacCertificationCoordinator` + `CertificationSession`; retains capabilities internally; per-role mint→consume→one canonical store call; proof-verifier `_multi_write` + `handle.complete()`; `reach_gate5_assurance` → `verify_human_authentication(require_real_assurance=True)`; hard stop at the bounded assurance result) | _this increment_ | done |
+| `scripts/hpac_certification_admin.py` (bounded standalone entry: `describe` / `status` only; no `--approve` / `--yes` / `--pin` / `--fake-real` / arbitrary role / arbitrary subcommand / `--protected-root`; real ceremony explicitly deferred to N16-5-FINAL-CERT) | _this increment_ | done |
+| ≥100-item H-3 implementation test suite (§99) | — | pending |
+| §39A consumer-inventory guard + fixture-seam guard tests | — | pending |
+| packaging (`pyproject` wheel inclusion) + clean-install smoke (§54/§55) | — | pending |
+| bounded regression + Fast-Green A/B attribution (§100/§101) | — | pending |
+| contract / schema / dependency byte-identity checks (§102/§103) | — | pending |
+| runtime / host-state preservation verification (§104/§105) | — | pending |
+| PROJECT_STATUS + CHANGELOG final; governed finalization; N16-5-H3-IV successor derivation | — | pending |
+
+## 8. Verdicts (to be completed at finalization — §115 verdict block)
+
+_pending._
