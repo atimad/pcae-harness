@@ -10,7 +10,7 @@ N16-5-H3-PAWA13 HPAC-PAWA-001 v1.3 certification-coordinator authority contract 
 
 ## Status
 
-active
+done
 
 ## Mode
 
