@@ -1,5 +1,30 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R`
+  (N-16-5 production authority-path repair for real-human / genuine-YubiKey
+  certification — H-3 challenge / proof / lifecycle / counter / Gate-5
+  reachability) **BLOCKED — H-3 NOT REPAIRED; N-16-5 NOT CLOSED**.
+  Independently reproduced H-3 from primary source: the real N-16-5
+  certification chain needs PRODUCTION `HPACWriterCapability` for five
+  lifecycle roles (`hpac_challenge_coordinator`, `hpac_assertion_recorder`,
+  `human_authentication_proof_verifier`, `hpac_gate5_binder`,
+  `hpac_rhamp_counter_state_verifier`), none mintable by any production path.
+  Established that the smallest correct repair requires a normative
+  `HPAC-PAWA-001` v1.2→v1.3 contract change (a new authorized `PRODUCTION`
+  writer-factory-consumer category for a certification coordinator + a
+  five-role production mint path); frozen `HPAC-PAWA-REQ-087/088/223/224`
+  hold the consumer set closed and name verifier/Gates/runtime/agent/CLI/
+  plugins as unauthorized. Per the phase's FROZEN CONTRACT PRESERVATION
+  directive, finalized BLOCKED through canonical completion — no `src/pcae` /
+  `scripts` / `tests` / `docs/contracts` / dependency change, no ceremony, 0
+  protected-root writes, counter untouched (generation 0), runtime unchanged,
+  no first governed runtime external effect. F-5: DEPLOYMENT VERIFIED —
+  CERTIFICATION BLOCKED. N-16-6 / N-16-7 OPEN / UNTOUCHED. Next = the
+  `HPAC-PAWA-001` v1.3 Certification-Coordinator Authority Contract
+  Reconciliation / Freeze phase (derived, not begun) → H-3 implementation →
+  IV → fresh final certification. Evidence
+  `.pcae/certification/n16_5_h3_production_authority_repair_30r5r2_1r1r1r.json`.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1`
   (final real-human / genuine-YubiKey protected-presentation N-16-5
   certification and closure adjudication — retry after canonical production

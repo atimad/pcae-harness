@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R
+— N-16-5 Production Authority-Path Repair for Real-Human / Genuine-YubiKey
+Certification — H-3 Challenge / Proof / Lifecycle / Counter / Gate-5
+Reachability. **STATUS: BLOCKED. H-3: NOT REPAIRED. N-16-5: NOT CLOSED.**
+Authorized to repair H-3 (the real N-16-5 certification chain has no
+production authority path). The primary-source investigation was completed
+and **independently reproduced H-3** from `hpac_verifier.py` /
+`hpac_protected_admin_writer.py` / `hpac_foundation.py` / `hpac_lifecycle.py`
+/ `human_authentication_proof.py` / `hpac_rhamp_counter_state.py` /
+`protected_presentation.py`: the chain needs PRODUCTION `HPACWriterCapability`
+for five lifecycle roles — `hpac_challenge_coordinator`,
+`hpac_assertion_recorder`, `human_authentication_proof_verifier`,
+`hpac_gate5_binder`, `hpac_rhamp_counter_state_verifier` — none mintable by
+any production path (`HPACStoreAuthority.writer()` refuses all non-FIXTURE
+roles; `_mint_production_writer_capability` is seal-gated to
+`hpac_protected_admin_writer`, whose two mint sites cover only
+registry-admin / presentation-installer / evidence-writer roles;
+`production()` alone fails `_validate_production_boundary` as deployment owner
+unless `_configured_agent_identity` is bound, which happens only inside the
+factory §33 recognition sequence). The investigation then established that
+**the smallest correct repair requires a normative `HPAC-PAWA-001` v1.2→v1.3
+contract change**: a new authorized `PRODUCTION` writer-factory-consumer
+category for a certification coordinator + a production mint path for the five
+lifecycle roles. Frozen `HPAC-PAWA-REQ-087/088/223/224` enumerate a **closed**
+consumer set and state explicitly that *"the launcher, helper, presentation
+store, verifier, Gates, runtime, agent, CLI, and plugins remain
+unauthorized"*. Per this phase's own FROZEN CONTRACT PRESERVATION directive
+(*"If the repair cannot be made without contract change: STOP. Finalize
+BLOCKED. Recommend a contract-reconciliation phase."*), the phase is
+**finalized BLOCKED through canonical completion, not aborted**. NO `src/pcae`
+/ `scripts` / `tests` / `docs/contracts` / `pyproject.toml` / dependency
+change. NO ceremony (0 makeCredential / getAssertion / APPROVE / proof /
+challenge / Gate5 / principal). **0 protected-root writes.** Counter untouched
+(generation 0). Runtime unchanged (`not_implemented`/`Observed`/`observe`/
+`unavailable`, 0/0). No first governed runtime external effect. **N-16-5: NOT
+CLOSED. F-5: DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED.** N-16-6 / N-16-7
+OPEN / UNTOUCHED (N-16-7 strictly last). H0 = `3d1965b3`. Evidence
+`.pcae/certification/n16_5_h3_production_authority_repair_30r5r2_1r1r1r.json`;
+report `docs/PHASE_…_1R_N_16_5_H3_PRODUCTION_AUTHORITY_PATH_REPAIR_BLOCKED.md`.
+**Next = the `HPAC-PAWA-001` v1.3 Certification-Coordinator Authority Contract
+Reconciliation / Freeze phase** (derived, not begun) → then a dedicated H-3
+production implementation phase → then a dedicated IV phase → then a fresh
+final real-certification phase (re-run the predecessor certification phase
+unchanged; do not reuse a completed phase ID).
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1
 — Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5
 Certification and Closure Adjudication — Retry After Canonical Production
