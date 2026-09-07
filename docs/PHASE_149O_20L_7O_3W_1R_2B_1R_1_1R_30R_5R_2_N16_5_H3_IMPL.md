@@ -119,6 +119,51 @@ The full canonical `challenge → assertion → proof → verified → gate5-bin
 | runtime / host-state preservation verification (§104/§105) | — | pending |
 | PROJECT_STATUS + CHANGELOG final; governed finalization; N16-5-H3-IV successor derivation | — | pending |
 
-## 8. Verdicts (to be completed at finalization — §115 verdict block)
+## 8. Regression attribution (running — §100 / §101)
+
+**Fresh phase suite:** `tests/test_phase_…_n16_5_h3_impl.py` — **73 / 0**.
+
+**Targeted affected band** (`test_hpac_verifier` + `test_hpac_lifecycle` +
+`test_hpac_authentication_proof` + `.30R.3.1` + `.30R.3.4` + `.30R.3.5` +
+`.30R.5R.1` + `.30R.5R.2` contract-reconciliation + the v1.3 contract IV) —
+**466 passed, 6 failed**. All 6 are **point-in-time scope-fence guards from
+predecessor verification-only / contract phases** that assert "no `src/pcae`
+change / no certification production module exists yet" as of their own
+phase-entry SHA. They are **attributable to this phase's sanctioned
+implementation**, not regressions, and each is to be reconciled **phase-aware**
+(widen the authorized set by *exactly* this phase's file set —
+`hpac_protected_admin_writer.py`, `hpac_certification_coordinator.py`,
+`human_authentication_proof.py`, `scripts/hpac_certification_admin.py`,
+`tests/test_phase_…_n16_5_h3_impl.py` — subset/`==` orientation, NO
+wildcard/glob/fnmatch, NO `def test_` renamed/removed; memory trap 11/17):
+
+| Guard | Why it trips | Reconciliation |
+|---|---|---|
+| `test_hpac_verifier.py::test_runtime_authority_is_the_only_production_consumer_of_hpac_verifier_module` | the §38A coordinator now imports `verify_human_authentication` (contract REQ-247 **requires** the proof path to go through the verifier, never around it) | add `pcae.core.hpac_certification_coordinator` to the authorized-consumer set with an `N16-5-H3-IMPL` comment |
+| `.30R.3.1::test_42_no_agent_runtime_gate_plugin_consumer_of_the_factory` | the §38A coordinator imports `certification_writer` from the fence module (v1.3 §38A authorizes exactly this one consumer) | widen by the exact coordinator dotted-path; it is not an agent/runtime/gate/plugin |
+| `.30R.5R.2 contract-reconciliation::test_38_no_src_or_scripts_change_since_h0` | that phase was contract-only; H0 = `b2530066` | phase-aware: this implementation phase is the sanctioned src change; widen by the exact file set |
+| v1.3 contract IV::`test_01_v0_phase_entry_sha_resolves` | asserts `V0` is HEAD's ancestor with no src delta on that path shape | re-anchor / phase-aware widen |
+| v1.3 contract IV::`test_66_this_iv_edits_no_normative_contract_or_source` | the IV phase edited no source; this phase does | phase-aware: scope the guard to the IV phase's own commits |
+| v1.3 contract IV::`test_67_no_certification_production_module_exists` | explicitly asserted the module was not yet built | invert to `test_certification_production_module_exists_and_matches_ss38a` once built (this phase) |
+
+**Method for the reconciliation increment:** `git worktree add <wt> 74e52d59`;
+run the ~25-file guard band at I0 and at HEAD; `comm -23` the FAILED node lists;
+candidate-only = attributable → reconcile; baseline-common = pre-existing (do
+not repair). The two `test_hpac_verifier` `object.__new__` forgery failures
+(`test_object_dunder_new_bypasses_trusted_construction_seal`,
+`test_forged_via_object_new_would_report_real_runtime_eligible`) are
+**pre-existing at I0** (Py 3.14 `__slots__` interaction), reproduced under `git
+stash` — NOT attributable, NOT repaired here.
+
+## 9. Remaining work (as of commit `df915e32`)
+
+1. Guard reconciliation increment (the 6 attributable guards above; phase-aware; A/B worktree method).
+2. Test suite part 3 — deterministic non-elevation matrix (§57/§58), mixed non-real negatives (§59), PB/policy DENY dominance (§71/§72), challenge/proof/counter/principal forgery negatives (§66-§70), restart-dead (§94) — to ≥100 items (§99).
+3. Packaging: assert the coordinator ships in the wheel (`src/pcae/core/` — auto-included) and the standalone script is NOT a `console_scripts` entry (matching `scripts/hpac_protected_presentation_admin.py`); a clean-install smoke in a disposable venv (§54/§55).
+4. Contract / schema / dependency byte-identity final checks (§102/§103); `pcae runtime inspect` Observed/observe/unavailable, 0/0 (§73/§104/§105); host-state preservation (current principal / credential / counter / gen-1 presentation deployment — repository-only phase, 0 protected-root writes).
+5. PROJECT_STATUS + CHANGELOG final; derive (not begin) the `N16-5-H3-IV` successor (`docs/…` + `tasks/DECISIONS.md`).
+6. Governed finalization: `.pcae/phase-completion-metadata.json` + `.pcae/phase-completion-report.md` (memory `project-phase-completion-procedure`; implementation-phase metadata shape — `tests_added_or_updated` first token = count; `fast_green` = targeted `N passed, 0 failed`); `pcae phase complete … --stage-pending-report` → `pcae push` (**pushes to origin/main — confirm with the operator**) → re-run `pcae phase complete` (no flag) to promote + fire the Telegram notification; `origin/main..HEAD = 0`.
+
+## 10. Verdicts (to be completed at finalization — §115 verdict block)
 
 _pending._
