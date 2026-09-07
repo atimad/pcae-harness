@@ -163,4 +163,4 @@ human authentication; IDs recommended, **NOT reserved**.
 
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
 
-Governed push and canonical report promotion pending.
+Governed push COMPLETE (origin/main advanced to this phase's HEAD). Canonical report promoted to COMPLETE.
