@@ -4893,3 +4893,58 @@ verified in this phase.
   "only additions" guards allow later-phase modifications while still forbidding
   test-function removal. A/B vs `b2530066`: zero attributable functional
   regression.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R (alias N16-5-H3-PAWA13-IV) — Independent Verification of HPAC-PAWA-001 v1.3
+
+- **Verdict: HPAC-PAWA-001 v1.3 — INDEPENDENTLY VERIFIED. H-3 CONTRACT BLOCKER:
+  INDEPENDENTLY VERIFIED RESOLVED. H-3 PRODUCTION IMPLEMENTATION: PENDING.
+  N-16-5: NOT CLOSED.**
+- Independence: the v1.2 → v1.3 authority model was reconstructed from git
+  history (v1.2 baseline blob `ab5b471d`, byte-identical to guard baseline
+  `b2530066`; v1.3 freeze `76523d8c`), primary-source production modules, and
+  the referenced frozen contracts — the predecessor freeze verdict and its
+  tests were NOT taken as normative. V0 = `4977a2e5`.
+- CPIPC: the proposed canonical id = predecessor + exactly one `.1R`; same
+  series/branch, strict order, direct successor, unique, no active conflicting
+  phase; the CPIPC-derived id is identical to the proposed id; alias
+  display-only.
+- MINOR (S-2) independently survives the full §152 MAJOR-trigger walk (all 10
+  triggers rebutted) and matches the v1.2 §80.2 `configure_presentation_mechanism`
+  precedent under the §153 permit; REQ-154 not violated (the §42 capability's
+  scope is unchanged; the §96 edit is a bounded carve-out for a separate new
+  family).
+- The closed five-role allowlist equals the positive-chain writer roles read
+  independently from `hpac_lifecycle.py` / `human_authentication_proof.py` /
+  `hpac_rhamp_counter_state.py`; `hpac_lifecycle_terminator` (negative terminal
+  states only) / unknown / wildcard / prefix DENY; the authorized
+  factory-consumer set stays CLOSED (one enumerated category, no glob/prefix).
+- §33A reuses §33 steps 1–9 verbatim as required conjuncts (no trust conjunct
+  missing or weakened; step 9 tightened by the exact §38A check; mint/audit
+  specialized), fresh per call, one atomic unit, fail-closed at every step.
+- No new `PawaOperation` (6 members, primary source), no new `pawa_failure_code`
+  (21; every v1.3 denial maps via §42C; REQ-254 escape hatch), no new
+  `terminal_reason_code` / no RHAMP-001 edit (41), no schema field / artifact,
+  no companion contract. Cross-contract byte identity + semantic consistency
+  verified.
+- Historical guard reconciliation independently verified: `git diff
+  b2530066..HEAD -- src/pcae scripts pyproject.toml` empty; exactly one
+  `docs/contracts` file changed; 25 test files touched with **no `def test_`
+  removed / renamed / disabled and no skip/xfail added**; the point-in-time and
+  3 byte-freeze meta-guards reconciled phase-aware and widened-not-weakened;
+  0 attributable functional regressions.
+- **REPORTING-UX-1 (nonblocking):** `pcae architecture-status` current-phase
+  display parser does not recognise the alias-enhanced `## Current Phase`
+  formatting; canonical phase identity and report trust are correct; DISPLAY /
+  PARSER LIMITATION ONLY; not repaired here — a separate reporting-UX phase is
+  recommended. Observations O-1 / O-2 recorded, neither a defect.
+- This IV changed NO `src/pcae` / `scripts` / `pyproject.toml` / contract /
+  other-contract byte; no host mutation; 0 protected-root writes; 0 ceremony
+  operations; runtime `not_implemented` / `Observed` / `observe` /
+  `unavailable`, 0/0; first governed runtime external effect ABSENT /
+  UNREACHABLE.
+- Fresh IV suite 74/0.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.**
+- Next = N-16-5 H-3 production implementation (**N16-5-H3-IMPL**; this IV's
+  direct `.1R` successor; derived, NOT begun; own human auth) → implementation
+  IV (**N16-5-H3-IV**) → fresh final real-human / genuine-YubiKey N-16-5
+  certification (**N16-5-FINAL-CERT**; fresh CPIPC-valid successor id).
