@@ -33,6 +33,7 @@ from __future__ import annotations
 import hashlib
 import inspect
 import os
+import re
 import stat
 import sys
 from dataclasses import dataclass
@@ -93,6 +94,14 @@ __all__ = [
     "AUTHORIZED_FACTORY_CONSUMERS",
     "PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS",
     "mint_protected_presentation_evidence_writer",
+    # HPAC-PAWA-001 v1.3 §33A / §38A / §42B — the dedicated certification
+    # writer factory (distinct from the §36 production_writer factory).
+    "CERTIFICATION_FACTORY_CONSUMERS",
+    "CERTIFICATION_ROLE_ALLOWLIST",
+    "CERTIFICATION_LIFECYCLE_ROLES",
+    "CERTIFICATION_COUNTER_ROLE",
+    "CertificationWriterHandle",
+    "certification_writer",
 ]
 
 
@@ -496,7 +505,16 @@ def _run_recognition_sequence(
     configured_agent_identity_source,
     caller_module: str,
     topology_probe: Optional["TopologyProbe"],
+    authorized_consumers: "frozenset[str]" = AUTHORIZED_FACTORY_CONSUMERS,
+    test_consumers: "frozenset[str]" = _TEST_FACTORY_CONSUMERS,
 ) -> _RecognizedAnchor:
+    # §33 step 9 is the authorized-factory-consumer check (§32). The step
+    # itself — the check, its position, its ``unauthorized_factory_consumer``
+    # code — is verbatim for every factory; only the *enumerated set* it
+    # checks against is per-factory (the §36 administrative-mutation factory
+    # vs. the v1.3 §33A ``certification_writer`` factory, whose enumerated
+    # set is the single §38A consumer). No wildcard / prefix / glob for
+    # either set (PAWA-INV-9). HPAC-PAWA-REQ-235.
     if topology_probe is not None:
         effective_write_access = topology_probe.effective_write_access
         ancestor_chain_safe = topology_probe.ancestor_chain_safe
@@ -673,8 +691,8 @@ def _run_recognition_sequence(
         _positive_write_probe(authority_dir)
 
         # STEP 9 — the calling module is an authorized factory consumer.
-        if caller_module not in AUTHORIZED_FACTORY_CONSUMERS and caller_module not in _TEST_FACTORY_CONSUMERS:
-            raise PawaError("unauthorized_factory_consumer", f"{caller_module!r} is not an enumerated consumer (§38)")
+        if caller_module not in authorized_consumers and caller_module not in test_consumers:
+            raise PawaError("unauthorized_factory_consumer", f"{caller_module!r} is not an enumerated consumer (§38 / §38A)")
 
         return _RecognizedAnchor(
             authority=authority,
@@ -1612,3 +1630,367 @@ def mint_protected_presentation_evidence_writer(
         )
     except HPACAuthorityError as exc:
         raise PawaError("internal_fail_closed", f"evidence-writer mint refused: {exc}")
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# HPAC-PAWA-001 v1.3 §33A / §38A / §42B / §49A — the dedicated
+# ``certification_writer`` factory. DISTINCT from the §36 ``production_writer``
+# administrative-mutation factory: a separate symbol, its own recognition
+# entry, its own closed consumer inventory, its own closed role allowlist.
+# It reuses the §33 steps 1–9 verbatim (via ``_run_recognition_sequence``,
+# only the enumerated consumer set swapped), the same
+# ``_PRODUCTION_WRITER_FACTORY_SEAL`` mint trust root, the same
+# ``HPACWriterCapability`` type, and the same single-use / non-bearer /
+# process-local / restart-dead semantics (§45–§49, §49A). It introduces
+# NO new ``PawaOperation``, NO new ``pawa_failure_code``, NO schema, NO
+# generic string-addressable role escalation, NO caller-controlled generic
+# writer. HPAC-PAWA-REQ-234..268, PAWA-INV-13.
+# ─────────────────────────────────────────────────────────────────────────
+
+#: §38A (HPAC-PAWA-REQ-239) — the EXACT enumerated certification-writer
+#: consumer inventory: the one bounded N-16-5 real-human-authentication
+#: certification coordinator. No launcher, helper, presentation store,
+#: verifier, Gate, gate coordinator, runtime, agent, CLI, or plugin. No
+#: wildcard / prefix / glob / fnmatch (PAWA-INV-9). Any new consumer fails
+#: the §39A guard until explicitly added here AND the contract is amended by
+#: a new governed evolution.
+CERTIFICATION_FACTORY_CONSUMERS = frozenset({"pcae.core.hpac_certification_coordinator"})
+
+#: A disclosed, explicit **test-only** certification-consumer allowlist
+#: (§16 seam, HPAC-PAWA-REQ-166 / HPAC-PAWA-REQ-265). Exact module names,
+#: never a prefix. A guard test asserts no non-test module is a member.
+_CERTIFICATION_TEST_CONSUMERS = frozenset(
+    {
+        "test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_n16_5_h3_impl",
+    }
+)
+
+#: §42B (HPAC-PAWA-REQ-246) — the CLOSED five-role certification-lifecycle
+#: writer allowlist, EXACTLY. Independently revalidated against primary
+#: source: ``HPACLifecycleStore._GENESIS_WRITER_ROLE`` /
+#: ``_ASSERTION_WRITER_ROLE`` / ``_VERIFIED_WRITER_ROLE`` / ``_BOUND_WRITER_ROLE``
+#: and ``hpac_rhamp_counter_state.COUNTER_STATE_VERIFIER_ROLE``.
+#: ``HPACLifecycleStore._TERMINAL_WRITER_ROLE`` ("hpac_lifecycle_terminator",
+#: negative terminal states only) is **explicitly NOT** a member. No
+#: wildcard, no prefix, no fnmatch, no arbitrary role argument.
+CERTIFICATION_LIFECYCLE_ROLES = (
+    "hpac_challenge_coordinator",
+    "hpac_assertion_recorder",
+    "human_authentication_proof_verifier",
+    "hpac_gate5_binder",
+)
+CERTIFICATION_COUNTER_ROLE = "hpac_rhamp_counter_state_verifier"
+CERTIFICATION_ROLE_ALLOWLIST = frozenset(CERTIFICATION_LIFECYCLE_ROLES + (CERTIFICATION_COUNTER_ROLE,))
+assert len(CERTIFICATION_ROLE_ALLOWLIST) == 5
+#: The role explicitly denied even though it is a real lifecycle writer role
+#: (defence-in-depth readability; the allowlist membership check already
+#: rejects it — this is only to make the intent legible and testable).
+_CERTIFICATION_DENIED_TERMINATOR_ROLE = "hpac_lifecycle_terminator"
+assert _CERTIFICATION_DENIED_TERMINATOR_ROLE not in CERTIFICATION_ROLE_ALLOWLIST
+
+#: The proof-verifier role performs one bounded verification transaction —
+#: two canonical writes (``HumanAuthenticationProofStore.create_canonical``
+#: → ``proof.json`` and ``HPACLifecycleStore.record_verified_canonical`` →
+#: ``STATE_PROOF_VERIFIED``) that §42B / §49A treat as **one** verification
+#: lifecycle. It is minted ``_multi_write`` and spent once by the coordinator
+#: via ``authority.complete_multi_write`` after both writes + read-back.
+#: Every other role performs exactly one canonical write and is minted as an
+#: ordinary single-use (spend-on-first-write) capability.
+_CERTIFICATION_MULTI_WRITE_ROLES = frozenset({"human_authentication_proof_verifier"})
+
+_CERTIFICATION_ISSUER = "pcae.core.hpac_protected_admin_writer.certification_writer/1.3"
+
+
+class CertificationWriterHandle:
+    """A single-use, role- and session-scoped handle around one
+    ``PRODUCTION`` certification-lifecycle ``HPACWriterCapability`` (§42B /
+    §49A). The wrapped capability is ``_single_use`` at the foundation layer;
+    this handle additionally refuses a second ``.consume()`` at the factory
+    layer with ``capability_stale`` and refuses a mismatched
+    role / session / subject with ``target_scope_invalid``.
+
+    FACTORY ≠ CONSUMER, CONSUMER ≠ MINTER (§15 / HPAC-PAWA-REQ-250): the
+    handle exposes no remint / delegate / convert-to-generic / serialise /
+    reissue path. ``__reduce__`` raises. A second ``certification_writer``
+    call re-runs the full §33A sequence.
+    """
+
+    __slots__ = (
+        "_capability",
+        "_authority",
+        "role",
+        "certification_session_id",
+        "subject",
+        "principal_id",
+        "credential_id",
+        "proof_id",
+        "multi_write",
+        "operation_id",
+        "anchor_id",
+        "installation_id",
+        "descriptor_generation",
+        "_consumed",
+    )
+
+    def __init__(
+        self,
+        *,
+        capability: HPACWriterCapability,
+        authority: HPACStoreAuthority,
+        role: str,
+        certification_session_id: str,
+        subject: str,
+        principal_id: str,
+        credential_id: str,
+        proof_id: Optional[str],
+        multi_write: bool,
+        operation_id: str,
+        anchor_id: str,
+        installation_id: str,
+        descriptor_generation: int,
+    ) -> None:
+        self._capability = capability
+        self._authority = authority
+        self.role = role
+        self.certification_session_id = certification_session_id
+        self.subject = subject
+        self.principal_id = principal_id
+        self.credential_id = credential_id
+        self.proof_id = proof_id
+        self.multi_write = multi_write
+        self.operation_id = operation_id
+        self.anchor_id = anchor_id
+        self.installation_id = installation_id
+        self.descriptor_generation = descriptor_generation
+        self._consumed = False
+
+    def __reduce__(self):
+        raise TypeError("CertificationWriterHandle is process-local and non-serializable")
+
+    @property
+    def authority(self) -> HPACStoreAuthority:
+        return self._authority
+
+    def consume(
+        self,
+        role: str,
+        *,
+        certification_session_id: str,
+        subject: str,
+    ) -> HPACWriterCapability:
+        """Hand the wrapped one-shot capability to the exact canonical store
+        call it was minted for. A second call, a wrong role, a wrong
+        session, or a wrong subject fails closed."""
+
+        if self._consumed or getattr(self._capability, "_spent", True):
+            raise PawaError("capability_stale", "this certification writer has already been used")
+        if role != self.role:
+            raise PawaError("target_scope_invalid", f"handle bound to role {self.role!r}, used for {role!r}")
+        if certification_session_id != self.certification_session_id:
+            raise PawaError("target_scope_invalid", "handle bound to a different certification_session_id")
+        if subject != self.subject:
+            raise PawaError("target_scope_invalid", "handle bound to a different subject")
+        if not self.multi_write:
+            self._consumed = True
+        return self._capability
+
+    def complete(self) -> None:
+        """Spend a ``_multi_write`` proof-verifier capability exactly once,
+        after both of its bounded writes + read-back (§49A). A non-multi-write
+        handle is already spent by its single ``record_write``."""
+
+        if not self.multi_write:
+            return
+        if self._consumed:
+            raise PawaError("capability_stale", "this certification writer has already been completed")
+        self._consumed = True
+        try:
+            self._authority.complete_multi_write(self._capability)
+        except HPACAuthorityError as exc:
+            raise PawaError("capability_stale", f"multi-write completion refused: {exc}")
+
+
+def _validate_certification_inputs(
+    role: object,
+    certification_session_id: object,
+    principal_id: object,
+    credential_id: object,
+    proof_id: object,
+) -> "tuple[str, str, str, str, Optional[str]]":
+    # §42B / §42C (HPAC-PAWA-REQ-246/252) — role ∉ allowlist (incl.
+    # ``hpac_lifecycle_terminator``, a wildcard, a prefix, an arbitrary
+    # string) → ``operation_scope_invalid`` (#16). EXACT set membership;
+    # no ``startswith`` / glob / fnmatch / regex family recognition.
+    if not isinstance(role, str) or role not in CERTIFICATION_ROLE_ALLOWLIST:
+        raise PawaError(
+            "operation_scope_invalid",
+            f"{role!r} is not a member of the closed §42B certification role allowlist",
+        )
+
+    def _req(value: object, name: str) -> str:
+        # §33A step 3 (HPAC-PAWA-REQ-236.3) — a nonempty string; an explicit
+        # ``None`` / empty / whitespace / non-str bypass → ``operation_scope_invalid``.
+        if not isinstance(value, str) or not value.strip():
+            raise PawaError("operation_scope_invalid", f"{name} must be a non-empty string")
+        return value
+
+    sid = _req(certification_session_id, "certification_session_id")
+    pid = _req(principal_id, "principal_id")
+    cid = _req(credential_id, "credential_id")
+    # Every certification role is bound into one ceremony identified by its
+    # reserved ``proof_id`` (§43A / HPAC-PAWA-REQ-256 — reserved before the
+    # ceremony, exactly as §100 reserves an enrollment-transaction id). It is
+    # the ``subject`` for the four lifecycle roles and the session anchor for
+    # the counter role (whose ``subject`` is the ``credential_id``).
+    pf = _req(proof_id, "proof_id")
+    if not re.fullmatch(r"hap-[0-9a-f]{32}", pf):
+        raise PawaError("operation_scope_invalid", "proof_id does not match the reserved hap- grammar")
+    return role, sid, pid, cid, pf
+
+
+def _validate_certification_session_binding(
+    authority: HPACStoreAuthority,
+    *,
+    principal_id: str,
+    credential_id: str,
+) -> None:
+    """§33A step 3 (HPAC-PAWA-REQ-236.3 / §42C HPAC-PAWA-REQ-252) — the
+    target ``principal_id`` SHALL resolve to an **active, not-revoked**
+    ``PrincipalRecord`` (the canonical record is mechanism-neutral by
+    construction — HPAC-REQ-013 has no mechanism field), and the target
+    ``credential_id`` SHALL resolve to an **active, not-revoked**
+    ``CredentialRecord`` **bound to that principal**. Any failure →
+    ``operation_scope_invalid``. This is a pure protected-store read; it
+    mints nothing and writes nothing."""
+
+    from pcae.core.human_principal_registry import HumanPrincipalRegistryStore
+
+    try:
+        registry = HumanPrincipalRegistryStore(authority)
+        principal = registry.resolve_principal(principal_id)
+        credential = registry.resolve_credential(credential_id)
+    except Exception as exc:  # noqa: BLE001 — fail-closed read boundary (§0)
+        raise PawaError("operation_scope_invalid", f"certification target resolution failed: {type(exc).__name__}: {exc}")
+    if principal is None or getattr(principal, "status", None) != "active":
+        raise PawaError("operation_scope_invalid", "certification target principal is unresolvable or not active")
+    if credential is None or getattr(credential, "status", None) != "active":
+        raise PawaError("operation_scope_invalid", "certification target credential is unresolvable or not active")
+    if credential.principal_id != principal_id:
+        raise PawaError("operation_scope_invalid", "certification target credential is not bound to the target principal")
+
+
+def certification_writer(
+    role: str,
+    *,
+    certification_session_id: str,
+    principal_id: str,
+    credential_id: str,
+    proof_id: Optional[str] = None,
+    _protected_root: Optional[Path] = None,
+    _configured_agent_identity_source=None,
+    _topology_probe: Optional["TopologyProbe"] = None,
+    _caller_module: Optional[str] = None,
+) -> CertificationWriterHandle:
+    """§33A (HPAC-PAWA-REQ-234..238) — mint exactly one process-local,
+    single-use, restart-dead ``PRODUCTION`` certification-lifecycle
+    ``HPACWriterCapability`` (§42B) after a fresh, complete §33 recognition
+    sequence (steps 1–9 verbatim) plus the certification-specific
+    consumer / role-allowlist / session-binding / mint / audit steps.
+
+    Runs fresh on every call — no result is cached (HPAC-PAWA-REQ-237).
+    ``HPACStoreAuthority.writer(role)`` still ``raise``s for every
+    non-``FIXTURE_NON_REAL`` class (HPAC-PAWA-REQ-092 unchanged); this is not
+    a generic ``production_writer`` and takes no caller-controlled generic
+    role.
+
+    ``_protected_root`` / ``_configured_agent_identity_source`` /
+    ``_topology_probe`` / ``_caller_module`` are the disclosed test-only
+    seams (§72/§73 / HPAC-PAWA-REQ-166); a guard test asserts no non-test
+    module passes any of them and that the only production caller is the
+    §38A consumer's §33A path.
+
+    Raises :class:`PawaError` (code ∈ :data:`PAWA_FAILURE_CODES`, unchanged
+    21-value taxonomy) on any failure; mints nothing on any failure
+    (HPAC-PAWA-REQ-238, fail-closed).
+    """
+
+    caller_module = _detect_caller_module(_caller_module)
+    role, sid, pid, cid, pf = _validate_certification_inputs(
+        role, certification_session_id, principal_id, credential_id, proof_id
+    )
+
+    recognized = _run_recognition_sequence(
+        protected_root=_protected_root,
+        configured_agent_identity_source=_configured_agent_identity_source,
+        caller_module=caller_module,
+        topology_probe=_topology_probe,
+        authorized_consumers=CERTIFICATION_FACTORY_CONSUMERS,
+        test_consumers=_CERTIFICATION_TEST_CONSUMERS,
+    )
+
+    # §33A additional step 1 (HPAC-PAWA-REQ-236.1) — restate the exact §38A
+    # consumer check explicitly (defence in depth; step 9 above already
+    # enforced it against the certification set).
+    if caller_module not in CERTIFICATION_FACTORY_CONSUMERS and caller_module not in _CERTIFICATION_TEST_CONSUMERS:
+        raise PawaError("unauthorized_factory_consumer", f"{caller_module!r} is not the §38A certification consumer")
+
+    # §33A additional step 3 — certification-session context binding, keyed
+    # off the recognized PRODUCTION authority (a protected-store read only).
+    _validate_certification_session_binding(recognized.authority, principal_id=pid, credential_id=cid)
+
+    # STEP 10 — bind the configured-agent identity, then mint (identical
+    # trust root and seal discipline as ``production_writer`` — §36 / §41).
+    recognized.authority._bind_configured_agent_identity(
+        (recognized.configured_agent.uid, recognized.configured_agent.gids),
+        _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+    )
+    is_multi = role in _CERTIFICATION_MULTI_WRITE_ROLES
+    subject = cid if role == CERTIFICATION_COUNTER_ROLE else pf
+    try:
+        capability = recognized.authority._mint_production_writer_capability(
+            role,
+            subject,
+            _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+            multi_write=is_multi,
+        )
+    except HPACAuthorityError as exc:
+        raise PawaError("internal_fail_closed", f"certification mint refused: {exc}")
+
+    operation_id = new_operation_id()
+    handle = CertificationWriterHandle(
+        capability=capability,
+        authority=recognized.authority,
+        role=role,
+        certification_session_id=sid,
+        subject=subject,
+        principal_id=pid,
+        credential_id=cid,
+        proof_id=pf,
+        multi_write=is_multi,
+        operation_id=operation_id,
+        anchor_id=recognized.anchor_id,
+        installation_id=recognized.installation_id,
+        descriptor_generation=recognized.generation,
+    )
+
+    # §42B / §55 (HPAC-PAWA-REQ-246/251) — the issuance audit event. The
+    # role / certification_session_id / proof_id / ceremony phase are
+    # recorded as NON-AUTHORITATIVE facts (never capability fields, never the
+    # seal). No new schema; the existing HPAC-PAWA-ISSUANCE-EVIDENCE/1.0
+    # ``operation`` / ``context_annotation`` fields carry them.
+    _record_issuance_evidence(
+        recognized.root,
+        operation_id=operation_id,
+        operation=f"certification_lifecycle_writer:{role}",
+        anchor_id=recognized.anchor_id,
+        installation_id=recognized.installation_id,
+        descriptor_generation=recognized.generation,
+        protected_root_identity=recognized.live_root_identity,
+        target_principal_id=pid,
+        target_credential_id=cid,
+        enrollment_transaction_id=None,
+        result="issued",
+        capability_identifier="hpaw-cert-" + hashlib.sha256(operation_id.encode()).hexdigest()[:32],
+        context_annotation=f"certification_session={sid};role={role};proof_id={pf};phase=issue",
+    )
+    return handle

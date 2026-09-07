@@ -4948,3 +4948,38 @@ verified in this phase.
   direct `.1R` successor; derived, NOT begun; own human auth) → implementation
   IV (**N16-5-H3-IV**) → fresh final real-human / genuine-YubiKey N-16-5
   certification (**N16-5-FINAL-CERT**; fresh CPIPC-valid successor id).
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R (N16-5-H3-IMPL) — decisions
+
+- **I0 = `74e52d59738007c4b9f6dbeb28f83990ba82e9a8`.** HPAC-PAWA-001 v1.3 git
+  blob `9c816716bae2262831945ac24b1771cf79de4c55` — frozen; must remain
+  byte-unchanged (`docs/contracts` normative diff expected EMPTY).
+- **CPIPC:** candidate = predecessor + exactly one `.1R`; same series (`149O`),
+  same branch, strict order (`compare` = `less`), direct successor, unique, no
+  active conflicting phase. Canonical id == proposed id; alias `N16-5-H3-IMPL`
+  is display-only. NO CPIPC discrepancy.
+- **`certification_writer` factory shape:** a DISTINCT symbol in
+  `hpac_protected_admin_writer.py` (the same non-agent-importable §37 module as
+  `production_writer`), NOT a new `PawaOperation`, NOT a generic
+  string-addressable role. `_run_recognition_sequence` is parameterised by the
+  *enumerated consumer set only* — §33 steps 1–9 stay verbatim; the
+  certification factory checks against `CERTIFICATION_FACTORY_CONSUMERS`
+  (`{pcae.core.hpac_certification_coordinator}`) instead of
+  `AUTHORIZED_FACTORY_CONSUMERS`. Closed 5-role allowlist by exact set
+  membership (no `startswith`/glob/fnmatch); `hpac_lifecycle_terminator` and any
+  other role → `operation_scope_invalid` (existing code #16). One-shot
+  `CertificationWriterHandle`; subject = `proof_id` for the 4 lifecycle roles,
+  `credential_id` for `hpac_rhamp_counter_state_verifier`.
+- **OQ-1 resolution — `human_authentication_proof_verifier` subject.**
+  `HumanAuthenticationProofStore.create_canonical` currently checks
+  `require_writer(subject == proof.mechanism_id)`; `record_verified_canonical`
+  checks `subject == proof_id`; §33A REQ-236.4 / §43A REQ-255 fix the
+  certification capability subject as `proof_id`. Resolution: the proof-verifier
+  certification capability is minted `_multi_write` bound to `proof_id` (its two
+  writes — `proof.json` + `STATE_PROOF_VERIFIED` — are one verification
+  transaction under §42B / §49A), and `create_canonical` gains a narrow ADDITIVE
+  keyword (`certification_proof_subject`) so the certification path checks the
+  capability against `proof_id` without changing or weakening the existing
+  fixture `subject == mechanism_id` path (HPAC-PAWA-REQ-260 — an additive
+  prerequisite, never a weakening). Recorded before implementing that leg.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.**
