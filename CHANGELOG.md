@@ -35,7 +35,15 @@
   `scripts/hpac_certification_admin.py` (`describe` / `status` only; no
   approval-injection / PIN / `--fake-real` / arbitrary role / arbitrary
   subcommand / `--protected-root`; the real ceremony is deferred to
-  **N16-5-FINAL-CERT**).
+  **N16-5-FINAL-CERT**). Test suite part 1: 69/0 —
+  `tests/test_phase_…_n16_5_h3_impl.py` covers contract-identity freezes,
+  §33A recognition, the closed 5-role allowlist (terminator / unknown /
+  wildcard / prefix / near-miss all → `operation_scope_invalid`),
+  ambient-identity insufficiency, one-shot + wrong-role/session/subject
+  denial, forgery, no-remint/escalation, §43A session/subject binding
+  (unresolvable / revoked / cross-principal credential → deny), the §39A
+  import-fence + fixture-seam guards, the admin-script boundary, and
+  disposable-root host-state preservation.
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R`
   (alias **N16-5-H3-PAWA13-IV**) — **Independent Verification of HPAC-PAWA-001
