@@ -83,6 +83,7 @@
 
 ## Completed
 
+- N16-5-H3-IV independent verification (20260907-1816-n16-5-h3-iv-independent-verification)
 - Idle post-N16-5-H3-PAWA13-IV (20260907-1446-idle-post-n16-5-h3-pawa13-iv)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R N16-5-H3-PAWA13 HPAC-PAWA-001 v1.3 freeze (20260907-1203-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-n16-5-h3-pawa13-hpac-pawa-001-v1-3-freeze)
 - N16-5-H3-PAWA13 HPAC-PAWA-001 v1.3 certification-coordinator authority contract reconciliation/freeze (20260907-1046-n16-5-h3-pawa13-hpac-pawa-001-v1-3-certification-coordinator-authority-contract-reconciliation-freeze)
