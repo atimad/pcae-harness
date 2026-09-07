@@ -219,6 +219,96 @@ threading phases that were already failing at I0.
 5. PROJECT_STATUS + CHANGELOG final; derive (not begin) the `N16-5-H3-IV` successor (`docs/…` + `tasks/DECISIONS.md`).
 6. Governed finalization: `.pcae/phase-completion-metadata.json` + `.pcae/phase-completion-report.md` (memory `project-phase-completion-procedure`; implementation-phase metadata shape — `tests_added_or_updated` first token = count; `fast_green` = targeted `N passed, 0 failed`); `pcae phase complete … --stage-pending-report` → `pcae push` (**pushes to origin/main — confirm with the operator**) → re-run `pcae phase complete` (no flag) to promote + fire the Telegram notification; `origin/main..HEAD = 0`.
 
-## 10. Verdicts (to be completed at finalization — §115 verdict block)
+## 9A. Final identity / runtime / host-state (§102–§105, §73, §11)
 
-_pending._
+- **`git diff --name-only 74e52d59 HEAD -- docs/contracts schemas pyproject.toml` → EMPTY.** HPAC-PAWA-001 v1.3 (`9c816716`), HPAC-PPA-001 v1.0 (`3832eb92`), HUMAN_PRINCIPAL_AUTHENTICATION (`16509b6b`), RHAMP-001 v1.0 (`ef218e99`), HUMAN_APPROVAL_TRUSTED_PROVENANCE (`79af6e95`) — all byte-unchanged since I0.
+- `src/pcae/core/hpac_pawa_schemas.py` blob `a41d9272` byte-unchanged (no PAWA / PPA descriptor / current-generation schema change).
+- `PawaOperation` = **6** members (unchanged); `PAWA_FAILURE_CODES` = **21** (unchanged); RHAMP `TerminalReasonCode` = **41** (unchanged); `ISSUANCE_EVIDENCE_FIELDS` = 15 (no `certification` field). No new `pawa_failure_code`, no new `terminal_reason_code`, no new `PawaOperation`, no companion contract.
+- **Production diff since I0 = exactly the 4 intended files** (§80 — INTENDED == ACTUAL): `src/pcae/core/hpac_protected_admin_writer.py` (+§33A `certification_writer` + `CertificationWriterHandle` + closed 5-role allowlist + parameterised `_run_recognition_sequence` consumer set), `src/pcae/core/hpac_certification_coordinator.py` (NEW §38A consumer), `src/pcae/core/human_authentication_proof.py` (OQ-1 additive `certification_proof_subject` + `resolve_canonical` `{mechanism_id | proof_id}`), `scripts/hpac_certification_admin.py` (NEW bounded entry). `hpac_foundation.py` / `hpac_lifecycle.py` / `hpac_verifier.py` allowed but **NOT touched** (the additive spent-flag / single-use / one-ceremony semantics were satisfied by the existing `HPACWriterCapability._single_use` / `_multi_write` / `_mark_spent` / registry mechanics — HPAC-PAWA-REQ-260, no type change required). `pyproject.toml` dependency set UNCHANGED (no third-party dependency added).
+- **`pcae runtime inspect`:** `not_implemented` / `Observed` / `unavailable`; **0 plugins, 0 capabilities**; Permission Broker `execution_unavailable`; governance posture `non-executing`. Unchanged.
+- **Host-state preservation:** this phase is repository code only. The real `<HPAC_PROTECTED_ROOT>` was never accessed (it does not exist on this host — `scripts/hpac_certification_admin.py status` confirms absent). Every test mutation used a disposable provisioned root under `tmp_path`. Therefore: **protected-root writes = 0; credential-store / principal-store / counter-store writes = 0; `PrincipalRecord hp-8cee9b36b6784608ae48261af86289b8` UNCHANGED; `CredentialRecord hpc-2e7bbfa0c1b2480ba84ab5792159179d` UNCHANGED; counter state (generation 0) UNCHANGED; generation-1 protected-presentation deployment UNCHANGED.**
+- **Real-interaction audit — all ZERO:** `makeCredential` 0; `getAssertion` 0; protected APPROVE 0; protected REJECT 0; YubiKey touch 0; FIDO2 PIN prompt 0; real presentation evidence 0; real production challenge 0; real production authentication proof against live credentials 0; Gate-5 real certification 0. The end-to-end `test_100` uses `DeterministicCtap2Provider` + `_test_decision_source="APPROVE"` + an in-process launch shim against a disposable root — an **IV-style software observation**, correctly marked NON-CEREMONY; it proves PRODUCTION-class reachability, not real assurance.
+- **First governed runtime external effect: ABSENT / UNREACHABLE.** No `adapter.dispatch`, no `DispatchEnvelope` execution, no Gate 6–10 traversal, no runtime capability/plugin registration.
+- **Regression (§101):** targeted affected suites — **674 passed, 0 failed** (the single `test_production_file_allowlist_matches_frozen_phase_matrix` failure is **pre-existing at I0**, reproduced in the `74e52d59` worktree — a stale `.1R.17` runtime-authority frozen-matrix check unrelated to this phase; deselected for the metadata `fast_green` field, documented here). Fresh phase suite `tests/test_phase_…_n16_5_h3_impl.py`: **106 / 0**. Guard-band A/B (§8A): I0 67 → HEAD 58 failed, **0 attributable code regression**. No skip/xfail introduced; no `def test_` renamed/removed/disabled.
+
+## 10. §115 verdict block
+
+| Field | Verdict |
+|---|---|
+| PHASE ALIAS | N16-5-H3-IMPL |
+| CANONICAL PHASE ID | `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R` |
+| CPIPC DISCREPANCY | NONE — canonical id == proposed id; alias display-only |
+| I0 | `74e52d59738007c4b9f6dbeb28f83990ba82e9a8` |
+| HPAC-PAWA-001 v1.3 | **UNCHANGED** (blob `9c816716`) |
+| HPAC-PAWA-001 v1.3 IV | VERIFIED PREREQUISITE (predecessor N16-5-H3-PAWA13-IV) |
+| PRE-IMPLEMENTATION H-3 | CONTRACT VERIFIED — IMPLEMENTATION PENDING |
+| CERTIFICATION FACTORY | **IMPLEMENTED** — `hpac_protected_admin_writer.certification_writer(...)`, distinct from `production_writer` |
+| CERTIFICATION ENTRY BOUNDARY | `pcae.core.hpac_certification_coordinator.HpacCertificationCoordinator` (sole §38A consumer), reached only from `scripts/hpac_certification_admin.py` |
+| §37 NON-AGENT-IMPORTABLE FENCE | **IMPLEMENTED** — factory in the existing §37 module; coordinator + script off every agent/cli/runtime/gate/plugin import path (§39A guards) |
+| §33A RECOGNITION | **IMPLEMENTED** — reuses §33 steps 1–9 via the shared `_run_recognition_sequence` (only the enumerated consumer set swapped) + certification consumer / role-allowlist / session-binding / mint / audit; fresh per call; one atomic unit; fail-closed |
+| §33 STEPS 1–9 | **PRESERVED** — verbatim, shared code path |
+| CERTIFICATION CONSUMER INVENTORY | **ENFORCED** — `CERTIFICATION_FACTORY_CONSUMERS = {pcae.core.hpac_certification_coordinator}`; §39A guard: only caller of `certification_writer` is the coordinator |
+| CERTIFICATION ROLE ALLOWLIST | `{hpac_challenge_coordinator, hpac_assertion_recorder, human_authentication_proof_verifier, hpac_gate5_binder, hpac_rhamp_counter_state_verifier}` — exact set membership |
+| TERMINATOR | **DENIED VERIFIED** (`hpac_lifecycle_terminator` → `operation_scope_invalid`) |
+| UNKNOWN ROLE | **DENIED VERIFIED** |
+| WILDCARD / PREFIX / NEAR-MISS | **DENIED VERIFIED** |
+| GENERIC PRODUCTION WRITER AUTHORITY | **NOT INTRODUCED** — `HPACStoreAuthority.writer()` still raises; no caller-controlled generic role; no new public mint |
+| ONE-SHOT / SPENT SEMANTICS | **IMPLEMENTED** — `CertificationWriterHandle` (factory layer) + `HPACWriterCapability._single_use`/`_spent` (foundation layer); second consume → `capability_stale` |
+| ONE-CEREMONY / SESSION BINDING | **IMPLEMENTED** — capability bound to `(role, subject, certification_session_id)`; cross-session → `target_scope_invalid` |
+| SUBJECT BINDING | **IMPLEMENTED** — `proof_id` for the 4 lifecycle roles, `credential_id` for the counter role; wrong principal/credential/proof → deny |
+| REMINT / DELEGATION / ROLE ESCALATION | **DENIED** — handle exposes no remint/delegate/convert/serialise; second `certification_writer` re-runs full §33A |
+| PRODUCTION CHALLENGE PATH | **IMPLEMENTED** — `CertificationSession.open_challenge` → `HPACLifecycleStore.open_challenge_canonical` (STATE_CHALLENGE_CREATED); no arbitrary trusted-challenge API |
+| PRODUCTION ASSERTION-RECORDING PATH | **IMPLEMENTED** — `record_assertion` → `record_assertion_canonical` (STATE_ASSERTION_RECEIVED); recording ≠ validity |
+| PRODUCTION AUTHENTICATION-PROOF PATH | **IMPLEMENTED** — `record_verified_proof` → `HumanAuthenticationProofStore.create_canonical` + `HPACLifecycleStore.record_verified_canonical` (one `_multi_write` verification transaction, spent once) |
+| PRODUCTION RHAMP COUNTER-VERIFICATION PATH | **IMPLEMENTED** — counter writer minted; consumed inside `verify_human_authentication` → `HpacRhampCounterStateStore.apply_after_verification` on an accepted canonical decision only |
+| PRODUCTION `require_real_assurance` REACHABILITY | **IMPLEMENTED** — `reach_gate5_assurance` → `verify_human_authentication(require_real_assurance=True)`; `test_100` reaches a PRODUCTION `AuthenticatedHumanPrincipal` with NO test seal |
+| PRODUCTION GATE-5 REACHABILITY | **IMPLEMENTED** — the `hpac_gate5_binder` write produces the canonical `STATE_PROOF_VERIFIED_AND_BOUND` sequence-3 artifact (`test_100` asserts `resolve_gate5_binding_event` present); the actual Gate-5 implementation is unchanged and consumes it |
+| PRESENTATION EVIDENCE WRITER | **EXISTING BOUNDARY REUSED** — `mint_protected_presentation_evidence_writer` unchanged; outside the 5-role family |
+| TEST-ONLY SEAL REQUIRED | **NO** — the chain composes through the new `certification_writer` boundary; the disclosed one-underscore keyword-only seams (`_protected_root`/`_configured_agent_identity_source`/`_topology_probe`/`_caller_module`) are the only test injection points and a guard asserts no non-test module passes them |
+| ORDINARY LAUNCHER / HELPER / VERIFIER / GATE / RUNTIME / AGENT / CLI / PLUGIN | **UNAUTHORIZED VERIFIED** — 10 actor modules parametrised → `unauthorized_factory_consumer` |
+| DETERMINISTIC AUTH CAN ELEVATE | **NO** — `_REAL_ELIGIBLE_MECHANISM_IDS` unchanged; the joint check stays in the verifier |
+| DETERMINISTIC PRESENTATION CAN ELEVATE | **NO** — `_REAL_PRESENTATION_MECHANISM_ID` check unchanged; the coordinator does not relax `require_real_assurance` |
+| PB WALL / POLICY WALL | **PRESERVED** — the certification family excludes a PB permission / policy exception / RE result / runtime capability / `DispatchEnvelope`; the coordinator imports no PB / policy / runtime-dispatch module |
+| GATE-5 EFFECT TERMINATION | **VERIFIED** — `reach_gate5_assurance` returns the verifier-issued principal and stops; no Gate 6+ / dispatch / effect call |
+| PACKAGE / CLEAN-INSTALL PATH | **VERIFIED** — wheel carries the coordinator; fresh venv imports it with no `pytest`/`tests` dependency; `certification_writer` reachable; runtime unavailable |
+| CURRENT PRINCIPAL / CREDENTIAL / COUNTER / GEN-1 PRESENTATION DEPLOYMENT | **UNCHANGED** (real protected root never accessed) |
+| REAL CEREMONY | **NOT PERFORMED** |
+| **H-3** | **REPAIRED / IV PENDING** |
+| **F-5** | **DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED PENDING H-3 IV** |
+| **N-16-5** | **NOT CLOSED** |
+| **N-16-6 / N-16-7** | **OPEN / UNTOUCHED** (N-16-7 strictly last) |
+| RUNTIME | Observed / observe / unavailable |
+| FIRST GOVERNED RUNTIME EXTERNAL EFFECT | **ABSENT / UNREACHABLE** |
+
+### §106 H-3 REPAIRED / IV PENDING — all 25 criteria satisfied
+
+1 v1.3 byte-unchanged ✓ · 2 dedicated factory exists ✓ · 3 §33A fail-closed ✓ · 4 exact five-role allowlist ✓ · 5 terminator/unknown/wildcard/prefix denied ✓ · 6 one-shot / session binding ✓ · 7 trusted-construction / non-bearer preserved ✓ · 8 no remint/delegation/escalation ✓ · 9 challenge issuance reachable ✓ · 10 assertion recording reachable ✓ · 11 authentication-proof issuance reachable ✓ · 12 RHAMP counter transition reachable ✓ · 13 `require_real_assurance` production path mechanically reachable ✓ · 14 actual Gate-5 sequence-3 artifact reachable ✓ · 15 terminates before external effect ✓ · 16 no test-only seal required ✓ · 17 ordinary actors cannot obtain authority ✓ · 18 deterministic inputs cannot elevate ✓ · 19 PB/policy walls remain ✓ · 20 packaging / clean-install includes the full path ✓ · 21 real principal/credential/counter/deployment unchanged ✓ · 22 no ceremony ✓ · 23 runtime Observed/observe/unavailable ✓ · 24 all H-3 tests pass (106/0) ✓ · 25 no unresolved implementation blocker ✓.
+
+## 11. Required successor (§109 / §110 — DERIVED, NOT BEGUN)
+
+**Alias:** N16-5-H3-IV — *Independent Verification of the N-16-5 Production
+Certification Authority-Path Implementation Against HPAC-PAWA-001 v1.3 — H-3
+Repair.*
+
+**Expected canonical id:** this phase's id + exactly one `.1R` —
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R`
+(CPIPC-derive and confirm at IV open; id recommended, **NOT reserved**; own
+explicit human authorization; own human authentication).
+
+**IV scope (§110):** independently reconstruct the exact implementation diff
+(4 files) from primary source and the installed wheel; verify compliance with
+v1.3 §33A/§38A/§39A/§42B/§42C/§43A/§49A/§68A; the `certification_writer` trust
+root (same `_PRODUCTION_WRITER_FACTORY_SEAL` mint, no second trust root); §33A
+recognition (steps 1–9 verbatim, fail-closed); the exact five-role
+restrictions; one-shot / session / subject binding; the §39A consumer
+inventory + fixture-seam guard; **no test-seal dependency**; the production
+challenge / assertion / proof / counter / verifier-issuance / actual-Gate-5
+paths; wrong-binding / replay / forgery negatives; ordinary-actor
+non-authority; package clean-install reachability; no deterministic elevation;
+no runtime / effect reachability; the current real principal/credential/counter/
+deployment unchanged; the guard reconciliation (widen-not-weaken, no test
+weakening). Only after the IV succeeds may a fresh final real-human /
+genuine-YubiKey N-16-5 certification (**N16-5-FINAL-CERT**, a fresh CPIPC-valid
+successor id — never a reused completed certification id) proceed.
+**N-16-6 / N-16-7 remain OPEN / UNTOUCHED and out of scope; N-16-7 strictly
+last.** `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.

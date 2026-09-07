@@ -4,10 +4,11 @@
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R
 (alias **N16-5-H3-IMPL**) — N-16-5 Production Certification Authority-Path
-Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair. **STATUS: IN PROGRESS.
-H-3: IMPLEMENTATION IN PROGRESS. H-3 CONTRACT: VERIFIED. F-5: DEPLOYMENT
-VERIFIED — CERTIFICATION BLOCKED. N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN /
-UNTOUCHED (N-16-7 strictly last).** Governed PRODUCTION IMPLEMENTATION phase.
+Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair. **STATUS: COMPLETE.
+H-3: REPAIRED / IV PENDING (never self-VERIFIED). H-3 CONTRACT: VERIFIED.
+F-5: DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED PENDING H-3 IV. N-16-5: NOT
+CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).** Governed
+PRODUCTION IMPLEMENTATION phase.
 **I0 = `74e52d5973`.** HPAC-PAWA-001 v1.3 git blob `9c816716` frozen — must
 remain byte-unchanged (`docs/contracts` normative diff expected EMPTY). CPIPC:
 candidate = predecessor + exactly one `.1R`, same series (`149O`), same branch,
@@ -48,13 +49,38 @@ parameterised, §33 steps 1–9 verbatim); `0a194b13` OQ-1 additive
 proof-writer subject reconciliation (`create_canonical` +
 `certification_proof_subject` kwarg; `resolve_canonical` accepts
 `writer_subject ∈ {mechanism_id, proof_id}`; fixture path byte-unchanged).
-Remaining: `hpac_certification_coordinator` module + `scripts/…` entry + the
-≥100-item H-3 implementation test suite + §39A/fixture-seam guards + packaging /
-clean-install smoke + bounded regression + A/B attribution + governed
-finalization. **Outcome target: H-3 REPAIRED / IV PENDING (never
-self-VERIFIED); N-16-5 NOT CLOSED; derive but do not begin N16-5-H3-IV.**
-Runtime: Observed / observe / unavailable. Plugins 0. Capabilities 0. First
-governed runtime external effect: ABSENT / UNREACHABLE.
+Delivered (all committed): `certification_writer` factory + §33A (steps 1–9
+verbatim) + `CertificationWriterHandle` one-shot + closed 5-role allowlist
+(`5519faa4`); OQ-1 additive proof-writer subject reconciliation (`0a194b13`);
+`pcae.core.hpac_certification_coordinator` + `scripts/hpac_certification_admin.py`
+(`f8dfab4c`); H-3 test suite **106 / 0** (`0febf447` / `df915e32` / `90ac45c5`)
+incl. `test_100` — the deterministic end-to-end chain composes through the new
+boundary to a PRODUCTION `AuthenticatedHumanPrincipal` + the actual Gate-5
+sequence-3 artifact **with no `_mint_production_writer_capability` /
+`_PRODUCTION_WRITER_FACTORY_SEAL` test seal**; phase-aware guard reconciliation
+(add the ONE §38A consumer to the `hpac_verifier` / foundation
+consumer-inventories; re-anchor 8 completed-predecessor scope-fences to their
+own completion SHAs; A/B I0 `74e52d59` worktree vs HEAD 67→58 failed, **0
+attributable code regression**; no `def test_` renamed/removed/disabled; no
+skip/xfail) (`7a5cca9a`); packaging + clean-install smoke (wheel carries the
+coordinator; fresh venv imports it with no `pytest`/`tests`; runtime
+unavailable). **Production diff = exactly the 4 intended files**
+(`hpac_protected_admin_writer.py`, `hpac_certification_coordinator.py`,
+`human_authentication_proof.py`, `scripts/hpac_certification_admin.py`);
+`hpac_foundation.py` / `hpac_lifecycle.py` / `hpac_verifier.py` allowed but
+NOT touched. **NO** contract / schema / `PawaOperation` (6) /
+`pawa_failure_code` (21) / RHAMP `terminal_reason_code` (41) / `pyproject`
+dependency change. **NO** real ceremony: makeCredential / getAssertion /
+APPROVE / REJECT / YubiKey touch / FIDO2 PIN = 0; **0 protected-root writes**;
+canonical `PrincipalRecord hp-8cee…` / `CredentialRecord hpc-2e7b…` / counter
+(gen 0) / gen-1 protected-presentation deployment UNCHANGED (the real protected
+root was never accessed). Runtime: `not_implemented` / Observed / observe /
+unavailable; 0 plugins; 0 capabilities. First governed runtime external effect:
+ABSENT / UNREACHABLE. **Successor DERIVED, NOT BEGUN:** N16-5-H3-IV — dedicated
+Independent Verification of this implementation (this phase's `.1R`; own human
+authorization + human authentication; id NOT reserved) → then N16-5-FINAL-CERT
+(fresh CPIPC-valid successor id; the real-human / genuine-YubiKey N-16-5
+certification). N-16-6 / N-16-7 remain OPEN / UNTOUCHED; N-16-7 strictly last.
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
 
 ---

@@ -2,7 +2,14 @@
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-H3-IMPL**) — **N-16-5 Production Certification Authority-Path
-  Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair** (IN PROGRESS).
+  Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair**. **COMPLETE — H-3:
+  REPAIRED / IV PENDING (never self-VERIFIED); F-5: DEPLOYMENT VERIFIED —
+  CERTIFICATION BLOCKED PENDING H-3 IV; N-16-5: NOT CLOSED; N-16-6 / N-16-7:
+  OPEN / UNTOUCHED.** All 25 §106 criteria satisfied. Successor DERIVED, NOT
+  BEGUN: N16-5-H3-IV (dedicated implementation IV) → then N16-5-FINAL-CERT
+  (fresh CPIPC id). Test suite 106/0; targeted affected regression 674 passed,
+  0 failed; guard-band A/B (I0 worktree vs HEAD) 67→58 failed, 0 attributable
+  code regression. Was: (IN PROGRESS).
   I0 = `74e52d59`; HPAC-PAWA-001 v1.3 git blob `9c816716` frozen (must stay
   byte-unchanged). CPIPC: candidate = predecessor + exactly one `.1R`, same
   series/branch, strict order, direct successor, unique — canonical id ==
