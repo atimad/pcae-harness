@@ -1,5 +1,63 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R`
+  (alias **N16-5-H3-PAWA13**) — **HPAC-PAWA-001 v1.2 → v1.3 Certification-Coordinator
+  Authority Contract Reconciliation / Freeze**. Contract-only. **HPAC-PAWA-001
+  v1.3 — FROZEN (MINOR, S-2). H-3 CONTRACT BLOCKER: RESOLVED; H-3 PRODUCTION
+  IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED.** The predecessor
+  (`…1.1R.1R.1R`) independently reproduced blocking finding H-3 (the real
+  N-16-5 real-human / genuine-YubiKey certification chain had no production
+  authority path — it composed only through disclosed test-only seals) and
+  showed it cannot be honestly repaired under frozen v1.2, whose closed
+  authorized-consumer set (`HPAC-PAWA-REQ-087`) and §088 / §224 unauthorized
+  list exclude the certification consumer the chain requires. v1.3 adds the
+  minimum honest normative delta: **(1)** exactly one explicitly enumerated,
+  non-agent-importable production factory-consumer category — the *N-16-5
+  real-human-authentication certification coordinator*
+  (`pcae.core.hpac_certification_coordinator`, reached only from
+  `scripts/hpac_certification_admin.py`), §38A / §39A; **(2)** exactly one
+  closed *certification-lifecycle writer family*, §42B, over the closed
+  five-role allowlist `{ hpac_challenge_coordinator, hpac_assertion_recorder,
+  human_authentication_proof_verifier, hpac_gate5_binder,
+  hpac_rhamp_counter_state_verifier }` (`hpac_lifecycle_terminator` and every
+  other role denied), minted only by a new `certification_writer(...)` factory
+  behind the §37 non-agent-importable fence, reached by that one consumer under
+  a dedicated **§33A** recognition sequence that reuses the §33 machinery
+  (root topology + `HPAC-PAWA-AGENT-EXCLUSION/1.0` + configured-agent identity
+  + descriptor + current-generation + `O_EXCL|O_NOFOLLOW` write probe +
+  not-configured-agent + authorized-factory-consumer) verbatim, then adds
+  certification-consumer / role-allowlist / session-binding / mint / audit
+  steps, all fail-closed; capability process-local / non-bearer /
+  non-serialisable / restart-dead / single-use per role per one ceremony / no
+  delegation / no remint; **(3)** walls §68A + `PAWA-INV-13` — coordinator ≠
+  verifier / Gate / human approver / authenticator / presentation-evidence
+  writer / test harness; certification authority ≠ execution / PB / policy / RE
+  / runtime capability / `DispatchEnvelope`; deterministic inputs never become
+  REAL assurance; the path terminates at the bounded Gate-5 assurance result and
+  authorizes no first external effect. No new `pawa_failure_code` (21 unchanged,
+  §42C maps every v1.3 rejection), no new `terminal_reason_code`, no RHAMP-001
+  edit, no new `PawaOperation`, no protected-root artifact / schema change, no
+  new companion contract; §96 *specialized* not redefined; MINOR under
+  §80 / §152 (S-2, §80.3 — full MAJOR-trigger review, none fires); consistent
+  with §153's permits and the v1.2 §80.2 precedent. HPAC-001 v2.1, RHAMP-001
+  v1.0, HPAC-PPA-001 v1.0, HBDC-001 v1.2, and the descriptor / current-generation
+  schemas byte-unchanged. **No `src/pcae` / `scripts` / `pyproject.toml` /
+  dependency change. No ceremony (0 makeCredential / getAssertion / APPROVE /
+  proof / challenge / Gate 5 / principal). 0 protected-root writes.** Counter
+  untouched (generation 0). Runtime `not_implemented` / `Observed` / `observe` /
+  `unavailable`, 0 / 0. No first governed runtime external effect.
+  Contract-only verification suite (`…v1_3_contract_reconciliation.py`) 54/0;
+  four point-in-time guards reconciled (`HPAC-PAWA-REQ-217` discipline — no
+  `def test_` renamed / removed / skipped). Dedicated HPAC-PAWA-001 v1.3
+  contract IV (`HPAC-PAWA-REQ-274`, alias **N16-5-H3-PAWA13-IV**) recommended
+  before the H-3 implementation relies on this text. F-5: DEPLOYMENT VERIFIED —
+  CERTIFICATION BLOCKED PENDING H-3 IMPLEMENTATION. N-16-6 / N-16-7 OPEN /
+  UNTOUCHED (N-16-7 strictly last). H0 = `b2530066`. Next (derived, not begun) =
+  N16-5-H3-PAWA13-IV → N16-5-H3-IMPL → N16-5-H3-IV → N16-5-FINAL-CERT (fresh
+  CPIPC-valid successor id). Evidence
+  `.pcae/certification/n16_5_h3_pawa13_v1_3_contract_freeze.json`; report
+  `docs/PHASE_…_1R_HPAC_PAWA_001_V1_3_CERTIFICATION_COORDINATOR_AUTHORITY_CONTRACT_RECONCILIATION_FREEZE.md`.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R`
   (N-16-5 production authority-path repair for real-human / genuine-YubiKey
   certification — H-3 challenge / proof / lifecycle / counter / Gate-5
