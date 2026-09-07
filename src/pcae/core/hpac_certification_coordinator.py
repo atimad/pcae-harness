@@ -255,16 +255,36 @@ class CertificationSession:
         invocation_id: str,
         attempt_id: str,
         mechanism_id: str,
-        occurred_at: Optional[str] = None,
-        resolved_presentation: object,
+        presentation_id: str,
+        presentation_digest: str,
         challenge: object,
+        occurred_at: Optional[str] = None,
     ) -> LifecycleEvent:
+        """The trusted presentation evidence is named by a bare
+        ``(presentation_id, presentation_digest)`` and **re-resolved by this
+        coordinator on the freshly-recognized §33A production authority** —
+        an ``HPACResolvedRecord`` sealed to some other authority instance is
+        never accepted (HPAC-REQ-053 discipline)."""
+
         if self._challenge_done:
             raise CertificationCoordinatorError("challenge already opened for this session")
         handle = self._mint(_CHALLENGE_ROLE)
-        store = HPACLifecycleStore(handle.authority)
+        authority = handle.authority
+        store = HPACLifecycleStore(authority)
         capability = self._consume(handle, _CHALLENGE_ROLE, self.proof_id)
         try:
+            from pcae.core.approval_presentation import (
+                PresentationMechanismDescriptorStore,
+                TrustedApprovalPresentationStore,
+            )
+
+            resolved_presentation = TrustedApprovalPresentationStore(authority).resolve_canonical(
+                presentation_id=presentation_id,
+                presentation_digest=presentation_digest,
+                descriptor_store=PresentationMechanismDescriptorStore(authority),
+            )
+            if resolved_presentation is None:
+                raise CertificationCoordinatorError("trusted presentation evidence does not resolve")
             event = store.open_challenge_canonical(
                 capability,
                 proof_id=self.proof_id,
@@ -278,6 +298,8 @@ class CertificationSession:
                 resolved_presentation=resolved_presentation,
                 challenge=challenge,
             )
+        except CertificationCoordinatorError:
+            raise
         except Exception as exc:  # noqa: BLE001 — fail-closed boundary
             raise CertificationCoordinatorError(f"open_challenge failed: {type(exc).__name__}: {exc}") from exc
         self._challenge_done = True
@@ -358,9 +380,6 @@ class CertificationSession:
     def reach_gate5_assurance(
         self,
         *,
-        registry: object,
-        presentation_store: object,
-        descriptor_store: object,
         challenge: object,
         approval_id: str,
         now: str,
@@ -368,8 +387,6 @@ class CertificationSession:
         verifier_version: str = "hpac-verifier/1.0",
         require_real_assurance: bool = True,
         max_proof_age_seconds: Optional[int] = None,
-        sidecar_store: object = None,
-        counter_state_store: object = None,
     ) -> object:
         """Mint the ``hpac_gate5_binder`` and
         ``hpac_rhamp_counter_state_verifier`` capabilities and hand them to
@@ -387,15 +404,29 @@ class CertificationSession:
 
         from pcae.core.hpac_verifier import verify_human_authentication
 
+        from pcae.core.approval_presentation import (
+            PresentationMechanismDescriptorStore,
+            TrustedApprovalPresentationStore,
+        )
+        from pcae.core.human_principal_registry import HumanPrincipalRegistryStore
+        from pcae.core.hpac_rhamp_credential_sidecar import HpacRhampCredentialSidecarStore
+
         gate5_handle = self._mint(_GATE5_BINDER_ROLE)
         counter_handle = self._mint(CERTIFICATION_COUNTER_ROLE)
         gate5_authority = gate5_handle.authority
         counter_authority = counter_handle.authority
 
+        # Every read store is (re-)built on the freshly-recognized §33A
+        # production authority for this step; the counter store is paired
+        # with its own writer's authority instance. No caller-supplied
+        # resolved record or store crosses an authority-seal boundary.
         lifecycle_store = HPACLifecycleStore(gate5_authority)
         proof_store = HumanAuthenticationProofStore(gate5_authority)
-        if counter_state_store is None:
-            counter_state_store = HpacRhampCounterStateStore(counter_authority)
+        registry = HumanPrincipalRegistryStore(gate5_authority)
+        presentation_store = TrustedApprovalPresentationStore(gate5_authority)
+        descriptor_store = PresentationMechanismDescriptorStore(gate5_authority)
+        sidecar_store = HpacRhampCredentialSidecarStore(gate5_authority)
+        counter_state_store = HpacRhampCounterStateStore(counter_authority)
 
         gate5_writer = self._consume(gate5_handle, _GATE5_BINDER_ROLE, self.proof_id)
         counter_state_writer = self._consume(

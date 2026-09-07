@@ -28,8 +28,7 @@ import pytest
 from pcae.core import hpac_certification_coordinator as cc
 from pcae.core import hpac_protected_admin_writer as w
 from pcae.core.hpac_foundation import (
-    _PRODUCTION_TEST_FIXTURE_SEAL,
-    _PRODUCTION_WRITER_FACTORY_SEAL,
+    _PRODUCTION_TEST_FIXTURE_SEAL,  # builds the disposable provisioned root only
     HPACAuthorityClass,
     HPACAuthorityError,
     HPACStoreAuthority,
@@ -757,6 +756,249 @@ def test_91_runtime_remains_unavailable_after_import():
 
     assert not hasattr(m, "register_runtime_plugin")
     assert not hasattr(m, "RUNTIME_CAPABILITY")
+
+
+def test_93_pawa_and_frozen_contracts_byte_unchanged_since_i0():
+    names = subprocess.run(
+        ["git", "-C", str(REPO), "diff", "--name-only", I0, "HEAD", "--", "docs/contracts", "schemas"],
+        capture_output=True, text=True, check=True,
+    ).stdout.split()
+    assert names == [], names
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# I. Deterministic end-to-end reachability through the coordinator
+#    (§99 items 38-66; §106 criteria 9-15). This is the H-3 repair proof:
+#    the full canonical challenge → assertion → proof/verified →
+#    Gate-5 binding → counter chain composes through the NEW production
+#    `certification_writer` / coordinator boundary — NOT the disclosed
+#    `_mint_production_writer_capability` test seal.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_100_full_chain_reaches_real_assurance_and_gate5_via_coordinator(tmp_path):
+    import hashlib
+    import json
+
+    from pcae.core import hpac_protected_presentation_admin as ppadmin
+    from pcae.core import protected_presentation as pp
+    from pcae.core import protected_presentation_installation as inst
+    import pcae.protected_presentation_helper as H
+    from pcae.core.hpac_foundation import canonical_digest, canonical_json_bytes
+    from pcae.core.approval_presentation import (
+        PresentationMechanismDescriptorStore,
+        TrustedApprovalPresentationStore,
+        new_canonical_runtime_approval_subject,
+    )
+    from pcae.core.hpac_lifecycle import HPACLifecycleStore, STATE_PROOF_VERIFIED_AND_BOUND
+    from pcae.core.hpac_rhamp_client_context import MECHANISM_ID
+    from pcae.core.hpac_rhamp_credential_sidecar import HpacRhampCredentialSidecarStore
+    from pcae.core.hpac_rhamp_ctap2 import DeterministicCtap2Provider
+    from pcae.core.hpac_rhamp_enrollment import enroll_first_credential, resolve_active_credentials
+    from pcae.core.human_authenticator_fido2 import FIDO2HumanAuthenticator, encode_assertion_envelope
+    from pcae.core.human_authentication_proof import (
+        HumanAuthenticationProof,
+        HumanAuthenticationProofStore,
+        PROOF_SCHEMA_VERSION,
+    )
+    from pcae.core.hpac_verifier import (
+        AuthenticatedHumanPrincipal,
+        is_verifier_authenticated_principal,
+    )
+
+    HELPER_SHIM = (
+        b"#!/usr/bin/env python3\nimport sys\nfrom pcae.protected_presentation_helper import main\n"
+        b"sys.exit(main())\n"
+    )
+    RENDERER = "pcae-protected-local-presentation-renderer/1.0"
+
+    def _inproc_launch(helper_fd, request, *, timeout_seconds):
+        os.close(helper_fd)
+        req = H._validate_request(json.loads(canonical_json_bytes(request).decode()))
+        displayed = H.render_human_visible_bytes(req["human_visible_facts"], renderer_profile=req["renderer_profile"])
+        dd = hashlib.sha256(displayed).hexdigest()
+        decision = H._observe_election(req, displayed)
+        if decision == "CANCEL":
+            return None
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        return json.loads(canonical_json_bytes(H._build_response(req, decision, dd, now=now)).decode())
+
+    root = (tmp_path / "root").resolve()
+    w.provision_protected_root(protected_root=root, agent_account="a-svc-h3impl-e2e", agent_uid=4_242_777)
+    authority = HPACStoreAuthority._production_test_fixture(
+        root, _seal=_PRODUCTION_TEST_FIXTURE_SEAL, _topology_probe=_locked_probe()
+    )
+    registry = HumanPrincipalRegistryStore(authority)
+    sidecar_store = HpacRhampCredentialSidecarStore(authority)
+    principal_id = new_principal_id()
+    w.enroll_principal_via_pawa(
+        principal_id=principal_id, enrollment_provenance_ref="h3impl-e2e",
+        _protected_root=root, _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
+    sha = hashlib.sha256(HELPER_SHIM).hexdigest()
+    hp = inst.helper_content_addressed_path(root, sha)
+    hp.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    hp.write_bytes(HELPER_SHIM)
+    os.chmod(hp, 0o500)
+    ppadmin.configure_presentation_mechanism(
+        action="install", helper_sha256=sha, helper_implementation_version="pplp/1.0.0",
+        verifier_configuration_digest=hashlib.sha256(b"vc-h3impl").hexdigest(),
+        renderer_profile=RENDERER, descriptor_version="pplp-1.0", protected_root=root,
+        _configured_agent_identity_source=_agent_src(), _topology_probe=_locked_probe(),
+    )
+    provider = DeterministicCtap2Provider()
+    res = enroll_first_credential(
+        principal_id=principal_id, subject_digest="a" * 64, presentation_digest="b" * 64,
+        invocation_id="iv-h3impl", attempt_id="at-h3impl", provider=provider, protected_root=root,
+        _configured_agent_identity_source=_agent_src(), _topology_probe=_locked_probe(),
+    )
+
+    invocation_id, attempt_id = "inv-h3impl", "at-h3impl"
+    facts = {
+        "repository_identity": "repo-h3", "repository_display": "repo-h3 (fp:h3)",
+        "task_id": "task-h3", "task_display": "task-h3 x",
+        "runtime_target_id": "rt-none", "runtime_target_display": "rt-none x",
+        "operation_effect_scope_display": "cap=none; no-effect", "prompt_hash": "c" * 64,
+        "prompt_instruction_display": "h3 (fp:c001)", "invocation_id": invocation_id,
+        "invocation_display": f"{invocation_id} (fp:i001)", "expires_at": "2099-01-01T00:00:00Z",
+        "one_shot_notice": True,
+    }
+    subject = new_canonical_runtime_approval_subject(
+        subject={"repository_identity": "repo-h3", "task_id": "task-h3",
+                 "runtime_target_id": "rt-none", "prompt_hash": "c" * 64, "invocation_id": invocation_id},
+        approval_scope={"capability": "none", "one_dispatch": False, "network": False},
+        approval_preview_digest=hashlib.sha256(
+            H.render_human_visible_bytes(facts, renderer_profile=RENDERER)
+        ).hexdigest(),
+        expires_at="2099-01-01T00:00:00Z",
+    )
+    approval_id = "ria-" + hashlib.sha256(f"{invocation_id}{attempt_id}".encode()).hexdigest()[:32]
+
+    orig = pp._launch_and_exchange
+    pp._launch_and_exchange = _inproc_launch
+    try:
+        cer = pp.run_protected_presentation_ceremony(
+            authority=authority, approval_id=approval_id, challenge_id="ch-" + invocation_id,
+            canonical_subject=subject, human_visible_facts=facts, principal_id=principal_id,
+            invocation_id=invocation_id, attempt_id=attempt_id, _test_decision_source="APPROVE",
+        )
+    finally:
+        pp._launch_and_exchange = orig
+
+    ds = PresentationMechanismDescriptorStore(authority)
+    ps = TrustedApprovalPresentationStore(authority)
+    resolved_pres = ps.resolve_canonical(
+        presentation_id=cer.presentation_id, presentation_digest=cer.presentation_digest, descriptor_store=ds
+    )
+    assert resolved_pres.authority_class is HPACAuthorityClass.PRODUCTION
+
+    material = resolve_active_credentials(registry, principal_id)
+    allow = tuple(m.raw_credential_id for m in material if m.credential_id == res.credential_id)
+    auth_fido = FIDO2HumanAuthenticator(
+        principal_id=principal_id, credential_id=res.credential_id, provider=provider,
+        allow_credential_ids=allow, invocation_id=invocation_id, attempt_id=attempt_id,
+    )
+    ch = auth_fido.prepare_challenge(subject.digest(), cer.presentation_digest, issued_at="2026-09-07T12:00:00Z")
+    env = auth_fido.run_assertion_ceremony(ch)
+
+    # ── drive the chain through the NEW production coordinator ──────────
+    co = cc.HpacCertificationCoordinator(
+        _protected_root=root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+        _caller_module=COORDINATOR_MODULE,
+    )
+    sess = co.begin_session(principal_id=principal_id, credential_id=res.credential_id)
+
+    body = {
+        "proof_schema_version": PROOF_SCHEMA_VERSION, "proof_id": sess.proof_id,
+        "mechanism_id": MECHANISM_ID, "principal_id": principal_id, "credential_id": res.credential_id,
+        "challenge_digest": ch.challenge_digest, "approval_subject_digest": ch.approval_subject_digest,
+        "trusted_presentation_ref": {"presentation_id": cer.presentation_id,
+                                     "presentation_digest": cer.presentation_digest},
+        "assertion": encode_assertion_envelope(env), "up": env.up, "uv": env.uv,
+        "authenticated_at": ch.issued_at, "verifier_version": "h3impl/1.0",
+    }
+    body["proof_digest"] = canonical_digest({k: v for k, v in body.items() if k != "proof_digest"})
+    proof = HumanAuthenticationProof(**body)
+
+    assert resolved_pres is not None  # sanity: the test authority also resolves it
+    sess.open_challenge(
+        approval_id=approval_id, invocation_id=invocation_id, attempt_id=attempt_id,
+        mechanism_id=MECHANISM_ID, occurred_at="2026-09-07T12:00:10Z",
+        presentation_id=cer.presentation_id, presentation_digest=cer.presentation_digest, challenge=ch,
+    )
+    sess.record_assertion(
+        assertion_digest=canonical_digest({"assertion": proof.assertion}),
+        occurred_at="2026-09-07T12:00:20Z",
+    )
+    sess.record_verified_proof(
+        proof=proof, registry_state_digest=canonical_digest({"r": "s"}),
+        verifier_version="h3impl/1.0", occurred_at="2026-09-07T12:00:30Z",
+    )
+    principal = sess.reach_gate5_assurance(
+        challenge=ch, approval_id=approval_id, now="2026-09-07T12:01:00Z",
+        occurred_at="2026-09-07T12:00:45Z", verifier_version="h3impl/1.0",
+    )
+
+    # §106 criterion 13/14: the require_real_assurance PRODUCTION path and
+    # the actual Gate-5 binding are mechanically reachable through the new
+    # certification boundary, with NO test seal.
+    assert isinstance(principal, AuthenticatedHumanPrincipal)
+    assert principal.assurance_class is HPACAuthorityClass.PRODUCTION
+    assert principal.is_real_runtime_eligible is True
+    assert is_verifier_authenticated_principal(principal)
+
+    lc = HPACLifecycleStore(authority)
+    bound = lc.resolve_gate5_binding_event(sess.proof_id)
+    assert bound is not None and bound.record.state == STATE_PROOF_VERIFIED_AND_BOUND
+
+    # §106 criterion 16: the certification chain composed with NO test-only
+    # production seal — this end-to-end path never calls the low-level mint
+    # primitive directly and never imports the factory seal.
+    import ast
+
+    tree = ast.parse(Path(__file__).read_text())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            assert node.func.attr != ("_mint_production_writer" + "_capability")
+        if isinstance(node, ast.ImportFrom) and node.module == "pcae.core.hpac_foundation":
+            names = {a.name for a in node.names}
+            assert ("_PRODUCTION_WRITER" + "_FACTORY_SEAL") not in names
+
+
+def test_101_deterministic_fixture_authority_does_not_reach_real_assurance(tmp_path):
+    # A purely FIXTURE_NON_REAL authority can never satisfy the §33A
+    # recognition sequence — certification_writer needs a PRODUCTION-class
+    # HPACStoreAuthority (via the provisioned root), so a fixture path
+    # cannot elevate.
+    fixture_authority = HPACStoreAuthority.fixture(tmp_path / "fx")
+    assert fixture_authority.authority_class is HPACAuthorityClass.FIXTURE_NON_REAL
+    with pytest.raises(w.PawaError):
+        w.certification_writer(
+            "hpac_challenge_coordinator",
+            certification_session_id="hcs-" + "0" * 32,
+            principal_id="hp-" + "0" * 32, credential_id="hpc-" + "0" * 32,
+            proof_id="hap-" + "0" * 32,
+            _protected_root=tmp_path / "fx",
+            _configured_agent_identity_source=_agent_src(),
+            _topology_probe=_locked_probe(),
+            _caller_module=COORDINATOR_MODULE,
+        )
+
+
+def test_102_coordinator_production_status_does_not_relax_require_real_assurance():
+    v = (SRC / "core" / "hpac_verifier.py").read_text()
+    # the joint real-auth + real-presentation check is unchanged and lives
+    # in the verifier, not the coordinator.
+    assert "HPAC-PPA-REQ-057" in v
+    assert "require_real_assurance" in v
+    coord = (SRC / "core" / "hpac_certification_coordinator.py").read_text()
+    assert "require_real_assurance" in coord  # only ever passed through, never redefined
+    assert "assurance_class" not in coord.replace("assurance result", "")
 
 
 def test_92_no_makecredential_getassertion_pin_calls_in_coordinator_or_script():

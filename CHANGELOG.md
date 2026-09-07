@@ -43,7 +43,18 @@
   denial, forgery, no-remint/escalation, §43A session/subject binding
   (unresolvable / revoked / cross-principal credential → deny), the §39A
   import-fence + fixture-seam guards, the admin-script boundary, and
-  disposable-root host-state preservation.
+  disposable-root host-state preservation. Test suite part 2 (73/0): the
+  deterministic end-to-end **H-3 repair proof** — the full canonical
+  challenge → assertion → proof/verified → Gate-5-binding → counter chain
+  composes through the new `certification_writer` / coordinator boundary and
+  reaches a PRODUCTION `AuthenticatedHumanPrincipal` + the actual Gate-5
+  sequence-3 artifact **with no `_mint_production_writer_capability` /
+  `_PRODUCTION_WRITER_FACTORY_SEAL` test seal**. Two coordinator design
+  fixes: `open_challenge` takes bare `presentation_id` + `presentation_digest`
+  and re-resolves the trusted presentation on the freshly-recognized §33A
+  authority; `reach_gate5_assurance` builds every read store on the matching
+  writer's authority instance so no resolved record crosses an authority-seal
+  boundary.
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R`
   (alias **N16-5-H3-PAWA13-IV**) — **Independent Verification of HPAC-PAWA-001
