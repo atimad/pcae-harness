@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- **2026-09-07 — Open N16-5-FINAL-CERT; phase-entry orientation clean.**
+  Canonical phase ID `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R`
+  (alias N16-5-FINAL-CERT, display-only). CPIPC: valid direct `.1R` successor
+  of N16-5-H3-IV — same series, same branch, strict order, unique, no active
+  conflicting phase; canonical ID used verbatim, no discrepancy. C0 =
+  `633c77f7` (== H3_IV_FINAL; no phase opened since the IV push). H-3
+  production authority surface (4 files + contracts + schemas) byte-identical
+  to the independently-verified state (diff `a3af3a04^..HEAD` empty). Protected
+  root `/Library/Application Support/PCAE/HPAC/protected-root` PRESENT on this
+  host (`drwx------ root:admin`, not agent-readable). Runtime Observed /
+  observe / unavailable; 0 plugins / 0 capabilities. Live privileged
+  revalidation (SS13-22) and the real human/YubiKey ceremony (SS24-46) are
+  reserved to the primary authorized operator and are pending — no ceremony
+  step performed. N-16-5 remains NOT CLOSED; N-16-6 / N-16-7 untouched.
+  **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
 - **2026-09-04 — Independently verify F-9 and adjudicate F-5 RETRY: READY.**
   Independently reconstructed (not trusted from F-9 report prose) the
   original implicit-`HEAD` defect and immutable `3fbc12d7..90510428` repair

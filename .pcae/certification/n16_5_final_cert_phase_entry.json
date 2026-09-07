@@ -1,0 +1,75 @@
+{
+  "phase_alias": "N16-5-FINAL-CERT",
+  "canonical_phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R",
+  "title": "Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5 Certification and Closure Adjudication -- After H-3 Production Authority Repair Verification",
+  "repository": "~/repos/pcae-harness",
+  "branch": "main",
+  "phase_entry": {
+    "C0": "633c77f78f9b5aecd2bda4d9bf44ba3c39b52203",
+    "H3_IV_FINAL": "633c77f78f9b5aecd2bda4d9bf44ba3c39b52203",
+    "note": "C0 == H3_IV_FINAL: no governed phase opened between the N16-5-H3-IV completion push and this phase entry; origin/main HEAD == predecessor final pushed state.",
+    "phase_open_task_commit": "66ec3acd7f35034a44a34f13ebba26f2d783279e"
+  },
+  "cpipc_successor_validation": {
+    "predecessor_alias": "N16-5-H3-IV",
+    "predecessor_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R",
+    "predecessor_is_latest_completed_canonical_phase": true,
+    "same_series_root": "149O.20L.7O.3W",
+    "same_series": true,
+    "same_branch": true,
+    "candidate_segments": 38,
+    "predecessor_segments": 37,
+    "candidate_equals_predecessor_plus_exactly_one_direct_1R_successor": true,
+    "appended_segment": "1R",
+    "strict_ordering": true,
+    "uniqueness_candidate_id_unused_in_repo": true,
+    "no_active_conflicting_phase": true,
+    "lifecycle_acceptance": "task transition -> tasks/active/20260907-2007-...-n16-5-final-cert; status coherence passed; health healthy; check passed",
+    "verdict": "VALID DIRECT SUCCESSOR -- canonical ID used verbatim; alias display-only; no discrepancy"
+  },
+  "h3_production_authority_freshness": {
+    "method": "non-privileged source-level: git diff of the production/contract/schema surface between the predecessor IV phase entry (a3af3a04^) and C0",
+    "diff_src_pcae_scripts_pyproject_contracts_schemas_a3af3a04_parent_to_HEAD": "EMPTY",
+    "iv_verified_4_file_production_diff_base": "74e52d59738007c4b9f6dbeb28f83990ba82e9a8",
+    "four_files": [
+      "scripts/hpac_certification_admin.py",
+      "src/pcae/core/hpac_certification_coordinator.py",
+      "src/pcae/core/hpac_protected_admin_writer.py",
+      "src/pcae/core/human_authentication_proof.py"
+    ],
+    "four_files_last_touching_commits": {
+      "scripts/hpac_certification_admin.py": "f8dfab4c",
+      "src/pcae/core/hpac_certification_coordinator.py": "df915e32",
+      "src/pcae/core/hpac_protected_admin_writer.py": "5519faa4",
+      "src/pcae/core/human_authentication_proof.py": "0a194b13"
+    },
+    "all_four_touching_commits_predate_the_iv_phase_entry": true,
+    "verdict": "H-3 PRODUCTION AUTHORITY PATH: CURRENT -- byte-identical to the independently verified state (N16-5-H3-IV). Bounded non-ceremonial live freshness re-check (SS7/SS22) still pending on the real host."
+  },
+  "protected_root_presence_nonprivileged": {
+    "path": "/Library/Application Support/PCAE/HPAC/protected-root",
+    "topology_observed_uid501": "drwx------ root:admin 0700, 7 entries, mtime 2026-09-06 19:04",
+    "readable_by_configured_agent_uid_501": false,
+    "verdict": "PRESENT on this host at the canonical path; contents require primary-operator privileged READ-ONLY inspection (SS13)."
+  },
+  "runtime_state_at_phase_entry": {
+    "runtime_status": "not_implemented",
+    "runtime_state": "Observed",
+    "execution_capability": "unavailable",
+    "maximum_plugin_capability": "observe",
+    "plugin_count": 0,
+    "capability_count": 0,
+    "permission_broker_status": "execution_unavailable",
+    "governance_posture": "non-executing"
+  },
+  "gate_chain_state_persisted": {
+    "H-3": "INDEPENDENTLY VERIFIED",
+    "F-5": "FINAL CERTIFICATION IN PROGRESS",
+    "N-16-5": "NOT CLOSED",
+    "N-16-6": "OPEN / UNTOUCHED",
+    "N-16-7": "OPEN / UNTOUCHED / STRICTLY LAST",
+    "first_governed_runtime_external_effect": "ABSENT / UNREACHABLE",
+    "DELEGATED .3 FINALIZATION / COMMIT / PUSH": "UNAUTHORIZED (preserved)"
+  },
+  "ceremony_state": "NOT YET ELECTED -- awaiting primary-operator privileged live revalidation (SS14-22) and, if GO, the real ceremony (SS24-46)"
+}
