@@ -1021,3 +1021,287 @@ def test_92_no_makecredential_getassertion_pin_calls_in_coordinator_or_script():
         assert not ({"make_credential", "makeCredential", "get_assertion", "getAssertion", "verify_pin"} & called)
         assert "pcae.core.hpac_rhamp_ctap2" not in imported
         assert "pcae.core.human_authenticator_fido2" not in imported
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# J. Part 3 — non-elevation matrix, PB/policy dominance, forgery, currentness,
+#    restart-dead, ordinary-actor non-authority, external-effect termination
+#    (§57-§74 / §94; §99 items to ≥100; §106 criteria 17-24)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_110_deterministic_mechanism_id_never_reaches_real_eligible_set():
+    from pcae.core.hpac_verifier import _REAL_ELIGIBLE_MECHANISM_IDS
+    from pcae.core.human_authenticator_deterministic import DETERMINISTIC_MECHANISM_ID
+
+    assert DETERMINISTIC_MECHANISM_ID not in _REAL_ELIGIBLE_MECHANISM_IDS
+    assert _REAL_ELIGIBLE_MECHANISM_IDS == frozenset({"hpac.fido2.uv_presence.v2"})
+
+
+def test_111_require_real_assurance_joint_check_is_in_the_verifier_not_the_coordinator():
+    import ast
+
+    coord = ast.parse((SRC / "core" / "hpac_certification_coordinator.py").read_text())
+    # the coordinator only passes require_real_assurance through to the verifier;
+    # it never compares assurance_class or a mechanism id itself.
+    names = {n.attr for n in ast.walk(coord) if isinstance(n, ast.Attribute)}
+    assert "assurance_class" not in names
+    for kw in ("_REAL_ELIGIBLE_MECHANISM_IDS", "_REAL_PRESENTATION_MECHANISM_ID", "HPACAuthorityClass"):
+        assert kw not in (SRC / "core" / "hpac_certification_coordinator.py").read_text().replace(
+            "assurance result", ""
+        ).replace("the bounded assurance", "")
+
+
+def test_112_coordinator_does_not_construct_or_seal_a_principal_or_gate_result():
+    import ast
+
+    tree = ast.parse((SRC / "core" / "hpac_certification_coordinator.py").read_text())
+    called = {n.func.id for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)}
+    for forbidden in ("AuthenticatedHumanPrincipal", "Gate5Result", "ValidatedAuthorityProjection"):
+        assert forbidden not in called
+    text = (SRC / "core" / "hpac_certification_coordinator.py").read_text()
+    for seal in ("_VERIFIER_CONSTRUCTOR_SEAL", "_GATE5_RESULT_CONSTRUCTOR_SEAL", "_WRITER_CONSTRUCTOR_SEAL"):
+        assert seal not in text
+
+
+def test_113_pb_and_policy_walls_named_in_contract_and_unrelaxed():
+    pawa = (CONTRACTS / "HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md").read_text()
+    assert "override PB or policy" in pawa or "override a no-go" in pawa
+    assert "PAWA-INV-13" in pawa
+    # the certification family explicitly excludes a PB permission / policy
+    # exception / RE result / runtime capability / DispatchEnvelope
+    for excluded in ("PB\n  permission", "Runtime Enforcement result", "DispatchEnvelope",
+                     "runtime capability"):
+        assert excluded in pawa
+
+
+def test_114_certification_family_cannot_write_authority_consumption_or_gate9():
+    pawa = (CONTRACTS / "HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md").read_text()
+    assert "HPAC-AUTHORITY-CONSUMPTION/2.1" in pawa
+    assert "Gate-9 artifact" in pawa
+    # the coordinator imports no Gate-9 / consumption module
+    import ast
+
+    imported = {
+        n.module for n in ast.walk(ast.parse((SRC / "core" / "hpac_certification_coordinator.py").read_text()))
+        if isinstance(n, ast.ImportFrom) and n.module
+    }
+    assert "pcae.core.runtime_invocation_authority_consumption" not in imported
+    assert not any("gate9" in m or "gate_9" in m for m in imported)
+
+
+def test_115_presentation_evidence_writer_is_outside_the_five_role_family():
+    assert "protected_presentation_mechanism" not in w.CERTIFICATION_ROLE_ALLOWLIST
+    src = (SRC / "core" / "hpac_protected_admin_writer.py").read_text()
+    # mint_protected_presentation_evidence_writer is a DISTINCT factory,
+    # reused unchanged (HPAC-PAWA-REQ-248).
+    assert "def mint_protected_presentation_evidence_writer" in src
+    assert "PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS" in src
+
+
+def test_116_challenge_forgery_rejected_by_open_challenge(rig):
+    # a structurally-plausible but non-issued challenge fails
+    # open_challenge_canonical's digest / binding checks.
+    co = _coord(rig)
+    sess = co.begin_session(principal_id=rig.principal_id, credential_id=rig.credential_id)
+
+    class _FakeChallenge:
+        domain_separator = "x"
+        challenge_version = "v1"
+        proof_schema_version = "HPAC-PROOF/2.0"
+        principal_id = rig.principal_id
+        credential_id = rig.credential_id
+        approval_subject_digest = "a" * 64
+        trusted_presentation_digest = "b" * 64
+        nonce = "c" * 64
+        issued_at = "2026-09-07T12:00:00Z"
+        expires_at = "2026-09-07T13:00:00Z"
+        challenge_digest = "d" * 64
+
+    with pytest.raises(cc.CertificationCoordinatorError):
+        sess.open_challenge(
+            approval_id="ria-x", invocation_id="iv-x", attempt_id="at-x",
+            mechanism_id="hpac.fido2.uv_presence.v2",
+            presentation_id="hpe-" + "0" * 32, presentation_digest="b" * 64,
+            challenge=_FakeChallenge(),
+        )
+
+
+def test_117_forged_certification_capability_via_object_new_rejected(rig):
+    h = rig.cw("hpac_gate5_binder")
+    forged = object.__new__(w.CertificationWriterHandle)
+    with pytest.raises((HPACAuthorityError, AttributeError, w.PawaError, TypeError)):
+        # a shell handle has no bound capability / authority
+        forged.consume("hpac_gate5_binder", certification_session_id=rig.session_id, subject=rig.proof_id)
+
+
+def test_118_counter_decision_cannot_be_caller_supplied(rig):
+    # the counter role's authority is bounded to `apply_after_verification`
+    # on an accepted canonical decision — the coordinator never lets a caller
+    # pass ACCEPT/REVIEW/DENY. reach_gate5_assurance takes no `decision` arg.
+    import inspect
+
+    sig = inspect.signature(cc.CertificationSession.reach_gate5_assurance)
+    assert "decision" not in sig.parameters
+    assert "counter_decision" not in sig.parameters
+    pawa = (CONTRACTS / "HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md").read_text()
+    assert "trusting a caller-provided" in pawa and "counter accepted" in pawa
+
+
+def test_119_counter_role_cannot_reset_or_reassign(rig):
+    from pcae.core.hpac_rhamp_counter_state import COUNTER_STATE_VERIFIER_ROLE
+
+    h = rig.cw(COUNTER_STATE_VERIFIER_ROLE)
+    assert h.subject == rig.credential_id
+    # the minted capability is single-use, bound to exactly one credential
+    cap = h.consume(COUNTER_STATE_VERIFIER_ROLE, certification_session_id=rig.session_id, subject=rig.credential_id)
+    assert cap.role == COUNTER_STATE_VERIFIER_ROLE
+    with pytest.raises(w.PawaError):
+        h.consume(COUNTER_STATE_VERIFIER_ROLE, certification_session_id=rig.session_id, subject=rig.credential_id)
+
+
+def test_120_restart_dead_capability_from_a_prior_authority_instance(rig):
+    h1 = rig.cw("hpac_challenge_coordinator")
+    cap1 = h1._capability
+    # a fresh recognition (== a fresh "process" in the seal model) mints a
+    # new authority instance; the old capability fails the new one's identity
+    h2 = rig.cw("hpac_challenge_coordinator")
+    with pytest.raises(HPACAuthorityError):
+        h2.authority.require_writer(cap1, "hpac_challenge_coordinator", subject=rig.proof_id)
+
+
+def test_121_wrong_credential_for_counter_role_rejected(rig):
+    with pytest.raises(w.PawaError) as ei:
+        rig.cw("hpac_rhamp_counter_state_verifier", credential_id="hpc-" + "0" * 32)
+    assert ei.value.code == "operation_scope_invalid"
+
+
+@pytest.mark.parametrize("actor_module", [
+    "pcae.core.agent", "pcae.cli", "pcae.core.runtime_authority",
+    "pcae.core.runtime_dispatch_gate5", "pcae.core.protected_presentation",
+    "pcae.protected_presentation_helper", "pcae.core.hpac_protected_presentation_admin",
+    "pcae.core.hpac_verifier", "pcae.core.daemon", "some.plugin.module",
+])
+def test_122_ordinary_actors_cannot_acquire_certification_authority(rig, actor_module):
+    with pytest.raises(w.PawaError) as ei:
+        rig.cw("hpac_challenge_coordinator", _caller_module=actor_module)
+    assert ei.value.code == "unauthorized_factory_consumer"
+
+
+def test_123_test_fixture_module_is_not_a_production_consumer():
+    # the disclosed test-only seam is exactly this suite; a fixture module
+    # name is not in the production §38A inventory.
+    assert THIS_MODULE not in w.CERTIFICATION_FACTORY_CONSUMERS
+    assert THIS_MODULE in w._CERTIFICATION_TEST_CONSUMERS
+
+
+def test_124_external_effect_termination_contract_and_status():
+    pawa = (CONTRACTS / "HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md").read_text()
+    assert "bounded Gate-5 certification result" in pawa
+    assert "terminates at the bounded Gate-5 assurance result" in pawa
+    assert "authorizes no first" in pawa and "external effect" in pawa
+    out = subprocess.run(["pcae", "runtime", "inspect"], cwd=REPO, capture_output=True, text=True).stdout
+    assert "Runtime status:            not_implemented" in out
+    assert "Execution capability:      unavailable" in out
+    assert "Plugin count:              0" in out
+    assert "Capability count:          0" in out
+
+
+def test_125_no_pawa_operation_added_and_enum_membership_frozen():
+    from pcae.core.hpac_protected_admin_writer import PawaOperation
+
+    assert {m.value for m in PawaOperation} == {
+        "enroll_principal", "revoke_principal", "enroll_credential",
+        "revoke_credential", "initialize_credential_sidecar_state",
+        "configure_presentation_mechanism",
+    }
+
+
+def test_126_every_certification_rejection_maps_to_an_existing_code(rig):
+    seen = set()
+    cases = [
+        ("hpac_lifecycle_terminator", {}),
+        ("wildcard*", {}),
+        ("hpac_challenge_coordinator", {"certification_session_id": ""}),
+        ("hpac_challenge_coordinator", {"proof_id": "bad"}),
+        ("hpac_challenge_coordinator", {"principal_id": "hp-" + "0" * 32}),
+        ("hpac_challenge_coordinator", {"_caller_module": "pcae.core.agent"}),
+    ]
+    for role, over in cases:
+        try:
+            rig.cw(role, **over)
+        except w.PawaError as e:
+            seen.add(e.code)
+    assert seen <= set(w.PAWA_FAILURE_CODES)
+    assert seen <= {"operation_scope_invalid", "unauthorized_factory_consumer",
+                    "protected_root_untrusted", "agent_principal_unknown"}
+
+
+def test_127_certification_capabilities_are_process_local_non_bearer(rig):
+    h = rig.cw("hpac_challenge_coordinator")
+    cap = h._capability
+    # non-bearer: a structural lookalike with copied fields is not authority
+    import copy
+
+    with pytest.raises(TypeError):
+        copy.deepcopy(cap)
+    # process-local: the seal is an object() private to the authority instance
+    assert cap._authority_seal is h.authority._seal
+
+
+def test_128_admin_script_status_does_not_mutate_and_exits_cleanly_or_2():
+    r = subprocess.run(
+        [sys.executable, str(REPO / "scripts" / "hpac_certification_admin.py"), "status"],
+        capture_output=True, text=True,
+    )
+    assert r.returncode in (0, 2)  # 0 if a real root exists, 2 (reported) otherwise
+    # the bounded `status` entry performs only a read; it touches no protected
+    # store and no tracked source file.
+    changed = subprocess.run(
+        ["git", "-C", str(REPO), "diff", "--name-only"], capture_output=True, text=True
+    ).stdout.split()
+    assert not any(p.startswith(("src/", "scripts/", "docs/contracts/", "schemas/")) for p in changed)
+
+
+def test_129_no_new_terminal_reason_and_rhamp_contract_unedited_since_i0():
+    names = subprocess.run(
+        ["git", "-C", str(REPO), "diff", "--name-only", I0, "HEAD", "--",
+         "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.split()
+    assert names == []
+
+
+def test_130_h3_verdict_is_iv_pending_never_self_verified():
+    doc = (REPO / "docs" / "PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_H3_IMPL.md").read_text()
+    # the phase never claims H-3 VERIFIED / N-16-5 CLOSED
+    assert "H-3 VERIFIED" not in doc.replace("INDEPENDENTLY VERIFIED RESOLVED", "")
+    assert "N-16-5 CLOSED" not in doc.replace("N-16-5 NOT CLOSED", "").replace(
+        "do not close N-16-5", ""
+    ).replace("N-16-5 remains NOT CLOSED", "")
+
+
+def test_131_gate5_binder_subject_is_proof_id_and_counter_subject_is_credential_id(rig):
+    assert rig.cw("hpac_gate5_binder").subject == rig.proof_id
+    assert rig.cw("human_authentication_proof_verifier").subject == rig.proof_id
+    assert rig.cw("hpac_assertion_recorder").subject == rig.proof_id
+    assert rig.cw("hpac_rhamp_counter_state_verifier").subject == rig.credential_id
+
+
+def test_132_second_ceremony_capability_not_usable_in_first(rig):
+    co = _coord(rig)
+    s1 = co.begin_session(principal_id=rig.principal_id, credential_id=rig.credential_id)
+    s2 = co.begin_session(principal_id=rig.principal_id, credential_id=rig.credential_id)
+    assert s1.certification_session_id != s2.certification_session_id
+    assert s1.proof_id != s2.proof_id
+    h1 = s1._mint("hpac_challenge_coordinator")
+    with pytest.raises(w.PawaError) as ei:
+        h1.consume("hpac_challenge_coordinator",
+                   certification_session_id=s2.certification_session_id, subject=s1.proof_id)
+    assert ei.value.code == "target_scope_invalid"
+
+
+def test_133_coordinator_short_lived_one_ceremony_per_invocation_documented():
+    text = (SRC / "core" / "hpac_certification_coordinator.py").read_text()
+    assert "ceremony per invocation" in text
+    assert "HPAC-PAWA-REQ-259" in text

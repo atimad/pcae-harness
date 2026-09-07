@@ -65,7 +65,17 @@
   A/B (I0 `74e52d59` worktree vs HEAD, 46-suite band): 67 → 58 failed, 0 new
   attributable code regression (9 previously-failing guards recovered); the
   two `object.__new__` verifier-forgery failures reproduce at I0 (Py 3.14),
-  pre-existing.
+  pre-existing. Test suite part 3 (`test_110`–`test_133`, 106/0 total):
+  deterministic mechanism-id non-elevation; the joint `require_real_assurance`
+  check stays in the verifier; the coordinator constructs no principal / Gate
+  result / seal; PB/policy walls named and unrelaxed; certification family
+  excludes authority-consumption / Gate-9; challenge & `object.__new__`-handle
+  forgery rejected; counter decision never caller-supplied; restart-dead
+  capability; 10 ordinary-actor modules cannot acquire authority;
+  external-effect termination + `pcae runtime inspect` 0/0. Packaging /
+  clean-install smoke: the wheel carries the coordinator, a fresh venv imports
+  it with no `pytest`/`tests` dependency, and the standalone admin script is
+  deliberately not a `console_scripts` entry.
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R`
   (alias **N16-5-H3-PAWA13-IV**) — **Independent Verification of HPAC-PAWA-001
