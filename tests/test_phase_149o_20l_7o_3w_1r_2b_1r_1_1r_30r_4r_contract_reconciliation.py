@@ -261,20 +261,25 @@ def test_32_pawa_and_new_companion_are_only_contract_delta() -> None:
         "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
     }
     assert PPA.exists()
-    # Phase .1R.30R.4R.1 reconciliation — the implementation successor changes
-    # NO normative contract byte.
-    assert (
+    # Phase .1R.30R.4R.1 reconciliation — the implementation successor changed
+    # NO normative contract byte. Reconciled by phase N16-5-H3-PAWA13
+    # (HPAC-PAWA-001 v1.2 -> v1.3, MINOR): the only later normative-contract
+    # delta is the in-place v1.3 evolution of this same PAWA document.
+    assert set(
         subprocess.check_output(
             ["git", "diff", "--name-only", R4R_FINALIZED, "--", "docs/contracts"], cwd=ROOT, text=True
-        ).strip()
-        == ""
-    )
+        ).split()
+    ) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}
 
 
 def test_33_requirement_numbering_is_closed_and_sequential() -> None:
     pawa_nums = [int(v) for v in re.findall(r"\*\*HPAC-PAWA-REQ-(\d{3})(?:\.|\*\*)", text(PAWA))]
     ppa_nums = [int(v) for v in re.findall(r"\*\*HPAC-PPA-REQ-(\d{3})(?:\.|\*\*)", text(PPA))]
-    assert sorted(pawa_nums) == list(range(1, 234))
+    # Point-in-time count reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001
+    # v1.2 -> v1.3, MINOR): v1.2 froze REQ-001..233; v1.3 adds REQ-234..275
+    # (certification-coordinator authority). The property under test — closed,
+    # sequential, no gaps, no duplicates — is unchanged; only the ceiling moves.
+    assert sorted(pawa_nums) in (list(range(1, 234)), list(range(1, 276)))
     assert sorted(ppa_nums) == list(range(1, 77))
 
 

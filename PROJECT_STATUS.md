@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R
+(alias **N16-5-H3-PAWA13**) — HPAC-PAWA-001 v1.3 Certification-Coordinator
+Authority Contract Reconciliation / Freeze. **STATUS: HPAC-PAWA-001 v1.3 —
+FROZEN (MINOR, S-2). H-3 CONTRACT BLOCKER: RESOLVED. H-3 PRODUCTION
+IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED.** Contract-only phase. Predecessor
+`…1.1R.1R.1R` independently reproduced H-3 (the real N-16-5 real-human /
+genuine-YubiKey certification chain had no production authority path). v1.3
+adds the minimum honest delta: (1) one explicitly enumerated,
+non-agent-importable production factory-consumer category — the **N-16-5
+real-human-authentication certification coordinator**
+(`pcae.core.hpac_certification_coordinator` via
+`scripts/hpac_certification_admin.py`), §38A/§39A; (2) one closed
+**certification-lifecycle writer family**, §42B, over the closed five-role
+allowlist `{ hpac_challenge_coordinator, hpac_assertion_recorder,
+human_authentication_proof_verifier, hpac_gate5_binder,
+hpac_rhamp_counter_state_verifier }` (terminator + all else denied), minted only
+by a new `certification_writer(...)` factory reached by that one consumer under
+a dedicated **§33A** recognition sequence that reuses the §33 machinery
+verbatim then adds certification-consumer/role-allowlist/session-binding/mint/
+audit steps, all fail-closed; (3) walls §68A + PAWA-INV-13 (coordinator ≠
+verifier/Gate/human-approver/authenticator/presentation-evidence-writer;
+certification authority ≠ execution/PB/policy/RE/runtime-capability/
+DispatchEnvelope; deterministic never becomes REAL; path terminates at the
+Gate-5 assurance result, no first external effect). No new `pawa_failure_code`
+(21 unchanged, §42C), no new `terminal_reason_code`, no RHAMP-001 edit, no new
+`PawaOperation`, no protected-root schema change, no new companion contract; §96
+specialized not redefined; MINOR under §80/§152 (S-2, §80.3, full MAJOR-trigger
+review — none fires). **No `src/pcae`/`scripts`/`pyproject.toml`/dependency
+change. No ceremony. 0 protected-root writes.** Counter untouched (generation
+0). Runtime `not_implemented`/`Observed`/`observe`/`unavailable`, 0/0. No first
+governed runtime external effect. Contract-only verification suite 54/0; four
+point-in-time guards reconciled (`HPAC-PAWA-REQ-217` discipline — no `def test_`
+renamed/removed/skipped). Dedicated HPAC-PAWA-001 v1.3 contract IV
+(`HPAC-PAWA-REQ-274`, alias **N16-5-H3-PAWA13-IV**) recommended before the H-3
+implementation relies on this text. **N-16-5: NOT CLOSED. F-5: DEPLOYMENT
+VERIFIED — CERTIFICATION BLOCKED PENDING H-3 IMPLEMENTATION.** N-16-6 / N-16-7
+OPEN / UNTOUCHED (N-16-7 strictly last). H0 = `b2530066`. Evidence
+`.pcae/certification/n16_5_h3_pawa13_v1_3_contract_freeze.json`; report
+`docs/PHASE_…_1R_HPAC_PAWA_001_V1_3_CERTIFICATION_COORDINATOR_AUTHORITY_CONTRACT_RECONCILIATION_FREEZE.md`.
+**Next = the dedicated HPAC-PAWA-001 v1.3 contract IV (N16-5-H3-PAWA13-IV;
+derived, not begun) → N-16-5 H-3 production implementation (N16-5-H3-IMPL) →
+implementation IV (N16-5-H3-IV) → fresh final real-human / genuine-YubiKey
+N-16-5 certification (N16-5-FINAL-CERT; fresh CPIPC-valid successor id — do not
+reuse a completed certification phase id).**
+
+## Prior Phase (.1R.1R.1R)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R
 — N-16-5 Production Authority-Path Repair for Real-Human / Genuine-YubiKey
 Certification — H-3 Challenge / Proof / Lifecycle / Counter / Gate-5
@@ -47,7 +94,7 @@ production implementation phase → then a dedicated IV phase → then a fresh
 final real-certification phase (re-run the predecessor certification phase
 unchanged; do not reuse a completed phase ID).
 
-## Prior Phase
+## Prior Phase (.30R.5R.2…1.1R.1)
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1
 — Final Real-Human / Genuine-YubiKey Protected-Presentation N-16-5

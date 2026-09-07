@@ -294,7 +294,12 @@ def test_06_no_normative_contract_changed_since_A():
 
 def test_07_contract_identities_are_the_frozen_versions():
     assert "HPAC-PPA-001 v1.0" in PPA_CONTRACT.read_text()
-    assert PAWA_CONTRACT.read_text().splitlines()[0].startswith("# HPAC-PAWA-001 v1.2")
+    # Point-in-time guard reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001
+    # v1.2 -> v1.3, MINOR): the v1.2 identity requirement is preserved as the
+    # floor; v1.3 is the current in-place evolution of the same document.
+    assert PAWA_CONTRACT.read_text().splitlines()[0].startswith(
+        ("# HPAC-PAWA-001 v1.2", "# HPAC-PAWA-001 v1.3")
+    )
     assert "RHAMP-001 v1.0" in RHAMP_CONTRACT.read_text()
 
 

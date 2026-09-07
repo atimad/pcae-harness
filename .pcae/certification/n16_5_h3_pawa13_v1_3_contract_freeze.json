@@ -1,0 +1,193 @@
+{
+  "schema": "PCAE-N16-5-H3-PAWA13-V1-3-CONTRACT-FREEZE/1.0",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R",
+  "phase_alias": "N16-5-H3-PAWA13",
+  "phase_title": "HPAC-PAWA-001 v1.3 Certification-Coordinator Authority Contract Reconciliation / Freeze",
+  "status": "COMPLETE",
+  "verdict": "HPAC-PAWA-001 v1.3 FROZEN (MINOR, S-2); H-3 CONTRACT BLOCKER RESOLVED; H-3 PRODUCTION IMPLEMENTATION PENDING; N-16-5 NOT CLOSED",
+  "predecessor": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R",
+  "H0_phase_entry_sha": "b2530066b062b14b3c6f6df7c71c3092b22f215b",
+  "origin_main_ahead_at_entry": 0,
+  "origin_main_ahead_at_exit": 0,
+  "cpipc_successor_validation": {
+    "candidate": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R",
+    "parser": "pcae.core.phase_id",
+    "is_valid": true,
+    "same_series": true,
+    "same_branch": true,
+    "strict_order_predecessor_to_candidate": "less",
+    "direct_valid_successor": true,
+    "unique_absent_from_tasks_done_and_docs": true,
+    "reuses_completed_phase_id": false,
+    "parallel_numbering_introduced": false,
+    "mechanical_discrepancy": false,
+    "alias_used_as_display_only": true
+  },
+  "orientation": {
+    "git_status": "clean at entry; branch main even with origin/main",
+    "pcae_health": "healthy",
+    "pcae_check": "passed",
+    "runtime_inspect": "not_implemented / Observed / observe / unavailable; registry empty; 0 plugins / 0 capabilities; PB execution_unavailable; posture non-executing",
+    "telegram": "configured, enabled, outbound-ready",
+    "predecessor_is_latest_canonical_completed_phase": true,
+    "no_conflicting_active_phase": true
+  },
+  "h3_contract_conflict": {
+    "verdict": "VERIFIED",
+    "pre_repair_production_certification_authority_path": "ABSENT",
+    "test_only_mechanical_path": "PRESENT",
+    "primary_source_read": [
+      "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md (v1.2, all 2767 lines)",
+      "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
+      "docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md",
+      "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md",
+      "src/pcae/core/hpac_lifecycle.py",
+      "src/pcae/core/human_authentication_proof.py",
+      "src/pcae/core/hpac_rhamp_counter_state.py",
+      "src/pcae/core/hpac_verifier.py",
+      "src/pcae/core/hpac_protected_admin_writer.py"
+    ],
+    "req_087_088_223_224_reconciliation": {
+      "HPAC-PAWA-REQ-087": "CLARIFIED BY NEW REQUIREMENT (amended in place: one further category for the separate certification_writer factory; set stays closed)",
+      "HPAC-PAWA-REQ-088": "UNCHANGED; restated for the certification factory in HPAC-PAWA-REQ-240",
+      "HPAC-PAWA-REQ-223": "UNCHANGED; used as the precedented amendment form for HPAC-PAWA-REQ-239",
+      "HPAC-PAWA-REQ-224": "UNCHANGED; mirrored for the certification module/script in HPAC-PAWA-REQ-241",
+      "HPAC-PAWA-REQ-095_096": "SPECIALIZED IN PART (REQ-096 amended in place: §42B narrow enumerated exception; verifier sole author outside a bounded certification session)"
+    }
+  },
+  "five_role_allowlist": {
+    "independently_revalidated": true,
+    "source_constants": {
+      "hpac_challenge_coordinator": "HPACLifecycleStore._GENESIS_WRITER_ROLE",
+      "hpac_assertion_recorder": "HPACLifecycleStore._ASSERTION_WRITER_ROLE",
+      "human_authentication_proof_verifier": "HPACLifecycleStore._VERIFIED_WRITER_ROLE + HumanAuthenticationProofStore._WRITER_ROLE",
+      "hpac_gate5_binder": "HPACLifecycleStore._BOUND_WRITER_ROLE",
+      "hpac_rhamp_counter_state_verifier": "hpac_rhamp_counter_state.COUNTER_STATE_VERIFIER_ROLE"
+    },
+    "excluded_role": "hpac_lifecycle_terminator (HPACLifecycleStore._TERMINAL_WRITER_ROLE) — writes only EXPIRED/REVOKED/REJECTED; not on the positive path; a rejected/expired ceremony fails closed with no production write; a real future need is a new governed contract evolution",
+    "expansion_beyond_predecessor_list": "none"
+  },
+  "contract_shape_disposition": {
+    "chosen": "A — one enumerated factory-consumer category + closed five-role allowlist + dedicated certification_writer factory + §33A recognition sequence; no monolith required (§57)",
+    "rejected": {
+      "B": "per-role sub-consumer modules — heavier without added authority separation (retained as a permitted implementation refinement)",
+      "C": "per-role factory categories — multiplies recognition surface; one trust root",
+      "D": "new multi-role PawaOperation — weakens per-write/per-role/single-use binding; closer to generic certification authority"
+    },
+    "preference_applied": "narrowest design with the strongest authority separation"
+  },
+  "v1_3_normative_delta": {
+    "new_sections": ["7B", "33A", "38A", "39A", "42B", "42C", "43A", "44A", "49A", "68A", "80.3", "90.3", "95B", "95.2", "96B"],
+    "amended_in_place": ["title", "Contract identity/status header", "§7 lineage paragraphs", "HPAC-PAWA-REQ-087", "HPAC-PAWA-REQ-096", "§91 inventory", "§92 heading", "§93 self-consistency", "§94 history"],
+    "new_requirements": "HPAC-PAWA-REQ-234 .. HPAC-PAWA-REQ-275 (42)",
+    "requirement_count": {"v1_0": 163, "v1_1": 218, "v1_2": 233, "v1_3": 275},
+    "invariant_count": {"v1_2": 12, "v1_3": 13},
+    "new_invariant": "PAWA-INV-13",
+    "new_pawa_failure_code": "none (21 unchanged; §42C maps every v1.3 rejection onto #15/#16/#17/#18/#20/#21 or a §33 conjunct's exact code)",
+    "new_terminal_reason_code": "none (RHAMP-001 v1.0 §49 41-code vocabulary byte-unchanged; RHAMP-001 not edited)",
+    "new_pawa_operation": "none",
+    "new_protected_root_artifact_or_schema_field": "none",
+    "new_companion_contract": "none",
+    "96_disposition": "SPECIALIZED (narrow enumerated exception), NOT redefined"
+  },
+  "minor_adjudication": {
+    "classification": "MINOR",
+    "rule": "S-2 (§80.3 / HPAC-PAWA-REQ-269)",
+    "major_trigger_review": "none of the §152 triggers fires (HPAC-PAWA-REQ-270): authority basis stays live effective filesystem write authority; configured-agent exclusion and two-OS-principal topology reused unchanged; no remote authority; capability non-bearer/non-durable/non-serialisable/single-use/restart-dead; no runtime/PB/RE/runtime-capability/execution authority; bootstrap trust root and generation/rollback protection unchanged; no signing/pinned key/keychain; consumer inventory widened by exactly one explicitly enumerated category; role set exactly one explicitly enumerated closed allowlist",
+    "consistent_with": ["HPAC-PAWA-REQ-153 permits", "v1.2 §80.2 precedent", "v1.1 S-1 / HPAC-001 v2.1 MINOR precedent"],
+    "residual_risk_note": "a reasonable reader could argue the §96 specialization approaches a mutation-scope change; the dedicated HPAC-PAWA-001 v1.3 contract IV (HPAC-PAWA-REQ-274) is the recommended default before the H-3 implementation relies on this text (v1.1 C-3 precedent)"
+  },
+  "cross_contract_consistency": {
+    "verdict": "VERIFIED — NOT BLOCKED",
+    "no_second_frozen_contract_requires_amendment": true,
+    "byte_unchanged_at_H0": [
+      "HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
+      "REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md",
+      "HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md",
+      "HATP_CLASS_B_DEPLOYMENT_CONTRACT.md",
+      "every other docs/contracts file except the PAWA contract itself"
+    ]
+  },
+  "contract_verification_suite": {
+    "path": "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_n16_5_h3_pawa13_v1_3_contract_reconciliation.py",
+    "cases": 54,
+    "passed": 54,
+    "failed": 0,
+    "kind": "static / read-only contract-text verification; no functional implementation test; no manufactured success evidence"
+  },
+  "point_in_time_guard_reconciliation": {
+    "discipline": "HPAC-PAWA-REQ-217 — mechanical maintenance; no def test_ renamed / removed / skipped / xfailed",
+    "reconciled": [
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv.py::test_07_contract_identities_are_the_frozen_versions",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_contract_reconciliation.py::test_32_pawa_and_new_companion_are_only_contract_delta",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_contract_reconciliation.py::test_33_requirement_numbering_is_closed_and_sequential",
+      "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_3r_decomposition_adjudication.py::test_rhamp_001_byte_unchanged_since_baseline_a (pre-existing failure at H0, stale from v1.2 / .30R.4R, reproduced identically under git stash; reconciled to the guard's true intent)"
+    ]
+  },
+  "no_ceremony_no_mutation_attestation": {
+    "makeCredential": 0, "real_getAssertion": 0, "yubikey_touch": 0, "fido2_pin_prompt": 0,
+    "protected_APPROVE": 0, "protected_REJECT": 0, "real_presentation_evidence": 0,
+    "challenges_opened": 0, "proofs_created": 0, "gate5_certifications": 0, "principals_minted": 0,
+    "require_real_assurance_true_calls": 0,
+    "authorized_protected_host_mutation": 0, "unauthorized_protected_host_mutation": 0,
+    "counter_state_generation_before": 0, "counter_state_generation_after": 0,
+    "secrets_requested_or_echoed_or_logged": 0
+  },
+  "boundaries_preserved": {
+    "git_diff_name_only_H0_HEAD": "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md; docs/PHASE_...; tests/... (new contract-only suite + 4 guard reconciliations); PROJECT_STATUS.md; CHANGELOG.md; tasks/**; .pcae/**",
+    "src_pcae_change": "none",
+    "scripts_change": "none",
+    "pyproject_or_dependency_change": "none",
+    "docs_contracts_files_changed": ["docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"],
+    "protected_state_change": "none (principal / credential / counter / protected-root / helper / generation / PPA-registration unchanged)",
+    "runtime": "not_implemented / Observed / observe / unavailable; 0 plugins / 0 capabilities — unchanged",
+    "first_governed_runtime_external_effect": "ABSENT / UNREACHABLE",
+    "mechanism_neutrality": "human principal mechanism-neutral; hpac.fido2.uv_presence.v2 and pcae-protected-local-presentation/1.0 supported / non-exclusive; mobile / passkey future path open",
+    "delegated_3_finalization_commit_push": "UNAUTHORIZED — preserved; no delegated worker used",
+    "telegram_notification_auditability": "preserved; no historical re-dispatch; this phase's normal completion notification authorized"
+  },
+  "successor_phases_derived_not_begun": [
+    {"alias": "N16-5-H3-PAWA13-IV", "title": "Dedicated Independent Verification of HPAC-PAWA-001 v1.3", "ref": "HPAC-PAWA-REQ-274"},
+    {"alias": "N16-5-H3-IMPL", "title": "N-16-5 Production Certification Authority-Path Implementation Against HPAC-PAWA-001 v1.3 — H-3 Repair"},
+    {"alias": "N16-5-H3-IV", "title": "Dedicated Independent Verification of the H-3 implementation"},
+    {"alias": "N16-5-FINAL-CERT", "title": "Fresh final real-human / genuine-YubiKey N-16-5 certification (fresh CPIPC-valid successor id)"}
+  ],
+  "final_verdicts": {
+    "PHASE_ALIAS": "N16-5-H3-PAWA13",
+    "HPAC_PAWA_001_PREVIOUS_VERSION": "v1.2",
+    "HPAC_PAWA_001_CURRENT_VERSION": "v1.3",
+    "H3_CONTRACT_CONFLICT": "VERIFIED",
+    "AUTHORIZED_FACTORY_CONSUMER_SET": "CLOSED",
+    "NEW_CERTIFICATION_FACTORY_CONSUMER_CATEGORY": "FROZEN",
+    "CERTIFICATION_CATEGORY_RECOGNITION_SEQUENCE": "FROZEN",
+    "CERTIFICATION_ROLE_ALLOWLIST": ["hpac_challenge_coordinator", "hpac_assertion_recorder", "human_authentication_proof_verifier", "hpac_gate5_binder", "hpac_rhamp_counter_state_verifier"],
+    "UNKNOWN_ROLE": "DENY (operation_scope_invalid)",
+    "ORDINARY_LAUNCHER": "UNAUTHORIZED",
+    "HELPER": "UNAUTHORIZED",
+    "ORDINARY_VERIFIER": "UNAUTHORIZED",
+    "ORDINARY_GATE": "UNAUTHORIZED",
+    "RUNTIME": "UNAUTHORIZED",
+    "AGENT": "UNAUTHORIZED",
+    "ORDINARY_CLI": "UNAUTHORIZED",
+    "PLUGIN": "UNAUTHORIZED",
+    "REMINT_DELEGATION": "DENIED",
+    "GENERIC_PRODUCTION_WRITER_AUTHORITY": "NOT INTRODUCED",
+    "NON_BEARER_TRUSTED_CONSTRUCTION_SEMANTICS": "PRESERVED",
+    "HUMAN_APPROVAL_SEPARATION": "PRESERVED",
+    "REAL_VS_DETERMINISTIC_ASSURANCE_WALL": "PRESERVED",
+    "PB_POLICY_WALL": "PRESERVED",
+    "RUNTIME_EFFECT_WALL": "PRESERVED",
+    "CROSS_CONTRACT_CONSISTENCY": "VERIFIED",
+    "PRODUCTION_IMPLEMENTATION": "NOT PERFORMED",
+    "REAL_CEREMONY": "NOT PERFORMED",
+    "H3_CONTRACT_BLOCKER": "RESOLVED",
+    "H3_PRODUCTION_IMPLEMENTATION": "PENDING",
+    "H3": "CONTRACT RECONCILED — IMPLEMENTATION PENDING",
+    "F5": "DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED PENDING H-3 IMPLEMENTATION",
+    "N_16_5": "NOT CLOSED",
+    "N_16_6": "OPEN / UNTOUCHED",
+    "N_16_7": "OPEN / UNTOUCHED / STRICTLY LAST",
+    "RUNTIME_STATE": "not_implemented / Observed / observe / unavailable (0 plugins / 0 capabilities)",
+    "FIRST_GOVERNED_RUNTIME_EXTERNAL_EFFECT": "ABSENT / UNREACHABLE"
+  }
+}

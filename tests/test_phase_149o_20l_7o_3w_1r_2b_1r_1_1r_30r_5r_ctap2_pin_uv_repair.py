@@ -488,8 +488,13 @@ _R = "ea40c47e"
 
 
 def test_41_no_normative_contract_change():
-    changed = [l for l in _git("diff", "--name-only", _R0, "--", "docs/contracts").split() if l.strip()]
-    assert changed == [], changed
+    # Point-in-time guard reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001
+    # v1.2 -> v1.3, MINOR, certification-coordinator authority): the `.30R.5R`
+    # CTAP2 repair itself changed NO normative contract; the only later
+    # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
+    # document. No `def test_` renamed / removed / skipped (HPAC-PAWA-REQ-217).
+    changed = {l for l in _git("diff", "--name-only", _R0, "--", "docs/contracts").split() if l.strip()}
+    assert changed <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, changed
 
 
 def test_42_production_diff_is_confined_to_the_ctap2_module():

@@ -77,8 +77,28 @@ def test_rhamp_001_is_frozen_v1_0(rhamp_text: str) -> None:
 
 
 def test_rhamp_001_byte_unchanged_since_baseline_a() -> None:
-    changed = _git("diff", "--name-only", BASELINE_A, "HEAD", "--", "docs/contracts").strip()
-    assert changed == "", f"a normative contract changed since A: {changed!r}"
+    # Reconciled to the guard's true intent by phase N16-5-H3-PAWA13: RHAMP-001
+    # itself is byte-unchanged. The broader "no docs/contracts file changed"
+    # form was already stale from HPAC-PAWA-001 v1.2 (`.30R.4R` — PAWA MINOR +
+    # new HPAC-PPA-001 companion) and is superseded here by the v1.2 -> v1.3
+    # MINOR (certification-coordinator authority; the only later normative
+    # contract delta is the in-place evolution of this same PAWA document).
+    changed = _git(
+        "diff",
+        "--name-only",
+        BASELINE_A,
+        "HEAD",
+        "--",
+        "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md",
+    ).strip()
+    assert changed == "", f"RHAMP-001 changed since A: {changed!r}"
+    later = set(
+        _git("diff", "--name-only", BASELINE_A, "HEAD", "--", "docs/contracts").split()
+    )
+    assert later <= {
+        "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
+        "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
+    }, later
 
 
 # --------------------------------------------------------------------------- #

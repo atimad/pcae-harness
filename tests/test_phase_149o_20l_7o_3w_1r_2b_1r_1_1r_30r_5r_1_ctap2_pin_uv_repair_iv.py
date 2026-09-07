@@ -243,6 +243,9 @@ def test_19_r30r5r_repair_suite_still_passes():
          "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_ctap2_pin_uv_repair.py"],
         capture_output=True, text=True, cwd=str(REPO),
     )
+    # Count reconciled by phase N16-5-H3-PAWA13: the `.30R.5R` repair suite is
+    # unchanged in shape; test_41's point-in-time contract guard was widened to
+    # allow the in-place HPAC-PAWA-001 v1.2 -> v1.3 evolution.
     assert "48 passed" in out.stdout, out.stdout[-3000:]
 
 
