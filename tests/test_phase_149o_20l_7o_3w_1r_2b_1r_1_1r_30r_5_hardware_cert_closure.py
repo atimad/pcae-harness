@@ -61,7 +61,12 @@ def test_phase_entry_sha_is_the_finalized_30r4r2_head():
 # ── 2. Contracts byte-unchanged since A ───────────────────────────────────
 
 def test_all_contracts_byte_unchanged_since_A():
-    assert _git("diff", "--name-only", A, "HEAD", "--", "docs/contracts").strip() == ""
+    # N16-5-H3-PAWA13: the in-place HPAC-PAWA-001 v1.2 -> v1.3 MINOR
+    # (certification-coordinator authority) is the only later docs/contracts
+    # delta; this phase (`.30R.5`, hardware-cert closure) changed no contract.
+    assert set(_git("diff", "--name-only", A, "HEAD", "--", "docs/contracts").split()) <= {
+        "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
+    }
 
 
 @pytest.mark.parametrize(
@@ -73,6 +78,12 @@ def test_all_contracts_byte_unchanged_since_A():
     ],
 )
 def test_named_normative_contract_unchanged(contract):
+    if contract == "HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md":
+        # N16-5-H3-PAWA13: HPAC-PAWA-001 v1.2 -> v1.3 evolved this file in place
+        # after `.30R.5`'s entry (MINOR; certification-coordinator authority).
+        # `.30R.5` itself changed no contract; the delta is verified by the
+        # v1.3 contract-reconciliation suite.
+        return
     assert (
         _git("diff", "--stat", A, "HEAD", "--", f"docs/contracts/{contract}").strip()
         == ""

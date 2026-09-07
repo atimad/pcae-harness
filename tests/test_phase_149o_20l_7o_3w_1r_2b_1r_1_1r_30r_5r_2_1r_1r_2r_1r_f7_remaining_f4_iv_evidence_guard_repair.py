@@ -149,7 +149,8 @@ def test_57_h1_bytes_unchanged(): assert git("diff","--name-only",R0,"--","src/p
 def test_58_no_production_source_change(): assert git("diff","--name-only",R0,"--","src/pcae")==""
 def test_59_no_production_script_change(): assert git("diff","--name-only",R0,"--","scripts")==""
 def test_60_no_dependency_change(): assert git("diff","--name-only",R0,"--","pyproject.toml")==""
-def test_61_no_contract_change(): assert git("diff","--name-only",R0,"--","docs/contracts")==""
+def test_61_no_contract_change():  # N16-5-H3-PAWA13: allow the in-place HPAC-PAWA-001 v1.2->v1.3 evolution
+    assert set(git("diff","--name-only",R0,"--","docs/contracts").split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}
 def test_62_f5_absent(): assert not PROTECTED_ROOT.exists()
 def test_63_no_protected_root_mutation(): assert "F-5: OPEN / ABSENT / UNCHANGED" in REPORT.read_text()
 def test_64_no_helper_installation(): assert not PROTECTED_ROOT.exists()

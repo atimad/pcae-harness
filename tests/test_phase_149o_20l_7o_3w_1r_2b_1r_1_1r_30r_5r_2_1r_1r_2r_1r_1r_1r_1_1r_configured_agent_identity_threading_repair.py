@@ -141,7 +141,12 @@ def test_production_diff_scope_bounded_to_topology_verifier():
 
 def test_contracts_byte_unchanged_since_repair_entry():
     result = _git("diff", "--name-only", REPAIR_ENTRY_SHA, "--", "docs/contracts/")
-    assert result.stdout.strip() == "", result.stdout
+  # Reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001 v1.2 -> v1.3,
+  # MINOR, S-2: certification-coordinator authority). The only later
+  # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
+  # document (verified by the v1.3 contract-reconciliation suite). No
+  # `def test_` renamed / removed / skipped (HPAC-PAWA-REQ-217).
+    assert set(result.stdout.split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}, result.stdout
 
 
 def test_pyproject_byte_unchanged_since_repair_entry():

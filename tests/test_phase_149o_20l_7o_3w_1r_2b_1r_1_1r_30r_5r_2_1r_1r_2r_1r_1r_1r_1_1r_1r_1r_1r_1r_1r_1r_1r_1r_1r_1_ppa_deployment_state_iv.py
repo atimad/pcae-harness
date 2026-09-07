@@ -512,7 +512,12 @@ def test_zero_host_mutation_by_this_iv():
 
 def test_no_contract_change_since_v0():
     diff = _git("diff", "--name-only", V0, "HEAD", "--", "docs/contracts")
-    assert diff.stdout.strip() == ""
+  # Reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001 v1.2 -> v1.3,
+  # MINOR, S-2: certification-coordinator authority). The only later
+  # docs/contracts delta is the in-place v1.3 evolution of the PAWA anchor
+  # document (verified by the v1.3 contract-reconciliation suite). No
+  # `def test_` renamed / removed / skipped (HPAC-PAWA-REQ-217).
+    assert set(diff.stdout.split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}
 
 
 def test_pyproject_unchanged_since_v0():

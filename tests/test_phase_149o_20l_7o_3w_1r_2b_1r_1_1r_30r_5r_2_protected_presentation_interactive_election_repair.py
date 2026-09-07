@@ -159,8 +159,15 @@ def test_03_h2_and_f2_are_reconstructed_from_the_entry_blob():
 
 
 def test_04_no_normative_contract_changed():
-    assert _git("diff", "--name-only", ENTRY, "--", "docs/contracts").strip() == ""
+    # N16-5-H3-PAWA13: HPAC-PAWA-001 v1.2 -> v1.3 (MINOR, S-2:
+    # certification-coordinator authority) evolved the PAWA anchor document in
+    # place after this phase's entry. This phase changed no contract itself;
+    # the delta is verified by the v1.3 contract-reconciliation suite.
+    _PAWA = "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
+    assert set(_git("diff", "--name-only", ENTRY, "--", "docs/contracts").split()) <= {_PAWA}
     for rel in CONTRACTS:
+        if rel == _PAWA:
+            continue
         assert _git("diff", "--quiet", ENTRY, "--", rel) == ""
 
 

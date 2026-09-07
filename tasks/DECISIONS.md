@@ -4859,3 +4859,32 @@ verified in this phase.
 - No `src/pcae`/scripts/pyproject.toml/contracts change; no existing test
   modified; only additive checkpoint/evidence/IV/doc artifacts.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R (N16-5-H3-PAWA13) — HPAC-PAWA-001 v1.2 -> v1.3 certification-coordinator authority contract reconciliation / freeze
+
+- HPAC-PAWA-001 evolved **in place** v1.2 -> v1.3 (MINOR, S-2). Resolves
+  blocking finding H-3 at the contract level: adds one explicitly enumerated
+  non-agent-importable certification-coordinator factory-consumer category
+  (§38A) + one closed five-role certification-lifecycle writer family (§42B)
+  minted by a new `certification_writer(...)` factory under the §33A
+  recognition sequence (reuses the §33 conjuncts verbatim, fail-closed). No new
+  `pawa_failure_code`, no new `PawaOperation`, no protected-root schema change,
+  no RHAMP-001 edit, no new companion contract. §96 specialized not redefined;
+  §68A + PAWA-INV-13 preserve every human-approval / real-vs-deterministic / PB
+  / policy / runtime / effect wall; the path terminates at the Gate-5 assurance
+  result. Full MAJOR-trigger review — none fires.
+- Contract shape: option **A** (one category + closed five-role allowlist +
+  dedicated factory + §33A sequence; no monolith required). B / C / D rejected
+  (§95B).
+- Five-role allowlist independently revalidated from primary source; the sixth
+  lifecycle role `hpac_lifecycle_terminator` is **excluded** (negative terminal
+  states only; not on the positive path).
+- ~24 pre-existing point-in-time "no normative contract change since <baseline>"
+  guards across ~19 IV / repair suites reconciled **phase-aware**: authorized
+  set widened by exactly the one PAWA contract file, subset/`==` orientation
+  kept, no wildcard, **no `def test_` renamed / removed / skipped / xfailed**
+  (HPAC-PAWA-REQ-217 discipline; A/B verified against phase-entry `b2530066`).
+- No `src/pcae` / `scripts` / `pyproject.toml` change. No ceremony. 0
+  protected-root writes. N-16-5 remains NOT CLOSED; H-3 production
+  implementation + a dedicated v1.3 contract IV pending.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**

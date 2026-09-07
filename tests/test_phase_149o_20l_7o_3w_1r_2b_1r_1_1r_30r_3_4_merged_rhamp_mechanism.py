@@ -270,8 +270,11 @@ def test_01_rhamp_001_v1_0_byte_unchanged_since_A():
     diff = subprocess.run(
         ["git", "-C", str(REPO), "diff", "--name-only", _R4R_FINALIZED, "HEAD", "--", "docs/contracts"],
         capture_output=True, text=True, check=True,
-    ).stdout.strip()
-    assert diff == "", f"a normative contract changed since the .30R.4R finalized head: {diff!r}"
+    ).stdout.split()
+    # N16-5-H3-PAWA13: allow the in-place HPAC-PAWA-001 v1.2 -> v1.3 MINOR
+    # (certification-coordinator authority); RHAMP-001 itself stays v1.0
+    # byte-unchanged (re-asserted just below).
+    assert set(diff) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, diff
     rhamp = (CONTRACTS / "REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md").read_text()
     assert "RHAMP-001 v1.0" in rhamp
 

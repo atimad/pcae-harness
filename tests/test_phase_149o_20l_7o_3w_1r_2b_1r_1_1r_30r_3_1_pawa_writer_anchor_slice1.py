@@ -1301,7 +1301,10 @@ def test_87_contract_byte_identity_hpac_rhamp_hbdc_unchanged_since_entry():
         ["git", "-C", str(REPO), "diff", "--name-only", r4r_finalized, "HEAD", "--", "docs/contracts"],
         capture_output=True, text=True, check=True,
     ).stdout.split()
-    assert changed == [], f"no contract file changes since the .30R.4R finalized head: {changed}"
+    # N16-5-H3-PAWA13: the in-place HPAC-PAWA-001 v1.2 -> v1.3 MINOR
+    # (certification-coordinator authority) is the only later docs/contracts
+    # delta; `.30R.3.1` still changed no contract itself.
+    assert set(changed) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, changed
 
 
 def test_88_no_src_pcae_writer_capability_second_construction_site():

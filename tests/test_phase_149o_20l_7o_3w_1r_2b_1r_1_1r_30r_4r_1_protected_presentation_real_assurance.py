@@ -232,10 +232,23 @@ def test_03_rhamp_and_hpac_byte_unchanged_since_r4r():
     for path in ("docs/contracts", "src/pcae/core/hpac_rhamp_ctap2.py",
                  "src/pcae/core/hpac_rhamp_assertion_verify.py", "src/pcae/core/human_authenticator_fido2.py"):
         assert subprocess.run(["git", "diff", "--quiet", r4r, r4r1_head, "--", path], cwd=REPO).returncode == 0, path
-    # contracts + the assertion-verify / authenticator modules remain byte-unchanged at HEAD too
-    for path in ("docs/contracts", "src/pcae/core/hpac_rhamp_assertion_verify.py",
+    # the assertion-verify / authenticator modules remain byte-unchanged at HEAD too
+    for path in ("src/pcae/core/hpac_rhamp_assertion_verify.py",
                  "src/pcae/core/human_authenticator_fido2.py"):
         assert subprocess.run(["git", "diff", "--quiet", r4r, "HEAD", "--", path], cwd=REPO).returncode == 0, path
+    # N16-5-H3-PAWA13: docs/contracts at HEAD differs from r4r only by the
+    # in-place HPAC-PAWA-001 v1.2 -> v1.3 MINOR (certification-coordinator
+    # authority); RHAMP-001 / HPAC-001 themselves stay byte-unchanged.
+    changed = subprocess.run(
+        ["git", "diff", "--name-only", r4r, "HEAD", "--", "docs/contracts"],
+        cwd=REPO, capture_output=True, text=True,
+    ).stdout.split()
+    assert set(changed) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, changed
+    for c in ("REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md",
+              "HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md"):
+        assert subprocess.run(
+            ["git", "diff", "--quiet", r4r, "HEAD", "--", f"docs/contracts/{c}"], cwd=REPO
+        ).returncode == 0, c
 
 
 def test_04_historical_30r4_blocked_report_preserved():
