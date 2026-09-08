@@ -25,7 +25,7 @@
     },
     "validation_results": {
         "fast_green": "0 passed, 0 failed (certification phase blocked before ceremony; no test or code change)",
-        "cpipc": "canonical id = predecessor N16-5-H3-IV + exactly one direct .1R; same series 149O.20L.7O.3W; same branch main; strict order; direct successor; unique (id unused in repo); no active conflicting phase; canonical id used verbatim; alias display-only; NO discrepancy",
+        "cpipc": "canonical id = predecessor N16-5-H3-IV + exactly one direct .1R segment; same series root as the predecessor; same branch main; strict order; direct successor; unique (id unused in repo); no active conflicting phase; canonical id used verbatim; alias display-only; NO discrepancy",
         "shas": "C0 = H3_IV_FINAL = 633c77f78f9b5aecd2bda4d9bf44ba3c39b52203 (origin/main HEAD at phase entry; no governed phase opened since the IV push)",
         "h3_authority_freshness": "VERIFIED -- git diff a3af3a04^..HEAD over src/pcae + scripts + pyproject.toml + docs/contracts + schemas = EMPTY; the four H-3 production files are byte-identical to the independently-verified N16-5-H3-IV state; the four files' last-touching commits (f8dfab4c / df915e32 / 5519faa4 / 0a194b13) all predate the IV phase entry",
         "live_host": "VERIFIED -- Atilas-MacBook-Pro; the fixed macOS protected root /Library/Application Support/PCAE/HPAC/protected-root is present",

@@ -22,13 +22,12 @@ Idle: awaiting next governed phase (post-N16-5-FINAL-CERT BLOCKED F-5-B1); N-16-
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/certification/**
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/**
 
 ## Forbidden Files
 
