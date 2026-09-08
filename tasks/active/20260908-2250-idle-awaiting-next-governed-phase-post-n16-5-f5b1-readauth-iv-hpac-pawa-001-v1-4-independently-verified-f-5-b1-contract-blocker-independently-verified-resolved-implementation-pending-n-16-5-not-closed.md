@@ -1,0 +1,77 @@
+# Task Contract
+
+## Task ID
+
+20260908-2250-idle-awaiting-next-governed-phase-post-n16-5-f5b1-readauth-iv-hpac-pawa-001-v1-4-independently-verified-f-5-b1-contract-blocker-independently-verified-resolved-implementation-pending-n-16-5-not-closed
+
+## Title
+
+Idle: awaiting next governed phase (post-N16-5-F5B1-READAUTH-IV); HPAC-PAWA-001 v1.4 INDEPENDENTLY VERIFIED; F-5-B1 contract blocker INDEPENDENTLY VERIFIED RESOLVED / implementation PENDING; N-16-5 NOT CLOSED
+
+## Status
+
+active
+
+## Mode
+
+documentation
+
+## Goal
+
+Idle: awaiting next governed phase (post-N16-5-F5B1-READAUTH-IV); HPAC-PAWA-001 v1.4 INDEPENDENTLY VERIFIED; F-5-B1 contract blocker INDEPENDENTLY VERIFIED RESOLVED / implementation PENDING; N-16-5 NOT CLOSED
+
+## Allowed Files
+
+- .pcae/**
+- docs/**
+- tests/**
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- tasks/**
+
+## Forbidden Files
+
+- TBD
+
+
+## Allowed Zones
+
+- TBD
+
+## Forbidden Zones
+
+- TBD
+
+## Allowed Dependencies
+
+- TBD
+
+## Forbidden Dependencies
+
+- TBD
+
+## Enforcement Mode
+
+strict
+
+## Forbidden Changes
+
+- TBD
+
+## Acceptance Criteria
+
+- TBD
+
+## Acceptance Checks
+
+- pcae status coherence passes
+- pcae health passes
+- pcae check passes
+
+## Documentation Requirements
+
+- Update project memory files when workflow-visible behavior changes.
+
+## Created Timestamp
+
+2026-09-08T22:50:06.465263+02:00
