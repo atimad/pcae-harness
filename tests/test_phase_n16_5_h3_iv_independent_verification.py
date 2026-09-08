@@ -40,6 +40,15 @@ CONTRACTS = REPO / "docs" / "contracts"
 
 I_ENTRY = "74e52d59738007c4b9f6dbeb28f83990ba82e9a8"
 PAWA_V13_BLOB = "9c816716bae2262831945ac24b1771cf79de4c55"
+#: N16-5-F5B1-READAUTH: a downstream governed phase evolved HPAC-PAWA-001
+#: v1.3 -> v1.4 (MINOR, S-3 -- the F-5-B1 recognized read / ceremony-entry
+#: authority) and legitimately edits this one contract file, adding no
+#: schema and no dependency. These IV guards assert "no retro-edit during
+#: the H-3-IV window": re-anchor their endpoint from the moving HEAD to
+#: this fixed SHA (the N16-5-FINAL-CERT head -- the last commit at which
+#: the contract was still v1.3). No test function renamed or removed; no
+#: test disabled.
+_F5B1_READAUTH_ENTRY = "18d7da02435cac61159e9a90f86b2a586c4704d0"
 
 FIVE_ROLES = frozenset(
     {
@@ -80,16 +89,22 @@ def test_iv02_pawa_v13_blob_byte_unchanged_since_i_entry():
     ).strip()
     at_head = _git(
         "rev-parse",
-        "HEAD:docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
+        f"{_F5B1_READAUTH_ENTRY}:docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
     ).strip()
     assert at_entry == at_head == PAWA_V13_BLOB
 
 
 def test_iv03_sibling_contracts_and_schemas_and_deps_byte_unchanged():
     diff = _git(
-        "diff", "--name-only", I_ENTRY, "HEAD", "--", "docs/contracts", "schemas", "pyproject.toml"
+        "diff", "--name-only", I_ENTRY, _F5B1_READAUTH_ENTRY, "--", "docs/contracts", "schemas", "pyproject.toml"
     ).split()
     assert diff == []
+    # Since the F-5-B1 evolution: exactly this one contract file, and nothing
+    # under schemas/ or pyproject.toml (v1.4 adds no schema, no dependency).
+    since = _git(
+        "diff", "--name-only", _F5B1_READAUTH_ENTRY, "HEAD", "--", "docs/contracts", "schemas", "pyproject.toml"
+    ).split()
+    assert set(since) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, since
 
 
 # ── trust root ─────────────────────────────────────────────────────────────

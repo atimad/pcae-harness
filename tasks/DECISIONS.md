@@ -5060,3 +5060,53 @@ verified in this phase.
 - **Next (derived, NOT begun):** N16-5-FINAL-CERT — fresh CPIPC-valid
   successor id, own human authorization + own human authentication.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.**
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R (alias N16-5-F5B1-READAUTH) — F-5-B1 Production Recognized Read / Ceremony Authority Contract Reconciliation / Freeze
+
+- **Decision:** HPAC-PAWA-001 **v1.3 → v1.4**, **MINOR (S-3)**. Resolves blocking
+  finding **F-5-B1** (independently reproduced from primary source): the N-16-5
+  pre-ceremony provenance-verified canonical reads and
+  `run_protected_presentation_ceremony()` entry each need an `HPACStoreAuthority`
+  whose `_validate_production_boundary` passes under the deployment owner's real
+  (`sudo`/root) OS context — reachable only by `_bind_configured_agent_identity`
+  via the private `_PRODUCTION_WRITER_FACTORY_SEAL`, and every seal-holding
+  factory is a mutation/lifecycle-write path. v1.4 adds **one** recognized
+  **read-only** `HPACStoreAuthority` accessor (§33B / §38B / §42D / §42E / §49B /
+  §68B; PAWA-INV-14): reached only by the already-enumerated §38A coordinator;
+  reuses §33 steps 1–9; grants **no** `HPACWriterCapability`, no mint, no
+  `PawaOperation`, no writer role, no mutation, no counter transition;
+  `HPACStoreAuthority.writer()` still raises; enumerated closed read scope + one
+  ceremony entry; process-local / non-bearer / non-serialisable / restart-dead /
+  one-session. `HPAC-PRESENTATION-EVIDENCE/2.0` stays with
+  `mint_protected_presentation_evidence_writer` unchanged;
+  `hpac_rhamp_counter_state_verifier` stays the sole counter mutation authority.
+  No new `pawa_failure_code` (21 unchanged); no `terminal_reason_code`; no
+  RHAMP-001 edit; no schema change; single-contract solution; H-3 (§33A / §38A /
+  §42B / §68A) byte-unchanged; HPAC-001 v2.1 / RHAMP-001 v1.0 / HBDC-001 v1.2 /
+  HPAC-PPA-001 v1.0 byte-unchanged.
+- **Guard reconciliation (widen-not-weaken):** the v1.3 → v1.4 in-place contract
+  evolution invalidates 18 point-in-time guards across 6 completed-predecessor
+  suites (H-3-IMPL, H-3-IV, v1.3 freeze, v1.3 IV, v1.2 reconciliation, v1.2 PPA
+  real-assurance IV). Each reconciled: byte-freeze / no-diff guards re-anchored
+  from the moving `HEAD` to the fixed N16-5-FINAL-CERT head
+  `18d7da02` (the last commit at which the contract was v1.3), or converted to a
+  not-weakened check (v1.3 requirement bodies survive verbatim/append-only);
+  count / version / invariant-range pins re-anchored to the v1.3 freeze head
+  `4977a2e5` and widened to "contiguous from 1, never renumbered". A/B (baseline
+  `18d7da02`-state vs HEAD) — no test function renamed or removed; no test
+  disabled; 0 unexpected regressions. Pre-existing point-in-time `HEAD == V0`
+  guards unaffected.
+- **This phase:** contract + docs + tests + evidence only — **no** `src/pcae` /
+  `scripts` / `pyproject` change; no protected-host mutation; no ceremony.
+  Runtime `not_implemented` / `Observed` / `observe` / `unavailable`; 0 plugins /
+  0 capabilities; first governed runtime external effect ABSENT / UNREACHABLE.
+- **F-5-B1 CONTRACT BLOCKER: RESOLVED. F-5-B1 IMPLEMENTATION: PENDING.**
+  **F-5: LIVE READINESS VERIFIED — CEREMONY BLOCKED PENDING F-5-B1
+  IMPLEMENTATION. N-16-5: NOT CLOSED.** N-16-6 / N-16-7 OPEN / UNTOUCHED; N-16-7
+  strictly last. REPORTING-UX-1 still open (non-blocking).
+- **Next (derived, NOT begun):** dedicated HPAC-PAWA-001 v1.4 contract IV
+  (N16-5-F5B1-READAUTH-IV) → F-5-B1 implementation (N16-5-F5B1-IMPL) → its IV
+  (N16-5-F5B1-IV) → a fresh final real-human / genuine-YubiKey N-16-5
+  certification on a fresh CPIPC-valid successor id. Each its own explicit human
+  authorization.
+- **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.**

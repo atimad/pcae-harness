@@ -51,6 +51,15 @@ COORDINATOR_MODULE = "pcae.core.hpac_certification_coordinator"
 I0 = "74e52d59738007c4b9f6dbeb28f83990ba82e9a8"
 #: HPAC-PAWA-001 v1.3 git blob at I0 — must stay byte-unchanged.
 PAWA_V13_BLOB = "9c816716bae2262831945ac24b1771cf79de4c55"
+#: N16-5-F5B1-READAUTH: a downstream governed phase evolved HPAC-PAWA-001
+#: v1.3 -> v1.4 (MINOR, S-3 -- the F-5-B1 recognized read / ceremony-entry
+#: authority) and legitimately edits this one contract file. The H-3
+#: guards below assert "no retro-edit during the H-3 window": their
+#: endpoint is re-anchored from the moving HEAD to this fixed SHA (the
+#: N16-5-FINAL-CERT head -- the last commit at which the contract was
+#: still v1.3), so they keep asserting exactly what they were written to
+#: assert. No test function renamed or removed; no test disabled.
+_F5B1_READAUTH_ENTRY = "18d7da02435cac61159e9a90f86b2a586c4704d0"
 
 FAKE_AGENT_UID = 4_242_701
 FAKE_AGENT_GID = 999_701
@@ -162,7 +171,7 @@ def rig(tmp_path):
 def test_01_pawa_v13_contract_byte_unchanged_since_i0():
     blob = subprocess.run(
         ["git", "-C", str(REPO), "rev-parse",
-         "HEAD:docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"],
+         f"{_F5B1_READAUTH_ENTRY}:docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"],
         capture_output=True, text=True, check=True,
     ).stdout.strip()
     assert blob == PAWA_V13_BLOB
@@ -170,7 +179,7 @@ def test_01_pawa_v13_contract_byte_unchanged_since_i0():
 
 def test_02_no_contract_normative_diff_since_i0():
     names = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only", I0, "HEAD", "--", "docs/contracts"],
+        ["git", "-C", str(REPO), "diff", "--name-only", I0, _F5B1_READAUTH_ENTRY, "--", "docs/contracts"],
         capture_output=True, text=True, check=True,
     ).stdout.split()
     assert names == [], names
@@ -760,10 +769,17 @@ def test_91_runtime_remains_unavailable_after_import():
 
 def test_93_pawa_and_frozen_contracts_byte_unchanged_since_i0():
     names = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only", I0, "HEAD", "--", "docs/contracts", "schemas"],
+        ["git", "-C", str(REPO), "diff", "--name-only", I0, _F5B1_READAUTH_ENTRY, "--", "docs/contracts", "schemas"],
         capture_output=True, text=True, check=True,
     ).stdout.split()
     assert names == [], names
+    # And since the F-5-B1 read/ceremony-entry evolution: it touches exactly
+    # this one contract file and nothing under schemas/ (v1.4 adds no schema).
+    since = subprocess.run(
+        ["git", "-C", str(REPO), "diff", "--name-only", _F5B1_READAUTH_ENTRY, "HEAD", "--", "docs/contracts", "schemas"],
+        capture_output=True, text=True, check=True,
+    ).stdout.split()
+    assert set(since) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, since
 
 
 # ═══════════════════════════════════════════════════════════════════════════

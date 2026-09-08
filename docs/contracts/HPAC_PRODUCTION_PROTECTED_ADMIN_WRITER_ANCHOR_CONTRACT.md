@@ -3363,8 +3363,9 @@ ambiguity at any authority boundary fails closed.
 ## 89. N-23-1 / N-23-2
 
 - **HPAC-PAWA-REQ-163.** N-23-1 (INFO) and N-23-2 (INFO / DEFERRED NORMALIZATION
-  DEBT) are carried **unchanged** by v1.0, v1.1, v1.2, v1.3, and v1.4.
-  HPAC-PAWA-001 does not normalize PBRD / PBNDE semantics.
+  DEBT) are carried **unchanged** by v1.0 and by v1.1. HPAC-PAWA-001 does not
+  normalize PBRD / PBNDE semantics. **(v1.2 / v1.3 / v1.4)** likewise carried
+  unchanged — no evolution normalizes PBRD / PBNDE semantics.
 
 ## 90. Contract-freeze verdict
 

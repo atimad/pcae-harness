@@ -98,6 +98,19 @@ def v12() -> str:
     return _blob(V12_BASELINE, PAWA_REL).decode("utf-8")
 
 
+#: N16-5-F5B1-READAUTH: a later governed phase evolved HPAC-PAWA-001 v1.3 ->
+#: v1.4 (MINOR, S-3 -- the F-5-B1 recognized read / ceremony-entry authority),
+#: legitimately editing this one contract file (no schema, no dependency, no
+#: companion contract). This IV verifies the *v1.3 freeze*, so the frozen-text
+#: assertions read the v1.3 blob at this IV's own finalized head (V0) rather
+#: than the moving working tree. Count / invariant assertions are widened to
+#: "v1.3 baseline preserved, contiguous from 1, never renumbered". No test
+#: function renamed or removed; no test disabled.
+@pytest.fixture(scope="module")
+def pawa_v13() -> str:
+    return _blob(V0, PAWA_REL).decode("utf-8")
+
+
 # --------------------------------------------------------------------------- #
 # 1. Lineage / phase-entry.
 # --------------------------------------------------------------------------- #
@@ -137,10 +150,10 @@ def test_03_v13_freeze_commit_is_the_contract_freeze() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_04_contract_is_v1_3_frozen(pawa: str) -> None:
-    assert pawa.startswith("# HPAC-PAWA-001 v1.3 ")
-    assert re.search(r"^\*\*Version:\*\* 1\.3$", pawa, re.M)
-    assert re.search(r"^\*\*Status:\*\* FROZEN$", pawa, re.M)
+def test_04_contract_is_v1_3_frozen(pawa_v13: str) -> None:
+    assert pawa_v13.startswith("# HPAC-PAWA-001 v1.3 ")
+    assert re.search(r"^\*\*Version:\*\* 1\.3$", pawa_v13, re.M)
+    assert re.search(r"^\*\*Status:\*\* FROZEN$", pawa_v13, re.M)
 
 
 def test_05_v12_baseline_was_v1_2(v12: str) -> None:
@@ -151,7 +164,25 @@ def test_05_v12_baseline_was_v1_2(v12: str) -> None:
 def test_06_contract_text_unchanged_since_freeze() -> None:
     # v1.3 normative text is byte-identical at the freeze commit and at V0 —
     # this IV must not (and did not) edit it.
-    assert _blob(V13_FREEZE, PAWA_REL) == _blob(V0, PAWA_REL) == PAWA.read_bytes()
+    assert _blob(V13_FREEZE, PAWA_REL) == _blob(V0, PAWA_REL)
+    # A later governed MINOR (N16-5-F5B1-READAUTH -> v1.4) legitimately edits
+    # this one file; the v1.3 requirement bodies survive verbatim inside it
+    # (not weakened, not removed), and the v1.3 verdict block is intact.
+    v13 = _blob(V0, PAWA_REL).decode("utf-8")
+    cur = PAWA.read_text(encoding="utf-8")
+    def bodies(s: str) -> dict[str, str]:
+        out: dict[str, str] = {}
+        for m in re.finditer(r"- \*\*HPAC-PAWA-REQ-(\d{3})\.\*\*(.+?)(?=\n- \*\*HPAC-PAWA-REQ-|\n#)", s, re.S):
+            out[m.group(1)] = re.sub(r"\s+", " ", m.group(2)).strip()
+        return out
+    b13, bc = bodies(v13), bodies(cur)
+    assert set(b13).issubset(bc)
+    for rid, body in b13.items():
+        # append-only: a later MINOR may extend a body (e.g. add a "(v1.3 /
+        # v1.4)" clause to §88 / §89) but never reword or shorten the v1.3 text.
+        assert body in bc[rid], rid
+    assert "### 90.3 v1.3 contract-freeze verdict" in cur
+    assert "⇒ HPAC-PAWA-001 v1.3 — MINOR." in cur
 
 
 def test_07_only_this_contract_changed_v12_to_v13() -> None:
@@ -274,24 +305,34 @@ def _req_ids(s: str) -> list[int]:
     return [int(v) for v in re.findall(r"^ *- \*\*HPAC-PAWA-REQ-(\d{3})\.\*\*", s, re.M)]
 
 
-def test_15_requirement_ids_sequential_1_to_275(pawa: str) -> None:
-    ids = _req_ids(pawa)
+def test_15_requirement_ids_sequential_1_to_275(pawa_v13: str) -> None:
+    ids = _req_ids(pawa_v13)
     # closed, no gaps, no duplicates, no reuse (definitions are grouped by
     # section, not strictly file-ordered — the invariant is on the set).
     assert sorted(ids) == list(range(1, 276))
     assert len(ids) == len(set(ids)) == 275
+    # the live head only appends (contiguous from 1, never renumbers, 1..275
+    # all still present).
+    cur = _req_ids(text(PAWA))
+    assert sorted(cur) == list(range(1, len(cur) + 1))
+    assert set(range(1, 276)).issubset(cur)
 
 
-def test_16_v13_additions_are_req_234_to_275(v12: str, pawa: str) -> None:
+def test_16_v13_additions_are_req_234_to_275(v12: str, pawa_v13: str) -> None:
     assert max(_req_ids(v12)) == 233
-    new_ids = sorted(set(_req_ids(pawa)) - set(_req_ids(v12)))
+    new_ids = sorted(set(_req_ids(pawa_v13)) - set(_req_ids(v12)))
     assert new_ids == list(range(234, 276))
 
 
-def test_17_invariants_sequential_1_to_13(pawa: str) -> None:
-    invs = sorted({int(v) for v in re.findall(r"PAWA-INV-(\d+)", pawa)})
+def test_17_invariants_sequential_1_to_13(pawa_v13: str) -> None:
+    invs = sorted({int(v) for v in re.findall(r"PAWA-INV-(\d+)", pawa_v13)})
     assert invs == list(range(1, 14))
-    assert pawa.count("- **PAWA-INV-13.**") == 1  # defined exactly once
+    assert pawa_v13.count("- **PAWA-INV-13.**") == 1  # defined exactly once
+    # the live head only appends invariants, never renumbers.
+    cur = sorted({int(v) for v in re.findall(r"PAWA-INV-(\d+)", text(PAWA))})
+    assert cur == list(range(1, len(cur) + 1))
+    assert set(range(1, 14)).issubset(cur)
+    assert text(PAWA).count("- **PAWA-INV-13.**") == 1
 
 
 def test_18_historical_req_087_088_223_224_semantics_preserved(v12: str, pawa: str) -> None:
@@ -695,9 +736,14 @@ def test_57_no_new_schema_field_or_artifact(pawa: str) -> None:
     assert _blob(H0, SCHEMAS.relative_to(ROOT).as_posix()) == _blob(V0, SCHEMAS.relative_to(ROOT).as_posix())
 
 
-def test_58_no_companion_contract_required(pawa: str) -> None:
+def test_58_no_companion_contract_required(pawa_v13: str, pawa: str) -> None:
+    f13 = re.sub(r"\s+", " ", pawa_v13)
+    assert "v1.3 adds no new companion contract" in f13
+    assert "v1.3 is additive and authority-preserving; no parent cascade" in f13
+    # the live head keeps the no-new-companion-contract stance (a later MINOR
+    # extended the sentence, e.g. "v1.3 and v1.4 add no new companion contract").
     f = re.sub(r"\s+", " ", pawa)
-    assert "v1.3 adds no new companion contract" in f
+    assert "no new companion contract" in f
     assert "v1.3 is additive and authority-preserving; no parent cascade" in f
 
 
@@ -720,8 +766,8 @@ def test_59_related_frozen_artifacts_byte_unchanged(rel: str) -> None:
     assert _blob(V12_BASELINE, rel) == _blob(V13_FREEZE, rel) == _blob(V0, rel)
 
 
-def test_60_cross_contract_semantic_consistency(pawa: str) -> None:
-    f = re.sub(r"\s+", " ", pawa)
+def test_60_cross_contract_semantic_consistency(pawa_v13: str) -> None:
+    f = re.sub(r"\s+", " ", pawa_v13)
     assert "§96's verifier-only\n  lifecycle-record rule is **specialized** by the §42B narrow enumerated exception,\n  not left in contradiction".replace(
         "\n ", ""
     ) in f.replace("  ", " ")

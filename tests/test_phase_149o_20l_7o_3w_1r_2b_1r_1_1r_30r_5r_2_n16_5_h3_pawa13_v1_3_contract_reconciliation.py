@@ -27,6 +27,21 @@ ROOT = Path(__file__).resolve().parents[1]
 #: `…1.1R.1R.1R` N-16-5 H-3 production authority-path repair BLOCKED head.
 H0 = "b2530066b062b14b3c6f6df7c71c3092b22f215b"
 
+#: This v1.3 freeze phase's own finalized head (origin/main at completion).
+_V13_FREEZE_END = "4977a2e5db362e9e86f898cf438578f00e8051f5"
+#: N16-5-F5B1-READAUTH: a later governed phase evolved HPAC-PAWA-001 v1.3 ->
+#: v1.4 (MINOR, S-3 -- the F-5-B1 recognized read / ceremony-entry authority).
+#: The version / requirement-count / invariant-range assertions below were
+#: point-in-time to v1.3; they are re-anchored to `_V13_FREEZE_END` (this
+#: phase's own frozen head) or widened to "v1.3 baseline preserved, contiguous,
+#: never renumbered". No test function renamed or removed; no test disabled.
+_F5B1_READAUTH_ENTRY = "18d7da02435cac61159e9a90f86b2a586c4704d0"
+
+
+def at_sha(sha: str, path: Path) -> bytes:
+    rel = path.relative_to(ROOT).as_posix()
+    return subprocess.check_output(["git", "show", f"{sha}:{rel}"], cwd=ROOT)
+
 PAWA = ROOT / "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
 PPA = ROOT / "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md"
 RHAMP = ROOT / "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md"
@@ -85,10 +100,17 @@ def test_03_predecessor_h3_blocked_report_present() -> None:
 # --- 2. version / lineage ---------------------------------------------------
 
 def test_04_contract_version_is_v1_3() -> None:
-    t = text(PAWA)
+    # v1.3 was the frozen state at this phase's own finalized head.
+    t = at_sha(_V13_FREEZE_END, PAWA).decode("utf-8")
     assert t.splitlines()[0].startswith("# HPAC-PAWA-001 v1.3 —")
     assert "**Version:** 1.3" in t
     assert "**Status:** FROZEN" in t
+    # the current head is v1.3 or a later governed MINOR of the same contract,
+    # still FROZEN, lineage never rewritten.
+    cur = text(PAWA)
+    assert cur.splitlines()[0].startswith("# HPAC-PAWA-001 v1.")
+    assert "**Status:** FROZEN" in cur
+    assert "HPAC-PAWA-001 v1.0 → v1.1 → v1.2 → v1.3" in cur
 
 
 def test_05_lineage_records_all_four_versions() -> None:
@@ -258,7 +280,10 @@ def test_29_runtime_effect_wall_and_gate5_termination() -> None:
 def test_30_pawa_inv_13_present_once() -> None:
     t = text(PAWA)
     assert t.count("**PAWA-INV-13.**") == 1
-    assert "PAWA-INV-1` through `PAWA-INV-13`" in t
+    # v1.3 introduced PAWA-INV-13; a later MINOR may append further invariants
+    # (never renumber). The range clause still opens at PAWA-INV-1 and covers
+    # at least through 13.
+    assert re.search(r"`PAWA-INV-1` through `PAWA-INV-1[3-9]`", t)
 
 
 # --- 8. taxonomy / cross-contract ------------------------------------
@@ -340,8 +365,15 @@ def test_40_no_instance_ids_frozen_normatively() -> None:
 
 
 def test_41_requirement_ids_sequential_1_to_275() -> None:
+    # v1.3 defined exactly 275; a later governed MINOR appends further
+    # requirements (never renumbering, never reusing). The invariant is:
+    # contiguous from 1, no gaps, no duplicates, and 1..275 all present.
     ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d+)\.\*\*", text(PAWA)))
-    assert ids == list(range(1, 276))
+    assert ids == list(range(1, len(ids) + 1))
+    assert len(ids) == len(set(ids))
+    assert set(range(1, 276)).issubset(ids)
+    v13_ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d+)\.\*\*", at_sha(_V13_FREEZE_END, PAWA).decode("utf-8")))
+    assert v13_ids == list(range(1, 276))
 
 
 def test_42_n16_5_not_closed_and_n16_6_7_untouched() -> None:

@@ -297,8 +297,10 @@ def test_07_contract_identities_are_the_frozen_versions():
     # Point-in-time guard reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001
     # v1.2 -> v1.3, MINOR): the v1.2 identity requirement is preserved as the
     # floor; v1.3 is the current in-place evolution of the same document.
+    # N16-5-F5B1-READAUTH extends this floor: v1.4 (F-5-B1 recognized read /
+    # ceremony-entry authority, MINOR S-3) is the current in-place evolution.
     assert PAWA_CONTRACT.read_text().splitlines()[0].startswith(
-        ("# HPAC-PAWA-001 v1.2", "# HPAC-PAWA-001 v1.3")
+        ("# HPAC-PAWA-001 v1.2", "# HPAC-PAWA-001 v1.3", "# HPAC-PAWA-001 v1.4")
     )
     assert "RHAMP-001 v1.0" in RHAMP_CONTRACT.read_text()
 

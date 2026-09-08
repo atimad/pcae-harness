@@ -276,10 +276,12 @@ def test_33_requirement_numbering_is_closed_and_sequential() -> None:
     pawa_nums = [int(v) for v in re.findall(r"\*\*HPAC-PAWA-REQ-(\d{3})(?:\.|\*\*)", text(PAWA))]
     ppa_nums = [int(v) for v in re.findall(r"\*\*HPAC-PPA-REQ-(\d{3})(?:\.|\*\*)", text(PPA))]
     # Point-in-time count reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001
-    # v1.2 -> v1.3, MINOR): v1.2 froze REQ-001..233; v1.3 adds REQ-234..275
-    # (certification-coordinator authority). The property under test — closed,
-    # sequential, no gaps, no duplicates — is unchanged; only the ceiling moves.
-    assert sorted(pawa_nums) in (list(range(1, 234)), list(range(1, 276)))
+    # v1.2 -> v1.3, MINOR) and again by N16-5-F5B1-READAUTH (v1.3 -> v1.4,
+    # MINOR S-3): v1.2 froze REQ-001..233; v1.3 adds REQ-234..275; v1.4 adds
+    # REQ-276..309 (F-5-B1 recognized read / ceremony-entry authority). The
+    # property under test — closed, sequential, no gaps, no duplicates — is
+    # unchanged; only the ceiling moves.
+    assert sorted(pawa_nums) in (list(range(1, 234)), list(range(1, 276)), list(range(1, 310)))
     assert sorted(ppa_nums) == list(range(1, 77))
 
 
