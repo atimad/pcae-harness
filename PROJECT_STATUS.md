@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-FINAL-CERT**) — Final Real-Human / Genuine-YubiKey
+Protected-Presentation N-16-5 Certification and Closure Adjudication — After
+H-3 Production Authority Repair Verification. **STATUS: BLOCKED. N-16-5: NOT
+CLOSED.** CPIPC: valid direct `.1R` successor of N16-5-H3-IV (same series /
+branch, strict order, unique, no active conflict). **C0 = H3_IV_FINAL =
+`633c77f7`.** Live certification readiness was **freshly re-confirmed on the
+correct production host** (§5, §14–§21): protected root, PAWA anchor
+(generation 1), generation-1 protected-presentation deployment, helper
+(sha256 `933c664645…` exact), canonical mechanism-neutral principal
+`hp-8cee9b36…`, canonical FIDO2 credential `hpc-2e7bbfa0…` (active, bound,
+`hpac.fido2.uv_presence.v2`), live counter state (`COUNTER_BEFORE` =
+generation 0, read — not assumed), and a genuine YubiKey (`YubiKey FIDO`,
+Yubico vid `0x1050`) — **all byte-identical to the independently-verified
+baseline, every digest independently recomputed, zero drift, no protected-root
+write since 2026-09-06 19:04.** The phase then **BLOCKED before the ceremony**
+at finding **F-5-B1**: `run_protected_presentation_ceremony()` and the
+provenance-verified canonical-credential reads require a *recognized*
+production `HPACStoreAuthority` (configured-agent identity bound by
+`_run_recognition_sequence`, F-1). The only ways to obtain one are minting an
+unrelated `production_writer` PAWA *mutation* capability (no read-only
+`PawaOperation` exists) or the test-only seams — both forbidden here
+(§4/§8/§21/§79/§80/§81). The H-3 repair delivered the `certification_writer`
+authority + `hpac_certification_admin.py` (`describe`/`status`), but **no
+production entrypoint or recognized-authority accessor for the
+presentation-ceremony half** — a gap already recorded in the `…1R.1R.1R`
+H-3-BLOCKED analysis and not closed by N16-5-H3-IMPL. Building it is the
+forbidden change → **BLOCK, do not repair here.** **0 ceremony steps: 0
+sessions / challenges / presentation requests / helper launches / APPROVE /
+REJECT / getAssertion / makeCredential / PIN prompts / touches / presentation
+evidence / counter mutations / protected-root writes / `verify_human_authentication`
+calls / PRODUCTION principals / Gate-5 bindings / `adapter.dispatch` / external
+effects.** No `src/pcae` / `scripts` / `pyproject` / `docs/contracts` /
+`schemas` / `tests` change. Runtime `not_implemented` / `Observed` / `observe`
+/ `unavailable`, 0 plugins / 0 capabilities, first governed runtime external
+effect ABSENT / UNREACHABLE. **Narrowest successor (derived, NOT begun, NOT
+reserved):** a fresh-CPIPC-id implementation phase adding the minimal
+recognized-authority accessor / bounded presentation-ceremony entrypoint for
+the deployment owner (likely an HPAC-PAWA-001 vX.Y MINOR amendment), then its
+IV, then re-attempt N16-5-FINAL-CERT. **REPORTING-UX-1** still open.
+**N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).**
+
+Canonical report: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_FINAL_CERT.md`.
+Evidence: `.pcae/certification/n16_5_final_cert_phase_entry.json`,
+`.pcae/certification/n16_5_final_cert_live_revalidation.json`,
+`.pcae/certification/n16_5_final_cert_blocked.json`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-H3-IV**) — Independent Verification of the N-16-5 Production
 Certification Authority-Path Implementation Against HPAC-PAWA-001 v1.3 — H-3

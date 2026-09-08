@@ -1,0 +1,112 @@
+{
+  "schema": "PCAE-N16-5-FINAL-CERTIFICATION/1.0",
+  "phase_alias": "N16-5-FINAL-CERT",
+  "canonical_phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R",
+  "predecessor_alias": "N16-5-H3-IV",
+  "verdict": "BLOCKED BEFORE CEREMONY -- N-16-5 NOT CLOSED",
+  "C0": "633c77f78f9b5aecd2bda4d9bf44ba3c39b52203",
+  "H3_IV_FINAL": "633c77f78f9b5aecd2bda4d9bf44ba3c39b52203",
+
+  "live_certification_readiness": {
+    "SS5_live_host": "VERIFIED -- Atilas-MacBook-Pro; fixed macOS protected root present",
+    "SS14_protected_root": "VERIFIED -- present, directory, drwx------ root:admin, ancestor chain trusted (not agent-writable), configured-agent topology trusted (agent-exclusion.json ACTIVE uid 501 gen 1)",
+    "SS14_pawa_anchor": "VERIFIED -- hpawi-bfc91d001ac940b8bda0ed06566180eb, generation == 1, descriptor_digest 05d32613 consistent across all .authority records",
+    "SS15_ppa": "VERIFIED -- generation 1 active, hppi-648bee5e950b4f5e971a6c65c8cc53cf, no revocation; descriptor c4e9a04d / installation ab23db59 / anchor 2f26d428 / config 951182f5 -- all == baseline AND independently recomputed; verifier_kind pcae-protected-local-presentation/1.0; REAL",
+    "SS15_helper": "VERIFIED -- regular non-symlink, canonical content-addressed path, root:admin, 16295 bytes; sha256 933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182 EXACT (operator shasum == baseline == dir name == installation.json)",
+    "SS16_principal": "VERIFIED -- hp-8cee9b36b6784608ae48261af86289b8 active, revoked_at null, HPAC-REGISTRY/2.0, mechanism-neutral",
+    "SS17_credential": "VERIFIED -- hpc-2e7bbfa0c1b2480ba84ab5792159179d active, revoked_at null, bound to hp-8cee9b36, hpac.fido2.uv_presence.v2, rp_id hpac.pcae.local, [usb], aaguid b7d3f68e; exactly one credential; record_digest 7ab27cfb / raw-id sha256 e9ab1a21 / COSE-key ascii-hex sha256 bea8316c -- all independently recomputed == baseline",
+    "SS18_counter_before": {"schema": "RHAMP-COUNTER-STATE/1.0", "generation": 0, "last_accepted_meaningful": 0, "last_observed_raw": 0, "review_flag": false, "record_digest": "55e29aef37a91c236472dbbfb76732bfc19a9b8847979919b0fdec47e732055a", "independently_recomputed": true, "updated_at": "2026-09-06T17:04:55.881Z", "verdict": "VERIFIED -- read live, not assumed; unchanged since bootstrap"},
+    "SS19_genuine_yubikey": "VERIFIED -- NativeCtap2Provider().available() == True; fido2.hid.CtapHidDevice.list_devices() -> [('YubiKey FIDO', vid 0x1050 Yubico, pid 0x402)]; single real roaming CTAP2 device, no virtual authenticator",
+    "SS20_real_auth_profile": "VERIFIED -- hpac.fido2.uv_presence.v2 (credential mechanism); NativeCtap2Provider PRODUCTION_PROVIDER_KIND, no seams, no deterministic provider",
+    "SS21_real_presentation_profile": "VERIFIED -- pcae-protected-local-presentation/1.0; descriptor protected_output/agent_substitution_resistant/canonical_subject_rendering/explicit_election_support all true",
+    "SS22_h3_authority_source": "VERIFIED (source-level) -- production+contract+schema surface byte-identical since IV entry (git diff a3af3a04^..HEAD empty)",
+    "freshness": "no write under the protected root since 2026-09-06 19:04; 0 post-IV mutation",
+    "overall": "SS5, SS14-SS21 and SS22-source ALL PASS -- but SS22-live and the ceremony are UNREACHABLE (see blocking finding)"
+  },
+
+  "blocking_finding": {
+    "id": "F-5-B1",
+    "title": "No production-reachable invocation path for the real protected-presentation ceremony or the provenance-verified canonical-credential reads",
+    "detail": "run_protected_presentation_ceremony() (src/pcae/core/protected_presentation.py) and the provenance-verified canonical-credential reads (HumanPrincipalRegistryStore, hpac_rhamp_enrollment.resolve_active_credentials, ProtectedPresentationInstallationStore.resolve_current_generation) all require a *recognized* PRODUCTION HPACStoreAuthority -- one whose configured-agent identity has been bound by _run_recognition_sequence + authority._bind_configured_agent_identity (F-1 / HPAC-PAWA-REQ-022). Without that binding, _validate_production_boundary keys the negative boundary off the live process; the deployment owner (root) legitimately owns the tree with a write bit, so every provenance-verified read/write fails closed ('production HPAC root is not protected from the configured agent principal'). Observed live this phase: 'sudo python scripts/hpac_protected_presentation_admin.py status' raised exactly this.",
+    "the_only_ways_to_obtain_a_recognized_authority": [
+      "(a) mint a pcae.core.hpac_protected_admin_writer.production_writer(<PawaOperation>) capability for an UNRELATED mutation (enroll/revoke/configure -- there is no read-only or recognition-only PawaOperation) and reuse handle.authority -- semantically dishonest (mints + audit-logs a mutation operation_id with no mutation), exposes a raw reusable HPACWriterCapability (prompt SS8), and is a competing-authority-path misuse (prompt SS8)",
+      "(b) the test-only seams HPACStoreAuthority._production_test_fixture / _topology_probe / _test_decision_source -- forbidden (prompt SS4 'no deterministic/test substitute', SS8 'no private test mint', SS21 'no test seam', SS79)"
+    ],
+    "what_the_h3_repair_delivered": "certification_writer (5 cert roles: hpac_challenge_coordinator / hpac_assertion_recorder / human_authentication_proof_verifier / hpac_rhamp_counter_state_verifier / hpac_gate5_binder) + HpacCertificationCoordinator (self-recognizing per step) + scripts/hpac_certification_admin.py (describe / status only). The coordinator RESOLVES trusted presentation evidence on its freshly-recognized SS33A authority, but does NOT CREATE it and exposes no authority to the caller (HPAC-PAWA-REQ-250).",
+    "what_was_never_delivered": "a production entrypoint or recognized-read-only-authority accessor for the presentation-ceremony half (run_protected_presentation_ceremony + mint_protected_presentation_evidence_writer + the canonical-credential/registry reads). presentation-evidence writing is OUTSIDE the 5-role certification family (H-3 IV finding).",
+    "already_documented": "docs/PHASE_...N_16_5_H3_PRODUCTION_AUTHORITY_PATH_REPAIR_BLOCKED.md line 154 -- protected-presentation request/evidence row: 'partial -- mint fn EXISTS, but needs a recognized PRODUCTION authority handed in | delivered? no | still needs: a way for the coordinator to obtain the recognized authority'. That gap was not closed by N16-5-H3-IMPL (which scoped only the certification_writer half) and its persistence was not caught by N16-5-H3-IV (which deferred the live re-confirmation, root absent in that run).",
+    "why_this_phase_cannot_proceed": "prompt SS4 (no fallback / no repair), SS8 (do not add mint path / create new seal / use private test mint / modify coordinator / modify admin script / modify contracts; if the ceremony reveals an implementation defect: BLOCK), SS21 (no test seam), SS79 (no H-3 repair here), SS80 (no contract repair), SS81 (git diff C0..HEAD -- src/pcae scripts pyproject.toml EMPTY). Building the missing accessor is exactly the forbidden production/script/contract change.",
+    "classification": "IMPLEMENTATION DEFECT surfaced at the SS7/SS22 pre-ceremony freshness stage -> BLOCK BEFORE CEREMONY (prompt SS8 / SS26 / SS79 / SS104)"
+  },
+
+  "ceremony_not_reached": {
+    "certification_session": 0,
+    "production_challenge": 0,
+    "protected_presentation_request": 0,
+    "protected_helper_launched": 0,
+    "human_APPROVE": 0,
+    "human_REJECT": 0,
+    "real_presentation_evidence": 0,
+    "getAssertion": 0,
+    "makeCredential": 0,
+    "fido2_pin_prompts": 0,
+    "yubikey_touches": 0,
+    "counter_mutations": 0,
+    "protected_root_writes": 0,
+    "verify_human_authentication_calls": 0,
+    "production_AuthenticatedHumanPrincipal_issued": 0,
+    "gate5_bindings": 0,
+    "adapter_dispatch_calls": 0,
+    "external_effects": 0,
+    "secrets_persisted": "NO",
+    "approval_injected_programmatically": "NO"
+  },
+
+  "negative_matrix": "NOT PERFORMED -- ceremony not reached; there are no real challenge/presentation/proof/assertion/counter artifacts to run wrong-challenge / replay / forgery / PB-DENY / policy-DENY negatives against. Deterministic forgery/PB/policy negatives against the certification coordinator remain covered by the frozen H-3 suites (106/0) and the H-3 IV suite (19/0), unchanged this phase.",
+
+  "post_phase_live_state": {
+    "counter_after": "== COUNTER_BEFORE (generation 0; 0 mutations)",
+    "credential": "active, not revoked, unchanged",
+    "principal": "active, mechanism-neutral, unchanged",
+    "pawa_generation": 1,
+    "ppa": "unchanged",
+    "helper": "unchanged",
+    "protected_root_mutations_this_phase": 0
+  },
+
+  "product_contract_immutability": {
+    "git_diff_name_only_C0_HEAD_src_pcae_scripts_pyproject": "EMPTY (verify at finalize)",
+    "git_diff_name_only_C0_HEAD_docs_contracts_schemas": "EMPTY (verify at finalize)",
+    "frozen_contracts_byte_unchanged": "HPAC-PAWA-001 v1.3 / HPAC-001 / RHAMP-001 / HBDC-001 / HPAC-PPA-001 -- unchanged",
+    "phase_changes": "certification evidence JSON + canonical phase report/doc + PROJECT_STATUS + CHANGELOG + tasks + .pcae completion artifacts only; NO src/pcae, NO scripts, NO contracts, NO schemas, NO tests"
+  },
+
+  "runtime_final": {
+    "runtime_status": "not_implemented", "runtime_state": "Observed", "execution_capability": "unavailable",
+    "maximum_plugin_capability": "observe", "plugin_count": 0, "capability_count": 0,
+    "permission_broker_status": "execution_unavailable", "governance_posture": "non-executing",
+    "first_governed_runtime_external_effect": "ABSENT / UNREACHABLE"
+  },
+
+  "gate_chain_after": {
+    "H-3": "INDEPENDENTLY VERIFIED (unchanged)",
+    "F-5": "LIVE CERTIFICATION READINESS: SS5/SS14-SS21 CONFIRMED on the real host, but the real ceremony is UNREACHABLE -- BLOCKED at finding F-5-B1 (no production presentation-ceremony authority path)",
+    "N-16-5": "NOT CLOSED",
+    "N-16-6": "OPEN / UNTOUCHED",
+    "N-16-7": "OPEN / UNTOUCHED / STRICTLY LAST",
+    "REPORTING-UX-1": "still open (nonblocking)"
+  },
+
+  "narrowest_successor_derived_not_begun": {
+    "kind": "fresh-CPIPC-id implementation phase (analogous to N16-5-H3-IMPL), then its IV, then re-attempt N16-5-FINAL-CERT",
+    "scope": "add the MINIMAL production-reachable way for the deployment owner to obtain a recognized PRODUCTION HPACStoreAuthority for (1) run_protected_presentation_ceremony and (2) the canonical principal/credential/counter provenance-verified reads -- e.g. a bounded ceremony subcommand on scripts/hpac_certification_admin.py that runs SS33 recognition and drives the presentation ceremony, OR a certification_writer-adjacent recognized-read-only-authority accessor consumed by the coordinator/harness. Likely needs an HPAC-PAWA-001 vX.Y MINOR amendment authorizing that accessor (the presentation-evidence writer role already exists; the recognized-authority accessor must be contract-blessed). NO second trust root, NO new mint primitive, NO test-seal authority.",
+    "must_not": "reuse any completed certification phase id; create a parallel chain; begin N-16-6 / N-16-7",
+    "reserved": false
+  },
+
+  "governance": {
+    "DELEGATED .3 FINALIZATION / COMMIT / PUSH": "UNAUTHORIZED (preserved)",
+    "privileged_live_inspection": "performed by the primary operator (sudo, read-only, 0 mutations, 0 python-under-sudo except the light describe/status reads); agent recomputed digests only",
+    "no_raw_git": "governed pcae lifecycle only"
+  }
+}
