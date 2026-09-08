@@ -10,7 +10,7 @@
     "metadata_consistency": "The canonical Phase Report docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_FINAL_CERT.md, .pcae/phase-completion-report.md, PROJECT_STATUS.md, CHANGELOG.md, tasks/DECISIONS.md, the task lifecycle, and this metadata consistently record the same canonical phase id, the BLOCKED status, finding F-5-B1, LIVE READINESS SS5/SS14-SS21 CONFIRMED with zero drift, 0 ceremony steps, N-16-5 NOT CLOSED, N-16-6 / N-16-7 OPEN / UNTOUCHED, and the derived-not-begun fresh-CPIPC-id implementation successor.",
     "internal_evidence_coherence": "The canonical Phase Report and the three machine-readable evidence files .pcae/certification/n16_5_final_cert_phase_entry.json, .pcae/certification/n16_5_final_cert_live_revalidation.json, and .pcae/certification/n16_5_final_cert_blocked.json all cross-reference the identical C0 / H3_IV_FINAL SHA 633c77f7, the identical CPIPC successor result, the identical live baseline digests (helper 933c664645, credential record 7ab27cfb, counter record 55e29aef, PPA descriptor c4e9a04d / installation ab23db59 / anchor 2f26d428 / config 951182f5, PAWA anchor hpawi-bfc91d00 generation 1), the identical finding F-5-B1, and the identical BLOCKED verdict.",
     "internal_report_coherence": "Historical BLOCKED / COMPLETE phase reports remain immutable and byte-unchanged; only this phase's own canonical report, evidence, and governance / task / status artifacts are added.",
-    "report_consistency": "Pushed to origin/main; canonical report promoted to COMPLETE (recording the BLOCKED verdict).",
+    "report_consistency": "Pushed to origin/main at 40bf37fd; canonical report promoted to COMPLETE (recording the BLOCKED verdict).",
     "origin_main_head_count": 0,
     "test_evidence_classification": "not_applicable_no_code_or_test_change_blocked_before_ceremony",
     "tests_run": 0,
@@ -126,6 +126,6 @@
         }
     ],
     "recommended_next_phase": "A fresh-CPIPC-id implementation phase (analogous to N16-5-H3-IMPL) is required first, then its independent verification, then a re-attempt of this exact N16-5-FINAL-CERT scope. Scope of the implementation phase: add the minimal production-reachable way for the deployment owner to obtain a recognized PRODUCTION HPACStoreAuthority for (1) run_protected_presentation_ceremony and (2) the canonical principal / credential / counter provenance-verified reads -- e.g. a bounded ceremony subcommand on scripts/hpac_certification_admin.py that runs the SS33 recognition and drives the presentation ceremony, or a certification_writer-adjacent recognized-read-only-authority accessor consumed by the coordinator / harness. This likely requires an HPAC-PAWA-001 vX.Y MINOR amendment authorizing that accessor (the presentation-evidence writer role already exists; the recognized-authority accessor must be contract-blessed). No second trust root, no new mint primitive, no test-seal authority, no reuse of a completed certification phase id, no parallel chain. REPORTING-UX-1 also remains open (nonblocking). N-16-6 / N-16-7 remain OPEN / UNTOUCHED; N-16-7 strictly last; do not begin either.",
-    "pushed_status": "pending",
-    "origin_main_head": "pending_push"
+    "pushed_status": "pushed",
+    "origin_main_head": "40bf37fd3ddee7de28c075f9f09913d53f502c8b"
 }
