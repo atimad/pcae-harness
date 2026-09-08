@@ -1,0 +1,143 @@
+{
+  "phase_alias": "N16-5-FINAL-CERT",
+  "canonical_phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R",
+  "step": "SS13-SS22 privileged read-only live revalidation",
+  "method": "operator-run privileged read-only inspection (sudo stat/ls/find/cat/shasum/file; 0 mutations; 0 python under sudo; all content non-secret) + agent-side independent digest recomputation via pcae.core.hpac_foundation.canonical_json_bytes",
+  "live_host": {
+    "hostname": "Atilas-MacBook-Pro",
+    "computer_name": "Atila's MacBook Pro",
+    "fixed_macos_protected_root_present": true,
+    "verdict": "CORRECT PRODUCTION HOST"
+  },
+  "protected_root_topology_SS14": {
+    "root": "drwx------ root:admin  /Library/Application Support/PCAE/HPAC/protected-root",
+    "ancestor_chain": [
+      "/ drwxr-xr-x root:wheel",
+      "/Library drwxr-xr-x root:wheel",
+      "/Library/Application Support drwxr-xr-x root:admin  (NOT group-writable -- hardened)",
+      "/Library/Application Support/PCAE drwxr-xr-x root:admin",
+      "/Library/Application Support/PCAE/HPAC drwxr-xr-x root:admin"
+    ],
+    "configured_agent_principal": "uid 501 (atilamadai), member of group admin",
+    "agent_write_access_to_root_or_any_ancestor": false,
+    "hpac_protected_presentation_admin_status_sudo_traceback": "EXPECTED sudo artifact -- _validate_production_boundary falls back to _current_agent_identity() when the SS33 recognition sequence has not bound the configured-agent identity; under sudo that resolves to root (owner, write bit) and fails closed. NOT drift: keyed to the configured agent principal (uid 501) the negative boundary holds. The authoritative check runs inside the coordinator SS33A recognition sequence.",
+    "agent_exclusion_json": {
+      "artifact_schema_version": "HPAC-PAWA-AGENT-EXCLUSION/1.0",
+      "state": "ACTIVE",
+      "provisioned_uid": 501,
+      "symbolic_account": "atilamadai",
+      "generation": 1,
+      "installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+      "record_digest": "bf0a7a9022f14cfee4d261b83cf932565de85839f59e0dbe135228e9fcad0b2f",
+      "cross_consistent_with_current_generation_agent_exclusion_digest": true
+    },
+    "verdict": "TRUSTED -- root present, directory, trusted ownership/mode, ancestor chain trusted, configured-agent topology trusted"
+  },
+  "pawa_anchor_SS14": {
+    "manifest": {"authority_class": "production", "store_id": "hpacs-ff437f1cf5dc4f28aa11d2871c8fda4d", "root_identity": {"device": 16777230, "inode": 555016224}},
+    "anchor_id": "hpaw-f9661f401f204d828a4aec951855819a",
+    "installation_id": "hpawi-bfc91d001ac940b8bda0ed06566180eb",
+    "current_generation": 1,
+    "descriptor_digest": "05d32613cccc8664bba8bb832d4f683f5c71e19578776dabe1e1ade64a97a678",
+    "descriptor_digest_consistent_across": ["current-generation.json", "authority-descriptor (deployment-owner.json)"],
+    "deployment_owner_role": "HPAC_PROTECTED_ADMIN",
+    "configured_agent_exclusion_binding": {"excluded_principal_kind": "PCAE_CONFIGURED_AGENT_PRINCIPAL", "exclusion_basis": "OS_FILESYSTEM_WRITE_AUTHORITY"},
+    "root_identity_consistent_across": ["manifest.json", "agent-exclusion.json", "authority-descriptor"],
+    "verdict": "VERIFIED -- anchor canonical, installation canonical, generation == 1"
+  },
+  "ppa_SS15": {
+    "current_generation": 1,
+    "status": "active",
+    "installation_id": "hppi-648bee5e950b4f5e971a6c65c8cc53cf",
+    "supersedes": null,
+    "revocation": "none",
+    "updated_at": "2026-09-05T16:53:22.143Z",
+    "digests": {
+      "descriptor_digest": "c4e9a04d8d4af865372d78db280b8a2ba40f7ad29414b365acf87b775b13fc6e",
+      "installation_digest": "ab23db5921be7b88f565f9d42e29707e594c9c1fa209953037040cf9f38e5820",
+      "anchor_digest": "2f26d42805a5f4f5b60a4da93f4c0499c8ea8821f03d937b64ee708a08db8ac5",
+      "verifier_configuration_digest": "951182f5e737068d286313903504e34cb3dc57b47a2a19f9031ac068c7992c85"
+    },
+    "digests_vs_baseline": "EXACT MATCH (n16_5_final_certification_30r5r2_1r1r2r1r1r1r1_1r1.json gen1_presentation_deployment)",
+    "descriptor_digest_independently_recomputed": "c4e9a04d... (sha256 canonical-json, record_digest field excluded) == on-disk",
+    "installation_digest_independently_recomputed": "ab23db59... (sha256 canonical-json, installation_digest field blanked) == on-disk",
+    "cross_check": "descriptor_digest identical in current-generation.json / installation.json / descriptor.json; installation_digest identical in current-generation.json / installation.json",
+    "verifier_kind": "pcae-protected-local-presentation/1.0",
+    "descriptor_real_presentation_properties": {"protected_output": true, "agent_substitution_resistant": true, "canonical_subject_rendering": true, "explicit_election_support": true},
+    "verdict": "VERIFIED -- generation 1 current and trusted; mechanism classified REAL"
+  },
+  "helper_SS15": {
+    "path": "/Library/Application Support/PCAE/HPAC/protected-root/presentation-helper/installations/933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182/pcae-protected-local-presentation",
+    "regular_non_symlink": true,
+    "mode_owner": "-rw-r--r-- root:admin",
+    "size_bytes": 16295,
+    "file_type": "Python script text executable, UTF-8",
+    "sha256_operator_shasum": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+    "sha256_expected_baseline": "933c66464516080b91fa2b5e7e2b50ea176a5887058bc63a51ddb083c9ea6182",
+    "sha256_matches_own_content_addressed_directory_name": true,
+    "sha256_matches_installation_json_helper_sha256": true,
+    "verdict": "VERIFIED -- present, regular non-symlink, canonical path, digest EXACT"
+  },
+  "principal_SS16": {
+    "principal_id": "hp-8cee9b36b6784608ae48261af86289b8",
+    "status": "active",
+    "revoked_at": null,
+    "schema_version": "HPAC-REGISTRY/2.0",
+    "mechanism_neutral": true,
+    "enrolled_at": "2026-09-06T17:00:08.641Z",
+    "enrollment_provenance": "deployment-owner-ceremony:2026-09-06T10:01:23Z",
+    "verdict": "VERIFIED -- active, not revoked, trusted writer provenance, mechanism-neutral"
+  },
+  "credential_SS17": {
+    "credential_id": "hpc-2e7bbfa0c1b2480ba84ab5792159179d",
+    "principal_id": "hp-8cee9b36b6784608ae48261af86289b8",
+    "binding_to_principal": "VERIFIED (registry entry principal_id == sidecar principal_id == canonical principal)",
+    "status": "active",
+    "revoked_at": null,
+    "mechanism_id": "hpac.fido2.uv_presence.v2",
+    "rp_id": "hpac.pcae.local",
+    "transports": ["usb"],
+    "aaguid": "b7d3f68e88a6471e9ecf2df26d041ede",
+    "assurance_capabilities": ["UP", "UV", "usb"],
+    "registry_public_key_vs_sidecar_cose_public_key": "byte-identical",
+    "credentials_dir_entry_count": 1,
+    "canonical_selection_ambiguity": "none (exactly one credential)",
+    "record_digest": "7ab27cfba9483d0a22075acbea4a084e9637a98273f85624901147094d0522b7",
+    "record_digest_independently_recomputed": "7ab27cfba9483d0a22075acbea4a084e9637a98273f85624901147094d0522b7 (sha256 canonical-json, record_digest field blanked) == on-disk == baseline",
+    "raw_credential_id_sha256_independently_recomputed": "e9ab1a21a0406ad1d2b9c6fe2477cbb228525b128e8946ff94cf664d0861feb7 (== baseline)",
+    "cose_public_key_hexascii_sha256_independently_recomputed": "bea8316cedea4a9e8d29745eecbba07d27aee2eab6db77ed233c561cc843e461 (== baseline)",
+    "cose_key_structure": "EC2/P-256, alg ES256 (-7), 77-byte COSE_Key CBOR -- valid",
+    "verdict": "VERIFIED -- active, not revoked, bound to the exact canonical principal, canonical mechanism/rp_id/COSE material"
+  },
+  "counter_before_SS18": {
+    "artifact_schema_version": "RHAMP-COUNTER-STATE/1.0",
+    "rhamp_schema_version": "RHAMP-001/1.0",
+    "credential_id": "hpc-2e7bbfa0c1b2480ba84ab5792159179d",
+    "generation": 0,
+    "last_accepted_meaningful": 0,
+    "last_observed_raw": 0,
+    "review_flag": false,
+    "updated_at": "2026-09-06T17:04:55.881Z",
+    "record_digest": "55e29aef37a91c236472dbbfb76732bfc19a9b8847979919b0fdec47e732055a",
+    "record_digest_independently_recomputed": "55e29aef37a91c236472dbbfb76732bfc19a9b8847979919b0fdec47e732055a (sha256 canonical-json, record_digest field blanked) == on-disk == baseline",
+    "unchanged_since_bootstrap": true,
+    "verdict": "VERIFIED -- canonical baseline read live (NOT assumed); no unexplained change since bootstrap; recorded as COUNTER_BEFORE"
+  },
+  "h3_authority_path_SS22_source_level": {
+    "production_contract_schema_surface_diff_since_iv_entry": "EMPTY (git diff a3af3a04^..HEAD -- src/pcae scripts pyproject.toml docs/contracts schemas)",
+    "live_coordinator_SS33A_recognition_bounded_readonly_check": "PENDING -- to be exercised by the phase-specific operator harness immediately before ceremony",
+    "verdict": "CURRENT (source-level); live bounded recognition check pending"
+  },
+  "freshness": {
+    "newest_mtime_anywhere_under_protected_root": "2026-09-06 19:04 (credential bootstrap ceremony)",
+    "post_iv_mutation": "NONE",
+    "verdict": "no write to the protected root since the last known governed ceremony"
+  },
+  "runtime_state": {
+    "runtime_status": "not_implemented", "runtime_state": "Observed", "execution_capability": "unavailable",
+    "maximum_plugin_capability": "observe", "plugin_count": 0, "capability_count": 0
+  },
+  "SS14_to_SS18_and_SS22_source_level": "ALL PASS -- ZERO DRIFT",
+  "remaining_before_SS23_go_no_go": ["SS19 genuine YubiKey availability (real NativeCtap2Provider, no virtual authenticator)", "SS20 real authentication profile selection", "SS21 real presentation profile selection", "SS22 live bounded coordinator SS33A recognition (read-only, via harness)"],
+  "ceremony_state": "NOT YET ELECTED"
+}
