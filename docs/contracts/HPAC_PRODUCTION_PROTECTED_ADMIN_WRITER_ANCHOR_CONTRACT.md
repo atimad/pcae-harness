@@ -1,9 +1,9 @@
-# HPAC-PAWA-001 v1.3 — HPAC Production Protected Administration Writer Anchor Contract
+# HPAC-PAWA-001 v1.4 — HPAC Production Protected Administration Writer Anchor Contract
 
 ## Contract identity and status
 
 **Contract:** HPAC-PAWA-001
-**Version:** 1.3
+**Version:** 1.4
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2 — HPAC-PAWA-001 v1.0
 Production Protected-Admin Writer Anchor Contract Freeze (initial freeze,
@@ -53,6 +53,47 @@ redefined; no production implementation, no `src/pcae` / `scripts` / `tests` /
 dependency change, no protected-host mutation, no ceremony; a dedicated
 HPAC-PAWA-001 v1.3 contract IV is the recommended default before the H-3
 implementation relies on this text; **N-16-5 remains NOT CLOSED**).
+**Evolved to v1.4 by:** Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R
+— F-5-B1 Production Recognized Read / Ceremony Authority Contract Reconciliation
+and Freeze (alias **N16-5-F5B1-READAUTH**) (**MINOR**; resolves blocking finding
+**F-5-B1** independently reproduced from primary source by the predecessor
+N16-5-FINAL-CERT — the N-16-5 pre-ceremony provenance-verified canonical
+**reads** (`PrincipalRecord`, `CredentialRecord`, RHAMP counter state) and
+`run_protected_presentation_ceremony()` **entry** require an
+`HPACStoreAuthority` whose `_validate_production_boundary` passes under the
+deployment owner's real (`sudo` / root) OS context, which is reachable **only**
+by binding the configured-agent identity through the private
+`_PRODUCTION_WRITER_FACTORY_SEAL`, and every seal-holding factory
+(`production_writer`, `certification_writer`,
+`mint_protected_presentation_evidence_writer`) is a **mutation / lifecycle-write**
+path — there is **no least-privilege production-recognized read / ceremony-entry
+path**, and the only reachable substitutes (an unrelated `production_writer`
+mutation capability, or the disclosed test-only seams) are forbidden; adds
+**exactly one** recognized, **read-only** production authority accessor — a
+dedicated factory reached **only** by the already-enumerated §38A certification
+coordinator, minted through a §33B recognition sequence that reuses the §33
+steps 1–9 verbatim, granting **no** `HPACWriterCapability`, **no** mint
+authority, **no** new `PawaOperation`, **no** new writer role, **no** mutation,
+confined to an **explicitly enumerated closed** set of protected-store reads
+plus **one** bounded protected-presentation ceremony entry, process-local /
+non-bearer / non-serialisable / restart-dead / session-scoped; `writer()` on the
+recognized authority **still raises** (HPAC-PAWA-REQ-092 unchanged);
+`HPAC-PRESENTATION-EVIDENCE/2.0` stays outside it and the existing
+`mint_protected_presentation_evidence_writer` path is reused **unchanged**
+(§42B / HPAC-PAWA-REQ-248 preserved); `hpac_rhamp_counter_state_verifier` (§42B)
+remains the **sole** counter-state mutation authority; **no** new
+`pawa_failure_code` (every F-5-B1 rejection maps onto the existing 21 codes,
+§42C / §42E); **no** change to R1-HYBRID, non-bearer, one-operation, root,
+generation, rollback, two-OS-principal, §33 / §33A, or the §42B / §68A / H-3
+five-role design; **no** runtime / PB / RE / runtime-capability / execution
+authority — the read / ceremony-entry authority terminates at trusted reads
+plus one ceremony entry and authorizes no first external effect; §96 is
+**further specialized** (a narrower read-only exception added), not redefined;
+no production implementation, no `src/pcae` / `scripts` / `tests` / dependency
+change, no protected-host mutation, no ceremony; a dedicated HPAC-PAWA-001 v1.4
+contract IV is the recommended default before the F-5-B1 implementation relies
+on this text; **N-16-5 remains NOT CLOSED**).
 **v1.0 → v1.1 delta:** §7A (delta table), §32A, §20A, §80 (S-1), §94 (history),
 §95A (R1/R2/R3/R4 disposition). Incorporates the three
 `.1R.30R.2A.1` independent-verification corrections: **C-1** (R1-HYBRID
@@ -127,10 +168,10 @@ HBDC-001 change, **no** RDGO-001 state-machine change, no gate reorder, no
 first-effect-boundary move, no merge of the
 authentication / presence / verification / informed-intent / approval /
 PB-permission / Runtime-Enforcement / runtime-capability / execution concerns.
-The current lineage is **HPAC-PAWA-001 v1.0 → v1.1 → v1.2 → v1.3**, every
-evolution MINOR. The v1.2 companion HPAC-PPA-001 v1.0 is new and, at v1.3,
-byte-unchanged; every pre-existing contract other than HPAC-PAWA-001 remains
-byte-unchanged. v1.3 adds no new companion contract.
+The current lineage is **HPAC-PAWA-001 v1.0 → v1.1 → v1.2 → v1.3 → v1.4**, every
+evolution MINOR. The v1.2 companion HPAC-PPA-001 v1.0 is new and, at v1.3 and
+v1.4, byte-unchanged; every pre-existing contract other than HPAC-PAWA-001
+remains byte-unchanged. v1.3 and v1.4 add no new companion contract.
 
 This is a contract-freeze document. It creates no protected root, installs no
 descriptor, mints no writer capability, writes no registry, implements no writer
@@ -141,7 +182,10 @@ no path. The v1.1, v1.2, and v1.3 evolutions add normative text only — no
 `agent-exclusion.json` schema helper, no `pwd` / `grp` call, no
 `hpac_certification_coordinator.py`, no `certification_writer(...)` factory, no
 `scripts/hpac_certification_admin.py`, no challenge / assertion / proof /
-Gate-5-binding / counter-state write, no ceremony. Runtime remains
+Gate-5-binding / counter-state write, no ceremony. The v1.4 evolution adds
+normative text only — no `recognized_certification_read_authority(...)`
+accessor, no §33B recognition-sequence code, no `CertificationReadAuthority`
+handle type, no protected-store read, no ceremony entry. Runtime remains
 `not_implemented` / `Observed` / `observe` / `unavailable`; 0 plugins /
 0 capabilities. The first external effect remains **ABSENT**.
 
@@ -419,6 +463,27 @@ ambiguity at any authority boundary fails closed.
 | instance data | none frozen | **none frozen** — v1.3 SHALL NOT normatively embed `hp-8cee9b36…`, `hpc-2e7bbfa0…`, the counter value, the YubiKey AAGUID, the helper installation id, the anchor id, or any specific challenge / operation (§42B / HPAC-PAWA-REQ-267) | no change | the contract defines types / authority semantics, not current production instance state |
 | contract IV | v1.2 IV was `.1R.30R.4R.2` | a **dedicated HPAC-PAWA-001 v1.3 contract IV** is the recommended default before the H-3 implementation relies on this text; foldable into the H-3 IV only at explicit operator discretion (§80.3 / HPAC-PAWA-REQ-275) | recommendation | a new production authority category warrants its own IV (the v1.1 C-3 precedent) |
 | companion contracts | HPAC-PPA-001 v1.0 frozen alongside v1.2 | **byte-unchanged**; HPAC-001 v2.1, RHAMP-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1, HBDC-001 v1.2, the descriptor schema — all byte-unchanged | no change | v1.3 is additive and authority-preserving; no parent cascade |
+
+## 7C. v1.3 → v1.4 normative delta table
+
+| Area | v1.3 | v1.4 | Compatibility | Reason |
+|---|---|---|---|---|
+| production recognized **read** / ceremony-entry authority | **absent** — the N-16-5 pre-ceremony provenance-verified canonical reads (`HumanPrincipalRegistryStore` principal + credential, RHAMP counter state) and `run_protected_presentation_ceremony()` entry each need an `HPACStoreAuthority` whose `_validate_production_boundary` passes under the deployment owner's real `sudo` / root OS context; that is reachable **only** by binding the configured-agent identity via the private `_PRODUCTION_WRITER_FACTORY_SEAL`, and every seal-holding factory (`production_writer`, `certification_writer`, `mint_protected_presentation_evidence_writer`) is a **mutation / lifecycle-write** path — blocking finding **F-5-B1** | a bounded production path: **one** recognized **read-only** authority accessor (§33B / §38B / §42D) reached only by the already-enumerated §38A consumer | **MINOR** (S-3, §80.4) — adds **no** writer family, **no** writer role, **no** `PawaOperation`, **no** mutation; strictly narrower than the S-2 certification-writer family; §153 already permits "re-state verified behaviour", "tighten (never loosen) a bound", and "add an authorized-consumer category by explicit enumeration" | the predecessor N16-5-FINAL-CERT independently reproduced F-5-B1 from primary source: `_validate_production_boundary` (`hpac_foundation.py`) keys the negative boundary off `_current_agent_identity()` (= `os.geteuid()`, i.e. root under `sudo`) unless `_bind_configured_agent_identity` was called; `HPACStoreAuthority.production()` used for any `verify_record` read therefore fails closed under the required OS context, and no read-only factory binds that identity |
+| authorized certification factory consumers | §38A: the one N-16-5 real-human-authentication certification coordinator (`pcae.core.hpac_certification_coordinator` via `scripts/hpac_certification_admin.py`) for the `certification_writer` factory | **same one consumer** additionally reaches the new §33B read-authority accessor (§38B) — **no** new consumer category, **no** wildcard / prefix / glob (PAWA-INV-9) | additive; MINOR; exact reuse of the frozen §38A enumeration | F-5-B1 repair needs a recognized read / ceremony-entry boundary consumed by the same coordinator that already owns the certification session; a second consumer would be a second surface without a safety gain |
+| writer families | §42 administrative-mutation operations + the §42B closed certification-lifecycle writer family | **unchanged** — v1.4 adds **no** writer family and **no** role; the read authority grants **no** `HPACWriterCapability` and **no** mint (§42D) | no change | trusted reads and one ceremony entry are not writes; `HPACStoreAuthority.writer()` still `raise`s for every non-`FIXTURE_NON_REAL` class (HPAC-PAWA-REQ-092) |
+| `PawaOperation` vocabulary | 6 closed mutation classes | **6 closed mutation classes, unchanged** — the operation vocabulary is for mutations; a read / ceremony-entry recognition is not represented as a `PawaOperation` (§42D / HPAC-PAWA-REQ-288) | no change | no vocabulary expansion for a MINOR (§153 discipline) |
+| recognition sequence | §33 (11 steps, administrative-mutation) + §33A (certification writer) | **also** §33B — reuses §33 steps 1–9 verbatim as required conjuncts, then adds read-authority consumer / session-binding / configured-agent bind / **no-writer-mint** / audit steps; **no** role-allowlist step (there is no role) | additive; MINOR | the trust root, agent exclusion, two-OS-principal topology, generation / rollback protection are all reused unchanged |
+| readable scope | n/a | an **explicitly enumerated closed** set: the principal + credential registry records; the RHAMP credential sidecar + current counter-state record; the current-generation protected-presentation installation / descriptor / trusted-approval-presentation records; and the PAWA anchor / descriptor / exclusion records recognition already reads. **No** arbitrary filesystem read, **no** open-ended HPAC store enumeration, **no** OS secret, **no** `proofs/v2` read outside a bound session, **no** write of any kind (§42D / HPAC-PAWA-REQ-284) | tightening enumeration; MINOR | least authority — exactly the reads the FINAL-CERT pre-ceremony revalidation and the ceremony recognition require, nothing else |
+| counter read vs update | `hpac_rhamp_counter_state_verifier` (§42B) performs the one authorized bounded transition | **unchanged** — the read authority may read current counter state; it SHALL NOT apply a transition; `hpac_rhamp_counter_state_verifier` remains the **sole** counter-state mutation authority (§42D / HPAC-PAWA-REQ-286) | no change | pre-ceremony counter read ≠ post-assertion authorized counter transition |
+| ceremony entry | n/a | the read authority authorizes handing the recognized PRODUCTION `HPACStoreAuthority` to `run_protected_presentation_ceremony(authority=…)` for **exactly one** ceremony; the ceremony's one `HPAC-PRESENTATION-EVIDENCE/2.0` write remains authored by the **existing** `mint_protected_presentation_evidence_writer` path (HPAC-PAWA-REQ-248 / HPAC-PPA-REQ-041) unchanged; the read authority does **not** itself manufacture presentation evidence (§42D / HPAC-PAWA-REQ-285) | additive; MINOR | ceremony entry is a prerequisite to reach the genuine protected presentation — it is not the human APPROVE, not the presentation-evidence writer, not real assurance |
+| capability / handle lifetime | §49A: certification-lifecycle capability single-use per role per one ceremony | **also** §49B — the read-authority handle is bound to **one** certification session, single-use for the ceremony-entry hand-off, process-local, non-bearer, non-serialisable (`__reduce__` raises), restart-dead, no delegation / remint / conversion to generic authority; a second call re-runs the full §33B sequence | reuse; MINOR | no reusable / bearer / cross-session read authority is contemplated (§152 MAJOR trigger not fired) |
+| `pawa_failure_code` taxonomy | 21 closed values | **21 closed values, unchanged** — every F-5-B1 rejection maps onto #15 / #16 / #17 / #18 / #20 / #21 and the §33 conjuncts keep their exact existing codes (§42E); RHAMP §57 map unchanged; RHAMP-001 v1.0 byte-unchanged | no change | no vocabulary expansion for a MINOR |
+| §96 (verifier-only lifecycle records) | specialized by the §42B narrow write exception | **further specialized** — a **read-only** exception: the certification coordinator, only inside a bounded certification session, MAY obtain a recognized read view of the canonical principal / credential / counter / presentation records and enter the ceremony once; it writes **nothing** through this authority | narrowing read-only exception; MINOR (S-3) | F-5-B1 cannot be repaired without a recognized production read view of those exact records under the real OS context; the exception grants no write |
+| walls | §5 / §13 / §67 / §68 / §68A / PAWA-INV-2 / PAWA-INV-8 / PAWA-INV-13 | **all preserved verbatim** + PAWA-INV-14: read authority ≠ write authority; trusted read ≠ mutation authority; recognized `HPACStoreAuthority` ≠ `HPACWriterCapability`; ceremony entry ≠ human APPROVE / REJECT / UP / UV / real assurance / real presentation evidence; possession ≠ Gate-5 / PB permission / policy exception / RE result / runtime capability / `DispatchEnvelope` / execution; deterministic input never becomes REAL through it; the path terminates at trusted reads + one ceremony entry | preserved; additive invariant | §4 (read ≠ write wall), §12 (`writer()` escalation denied), §31 (test seams remain non-production), §62–§65 (human / real / PB / policy / runtime / effect walls) of the F-5-B1 phase prompt |
+| test-only seams | `_production_test_fixture` / directly-imported `_PRODUCTION_WRITER_FACTORY_SEAL` / `_test_decision_source` remain NON-PRODUCTION (HPAC-PAWA-REQ-265) | **unchanged** — v1.4 does **not** legitimize `_production_test_fixture`, `_topology_probe`, `_protected_root`, `_test_decision_source`, or an in-process launch shim as production authority; the §33B production path passes the real §33 recognition; a disclosed one-leading-underscore fixture-only keyword seam is the only permitted injection point and a guard asserts no non-test module passes it (§42D / HPAC-PAWA-REQ-287) | no change | production authority is not test authority |
+| instance data | none frozen | **none frozen** — v1.4 SHALL NOT normatively embed `hp-8cee9b36…`, `hpc-2e7bbfa0…`, the counter value, the YubiKey AAGUID, the helper installation id, the anchor id, or any specific challenge / operation (§42D / HPAC-PAWA-REQ-289) | no change | the contract defines authority semantics, not current production instance state |
+| contract IV | dedicated HPAC-PAWA-001 v1.3 contract IV recommended | a **dedicated HPAC-PAWA-001 v1.4 contract IV** is the recommended default before the F-5-B1 implementation relies on this text; foldable into the F-5-B1 implementation IV only at explicit operator discretion (§80.4 / HPAC-PAWA-REQ-291) | recommendation | a new production authority accessor warrants its own IV (the v1.1 C-3 / v1.3 precedent) |
+| companion contracts | HPAC-PPA-001 v1.0 byte-unchanged at v1.3 | **byte-unchanged**; HPAC-001 v2.1, RHAMP-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1, HBDC-001 v1.2, HPAC-PPA-001 v1.0, the descriptor + current-generation schemas — all byte-unchanged | no change | v1.4 is additive and authority-preserving; no parent cascade; single-contract solution normatively sufficient |
 
 ## 8. Trusted computing base
 
@@ -1368,6 +1433,79 @@ ambiguity at any authority boundary fails closed.
   code and identifying context are recorded (§55, §120). The absence of a denial
   is never authority.
 
+## 33B. Certification read / ceremony-entry authority recognition sequence (v1.4)
+
+- **HPAC-PAWA-REQ-276.** Under **HPAC-PAWA-001 v1.4** a recognized, **read-only**
+  production `HPACStoreAuthority` for the N-16-5 pre-ceremony provenance-verified
+  canonical reads and for `run_protected_presentation_ceremony()` entry SHALL be
+  obtained **only** through a dedicated accessor exported from the **same
+  non-agent-importable admin-only production module** as the §36 `production_writer`
+  and §33A `certification_writer` factories (recommended
+  `src/pcae/core/hpac_protected_admin_writer.py`, or a sibling behind the identical
+  §37 import fence), invoked **only** by the exact §38A / §38B authorized
+  certification consumer. A conceptual symbol is
+  `recognized_certification_read_authority(*, certification_session_id,
+  principal_id, credential_id, proof_id)` returning a
+  `CertificationReadAuthority` handle, or a repository-derived equivalent; the
+  contract fixes the **semantics**, not the exact class or method name. The
+  accessor SHALL NOT introduce a new public generic authority function, a
+  string-addressable authority argument, or a caller-controlled authority class.
+- **HPAC-PAWA-REQ-277.** The §33B sequence SHALL run, as **required conjuncts**,
+  the §33 steps 1–9 **verbatim** (reusing the §33 / §33A machinery — canonical-root
+  resolution and trust §25; `HPAC-PAWA-AGENT-EXCLUSION/1.0` load + live account
+  resolution + `live uid == provisioned_uid` + live group enumeration §32A and the
+  resulting `ConfiguredAgentAuthorityIdentity`; the configured-agent exclusion
+  negative boundary §26; descriptor trust §14 / §27; `current-generation.json`
+  incl. `agent_exclusion_digest` §20A with `descriptor.generation ==
+  current_generation`; the not-configured-agent current-context check §31; the
+  `O_EXCL | O_NOFOLLOW` positive write probe under `.authority/` §28; the
+  authorized-factory-consumer check §32 — evaluated against the §38B enumerated
+  set). Removing any one re-opens a named §20 threat; no single conjunct is
+  sufficient (PAWA-INV-3).
+- **HPAC-PAWA-REQ-278.** After step 9 the sequence SHALL additionally:
+  1. verify the calling module is the **exact** §38B read-authority consumer
+     (`unauthorized_factory_consumer`);
+  2. validate the **certification-session context binding** — identical to §33A
+     step 3: a nonempty `certification_session_id`; a target `principal_id` that
+     resolves in the `HumanPrincipalRegistryStore` to an **active, not-revoked,
+     mechanism-neutral** `PrincipalRecord`; a target `credential_id` that resolves
+     to an **active, not-revoked** `CredentialRecord` **bound to that principal**;
+     and a `proof_id` matching the reserved ceremony grammar
+     (`operation_scope_invalid` on any malformed / missing / `None`-bypass input;
+     `target_scope_invalid` on a principal / credential / proof that does not
+     belong to the session). This validation is itself performed **after** the
+     configured-agent identity is bound (step 3 below) so the protected-store
+     reads it makes pass `_validate_production_boundary` under the deployment
+     owner's real OS context;
+  3. bind the resolved `ConfiguredAgentAuthorityIdentity` `(uid, gids)` onto the
+     recognized `HPACStoreAuthority` instance through the existing
+     `_PRODUCTION_WRITER_FACTORY_SEAL` discipline (the identical
+     `_bind_configured_agent_identity` primitive the §33 / §33A mint paths use),
+     so every subsequent `_validate_production_boundary` on that instance keys the
+     negative boundary off the **configured agent principal**, not the invoking
+     (`sudo` / root) process (finding F-1 / F-5-B1);
+  4. return **one** process-local, single-use, restart-dead
+     `CertificationReadAuthority` handle bound to
+     `(certification_session_id, principal_id, credential_id, proof_id)` that
+     wraps the recognized authority and exposes **only** the §42D reads and the
+     §42D one-ceremony-entry hand-off — **no** `HPACWriterCapability`, **no**
+     `writer()` / `production_writer` / `certification_writer` /
+     `_mint_production_writer_capability` path, **no** remint / delegate /
+     serialise / convert-to-generic path (`__reduce__` raises);
+  5. record the issuance audit evidence (§55, extended per §42D /
+     HPAC-PAWA-REQ-290) with `operation = "certification_read_authority"`.
+- **HPAC-PAWA-REQ-279.** The §33B sequence SHALL run fresh on **every** accessor
+  call. No result is cached across calls. The recognition conjuncts, the
+  session-binding reads, the configured-agent bind, and the handle construction
+  are inside **one atomic recognition unit** — they cannot be split such that a
+  recognized read authority exists without all of them having run (PAWA-INV-3,
+  PAWA-INV-12, PAWA-INV-14).
+- **HPAC-PAWA-REQ-280.** The sequence **fails closed**: any failed conjunct or
+  check → the corresponding §56 code (§42E mapping); **no** read authority is
+  returned; the absence of a denial is never authority. There is **no fallback**
+  to a `production_writer` mutation capability, to
+  `HPACStoreAuthority.production()` used directly, or to any test-only seam.
+
 ## 34. No sudo / euid shortcut
 
 - **HPAC-PAWA-REQ-076.** The following SHALL NOT appear as the normative positive
@@ -1551,6 +1689,41 @@ ambiguity at any authority boundary fails closed.
   is amended by a new governed evolution to name it. No glob / `fnmatch` / prefix
   broadening of the certification consumer inventory is ever permitted
   (PAWA-INV-9).
+
+## 38B. Authorized read / ceremony-entry authority consumer (v1.4)
+
+- **HPAC-PAWA-REQ-281.** HPAC-PAWA-001 v1.4 adds **no** new factory-consumer
+  category. The **only** authorized consumer of the §33B
+  `recognized_certification_read_authority(...)` accessor is the **already
+  enumerated §38A** N-16-5 real-human-authentication certification coordinator —
+  exact source consumer `pcae.core.hpac_certification_coordinator`, reached only
+  from the standalone `scripts/hpac_certification_admin.py` entry point. Neither
+  name is a prefix, glob, or category wildcard. **No** launcher, helper,
+  presentation store, verifier, Gate, gate coordinator, runtime, agent, CLI,
+  plugin, or phase-specific certification / orchestration harness is an
+  authorized read-authority consumer (§38A / §240 / §88 / §224 preserved
+  verbatim). A later N16-5-FINAL-CERT harness MAY call the production coordinator;
+  it SHALL NOT itself receive a `CertificationReadAuthority` handle or the raw
+  recognized authority (§44 discipline — a harness is never authority).
+- **HPAC-PAWA-REQ-282.** The F-5-B1 implementation phase SHALL add exact
+  source / import consumer-inventory guard tests (the §39 / §39A /
+  HBDC-REQ-056/066 pattern): a text-scan of `src/pcae/cli.py`,
+  `src/pcae/commands/**`, `src/pcae/core/agent.py`, and every other
+  agent-reachable entry asserting that the read-authority accessor symbol never
+  appears as an import; and an assertion that the **only** caller of the accessor
+  is the §38B consumer's §33B path. Any **new** read-authority consumer SHALL
+  fail the guard until it is explicitly added to §38B **and** this contract is
+  amended by a new governed evolution. No glob / `fnmatch` / prefix broadening of
+  the read-authority consumer inventory is ever permitted (PAWA-INV-9).
+- **HPAC-PAWA-REQ-283.** Only the deployment owner — or an equally-privileged
+  protected-administration context that independently satisfies the §33B sequence
+  (holds real OS filesystem write authority over this deployment's
+  `<HPAC_PROTECTED_ROOT>`, presents a valid current descriptor, and is not the
+  configured agent principal) — MAY obtain a `CertificationReadAuthority` through
+  the enumerated coordinator. **Deployment owner ≠ human approver** (§46 / §51 of
+  the F-5-B1 phase prompt preserved): obtaining a recognized read view and
+  entering the ceremony does **not** manufacture the human APPROVE; the protected
+  presentation still obtains explicit human election separately.
 
 ## 40. `HPACWriterCapability` class
 
@@ -1791,6 +1964,120 @@ ambiguity at any authority boundary fails closed.
   stale / replayed / expired lifecycle object → the owning contract's existing
   rejection, and no trusted proof / no production assurance results.
 
+## 42D. Certification read / ceremony-entry authority — grants no write (v1.4)
+
+- **HPAC-PAWA-REQ-284.** The `CertificationReadAuthority` obtained through §33B
+  authorizes **only reads**, over an **explicitly enumerated closed** set of
+  canonical protected-store records for the bound session:
+  - the `PrincipalRecord` for the bound `principal_id` and the `CredentialRecord`
+    for the bound `credential_id` (and its canonical provenance) via
+    `HumanPrincipalRegistryStore`;
+  - the credential's RHAMP sidecar (`RHAMP-FIDO2-CREDENTIAL/1.0`) and its
+    **current** counter-state record (`RHAMP-COUNTER-STATE/1.0`) via the existing
+    sidecar / counter-state stores — **read only**;
+  - the **current-generation** protected-presentation installation record, the
+    HPAC-REQ-090 mechanism descriptor, and the trusted-approval-presentation
+    record via `ProtectedPresentationInstallationStore` /
+    `PresentationMechanismDescriptorStore` / `TrustedApprovalPresentationStore`;
+  - the PAWA anchor / descriptor / `HPAC-PAWA-AGENT-EXCLUSION/1.0` records the §33
+    recognition already reads.
+  It SHALL NOT permit: an arbitrary filesystem read; an open-ended HPAC store
+  enumeration beyond the enumerated set; a read of OS secrets, keychain / keyring
+  material, a FIDO2 PIN, Telegram or other application secrets, or a private key;
+  a read of an unrelated principal / credential / proof / session; or **any**
+  write, create, replace, `chmod`, `chown`, or execute.
+- **HPAC-PAWA-REQ-285.** The `CertificationReadAuthority` additionally authorizes
+  handing the wrapped recognized PRODUCTION `HPACStoreAuthority` to
+  `run_protected_presentation_ceremony(authority=…)` for **exactly one** protected
+  presentation ceremony in the bound session. The ceremony's single
+  `HPAC-PRESENTATION-EVIDENCE/2.0` write remains authored by the **existing**
+  `mint_protected_presentation_evidence_writer` path (HPAC-PAWA-REQ-248 /
+  HPAC-PPA-REQ-041) **unchanged** — that path performs its own launcher-consumer
+  check and its own seal-guarded mint on the same recognized authority. The
+  `CertificationReadAuthority` does **not** itself manufacture, seal, or persist
+  presentation evidence; the §20 protected-presentation evidence-writer boundary,
+  HPAC-PPA-001 v1.0, and the trusted human-election writer boundary are
+  **unaffected**. Ceremony entry authority ≠ human APPROVE / REJECT; ≠ FIDO2 user
+  presence / verification; ≠ a real authenticator assertion; ≠ real assurance
+  (§68B).
+- **HPAC-PAWA-REQ-286.** The `CertificationReadAuthority` SHALL NOT apply a
+  counter-state transition, reset a counter, set a counter value, or modify
+  credential identity or revocation. The §42B `hpac_rhamp_counter_state_verifier`
+  role remains the **sole** authority for the one bounded post-verification
+  counter-state transition. Pre-ceremony counter **read** ≠ authorized counter
+  **transition** (F-5-B1 phase prompt §18 / §45).
+- **HPAC-PAWA-REQ-287.** `HPACStoreAuthority.writer()` on the wrapped recognized
+  authority SHALL continue to `raise HPACAuthorityError` for every
+  non-`FIXTURE_NON_REAL` class (HPAC-PAWA-REQ-092 unchanged). The
+  `CertificationReadAuthority` handle exposes **no** `writer()`,
+  `production_writer(...)`, `certification_writer(...)`,
+  `_mint_production_writer_capability(...)`, `_bind_configured_agent_identity(...)`
+  re-invocation, or generic-authority conversion. A consumer holding the handle
+  SHALL NOT be able to escalate to a `PRODUCTION` `HPACWriterCapability`, request
+  a `production_writer` mutation capability, or mint any §42 / §42B capability.
+  **FACTORY ≠ CONSUMER, CONSUMER ≠ MINTER** (§15 preserved). The disclosed
+  test-only seams (`_production_test_fixture`, a directly-imported
+  `_PRODUCTION_WRITER_FACTORY_SEAL`, `_topology_probe`, `_protected_root`,
+  `_test_decision_source`, an in-process launch shim) remain **NON-PRODUCTION**;
+  v1.4 does not legitimize any of them, and a guard test SHALL assert no non-test
+  module passes any of them into the §33B path (HPAC-PAWA-REQ-166 / 265
+  discipline).
+- **HPAC-PAWA-REQ-288.** The read / ceremony-entry recognition is **not** a new
+  `PawaOperation` and creates **no** new lifecycle primitive, **no** new writer
+  role, and **no** new protected-root schema or artifact. The `PawaOperation`
+  vocabulary stays at its 6 closed mutation members. It consumes the
+  already-provisioned anchor exactly as the §36 / §33A factories do.
+- **HPAC-PAWA-REQ-289.** **No instance data in the contract.** v1.4 SHALL NOT
+  normatively freeze `hp-8cee9b36…`, `hpc-2e7bbfa0…`, the counter value, the
+  YubiKey AAGUID, the helper installation id, the anchor id, a specific
+  challenge, or a specific operation. Those are current production **evidence**,
+  not contract types.
+- **HPAC-PAWA-REQ-290.** Each successful read-authority issuance SHALL record a
+  durable audit event with the §55 field set plus, recorded as
+  **non-authoritative** facts (never handle fields, never the `_seal`): the
+  `certification_session_id`, the bound `principal_id` / `credential_id` /
+  `proof_id`, the read scope, and the result. It SHALL NOT serialise the
+  `_authority_seal` or anything from which a working authority or capability could
+  be reconstructed (§119). It uses the existing `HPAC-PAWA-ISSUANCE-EVIDENCE/1.0`
+  `operation` / `context_annotation` fields (`operation =
+  "certification_read_authority"`); **no** new schema. Audit evidence is not
+  authority (§117, PAWA-INV-10).
+
+## 42E. v1.4 rejection cases — all map onto the existing 21 codes
+
+- **HPAC-PAWA-REQ-291.** Every terminal rejection introduced by the §33B
+  recognition sequence and the §42D read / ceremony-entry authority maps
+  **deterministically onto an existing `pawa_failure_code`** — **no new
+  `pawa_failure_code` is created; the taxonomy remains 21 closed values**:
+
+  | v1.4 rejection case | existing `pawa_failure_code` | # |
+  |---|---|---|
+  | caller is not the exact §38B read-authority consumer | `unauthorized_factory_consumer` | 15 |
+  | malformed / missing / `None`-bypass `certification_session_id` / `principal_id` / `credential_id` / `proof_id` | `operation_scope_invalid` | 16 |
+  | target principal unresolvable / revoked / not mechanism-neutral; target credential unresolvable / revoked / not bound to the principal | `operation_scope_invalid` | 16 |
+  | a read requested outside the §42D enumerated closed scope; an attempt to reach `writer()` / a mint / a mutation / a counter transition through the handle | `operation_scope_invalid` | 16 |
+  | handle used for a different `certification_session_id` / subject than bound; a proof / principal / credential that does not belong to the session | `target_scope_invalid` | 17 |
+  | read-authority handle reused for a second ceremony entry, after the ceremony, after a rotation, or after a restart | `capability_stale` | 18 |
+  | a forged / deserialised / `object.__new__` `CertificationReadAuthority` fails the seal-identity check | `reconstruction_attempt` | 20 |
+  | any §33 conjunct (steps 1–9) failure | its **exact existing** §56 code (#1–#15) | 1–15 |
+  | an otherwise unclassified fail-closed error in read-authority recognition / issuance | `internal_fail_closed` | 21 |
+
+- **HPAC-PAWA-REQ-292.** The PAWA→RHAMP map (§57) is **unchanged**: a v1.4
+  rejection during a RHAMP ceremony resolves through the existing §57 / §42C rows
+  — `unauthorized_factory_consumer` / `write_probe_failed` /
+  `current_context_is_agent` / `agent_has_protected_write_authority` →
+  `enrollment_not_protected_admin` (#2); `operation_scope_invalid` /
+  `target_scope_invalid` / `capability_stale` / `reconstruction_attempt` /
+  `internal_fail_closed` → `internal_verification_error` (#41); the `descriptor_*`
+  and `protected_root_*` codes keep their existing rows. **No new
+  `terminal_reason_code`; RHAMP-001 v1.0 §49's 41-code vocabulary is
+  byte-unchanged; RHAMP-001 is not edited.**
+- **HPAC-PAWA-REQ-293.** If a future read-authority rejection genuinely has **no**
+  semantically valid mapping onto the 21 `pawa_failure_code` values or the 41
+  RHAMP `terminal_reason_code` values, that is a
+  **BLOCKED-on-contract-compatibility** condition for the phase that discovers it
+  — it does **not** silently add a code.
+
 ## 45. Process-local
 
 - **HPAC-PAWA-REQ-101.** The `PRODUCTION` `HPACWriterCapability` is
@@ -1873,6 +2160,32 @@ ambiguity at any authority boundary fails closed.
   implementation phase records it as a prerequisite and the change is
   **additive** (a spent flag / one-shot wrapper), never a weakening
   (HPAC-PAWA-REQ-107 discipline).
+
+## 49B. Certification read / ceremony-entry authority lifetime (v1.4)
+
+- **HPAC-PAWA-REQ-294.** A `CertificationReadAuthority` handle is bound to
+  **exactly one** certification session and authorizes **exactly one** protected
+  presentation ceremony entry. It SHALL NOT be reused for a second ceremony, a
+  second session, after a descriptor rotation (§50), or after a process restart
+  (§48) — a second attempt → `capability_stale` (§56). §45 (process-local), §46
+  (non-bearer), §47 (non-serializable — `__reduce__` raises), §48 (restart
+  invalidation — a fresh `HPACStoreAuthority` instance has a fresh `_seal`) apply
+  to the `CertificationReadAuthority` and to the recognized authority it wraps
+  **verbatim**. The reads it authorizes MAY be performed more than once **within**
+  the one bounded session (revalidation before and immediately before the
+  ceremony), but the handle confers no authority once the session's ceremony has
+  been entered.
+- **HPAC-PAWA-REQ-295.** The enclosing `scripts/hpac_certification_admin.py`
+  invocation SHALL be **short-lived** — one certification ceremony per invocation,
+  the process exits after. There is **no** session-wide reusable read authority
+  and **no** `CertificationReadAuthority` that survives the ceremony it was
+  obtained for. A second accessor call re-runs the full §33B sequence.
+- **HPAC-PAWA-REQ-296.** If enforcing single-ceremony-entry / session binding
+  requires a type addition, the F-5-B1 implementation phase records it as a
+  prerequisite and the change is **additive** (a spent flag / one-shot wrapper),
+  never a weakening (HPAC-PAWA-REQ-107 / 260 discipline). It SHALL NOT require any
+  change to the `HPACWriterCapability` `__slots__` or to any protected-root
+  schema.
 
 ## 50. Descriptor rotation
 
@@ -2270,6 +2583,53 @@ ambiguity at any authority boundary fails closed.
   runtime-enablement clause. N-16-6 and N-16-7 remain **OPEN and untouched**;
   N-16-7 strictly last. The certification-authority path exists for
   human-assurance certification only and unblocks neither.
+
+## 68B. Certification read / ceremony-entry authority walls (v1.4)
+
+- **HPAC-PAWA-REQ-297.** **Canonical read authority ≠ canonical write authority.**
+  A `CertificationReadAuthority` (§42D) proves trusted provenance for a bounded,
+  enumerated set of canonical protected-store reads and authorizes one ceremony
+  entry. It is **not** an `HPACWriterCapability`, **not** a §42 / §42B mint, and
+  **not** convertible into one. `trusted read ≠ mutation authority`;
+  `store recognition ≠ writer capability`; `HPACStoreAuthority ≠
+  HPACWriterCapability`; `ceremony entry authority ≠ human APPROVE`;
+  `ceremony entry authority ≠ FIDO2 authentication`; `protected presentation ≠
+  PB permission`; `Gate-5 success ≠ execution authority`.
+- **HPAC-PAWA-REQ-298.** **The read authority does not automate authority.**
+  Possession of a `CertificationReadAuthority` SHALL NOT: manufacture a human
+  APPROVE or REJECT, FIDO2 user presence, FIDO2 user verification, a real
+  protected presentation, or a real authenticator assertion; construct a
+  `PRODUCTION` `AuthenticatedHumanPrincipal` (that stays with
+  `verify_human_authentication(require_real_assurance=True)` — the read authority
+  only makes the PRODUCTION records **reachable**, it does not relax the check);
+  convert deterministic authentication / presentation evidence into REAL
+  assurance; manufacture or bypass a Gate result; satisfy Gate 5 / 6 / 7 / 8 / 9 /
+  10; create a `DispatchEnvelope`; override a no-go; issue a runtime approval, a
+  Permission Broker permission, a policy exception, a Runtime Enforcement result,
+  a runtime capability, or an adapter admission; or transition the runtime out of
+  `Observed` / `observe` / `unavailable`. The read / ceremony-entry authority
+  path **terminates at the trusted reads plus one ceremony entry**; it authorizes
+  **no first governed runtime external effect**.
+- **HPAC-PAWA-REQ-299.** **H-3 and its neighbours are unchanged.** v1.4 does
+  **not** reopen or weaken the §33A / §38A / §42B / §68A certification-writer
+  design: the five-role family, the §33A recognition sequence, the
+  `certification_writer` factory, the one-shot / session / subject semantics, the
+  existing trust root, and the Gate-5 termination are all preserved verbatim. The
+  §42B `hpac_rhamp_counter_state_verifier` role remains the sole counter-state
+  mutation authority; `mint_protected_presentation_evidence_writer` and the §20 /
+  HPAC-PPA-001 v1.0 presentation-evidence boundary remain the sole author of
+  `HPAC-PRESENTATION-EVIDENCE/2.0`; the trusted human-election writer boundary is
+  unchanged. The F-5-B1 read authority **composes with** H-3, it does not replace
+  it.
+- **HPAC-PAWA-REQ-300.** **No second trust root.** The §33B recognition reuses the
+  **existing** production recognition / trust root — OS filesystem write authority
+  on the out-of-band-provisioned `<HPAC_PROTECTED_ROOT>` plus the descriptor plus
+  the write probe, evaluated against the configured-agent exclusion. v1.4
+  introduces **no** new global seal, secret, trust token, magic environment
+  variable, privileged file, persistent authority record, or independent factory
+  root. F-5-B1 is a reachability / least-privilege gap, not a justification for a
+  second root of trust. The `CertificationReadAuthority` is non-bearer and
+  process-local; nothing serialisable is authority.
 
 ## 69. No FIDO2 requirement for first bootstrap
 
@@ -2765,6 +3125,137 @@ ambiguity at any authority boundary fails closed.
   already-provisioned anchor exactly as the §42 administrative-mutation factory
   does.
 
+### 80.4 v1.4 versioning rule (finding S-3)
+
+- **HPAC-PAWA-REQ-301.** **Explicit MINOR rule (S-3):** *adding **one** recognized,
+  **read-only** production authority accessor — reached only by an
+  **already-enumerated** §38A / §38B consumer, minted through a recognition
+  sequence that reuses the §33 steps 1–9 verbatim, granting **no**
+  `HPACWriterCapability`, **no** mint authority, **no** new `PawaOperation`, **no**
+  new writer role, **no** mutation, confined to an **explicitly enumerated closed**
+  set of protected-store reads plus **one** bounded protected-presentation
+  ceremony entry, process-local / non-bearer / non-serialisable / restart-dead /
+  session-scoped, and granting **no** runtime / PB / RE / runtime-capability /
+  execution authority — is a **MINOR** evolution.* This is consistent with
+  HPAC-PAWA-REQ-153's existing permits — "re-state verified behaviour", "tighten
+  (never loosen) a bound", and "add an authorized-consumer **category** by explicit
+  enumeration (never wildcard)" — and is **strictly narrower** than the S-2
+  certification-writer family (which added a writer family and a five-role
+  allowlist): S-3 adds **no** writer authority at all. §96 is thereby **further
+  specialized**, not redefined: a narrow **read-only** enumerated exception is
+  added — the certification coordinator, only inside a bounded certification
+  session, MAY obtain a recognized read view of the canonical principal /
+  credential / counter / presentation records and enter the ceremony once — while
+  it writes **nothing** through this authority and the trusted verifier / the
+  §42B family / `mint_protected_presentation_evidence_writer` remain the sole
+  authors of every record. Future readers SHALL apply this rule directly.
+- **HPAC-PAWA-REQ-302.** **v1.4 MAJOR-trigger review — none fires
+  (HPAC-PAWA-REQ-152 / 213 / 271):** the v1.4 evolution does **not** make `sudo` /
+  `euid` / an environment variable sufficient authority (the §33B authority basis
+  is the §33 conjunction — live effective filesystem write authority + the
+  descriptor + the write probe, evaluated against the configured-agent exclusion);
+  does **not** collapse or remove the configured-agent exclusion (§33B reuses §26
+  / §31 / §32A unchanged, and the whole point of the accessor is to bind the
+  configured-agent identity for the negative boundary); does **not** permit a
+  same-principal agent / deployment-owner topology (§61 / HPAC-PAWA-REQ-205 reused
+  — still fail closed); does **not** introduce a remote / network / cloud
+  authority service or transport (fully local); does **not** make any authority or
+  capability bearer, durable, serialisable, or reusable across operations /
+  ceremonies / sessions (§49B: single-use per session, process-local,
+  non-serialisable, restart-dead, no delegation / remint; the read authority
+  grants **no** capability at all); does **not** broaden any capability into
+  runtime approval / PB permission / RE result / runtime capability / execution
+  (§68B — the path terminates at the trusted reads plus one ceremony entry and
+  authorizes no first external effect); does **not** change the bootstrap trust
+  root away from OS filesystem write authority on the out-of-band-provisioned
+  protected root (HPAC-PAWA-REQ-300); does **not** remove the `generation` /
+  rollback-prevention protection (§33B reuses §20 / §20A); does **not** add a
+  signing key / pinned key / keychain requirement as an authority input; does
+  **not** widen the authorized-consumer inventory by wildcard / prefix / glob — it
+  adds **no** new consumer category and reuses the **exact** §38A enumeration.
+  Every §271 v1.3-specific trigger is likewise not fired: no certification-lifecycle
+  capability is made bearer / reusable / cross-ceremony (none is minted); the
+  coordinator is not authorized to mint a PRODUCTION `AuthenticatedHumanPrincipal`
+  outside `verify_human_authentication(require_real_assurance=True)`, a Gate
+  result, or a PB / policy / RE / runtime-capability / execution decision; no
+  certification role is added by wildcard / prefix / arbitrary argument (no role
+  is added); no additional certification-writer consumer is authorized.
+  **⇒ HPAC-PAWA-001 v1.4 — MINOR.**
+- **HPAC-PAWA-REQ-303.** **MAJOR triggers preserved and extended for v1.4:** every
+  §152 / §213 / §271 trigger, plus — making the `CertificationReadAuthority`
+  bearer, durable, serialisable, reusable across sessions / ceremonies, or
+  delegable; letting it (or anything the consumer does with it) obtain a
+  `PRODUCTION` `HPACWriterCapability`, a `production_writer` mutation capability, a
+  §42B certification capability, or any mint / `writer()` escalation; widening the
+  §42D read scope beyond the enumerated closed set or to arbitrary filesystem /
+  store reads; authorizing any additional read-authority consumer; or letting the
+  read authority manufacture a human APPROVE, real assurance, a Gate result, or
+  any PB / policy / RE / runtime / execution authority — each remains a **MAJOR**
+  plus its own adjudication and independent verification.
+- **HPAC-PAWA-REQ-304.** **Traceability (v1.4).** The F-5-B1 implementation phase
+  and its IV SHALL map every load-bearing §33B / §38B / §42D / §42E / §49B / §68B
+  clause to exact production-source and test evidence (§73 discipline; no
+  prose-only guarantee): the `recognized_certification_read_authority(...)`
+  accessor symbol and its non-agent-importable fence; the §33B recognition
+  sequence (steps 1–9 reuse + the read-authority steps, incl. the
+  `_bind_configured_agent_identity` bind that repairs the F-5-B1 boundary failure
+  and the ordering that makes it precede the session-binding reads); the
+  `CertificationReadAuthority` handle (`__reduce__` raises; no `writer()` / mint /
+  `production_writer` / `certification_writer` path; session + subject binding;
+  single ceremony entry); the §42D enumerated closed read scope; the §38B
+  consumer-inventory guard and the assertion that the only caller is
+  `pcae.core.hpac_certification_coordinator` via
+  `scripts/hpac_certification_admin.py`; the fixture-only seam guard; and tests
+  that the handle cannot mint a `PRODUCTION` capability, apply a counter
+  transition, write any record, manufacture a human APPROVE / a Gate result / a
+  PB / RE / runtime decision, or reach an external effect.
+- **HPAC-PAWA-REQ-305.** **Dedicated contract IV (recommended default).** A
+  **dedicated independent verification of HPAC-PAWA-001 v1.4** SHALL run **before**
+  the F-5-B1 implementation phase relies on this text — the safer default because
+  the recognized read-authority accessor is a **new production authority
+  construction** (it calls `_bind_configured_agent_identity` for a non-writer
+  purpose for the first time), not a prose restatement (the v1.1 **C-3** / v1.3
+  precedent). Folding it into the F-5-B1 implementation's IV is permitted **only
+  at the authorizing operator's explicit discretion**. At minimum it SHALL
+  independently verify: the MINOR classification under §80 / §152 (S-3); that the
+  read authority grants **no** `HPACWriterCapability`, **no** mint, **no**
+  `PawaOperation`, **no** role, **no** mutation, and **no** counter transition;
+  that §33B reuses the §33 conjuncts and fails closed on each; the enumerated
+  closed §42D read scope; the non-bearer / non-serialisable / single-session /
+  restart-dead / one-ceremony-entry semantics; the §68B walls (no human-APPROVE
+  manufacture, no deterministic elevation, no PB / policy / RE / runtime /
+  execution authority, termination at trusted reads + one ceremony entry); that
+  `HPACStoreAuthority.writer()` still raises; that no new `pawa_failure_code` and
+  no RHAMP-001 edit is required; that H-3 (§33A / §38A / §42B / §68A) is
+  byte-unchanged; and that HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2,
+  HPAC-PPA-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1, and the
+  `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` / `HPAC-PAWA-CURRENT-GENERATION/1.0`
+  schemas are byte-unchanged.
+- **HPAC-PAWA-REQ-306.** **`HPAC-PAWA-CURRENT-GENERATION/1.0` and
+  `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` schemas are byte-unchanged by v1.4.** The
+  read / ceremony-entry authority adds **no** field to any protected-root schema,
+  **no** new protected-root artifact, and **no** new provisioning step; it
+  consumes the already-provisioned anchor exactly as the §36 / §33A factories do.
+- **HPAC-PAWA-REQ-307.** **No production change in the v1.4 freeze phase.** Hard
+  requirement: `git diff <v1.4-phase-entry> HEAD -- src/pcae scripts pyproject.toml`
+  is **empty**, `git diff --name-only <v1.4-phase-entry> HEAD -- docs/contracts`
+  names **exactly one** file — this contract, evolved in place to HPAC-PAWA-001
+  v1.4 — and **no other contract edit and no new contract**. Any
+  contract-traceability test authored in the freeze phase stays contract-only and
+  non-production; the §33B / §38B / §42D guards and functional tests are
+  **specifications for the F-5-B1 implementation phase and the dedicated v1.4
+  contract IV**, not tests authored now (HPAC-PAWA-REQ-158 / 217 / 273 discipline).
+- **HPAC-PAWA-REQ-308.** **Single-contract solution.** v1.4 independently
+  determined that a bounded amendment to **HPAC-PAWA-001 alone** is normatively
+  sufficient: HPAC-001 v2.1 (walls preserved), RHAMP-001 v1.0 (counter **read**
+  only, no mutation, no new `terminal_reason_code`), HPAC-PPA-001 v1.0 (the
+  ceremony signature and the `mint_protected_presentation_evidence_writer` path
+  are reused unchanged; HPAC-PPA-001 never fixed where the launcher's authority
+  originates), HBDC-001 v1.2, and every other frozen contract require **no**
+  amendment. No companion contract is added. Had a second frozen contract
+  genuinely required a normative change, this phase would have **BLOCKED** and
+  derived a separate contract phase rather than silently expanding scope.
+
 ## 81. Existing-contract byte identity
 
 - **HPAC-PAWA-REQ-155.** At finalization, `.1R.30R.2` SHALL independently prove
@@ -2850,18 +3341,30 @@ ambiguity at any authority boundary fails closed.
   N-16-5 closure still requires `.1R.30R.3.*` implementation, `.1R.30R.4`
   composite IV, `.1R.30R.5` presentation + `require_real_assurance` wiring, and
   `.1R.30R.6` (IV + mandatory real-CTAP2-hardware verification).
+- **HPAC-PAWA-REQ-309.** On a clean v1.4 freeze (alias **N16-5-F5B1-READAUTH**):
+  **N-16-5 — F-5-B1 READ / CEREMONY-ENTRY AUTHORITY CONTRACT BLOCKER RESOLVED —
+  F-5-B1 IMPLEMENTATION PENDING — DEDICATED HPAC-PAWA-001 v1.4 CONTRACT IV
+  RECOMMENDED — N-16-5 NOT CLOSED.** The recognized-read / ceremony-entry
+  least-privilege gap that BLOCKED N16-5-FINAL-CERT is closed **at the contract
+  level** by §33B / §38B / §42D; N-16-5 closure still requires the F-5-B1
+  implementation (alias **N16-5-F5B1-IMPL**), its dedicated IV
+  (**N16-5-F5B1-IV**), and a fresh final real-human / genuine-YubiKey
+  certification phase on a **fresh CPIPC-valid** successor id.
 
 ## 88. N-16-6 / N-16-7
 
 - **HPAC-PAWA-REQ-162.** N-16-6 and N-16-7 remain **OPEN and untouched**;
   N-16-7 strictly last. **(v1.1)** HPAC-PAWA-001 v1.1 does not begin, reference,
-  or unblock N-16-6 or N-16-7, and no Slice C.
+  or unblock N-16-6 or N-16-7, and no Slice C. **(v1.3 / v1.4)** neither
+  evolution contains a runtime-enablement clause; the certification-writer and
+  the read / ceremony-entry authority paths exist for human-assurance
+  certification only and unblock neither.
 
 ## 89. N-23-1 / N-23-2
 
 - **HPAC-PAWA-REQ-163.** N-23-1 (INFO) and N-23-2 (INFO / DEFERRED NORMALIZATION
-  DEBT) are carried **unchanged** by v1.0 and by v1.1. HPAC-PAWA-001 does not
-  normalize PBRD / PBNDE semantics.
+  DEBT) are carried **unchanged** by v1.0, v1.1, v1.2, v1.3, and v1.4.
+  HPAC-PAWA-001 does not normalize PBRD / PBNDE semantics.
 
 ## 90. Contract-freeze verdict
 
@@ -3155,6 +3658,151 @@ human authorization. Do not begin any of them.
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
 ```
 
+### 90.4 v1.4 contract-freeze verdict
+
+```
+HPAC-PAWA-001 v1.4 — FROZEN (MINOR; S-3; certification read / ceremony-entry authority)
+HPAC-PPA-001 v1.0   — UNCHANGED (byte-identical companion)
+HPAC-001 v2.1 / RHAMP-001 v1.0 / RIHAC-001 v2.0 / RIASC-001 v3.0 /
+RDGO-001 v3.1 / HBDC-001 v1.2 — UNCHANGED (byte-identical)
+HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0 / HPAC-PAWA-CURRENT-GENERATION/1.0
+                    — SCHEMA BYTE-UNCHANGED
+§33A / §38A / §42B / §68A (H-3 certification-writer design) — BYTE-UNCHANGED
+every other contract — byte-unchanged
+
+BLOCKING FINDING F-5-B1 — CONTRACT BLOCKER RESOLVED — IMPLEMENTATION PENDING
+
+  F-5-B1 ROOT CAUSE              = VERIFIED (independently reproduced from
+                                   primary source: hpac_foundation.py
+                                   _validate_production_boundary keys the
+                                   negative boundary off _current_agent_identity()
+                                   = os.geteuid() [root under sudo] unless
+                                   _bind_configured_agent_identity was called via
+                                   the private _PRODUCTION_WRITER_FACTORY_SEAL;
+                                   HPACStoreAuthority.production() used for any
+                                   verify_record read therefore fails closed
+                                   under the required deployment-owner OS
+                                   context; every seal-holding factory is a
+                                   mutation / lifecycle-write path)
+  CURRENT PRODUCTION TRUSTED READ PATH = ABSENT
+  OVER-AUTHORIZED FALLBACK       = production_writer(<PawaOperation>) — all 6
+                                   PawaOperations are mutations; reuse of
+                                   handle.authority is a phantom mutation +
+                                   audit + a raw reusable capability leak —
+                                   FORBIDDEN by the phase prompt (§2 / §5 / §28)
+  TEST-ONLY FALLBACK            = PRESENT (_production_test_fixture /
+                                   _topology_probe / _protected_root /
+                                   _test_decision_source) — FORBIDDEN, remains
+                                   NON-PRODUCTION (§31 / HPAC-PAWA-REQ-287)
+  CANONICAL READ AUTHORITY      = DISTINCT FROM WRITE AUTHORITY (verified:
+                                   HPACStoreAuthority.writer() raises for every
+                                   non-FIXTURE_NON_REAL class; every mutation
+                                   needs a separately sealed HPACWriterCapability
+                                   from a seal-guarded mint; a recognized
+                                   PRODUCTION HPACStoreAuthority on its own
+                                   confers only verify_record / resolve_record
+                                   reads)
+  SELECTED MINIMAL AUTHORITY SHAPE = one recognized READ-ONLY production
+                                   HPACStoreAuthority accessor (§33B / §42D) —
+                                   NO HPACWriterCapability, NO mint, NO
+                                   PawaOperation, NO role, NO mutation, NO
+                                   counter transition; enumerated closed read
+                                   scope + one bounded ceremony entry;
+                                   process-local / non-bearer / non-serialisable
+                                   / restart-dead / one-session
+  AUTHORIZED CONSUMER CATEGORY  = the ALREADY-ENUMERATED §38A coordinator
+                                   (pcae.core.hpac_certification_coordinator via
+                                   scripts/hpac_certification_admin.py) — NO new
+                                   consumer, NO wildcard / prefix / glob (§38B)
+  RECOGNITION SEQUENCE          = §33B — §33 steps 1–9 verbatim +
+                                   read-authority consumer / session-binding /
+                                   configured-agent bind / no-writer-mint /
+                                   audit; fail-closed; NO role-allowlist step
+  SECOND TRUST ROOT             = NOT INTRODUCED (§33B reuses the existing OS
+                                   filesystem-write + descriptor + write-probe
+                                   trust root; no seal / secret / env var /
+                                   privileged file / persistent record added —
+                                   HPAC-PAWA-REQ-300)
+  READABLE STORE / RECORD SCOPE = CLOSED — principal + credential registry
+                                   records; RHAMP sidecar + CURRENT counter
+                                   state (read only); current-generation
+                                   presentation installation / descriptor /
+                                   trusted-approval-presentation records; PAWA
+                                   anchor / descriptor / exclusion records.
+                                   NO arbitrary FS read, NO open-ended store
+                                   enumeration, NO OS / PIN / keychain / Telegram
+                                   secret, NO write (§42D)
+  CEREMONY INVOCATION           = AUTHORIZED — hand the recognized authority to
+                                   run_protected_presentation_ceremony() once;
+                                   the one HPAC-PRESENTATION-EVIDENCE/2.0 write
+                                   stays with mint_protected_presentation_evidence_writer
+                                   UNCHANGED (§42B / HPAC-PAWA-REQ-248)
+  WRITER ESCALATION             = DENIED (HPACStoreAuthority.writer() still
+                                   raises; handle exposes no writer / mint /
+                                   production_writer / certification_writer /
+                                   _mint_production_writer_capability /
+                                   _bind_configured_agent_identity path)
+  MUTATION AUTHORITY            = NONE
+  COUNTER READ / COUNTER UPDATE = READ AUTHORIZED / UPDATE NOT AUTHORIZED BY
+                                   THIS AUTHORITY (hpac_rhamp_counter_state_verifier
+                                   §42B remains the sole counter mutation authority)
+  PRINCIPAL / CREDENTIAL READ   = AUTHORIZED;  PRINCIPAL / CREDENTIAL MUTATION = DENIED
+  PPA MUTATION / REMINT / DELEGATION / TEST-SEAM AUTHORITY = DENIED
+  ORDINARY AGENT / CLI / RUNTIME / PLUGIN = UNAUTHORIZED (§38B / §240 / §88 /
+                                   §224 preserved)
+  HUMAN-APPROVAL WALL           = PRESERVED (read / ceremony-entry authority
+                                   cannot produce APPROVE / REJECT / UP / UV;
+                                   deployment owner ≠ human approver)
+  REAL-vs-DETERMINISTIC WALL    = PRESERVED (require_real_assurance unchanged;
+                                   deterministic inputs never become REAL)
+  PB / POLICY WALL              = PRESERVED
+  RUNTIME / EFFECT WALL         = PRESERVED (no runtime capability, no
+                                   DispatchEnvelope; path terminates at trusted
+                                   reads + one ceremony entry; first external
+                                   effect ABSENT / UNREACHABLE)
+  H-3 (§33A / §38A / §42B / §68A) = UNCHANGED
+  FAILURE TAXONOMY              = 21 closed pawa_failure_code values UNCHANGED;
+                                   every v1.4 rejection maps onto
+                                   #15 / #16 / #17 / #18 / #20 / #21 or a §33
+                                   conjunct's exact code (§42E); RHAMP §57 map
+                                   UNCHANGED — NO new terminal_reason_code
+  PawaOperation / WRITER ROLE / SCHEMA = UNCHANGED
+  §96                           = FURTHER SPECIALIZED (narrow read-only
+                                   enumerated exception), NOT redefined
+  MECHANISM NEUTRALITY          = PRESERVED (no YubiKey / AAGUID / brand /
+                                   presentation-mechanism id frozen)
+  INSTANCE DATA IN CONTRACT     = NONE
+  COMPANION CONTRACT            = NOT REQUIRED (single-contract solution —
+                                   HPAC-PAWA-REQ-308)
+  CROSS-CONTRACT CONSISTENCY    = VERIFIED — no second frozen contract requires
+                                   amendment
+  PRODUCTION IMPLEMENTATION     = NOT PERFORMED
+  REAL CEREMONY                 = NOT PERFORMED (0 makeCredential / getAssertion
+                                   / APPROVE / REJECT / touch / PIN / evidence /
+                                   challenge / proof / Gate-5 / principal /
+                                   counter mutation / protected-root write)
+  PROTECTED-HOST MUTATION       = NONE
+
+Runtime: not_implemented / Observed / observe / unavailable; 0 plugins /
+0 capabilities. First external effect: ABSENT / UNREACHABLE.
+
+F-5-B1 CONTRACT BLOCKER: RESOLVED. F-5-B1 IMPLEMENTATION: PENDING.
+F-5: LIVE READINESS VERIFIED — CEREMONY BLOCKED PENDING F-5-B1 IMPLEMENTATION.
+N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN, untouched, N-16-7 last.
+N-23-1 / N-23-2: carried.
+
+RECOMMENDED NEXT PHASE: a dedicated Independent Verification of HPAC-PAWA-001
+v1.4 (alias N16-5-F5B1-READAUTH-IV; HPAC-PAWA-REQ-305), then the F-5-B1
+Production Recognized Read / Ceremony Authority Implementation (alias
+N16-5-F5B1-IMPL), then a dedicated implementation IV (N16-5-F5B1-IV), then a
+fresh final real-human / genuine-YubiKey N-16-5 certification phase
+(N16-5-FINAL-CERT on a fresh CPIPC-valid successor id — do not reuse a completed
+certification phase id). Each requires its own explicit human authorization. Do
+not begin any of them.
+
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.
+```
+
 ## 91. Requirement inventory
 
 **Requirement count (v1.0):** HPAC-PAWA-001 v1.0 defined **163** requirements,
@@ -3177,9 +3825,15 @@ no duplicates. The v1.3 additions are `HPAC-PAWA-REQ-234` through
 `HPAC-PAWA-REQ-275` (§7B, §33A, §38A, §39A, §42B, §42C, §43A, §44A, §49A, §68A,
 §80.3, §90.3).
 
-**Invariant count:** 13 — `PAWA-INV-1` through `PAWA-INV-13` (§92, below).
+**Requirement count (v1.4):** HPAC-PAWA-001 v1.4 defines **309** requirements,
+`HPAC-PAWA-REQ-001` through `HPAC-PAWA-REQ-309` inclusive, sequential, no gaps,
+no duplicates. The v1.4 additions are `HPAC-PAWA-REQ-276` through
+`HPAC-PAWA-REQ-309` (§7C, §33B, §38B, §42D, §42E, §49B, §68B, §80.4, §87, §88,
+§89, §90.4).
 
-## 92. Security invariants (PAWA-INV-1 .. PAWA-INV-13)
+**Invariant count:** 14 — `PAWA-INV-1` through `PAWA-INV-14` (§92, below).
+
+## 92. Security invariants (PAWA-INV-1 .. PAWA-INV-14)
 
 - **PAWA-INV-1.** `euid == 0`, a `sudo` invocation, and any `SUDO_*` /
   environment variable are **never**, in whole or in part, the positive
@@ -3256,24 +3910,59 @@ no duplicates. The v1.3 additions are `HPAC-PAWA-REQ-234` through
   new consumer requires a new governed contract evolution (§80.3, PAWA-INV-9).
   No new `pawa_failure_code`; no RHAMP-001 edit; no protected-root schema change.
 
+- **PAWA-INV-14.** **(v1.4)** The certification read / ceremony-entry authority
+  (§33B / §38B / §42D / §42E / §49B / §68B) is **one** recognized, **read-only**
+  production `HPACStoreAuthority` accessor reached **only** by the
+  already-enumerated §38A consumer
+  (`pcae.core.hpac_certification_coordinator` via
+  `scripts/hpac_certification_admin.py`), minted through a §33B sequence that
+  reuses the §33 steps 1–9 verbatim, binds the configured-agent identity through
+  the existing `_PRODUCTION_WRITER_FACTORY_SEAL` so
+  `_validate_production_boundary` passes under the deployment owner's real OS
+  context, and fails closed. It grants **no** `HPACWriterCapability`, **no** mint,
+  **no** `production_writer` / `certification_writer` / `writer()` escalation,
+  **no** new `PawaOperation`, **no** new writer role, **no** mutation, and **no**
+  counter-state transition (`hpac_rhamp_counter_state_verifier` §42B stays the
+  sole counter mutation authority). Its reads are confined to an **explicitly
+  enumerated closed** set; it authorizes **one** bounded
+  `run_protected_presentation_ceremony()` entry while
+  `mint_protected_presentation_evidence_writer` (§42B / HPAC-PAWA-REQ-248) stays
+  the sole author of `HPAC-PRESENTATION-EVIDENCE/2.0`. The handle is
+  process-local, non-bearer, non-serialisable, restart-dead, single-session; a
+  second call re-runs the full §33B sequence. It **never** manufactures a human
+  APPROVE / REJECT, FIDO2 user presence / verification, a real presentation, a
+  real assertion, a PRODUCTION `AuthenticatedHumanPrincipal`, a Gate result, a
+  PB / policy / RE decision, a runtime capability, a `DispatchEnvelope`, or an
+  external effect; deterministic inputs **never** become REAL through it; the
+  path **terminates** at trusted reads plus one ceremony entry. No wildcard /
+  prefix / glob consumer or scope; a new consumer or a scope widening requires a
+  new governed contract evolution (§80.4, PAWA-INV-9). No new `pawa_failure_code`;
+  no RHAMP-001 edit; no protected-root schema change; no second trust root. H-3
+  (§33A / §38A / §42B / §68A) is byte-unchanged.
+
 ## 93. Contract self-consistency statement
 
-This contract, at v1.3: (a) introduces no implementation dependency, in either direction, on
+This contract, at v1.4: (a) introduces no implementation dependency, in either direction, on
 `src/pcae/**` or `scripts/**` — it references existing and planned modules /
 functions / symbols by name in normative text only, and imports / executes
 nothing; (b) does not amend HPAC-001, RHAMP-001, HBDC-001, HPAC-PPA-001, or any
 other pre-existing contract's byte content, and does not touch the
 `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` or `HPAC-PAWA-CURRENT-GENERATION/1.0`
-schema; v1.3 adds no new companion contract; (c) creates no protected state, OS
-principals, filesystem permissions, descriptors, exclusion records, account
-resolutions, writer capabilities, certification consumers, challenges, proofs,
-lifecycle records, counter-state writes, or ceremonies; (d) is internally
-traceable — every `HPAC-PAWA-REQ-###` ID is sequential from 001 through 275 with
-no gaps and no duplicates, and every `PAWA-INV-#` (1..13) referenced elsewhere
+schema; v1.3 and v1.4 add no new companion contract; (c) creates no protected
+state, OS principals, filesystem permissions, descriptors, exclusion records,
+account resolutions, writer capabilities, certification consumers, read-authority
+accessors, challenges, proofs, lifecycle records, counter-state writes,
+protected-store reads, or ceremonies; (d) is internally
+traceable — every `HPAC-PAWA-REQ-###` ID is sequential from 001 through 309 with
+no gaps and no duplicates, and every `PAWA-INV-#` (1..14) referenced elsewhere
 appears in §92 exactly once; (e) is internally consistent — §96's verifier-only
-lifecycle-record rule is **specialized** by the §42B narrow enumerated exception,
+lifecycle-record rule is **specialized** by the §42B narrow enumerated write
+exception and **further specialized** by the §42D narrow read-only exception,
 not left in contradiction; the closed-consumer-set language of §38 / §87 is
-**extended by explicit enumeration** (§38A), not opened; (f) leaves runtime
+**extended by explicit enumeration** (§38A) and **reused unchanged** (§38B), not
+opened; the §33B read-authority path grants strictly less than the §33A
+certification-writer path (no capability, no mutation) and reuses its recognition
+conjuncts; (f) leaves runtime
 `not_implemented` / `Observed` / `observe` / `unavailable` and the first external
 effect ABSENT.
 
@@ -3358,6 +4047,61 @@ foldable into the H-3 implementation's IV only at explicit operator discretion,
 — the contract-level blocker is resolved; the H-3 production implementation, its
 IV, and a fresh final certification remain pending.
 
+**v1.4** was frozen by Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F5B1-READAUTH**) — a **MINOR** evolution (S-3, §80.4) resolving
+blocking finding **F-5-B1**, independently reproduced from primary source by the
+predecessor phase **N16-5-FINAL-CERT**: the N-16-5 pre-ceremony
+provenance-verified canonical reads (`PrincipalRecord`, `CredentialRecord`, RHAMP
+counter state) and `run_protected_presentation_ceremony()` entry each require an
+`HPACStoreAuthority` whose `_validate_production_boundary` passes under the
+deployment owner's real (`sudo` / root) OS context — reachable **only** by
+binding the configured-agent identity via the private
+`_PRODUCTION_WRITER_FACTORY_SEAL` (`_bind_configured_agent_identity`), and every
+seal-holding factory (`production_writer`, `certification_writer`,
+`mint_protected_presentation_evidence_writer`) is a **mutation / lifecycle-write**
+path — there was **no least-privilege production-recognized read / ceremony-entry
+path**, and the only reachable substitutes (an unrelated `production_writer`
+mutation capability, or the disclosed test-only seams) are forbidden. v1.4 adds
+**exactly one** recognized, **read-only** production `HPACStoreAuthority`
+accessor — a dedicated factory (conceptual
+`recognized_certification_read_authority(...)`) reached **only** by the
+already-enumerated §38A certification coordinator (§38B — **no** new consumer
+category), minted through the §33B recognition sequence that reuses the §33
+steps 1–9 verbatim and then binds the configured-agent identity, validates the
+certification-session context, and returns a `CertificationReadAuthority` handle.
+It grants **no** `HPACWriterCapability`, **no** mint, **no** new `PawaOperation`,
+**no** new writer role, **no** mutation, and **no** counter-state transition;
+`HPACStoreAuthority.writer()` still `raise`s (HPAC-PAWA-REQ-092 unchanged); its
+reads are confined to an **explicitly enumerated closed** set (§42D); it
+authorizes **one** bounded `run_protected_presentation_ceremony()` entry while
+`mint_protected_presentation_evidence_writer` (§42B / HPAC-PAWA-REQ-248) stays
+the sole author of `HPAC-PRESENTATION-EVIDENCE/2.0`;
+`hpac_rhamp_counter_state_verifier` (§42B) stays the sole counter-state mutation
+authority. It creates **no** new `pawa_failure_code` (§42E — every F-5-B1
+rejection maps onto the existing 21 codes), **no** new `PawaOperation`, **no**
+new protected-root artifact, **no** protected-root schema change, and **no**
+RHAMP-001 edit. §96 is **further specialized** (a narrow read-only enumerated
+exception), not redefined; §68B preserves every read-vs-write / human-approval /
+real-vs-deterministic / PB / policy / runtime / effect wall and adds
+`PAWA-INV-14`; the read / ceremony-entry authority path terminates at trusted
+reads plus one ceremony entry and authorizes no first external effect. The H-3
+design (§33A / §38A / §42B / §68A) is **byte-unchanged**. HPAC-001 v2.1,
+RHAMP-001 v1.0, RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1, HBDC-001 v1.2,
+HPAC-PPA-001 v1.0, and the `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` +
+`HPAC-PAWA-CURRENT-GENERATION/1.0` schemas are **byte-unchanged**; a
+single-contract solution was independently determined normatively sufficient
+(HPAC-PAWA-REQ-308); no `src/pcae` / `scripts` / `tests` / dependency change; no
+ceremony; no protected-host mutation. v1.4 requires its own **dedicated**
+independent verification (HPAC-PAWA-REQ-305, the v1.1 **C-3** / v1.3 precedent),
+foldable into the F-5-B1 implementation's IV only at explicit operator
+discretion, **before** the implementation relies on this text. Historical v1.0 /
+v1.1 / v1.2 / v1.3 freeze records and their IVs remain **immutable**; v1.4 is
+append-only. **N-16-5 remains NOT CLOSED** — the F-5-B1 contract-level blocker is
+resolved; the F-5-B1 implementation (alias **N16-5-F5B1-IMPL**), its IV (alias
+**N16-5-F5B1-IV**), and a fresh final real-human / genuine-YubiKey certification
+on a fresh CPIPC-valid successor id remain pending.
+
 ## 95A. R1 / R2 / R3 / R4 design disposition (append-only, v1.1)
 
 | Option | Disposition |
@@ -3421,6 +4165,81 @@ HPAC-PAWA-001 v1.1 — FROZEN
 — RUNTIME Observed / observe / unavailable — FIRST EXTERNAL EFFECT ABSENT
 — N-16-5 NOT CLOSED (contract-level gap closed; implementation + dedicated
   contract IV pending)
+```
+
+## 95C. Read / ceremony-entry authority contract-shape disposition (append-only, v1.4)
+
+The v1.4 freeze phase independently derived the normative construction from
+primary source rather than adopting the predecessor's conceptual proposal
+verbatim. The candidate shapes were evaluated for: proves trusted provenance;
+permits exactly the necessary canonical reads / ceremony entry; grants no
+unrelated mutation authority; introduces no second trust root; does not
+legitimize test seams; cannot become execution authority.
+
+| Option | Disposition |
+|---|---|
+| **A** — one recognized **read-only** `HPACStoreAuthority` accessor (a dedicated factory `recognized_certification_read_authority(...)`) behind the §37 non-agent-importable fence, reached only by the already-enumerated §38A coordinator, running the §33 steps 1–9 verbatim and then `_bind_configured_agent_identity`, returning a session-bound single-use `CertificationReadAuthority` handle that exposes only the §42D enumerated reads + one ceremony entry and no writer / mint path | **FROZEN in v1.4** (§33B, §38B, §42D). Smallest model that proves provenance and permits exactly the required reads + ceremony entry: no `HPACWriterCapability`, no mint, no `PawaOperation`, no role, no mutation, no second consumer, no second trust root; reuses every §33 conjunct; `HPACStoreAuthority.writer()` still raises; the recognized authority object is process-local / non-serialisable / restart-dead. |
+| **B** — a new read-only `PawaOperation` (`certification_read`) minting a "read capability" | **REJECTED** — the `PawaOperation` vocabulary is for **mutations**; a read / ceremony-entry recognition is not a mutation, and modelling it as an operation drags in the writer-transaction / capability-mint infrastructure the read path must not touch (F-5-B1 phase prompt §38). |
+| **C** — a `certification_reader` **writer role** on the §42B family | **REJECTED** — a trusted read is not a writer role; naming it one (`hpac_read_only_writer` / `certification_reader_writer`) is semantic abuse (phase prompt §13 / §39) and would place it inside the single-use per-ceremony write family where it does not belong. |
+| **D** — expose `HPACStoreAuthority` generically / let the coordinator keep a raw recognized authority obtained as a side effect of a `certification_writer` mint | **REJECTED** — obtaining authority as a side effect of a lifecycle **write** (the current-state situation) is exactly the phantom-mutation / raw-reusable-capability misuse F-5-B1 identifies; a generic authority export is broader than the enumerated reads require and risks a `writer()` / mint reach even though `writer()` raises for PRODUCTION. The handle in Option A encapsulates the recognized authority and exposes only the enumerated surface. |
+| **E** — extend `run_protected_presentation_ceremony` with a higher-level "begin certification ceremony" entrypoint that self-recognizes | **REJECTED as the contract shape** — that is an *implementation* choice the F-5-B1 implementation phase MAY make (§75); the contract freezes the **authority semantics** (who may obtain a recognized read view, under what recognition, over what scope, with what prohibitions), not a specific function signature. `run_protected_presentation_ceremony`'s `authority: HPACStoreAuthority` parameter is preserved. |
+
+Preference applied: the smallest model with the strongest read-vs-write
+separation; an implementation-friendly contract was **not** chosen where a
+stricter model was possible. **Read authority is not a general security bypass**
+(§42D / HPAC-PAWA-REQ-284): the accessor cannot read arbitrary files, OS
+secrets, a FIDO2 PIN, Telegram secrets, private keys, or unrelated application
+state — only the enumerated canonical HPAC certification state.
+
+### 95.3 Expected contract verdict (v1.4)
+
+```
+HPAC-PAWA-001 v1.4 — FROZEN (MINOR; S-3; certification read / ceremony-entry authority)
+— F-5-B1 CONTRACT BLOCKER RESOLVED — F-5-B1 PRODUCTION IMPLEMENTATION PENDING
+— ROOT CAUSE VERIFIED: _validate_production_boundary keys off os.geteuid()
+  (root under sudo) unless _bind_configured_agent_identity was called via the
+  private _PRODUCTION_WRITER_FACTORY_SEAL; every seal-holding factory is a
+  mutation / lifecycle-write path — no least-privilege read / ceremony-entry path
+— NEW: one recognized READ-ONLY HPACStoreAuthority accessor (§33B / §42D)
+— CONSUMER: the ALREADY-ENUMERATED §38A coordinator only (§38B) — NO new
+  consumer category, NO wildcard / prefix / glob
+— §33B RECOGNITION: §33 steps 1–9 verbatim + read-authority consumer /
+  session-binding / configured-agent bind / no-writer-mint / audit; fail-closed
+— GRANTS: enumerated closed protected-store READS + one bounded
+  run_protected_presentation_ceremony() ENTRY
+— GRANTS NO: HPACWriterCapability / mint / production_writer /
+  certification_writer / writer() escalation / PawaOperation / writer role /
+  mutation / counter-state transition
+— HPACStoreAuthority.writer() STILL RAISES (HPAC-PAWA-REQ-092 unchanged)
+— HPAC-PRESENTATION-EVIDENCE/2.0 stays with mint_protected_presentation_evidence_writer
+  UNCHANGED (§42B / HPAC-PAWA-REQ-248); hpac_rhamp_counter_state_verifier stays
+  the sole counter mutation authority
+— HANDLE: process-local / non-bearer / non-serialisable / restart-dead /
+  one-session / one-ceremony-entry / no delegation / no remint / no escalation
+— TEST-ONLY SEAMS REMAIN NON-PRODUCTION — NO SECOND TRUST ROOT
+— HUMAN-APPROVAL / REAL-vs-DETERMINISTIC / PB / POLICY / RUNTIME / EFFECT WALLS
+  — PRESERVED (§68B, PAWA-INV-14); path TERMINATES at trusted reads + one
+  ceremony entry; FIRST EXTERNAL EFFECT ABSENT / UNREACHABLE
+— NO new pawa_failure_code (21 UNCHANGED, §42E) — NO new terminal_reason_code —
+  RHAMP-001 v1.0 BYTE-UNCHANGED
+— NO new PawaOperation — NO new protected-root artifact or schema field —
+  DESCRIPTOR + CURRENT-GENERATION SCHEMAS BYTE-UNCHANGED
+— H-3 (§33A / §38A / §42B / §68A) — BYTE-UNCHANGED
+— §96 FURTHER SPECIALIZED (read-only exception), NOT REDEFINED — SELF-CONSISTENT
+— SINGLE-CONTRACT SOLUTION (HPAC-PAWA-REQ-308) — NO COMPANION CONTRACT
+— HPAC-001 v2.1 / RHAMP-001 v1.0 / RIHAC-001 v2.0 / RIASC-001 v3.0 /
+  RDGO-001 v3.1 / HBDC-001 v1.2 / HPAC-PPA-001 v1.0 — BYTE-UNCHANGED
+— MINOR (S-3) — NO MAJOR TRIGGER (§80.4)
+— NO INSTANCE-SPECIFIC PRINCIPAL / CREDENTIAL / COUNTER / AAGUID / ANCHOR ID
+  NORMATIVELY FROZEN — MECHANISM-NEUTRAL — MOBILE / PASSKEY FUTURE OPEN
+— NO PRODUCTION SOURCE / SCRIPT / TEST / DEPENDENCY CHANGE — NO PROTECTED-HOST
+  MUTATION — NO CEREMONY
+— DEDICATED HPAC-PAWA-001 v1.4 CONTRACT IV RECOMMENDED (HPAC-PAWA-REQ-305),
+  NOT AUTHORIZED
+— RUNTIME not_implemented / Observed / observe / unavailable — 0 plugins /
+  0 capabilities
+— N-16-5 NOT CLOSED — N-16-6 / N-16-7 OPEN / UNTOUCHED — N-16-7 STRICTLY LAST
+— N-23-1 / N-23-2 carried
 ```
 
 ### 95.2 Expected contract verdict (v1.3)
@@ -3505,6 +4324,67 @@ approval.
 **Do not begin any of `N16-5-H3-PAWA13-IV` / `N16-5-H3-IMPL` / `N16-5-H3-IV` /
 `N16-5-FINAL-CERT`. Do not begin N-16-6 / N-16-7 / Slice C. Do not implement or
 call the first external effect. Do not enable execution.** N-16-7 strictly last.
+
+## 96C. Recommended next phases (as of v1.4)
+
+Items 2–4 of §96B (`N16-5-H3-IMPL` completed 2026-09-07; `N16-5-H3-IV` completed
+2026-09-07; `N16-5-FINAL-CERT` completed 2026-09-08 **BLOCKED** at finding
+**F-5-B1**). The v1.4 successors are **derived, NOT begun**; each requires its
+own separate explicit human authorization; IDs recommended, **NOT reserved**;
+each needs its own human authentication and (where a ceremony occurs) its own
+protected human approval.
+
+1. **Dedicated Independent Verification of HPAC-PAWA-001 v1.4** (alias
+   **N16-5-F5B1-READAUTH-IV**; HPAC-PAWA-REQ-305) — the recommended default
+   before the F-5-B1 implementation relies on this text; a fold into the F-5-B1
+   implementation IV is permitted **only at the authorizing operator's explicit
+   discretion**. Minimum scope: HPAC-PAWA-REQ-305.
+2. **F-5-B1 Production Recognized Read / Ceremony Authority Implementation for
+   N-16-5 Final Certification** (alias **N16-5-F5B1-IMPL**). It SHALL: implement
+   only the frozen §33B `recognized_certification_read_authority(...)` accessor +
+   the `CertificationReadAuthority` handle + the §33B recognition steps (the §33
+   steps 1–9 reused + the read-authority consumer / session-binding /
+   configured-agent bind / no-writer-mint / audit steps, in the order §33B
+   fixes) + the §38B consumer-inventory guard; reuse the existing trust root and
+   the `_PRODUCTION_WRITER_FACTORY_SEAL` mint-trust-root discipline; grant **no**
+   `HPACWriterCapability`, **no** mint, **no** `PawaOperation`, **no** role, **no**
+   mutation, **no** counter transition; prevent every `writer()` / mint /
+   `production_writer` / `certification_writer` escalation through the handle;
+   expose only the §42D enumerated reads + one ceremony entry; keep the recognized
+   authority encapsulated in the handle; preserve H-3 (§33A / §38A / §42B / §68A)
+   unchanged; require **no** test seals; perform **no** real ceremony; finish
+   F-5-B1 as **REPAIRED / IV PENDING**. It MAY, at the implementation's
+   discretion (§75), realise the accessor as a bounded subcommand on
+   `scripts/hpac_certification_admin.py` or as a coordinator-internal method — the
+   contract fixes the authority semantics, not the entrypoint shape.
+3. **Dedicated Independent Verification of the F-5-B1 implementation** (alias
+   **N16-5-F5B1-IV**) — independently verify: the exact implementation diff; the
+   §33B recognition (steps 1–9 reuse + the read-authority steps + the ordering
+   that makes the configured-agent bind precede the session-binding reads so they
+   pass under the real OS context); trusted read provenance; no `writer()` / mint
+   escalation; no mutation path; no counter transition; ceremony-entry production
+   reachability; no test seam; no second trust root; the closed §38B consumer
+   inventory; the §42D closed read scope; record / session / subject binding; the
+   non-bearer / non-serialisable / single-session / restart-dead semantics; a
+   clean package install; H-3 byte-unchanged; the §68B walls intact; runtime
+   unavailability; and no external effect. **Not** merged into the implementation.
+4. **Fresh final real-human / genuine-YubiKey N-16-5 certification** (alias
+   **N16-5-FINAL-CERT**) — on a **fresh CPIPC-valid successor id** (do **not**
+   reuse any completed certification phase id). It SHALL freshly revalidate the
+   canonical principal / credential / counter / generation-1 protected
+   presentation / the F-5-B1 production read-authority path / real provider /
+   hardware availability on the real host, then run the real ceremony (real
+   protected APPROVE → real presentation evidence → genuine YubiKey
+   `getAssertion` → UP + UV → real authentication →
+   `require_real_assurance=True` → PRODUCTION `AuthenticatedHumanPrincipal` →
+   actual Gate 5 → negative matrix → N-16-5 closure adjudication). Only this
+   phase MAY conduct any of those.
+
+**Do not begin any of `N16-5-F5B1-READAUTH-IV` / `N16-5-F5B1-IMPL` /
+`N16-5-F5B1-IV` / `N16-5-FINAL-CERT`. Do not begin N-16-6 / N-16-7 / Slice C.
+Do not implement or call the first external effect. Do not enable execution.**
+N-16-7 strictly last. **REPORTING-UX-1** remains open and non-blocking (a
+separate reporting-UX phase; not repaired here).
 
 ## 96. Recommended next phase (v1.0 baseline)
 
