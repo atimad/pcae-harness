@@ -25,6 +25,7 @@
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- session bootstrap / health / check / status coherence / doctor task-memory / runtime inspect / push check / report-trust lifecycle exercised at entry and at finalization; no reporting-code change"
     },
     "validation_results": {
+        "fast_green": "49 passed, 0 failed (targeted scope for this verification-only phase: the existing N16-5-F5B1-READAUTH contract-verification suite, re-run unmodified and read-only)",
         "phase_identity_token": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R",
         "cpipc": "candidate = predecessor N16-5-F-5-B1-READAUTH + exactly one direct .1R segment (independently confirmed by string comparison); same series 149; same branch O; strict order; unique; no active conflicting phase; canonical id used verbatim; alias N16-5-F-5-B1-READAUTH-IV display-only; NO discrepancy",
         "shas": "V0 (phase-entry) = 3ef9ad5d679a452643c38f265e406d348b2b6e82; V13_BASE = 18d7da02435cac61159e9a90f86b2a586c4704d0; V14_FINAL (contract-text freeze commit) = 1877a412ec1a5051d9f8577a744a154942dc2b93",
