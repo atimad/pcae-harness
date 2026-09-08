@@ -22,13 +22,12 @@ Idle: awaiting next governed phase (post-N16-5-F5B1-READAUTH); HPAC-PAWA-001 v1.
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- .pcae/**
+- docs/**
+- tests/**
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/**
 
 ## Forbidden Files
 
