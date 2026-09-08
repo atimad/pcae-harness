@@ -854,6 +854,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-N16-5-FINAL-CERT BLOCKED F-5-B1); N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F5B1-READAUTH); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-FINAL-CERT) to Idle: awaiting next governed phase (post-N16-5-FINAL-CERT BLOCKED F-5-B1); N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-N16-5-H3-IV to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-FINAL-CERT); session refreshed and governance continuity revalidated.
 - Transitioned active task from N16-5-H3-IV independent verification to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R (N16-5-H3-IV); session refreshed and governance continuity revalidated.
