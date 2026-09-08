@@ -1,7 +1,7 @@
 # Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R Complete — F-5-B1 Production Recognized Read / Ceremony Authority Contract Reconciliation and Freeze
 
 - Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R`
-- Alias: **N16-5-F5B1-READAUTH** (operator readability only; the full canonical CPIPC id is authoritative in task state, lifecycle, reports, completion metadata, evidence, and canonical project status)
+- Alias: **N16-5-F-5-B1-READAUTH** (operator readability only; the full canonical CPIPC id is authoritative in task state, lifecycle, reports, completion metadata, evidence, and canonical project status)
 - Status: **COMPLETE** — contract reconciliation / freeze
 - Predecessor: **N16-5-FINAL-CERT** (BLOCKED at finding F-5-B1)
 - C0 (phase-entry SHA) = `18d7da02435cac61159e9a90f86b2a586c4704d0` (N16-5-FINAL-CERT head; last commit at which HPAC-PAWA-001 was v1.3)
@@ -64,12 +64,12 @@
 
 ## Recommended next phases (derived, NOT begun, NOT reserved)
 
-1. **N16-5-F5B1-READAUTH-IV** — dedicated Independent Verification of
+1. **N16-5-F-5-B1-READAUTH-IV** — dedicated Independent Verification of
    HPAC-PAWA-001 v1.4 (HPAC-PAWA-REQ-305).
-2. **N16-5-F5B1-IMPL** — F-5-B1 Production Recognized Read / Ceremony Authority
+2. **N16-5-F-5-B1-IMPL** — F-5-B1 Production Recognized Read / Ceremony Authority
    Implementation (implement only the frozen §33B accessor + handle + guard;
    H-3 unchanged; no real ceremony; finish F-5-B1 as REPAIRED / IV PENDING).
-3. **N16-5-F5B1-IV** — dedicated Independent Verification of the F-5-B1
+3. **N16-5-F-5-B1-IV** — dedicated Independent Verification of the F-5-B1
    implementation (not merged).
 4. **N16-5-FINAL-CERT** — fresh final real-human / genuine-YubiKey N-16-5
    certification on a **fresh CPIPC-valid successor id** (never a reused

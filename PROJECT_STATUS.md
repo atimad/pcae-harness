@@ -3,7 +3,7 @@
 ## Current Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R
-(alias **N16-5-F5B1-READAUTH**) — F-5-B1 Production Recognized Read / Ceremony
+(alias **N16-5-F-5-B1-READAUTH**) — F-5-B1 Production Recognized Read / Ceremony
 Authority Contract Reconciliation and Freeze — Least-Privilege Canonical-State
 Access for Final N-16-5 Certification. **STATUS: COMPLETE (contract
 reconciliation / freeze). F-5-B1 CONTRACT BLOCKER: RESOLVED. F-5-B1
@@ -52,12 +52,12 @@ regressions; no test renamed / removed / disabled). Runtime `not_implemented` /
 `Observed` / `observe` / `unavailable`, 0 plugins / 0 capabilities; first
 governed runtime external effect ABSENT / UNREACHABLE. **Successors (derived,
 NOT begun, NOT reserved):** dedicated HPAC-PAWA-001 v1.4 contract IV
-(**N16-5-F5B1-READAUTH-IV**) → F-5-B1 implementation (**N16-5-F5B1-IMPL**) →
-its IV (**N16-5-F5B1-IV**) → a fresh **N16-5-FINAL-CERT** on a fresh
+(**N16-5-F-5-B1-READAUTH-IV**) → F-5-B1 implementation (**N16-5-F-5-B1-IMPL**) →
+its IV (**N16-5-F-5-B1-IV**) → a fresh **N16-5-FINAL-CERT** on a fresh
 CPIPC-valid successor id. **REPORTING-UX-1** still open (non-blocking).
 **N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).**
 
-Canonical report: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F5B1_READAUTH.md`.
+Canonical report: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F-5-B1_READAUTH.md`.
 Evidence: `.pcae/certification/n16_5_f5b1_readauth_phase_entry.json`,
 `.pcae/certification/n16_5_f5b1_readauth_contract_freeze.json`.
 
