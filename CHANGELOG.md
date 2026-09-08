@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (alias **N16-5-F5B1-READAUTH-IV**) — **Independent Verification of
+  HPAC-PAWA-001 v1.4 Production Recognized Read / Ceremony Authority
+  Contract**. Verification-only: no source, script, or contract-text
+  mutation. **HPAC-PAWA-001 v1.4: INDEPENDENTLY VERIFIED (not inherited).
+  F-5-B1 CONTRACT BLOCKER: INDEPENDENTLY VERIFIED RESOLVED. F-5-B1
+  IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED; N-16-6 / N-16-7: OPEN /
+  UNTOUCHED.** CPIPC: valid direct `.1R` successor of N16-5-F5B1-READAUTH.
+  `V0 = 3ef9ad5d`; `V13_BASE = 18d7da02`; `V14_FINAL = 1877a412`.
+  Independently re-derived (not copied from the predecessor's report): the
+  v1.3→v1.4 delta is one contract file with an empty `src/pcae`/`scripts`
+  diff; MINOR/S-3 survives independent MAJOR-trigger review; F-5-B1 root
+  cause reproduced against `HPACStoreAuthority._validate_production_boundary`
+  / `os.geteuid()` fallback; recognized read authority confirmed distinct
+  from write authority (`.writer()` still raises for production, no hidden
+  mutation route); §33B configured-agent-bind ordering matches real source
+  mechanics (one non-blocking wording nit: REQ-278 step numbering vs. its own
+  forward-referencing prose); §38B/§42D consumer + read-scope closure exactly
+  enumerated, no wildcard; zero `HPACWriterCapability` / `PawaOperation` /
+  writer-role / trust-root / schema creep; ceremony entry reuses
+  `run_protected_presentation_ceremony()`, evidence writer stays separate;
+  `recognized_certification_read_authority` / `CertificationReadAuthority`
+  confirmed **not implemented** anywhere in source. Predecessor's 49/0
+  contract-test claim reproduced but flagged: ~60% are self-referential
+  string-matches against the same doc, not functional proof — only ~11 tests
+  carry independent evidential weight (git-history/source checks). No defect
+  found that would block the freeze; required successor
+  (**N16-5-F5B1-IMPL**, not begun) implements the accessor, followed by a
+  dedicated **N16-5-F5B1-IV** and a fresh **N16-5-FINAL-CERT** on a new id.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-F5B1-READAUTH**) — **F-5-B1 Production Recognized Read /
   Ceremony Authority Contract Reconciliation and Freeze**. **HPAC-PAWA-001

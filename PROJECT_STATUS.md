@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F5B1-READAUTH-IV**) — Independent Verification of HPAC-PAWA-001
+v1.4 Production Recognized Read / Ceremony Authority Contract (F-5-B1
+Least-Privilege Canonical-State Access). **STATUS: COMPLETE (verification-only
+— no source/contract-text mutation). HPAC-PAWA-001 v1.4: INDEPENDENTLY
+VERIFIED. F-5-B1 CONTRACT BLOCKER: INDEPENDENTLY VERIFIED RESOLVED. F-5-B1
+IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED.** CPIPC: valid direct `.1R`
+successor of N16-5-F5B1-READAUTH (same series/branch, strict order, unique, no
+active conflict; alias display-only, no discrepancy). **V0 = `3ef9ad5d`**
+(predecessor completion HEAD); **V13_BASE = `18d7da02`**; **V14_FINAL =
+`1877a412`** (the v1.3→v1.4 contract-text freeze commit).
+
+Independently re-derived (not inherited from the predecessor's own report or
+test suite): the v1.3→v1.4 delta is confined to one contract-doc file with an
+empty `src/pcae`/`scripts`/`pyproject.toml` diff; MINOR/S-3 classification
+survives independent MAJOR-trigger review (no new trust root, consumer
+category, schema, operation, or effect authority); F-5-B1's root cause was
+independently reproduced against `hpac_foundation.HPACStoreAuthority
+._validate_production_boundary` and `os.geteuid()` fallback semantics; the
+proposed recognized read accessor is confirmed distinct from write authority
+(`HPACStoreAuthority.writer()` still raises for production; no hidden mutation
+route found); §33B's configured-agent-bind-before-reads ordering matches real
+source mechanics (one non-blocking wording nit recorded: REQ-278's step
+numbering vs. its own forward-referencing prose); §38B/§42D read-scope and
+consumer closure are exactly enumerated, no wildcard; no `HPACWriterCapability`
+/ `PawaOperation` / writer-role / trust-root / schema creep; the ceremony entry
+correctly reuses `run_protected_presentation_ceremony()` with the presentation
+evidence writer remaining separate; `recognized_certification_read_authority`
+/ `CertificationReadAuthority` confirmed **not implemented** anywhere in
+source (implementation is genuinely PENDING, not silently done). The
+predecessor's own contract-test suite (49/0 passing) was re-run read-only and
+reproduced, but is flagged in this report as ~60% self-referential
+string-matching against its own contract doc — real evidential weight comes
+from the ~11 tests that check git history/source directly; future citations
+should not treat "49/0" as functional proof. No defect found that would
+justify blocking the freeze.
+
+**Required successor (derived, NOT begun):** F-5-B1 implementation
+(**N16-5-F5B1-IMPL**) — implement only `recognized_certification_read_authority`
+/ `CertificationReadAuthority` per the frozen §33B/§38B/§42D scope (with the
+REQ-278 numbering clarity fix) — → its own dedicated IV (**N16-5-F5B1-IV**,
+not merged into the implementation) → a fresh **N16-5-FINAL-CERT** on a fresh
+CPIPC-valid successor id (never reusing a completed/blocked certification id).
+**REPORTING-UX-1** still open (non-blocking). **N-16-6 / N-16-7: OPEN /
+UNTOUCHED (N-16-7 strictly last).** Runtime `not_implemented` / `Observed` /
+`observe` / `unavailable`, 0 plugins / 0 capabilities; first governed runtime
+external effect ABSENT / UNREACHABLE.
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_INDEPENDENT_VERIFICATION_HPAC_PAWA_001_V1_4.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B1-READAUTH**) — F-5-B1 Production Recognized Read / Ceremony
 Authority Contract Reconciliation and Freeze — Least-Privilege Canonical-State
