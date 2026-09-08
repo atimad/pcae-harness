@@ -1,0 +1,85 @@
+{
+  "schema": "PCAE-N16-5-F5B1-READAUTH-PHASE-ENTRY/1.0",
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R",
+  "phase_alias": "N16-5-F5B1-READAUTH",
+  "phase_title": "F-5-B1 Production Recognized Read / Ceremony Authority Contract Reconciliation and Freeze",
+  "predecessor": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R",
+  "predecessor_alias": "N16-5-FINAL-CERT",
+  "predecessor_status": "COMPLETE (report) / BLOCKED (verdict) at finding F-5-B1",
+  "C0_phase_entry_sha": "18d7da02435cac61159e9a90f86b2a586c4704d0",
+  "pawa_contract_blob_at_C0": "9c816716bae2262831945ac24b1771cf79de4c55",
+  "pawa_contract_version_at_C0": "v1.3",
+  "origin_main_ahead_at_entry": 0,
+  "cpipc_successor_validation": {
+    "candidate": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R",
+    "parser": "pcae.core.phase_id",
+    "is_valid": true,
+    "same_series": true,
+    "same_branch": true,
+    "strict_order_predecessor_to_candidate": "less",
+    "direct_valid_successor": true,
+    "candidate_equals_predecessor_plus_one_1R": true,
+    "unique_absent_from_tasks_done_and_docs": true,
+    "reuses_completed_phase_id": false,
+    "parallel_numbering_introduced": false,
+    "mechanical_discrepancy": false,
+    "alias_used_as_display_only": true
+  },
+  "orientation": {
+    "git_status": "clean at entry; branch main even with origin/main",
+    "pcae_health": "healthy",
+    "pcae_check": "passed",
+    "runtime_inspect": "State Observed / Maximum Capability observe / Execution Availability unavailable; 0 plugins / 0 capabilities",
+    "telegram": "loaded; last phase notification sent",
+    "predecessor_is_latest_canonical_completed_phase": true,
+    "no_conflicting_active_phase": true,
+    "reporting_ux_1": "open, non-blocking (architecture-status inspect current-phase alias-prose parser); not repaired here"
+  },
+  "f5b1_root_cause": {
+    "verdict": "VERIFIED — independently reproduced from primary source",
+    "mechanism": "hpac_foundation.HPACStoreAuthority._validate_production_boundary keys the configured-agent negative boundary off _current_agent_identity() (= os.geteuid(), root under sudo) unless _bind_configured_agent_identity((uid,gids), _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL) was called on the instance. The deployment owner must run under sudo/root to hold real write authority over the root-owned protected root; under sudo os.geteuid()==0, root owns the protected root, so _effective_write_access returns writable=True -> HPACAuthorityError raised, fail closed.",
+    "affected_operations": [
+      "HumanPrincipalRegistryStore.resolve_canonical_principal / resolve_canonical_credential (via verify_record -> _ensure_root -> _validate_production_boundary)",
+      "RHAMP credential sidecar / counter-state reads",
+      "ProtectedPresentationInstallationStore reads inside run_protected_presentation_ceremony",
+      "mint_protected_presentation_evidence_writer (requires PRODUCTION authority; calls _mint_production_writer_capability -> _ensure_root)"
+    ],
+    "seal_holders_are_all_write_paths": [
+      "production_writer(operation) — all 6 PawaOperations are mutations",
+      "certification_writer(role) — lifecycle write for one of the 5 §42B roles",
+      "mint_protected_presentation_evidence_writer(authority) — one HPAC-PRESENTATION-EVIDENCE/2.0 create"
+    ],
+    "forbidden_substitutes": {
+      "A_unrelated_production_writer_mutation_cap_reuse_handle_authority": "phantom mutation + audit + raw reusable capability leak; competing-path misuse (prompt §2/§5/§28)",
+      "B_test_only_seams": "_production_test_fixture / _topology_probe / _protected_root / _test_decision_source — test authority is not production authority (prompt §31)"
+    },
+    "independent_observation": "sudo scripts/hpac_protected_presentation_admin.py status raised the boundary error on the real production host (per N16-5-FINAL-CERT)"
+  },
+  "primary_source_read": [
+    "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md (v1.3, full)",
+    "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
+    "docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md",
+    "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md",
+    "docs/contracts/HUMAN_APPROVAL_TRUSTED_PROVENANCE_CONTRACT.md",
+    "src/pcae/core/hpac_foundation.py",
+    "src/pcae/core/hpac_protected_admin_writer.py",
+    "src/pcae/core/hpac_certification_coordinator.py",
+    "src/pcae/core/protected_presentation.py",
+    "src/pcae/core/human_principal_registry.py",
+    "src/pcae/core/hatp_class_b_topology_verifier.py",
+    "scripts/hpac_certification_admin.py",
+    "scripts/hpac_protected_presentation_admin.py"
+  ],
+  "read_vs_write_separation_finding": "VERIFIED — a recognized PRODUCTION HPACStoreAuthority on its own confers only verify_record / resolve_record reads; every mutation needs a separately sealed HPACWriterCapability from the seal-guarded _mint_production_writer_capability; HPACStoreAuthority.writer() raises for every non-FIXTURE_NON_REAL class. The minimal fix exposes an existing read-safe primitive through a bounded accessor.",
+  "no_ceremony_no_mutation_attestation": {
+    "makeCredential": 0, "real_getAssertion": 0, "yubikey_touch": 0, "fido2_pin_prompt": 0,
+    "protected_APPROVE": 0, "protected_REJECT": 0, "real_presentation_evidence": 0,
+    "challenges_opened": 0, "proofs_created": 0, "gate5_certifications": 0, "principals_minted": 0,
+    "require_real_assurance_true_calls": 0,
+    "authorized_protected_host_mutation": 0, "unauthorized_protected_host_mutation": 0,
+    "secrets_requested_or_echoed_or_logged": 0
+  },
+  "runtime": "not_implemented / Observed / observe / unavailable; 0 plugins / 0 capabilities",
+  "first_governed_runtime_external_effect": "ABSENT / UNREACHABLE",
+  "delegated_3_finalization_commit_push": "UNAUTHORIZED — preserved"
+}

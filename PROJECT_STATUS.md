@@ -2,6 +2,69 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F5B1-READAUTH**) — F-5-B1 Production Recognized Read / Ceremony
+Authority Contract Reconciliation and Freeze — Least-Privilege Canonical-State
+Access for Final N-16-5 Certification. **STATUS: COMPLETE (contract
+reconciliation / freeze). F-5-B1 CONTRACT BLOCKER: RESOLVED. F-5-B1
+IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED.** CPIPC: valid direct `.1R`
+successor of N16-5-FINAL-CERT (same series / branch, strict order, unique, no
+active conflict; alias display-only, no discrepancy). **C0 = N16-5-FINAL-CERT
+head = `18d7da02`** (last commit at which HPAC-PAWA-001 was v1.3). **F-5-B1
+independently reproduced from primary source:**
+`hpac_foundation.HPACStoreAuthority._validate_production_boundary` keys the
+configured-agent negative boundary off `_current_agent_identity()` (=
+`os.geteuid()`, root under `sudo`) unless `_bind_configured_agent_identity` was
+called via the private `_PRODUCTION_WRITER_FACTORY_SEAL`; so
+`HPACStoreAuthority.production()` used for any provenance-verified read
+(principal / credential / counter) or for `run_protected_presentation_ceremony()`
+entry **fails closed** under the deployment owner's real (`sudo`/root) OS
+context, and every seal-holding factory (`production_writer`,
+`certification_writer`, `mint_protected_presentation_evidence_writer`) is a
+**mutation / lifecycle-write** path — the only reachable substitutes (an
+unrelated `production_writer` mutation capability, or the disclosed test-only
+seams) are forbidden. **Resolution: HPAC-PAWA-001 v1.3 → v1.4, MINOR (S-3).**
+Adds **one** recognized **read-only** `HPACStoreAuthority` accessor (§33B /
+§38B / §42D / §42E / §49B / §68B; PAWA-INV-14): reached **only** by the
+already-enumerated §38A certification coordinator (no new consumer category, no
+wildcard); reuses the §33 steps 1–9 verbatim then binds the configured-agent
+identity; grants **no** `HPACWriterCapability`, no mint, no `PawaOperation`, no
+writer role, no mutation, no counter-state transition;
+`HPACStoreAuthority.writer()` still raises; enumerated **closed** read scope +
+**one** bounded ceremony entry; process-local / non-bearer / non-serialisable /
+restart-dead / one-session. `HPAC-PRESENTATION-EVIDENCE/2.0` stays with
+`mint_protected_presentation_evidence_writer` **unchanged** (§42B /
+HPAC-PAWA-REQ-248); `hpac_rhamp_counter_state_verifier` (§42B) remains the
+**sole** counter-state mutation authority. **No** new `pawa_failure_code` (21
+unchanged, §42E); **no** `terminal_reason_code`; **no** RHAMP-001 edit; **no**
+schema change; **single-contract solution** (HPAC-PAWA-REQ-308); H-3 (§33A /
+§38A / §42B / §68A) **byte-unchanged**; HPAC-001 v2.1 / RHAMP-001 v1.0 /
+HBDC-001 v1.2 / HPAC-PPA-001 v1.0 **byte-unchanged**. **0 ceremony steps** (0
+sessions / challenges / presentation requests / helper launches / APPROVE /
+REJECT / getAssertion / makeCredential / PIN / touches / presentation evidence /
+counter mutations / protected-root writes / `verify_human_authentication` /
+PRODUCTION principals / Gate-5 / `adapter.dispatch` / external effects). **No
+`src/pcae` / `scripts` / `pyproject` / `schemas` change**; the only
+`docs/contracts` change is HPAC-PAWA-001 v1.3 → v1.4 in place. 18
+completed-predecessor point-in-time guards reconciled **widen-not-weaken**
+(re-anchored to fixed SHAs `18d7da02` / `4977a2e5`; A/B — 0 attributable
+regressions; no test renamed / removed / disabled). Runtime `not_implemented` /
+`Observed` / `observe` / `unavailable`, 0 plugins / 0 capabilities; first
+governed runtime external effect ABSENT / UNREACHABLE. **Successors (derived,
+NOT begun, NOT reserved):** dedicated HPAC-PAWA-001 v1.4 contract IV
+(**N16-5-F5B1-READAUTH-IV**) → F-5-B1 implementation (**N16-5-F5B1-IMPL**) →
+its IV (**N16-5-F5B1-IV**) → a fresh **N16-5-FINAL-CERT** on a fresh
+CPIPC-valid successor id. **REPORTING-UX-1** still open (non-blocking).
+**N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).**
+
+Canonical report: `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F5B1_READAUTH.md`.
+Evidence: `.pcae/certification/n16_5_f5b1_readauth_phase_entry.json`,
+`.pcae/certification/n16_5_f5b1_readauth_contract_freeze.json`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-FINAL-CERT**) — Final Real-Human / Genuine-YubiKey
 Protected-Presentation N-16-5 Certification and Closure Adjudication — After
