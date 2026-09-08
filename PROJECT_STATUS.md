@@ -3,13 +3,13 @@
 ## Current Phase
 
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
-(alias **N16-5-F5B1-READAUTH-IV**) — Independent Verification of HPAC-PAWA-001
+(alias **N16-5-F-5-B1-READAUTH-IV**) — Independent Verification of HPAC-PAWA-001
 v1.4 Production Recognized Read / Ceremony Authority Contract (F-5-B1
 Least-Privilege Canonical-State Access). **STATUS: COMPLETE (verification-only
 — no source/contract-text mutation). HPAC-PAWA-001 v1.4: INDEPENDENTLY
 VERIFIED. F-5-B1 CONTRACT BLOCKER: INDEPENDENTLY VERIFIED RESOLVED. F-5-B1
 IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED.** CPIPC: valid direct `.1R`
-successor of N16-5-F5B1-READAUTH (same series/branch, strict order, unique, no
+successor of N16-5-F-5-B1-READAUTH (same series/branch, strict order, unique, no
 active conflict; alias display-only, no discrepancy). **V0 = `3ef9ad5d`**
 (predecessor completion HEAD); **V13_BASE = `18d7da02`**; **V14_FINAL =
 `1877a412`** (the v1.3→v1.4 contract-text freeze commit).
@@ -40,9 +40,9 @@ should not treat "49/0" as functional proof. No defect found that would
 justify blocking the freeze.
 
 **Required successor (derived, NOT begun):** F-5-B1 implementation
-(**N16-5-F5B1-IMPL**) — implement only `recognized_certification_read_authority`
+(**N16-5-F-5-B1-IMPL**) — implement only `recognized_certification_read_authority`
 / `CertificationReadAuthority` per the frozen §33B/§38B/§42D scope (with the
-REQ-278 numbering clarity fix) — → its own dedicated IV (**N16-5-F5B1-IV**,
+REQ-278 numbering clarity fix) — → its own dedicated IV (**N16-5-F-5-B1-IV**,
 not merged into the implementation) → a fresh **N16-5-FINAL-CERT** on a fresh
 CPIPC-valid successor id (never reusing a completed/blocked certification id).
 **REPORTING-UX-1** still open (non-blocking). **N-16-6 / N-16-7: OPEN /

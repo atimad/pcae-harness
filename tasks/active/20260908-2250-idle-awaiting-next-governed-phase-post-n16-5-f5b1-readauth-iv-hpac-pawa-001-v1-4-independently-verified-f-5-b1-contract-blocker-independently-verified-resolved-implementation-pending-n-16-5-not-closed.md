@@ -6,7 +6,7 @@
 
 ## Title
 
-Idle: awaiting next governed phase (post-N16-5-F5B1-READAUTH-IV); HPAC-PAWA-001 v1.4 INDEPENDENTLY VERIFIED; F-5-B1 contract blocker INDEPENDENTLY VERIFIED RESOLVED / implementation PENDING; N-16-5 NOT CLOSED
+Idle: awaiting next governed phase (post-N16-5-F-5-B1-READAUTH-IV); HPAC-PAWA-001 v1.4 INDEPENDENTLY VERIFIED; F-5-B1 contract blocker INDEPENDENTLY VERIFIED RESOLVED / implementation PENDING; N-16-5 NOT CLOSED
 
 ## Status
 
@@ -18,7 +18,7 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-N16-5-F5B1-READAUTH-IV); HPAC-PAWA-001 v1.4 INDEPENDENTLY VERIFIED; F-5-B1 contract blocker INDEPENDENTLY VERIFIED RESOLVED / implementation PENDING; N-16-5 NOT CLOSED
+Idle: awaiting next governed phase (post-N16-5-F-5-B1-READAUTH-IV); HPAC-PAWA-001 v1.4 INDEPENDENTLY VERIFIED; F-5-B1 contract blocker INDEPENDENTLY VERIFIED RESOLVED / implementation PENDING; N-16-5 NOT CLOSED
 
 ## Allowed Files
 

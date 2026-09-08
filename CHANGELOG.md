@@ -1,13 +1,13 @@
 # Changelog
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
-  (alias **N16-5-F5B1-READAUTH-IV**) — **Independent Verification of
+  (alias **N16-5-F-5-B1-READAUTH-IV**) — **Independent Verification of
   HPAC-PAWA-001 v1.4 Production Recognized Read / Ceremony Authority
   Contract**. Verification-only: no source, script, or contract-text
   mutation. **HPAC-PAWA-001 v1.4: INDEPENDENTLY VERIFIED (not inherited).
   F-5-B1 CONTRACT BLOCKER: INDEPENDENTLY VERIFIED RESOLVED. F-5-B1
   IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED; N-16-6 / N-16-7: OPEN /
-  UNTOUCHED.** CPIPC: valid direct `.1R` successor of N16-5-F5B1-READAUTH.
+  UNTOUCHED.** CPIPC: valid direct `.1R` successor of N16-5-F-5-B1-READAUTH.
   `V0 = 3ef9ad5d`; `V13_BASE = 18d7da02`; `V14_FINAL = 1877a412`.
   Independently re-derived (not copied from the predecessor's report): the
   v1.3→v1.4 delta is one contract file with an empty `src/pcae`/`scripts`
@@ -27,11 +27,11 @@
   string-matches against the same doc, not functional proof — only ~11 tests
   carry independent evidential weight (git-history/source checks). No defect
   found that would block the freeze; required successor
-  (**N16-5-F5B1-IMPL**, not begun) implements the accessor, followed by a
-  dedicated **N16-5-F5B1-IV** and a fresh **N16-5-FINAL-CERT** on a new id.
+  (**N16-5-F-5-B1-IMPL**, not begun) implements the accessor, followed by a
+  dedicated **N16-5-F-5-B1-IV** and a fresh **N16-5-FINAL-CERT** on a new id.
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R`
-  (alias **N16-5-F5B1-READAUTH**) — **F-5-B1 Production Recognized Read /
+  (alias **N16-5-F-5-B1-READAUTH**) — **F-5-B1 Production Recognized Read /
   Ceremony Authority Contract Reconciliation and Freeze**. **HPAC-PAWA-001
   v1.3 → v1.4 FROZEN (MINOR, S-3). F-5-B1 CONTRACT BLOCKER: RESOLVED. F-5-B1
   IMPLEMENTATION: PENDING. N-16-5: NOT CLOSED; N-16-6 / N-16-7: OPEN /
@@ -75,11 +75,11 @@
   protected-host mutation.** Runtime `not_implemented` / `Observed` / `observe`
   / `unavailable`, 0 plugins / 0 capabilities; first governed runtime external
   effect ABSENT / UNREACHABLE. Successors (derived, NOT begun):
-  **N16-5-F5B1-READAUTH-IV** (dedicated v1.4 contract IV) → **N16-5-F5B1-IMPL**
-  → **N16-5-F5B1-IV** → a fresh **N16-5-FINAL-CERT** on a fresh CPIPC-valid
+  **N16-5-F-5-B1-READAUTH-IV** (dedicated v1.4 contract IV) → **N16-5-F-5-B1-IMPL**
+  → **N16-5-F-5-B1-IV** → a fresh **N16-5-FINAL-CERT** on a fresh CPIPC-valid
   successor id. REPORTING-UX-1 still open (non-blocking).
   `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved. Report:
-  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F5B1_READAUTH.md`.
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F-5-B1_READAUTH.md`.
 
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-FINAL-CERT**) — **Final Real-Human / Genuine-YubiKey
@@ -935,8 +935,8 @@
 
 ## Unreleased
 
-- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F5B1-READAUTH) to Idle: awaiting next governed phase (post-N16-5-F5B1-READAUTH); HPAC-PAWA-001 v1.4 FROZEN, F-5-B1 contract blocker RESOLVED / implementation PENDING; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
-- Transitioned active task from Idle: awaiting next governed phase (post-N16-5-FINAL-CERT BLOCKED F-5-B1); N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F5B1-READAUTH); session refreshed and governance continuity revalidated.
+- Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B1-READAUTH) to Idle: awaiting next governed phase (post-N16-5-F-5-B1-READAUTH); HPAC-PAWA-001 v1.4 FROZEN, F-5-B1 contract blocker RESOLVED / implementation PENDING; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
+- Transitioned active task from Idle: awaiting next governed phase (post-N16-5-FINAL-CERT BLOCKED F-5-B1); N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B1-READAUTH); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-FINAL-CERT) to Idle: awaiting next governed phase (post-N16-5-FINAL-CERT BLOCKED F-5-B1); N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-N16-5-H3-IV to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-FINAL-CERT); session refreshed and governance continuity revalidated.
 - Transitioned active task from N16-5-H3-IV independent verification to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R (N16-5-H3-IV); session refreshed and governance continuity revalidated.
