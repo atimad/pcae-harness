@@ -2,6 +2,37 @@
 
 ## Accepted
 
+- **2026-09-08 — N16-5-FINAL-CERT BLOCKED before ceremony at finding F-5-B1.**
+  Live certification readiness was freshly re-confirmed on the correct
+  production host (§5, §14–§21): protected root / PAWA anchor gen 1 /
+  generation-1 PPA deployment / helper sha256 `933c664645…` / principal
+  `hp-8cee9b36…` / credential `hpc-2e7bbfa0…` / live counter `COUNTER_BEFORE`
+  gen 0 / genuine `YubiKey FIDO` (vid `0x1050`) — all byte-identical to the
+  independently-verified baseline, every digest independently recomputed, zero
+  drift, no protected-root write since 2026-09-06 19:04. **F-5-B1:**
+  `run_protected_presentation_ceremony()` and the provenance-verified
+  canonical-credential reads require a *recognized* production
+  `HPACStoreAuthority` (F-1 configured-agent binding via
+  `_run_recognition_sequence`); the only ways to obtain one are minting an
+  unrelated `production_writer` PAWA *mutation* capability (no read-only
+  `PawaOperation`) or the test-only seams — both forbidden here (§4 / §8 / §21
+  / §79 / §80 / §81). The H-3 repair delivered the `certification_writer`
+  authority + `hpac_certification_admin.py` (`describe`/`status`) but no
+  production presentation-ceremony entrypoint / recognized-authority accessor —
+  gap already recorded in the `…1R.1R.1R` H-3-BLOCKED analysis, not closed by
+  N16-5-H3-IMPL, not caught by N16-5-H3-IV (root absent that run). Building it
+  is the forbidden production/script/contract change → BLOCK, no repair here.
+  0 ceremony steps; 0 protected-root writes; COUNTER_AFTER == COUNTER_BEFORE.
+  N-16-5 closure criteria 11/60 PASS (1 FAIL: F-5-B1). **N-16-5: NOT CLOSED.**
+  Runtime unchanged (`not_implemented` / `Observed` / `observe` / `unavailable`,
+  0/0); first governed runtime external effect ABSENT / UNREACHABLE. N-16-6 /
+  N-16-7 OPEN / UNTOUCHED (N-16-7 strictly last). Narrowest successor (derived,
+  NOT begun, NOT reserved): a fresh-CPIPC-id implementation phase adding the
+  minimal recognized-authority accessor / bounded presentation-ceremony
+  entrypoint (likely an HPAC-PAWA-001 vX.Y MINOR amendment), then its IV, then
+  re-attempt N16-5-FINAL-CERT. REPORTING-UX-1 still open.
+  **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.**
+
 - **2026-09-07 — Open N16-5-FINAL-CERT; phase-entry orientation clean.**
   Canonical phase ID `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias N16-5-FINAL-CERT, display-only). CPIPC: valid direct `.1R` successor
