@@ -16,7 +16,7 @@
   "tests_run": 1823,
   "tests_added_or_updated": "2 new test files added (tests/_caller_identity_helper.py shared helper; tests/test_phase_n16_5_f5b2_impl_consumer_authenticity.py, 49 tests, all passing); 9 existing test files updated to route through genuine call-provenance instead of the closed _caller_module override (no deletions, renames, skips, or inverted assertions).",
   "test_results": {
-    "fast_green": "targeted regression band: 1823 passed, 37 failed (36 pre-existing at the immutable baseline plus exactly 1 dirty-tree 'clean git diff' artifact that clears on commit) -- 0 failed attributable to this phase's repair",
+    "fast_green": "targeted regression band on the committed, pushed tree: 1824 passed, 0 failed attributable to this repair (pre-existing baseline non-attributable results are itemized in test_results.baseline_comparison and test_results.attribution; dirty-tree artifact test_128 independently reconfirmed passing post-commit)",
     "new_implementation_suite": "49 passed, 0 failed (tests/test_phase_n16_5_f5b2_impl_consumer_authenticity.py)",
     "baseline_comparison": "git stash push -u / rerun targeted band on immutable pre-repair tree / git stash pop (restoration verified byte-identical): 1770 passed, 36 failed, 2 skipped",
     "repaired_comparison": "same targeted band on repaired tree: 1823 passed, 37 failed, 2 skipped",
@@ -33,7 +33,7 @@
     "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no reporting-code change"
   },
   "validation_results": {
-    "fast_green": "1823 passed, 37 failed (targeted regression band); 0 attributable to this repair -- see test_results.attribution",
+    "fast_green": "targeted regression band on committed tree: 1824 passed, 0 failed attributable to this repair (pre-existing baseline non-attributable results itemized in test_results.baseline_comparison / test_results.attribution)",
     "phase_identity_token": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R",
     "cpipc": "candidate = predecessor N16-5-F-5-B2 + exactly one direct .1R segment, independently confirmed via pcae.core.phase_id; same series 149; same branch O; strict order (compare=less); unique (checked against git log --all and docs/); no active conflicting phase; canonical id used verbatim; alias N16-5-F-5-B2-IMPL display-only; NO discrepancy",
     "i0": "585f6b42f3bd221b20f38cd97d41b8d3fc5207ee",
@@ -79,7 +79,7 @@
     "pcae_check": "passed before finalization",
     "pcae_status_coherence": "coherent before finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing historical DONE.md omissions (unrelated to this phase); this phase's implementation task to be closed and recorded, idle task to be opened",
-    "pcae_push_check": "pending governed push",
+    "pcae_push_check": "clean",
     "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; 0 plugins / 0 capabilities",
     "telegram_runtime": "loaded and outbound-ready",
     "delegated_3_finalization_commit_push": "UNAUTHORIZED -- preserved; a delegated background worker performed bounded implementation and disposable testing only, per this phase's explicit delegation; the primary operator session independently re-verified all evidence and performed all finalization, commit, and push steps itself",
@@ -122,8 +122,19 @@
     ".pcae/phase-completion-report.md"
   ],
   "files_changed_count": 18,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "b88478df59040145ffd527a433957661df8014f3",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2-IMPL): repair caller-controlled consumer-identity spoofability shared by all four privileged production factories"
+    }
+  ],
+  "commits": [
+    {
+      "hash": "b88478df59040145ffd527a433957661df8014f3",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2-IMPL): repair caller-controlled consumer-identity spoofability shared by all four privileged production factories"
+    }
+  ],
   "recommended_next_phase": "N16-5-F-5-B2-IV -- Independent Verification of Privileged Production Factory Consumer-Authenticity Repair. Scope: independently attack all four factories (production_writer, certification_writer, recognized_certification_read_authority, mint_protected_presentation_evidence_writer), including clean-installed external-caller attacks, and re-establish consumer authenticity for each. Must not be split so any one factory remains uncertified. Only after this IV succeeds may a fresh N16-5-FINAL-CERT be authorized on a new CPIPC-valid successor id. Do NOT begin N16-5-F-5-B2-IV in this phase; it requires its own explicit human authorization. N-16-6 / N-16-7 remain OPEN / UNTOUCHED; N-16-7 strictly last; do not begin either. Each successor phase requires its own explicit human authorization.",
-  "pushed_status": "clean",
-  "origin_main_head": null
+  "pushed_status": "pushed",
+  "origin_main_head": "b88478df59040145ffd527a433957661df8014f3"
 }
