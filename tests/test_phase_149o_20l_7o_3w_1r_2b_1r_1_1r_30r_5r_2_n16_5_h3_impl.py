@@ -36,6 +36,8 @@ from pcae.core.hpac_foundation import (
 from pcae.core.human_authentication_proof import new_proof_id
 from pcae.core.human_principal_registry import HumanPrincipalRegistryStore, new_principal_id
 
+from _caller_identity_helper import call_with_real_module_identity
+
 pytestmark = [
     pytest.mark.fast_green,
     pytest.mark.skipif(os.name != "posix", reason="POSIX-only protected-root model"),
@@ -245,15 +247,33 @@ def test_12_authorized_certification_category_accepted(rig):
     assert handle.certification_session_id == rig.session_id
 
 
+def _cw_as(rig, module_name, role, **over):
+    """N16-5-F-5-B2-IMPL: ``rig.cw``'s own default ``_caller_module``
+    override is no longer authoritative, so a genuine wrong-identity
+    negative test must make the ``certification_writer`` call really
+    originate from ``module_name`` (real caller-provenance detection)."""
+    kw = dict(
+        certification_session_id=rig.session_id,
+        principal_id=rig.principal_id,
+        credential_id=rig.credential_id,
+        proof_id=rig.proof_id,
+        _protected_root=rig.root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
+    kw.update(over)
+    return call_with_real_module_identity(module_name, w.certification_writer, role, **kw)
+
+
 def test_13_wrong_category_caller_denied(rig):
     with pytest.raises(w.PawaError) as ei:
-        rig.cw("hpac_challenge_coordinator", _caller_module="pcae.core.agent")
+        _cw_as(rig, "pcae.core.agent", "hpac_challenge_coordinator")
     assert ei.value.code == "unauthorized_factory_consumer"
 
 
 def test_14_production_writer_admin_module_cannot_request_certification_role(rig):
     with pytest.raises(w.PawaError) as ei:
-        rig.cw("hpac_challenge_coordinator", _caller_module="pcae.core.hpac_protected_admin_writer")
+        _cw_as(rig, "pcae.core.hpac_protected_admin_writer", "hpac_challenge_coordinator")
     assert ei.value.code == "unauthorized_factory_consumer"
 
 
@@ -305,10 +325,11 @@ def test_18_ambient_identity_is_not_authority(rig, monkeypatch):
 
 
 def test_19_caller_string_cannot_self_identify_via_argument(rig):
-    # An arbitrary _caller_module string that is not the exact §38A consumer
-    # is rejected; the argument is a disclosed test seam, not a trust input.
+    # An arbitrary caller module that is not the exact §38A consumer is
+    # rejected; consumer identity is real caller provenance, never a
+    # caller-asserted argument.
     with pytest.raises(w.PawaError) as ei:
-        rig.cw("hpac_challenge_coordinator", _caller_module="pcae.core.hpac_certification_coordinator.evil")
+        _cw_as(rig, "pcae.core.hpac_certification_coordinator.evil", "hpac_challenge_coordinator")
     assert ei.value.code == "unauthorized_factory_consumer"
 
 
@@ -1200,7 +1221,7 @@ def test_121_wrong_credential_for_counter_role_rejected(rig):
 ])
 def test_122_ordinary_actors_cannot_acquire_certification_authority(rig, actor_module):
     with pytest.raises(w.PawaError) as ei:
-        rig.cw("hpac_challenge_coordinator", _caller_module=actor_module)
+        _cw_as(rig, actor_module, "hpac_challenge_coordinator")
     assert ei.value.code == "unauthorized_factory_consumer"
 
 

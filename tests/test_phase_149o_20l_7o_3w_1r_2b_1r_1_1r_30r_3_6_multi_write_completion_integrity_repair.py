@@ -35,6 +35,8 @@ from pcae.core.hpac_rhamp_enrollment import enroll_first_credential
 from pcae.core.hpac_rhamp_terminal_reasons import TERMINAL_REASON_CODES
 from pcae.core.human_principal_registry import new_principal_id
 
+from _caller_identity_helper import call_with_real_module_identity
+
 pytestmark = pytest.mark.fast_green
 
 REPO = Path(__file__).resolve().parents[1]
@@ -100,14 +102,15 @@ def _production_multi(tmp_path: Path, *, subject: str = SUBJECT):
         _configured_agent_identity_source=_agent_src,
         _topology_probe=_locked_probe(),
     )
-    handle = w.production_writer(
+    handle = call_with_real_module_identity(
+        "pcae.core.hpac_rhamp_enrollment",
+        w.production_writer,
         w.PawaOperation.ENROLL_CREDENTIAL,
         principal_id=principal_id,
         transaction_id=subject,
         _protected_root=root,
         _configured_agent_identity_source=_agent_src,
         _topology_probe=_locked_probe(),
-        _caller_module="pcae.core.hpac_rhamp_enrollment",
     )
     capability = handle.consume(
         w.PawaOperation.ENROLL_CREDENTIAL,

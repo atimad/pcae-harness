@@ -38,6 +38,8 @@ from pcae.core.hpac_foundation import (
 from pcae.core.human_authentication_proof import new_proof_id
 from pcae.core.human_principal_registry import HumanPrincipalRegistryStore, new_principal_id
 
+from _caller_identity_helper import call_with_real_module_identity
+
 pytestmark = [
     pytest.mark.fast_green,
     pytest.mark.skipif(os.name != "posix", reason="POSIX-only protected-root model"),
@@ -247,14 +249,40 @@ def test_12_authorized_consumer_accepted(rig):
     "pcae.core.hpac_protected_admin_writer",
 ])
 def test_13_wrong_consumer_matrix_denied(rig, caller):
+    # N16-5-F-5-B2-IMPL: the disclosed ``_caller_module`` keyword is no
+    # longer authoritative, so the negative matrix is now reproduced by
+    # making the call genuinely originate from each candidate module name
+    # (real caller-provenance detection), not by asserting a string.
+    kw = dict(
+        certification_session_id=rig.session_id,
+        principal_id=rig.principal_id,
+        credential_id=rig.credential_id,
+        proof_id=rig.proof_id,
+        _protected_root=rig.root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
     with pytest.raises(w.PawaError) as ei:
-        rig.ra(_caller_module=caller)
+        call_with_real_module_identity(caller, w.recognized_certification_read_authority, **kw)
     assert ei.value.code == "unauthorized_factory_consumer"
 
 
 def test_14_wildcard_prefix_nearmiss_denied(rig):
+    kw = dict(
+        certification_session_id=rig.session_id,
+        principal_id=rig.principal_id,
+        credential_id=rig.credential_id,
+        proof_id=rig.proof_id,
+        _protected_root=rig.root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
     with pytest.raises(w.PawaError) as ei:
-        rig.ra(_caller_module="pcae.core.hpac_certification_coordinator.evil")
+        call_with_real_module_identity(
+            "pcae.core.hpac_certification_coordinator.evil",
+            w.recognized_certification_read_authority,
+            **kw,
+        )
     assert ei.value.code == "unauthorized_factory_consumer"
 
 
@@ -285,8 +313,17 @@ def test_17_runs_fresh_every_call_no_caching(rig):
 def test_18_no_fallback_to_production_writer_or_direct_authority(rig):
     # Failing the §33B sequence never falls back to a mutation capability
     # or a raw HPACStoreAuthority.production() -- it just raises.
+    kw = dict(
+        certification_session_id=rig.session_id,
+        principal_id=rig.principal_id,
+        credential_id=rig.credential_id,
+        proof_id=rig.proof_id,
+        _protected_root=rig.root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
     with pytest.raises(w.PawaError):
-        rig.ra(_caller_module="pcae.core.agent")
+        call_with_real_module_identity("pcae.core.agent", w.recognized_certification_read_authority, **kw)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -700,7 +737,20 @@ def test_82_coordinator_run_presentation_ceremony_second_call_denied(rig, monkey
         session.run_presentation_ceremony(**_ceremony_kwargs())
 
 
-def test_83_coordinator_wrong_consumer_module_denied(tmp_path, rig):
+def test_83_coordinator_wrong_consumer_module_denied(tmp_path, rig, monkeypatch):
+    """POST-REPAIR (N16-5-F-5-B2-IMPL): the coordinator's own
+    ``_caller_module`` constructor seam forwards straight into the (now
+    non-authoritative) factory keyword -- it can no longer make the REAL
+    coordinator either impersonate a different consumer or be denied as
+    one. The coordinator's genuine module identity (itself the sole §38B
+    consumer) always governs. This test's name is retained; it now proves
+    exactly that: setting the seam to an arbitrary unauthorized-looking
+    name has NO effect on the outcome -- the call still succeeds, exactly
+    as it does with no seam at all (test_81)."""
+    monkeypatch.setattr(
+        "pcae.core.protected_presentation.run_protected_presentation_ceremony",
+        lambda **kw: "COORD_SENTINEL",
+    )
     coordinator = cc.HpacCertificationCoordinator(
         _protected_root=rig.root,
         _configured_agent_identity_source=_agent_src(),
@@ -710,9 +760,8 @@ def test_83_coordinator_wrong_consumer_module_denied(tmp_path, rig):
     session = coordinator.begin_session(
         principal_id=rig.principal_id, credential_id=rig.credential_id, proof_id=rig.proof_id
     )
-    with pytest.raises(cc.CertificationCoordinatorError) as ei:
-        session.run_presentation_ceremony(**_ceremony_kwargs())
-    assert ei.value.pawa_failure_code == "unauthorized_factory_consumer"
+    result = session.run_presentation_ceremony(**_ceremony_kwargs())
+    assert result == "COORD_SENTINEL"
 
 
 def test_84_coordinator_never_exposes_read_authority_object(rig, monkeypatch):
@@ -770,7 +819,15 @@ def test_93_coordinator_module_not_imported_by_cli_or_agent():
 
 
 def test_95_certification_writer_still_mints_for_h3_roles(rig):
-    handle = w.certification_writer(
+    # This suite's own real module name is a disclosed
+    # ``_READ_AUTHORITY_TEST_CONSUMERS`` member, not a
+    # ``_CERTIFICATION_TEST_CONSUMERS`` one -- so a direct
+    # ``certification_writer`` call needs a genuine real-caller-identity
+    # simulation (the disclosed ``_caller_module`` keyword is no longer
+    # authoritative for either allowlist).
+    handle = call_with_real_module_identity(
+        COORDINATOR_MODULE,
+        w.certification_writer,
         "hpac_challenge_coordinator",
         certification_session_id=rig.session_id,
         principal_id=rig.principal_id,
@@ -779,7 +836,6 @@ def test_95_certification_writer_still_mints_for_h3_roles(rig):
         _protected_root=rig.root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
-        _caller_module=COORDINATOR_MODULE,
     )
     assert isinstance(handle, w.CertificationWriterHandle)
     assert handle.role == "hpac_challenge_coordinator"

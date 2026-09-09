@@ -64,6 +64,8 @@ from pcae.core.hpac_foundation import (
 )
 from pcae.protected_presentation_helper import render_human_visible_bytes
 
+from _caller_identity_helper import call_with_real_module_identity
+
 pytestmark = [
     pytest.mark.fast_green,
     pytest.mark.skipif(os.name != "posix", reason="POSIX-only protected-store / launch model"),
@@ -561,10 +563,18 @@ def test_29_evidence_writer_capability_is_single_use_and_non_bearer(installed):
 
 
 def test_30_evidence_writer_factory_rejects_unauthorized_caller(installed):
+    # N16-5-F-5-B2-IMPL: the disclosed `_caller_module` keyword is no
+    # longer authoritative, and this suite's own real module name is
+    # itself a disclosed test consumer -- so a genuine wrong-identity
+    # negative test needs the call to really originate from
+    # "pcae.core.hpac_verifier" (real caller-provenance detection).
     root, authority = installed
     with pytest.raises(w.PawaError) as e:
-        w.mint_protected_presentation_evidence_writer(
-            authority, mechanism_id=inst.MECHANISM_ID, _caller_module="pcae.core.hpac_verifier"
+        call_with_real_module_identity(
+            "pcae.core.hpac_verifier",
+            w.mint_protected_presentation_evidence_writer,
+            authority,
+            mechanism_id=inst.MECHANISM_ID,
         )
     assert e.value.code == "unauthorized_factory_consumer"
 

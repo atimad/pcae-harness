@@ -42,6 +42,8 @@ from pcae.core.human_principal_registry import HumanPrincipalRegistryStore, new_
 from pcae.core.hpac_rhamp_ctap2 import DeterministicCtap2Provider
 from pcae.core.hpac_rhamp_enrollment import enroll_first_credential
 
+from _caller_identity_helper import call_with_real_module_identity
+
 pytestmark = [
     pytest.mark.fast_green,
     pytest.mark.skipif(os.name != "posix", reason="POSIX-only protected-root model"),
@@ -123,7 +125,11 @@ def principal_and_credential(root):
 
 
 def test_01_detect_caller_module_trusts_explicit_value_verbatim():
-    assert w._detect_caller_module("literally.anything") == "literally.anything"
+    """POST-REPAIR (N16-5-F-5-B2-IMPL): the historical name of this test is
+    retained (no test is renamed), but the behaviour it now demonstrates is
+    the opposite of its name — ``explicit`` is unconditionally ignored;
+    real stack-based provenance governs regardless of what is passed."""
+    assert w._detect_caller_module("literally.anything") != "literally.anything"
 
 
 def test_02_four_factories_share_the_primitive():
@@ -168,13 +174,37 @@ def test_10_production_writer_unspoofed_denied(root):
 
 
 def test_11_production_writer_spoofed_yields_full_writer_capability(root):
-    handle = w.production_writer(
+    """POST-REPAIR (N16-5-F-5-B2-IMPL): this test's historical name is
+    retained (no test is renamed/deleted), but the finding it reproduced is
+    now closed — ``_caller_module`` no longer overrides real provenance, so
+    the exact same spoof attempt is now DENIED. See
+    ``test_11b_production_writer_real_caller_still_yields_full_writer_capability``
+    below for proof the genuine production path is unaffected."""
+    with pytest.raises(w.PawaError) as ei:
+        w.production_writer(
+            w.PawaOperation.ENROLL_PRINCIPAL,
+            principal_id="hp-" + "1" * 32,
+            _protected_root=root,
+            _configured_agent_identity_source=_agent_src(),
+            _topology_probe=_locked_probe(),
+            _caller_module="pcae.core.hpac_protected_admin_writer",
+        )
+    assert ei.value.code == "unauthorized_factory_consumer"
+
+
+def test_11b_production_writer_real_caller_still_yields_full_writer_capability(root):
+    # The genuine production path is unaffected: a call that REALLY
+    # originates from an authorized consumer module still mints a full
+    # writer capability -- proving the repair closed the spoof without
+    # breaking real recognition.
+    handle = call_with_real_module_identity(
+        "pcae.core.hpac_protected_admin_writer",
+        w.production_writer,
         w.PawaOperation.ENROLL_PRINCIPAL,
         principal_id="hp-" + "1" * 32,
         _protected_root=root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
-        _caller_module="pcae.core.hpac_protected_admin_writer",
     )
     assert isinstance(handle, w.ProductionWriterHandle)
     cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id="hp-" + "1" * 32)
@@ -200,8 +230,29 @@ def test_12_certification_writer_unspoofed_denied(root, principal_and_credential
 
 
 def test_13_certification_writer_spoofed_yields_full_writer_handle(root, principal_and_credential):
+    """POST-REPAIR: name retained, spoof now DENIED — see test_13b for the
+    genuine real-caller path."""
     principal_id, credential_id = principal_and_credential
-    handle = w.certification_writer(
+    with pytest.raises(w.PawaError) as ei:
+        w.certification_writer(
+            "hpac_challenge_coordinator",
+            certification_session_id="hcs-" + "1" * 32,
+            principal_id=principal_id,
+            credential_id=credential_id,
+            proof_id=new_proof_id(),
+            _protected_root=root,
+            _configured_agent_identity_source=_agent_src(),
+            _topology_probe=_locked_probe(),
+            _caller_module="pcae.core.hpac_certification_coordinator",
+        )
+    assert ei.value.code == "unauthorized_factory_consumer"
+
+
+def test_13b_certification_writer_real_caller_still_yields_full_writer_handle(root, principal_and_credential):
+    principal_id, credential_id = principal_and_credential
+    handle = call_with_real_module_identity(
+        "pcae.core.hpac_certification_coordinator",
+        w.certification_writer,
         "hpac_challenge_coordinator",
         certification_session_id="hcs-" + "1" * 32,
         principal_id=principal_id,
@@ -210,17 +261,36 @@ def test_13_certification_writer_spoofed_yields_full_writer_handle(root, princip
         _protected_root=root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
-        _caller_module="pcae.core.hpac_certification_coordinator",
     )
     assert isinstance(handle, w.CertificationWriterHandle)
     assert handle.role == "hpac_challenge_coordinator"
 
 
 def test_14_recognized_read_authority_spoofed_succeeds_but_escalation_denied(root, principal_and_credential):
-    # Re-confirms the F-5-B1-IV finding fresh, from this phase's own entry
-    # point, and additionally checks the independent escalation gate.
+    """POST-REPAIR: the F-5-B1-IV finding this test reproduced is now
+    CLOSED by N16-5-F-5-B2-IMPL — the same spoof attempt is denied outright
+    (never reaches the escalation gate). The escalation gate itself is
+    re-confirmed independently below via the genuine real-caller path."""
     principal_id, credential_id = principal_and_credential
-    ra = w.recognized_certification_read_authority(
+    with pytest.raises(w.PawaError) as ei:
+        w.recognized_certification_read_authority(
+            certification_session_id="hcs-" + "2" * 32,
+            principal_id=principal_id,
+            credential_id=credential_id,
+            proof_id=new_proof_id(),
+            _protected_root=root,
+            _configured_agent_identity_source=_agent_src(),
+            _topology_probe=_locked_probe(),
+            _caller_module="pcae.core.hpac_certification_coordinator",
+        )
+    assert ei.value.code == "unauthorized_factory_consumer"
+
+
+def test_14b_recognized_read_authority_real_caller_succeeds_escalation_still_denied(root, principal_and_credential):
+    principal_id, credential_id = principal_and_credential
+    ra = call_with_real_module_identity(
+        "pcae.core.hpac_certification_coordinator",
+        w.recognized_certification_read_authority,
         certification_session_id="hcs-" + "2" * 32,
         principal_id=principal_id,
         credential_id=credential_id,
@@ -228,7 +298,6 @@ def test_14_recognized_read_authority_spoofed_succeeds_but_escalation_denied(roo
         _protected_root=root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
-        _caller_module="pcae.core.hpac_certification_coordinator",
     )
     assert isinstance(ra, w.CertificationReadAuthority)
     with pytest.raises(HPACAuthorityError):
@@ -236,13 +305,29 @@ def test_14_recognized_read_authority_spoofed_succeeds_but_escalation_denied(roo
 
 
 def test_15_presentation_evidence_writer_spoofed_yields_full_writer_capability(root):
+    """POST-REPAIR: name retained, spoof now DENIED — see test_15b for the
+    genuine real-caller (launcher) path."""
+    authority = HPACStoreAuthority._production_test_fixture(
+        root, _seal=_PRODUCTION_TEST_FIXTURE_SEAL, _topology_probe=_locked_probe()
+    )
+    with pytest.raises(w.PawaError) as ei:
+        w.mint_protected_presentation_evidence_writer(
+            authority, mechanism_id="f5b2-mechanism", _caller_module="pcae.core.protected_presentation"
+        )
+    assert ei.value.code == "unauthorized_factory_consumer"
+
+
+def test_15b_presentation_evidence_writer_real_caller_still_yields_full_writer_capability(root):
     authority = HPACStoreAuthority._production_test_fixture(
         root, _seal=_PRODUCTION_TEST_FIXTURE_SEAL, _topology_probe=_locked_probe()
     )
     from pcae.core.hpac_foundation import HPACWriterCapability
 
-    cap = w.mint_protected_presentation_evidence_writer(
-        authority, mechanism_id="f5b2-mechanism", _caller_module="pcae.core.protected_presentation"
+    cap = call_with_real_module_identity(
+        "pcae.core.protected_presentation",
+        w.mint_protected_presentation_evidence_writer,
+        authority,
+        mechanism_id="f5b2-mechanism",
     )
     assert isinstance(cap, HPACWriterCapability)
 
@@ -262,12 +347,17 @@ def test_16_presentation_evidence_writer_unspoofed_denied(root):
 
 
 def test_20_static_guard_is_source_scan_not_runtime_gate():
-    # This suite's own THIS_MODULE assertions above (not a member of any
-    # allowlist) plus test_11/13/15's live success from that same module
-    # jointly demonstrate: a source-level "no non-test caller passes
-    # _caller_module" scan cannot see, and does not block, a call made
-    # from outside the scanned tree (this file itself, an external script,
-    # a plugin, or any other in-process caller).
+    # POST-REPAIR (N16-5-F-5-B2-IMPL): before the repair, this suite's own
+    # THIS_MODULE assertions above (not a member of any allowlist) plus
+    # test_11/13/15's live success from that same module jointly
+    # demonstrated that a source-level "no non-test caller passes
+    # _caller_module" scan alone was not a runtime control. Since the
+    # repair, test_11/13/15 (same inputs) are now correctly DENIED at
+    # runtime too -- the disclosed keyword argument is no longer
+    # authoritative for either control. This scan is retained as
+    # defence-in-depth (it still independently confirms no *other*
+    # production module forwards the now-inert seam), not as the sole
+    # control it once effectively was.
     result = subprocess.run(
         ["git", "grep", "-n", "_caller_module=", "--", "src/pcae"],
         cwd=REPO, capture_output=True, text=True,
@@ -290,9 +380,22 @@ def test_30_pawa_contract_defines_consumer_as_the_calling_module():
 
 
 def test_31_no_contract_or_production_source_modified_since_b2_0():
+    """This diagnostic phase (N16-5-F-5-B2) was itself read-only / decision
+    -only, so at B2_0 it correctly asserted NO src/pcae change at all. Its
+    recommended successor, N16-5-F-5-B2-IMPL, deliberately DOES modify
+    ``src/pcae/core/hpac_protected_admin_writer.py`` to repair the finding
+    this suite documents -- that is the entire point of the successor
+    phase, not a regression of this invariant. What must still hold, and
+    is independently re-checked here, is the part of the original
+    invariant that is a real, permanent constraint on this repair: no
+    contract-text byte changes and no dependency-set change. (Whether
+    ``src/pcae`` / ``scripts`` differ from B2_0 is no longer asserted here
+    -- see test_02_four_factories_share_the_primitive and the regression
+    suite in test_phase_..._n16_5_f5b2_impl_consumer_authenticity.py for
+    what DID change and why.)"""
     names = subprocess.run(
         ["git", "-C", str(REPO), "diff", "--name-only", B2_0, "HEAD", "--",
-         "src/pcae", "scripts", "pyproject.toml", "docs/contracts"],
+         "docs/contracts", "pyproject.toml"],
         capture_output=True, text=True, check=True,
     ).stdout.split()
     assert names == [], names

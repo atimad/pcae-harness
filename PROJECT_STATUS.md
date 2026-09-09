@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F-5-B2-IMPL**) — Privileged Production Factory
+Consumer-Authenticity Repair. **STATUS: F-5-B2 REPAIR IMPLEMENTED / IV
+PENDING.** CPIPC: valid direct `.1R` successor of `N16-5-F-5-B2` (same
+series/branch, strict order, unique, no active conflict; independently
+re-derived via `pcae.core.phase_id`, alias display-only, no discrepancy).
+**I0 = `585f6b42`** (phase-entry SHA).
+
+Repaired the single shared primitive `_detect_caller_module` in
+`src/pcae/core/hpac_protected_admin_writer.py`: the caller-controlled early
+return (`if explicit is not None: return explicit`) is removed; the
+`_caller_module` keyword argument on all four privileged factories
+(`production_writer`, `certification_writer`,
+`recognized_certification_read_authority`,
+`mint_protected_presentation_evidence_writer`) is now unconditionally
+ignored, and consumer identity is always derived from actual call-stack
+provenance. No second trust root; no contract/`PawaOperation`/role/schema/
+dependency change (`HPAC-PAWA-001` byte-unchanged).
+
+New dedicated test suite (49 tests, all passing) proves, per factory:
+caller-supplied authorized-name spoofing now DENIES; near-miss/prefix/
+suffix/empty/wildcard spoofing DENIES; legitimate production callers
+(via genuine call provenance, not asserted names) still succeed. A/B
+regression attribution against the immutable pre-repair baseline
+(`git stash`-verified): **0 attributable regressions** (36 pre-existing
+baseline failures unchanged; the one additional failure at the repaired,
+uncommitted tree is a pre-existing "clean git diff" style check that
+clears once committed). Load-bearing mutation proof performed (reverting
+the fix makes 10/49 new tests fail; restoring it returns 49/49 green).
+Clean-installed wheel: external caller spoof **4/4 DENIED** across all
+four factories; legitimate production path confirmed working from the
+installed package.
+
+**Verdict: F-5-B2: REPAIR IMPLEMENTED / IV PENDING. F-5: CERTIFICATION
+BLOCKED PENDING F-5-B2 IV. N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN /
+UNTOUCHED (N-16-7 strictly last).** H-3 consumer-authenticity: REPAIR
+IMPLEMENTED / RE-IV PENDING. F-5-B1: REPAIR IMPLEMENTED / IV PENDING.
+Presentation-evidence writer: REPAIR IMPLEMENTED / IV PENDING.
+
+**Required successor (derived, NOT begun): N16-5-F-5-B2-IV** —
+Independent Verification of Privileged Production Factory
+Consumer-Authenticity Repair, covering all four factories including
+clean-installed external-caller attacks. Only after it succeeds may a
+fresh `N16-5-FINAL-CERT` be authorized. Do not begin N16-5-F-5-B2-IV in
+this phase; it requires its own explicit human authorization.
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_N16_5_F5B2_IMPL.md`.
+
+New test suite:
+`tests/test_phase_n16_5_f5b2_impl_consumer_authenticity.py` (49 tests, all
+pass).
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B2**) — Privileged Production Factory Consumer-Authenticity
 Blast-Radius Reconstruction and Normative Repair Adjudication. **STATUS:

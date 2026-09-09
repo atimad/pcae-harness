@@ -95,6 +95,8 @@ from pcae.core.hpac_foundation import (  # noqa: E402
 )
 from pcae.protected_presentation_helper import render_human_visible_bytes  # noqa: E402
 
+from _caller_identity_helper import call_with_real_module_identity  # noqa: E402
+
 _AGENT_UID = 5_151_515
 _AGENT_GID = 888_888
 RENDERER = "pcae-protected-local-presentation-renderer/1.0"
@@ -532,12 +534,19 @@ def test_23_three_distinct_authorities_no_role_inherits_another():
 
 
 def test_24_evidence_writer_factory_rejects_every_non_launcher_caller(installed):
+    # N16-5-F-5-B2-IMPL: the disclosed `_caller_module` keyword is no
+    # longer authoritative, and this suite's own real module name is
+    # itself a disclosed test consumer -- so each wrong-identity case needs
+    # the call to really originate from that module name (real
+    # caller-provenance detection), not merely assert it.
     root, authority = installed
     for bad in ("pcae.core.hpac_verifier", "pcae.core.approval_presentation",
                 "pcae.core.hpac_protected_presentation_admin", "pcae.core.runtime_authority",
                 "pcae.cli"):
         with pytest.raises(w.PawaError) as e:
-            w.mint_protected_presentation_evidence_writer(authority, mechanism_id=inst.MECHANISM_ID, _caller_module=bad)
+            call_with_real_module_identity(
+                bad, w.mint_protected_presentation_evidence_writer, authority, mechanism_id=inst.MECHANISM_ID
+            )
         assert e.value.code == "unauthorized_factory_consumer"
 
 

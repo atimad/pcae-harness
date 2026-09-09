@@ -1,5 +1,25 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (alias **N16-5-F-5-B2-IMPL**) — **Privileged Production Factory
+  Consumer-Authenticity Repair**. Repaired the shared `_detect_caller_module`
+  primitive in `src/pcae/core/hpac_protected_admin_writer.py`: removed the
+  caller-controlled early return so the `_caller_module` override can no
+  longer satisfy production consumer authenticity for any of the four
+  privileged factories (`production_writer`, `certification_writer`,
+  `recognized_certification_read_authority`,
+  `mint_protected_presentation_evidence_writer`); consumer identity is now
+  always derived from real call-stack provenance. No contract, schema,
+  `PawaOperation`, role, failure-code, or dependency change; no new trust
+  root. New 49-test suite
+  (`tests/test_phase_n16_5_f5b2_impl_consumer_authenticity.py`) proves
+  caller-name spoofing now denies across all four factories while
+  legitimate production callers still succeed; 0 attributable regressions
+  vs. an immutable pre-repair baseline; load-bearing mutation proof
+  performed; clean-installed wheel external-caller spoof 4/4 DENIED.
+  **Verdict: F-5-B2 REPAIR IMPLEMENTED / IV PENDING. F-5 CERTIFICATION
+  BLOCKED PENDING F-5-B2 IV. N-16-5 NOT CLOSED.** Successor
+  `N16-5-F-5-B2-IV` derived, not begun.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-F-5-B2**) — **Privileged Production Factory
   Consumer-Authenticity Blast-Radius Reconstruction and Normative Repair

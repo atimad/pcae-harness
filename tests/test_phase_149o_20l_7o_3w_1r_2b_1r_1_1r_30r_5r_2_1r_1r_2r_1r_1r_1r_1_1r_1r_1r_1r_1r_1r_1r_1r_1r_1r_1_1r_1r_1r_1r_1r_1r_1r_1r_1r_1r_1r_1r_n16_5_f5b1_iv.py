@@ -49,6 +49,8 @@ from pcae.core.hpac_foundation import (
 from pcae.core.human_authentication_proof import new_proof_id
 from pcae.core.human_principal_registry import HumanPrincipalRegistryStore, new_principal_id
 
+from _caller_identity_helper import call_with_real_module_identity
+
 pytestmark = [
     pytest.mark.skipif(os.name != "posix", reason="POSIX-only protected-root model"),
 ]
@@ -146,6 +148,28 @@ class IvRig:
         kw.update(over)
         return w.recognized_certification_read_authority(**kw)
 
+    def real_ra(self, **over):
+        """N16-5-F-5-B2-IMPL: obtain a genuine (non-spoofed)
+        ``CertificationReadAuthority`` by making the call really originate
+        from the authorized §38B consumer module's name, via
+        ``call_with_real_module_identity`` -- NOT via the disclosed (and,
+        post-repair, non-authoritative) ``_caller_module`` keyword."""
+        kw = dict(
+            certification_session_id=self.session_id,
+            principal_id=self.principal_id,
+            credential_id=self.credential_id,
+            proof_id=self.proof_id,
+            _protected_root=self.root,
+            _configured_agent_identity_source=_agent_src(),
+            _topology_probe=_locked_probe(),
+        )
+        kw.update(over)
+        return call_with_real_module_identity(
+            "pcae.core.hpac_certification_coordinator",
+            w.recognized_certification_read_authority,
+            **kw,
+        )
+
 
 @pytest.fixture
 def rig(tmp_path):
@@ -222,17 +246,24 @@ def test_20_baseline_this_module_is_genuinely_unauthorized(rig):
 
 
 def test_21_arbitrary_caller_spoofs_coordinator_identity_and_succeeds(rig):
-    """THE FINDING: this same unauthorized module, using only the public
-    ``_caller_module`` keyword argument (no reflection, no private-attribute
-    access, no monkeypatching), claims the authorized coordinator's module
-    name and receives a fully working, indistinguishable
-    ``CertificationReadAuthority`` handle. Per the IV spec's mandatory
-    consumer-authenticity criterion, this MUST be denied; it is not.
+    """POST-REPAIR (N16-5-F-5-B2-IMPL): THE FINDING this test's historical
+    name documents is now CLOSED. The exact same attempt -- the public
+    ``_caller_module`` keyword argument claiming the authorized
+    coordinator's module name, from this genuinely unauthorized module --
+    is now denied outright; the argument is no longer authoritative for
+    consumer recognition. (Name retained; no test is renamed or deleted.)
+    See ``test_21b_...`` for proof a GENUINE call from that module name
+    still succeeds, i.e. the repair closed the spoof without breaking real
+    recognition.
     """
-    handle = rig.ra(_caller_module="pcae.core.hpac_certification_coordinator")
+    with pytest.raises(w.PawaError) as ei:
+        rig.ra(_caller_module="pcae.core.hpac_certification_coordinator")
+    assert ei.value.code == "unauthorized_factory_consumer"
+
+
+def test_21b_real_coordinator_identity_still_succeeds(rig):
+    handle = rig.real_ra()
     assert isinstance(handle, w.CertificationReadAuthority)
-    # The forged handle is fully functional, indistinguishable from a
-    # genuine one obtained by the real coordinator.
     principal, credential = handle.read_principal_and_credential()
     assert principal.principal_id == rig.principal_id
     assert credential.credential_id == rig.credential_id
@@ -256,12 +287,11 @@ def test_22_predecessors_own_positive_tests_rely_on_the_same_spoof_seam():
 
 
 def test_23_detect_caller_module_returns_explicit_value_unconditionally():
-    """Direct source-level confirmation of the root cause: the shared
-    ``_detect_caller_module`` helper (reused verbatim from the pre-existing
-    ``production_writer`` / ``certification_writer`` factories) returns any
-    explicitly supplied value with no gate, before ever consulting the real
-    call stack."""
-    assert w._detect_caller_module("literally.anything.i.want") == "literally.anything.i.want"
+    """POST-REPAIR: name retained; the root cause this test documented is
+    fixed -- the shared ``_detect_caller_module`` helper no longer returns
+    (or otherwise consults) any explicitly supplied value at all; it always
+    consults the real call stack."""
+    assert w._detect_caller_module("literally.anything.i.want") != "literally.anything.i.want"
 
 
 # =============================================================================
@@ -270,13 +300,15 @@ def test_23_detect_caller_module_returns_explicit_value_unconditionally():
 
 
 def test_30_wrapped_authority_writer_denied(rig):
-    handle = rig.ra(_caller_module="pcae.core.hpac_certification_coordinator")
+    # N16-5-F-5-B2-IMPL: obtained via the genuine real-caller path (the
+    # disclosed ``_caller_module`` override is no longer authoritative).
+    handle = rig.real_ra()
     with pytest.raises(HPACAuthorityError):
         handle._authority.writer("certification_writer")
 
 
 def test_31_reads_return_plain_records_not_resolved_record_with_seal(rig):
-    handle = rig.ra(_caller_module="pcae.core.hpac_certification_coordinator")
+    handle = rig.real_ra()
     principal, credential = handle.read_principal_and_credential()
     for obj in (principal, credential):
         assert not hasattr(obj, "authority_seal")
@@ -284,7 +316,7 @@ def test_31_reads_return_plain_records_not_resolved_record_with_seal(rig):
 
 
 def test_32_handle_is_not_serializable(rig):
-    handle = rig.ra(_caller_module="pcae.core.hpac_certification_coordinator")
+    handle = rig.real_ra()
     with pytest.raises(TypeError):
         handle.__reduce__()
 

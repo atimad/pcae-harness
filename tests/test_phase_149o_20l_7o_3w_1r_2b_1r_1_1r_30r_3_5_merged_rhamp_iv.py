@@ -30,6 +30,8 @@ from pcae.core.hpac_rhamp_credential_sidecar import (
 from pcae.core.hpac_rhamp_counter_state import HpacRhampCounterStateStore
 from pcae.core.human_principal_registry import HumanPrincipalRegistryStore, new_principal_id
 
+from _caller_identity_helper import call_with_real_module_identity
+
 pytestmark = [
     pytest.mark.fast_green,
     pytest.mark.skipif(os.name != "posix", reason="POSIX-only protected-root model"),
@@ -117,20 +119,24 @@ class Rig:
         # allowlist that does not (and per PAWA-INV-9 must not) include this
         # test module — `enroll_first_credential` reaches `production_writer`
         # through `pcae.core.hpac_rhamp_enrollment`, never directly from a
-        # test. `_caller_module` is the same private test-injection seam as
-        # `_protected_root` / `_topology_probe` (production callers never
-        # pass it); using it here to isolate `_multi_write` mechanics from
-        # the full enrollment ceremony is not a scope bypass — test_16 below
-        # independently confirms the real fence still rejects an
-        # unauthorized caller.
-        handle = w.production_writer(
+        # test. N16-5-F-5-B2-IMPL: the disclosed `_caller_module` keyword
+        # is no longer authoritative for consumer recognition (it was the
+        # entire root cause of the N16-5-F-5-B2 finding), so isolating
+        # `_multi_write` mechanics from the full enrollment ceremony now
+        # requires the call to genuinely originate from
+        # `pcae.core.hpac_rhamp_enrollment` (real caller-provenance
+        # detection via `call_with_real_module_identity`), not merely
+        # assert that module's name. test_16b below independently confirms
+        # the real fence still rejects an unauthorized caller.
+        handle = call_with_real_module_identity(
+            "pcae.core.hpac_rhamp_enrollment",
+            w.production_writer,
             PawaOperation.ENROLL_CREDENTIAL,
             principal_id=principal_id or self.principal_id,
             transaction_id=transaction_id,
             _protected_root=self.root,
             _configured_agent_identity_source=_agent_src(),
             _topology_probe=_locked_probe(),
-            _caller_module="pcae.core.hpac_rhamp_enrollment",
         )
         return handle
 

@@ -493,10 +493,31 @@ class _RecognizedAnchor:
 
 
 def _detect_caller_module(explicit: Optional[str]) -> str:
-    if explicit is not None:
-        return explicit
+    """Real call-provenance detection (§32 "Recognition predicate 6";
+    HPAC-PAWA-REQ-235, PAWA-INV-9).
+
+    N16-5-F-5-B2-IMPL repair: ``explicit`` is retained as a parameter only
+    for call-site / source-scan continuity across the four privileged
+    factories — it is intentionally **never returned and never otherwise
+    consulted**. Trusting a caller-supplied string verbatim was the entire
+    root cause of the N16-5-F-5-B2 finding: any in-process caller of
+    ``production_writer`` / ``certification_writer`` /
+    ``recognized_certification_read_authority`` /
+    ``mint_protected_presentation_evidence_writer`` could pass
+    ``_caller_module`` set to any enumerated consumer name and be recognized
+    as that consumer, defeating the §38/§38A/§38B/HPAC-PPA-REQ-041
+    enumerated-consumer allowlists entirely. The consumer identity used by
+    §33 step 9 (and its per-factory restatements) is now, unconditionally,
+    the REAL importing/calling source module — a build-time / import-time
+    fact established by walking the live call stack — never a
+    caller-asserted label. A disclosed test seam that needs a different
+    *real* module identity must make the call genuinely originate from
+    that module (see ``tests/_caller_identity_helper.py``), not merely
+    assert a string.
+    """
+    del explicit  # intentionally ignored — see docstring above.
     stack = inspect.stack()
-    # 0: _detect_caller_module, 1: production_writer, 2: the caller.
+    # 0: _detect_caller_module, 1: the factory function, 2: its real caller.
     for frame_info in stack[2:]:
         name = frame_info.frame.f_globals.get("__name__")
         if name and name != __name__ + ".<locals>" and name != "contextlib":
@@ -1590,6 +1611,20 @@ def revoke_anchor(*, protected_root: Path) -> dict:
 PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS = frozenset({"pcae.core.protected_presentation"})
 _PROTECTED_PRESENTATION_EVIDENCE_WRITER_ROLE = "protected_presentation_mechanism"
 
+#: A disclosed, explicit **test-only** consumer allowlist for
+#: ``mint_protected_presentation_evidence_writer`` (§16 seam,
+#: HPAC-PAWA-REQ-166 discipline — mirrors ``_TEST_FACTORY_CONSUMERS`` /
+#: ``_CERTIFICATION_TEST_CONSUMERS`` / ``_READ_AUTHORITY_TEST_CONSUMERS``).
+#: Exact module names, never a prefix. Extracted from the former inline
+#: literal (N16-5-F-5-B2-IMPL) so a second disclosed test consumer could be
+#: added without duplicating the set at the call site.
+_PROTECTED_PRESENTATION_EVIDENCE_TEST_CONSUMERS = frozenset(
+    {
+        "test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance",
+        "test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv",
+    }
+)
+
 
 def mint_protected_presentation_evidence_writer(
     authority: HPACStoreAuthority,
@@ -1612,8 +1647,7 @@ def mint_protected_presentation_evidence_writer(
     caller_module = _detect_caller_module(_caller_module)
     if (
         caller_module not in PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS
-        and caller_module
-        not in {"test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance"}
+        and caller_module not in _PROTECTED_PRESENTATION_EVIDENCE_TEST_CONSUMERS
     ):
         raise PawaError(
             "unauthorized_factory_consumer",

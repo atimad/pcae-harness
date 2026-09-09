@@ -46,6 +46,7 @@ from pcae.core.hpac_foundation import (
     canonical_digest,
     canonical_json_bytes,
 )
+from _caller_identity_helper import call_with_real_module_identity
 from pcae.core.human_principal_registry import (
     HumanPrincipalRegistryError,
     HumanPrincipalRegistryStore,
@@ -654,9 +655,24 @@ def test_40_exact_factory_consumer_inventory_no_wildcard():
 
 
 def test_41_unauthorized_production_importer_rejected(provisioned):
+    # N16-5-F-5-B2-IMPL: the disclosed `_caller_module` keyword (forwarded
+    # by the `_mint` helper as `caller=`) is no longer authoritative for
+    # consumer recognition, and `_mint` is itself defined in this suite's
+    # own module -- which IS an enumerated `_TEST_FACTORY_CONSUMERS`
+    # member -- so a genuine wrong-identity negative test needs the call to
+    # really originate from "pcae.commands.agent" (real caller-provenance
+    # detection), not merely assert that name via `caller=`.
     root, _ = provisioned
     with pytest.raises(w.PawaError) as ei:
-        _mint(root, principal_id=HP_A, caller="pcae.commands.agent")
+        call_with_real_module_identity(
+            "pcae.commands.agent",
+            w.production_writer,
+            w.PawaOperation.ENROLL_PRINCIPAL,
+            principal_id=HP_A,
+            _protected_root=root,
+            _configured_agent_identity_source=_agent_src(),
+            _topology_probe=_locked_probe(),
+        )
     assert ei.value.code == "unauthorized_factory_consumer"
 
 
