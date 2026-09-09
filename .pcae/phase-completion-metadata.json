@@ -105,7 +105,12 @@
     ".pcae/phase-completion-report.md"
   ],
   "files_changed_count": 8,
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "c6863828e0ae5f91836d2a9e1825527fe1432151",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2): consumer-authenticity blast-radius reconstruction and normative repair adjudication -- 4 factories share the spoofable primitive (not 3); 3 yield full authority, read-authority is a partial gate; H-3 consumer-authenticity assurance INVALIDATED; contract already sufficient -- IMPLEMENTATION-ONLY REPAIR verdict; successor N16-5-F-5-B2-IMPL derived, not begun"
+    }
+  ],
   "recommended_next_phase": "N16-5-F-5-B2-IMPL -- Privileged Production Factory Consumer-Authenticity Repair. Scope: repair the consumer-authorization check for all four affected factories (production_writer, certification_writer, recognized_certification_read_authority, mint_protected_presentation_evidence_writer) atomically, since they share one primitive and one contract predicate (HPAC-PAWA-001 section 32), so that recognition is evaluated against the actual calling module rather than a caller-supplied string. Required successor-IV scope: independently re-establish consumer authenticity for all four factories, re-run this phase's 14-test diagnostic suite and confirm every currently-spoofed test now denies, confirm all legitimate production/test consumers still work, and re-run the predecessor's and H-3's full suites for regression. Do NOT begin N16-5-F-5-B2-IMPL in this phase; it requires its own explicit human authorization. Only after N16-5-F-5-B2-IMPL is independently re-verified may a fresh N16-5-FINAL-CERT be authorized on a new CPIPC-valid successor id. REPORTING-UX-1 remains open (non-blocking). N-16-6 / N-16-7 remain OPEN / UNTOUCHED; N-16-7 strictly last; do not begin either. Each successor phase requires its own explicit human authorization.",
   "pushed_status": "clean",
   "origin_main_head": null
