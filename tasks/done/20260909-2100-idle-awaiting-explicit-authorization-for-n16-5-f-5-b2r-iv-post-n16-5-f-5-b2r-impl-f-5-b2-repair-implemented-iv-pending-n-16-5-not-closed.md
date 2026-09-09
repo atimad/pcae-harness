@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for N16-5-F-5-B2R-IV (post-N16-5-F-5-B2R-I
 
 ## Status
 
-active
+done
 
 ## Mode
 

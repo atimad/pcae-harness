@@ -2,6 +2,90 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1
+(alias **N16-5-F-5-B2R-IV**) — Fresh Independent Verification of Privileged
+Production Factory Consumer-Authenticity Repair. CPIPC: valid direct `.1`
+successor of `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+(alias `N16-5-F-5-B2R-IMPL`) (same series/branch, strict order —
+`pcae.core.phase_id.compare` == `greater` — unique against full git
+history; independently re-derived via `pcae.core.phase_id`, alias
+display-only, no discrepancy).
+
+**STATUS: N16-5-F-5-B2R-IV COMPLETE — NOT VERIFIED / BLOCKED.**
+
+Independently reconstructed the repaired trust mechanism from primary
+source in `src/pcae/core/hpac_protected_admin_writer.py` (not accepted from
+the predecessor's report). Confirmed `_verified_production_caller_name`
+correctly denies both disclosed forgery classes: (1) the predecessor's
+exact `exec()`-crafted `frame.f_globals["__name__"]` forgery, and (2)
+`sys.modules` poisoning via a hand-built module with no genuine
+`SourceFileLoader` provenance. Both independently re-tested and confirmed
+denied.
+
+**BLOCKING FINDING**: the process-local trust-pin state
+(`_PINNED_CODE_OBJECTS` / `_PINNED_TRUSTED_MODULES` /
+`_CODE_OBJECT_KEEPALIVE`) is ordinary, unencapsulated module-level mutable
+`dict`/`list` state — protected only by a leading-underscore naming
+convention, not by any real access control. Any ordinary in-process code
+that can `import pcae.core.hpac_protected_admin_writer` can write directly
+to these dicts. An independent adversarial test
+(`tests/test_phase_n16_5_f5b2r_iv_independent_verification.py::test_BLOCKING_ordinary_code_can_overwrite_pin_state_to_impersonate_authorized_consumer`)
+demonstrates that doing so — then invoking `production_writer` via a
+single `exec()` against the real target module's own `__dict__` (itself an
+ordinary, caller-obtainable object via `sys.modules[name].__dict__`) —
+mints a genuine `ProductionWriterHandle`. No forged `__name__`, no
+`sys.modules` poisoning, and no import-provenance spoof is used; the
+entire repaired recognition sequence is bypassed by direct process-local
+mutable-state tampering. This directly violates the IV's required negative
+authenticity property (an ordinary caller must not be able to obtain
+privileged authority "by manipulating caller-controlled metadata, Python
+import state, module naming, load order, object identity, package layout
+resemblance, **or process-local mutable state**") and IV pass criterion
+#17 ("ordinary in-process code cannot trivially mutate/reset/replace the
+trust state in a way that grants authority"). The same primitive is shared
+verbatim by all four privileged factories (`production_writer`,
+`certification_writer`, `recognized_certification_read_authority`,
+`mint_protected_presentation_evidence_writer`), so the finding is not
+scoped to a single factory.
+
+This is a genuine early-stop condition (critical product defect found).
+Per governed-phase discipline, the defect is **documented, not repaired,
+in this IV**: no production source was modified by this phase. Three new
+independent tests were added
+(`tests/test_phase_n16_5_f5b2r_iv_independent_verification.py`): two
+regression confirmations (forged-`__name__` denial, `sys.modules`-poisoning
+denial — both PASS) and one disclosed-finding test documenting the pin-state
+bypass (PASS, i.e. the vulnerability is confirmed present; this test is
+expected to be inverted into a regression lock once a successor repair
+phase closes the gap).
+
+**Verdict: F-5-B2 BLOCKED.** F-5: CERTIFICATION BLOCKED. N-16-5: NOT
+CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last). Runtime
+posture unchanged: Observed / observe / unavailable / 0 plugins / 0
+capabilities; first governed runtime external effect remains ABSENT /
+UNREACHABLE. No live production/HPAC/PPA/FIDO2 mutation; no real
+certification ceremony performed; contracts (`HPAC-PAWA-001` and others)
+byte-unchanged.
+
+**Required successor (derived, NOT begun): a fresh governed repair phase**
+that closes the process-local mutable-state gap — e.g. by moving the pin
+state behind real encapsulation the ordinary Python object model cannot
+reach from another module (a closure-only reference with no module-level
+exposed name, a C-extension-backed opaque handle, or an equivalent
+mechanism that is not merely a private-by-convention module attribute).
+Do not begin that repair, a fresh IV, N16-6, or N16-7 without their own
+explicit human authorization.
+
+Canonical report: `docs/PHASE_N16_5_F5B2R_IV.md`.
+
+New test suite:
+`tests/test_phase_n16_5_f5b2r_iv_independent_verification.py` (3 tests, all
+passing — 2 regression confirmations + 1 disclosed-finding test).
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B2R-IMPL**) — Privileged Production Factory
 Consumer-Authenticity Repair (Caller-Controlled Module-Identity
