@@ -100,34 +100,27 @@ def _call_with_forged_name(module_name: str, fn, *args, **kwargs):
 
 
 def test_A1_production_writer_name_forgery_via_exec_globals(root):
-    """Forge __name__ to the real AUTHORIZED_FACTORY_CONSUMERS member
-    'pcae.core.hpac_rhamp_enrollment' from this (unauthorized) test module,
-    with NO disclosed _caller_module keyword used at all."""
+    """N16-5-F-5-B2-IV originally disclosed this as a BLOCKING FINDING: at
+    the time, forging __name__ to the real AUTHORIZED_FACTORY_CONSUMERS
+    member 'pcae.core.hpac_rhamp_enrollment' via a scratch exec() globals
+    dict (no disclosed _caller_module keyword involved at all) was
+    sufficient to obtain a genuine ProductionWriterHandle. The successor
+    repair phase N16-5-F-5-B2R-IMPL closed this
+    (`_verified_production_caller_name` in
+    src/pcae/core/hpac_protected_admin_writer.py — requires genuine
+    import-machinery module provenance AND real code-object identity, not
+    merely a matching frame.f_globals['__name__'] key). This test now
+    serves as that repair's regression lock: the exact forged call this
+    finding is built on must be denied."""
     assert "pcae.core.hpac_rhamp_enrollment" in w.AUTHORIZED_FACTORY_CONSUMERS
-    try:
-        handle = _call_with_forged_name(
+    with pytest.raises(w.PawaError) as ei:
+        _call_with_forged_name(
             "pcae.core.hpac_rhamp_enrollment",
             w.production_writer,
             w.PawaOperation.ENROLL_PRINCIPAL,
             **_pw_kwargs(root),
         )
-    except w.PawaError as exc:
-        pytest.fail(
-            "EXPECTED-FAIL-CLOSED-BUT-GOT-DENY: recognition denied the forged "
-            f"identity (code={exc.code!r}) -- record as evidence, not a bug"
-        )
-    else:
-        # If we get here, forging __name__ was sufficient to obtain a real,
-        # usable capability handle -- this IS the blocking finding.
-        assert isinstance(handle, w.ProductionWriterHandle)
-        raise AssertionError(
-            "SECURITY BOUNDARY FAILURE: production_writer granted a genuine "
-            "ProductionWriterHandle to a caller whose ONLY credential was a "
-            "hand-set __name__ key in its own exec() globals dict -- this "
-            "reproduces the B2 defect's authority consequence through a "
-            "different mechanical route (forged f_globals['__name__'] instead "
-            "of the removed _caller_module keyword)."
-        )
+    assert ei.value.code == "unauthorized_factory_consumer"
 
 
 def test_A2_certification_writer_name_forgery_via_exec_globals(root):
@@ -157,9 +150,14 @@ def test_A2_certification_writer_name_forgery_via_exec_globals(root):
     )
     credential_id = result.credential_id
 
+    # N16-5-F-5-B2-IV originally disclosed this same forgery reproduced
+    # against certification_writer as part of the BLOCKING FINDING;
+    # N16-5-F-5-B2R-IMPL's repair closed it (see test_A1's docstring). This
+    # test now serves as that repair's regression lock for the second
+    # factory.
     assert w.CERTIFICATION_FACTORY_CONSUMERS == frozenset({"pcae.core.hpac_certification_coordinator"})
-    try:
-        handle = _call_with_forged_name(
+    with pytest.raises(w.PawaError) as ei:
+        _call_with_forged_name(
             "pcae.core.hpac_certification_coordinator",
             w.certification_writer,
             "hpac_challenge_coordinator",
@@ -171,17 +169,7 @@ def test_A2_certification_writer_name_forgery_via_exec_globals(root):
             _configured_agent_identity_source=_agent_src(),
             _topology_probe=_locked_probe(),
         )
-    except w.PawaError as exc:
-        pytest.fail(
-            "EXPECTED-FAIL-CLOSED-BUT-GOT-DENY: recognition denied the forged "
-            f"identity (code={exc.code!r}) -- record as evidence, not a bug"
-        )
-    else:
-        assert isinstance(handle, w.CertificationWriterHandle)
-        raise AssertionError(
-            "SECURITY BOUNDARY FAILURE: certification_writer granted a "
-            "genuine CertificationWriterHandle to a __name__-forged caller."
-        )
+    assert ei.value.code == "unauthorized_factory_consumer"
 
 
 # ═══════════════════════════════════════════════════════════════════════════

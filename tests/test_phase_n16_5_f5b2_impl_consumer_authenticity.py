@@ -286,51 +286,161 @@ def test_13_presentation_evidence_writer_near_miss_denied(root, bad):
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+# N16-5-F-5-B2R-IMPL: `call_with_real_module_identity`'s scratch-module
+# technique no longer suffices to prove "a real caller succeeds" for the
+# four enumerated production consumers -- the repair correctly denies it
+# (that denial is now covered by tests/test_phase_n16_5_f5b2r_impl_repair.py
+# and by test_01-04/test_10-13 near-miss coverage above). The four tests
+# below instead drive the call genuinely through the real, actually-imported
+# production consumer module's own pre-existing code, proving the repair
+# does not break legitimate recognition.
+
+
 def test_20_production_writer_real_rhamp_enrollment_caller_succeeds(root):
-    handle = call_with_real_module_identity(
-        "pcae.core.hpac_rhamp_enrollment",
-        w.production_writer,
-        w.PawaOperation.ENROLL_PRINCIPAL,
-        **_pw_kwargs(root),
+    # enroll_first_credential is hpac_rhamp_enrollment's own real,
+    # pre-existing code and genuinely calls production_writer internally --
+    # the exact real path, not a simulation.
+    principal_id = new_principal_id()
+    w.enroll_principal_via_pawa(
+        principal_id=principal_id,
+        enrollment_provenance_ref="impl-real-20",
+        _protected_root=root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
     )
-    assert isinstance(handle, w.ProductionWriterHandle)
-    cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id="hp-" + "3" * 32)
-    assert isinstance(cap, HPACWriterCapability)
+    result = enroll_first_credential(
+        principal_id=principal_id,
+        subject_digest="3" * 64,
+        presentation_digest="4" * 64,
+        invocation_id="iv-impl-20",
+        attempt_id="at-impl-20",
+        provider=DeterministicCtap2Provider(),
+        protected_root=root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
+    assert result.credential_id
 
 
 def test_21_certification_writer_real_coordinator_caller_succeeds(root, principal_and_credential):
+    from pcae.core.hpac_certification_coordinator import HpacCertificationCoordinator
+
     principal_id, credential_id = principal_and_credential
-    handle = call_with_real_module_identity(
-        "pcae.core.hpac_certification_coordinator",
-        w.certification_writer,
+    coordinator = HpacCertificationCoordinator(
+        _protected_root=root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
+    session = coordinator.begin_session(principal_id=principal_id, credential_id=credential_id)
+    handle = coordinator._mint(
         "hpac_challenge_coordinator",
-        **_cw_kwargs(root, principal_id, credential_id),
+        certification_session_id=session.certification_session_id,
+        principal_id=principal_id,
+        credential_id=credential_id,
+        proof_id=session.proof_id,
     )
     assert isinstance(handle, w.CertificationWriterHandle)
     assert handle.role == "hpac_challenge_coordinator"
 
 
 def test_22_recognized_read_authority_real_coordinator_caller_succeeds(root, principal_and_credential):
+    from pcae.core.hpac_certification_coordinator import HpacCertificationCoordinator
+
     principal_id, credential_id = principal_and_credential
-    ra = call_with_real_module_identity(
-        "pcae.core.hpac_certification_coordinator",
-        w.recognized_certification_read_authority,
-        **_cw_kwargs(root, principal_id, credential_id),
+    coordinator = HpacCertificationCoordinator(
+        _protected_root=root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+    )
+    session = coordinator.begin_session(principal_id=principal_id, credential_id=credential_id)
+    ra = coordinator._obtain_read_authority(
+        certification_session_id=session.certification_session_id,
+        principal_id=principal_id,
+        credential_id=credential_id,
+        proof_id=session.proof_id,
     )
     assert isinstance(ra, w.CertificationReadAuthority)
 
 
 def test_23_presentation_evidence_writer_real_launcher_caller_succeeds(root):
+    # Genuinely drive the real production launcher path
+    # (pcae.core.protected_presentation.run_protected_presentation_ceremony
+    # -> _build_and_persist_evidence -> mint_protected_presentation_evidence_writer)
+    # end to end, rather than simulating the launcher's module identity.
+    from pcae.core import hpac_protected_presentation_admin as admin
+    from pcae.core import protected_presentation as pp
+    from pcae.core import protected_presentation_installation as inst
+    from pcae.core.approval_presentation import new_canonical_runtime_approval_subject
+    from pcae.protected_presentation_helper import render_human_visible_bytes
+    import hashlib as _hashlib
+
+    renderer = "pcae-protected-local-presentation-renderer/1.0"
+    helper_shim = (
+        b"#!/usr/bin/env python3\n"
+        b"import sys\n"
+        b"from pcae.protected_presentation_helper import main\n"
+        b"sys.exit(main())\n"
+    )
+    sha = _hashlib.sha256(helper_shim).hexdigest()
+    helper_path = inst.helper_content_addressed_path(root, sha)
+    helper_path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    helper_path.write_bytes(helper_shim)
+    os.chmod(helper_path, 0o500)
+    admin.configure_presentation_mechanism(
+        action="install",
+        protected_root=root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+        helper_sha256=sha,
+        helper_implementation_version="pplp/1.0.0",
+        verifier_configuration_digest=_hashlib.sha256(b"verifier-config-v1").hexdigest(),
+        renderer_profile=renderer,
+        descriptor_version="impl23-1.0",
+    )
     authority = HPACStoreAuthority._production_test_fixture(
         root, _seal=_PRODUCTION_TEST_FIXTURE_SEAL, _topology_probe=_locked_probe()
     )
-    cap = call_with_real_module_identity(
-        "pcae.core.protected_presentation",
-        w.mint_protected_presentation_evidence_writer,
-        authority,
-        mechanism_id="impl-mechanism-3",
+    facts = {
+        "repository_identity": "repo-abc",
+        "repository_display": "repo-abc (fp:abc123)",
+        "task_id": "task-1",
+        "task_display": "task-1 — the active task",
+        "runtime_target_id": "rt-1",
+        "runtime_target_display": "rt-1 — mock runtime",
+        "operation_effect_scope_display": "cap=read; local; effect=fs; one-dispatch; no-network",
+        "prompt_hash": "p" * 64,
+        "prompt_instruction_display": "do the bounded thing (fp:p001)",
+        "invocation_id": "inv-impl-23",
+        "invocation_display": "inv-impl-23 (fp:i001)",
+        "expires_at": "2099-01-01T00:00:00Z",
+        "one_shot_notice": True,
+    }
+    displayed_digest = _hashlib.sha256(render_human_visible_bytes(facts, renderer_profile=renderer)).hexdigest()
+    subject = new_canonical_runtime_approval_subject(
+        subject={
+            "repository_identity": facts["repository_identity"],
+            "task_id": facts["task_id"],
+            "runtime_target_id": facts["runtime_target_id"],
+            "prompt_hash": facts["prompt_hash"],
+            "invocation_id": facts["invocation_id"],
+        },
+        approval_scope={"capability": "read", "one_dispatch": True, "network": False},
+        approval_preview_digest=displayed_digest,
+        expires_at=facts["expires_at"],
     )
-    assert isinstance(cap, HPACWriterCapability)
+    result = pp.run_protected_presentation_ceremony(
+        authority=authority,
+        approval_id="ria-" + _hashlib.sha256(b"impl-23").hexdigest()[:32],
+        challenge_id="ch-impl-23",
+        canonical_subject=subject,
+        human_visible_facts=facts,
+        principal_id="hp-" + "c" * 32,
+        invocation_id="inv-impl-23",
+        attempt_id="at-impl-23",
+        _test_decision_source="APPROVE",
+    )
+    assert result.decision == "APPROVE"
+    assert (root / "presentations" / "v2" / result.presentation_id / "presentation.json").exists()
 
 
 def test_24_actual_certification_coordinator_module_is_the_real_production_path(root, principal_and_credential):

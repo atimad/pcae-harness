@@ -31,11 +31,13 @@ The ``.1R.30R.3.1`` A1 atomic unit: this module ships **together with**
 from __future__ import annotations
 
 import hashlib
+import importlib.machinery
 import inspect
 import os
 import re
 import stat
 import sys
+import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -492,6 +494,174 @@ class _RecognizedAnchor:
     configured_agent: ConfiguredAgentAuthorityIdentity
 
 
+#: N16-5-F-5-B2R-IMPL repair — the process-local pin of each production
+#: consumer's REAL module object and its REAL, pre-existing code objects,
+#: keyed by its exact §38/§38A/§38B/HPAC-PPA-REQ-041 dotted name.
+#: Populated only via :func:`_verified_production_caller_name`, never
+#: writable by ordinary caller code, never serialised, never reset except
+#: by process restart (mirrors the existing restart-dead / process-local
+#: discipline used throughout this module — no new bearer credential is
+#: introduced: nothing here is ever handed to, or reusable by, caller
+#: code — every call still re-derives its own frame's identity fresh).
+#:
+#: Pinning the module object / its ``__dict__`` identity alone is
+#: NOT sufficient: ``sys.modules[name].__dict__`` is an ordinary,
+#: caller-referenceable object, so ``exec(code, real_module.__dict__)``
+#: produces a frame whose ``f_globals`` genuinely IS that real module's
+#: dict without the calling code being anything the module ever defined.
+#: ``_PINNED_CODE_OBJECTS`` additionally requires ``frame.f_code`` to be
+#: object-identical to one of the module's OWN function/method code
+#: objects, captured in one snapshot at first-verified-use — a code
+#: object ``exec()`` freshly compiles is never among them, and a code
+#: object an attacker only *adds* to the module's namespace afterward was
+#: never in the frozen snapshot either. ``_CODE_OBJECT_KEEPALIVE`` keeps
+#: the snapshotted code objects alive for the rest of the process so a
+#: CPython ``id()`` reuse after garbage collection can never collide with
+#: a pinned id.
+_PINNED_TRUSTED_MODULES: "dict[str, object]" = {}
+_PINNED_CODE_OBJECTS: "dict[str, frozenset[int]]" = {}
+_CODE_OBJECT_KEEPALIVE: "dict[str, list]" = {}
+_PIN_LOCK = threading.Lock()
+
+
+def _extract_code_object(obj: object):
+    import types as _types
+
+    func = obj
+    if isinstance(obj, (staticmethod, classmethod)):
+        func = obj.__func__
+    if isinstance(func, _types.FunctionType):
+        return func.__code__
+    return None
+
+
+def _collect_module_code_objects(module: object) -> list:
+    """Every function / method / staticmethod / classmethod actually
+    defined in ``module`` right now (one level into each class it
+    defines). Called only at first-verified-use pin time — never
+    re-scanned afterward, so an attribute an attacker adds to (or
+    replaces on) the module's namespace *after* pinning can never enter
+    the trusted set."""
+
+    collected: list = []
+    for value in list(vars(module).values()):
+        code = _extract_code_object(value)
+        if code is not None:
+            collected.append(code)
+        if isinstance(value, type):
+            for member in list(vars(value).values()):
+                member_code = _extract_code_object(member)
+                if member_code is not None:
+                    collected.append(member_code)
+    return collected
+
+
+def _all_known_production_consumer_names() -> "frozenset[str]":
+    """The union of every real (non-test) enumerated production-consumer
+    dotted name across all four privileged factories. Reads the module
+    globals lazily (by name, at call time) so definition order in this
+    file — the four ``*_CONSUMERS`` frozensets are defined at various
+    points below this function — does not matter; every one of them
+    exists by the time any factory can actually be called."""
+
+    return (
+        AUTHORIZED_FACTORY_CONSUMERS
+        | CERTIFICATION_FACTORY_CONSUMERS
+        | READ_AUTHORITY_CONSUMERS
+        | PROTECTED_PRESENTATION_LAUNCHER_CONSUMERS
+    )
+
+
+def _pcae_package_src_root() -> Path:
+    """The real on-disk directory containing the installed ``pcae``
+    package (parent of ``pcae/__init__.py``'s own parent) — works
+    identically from an editable checkout and a clean-installed wheel;
+    it is derived from the already-imported ``pcae`` package object's own
+    ``__file__``, never from ``sys.path``, ``cwd``, or a caller-supplied
+    location."""
+
+    import pcae as _pcae_pkg
+
+    return Path(_pcae_pkg.__file__).resolve().parent.parent
+
+
+def _expected_source_path(dotted_name: str) -> Optional[Path]:
+    """The single on-disk location a genuine import of ``dotted_name``
+    (e.g. ``pcae.core.hpac_rhamp_enrollment``) MUST resolve to, derived
+    purely from the package layout — never from anything caller-supplied."""
+
+    if not dotted_name.startswith("pcae."):
+        return None
+    return (_pcae_package_src_root() / Path(*dotted_name.split("."))).with_suffix(".py")
+
+
+def _module_has_verified_provenance(dotted_name: str, module: object) -> bool:
+    """§32 SS33A / Recognition predicate 6 — a module object is trusted
+    provenance only if the REAL import machinery (never a caller-built
+    ``types.ModuleType`` / hand-crafted ``__spec__``) loaded it, from the
+    exact on-disk file the package layout for ``dotted_name`` requires.
+    Defeats sys.modules poisoning: a forged module inserted directly into
+    ``sys.modules`` under the authorized name has no genuine
+    ``SourceFileLoader`` origin resolving to that exact installed-package
+    path, so it is rejected here regardless of what ``__name__`` claims."""
+
+    spec = getattr(module, "__spec__", None)
+    loader = getattr(spec, "loader", None) if spec is not None else None
+    origin = getattr(spec, "origin", None) if spec is not None else None
+    if origin is None or not isinstance(loader, importlib.machinery.SourceFileLoader):
+        return False
+    expected = _expected_source_path(dotted_name)
+    if expected is None:
+        return False
+    try:
+        return Path(origin).resolve() == expected.resolve()
+    except OSError:
+        return False
+
+
+def _verified_production_caller_name(candidate: str, frame) -> Optional[str]:
+    """Return ``candidate`` iff this exact frame is genuinely, currently
+    executing REAL, pre-existing code that belongs to the REAL module
+    registered under that dotted name — never merely because the frame's
+    ``f_globals`` dict happens to carry a matching ``__name__`` key (that
+    key is ordinary caller-writable data, the entire N16-5-F-5-B2 root
+    cause) and never merely because ``frame.f_globals`` happens to be
+    object-identical to that real module's ``__dict__`` (that dict is
+    itself an ordinary, caller-referenceable object reachable via
+    ``sys.modules[name].__dict__`` — ``exec()``-ing fresh code against it
+    would satisfy that check alone without being anything the module ever
+    defined). Both the module's genuine import-time provenance AND the
+    calling frame's code-object identity are required. Returns ``None``
+    (never a substitute name) when verification fails, so the caller
+    fails closed rather than silently attributing identity elsewhere."""
+
+    with _PIN_LOCK:
+        pinned_codes = _PINNED_CODE_OBJECTS.get(candidate)
+        if pinned_codes is not None:
+            pinned_module = _PINNED_TRUSTED_MODULES[candidate]
+            if frame.f_globals is getattr(pinned_module, "__dict__", None) and id(frame.f_code) in pinned_codes:
+                return candidate
+            return None
+        module = sys.modules.get(candidate)
+        if (
+            module is None
+            or frame.f_globals is not getattr(module, "__dict__", None)
+            or not _module_has_verified_provenance(candidate, module)
+        ):
+            return None
+        codes = _collect_module_code_objects(module)
+        code_ids = frozenset(id(code) for code in codes)
+        if id(frame.f_code) not in code_ids:
+            # The very first observed call for this dotted name must
+            # itself be genuine pre-existing module code, or nothing is
+            # pinned at all — never pin off an unverified first sighting.
+            return None
+        _CODE_OBJECT_KEEPALIVE[candidate] = codes
+        _PINNED_CODE_OBJECTS[candidate] = code_ids
+        _PINNED_TRUSTED_MODULES[candidate] = module
+        return candidate
+
+
 def _detect_caller_module(explicit: Optional[str]) -> str:
     """Real call-provenance detection (§32 "Recognition predicate 6";
     HPAC-PAWA-REQ-235, PAWA-INV-9).
@@ -499,29 +669,50 @@ def _detect_caller_module(explicit: Optional[str]) -> str:
     N16-5-F-5-B2-IMPL repair: ``explicit`` is retained as a parameter only
     for call-site / source-scan continuity across the four privileged
     factories — it is intentionally **never returned and never otherwise
-    consulted**. Trusting a caller-supplied string verbatim was the entire
-    root cause of the N16-5-F-5-B2 finding: any in-process caller of
-    ``production_writer`` / ``certification_writer`` /
-    ``recognized_certification_read_authority`` /
-    ``mint_protected_presentation_evidence_writer`` could pass
-    ``_caller_module`` set to any enumerated consumer name and be recognized
-    as that consumer, defeating the §38/§38A/§38B/HPAC-PPA-REQ-041
-    enumerated-consumer allowlists entirely. The consumer identity used by
-    §33 step 9 (and its per-factory restatements) is now, unconditionally,
-    the REAL importing/calling source module — a build-time / import-time
-    fact established by walking the live call stack — never a
-    caller-asserted label. A disclosed test seam that needs a different
-    *real* module identity must make the call genuinely originate from
-    that module (see ``tests/_caller_identity_helper.py``), not merely
-    assert a string.
+    consulted**.
+
+    N16-5-F-5-B2R-IMPL repair (this phase): the N16-5-F-5-B2-IMPL repair
+    above closed the disclosed ``_caller_module`` keyword-argument spoof
+    path, but the independent-verification predecessor phase
+    (N16-5-F-5-B2-IV) proved the replacement was itself forgeable —
+    ``frame.f_globals["__name__"]`` is an ordinary dict key on the
+    caller's own frame, settable by any in-process code via
+    ``exec()`` against a hand-built globals dict with no import-machinery
+    registration required. For any candidate name that names one of the
+    four factories' real enumerated production consumers, this function no
+    longer trusts that dict key by itself: :func:`_verified_production_caller_name`
+    additionally requires that the frame is genuinely executing inside the
+    REAL module object registered (and, after first verification,
+    process-locally pinned by object identity) under that exact dotted
+    name — a build-time / import-time fact the ordinary caller cannot
+    fabricate, established through PCAE's own trusted package layout, not
+    through anything the caller supplies (no environment variable, argv,
+    cwd, PATH, module-name argument, or import alias is consulted). A
+    forged claim to an enumerated production-consumer name is REJECTED
+    outright (never re-attributed to an outer frame). Non-production
+    candidate names (an ordinary caller, a disclosed test-only consumer
+    name — §16 seam, unchanged scope) are returned exactly as before.
+
+    A disclosed test seam that needs a different *real* production-consumer
+    module identity must make the call genuinely originate from that real,
+    actually-imported module (see ``tests/_caller_identity_helper.py`` —
+    its documented technique no longer suffices for the four enumerated
+    production consumer names; it remains valid only for the separate,
+    already-disclosed test-consumer allowlists, which this repair does not
+    widen or narrow).
     """
     del explicit  # intentionally ignored — see docstring above.
     stack = inspect.stack()
     # 0: _detect_caller_module, 1: the factory function, 2: its real caller.
     for frame_info in stack[2:]:
-        name = frame_info.frame.f_globals.get("__name__")
-        if name and name != __name__ + ".<locals>" and name != "contextlib":
-            return name or "<unknown>"
+        frame = frame_info.frame
+        name = frame.f_globals.get("__name__")
+        if not name or name == __name__ + ".<locals>" or name == "contextlib":
+            continue
+        if name in _all_known_production_consumer_names():
+            verified = _verified_production_caller_name(name, frame)
+            return verified if verified is not None else "<unverified-caller>"
+        return name
     return "<unknown>"
 
 

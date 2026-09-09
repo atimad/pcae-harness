@@ -149,26 +149,37 @@ class IvRig:
         return w.recognized_certification_read_authority(**kw)
 
     def real_ra(self, **over):
-        """N16-5-F-5-B2-IMPL: obtain a genuine (non-spoofed)
-        ``CertificationReadAuthority`` by making the call really originate
-        from the authorized §38B consumer module's name, via
-        ``call_with_real_module_identity`` -- NOT via the disclosed (and,
-        post-repair, non-authoritative) ``_caller_module`` keyword."""
+        """N16-5-F-5-B2R-IMPL: obtain a genuine (non-spoofed)
+        ``CertificationReadAuthority`` by driving the call through the real,
+        actually-imported ``HpacCertificationCoordinator``'s own
+        pre-existing code -- the scratch-module
+        ``call_with_real_module_identity`` technique this helper previously
+        used is no longer sufficient real provenance for the enumerated
+        production consumers (see
+        tests/test_phase_n16_5_f5b2r_impl_repair.py). ``over`` overrides are
+        applied only to the fields this real path still accepts a caller
+        override for (none currently -- the real coordinator derives
+        ``certification_session_id`` / ``proof_id`` itself from its own
+        ``begin_session``); a caller that needs a genuinely different
+        session/proof must construct its own coordinator flow."""
+        from pcae.core.hpac_certification_coordinator import HpacCertificationCoordinator
+
+        principal_id = over.pop("principal_id", self.principal_id)
+        credential_id = over.pop("credential_id", self.credential_id)
+        coordinator = HpacCertificationCoordinator(
+            _protected_root=over.pop("_protected_root", self.root),
+            _configured_agent_identity_source=over.pop("_configured_agent_identity_source", _agent_src()),
+            _topology_probe=over.pop("_topology_probe", _locked_probe()),
+        )
+        session = coordinator.begin_session(principal_id=principal_id, credential_id=credential_id)
         kw = dict(
-            certification_session_id=self.session_id,
-            principal_id=self.principal_id,
-            credential_id=self.credential_id,
-            proof_id=self.proof_id,
-            _protected_root=self.root,
-            _configured_agent_identity_source=_agent_src(),
-            _topology_probe=_locked_probe(),
+            certification_session_id=session.certification_session_id,
+            principal_id=principal_id,
+            credential_id=credential_id,
+            proof_id=session.proof_id,
         )
         kw.update(over)
-        return call_with_real_module_identity(
-            "pcae.core.hpac_certification_coordinator",
-            w.recognized_certification_read_authority,
-            **kw,
-        )
+        return coordinator._obtain_read_authority(**kw)
 
 
 @pytest.fixture

@@ -115,30 +115,56 @@ class Rig:
         )
 
     def issue_multi_write(self, *, transaction_id: str, principal_id: str | None = None):
-        # §38's AUTHORIZED_FACTORY_CONSUMERS is an exact dotted-path
-        # allowlist that does not (and per PAWA-INV-9 must not) include this
-        # test module — `enroll_first_credential` reaches `production_writer`
-        # through `pcae.core.hpac_rhamp_enrollment`, never directly from a
-        # test. N16-5-F-5-B2-IMPL: the disclosed `_caller_module` keyword
-        # is no longer authoritative for consumer recognition (it was the
-        # entire root cause of the N16-5-F-5-B2 finding), so isolating
-        # `_multi_write` mechanics from the full enrollment ceremony now
-        # requires the call to genuinely originate from
-        # `pcae.core.hpac_rhamp_enrollment` (real caller-provenance
-        # detection via `call_with_real_module_identity`), not merely
-        # assert that module's name. test_16b below independently confirms
-        # the real fence still rejects an unauthorized caller.
-        handle = call_with_real_module_identity(
-            "pcae.core.hpac_rhamp_enrollment",
-            w.production_writer,
-            PawaOperation.ENROLL_CREDENTIAL,
-            principal_id=principal_id or self.principal_id,
-            transaction_id=transaction_id,
-            _protected_root=self.root,
-            _configured_agent_identity_source=_agent_src(),
-            _topology_probe=_locked_probe(),
+        # This suite isolates `_multi_write` completion mechanics on
+        # `HPACStoreAuthority` from the full enrollment ceremony -- it is
+        # not exercising (and must not simulate) the `production_writer`
+        # caller-identity gate itself, which N16-5-F-5-B2R-IMPL hardened to
+        # require genuine import-time module provenance (a real, in-process
+        # `exec()`-forged or scratch-module caller identity, previously
+        # accepted via `call_with_real_module_identity`, is now correctly
+        # denied -- see tests/test_phase_n16_5_f5b2r_impl_repair.py). To
+        # isolate authority-layer mechanics from that unrelated gate, this
+        # rig performs the exact same two steps `production_writer` itself
+        # performs internally post-recognition (white-box, via the already
+        # privately-imported `_run_recognition_sequence` / `PawaError` /
+        # `_PRODUCTION_WRITER_FACTORY_SEAL` internals) instead of routing
+        # through the public, caller-identity-gated factory function.
+        # test_16b below independently confirms the real public fence still
+        # rejects an unauthorized caller.
+        pid = principal_id or self.principal_id
+        recognized = w._run_recognition_sequence(
+            protected_root=self.root,
+            configured_agent_identity_source=_agent_src(),
+            caller_module="pcae.core.hpac_rhamp_enrollment",
+            topology_probe=_locked_probe(),
         )
-        return handle
+        from pcae.core.hpac_foundation import _PRODUCTION_WRITER_FACTORY_SEAL
+
+        recognized.authority._bind_configured_agent_identity(
+            (recognized.configured_agent.uid, recognized.configured_agent.gids),
+            _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+        )
+        capability = recognized.authority._mint_production_writer_capability(
+            "human_principal_registry_admin",
+            transaction_id,
+            _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+            multi_write=True,
+        )
+        from pcae.core.hpac_protected_admin_writer import ProductionWriterHandle
+        from pcae.core.hpac_pawa_schemas import new_operation_id
+
+        return ProductionWriterHandle(
+            capability=capability,
+            authority=recognized.authority,
+            operation=PawaOperation.ENROLL_CREDENTIAL,
+            principal_id=pid,
+            credential_id=None,
+            operation_id=new_operation_id(),
+            anchor_id=recognized.anchor_id,
+            installation_id=recognized.installation_id,
+            descriptor_generation=recognized.generation,
+            transaction_id=transaction_id,
+        )
 
 
 @pytest.fixture

@@ -819,23 +819,27 @@ def test_93_coordinator_module_not_imported_by_cli_or_agent():
 
 
 def test_95_certification_writer_still_mints_for_h3_roles(rig):
-    # This suite's own real module name is a disclosed
-    # ``_READ_AUTHORITY_TEST_CONSUMERS`` member, not a
-    # ``_CERTIFICATION_TEST_CONSUMERS`` one -- so a direct
-    # ``certification_writer`` call needs a genuine real-caller-identity
-    # simulation (the disclosed ``_caller_module`` keyword is no longer
-    # authoritative for either allowlist).
-    handle = call_with_real_module_identity(
-        COORDINATOR_MODULE,
-        w.certification_writer,
-        "hpac_challenge_coordinator",
-        certification_session_id=rig.session_id,
-        principal_id=rig.principal_id,
-        credential_id=rig.credential_id,
-        proof_id=rig.proof_id,
+    # N16-5-F-5-B2R-IMPL: the scratch-module `call_with_real_module_identity`
+    # technique this test previously used to simulate a real
+    # hpac_certification_coordinator caller is no longer sufficient real
+    # provenance for the enumerated production consumers (see
+    # tests/test_phase_n16_5_f5b2r_impl_repair.py). Drive the call through
+    # the real, actually-imported coordinator's own pre-existing code
+    # instead.
+    from pcae.core.hpac_certification_coordinator import HpacCertificationCoordinator
+
+    coordinator = HpacCertificationCoordinator(
         _protected_root=rig.root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
+    )
+    session = coordinator.begin_session(principal_id=rig.principal_id, credential_id=rig.credential_id)
+    handle = coordinator._mint(
+        "hpac_challenge_coordinator",
+        certification_session_id=session.certification_session_id,
+        principal_id=rig.principal_id,
+        credential_id=rig.credential_id,
+        proof_id=session.proof_id,
     )
     assert isinstance(handle, w.CertificationWriterHandle)
     assert handle.role == "hpac_challenge_coordinator"

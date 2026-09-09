@@ -194,23 +194,23 @@ def test_11_production_writer_spoofed_yields_full_writer_capability(root):
 
 def test_11b_production_writer_real_caller_still_yields_full_writer_capability(root):
     # The genuine production path is unaffected: a call that REALLY
-    # originates from an authorized consumer module still mints a full
-    # writer capability -- proving the repair closed the spoof without
-    # breaking real recognition.
-    handle = call_with_real_module_identity(
-        "pcae.core.hpac_protected_admin_writer",
-        w.production_writer,
-        w.PawaOperation.ENROLL_PRINCIPAL,
+    # originates from an authorized consumer module (here, the self-consumer
+    # bounded principal-admin operations of hpac_protected_admin_writer
+    # itself) still mints and consumes a full writer capability end to end
+    # -- proving the N16-5-F-5-B2R-IMPL repair closed the forgery (see
+    # tests/test_phase_n16_5_f5b2r_impl_repair.py) without breaking real
+    # recognition. (N16-5-F-5-B2R-IMPL: the scratch-module
+    # `call_with_real_module_identity` technique this test previously used
+    # is no longer sufficient real provenance for the four enumerated
+    # production consumers -- see that suite for why.)
+    result = w.enroll_principal_via_pawa(
         principal_id="hp-" + "1" * 32,
+        enrollment_provenance_ref="f5b2-11b-real",
         _protected_root=root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
     )
-    assert isinstance(handle, w.ProductionWriterHandle)
-    cap = handle.consume(w.PawaOperation.ENROLL_PRINCIPAL, principal_id="hp-" + "1" * 32)
-    from pcae.core.hpac_foundation import HPACWriterCapability
-
-    assert isinstance(cap, HPACWriterCapability)
+    assert result is not None
 
 
 def test_12_certification_writer_unspoofed_denied(root, principal_and_credential):
@@ -249,18 +249,24 @@ def test_13_certification_writer_spoofed_yields_full_writer_handle(root, princip
 
 
 def test_13b_certification_writer_real_caller_still_yields_full_writer_handle(root, principal_and_credential):
+    # N16-5-F-5-B2R-IMPL: driven through the real HpacCertificationCoordinator
+    # (its own genuine pre-existing code) instead of the scratch-module proxy
+    # -- see test_11b's comment / tests/test_phase_n16_5_f5b2r_impl_repair.py.
+    from pcae.core.hpac_certification_coordinator import HpacCertificationCoordinator
+
     principal_id, credential_id = principal_and_credential
-    handle = call_with_real_module_identity(
-        "pcae.core.hpac_certification_coordinator",
-        w.certification_writer,
-        "hpac_challenge_coordinator",
-        certification_session_id="hcs-" + "1" * 32,
-        principal_id=principal_id,
-        credential_id=credential_id,
-        proof_id=new_proof_id(),
+    coordinator = HpacCertificationCoordinator(
         _protected_root=root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
+    )
+    session = coordinator.begin_session(principal_id=principal_id, credential_id=credential_id)
+    handle = coordinator._mint(
+        "hpac_challenge_coordinator",
+        certification_session_id=session.certification_session_id,
+        principal_id=principal_id,
+        credential_id=credential_id,
+        proof_id=session.proof_id,
     )
     assert isinstance(handle, w.CertificationWriterHandle)
     assert handle.role == "hpac_challenge_coordinator"
@@ -287,17 +293,22 @@ def test_14_recognized_read_authority_spoofed_succeeds_but_escalation_denied(roo
 
 
 def test_14b_recognized_read_authority_real_caller_succeeds_escalation_still_denied(root, principal_and_credential):
+    # N16-5-F-5-B2R-IMPL: driven through the real HpacCertificationCoordinator
+    # instead of the scratch-module proxy -- see test_13b.
+    from pcae.core.hpac_certification_coordinator import HpacCertificationCoordinator
+
     principal_id, credential_id = principal_and_credential
-    ra = call_with_real_module_identity(
-        "pcae.core.hpac_certification_coordinator",
-        w.recognized_certification_read_authority,
-        certification_session_id="hcs-" + "2" * 32,
-        principal_id=principal_id,
-        credential_id=credential_id,
-        proof_id=new_proof_id(),
+    coordinator = HpacCertificationCoordinator(
         _protected_root=root,
         _configured_agent_identity_source=_agent_src(),
         _topology_probe=_locked_probe(),
+    )
+    session = coordinator.begin_session(principal_id=principal_id, credential_id=credential_id)
+    ra = coordinator._obtain_read_authority(
+        certification_session_id=session.certification_session_id,
+        principal_id=principal_id,
+        credential_id=credential_id,
+        proof_id=session.proof_id,
     )
     assert isinstance(ra, w.CertificationReadAuthority)
     with pytest.raises(HPACAuthorityError):
@@ -318,18 +329,86 @@ def test_15_presentation_evidence_writer_spoofed_yields_full_writer_capability(r
 
 
 def test_15b_presentation_evidence_writer_real_caller_still_yields_full_writer_capability(root):
+    # N16-5-F-5-B2R-IMPL: driven through the real production launcher path
+    # (pcae.core.protected_presentation.run_protected_presentation_ceremony
+    # -> _build_and_persist_evidence -> mint_protected_presentation_evidence_writer)
+    # end to end, instead of the scratch-module proxy -- see test_11b's
+    # comment / tests/test_phase_n16_5_f5b2r_impl_repair.py.
+    import hashlib as _hashlib
+
+    from pcae.core import hpac_protected_presentation_admin as admin
+    from pcae.core import protected_presentation as pp
+    from pcae.core import protected_presentation_installation as inst
+    from pcae.core.approval_presentation import new_canonical_runtime_approval_subject
+    from pcae.protected_presentation_helper import render_human_visible_bytes
+
+    renderer = "pcae-protected-local-presentation-renderer/1.0"
+    helper_shim = (
+        b"#!/usr/bin/env python3\n"
+        b"import sys\n"
+        b"from pcae.protected_presentation_helper import main\n"
+        b"sys.exit(main())\n"
+    )
+    sha = _hashlib.sha256(helper_shim).hexdigest()
+    helper_path = inst.helper_content_addressed_path(root, sha)
+    helper_path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    helper_path.write_bytes(helper_shim)
+    os.chmod(helper_path, 0o500)
+    admin.configure_presentation_mechanism(
+        action="install",
+        protected_root=root,
+        _configured_agent_identity_source=_agent_src(),
+        _topology_probe=_locked_probe(),
+        helper_sha256=sha,
+        helper_implementation_version="pplp/1.0.0",
+        verifier_configuration_digest=_hashlib.sha256(b"verifier-config-v1").hexdigest(),
+        renderer_profile=renderer,
+        descriptor_version="f5b2-15b-1.0",
+    )
     authority = HPACStoreAuthority._production_test_fixture(
         root, _seal=_PRODUCTION_TEST_FIXTURE_SEAL, _topology_probe=_locked_probe()
     )
-    from pcae.core.hpac_foundation import HPACWriterCapability
-
-    cap = call_with_real_module_identity(
-        "pcae.core.protected_presentation",
-        w.mint_protected_presentation_evidence_writer,
-        authority,
-        mechanism_id="f5b2-mechanism",
+    facts = {
+        "repository_identity": "repo-abc",
+        "repository_display": "repo-abc (fp:abc123)",
+        "task_id": "task-1",
+        "task_display": "task-1 — the active task",
+        "runtime_target_id": "rt-1",
+        "runtime_target_display": "rt-1 — mock runtime",
+        "operation_effect_scope_display": "cap=read; local; effect=fs; one-dispatch; no-network",
+        "prompt_hash": "p" * 64,
+        "prompt_instruction_display": "do the bounded thing (fp:p001)",
+        "invocation_id": "inv-f5b2-15b",
+        "invocation_display": "inv-f5b2-15b (fp:i001)",
+        "expires_at": "2099-01-01T00:00:00Z",
+        "one_shot_notice": True,
+    }
+    displayed_digest = _hashlib.sha256(render_human_visible_bytes(facts, renderer_profile=renderer)).hexdigest()
+    subject = new_canonical_runtime_approval_subject(
+        subject={
+            "repository_identity": facts["repository_identity"],
+            "task_id": facts["task_id"],
+            "runtime_target_id": facts["runtime_target_id"],
+            "prompt_hash": facts["prompt_hash"],
+            "invocation_id": facts["invocation_id"],
+        },
+        approval_scope={"capability": "read", "one_dispatch": True, "network": False},
+        approval_preview_digest=displayed_digest,
+        expires_at=facts["expires_at"],
     )
-    assert isinstance(cap, HPACWriterCapability)
+    result = pp.run_protected_presentation_ceremony(
+        authority=authority,
+        approval_id="ria-" + _hashlib.sha256(b"f5b2-15b").hexdigest()[:32],
+        challenge_id="ch-f5b2-15b",
+        canonical_subject=subject,
+        human_visible_facts=facts,
+        principal_id="hp-" + "d" * 32,
+        invocation_id="inv-f5b2-15b",
+        attempt_id="at-f5b2-15b",
+        _test_decision_source="APPROVE",
+    )
+    assert result.decision == "APPROVE"
+    assert (root / "presentations" / "v2" / result.presentation_id / "presentation.json").exists()
 
 
 def test_16_presentation_evidence_writer_unspoofed_denied(root):
