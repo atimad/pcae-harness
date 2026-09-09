@@ -2,6 +2,73 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F-5-B2**) — Privileged Production Factory Consumer-Authenticity
+Blast-Radius Reconstruction and Normative Repair Adjudication. **STATUS:
+COMPLETE (read-only / architecture-and-normative-adjudication — no
+`src/pcae`/`scripts`/contract-text mutation).** CPIPC: valid direct `.1R`
+successor of `N16-5-F-5-B1-IV` (same series/branch, strict order, unique, no
+active conflict; independently re-derived via `pcae.core.phase_id`, alias
+display-only, no discrepancy). **B2_0 = `7b744eba`** (phase-entry SHA).
+
+Exhaustively inventoried every `_detect_caller_module` / `_caller_module`
+use in the repository (exactly two source files) and every privileged
+factory that shares the primitive — **four**, not three:
+`production_writer`, `certification_writer`,
+`recognized_certification_read_authority`,
+`mint_protected_presentation_evidence_writer`. Freshly reproduced the
+consumer-identity spoof directly against each of the four (disposable
+`tmp_path`-scoped protected roots only) from this phase's own diagnostic
+test module, which is a member of no consumer allowlist:
+`production_writer`, `certification_writer`, and
+`mint_protected_presentation_evidence_writer` each return a genuine,
+fully-usable writer capability to the spoofing caller (classification **B —
+full authority obtainable**); `recognized_certification_read_authority`
+returns a genuine read handle but escalation to `.writer(...)` remains
+independently denied (classification **A — partial gate**, consistent with
+the predecessor's finding).
+
+**H-3 reconciliation (not a restatement):** H-3's source, contract, and
+five-role semantics are unchanged, but its **consumer-authenticity
+assurance is INVALIDATED**, not merely "unchanged" — this phase shows an
+ordinary caller obtains a full `CertificationWriterHandle` directly from
+`certification_writer`, not only via escalation from a different authority
+object as previously examined.
+
+**Contract sufficiency:** `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`
+§32 already defines factory-consumer recognition as "the importing /
+calling **source module**" — "a build-time / import-time fact" — not a
+caller-asserted string. This predicate is shared, by explicit reference,
+across all four factories via one contract (§33/§33A/§33B all reuse §32
+verbatim). **Verdict: IMPLEMENTATION BUG UNDER SUFFICIENT CONTRACT →
+IMPLEMENTATION-ONLY REPAIR SUFFICIENT** (single-contract, not multi-contract,
+not contract-first).
+
+**Required successor (derived, NOT begun):** **N16-5-F-5-B2-IMPL** —
+*Privileged Production Factory Consumer-Authenticity Repair* — repair the
+consumer-authorization check for all four affected factories atomically
+(they share one primitive and one contract predicate) so that recognition
+is evaluated against the actual calling module, not a caller-supplied
+string, followed by a dedicated re-verification IV before any fresh
+`N16-5-FINAL-CERT` may be authorized. Do not begin N16-5-F-5-B2-IMPL in this
+phase; it requires its own explicit human authorization.
+
+**Verdict: F-5-B1: still NOT VERIFIED / BLOCKED (unchanged). F-5:
+CERTIFICATION BLOCKED PENDING F-5-B2 REPAIR (successor
+N16-5-F-5-B2-IMPL). N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED
+(N-16-7 strictly last). REPORTING-UX-1** still open (non-blocking).
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_N16_5_F_5_B2.md`.
+
+Diagnostic evidence:
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_n16_5_f5b2.py`
+(14 tests, all pass).
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B1-IV**) — Independent Verification of the Production
 Recognized Read / Ceremony Authority Implementation for N-16-5 — F-5-B1

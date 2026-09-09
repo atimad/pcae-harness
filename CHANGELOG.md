@@ -1,5 +1,28 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (alias **N16-5-F-5-B2**) — **Privileged Production Factory
+  Consumer-Authenticity Blast-Radius Reconstruction and Normative Repair
+  Adjudication**. Read-only / adjudication-only (no
+  `src/pcae`/`scripts`/contract-text mutation). Exhaustively inventoried
+  `_detect_caller_module`/`_caller_module` (exactly 2 source files) and
+  found **four** privileged factories share the primitive (not three):
+  `production_writer`, `certification_writer`,
+  `recognized_certification_read_authority`,
+  `mint_protected_presentation_evidence_writer`. Freshly reproduced the
+  spoof directly against each from a diagnostic module on no consumer
+  allowlist: `production_writer`/`certification_writer`/presentation writer
+  each yield a full writer capability to the spoofing caller
+  (classification B); read authority yields a read handle but escalation to
+  writer remains independently denied (classification A). H-3's
+  consumer-authenticity assurance is **INVALIDATED** (source/contract/role
+  semantics unchanged). HPAC-PAWA-001 §32 already defines consumer identity
+  as the actual calling module, not a caller-asserted string — **verdict:
+  IMPLEMENTATION BUG UNDER SUFFICIENT CONTRACT, IMPLEMENTATION-ONLY REPAIR
+  SUFFICIENT** across all four factories under one shared contract
+  predicate. Derived, not begun: **N16-5-F-5-B2-IMPL**. **F-5: CERTIFICATION
+  BLOCKED PENDING F-5-B2 REPAIR. N-16-5: NOT CLOSED.**
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-F-5-B1-IV**) — **Independent Verification of the Production
   Recognized Read / Ceremony Authority Implementation for N-16-5 — F-5-B1
