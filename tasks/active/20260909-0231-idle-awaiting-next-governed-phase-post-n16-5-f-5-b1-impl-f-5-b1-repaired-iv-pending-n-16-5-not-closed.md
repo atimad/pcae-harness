@@ -22,10 +22,8 @@ Await explicit human authorization for N16-5-F-5-B1-IV (independent verification
 
 ## Allowed Files
 
-- tasks/done/20260909-0222-n16-5-f-5-b1-impl-production-recognized-read-ceremony-authority-implementation.md
 - tasks/active/20260909-0231-idle-awaiting-next-governed-phase-post-n16-5-f-5-b1-impl-f-5-b1-repaired-iv-pending-n-16-5-not-closed.md
-- tasks/active/20260909-0222-n16-5-f-5-b1-impl-production-recognized-read-ceremony-authority-implementation.md
-- .pcae/session.json
+- tasks/done/20260909-0222-n16-5-f-5-b1-impl-production-recognized-read-ceremony-authority-implementation.md
 
 ## Forbidden Files
 
