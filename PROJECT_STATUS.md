@@ -2,6 +2,89 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F-5-B1-IMPL**) — Production Recognized Read / Ceremony Authority
+Implementation for N-16-5 Final Certification — F-5-B1 Repair Against
+Independently Verified HPAC-PAWA-001 v1.4. **STATUS: COMPLETE (implementation).
+F-5-B1: REPAIRED / IV PENDING. N-16-5: NOT CLOSED.** CPIPC: valid direct `.1R`
+successor of N16-5-F-5-B1-READAUTH-IV (same series/branch, strict order,
+unique, no active conflict; alias display-only, no discrepancy). **I0 =
+`a6455ef1`** (predecessor completion HEAD).
+
+Implements exactly the frozen v1.4 §33B/§38B/§42D/§42E/§49B/§68B scope in
+`src/pcae/core/hpac_protected_admin_writer.py`:
+`recognized_certification_read_authority(...)` (fresh on every call, no
+caching) returning a process-local, single-ceremony-entry, restart-dead,
+non-serialisable `CertificationReadAuthority` handle. Reuses the §33 steps
+1–9 verbatim via the existing `_run_recognition_sequence`; the sole
+authorized consumer is the already-enumerated §38A `hpac_certification_coordinator`
+(`READ_AUTHORITY_CONSUMERS = CERTIFICATION_FACTORY_CONSUMERS`, no new
+category). **F-5-B1 root-cause repair:** the configured-agent identity is
+bound (`_bind_configured_agent_identity`, reusing the existing
+`_PRODUCTION_WRITER_FACTORY_SEAL` trust root — no second root) **before**
+the session-binding validation now runs through provenance-verified
+canonical reads (`resolve_canonical_principal` / `resolve_canonical_credential`),
+so `_validate_production_boundary` keys off the CONFIGURED AGENT rather than
+the ambient (`sudo`/root) invoking process; a fresh, deterministic
+mutation-tested regression (disable the bind → 4 tests fail; restore → all
+green) proves the fix is load-bearing, not vacuous. The handle exposes
+**only** the §42D closed read scope (`read_principal_and_credential`,
+`read_credential_sidecar_and_counter`, `read_presentation_state` — all
+returning plain records, never an `HPACResolvedRecord` with `authority_seal`)
+plus **one** bounded `enter_ceremony(...)` hand-off to the existing
+`run_protected_presentation_ceremony()` (spent on entry, second call →
+`capability_stale`; no `_test_decision_source` parameter on this new
+production API — tests observe via monkeypatching the imported production
+reference, not an injected seam). **No** `HPACWriterCapability`, no
+`writer()`/`production_writer`/`certification_writer` reachability, no
+remint/delegate/serialise, no raw-authority-escape surface (verified by a
+public-API property scan), no new `PawaOperation` / `pawa_failure_code` /
+writer role / schema / trust root. Wired into
+`hpac_certification_coordinator.CertificationSession.run_presentation_ceremony`
+(the coordinator obtains and consumes the read authority internally; it is
+never returned to the coordinator's own caller — §44 discipline preserved).
+`scripts/hpac_certification_admin.py` intentionally **left unchanged**
+(still `describe`/`status` only; the real ceremony-driving entry is reserved
+for the future N16-5-FINAL-CERT phase, per its own docstring).
+
+72 new tests (`test_phase_..._n16_5_f5b1_impl.py`), all green; H-3 (§33A/
+§38A/§42B/§68A) regression suite green, byte-unchanged; HPAC-PAWA-001 v1.4 /
+HPAC-001 v2.1 / RHAMP-001 v1.0 / HPAC-PPA-001 v1.0 / HBDC-001 v1.2 and
+`pyproject.toml` byte-unchanged since I0 (verified via `git diff`). Two
+pre-existing point-in-time scope guards legitimately reconciled
+widen-not-weaken (a v1.0-slice guard's docstring literal, and a foundation
+consumer-inventory guard admitting the one new `hpac_protected_admin_writer.py`
+→ `pcae.core.approval_presentation` import edge the closed §42D read scope
+requires); two contract-IV guards that had asserted "not implemented yet" as
+a stated specification for this phase were re-anchored to their historical
+entry SHA rather than weakened. Full-repo `fast_green` A/B attribution:
+**0 attributable regressions** — the only deltas between the pre-change and
+post-change runs are `git status --porcelain`-based "working tree is dirty"
+guards across ~18 unrelated older phase-test files, which check for *any*
+uncommitted change under `src/pcae`/`scripts`/`docs/contracts` and clear on
+commit (confirmed by reading their source, not assumed). Packaging: wheel +
+sdist built successfully; clean-venv install (no editable install, no test
+package) proves the new symbols import, the bounded read path mechanically
+works against a disposable fixture root, `writer()` and cross-consumer
+access remain denied. No real ceremony, no live protected-root mutation, no
+FIDO2/YubiKey interaction anywhere in this phase. Runtime remains
+`not_implemented`/`Observed`/`observe`/`unavailable`, 0 plugins/0
+capabilities; first governed runtime external effect ABSENT/UNREACHABLE.
+
+**Required successor (derived, NOT begun):** Independent Verification of the
+Production Recognized Read / Ceremony Authority Implementation for N-16-5 —
+F-5-B1 Repair (**N16-5-F-5-B1-IV**) — must independently verify this
+implementation before any real ceremony is authorized. **REPORTING-UX-1**
+still open (non-blocking). **N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7
+strictly last).**
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_N16_5_F5B1_IMPL.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B1-READAUTH-IV**) — Independent Verification of HPAC-PAWA-001
 v1.4 Production Recognized Read / Ceremony Authority Contract (F-5-B1

@@ -878,6 +878,16 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
         ("hpac_certification_coordinator.py", "pcae.core.human_authentication_proof"),
         ("hpac_certification_coordinator.py", "pcae.core.approval_presentation"),
         ("hpac_certification_coordinator.py", "pcae.core.human_principal_registry"),
+        # N16-5-F-5-B1-IMPL (149O...30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R):
+        # HPAC-PAWA-001 v1.4 §33B/§42D — `recognized_certification_read_authority`'s
+        # `CertificationReadAuthority.read_presentation_state` reads the
+        # current-generation protected-presentation installation record, the
+        # HPAC-REQ-090 mechanism descriptor, and the trusted-approval-presentation
+        # record via the existing `PresentationMechanismDescriptorStore` /
+        # `TrustedApprovalPresentationStore` in `approval_presentation.py` — the
+        # same read-only stores `hpac_certification_coordinator.py` already
+        # consumes above. Exact filename, no wildcard.
+        ("hpac_protected_admin_writer.py", "pcae.core.approval_presentation"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

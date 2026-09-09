@@ -59,6 +59,7 @@ from pcae.core.hpac_protected_admin_writer import (
     CertificationWriterHandle,
     PawaError,
     certification_writer,
+    recognized_certification_read_authority,
 )
 from pcae.core.hpac_rhamp_counter_state import HpacRhampCounterStateStore
 from pcae.core.human_authentication_proof import (
@@ -200,6 +201,36 @@ class HpacCertificationCoordinator:
                 pawa_failure_code=exc.code,
             ) from exc
 
+    # ── HPAC-PAWA-001 v1.4 §33B/§38B — the sole caller of
+    #    recognized_certification_read_authority (§39A-pattern guard target,
+    #    F-5-B1 repair). Grants no writer capability; read-only + one bounded
+    #    ceremony-entry hand-off. ────────────────────────────────────────
+    def _obtain_read_authority(
+        self,
+        *,
+        certification_session_id: str,
+        principal_id: str,
+        credential_id: str,
+        proof_id: str,
+    ):
+        s = self._seams
+        try:
+            return recognized_certification_read_authority(
+                certification_session_id=certification_session_id,
+                principal_id=principal_id,
+                credential_id=credential_id,
+                proof_id=proof_id,
+                _protected_root=s.protected_root,
+                _configured_agent_identity_source=s.configured_agent_identity_source,
+                _topology_probe=s.topology_probe,
+                _caller_module=s.caller_module,
+            )
+        except PawaError as exc:
+            raise CertificationCoordinatorError(
+                f"read authority recognition refused ({exc.code}): {exc.detail}",
+                pawa_failure_code=exc.code,
+            ) from exc
+
 
 class CertificationSession:
     """One bounded certification ceremony. Each ``*_canonical`` step mints a
@@ -217,6 +248,7 @@ class CertificationSession:
         "_assertion_done",
         "_verified_done",
         "_gate5_reached",
+        "_presentation_ceremony_done",
     )
 
     def __init__(
@@ -237,6 +269,52 @@ class CertificationSession:
         self._assertion_done = False
         self._verified_done = False
         self._gate5_reached = False
+        self._presentation_ceremony_done = False
+
+    # ── v1.4 §33B/§42D — obtain the recognized read/ceremony-entry
+    #    authority for THIS session and enter the one bounded protected-
+    #    presentation ceremony. The CertificationReadAuthority itself never
+    #    escapes this method (§44 discipline — the coordinator is the
+    #    consumer, not this session object's caller). ───────────────────
+    def run_presentation_ceremony(
+        self,
+        *,
+        approval_id: str,
+        challenge_id: str,
+        canonical_subject: object,
+        human_visible_facts: dict,
+        invocation_id: str,
+        attempt_id: str,
+        presented_at: Optional[str] = None,
+        timeout_seconds: Optional[int] = None,
+    ) -> object:
+        if self._presentation_ceremony_done:
+            raise CertificationCoordinatorError("presentation ceremony already entered for this session")
+        read_authority = self._coordinator._obtain_read_authority(
+            certification_session_id=self.certification_session_id,
+            principal_id=self.principal_id,
+            credential_id=self.credential_id,
+            proof_id=self.proof_id,
+        )
+        try:
+            result = read_authority.enter_ceremony(
+                approval_id=approval_id,
+                challenge_id=challenge_id,
+                canonical_subject=canonical_subject,
+                human_visible_facts=human_visible_facts,
+                invocation_id=invocation_id,
+                attempt_id=attempt_id,
+                presented_at=presented_at,
+                timeout_seconds=timeout_seconds,
+            )
+        except PawaError as exc:
+            raise CertificationCoordinatorError(
+                f"presentation ceremony entry refused ({exc.code}): {exc.detail}",
+                pawa_failure_code=exc.code,
+            ) from exc
+        finally:
+            self._presentation_ceremony_done = True
+        return result
 
     def _mint(self, role: str) -> CertificationWriterHandle:
         return self._coordinator._mint(

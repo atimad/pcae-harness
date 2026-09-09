@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (alias **N16-5-F-5-B1-IMPL**) — **Production Recognized Read / Ceremony
+  Authority Implementation for N-16-5 Final Certification — F-5-B1 Repair**.
+  **F-5-B1: REPAIRED / IV PENDING. N-16-5: NOT CLOSED.** CPIPC: valid direct
+  `.1R` successor of N16-5-F-5-B1-READAUTH-IV. `I0 = a6455ef1`. Implements
+  the frozen HPAC-PAWA-001 v1.4 §33B/§38B/§42D/§42E/§49B/§68B scope in
+  `hpac_protected_admin_writer.py`: `recognized_certification_read_authority(...)`
+  / `CertificationReadAuthority` — a process-local, single-ceremony-entry,
+  restart-dead, non-bearer handle reusing the §33 recognition sequence and
+  the existing `_PRODUCTION_WRITER_FACTORY_SEAL` trust root (no second
+  root), authorized only for the already-enumerated §38A certification
+  coordinator (no new consumer category). Root-cause repair: the
+  configured-agent identity is bound before the session-binding validation
+  runs through provenance-verified canonical reads, so the production
+  boundary check keys off the configured agent rather than ambient
+  sudo/root — proven load-bearing via a deliberate mutation test (disabling
+  the bind breaks 4 tests; restoring it turns them green again). Exposes
+  only the §42D closed read scope (plain records, no raw-authority escape)
+  plus one bounded `enter_ceremony(...)` hand-off to the existing
+  `run_protected_presentation_ceremony()`; grants **no**
+  `HPACWriterCapability`, no mutation, no counter-state transition, no new
+  `PawaOperation` / failure code / writer role / schema. Wired into
+  `hpac_certification_coordinator.CertificationSession.run_presentation_ceremony`
+  (the read authority never escapes to the coordinator's own caller).
+  `scripts/hpac_certification_admin.py` intentionally left unchanged (no
+  new deployment-owner entry required this phase). 72 new tests, all green;
+  H-3 unaffected; contracts/schemas/dependencies byte-unchanged since I0;
+  full-repo `fast_green` A/B attribution shows **0 regressions**
+  attributable to this change (only pre-existing `git status`-based
+  working-tree-dirty guards differ, confirmed self-resolving on commit by
+  reading their source); wheel/sdist build and clean-venv install verified
+  (bounded read path works, mutation stays denied, no test-package
+  dependency). No real ceremony, no live protected-root mutation anywhere
+  in this phase. Required successor (derived, not begun):
+  **N16-5-F-5-B1-IV** — independent verification of this implementation.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-F-5-B1-READAUTH-IV**) — **Independent Verification of
   HPAC-PAWA-001 v1.4 Production Recognized Read / Ceremony Authority

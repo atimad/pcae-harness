@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-N16-5-F-5-B1-READAUTH-IV); HPAC-PAWA-00
 
 ## Status
 
-active
+done
 
 ## Mode
 

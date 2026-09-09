@@ -399,20 +399,34 @@ def test_91_current_agent_identity_is_geteuid() -> None:
     assert "return os.geteuid(), frozenset(os.getgroups()) | {os.getegid()}" in t
 
 
+def _blob_at(commit: str, relpath: str) -> str:
+    return subprocess.run(
+        ["git", "-C", str(ROOT), "show", f"{commit}:{relpath}"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+
+
 def test_92_every_seal_holder_is_a_write_path() -> None:
-    t = text(ADMIN_WRITER)
-    # the three functions that bind the configured-agent identity
+    # This assertion is a POINT-IN-TIME snapshot of C0 (this contract-freeze
+    # phase's own entry), not a claim about the moving HEAD: the docstring
+    # above says outright that "no read-only accessor exists yet" is a
+    # specification "for the F-5-B1 implementation phase", i.e. it is
+    # EXPECTED to become true there. N16-5-F-5-B1-IMPL legitimately adds
+    # `recognized_certification_read_authority` / `CertificationReadAuthority`
+    # to the live file — re-anchored to C0 so this test keeps asserting
+    # exactly what it was written to assert, per the same historical-guard
+    # discipline the N16-5-H3-IMPL suite's test_01/02 already established.
+    t = _blob_at(C0, "src/pcae/core/hpac_protected_admin_writer.py")
     for sym in ("def production_writer(", "def certification_writer(",
                 "def mint_protected_presentation_evidence_writer("):
         assert sym in t
-    # no read-only accessor exists yet
     assert "recognized_certification_read_authority" not in t
     assert "CertificationReadAuthority" not in t
 
 
 def test_93_ceremony_takes_an_hpac_store_authority_no_read_only_getter() -> None:
-    t = text(PRESENTATION)
+    # Re-anchored to C0 for the same reason as test_92 above.
+    t = _blob_at(C0, "src/pcae/core/protected_presentation.py")
     assert "def run_protected_presentation_ceremony(" in t
     assert "authority: HPACStoreAuthority" in t
-    # this phase adds no accessor / getter in production source
     assert "recognized_certification_read_authority" not in t

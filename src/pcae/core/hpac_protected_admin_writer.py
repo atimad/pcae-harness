@@ -102,6 +102,11 @@ __all__ = [
     "CERTIFICATION_COUNTER_ROLE",
     "CertificationWriterHandle",
     "certification_writer",
+    # HPAC-PAWA-001 v1.4 §33B / §38B / §42D / §49B / §68B — the dedicated
+    # read / ceremony-entry authority accessor (F-5-B1 repair).
+    "READ_AUTHORITY_CONSUMERS",
+    "CertificationReadAuthority",
+    "recognized_certification_read_authority",
 ]
 
 
@@ -1992,5 +1997,423 @@ def certification_writer(
         result="issued",
         capability_identifier="hpaw-cert-" + hashlib.sha256(operation_id.encode()).hexdigest()[:32],
         context_annotation=f"certification_session={sid};role={role};proof_id={pf};phase=issue",
+    )
+    return handle
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# HPAC-PAWA-001 v1.4 §33B / §38B / §42D / §49B / §68B — the dedicated
+# recognized_certification_read_authority accessor (F-5-B1 repair,
+# alias N16-5-F-5-B1-IMPL). DISTINCT from ``certification_writer``: this
+# path grants NO HPACWriterCapability and NO mutation authority of any
+# kind — read-only access to a closed, enumerated set of canonical
+# protected-store records plus a single bounded protected-presentation
+# ceremony-entry hand-off. It reuses the §33 steps 1-9 verbatim (via
+# ``_run_recognition_sequence``, only the enumerated consumer set
+# swapped — reusing the already-enumerated §38A/§38B set, HPAC-PAWA-REQ-281),
+# the same ``_PRODUCTION_WRITER_FACTORY_SEAL`` trust root discipline (reused
+# for the constructor seal and the configured-agent bind, never a second
+# root), and the same process-local / non-bearer / restart-dead / one-shot
+# semantics (§45-§49, §49B). It introduces NO new ``PawaOperation``, NO new
+# ``pawa_failure_code``, NO schema, NO writer role, and exposes NO ``writer()``
+# / ``production_writer`` / ``certification_writer`` / raw-authority escape.
+# HPAC-PAWA-REQ-276..300, PAWA-INV-3/9/10/12/13/14.
+#
+# F-5-B1 root cause repaired here: the underlying
+# ``HPACStoreAuthority._validate_production_boundary`` negative check keys
+# off ``_configured_agent_identity`` when bound, and off the *live invoking
+# process* identity when not. Running the deployment-owner tool under real
+# sudo/root means the live process identity legitimately CAN write the
+# protected root, so any protected-store read attempted on an unbound
+# authority while running as root/sudo fails the boundary check outright
+# (`production HPAC root is not protected from the configured agent
+# principal`) -- root is never implicitly trusted. Binding the resolved
+# CONFIGURED-AGENT identity (REQ-278.3, done here BEFORE the first
+# protected-store canonical read) repairs this: the boundary is then
+# evaluated against the configured agent (who genuinely lacks write
+# access), so the deployment owner's real reads succeed while an
+# unbound / never-recognized direct read stays denied.
+# ─────────────────────────────────────────────────────────────────────────
+
+#: §38B (HPAC-PAWA-REQ-281) — v1.4 adds NO new factory-consumer category;
+#: the sole authorized read-authority consumer is the already-enumerated
+#: §38A N-16-5 certification coordinator.
+READ_AUTHORITY_CONSUMERS = CERTIFICATION_FACTORY_CONSUMERS
+
+#: A disclosed, explicit **test-only** read-authority consumer allowlist
+#: (§16 seam, HPAC-PAWA-REQ-166/282/265 discipline). Exact module names,
+#: never a prefix. A guard test asserts no non-test module is a member.
+_READ_AUTHORITY_TEST_CONSUMERS = frozenset(
+    {
+        "test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_n16_5_f5b1_impl",
+    }
+)
+
+_READ_AUTHORITY_ISSUER = "pcae.core.hpac_protected_admin_writer.recognized_certification_read_authority/1.4"
+
+
+def _validate_read_authority_inputs(
+    certification_session_id: object,
+    principal_id: object,
+    credential_id: object,
+    proof_id: object,
+) -> "tuple[str, str, str, str]":
+    # §33B step (HPAC-PAWA-REQ-278.2) — a nonempty string for each; an
+    # explicit ``None`` / empty / whitespace / non-str bypass →
+    # ``operation_scope_invalid``.
+    def _req(value: object, name: str) -> str:
+        if not isinstance(value, str) or not value.strip():
+            raise PawaError("operation_scope_invalid", f"{name} must be a non-empty string")
+        return value
+
+    sid = _req(certification_session_id, "certification_session_id")
+    pid = _req(principal_id, "principal_id")
+    cid = _req(credential_id, "credential_id")
+    pf = _req(proof_id, "proof_id")
+    if not re.fullmatch(r"hap-[0-9a-f]{32}", pf):
+        raise PawaError("operation_scope_invalid", "proof_id does not match the reserved hap- grammar")
+    return sid, pid, cid, pf
+
+
+def _validate_read_authority_session_binding(
+    authority: HPACStoreAuthority,
+    *,
+    principal_id: str,
+    credential_id: str,
+) -> None:
+    """§33B step (HPAC-PAWA-REQ-278.2, executed AFTER the configured-agent
+    bind per the phase's independently-verified normative execution order
+    — HPAC-PAWA-REQ-278 note): resolve the bound principal / credential
+    through the **provenance-verified canonical** reads
+    (``resolve_canonical_principal`` / ``resolve_canonical_credential``),
+    which route through ``HPACStoreAuthority.store_id`` ->
+    ``_ensure_root(create=False)`` -> ``_validate_production_boundary()``.
+    This is the exact protected-store read the F-5-B1 finding requires to
+    pass under the CONFIGURED-AGENT binding rather than the ambient
+    (sudo/root) invoking-process identity. A pure read; mints nothing."""
+
+    from pcae.core.human_principal_registry import HumanPrincipalRegistryStore
+
+    try:
+        registry = HumanPrincipalRegistryStore(authority)
+        principal_resolution = registry.resolve_canonical_principal(principal_id)
+        credential_resolution = registry.resolve_canonical_credential(credential_id)
+    except HPACAuthorityError:
+        raise
+    except Exception as exc:  # noqa: BLE001 — fail-closed read boundary (§0)
+        raise PawaError("operation_scope_invalid", f"read-authority target resolution failed: {type(exc).__name__}: {exc}")
+    if principal_resolution is None or getattr(principal_resolution.record, "status", None) != "active":
+        raise PawaError("operation_scope_invalid", "read-authority target principal is unresolvable or not active")
+    if credential_resolution is None or getattr(credential_resolution.record, "status", None) != "active":
+        raise PawaError("operation_scope_invalid", "read-authority target credential is unresolvable or not active")
+    if credential_resolution.record.principal_id != principal_id:
+        raise PawaError("operation_scope_invalid", "read-authority target credential is not bound to the target principal")
+
+
+class CertificationReadAuthority:
+    """§33B/§42D/§49B (v1.4) — a process-local, single-ceremony-entry,
+    restart-dead, non-bearer handle wrapping a recognized ``PRODUCTION``
+    ``HPACStoreAuthority``. Exposes **only** the §42D closed read scope
+    plus **one** bounded protected-presentation ceremony-entry hand-off.
+
+    Grants **no** ``HPACWriterCapability``, no ``writer()`` /
+    ``production_writer(...)`` / ``certification_writer(...)`` /
+    ``_mint_production_writer_capability(...)`` /
+    ``_bind_configured_agent_identity(...)`` re-invocation, and no
+    remint / delegate / serialise / generic-authority conversion (§68B,
+    HPAC-PAWA-REQ-287). ``__reduce__`` raises. There is intentionally no
+    public method or property that returns the wrapped
+    ``HPACStoreAuthority`` (no raw-authority escape).
+
+    Constructed **only** by :func:`recognized_certification_read_authority`.
+    """
+
+    __slots__ = (
+        "_authority",
+        "certification_session_id",
+        "principal_id",
+        "credential_id",
+        "proof_id",
+        "anchor_id",
+        "installation_id",
+        "descriptor_generation",
+        "_ceremony_consumed",
+    )
+
+    def __init__(
+        self,
+        *,
+        _factory_seal: object,
+        authority: HPACStoreAuthority,
+        certification_session_id: str,
+        principal_id: str,
+        credential_id: str,
+        proof_id: str,
+        anchor_id: str,
+        installation_id: str,
+        descriptor_generation: int,
+    ) -> None:
+        if _factory_seal is not _PRODUCTION_WRITER_FACTORY_SEAL:
+            raise HPACAuthorityError(
+                "CertificationReadAuthority can only be constructed by the recognized read-authority factory"
+            )
+        if not isinstance(authority, HPACStoreAuthority) or authority.authority_class is not HPACAuthorityClass.PRODUCTION:
+            raise HPACAuthorityError("CertificationReadAuthority requires a PRODUCTION HPACStoreAuthority")
+        self._authority = authority
+        self.certification_session_id = certification_session_id
+        self.principal_id = principal_id
+        self.credential_id = credential_id
+        self.proof_id = proof_id
+        self.anchor_id = anchor_id
+        self.installation_id = installation_id
+        self.descriptor_generation = descriptor_generation
+        self._ceremony_consumed = False
+
+    def __reduce__(self):
+        raise TypeError("CertificationReadAuthority is process-local and non-serializable")
+
+    def _check_live(self) -> None:
+        # §49B (HPAC-PAWA-REQ-294) — confers no authority once the
+        # session's ceremony has been entered.
+        if self._ceremony_consumed:
+            raise PawaError("capability_stale", "this read authority's ceremony entry has already been used")
+        # Force the F-5-B1-repaired boundary check on *every* read,
+        # independent of which specific store method is used underneath
+        # (``store_id`` -> ``_ensure_root(create=False)`` ->
+        # ``_validate_production_boundary()``).
+        try:
+            self._authority.store_id
+        except HPACAuthorityError as exc:
+            raise PawaError("internal_fail_closed", f"read-authority boundary re-check failed: {exc}")
+
+    # ── §42D closed read scope (HPAC-PAWA-REQ-284) ───────────────────────
+
+    def read_principal_and_credential(self):
+        """The ``PrincipalRecord`` for the bound ``principal_id`` and the
+        ``CredentialRecord`` for the bound ``credential_id``, both via
+        provenance-verified canonical resolution. Returns plain records —
+        never an ``HPACResolvedRecord`` (which carries ``authority_seal``)."""
+
+        self._check_live()
+        from pcae.core.human_principal_registry import HumanPrincipalRegistryStore
+
+        registry = HumanPrincipalRegistryStore(self._authority)
+        principal_resolution = registry.resolve_canonical_principal(self.principal_id)
+        credential_resolution = registry.resolve_canonical_credential(self.credential_id)
+        if principal_resolution is None or getattr(principal_resolution.record, "status", None) != "active":
+            raise PawaError("operation_scope_invalid", "bound principal is unresolvable or not active")
+        if credential_resolution is None or getattr(credential_resolution.record, "status", None) != "active":
+            raise PawaError("operation_scope_invalid", "bound credential is unresolvable or not active")
+        if credential_resolution.record.principal_id != self.principal_id:
+            raise PawaError("operation_scope_invalid", "bound credential is not bound to the bound principal")
+        return principal_resolution.record, credential_resolution.record
+
+    def read_credential_sidecar_and_counter(self):
+        """The bound credential's RHAMP FIDO2-credential sidecar record and
+        its **current** counter-state record, read only — no counter
+        transition. Returns plain records."""
+
+        self._check_live()
+        from pcae.core.hpac_rhamp_credential_sidecar import HpacRhampCredentialSidecarStore
+        from pcae.core.hpac_rhamp_counter_state import HpacRhampCounterStateStore
+
+        sidecar_resolution = HpacRhampCredentialSidecarStore(self._authority).resolve_canonical(self.credential_id)
+        if sidecar_resolution is None:
+            raise PawaError("operation_scope_invalid", "no RHAMP sidecar for the bound credential")
+        counter_resolution = HpacRhampCounterStateStore(self._authority).resolve_canonical(self.credential_id)
+        return sidecar_resolution.record, counter_resolution.record
+
+    def read_presentation_state(
+        self,
+        *,
+        mechanism_id: str,
+        presentation_id: Optional[str] = None,
+        presentation_digest: Optional[str] = None,
+    ):
+        """The current-generation protected-presentation installation
+        record, the HPAC-REQ-090 mechanism descriptor, and — when a prior
+        ``(presentation_id, presentation_digest)`` is supplied — the
+        trusted-approval-presentation record it names. No arbitrary
+        installation enumeration, no unrelated mechanism, no unrelated
+        presentation."""
+
+        self._check_live()
+        if not isinstance(mechanism_id, str) or not mechanism_id.strip():
+            raise PawaError("operation_scope_invalid", "mechanism_id must be a non-empty string")
+        from pcae.core.approval_presentation import (
+            PresentationMechanismDescriptorStore,
+            TrustedApprovalPresentationStore,
+        )
+        from pcae.core.protected_presentation_installation import ProtectedPresentationInstallationStore
+
+        descriptor_store = PresentationMechanismDescriptorStore(self._authority)
+        descriptor_resolution = descriptor_store.resolve_canonical(mechanism_id)
+        installation = ProtectedPresentationInstallationStore(self._authority).resolve_current_generation()
+        presentation = None
+        if presentation_id is not None or presentation_digest is not None:
+            if not isinstance(presentation_id, str) or not isinstance(presentation_digest, str):
+                raise PawaError("operation_scope_invalid", "presentation_id / presentation_digest must both be strings")
+            presentation_resolution = TrustedApprovalPresentationStore(self._authority).resolve_canonical(
+                presentation_id=presentation_id,
+                presentation_digest=presentation_digest,
+                descriptor_store=descriptor_store,
+            )
+            presentation = presentation_resolution.record if presentation_resolution is not None else None
+        return (
+            descriptor_resolution.record if descriptor_resolution is not None else None,
+            installation,
+            presentation,
+        )
+
+    # ── §42D one bounded ceremony-entry hand-off (HPAC-PAWA-REQ-285) ─────
+
+    def enter_ceremony(
+        self,
+        *,
+        approval_id: str,
+        challenge_id: str,
+        canonical_subject: object,
+        human_visible_facts: dict,
+        invocation_id: str,
+        attempt_id: str,
+        presented_at: Optional[str] = None,
+        timeout_seconds: Optional[int] = None,
+    ) -> object:
+        """Hand the wrapped recognized authority to the **existing**
+        ``run_protected_presentation_ceremony`` production boundary for
+        **exactly one** protected-presentation ceremony in this bound
+        session. Does not itself manufacture, seal, or persist presentation
+        evidence (the existing ``mint_protected_presentation_evidence_writer``
+        path remains the sole author, unchanged). Ceremony entry authority
+        ≠ human APPROVE/REJECT ≠ FIDO2 assurance (§68B). This method exposes
+        no test-decision-directive parameter of its own — a production API
+        seam-free by construction (§40 of the phase prompt); tests observe
+        this path by monkeypatching the imported production reference, not
+        by injecting a seam.
+
+        A second call — for this handle, in this process — fails closed
+        with ``capability_stale``, spent at the point of entry regardless
+        of the ceremony's own outcome (mirrors ``CertificationWriterHandle
+        .consume``)."""
+
+        self._check_live()
+        self._ceremony_consumed = True
+
+        from pcae.core import protected_presentation as _pp
+
+        kwargs = dict(
+            authority=self._authority,
+            approval_id=approval_id,
+            challenge_id=challenge_id,
+            canonical_subject=canonical_subject,
+            human_visible_facts=human_visible_facts,
+            principal_id=self.principal_id,
+            invocation_id=invocation_id,
+            attempt_id=attempt_id,
+        )
+        if presented_at is not None:
+            kwargs["presented_at"] = presented_at
+        if timeout_seconds is not None:
+            kwargs["timeout_seconds"] = timeout_seconds
+        return _pp.run_protected_presentation_ceremony(**kwargs)
+
+
+def recognized_certification_read_authority(
+    *,
+    certification_session_id: str,
+    principal_id: str,
+    credential_id: str,
+    proof_id: str,
+    _protected_root: Optional[Path] = None,
+    _configured_agent_identity_source=None,
+    _topology_probe: Optional["TopologyProbe"] = None,
+    _caller_module: Optional[str] = None,
+) -> CertificationReadAuthority:
+    """§33B (HPAC-PAWA-REQ-276..280) — obtain exactly one process-local,
+    single-ceremony-entry, restart-dead ``CertificationReadAuthority`` after
+    a fresh, complete §33 recognition sequence (steps 1-9 verbatim, reusing
+    the §33/§33A machinery) plus the §33B-specific consumer-restatement /
+    configured-agent-bind / session-binding / construction / audit steps.
+
+    Runs fresh on **every** call — no result is cached (HPAC-PAWA-REQ-279).
+    Grants **no** ``HPACWriterCapability`` and no write authority of any
+    kind (HPAC-PAWA-REQ-284/287). Fails closed on any conjunct failure —
+    the corresponding §42E code; no read authority is returned
+    (HPAC-PAWA-REQ-280).
+
+    ``_protected_root`` / ``_configured_agent_identity_source`` /
+    ``_topology_probe`` / ``_caller_module`` are the disclosed test-only
+    seams (§72/§73 / HPAC-PAWA-REQ-166); a guard test asserts no non-test
+    module passes any of them and that the only production caller is the
+    §38B consumer.
+    """
+
+    caller_module = _detect_caller_module(_caller_module)
+    sid, pid, cid, pf = _validate_read_authority_inputs(
+        certification_session_id, principal_id, credential_id, proof_id
+    )
+
+    recognized = _run_recognition_sequence(
+        protected_root=_protected_root,
+        configured_agent_identity_source=_configured_agent_identity_source,
+        caller_module=caller_module,
+        topology_probe=_topology_probe,
+        authorized_consumers=READ_AUTHORITY_CONSUMERS,
+        test_consumers=_READ_AUTHORITY_TEST_CONSUMERS,
+    )
+
+    # HPAC-PAWA-REQ-278.1 — restate the exact §38B consumer check
+    # explicitly (defence in depth; step 9 above already enforced it).
+    if caller_module not in READ_AUTHORITY_CONSUMERS and caller_module not in _READ_AUTHORITY_TEST_CONSUMERS:
+        raise PawaError("unauthorized_factory_consumer", f"{caller_module!r} is not the §38B read-authority consumer")
+
+    # HPAC-PAWA-REQ-278.3 (F-5-B1 repair) — bind the configured-agent
+    # identity BEFORE the first protected-store canonical read, so every
+    # subsequent ``_validate_production_boundary`` on this instance keys
+    # the negative boundary off the CONFIGURED AGENT, not the invoking
+    # (sudo/root) process.
+    recognized.authority._bind_configured_agent_identity(
+        (recognized.configured_agent.uid, recognized.configured_agent.gids),
+        _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+    )
+
+    # HPAC-PAWA-REQ-278.2 — certification-session context binding, now
+    # evaluated on the freshly-bound authority via provenance-verified
+    # canonical reads (the exact repair proof: this call denies on an
+    # unbound authority under ambient root, and succeeds here).
+    _validate_read_authority_session_binding(recognized.authority, principal_id=pid, credential_id=cid)
+
+    handle = CertificationReadAuthority(
+        _factory_seal=_PRODUCTION_WRITER_FACTORY_SEAL,
+        authority=recognized.authority,
+        certification_session_id=sid,
+        principal_id=pid,
+        credential_id=cid,
+        proof_id=pf,
+        anchor_id=recognized.anchor_id,
+        installation_id=recognized.installation_id,
+        descriptor_generation=recognized.generation,
+    )
+
+    operation_id = new_operation_id()
+    # §42D / HPAC-PAWA-REQ-290 — the issuance audit event. Non-authoritative
+    # facts only (never the seal, never anything a working authority could
+    # be reconstructed from). No new schema; the existing
+    # HPAC-PAWA-ISSUANCE-EVIDENCE/1.0 operation / context_annotation fields
+    # carry them.
+    _record_issuance_evidence(
+        recognized.root,
+        operation_id=operation_id,
+        operation="certification_read_authority",
+        anchor_id=recognized.anchor_id,
+        installation_id=recognized.installation_id,
+        descriptor_generation=recognized.generation,
+        protected_root_identity=recognized.live_root_identity,
+        target_principal_id=pid,
+        target_credential_id=cid,
+        enrollment_transaction_id=None,
+        result="issued",
+        capability_identifier="hpaw-readauth-" + hashlib.sha256((sid + pf).encode()).hexdigest()[:32],
+        context_annotation=f"certification_session={sid};proof_id={pf};phase=read_authority_issue",
     )
     return handle
