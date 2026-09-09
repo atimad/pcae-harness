@@ -95,8 +95,18 @@
     ".pcae/phase-completion-report.md"
   ],
   "files_changed_count": 8,
-  "phase_commits": [],
-  "commits": [],
+  "phase_commits": [
+    {
+      "hash": "62374fa5b866a5a79ba28a12d62080f363051ec1",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2-IV): independently verify the F-5-B2 consumer-authenticity repair, find it insufficient"
+    }
+  ],
+  "commits": [
+    {
+      "hash": "62374fa5b866a5a79ba28a12d62080f363051ec1",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2-IV): independently verify the F-5-B2 consumer-authenticity repair, find it insufficient"
+    }
+  ],
   "recommended_next_phase": "A fresh governed repair phase (new CPIPC-valid child of this IV phase) for the __name__-forgery consumer-recognition defect found in _detect_caller_module. Scope: replace trust in frame.f_globals['__name__'] with a mechanism that cannot be forged by an ordinary in-process caller via exec()-with-crafted-globals, across all four privileged factories (production_writer, certification_writer, recognized_certification_read_authority, mint_protected_presentation_evidence_writer) atomically since they share the primitive, and re-verify the clean-installed wheel boundary. Must not be split so any one factory remains uncertified. After that repair, an independent-verification retry equivalent to this phase is required before a fresh N16-5-FINAL-CERT may be authorized on a new CPIPC-valid successor id. Do NOT begin the repair phase, N16-6, or N16-7 without their own explicit human authorization.",
   "pushed_status": "clean",
   "origin_main_head": ""
