@@ -45,13 +45,15 @@
     "generic_writer_verdict": "PASS -- no new public factory symbol; __all__ unchanged",
     "second_trust_root_verdict": "PASS -- one process-local pin state, populated only via the trusted checks, never writable by ordinary caller code, never serialized",
     "clean_installed_wheel_boundary_verdict": "PASS -- 91 passed / 1 failed (test-methodology artifact, not a product defect)",
-    "no_test_credential_accepted_in_production_verdict": "PASS -- this repair touches only caller-identity recognition, not the certification/ceremony layers; no deterministic test seam mints real assurance"
+    "no_test_credential_accepted_in_production_verdict": "PASS -- this repair touches only caller-identity recognition, not the certification/ceremony layers; no deterministic test seam mints real assurance",
+    "report_notification_tests": "not_applicable_this_phase -- notification implementation unchanged",
+    "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no reporting-code change"
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "not_run_this_phase",
-    "pcae_push_check": "pending",
+    "pcae_push_check": "clean",
     "telegram_runtime": "not_configured"
   },
   "notification_dispatch_result": "pending -- to be dispatched by pcae phase complete on successful finalization",
@@ -101,13 +103,18 @@
     {
       "hash": "8adc617f",
       "subject": "governance artifacts -- canonical phase report, PROJECT_STATUS.md, task lifecycle"
+    },
+    {
+      "hash": "df8685e3",
+      "subject": "prefix canonical phase token onto the active task title; sync phase-completion metadata"
     }
   ],
   "commits": [
     "1496e343bf101687581e4bfdf5cd463968c9bd72",
-    "8adc617f"
+    "8adc617f",
+    "df8685e3"
   ],
   "recommended_next_phase": "N16-5-F-5-B2R-IV -- fresh independent verification of the repaired privileged-factory consumer-authenticity boundary, not begun",
-  "pushed_status": "clean",
-  "origin_main_head": true
+  "pushed_status": "pushed",
+  "origin_main_head": 0
 }
