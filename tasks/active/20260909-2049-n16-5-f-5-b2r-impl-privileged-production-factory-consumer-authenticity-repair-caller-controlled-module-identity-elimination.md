@@ -6,7 +6,7 @@
 
 ## Title
 
-N16-5-F-5-B2R-IMPL: Privileged Production Factory Consumer-Authenticity Repair -- Caller-Controlled Module-Identity Elimination
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2R-IMPL): Privileged Production Factory Consumer-Authenticity Repair -- Caller-Controlled Module-Identity Elimination
 
 ## Status
 
@@ -35,6 +35,8 @@ Repair the shared caller-controlled consumer-recognition primitive (_detect_call
 - tasks/done/20260909-1950-idle-awaiting-explicit-authorization-for-the-name-forgery-repair-phase-post-n16-5-f-5-b2-iv-n16-5-f-5-b2-not-verified-blocked-n-16-5-not-closed.md
 - tasks/active/20260909-2049-n16-5-f-5-b2r-impl-privileged-production-factory-consumer-authenticity-repair-caller-controlled-module-identity-elimination.md
 - tasks/done/20260909-2049-n16-5-f-5-b2r-impl-privileged-production-factory-consumer-authenticity-repair-caller-controlled-module-identity-elimination.md
+- .pcae/phase-completion-metadata.json
+- .pcae/session.json
 
 ## Forbidden Files
 
