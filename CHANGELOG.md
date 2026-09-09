@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (alias **N16-5-F-5-B1-IV**) — **Independent Verification of the Production
+  Recognized Read / Ceremony Authority Implementation for N-16-5 — F-5-B1
+  Repair**. Verification-only (no `src/pcae`/`scripts`/contract-text
+  mutation). **VERDICT: F-5-B1: NOT VERIFIED / BLOCKED. N-16-5: NOT
+  CLOSED.** CPIPC: valid direct `.1R` successor of N16-5-F-5-B1-IMPL,
+  independently re-derived and validated via `pcae.core.phase_id`
+  (same series/branch, strict order, unique, no conflict). `I_ENTRY =
+  a6455ef1`, independently re-derived from Git. Found, via a live
+  reproduction (not inference), that the predecessor's F-5-B1 repair reused
+  the pre-existing `_detect_caller_module(explicit)` helper (shared with
+  `production_writer`/`certification_writer` since before I_ENTRY)
+  unmodified: it returns any caller-supplied `_caller_module` value
+  verbatim with no runtime gate, so an arbitrary, genuinely-unauthorized
+  in-process module can impersonate the sole authorized consumer
+  (`pcae.core.hpac_certification_coordinator`) using only a public keyword
+  argument and obtain a fully working `CertificationReadAuthority` handle.
+  Independently confirmed the predecessor's own "authorized consumer
+  accepted" tests exercise the factory via this same caller-supplied
+  override, not a genuine trusted-caller binding. The only existing control
+  is a static, source-scanning guard test — not a runtime authorization
+  boundary. This is a mandatory BLOCK per HPAC-PAWA-001 v1.4 §33B/§38B
+  consumer-authenticity requirements; the pattern pre-dates F-5-B1 but its
+  repair reused it unaddressed. All other independently-checked material
+  properties held (exact 2-file pure-addition diff since I_ENTRY, contracts/
+  schema/pyproject byte-unchanged, predecessor's 72 tests still pass fresh,
+  bind-ordering correct, no writer/mutation escalation, no raw-authority
+  escape, narrow non-widening guard reconciliation, no test
+  deleted/renamed/skipped/inverted). Added a fresh 13-test IV suite
+  (`tests/test_..._n16_5_f5b1_iv.py`) as committed, reproducible evidence,
+  including the live consumer-spoof reproduction. No production, contract,
+  dependency, or protected-host state changed. Required successor (derived,
+  NOT begun): a narrowly-scoped repair phase (alias **N16-5-F-5-B2**) to
+  bind consumer identity to a non-bypassable trusted mechanism for
+  `recognized_certification_read_authority` (and, given the shared helper,
+  likely `production_writer`/`certification_writer` too). N-16-6/N-16-7
+  remain OPEN/UNTOUCHED; N-16-7 strictly last.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-F-5-B1-IMPL**) — **Production Recognized Read / Ceremony
   Authority Implementation for N-16-5 Final Certification — F-5-B1 Repair**.

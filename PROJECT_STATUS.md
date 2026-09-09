@@ -2,6 +2,94 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F-5-B1-IV**) — Independent Verification of the Production
+Recognized Read / Ceremony Authority Implementation for N-16-5 — F-5-B1
+Repair Against HPAC-PAWA-001 v1.4. **STATUS: COMPLETE (verification-only —
+no `src/pcae`/`scripts`/contract-text mutation). F-5-B1: NOT VERIFIED /
+BLOCKED. N-16-5: NOT CLOSED.** CPIPC: valid direct `.1R` successor of
+N16-5-F-5-B1-IMPL (same series/branch, strict order, unique, no active
+conflict; independently re-derived via `pcae.core.phase_id`, alias
+display-only, no discrepancy). **I_ENTRY = `a6455ef1`** (predecessor
+implementation phase-entry SHA, independently re-derived from Git, not
+adopted from the predecessor's own prose).
+
+**MATERIAL FINDING — consumer authenticity is spoofable.** The predecessor's
+F-5-B1 repair reused the pre-existing `_detect_caller_module(explicit)`
+helper (shared with `production_writer` / `certification_writer` since
+before I_ENTRY) unmodified for its new
+`recognized_certification_read_authority(...)` factory. That helper returns
+any caller-supplied `_caller_module` value **verbatim, with no runtime
+gate**, before ever consulting the real call stack. An arbitrary,
+genuinely-unauthorized in-process module — demonstrated live in this IV by
+the IV test module itself, via nothing more than the public keyword
+argument (no reflection, no private-attribute access, no monkeypatching) —
+successfully impersonates the sole authorized consumer
+(`pcae.core.hpac_certification_coordinator`) and receives a fully working,
+indistinguishable `CertificationReadAuthority` handle
+(`tests/test_..._n16_5_f5b1_iv.py::test_21_arbitrary_caller_spoofs_coordinator_identity_and_succeeds`).
+Independent inspection of the predecessor's own test file confirms its
+"authorized consumer accepted" positive tests (e.g. `test_12`) exercise the
+factory exclusively via this same caller-supplied override from the test
+module — i.e. the predecessor's own evidence for consumer authenticity was
+produced using the mechanism this IV finds is spoofable, not by exercising
+a genuine trusted-caller-identity binding. The only existing control is a
+*static*, source-scanning guard test elsewhere in the repo that asserts no
+non-test module in this checkout happens to pass the argument — not a
+runtime authorization boundary, and not effective against any caller outside
+that repo-local scan (a future plugin, an untracked script, or any code path
+the guard's `git grep` doesn't cover). Per HPAC-PAWA-001 v1.4 §33B/§38B and
+this IV's governing mandatory consumer-authenticity criterion, this is a
+BLOCKING defect. This exact pattern pre-dates F-5-B1 (present verbatim in
+`production_writer`/`certification_writer` before I_ENTRY, confirmed via
+`git log -S_caller_module`) — F-5-B1 did not introduce it, but its own
+repair reused it unaddressed, and provenance does not change the verdict for
+F-5-B1's own read-authority path. **Per this IV's governing rules, the
+defect is NOT repaired in this phase** (verification-only scope); no
+`src/pcae`, `scripts/`, or contract-text file was modified.
+
+All other independently-checked material properties held: production diff
+since I_ENTRY is exactly the 2 claimed files, pure addition; contracts /
+`hpac_pawa_schemas.py` / `pyproject.toml` byte-unchanged; the predecessor's
+72-test suite still fully passes (re-run fresh, not trusted); bind ordering
+(configured-agent bind before protected reads) confirmed by direct control-flow
+reading; no `HPACWriterCapability`/writer-role escalation reachable from the
+read handle; reads return plain records, never an `HPACResolvedRecord`
+carrying `authority_seal`; the handle is non-serialisable
+(`__reduce__` raises `TypeError`) and cannot be constructed without the
+existing `_PRODUCTION_WRITER_FACTORY_SEAL` trust root; the sole
+`approval_presentation` guard widening is narrow (one tuple, no wildcard) and
+no test was deleted/renamed/skipped/inverted in the implementation diff. A
+fresh 13-test IV suite
+(`tests/test_phase_..._1r_1r_2r_1r_1r_1r_1_..._n16_5_f5b1_iv.py`) captures
+all of the above as committed, reproducible evidence — all 13 pass (the
+spoof test passes because it *documents* the current, insecure behavior, not
+because the property holds).
+
+**Verdict: F-5-B1: NOT VERIFIED / BLOCKED. F-5: CERTIFICATION BLOCKED
+PENDING F-5-B2 (consumer-authenticity repair). N-16-5: NOT CLOSED.**
+**Required successor (derived, NOT begun):** a narrowly-scoped repair phase
+(alias **N16-5-F-5-B2**) must bind consumer identity to a trusted
+recognition/topology context (e.g. re-deriving the caller from a verified
+call-stack frame that cannot be overridden by an ordinary keyword argument,
+or an equivalent non-bypassable mechanism) for `recognized_certification_read_authority`
+— and, given the shared helper, should also address `production_writer`
+and `certification_writer`'s identical exposure, since a narrow read-only
+fix that leaves the write-authority factories using the same spoofable
+helper would be incomplete. Do not begin N16-5-F-5-B2 in this phase; it
+requires its own explicit human authorization. Only after a verified repair
+may a fresh **N16-5-F-5-B1-IV.2**-class re-verification run, and only after
+that succeeds may a fresh **N16-5-FINAL-CERT** successor (new CPIPC id) be
+authorized. **N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).**
+**REPORTING-UX-1** still open (non-blocking).
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_N16_5_F_5_B1_IV.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B1-IMPL**) — Production Recognized Read / Ceremony Authority
 Implementation for N-16-5 Final Certification — F-5-B1 Repair Against
