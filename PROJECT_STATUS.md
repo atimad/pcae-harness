@@ -2,7 +2,107 @@
 
 ## Current Phase
 
-Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F-5-B2R-IMPL**) — Privileged Production Factory
+Consumer-Authenticity Repair (Caller-Controlled Module-Identity
+Elimination). **STATUS: F-5-B2 CONSUMER-AUTHENTICITY REPAIR IMPLEMENTED /
+IV PENDING.** CPIPC: valid direct `.1R` successor of `N16-5-F-5-B2-IV` (same
+series/branch, strict order — `pcae.core.phase_id.compare` == `greater` —
+unique against full git history; independently re-derived via
+`pcae.core.phase_id`, alias display-only, no discrepancy).
+
+Repaired the shared `_detect_caller_module` primitive in
+`src/pcae/core/hpac_protected_admin_writer.py` that N16-5-F-5-B2-IV proved
+forgeable (trusting `frame.f_globals["__name__"]`, settable via
+`exec()` against a hand-built globals dict). The repair
+(`_verified_production_caller_name`) now requires, for any of the four
+factories' enumerated production-consumer names: (1) genuine import
+provenance — the candidate's `sys.modules[name]` must carry a real
+`importlib.machinery.SourceFileLoader` origin resolving to the exact
+on-disk path the installed `pcae` package layout requires, derived only
+from the already-imported `pcae` package's own `__file__`, never from
+caller input; and (2) the calling frame's code object must be identical to
+one of that module's own pre-existing function/method code objects,
+captured once at first-verified-use and pinned process-locally. Provenance
+check (1) alone was found insufficient during design (a real module's
+`__dict__` is itself an ordinary caller-referenceable object, so
+`exec(forged_code, real_module.__dict__)` would pass it) — check (2) closes
+that gap. A forged claim is rejected outright via a non-matching
+`"<unverified-caller>"` sentinel, never re-attributed to an outer frame.
+Applies atomically to all four factories (`production_writer`,
+`certification_writer`, `recognized_certification_read_authority`,
+`mint_protected_presentation_evidence_writer` — confirmed by reading each
+factory's source, all funnel through the same primitive). `explicit`/
+`_caller_module` remains present but ignored, unchanged from the
+predecessor repair. `HPAC-PAWA-001` and all other contracts byte-unchanged;
+no new production dependency; no generic writer, second trust root, or
+durable bearer credential introduced.
+
+New focused suite `tests/test_phase_n16_5_f5b2r_impl_repair.py` (23 tests,
+all passing): legitimate consumers succeed for all four factories via
+genuine imports; the predecessor's exact `exec()`-crafted-`__name__`
+forgery denied for all four; `sys.modules` poisoning denied (never pins the
+fake module); decoy/lookalike/copied-source-under-real-name denied; ambient
+env/argv/cwd identity irrelevant; five-role closure intact. The
+predecessor IV's two finding-documentation tests (`test_A1`/`test_A2` in
+`tests/test_phase_n16_5_f5b2_iv_adversarial.py`) are inverted into
+regression locks now asserting the forgery is denied, with a comment
+preserving their origin as the IV's disclosed-vulnerability evidence. Four
+other test files whose positive-path tests used the now-invalidated
+`_caller_identity_helper.py` scratch-module proxy were updated to make
+those calls genuinely originate from the real consumer module instead — no
+assertion about legitimate-consumer behavior was weakened.
+
+**Broader regression (fast_green, `-n auto`): 9645 passed / 368 failed / 5
+skipped / 9 errors**, vs. a `git stash`-confirmed baseline of 9637 passed /
+353 failed on the unmodified predecessor HEAD (`cee7de03`). **Zero
+attributable regressions**: all 18 "new" failures on the candidate are
+either the repository's well-documented fixed-commit `git diff`/`git
+status` self-check pattern (17 instances — trips on any legitimate
+`src/pcae` change by construction) or one confirmed-non-reproducing
+`pytest-xdist` ordering flake; the 3 "fixed" failures are the two
+intentionally-inverted IV tests plus one confirmed-flaky counterpart.
+Clean-installed-wheel boundary independently verified: built
+`pcae_harness-0.4.3` wheel via `python -m build`, installed into an
+isolated venv with no editable checkout on `sys.path`
+(`pcae.__file__` confirmed under that venv's own `site-packages`), the
+focused adversarial suite run against that install (repo's own declared
+`hatp-hardware` extra installed, no new production dependency): 91
+passed / 1 failed (the 1 failure is a `git grep`-based source-scan
+self-check that assumes the git-checkout layout — a test-methodology
+artifact of copying tests out of the repo, not a product defect).
+
+**Verdict: F-5-B2 CONSUMER-AUTHENTICITY REPAIR IMPLEMENTED / IV PENDING.**
+F-5: DEPLOYMENT VERIFIED — CERTIFICATION BLOCKED PENDING FRESH F-5-B2 IV.
+N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly
+last). Runtime posture unchanged: Observed / observe / unavailable / 0
+plugins / 0 capabilities; first governed runtime external effect remains
+ABSENT / UNREACHABLE. No live production/HPAC/PPA/FIDO2 mutation; no real
+certification ceremony performed.
+
+**Required successor (derived, NOT begun): a fresh independent verification
+phase**, display alias `N16-5-F-5-B2R-IV`, that independently reconstructs
+this trust mechanism from primary source and repeats the relevant
+adversarial boundary tests from a clean install — with explicit attention
+to the disclosed trust-on-first-use residual risk (the first-verified-use
+code-object snapshot is captured whenever the first call for a given
+consumer name happens to occur; no bypass was found, but this is an
+inherent TOCTOU risk class in a fully mutable runtime worth a future IV's
+explicit adversarial attention). Only after that IV passes may a fresh
+`N16-5-FINAL-CERT` be considered. Do not begin that IV, N16-6, or N16-7
+without their own explicit human authorization.
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_N16_5_F5B2R_IMPL.md`.
+
+New test suite:
+`tests/test_phase_n16_5_f5b2r_impl_repair.py` (23 tests, all passing).
+
+---
+
+## Prior Phase
+
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B2-IV**) — Independent Verification of Privileged
 Production Factory Consumer-Authenticity Repair. **STATUS: NOT VERIFIED /
 BLOCKED.** CPIPC: valid direct `.1R` successor of `N16-5-F-5-B2-IMPL` (same
