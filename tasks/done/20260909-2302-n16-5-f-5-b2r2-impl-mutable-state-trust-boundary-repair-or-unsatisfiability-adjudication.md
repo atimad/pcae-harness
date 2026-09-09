@@ -6,11 +6,11 @@
 
 ## Title
 
-N16-5-F-5-B2R2-IMPL: mutable-state trust-boundary repair or unsatisfiability adjudication
+N16-5-F-5-B2-R2-IMPL: mutable-state trust-boundary repair or unsatisfiability adjudication
 
 ## Status
 
-active
+done
 
 ## Mode
 
