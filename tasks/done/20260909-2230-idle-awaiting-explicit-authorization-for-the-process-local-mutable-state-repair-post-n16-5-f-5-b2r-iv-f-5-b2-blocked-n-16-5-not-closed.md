@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for the process-local mutable-state repair
 
 ## Status
 
-active
+done
 
 ## Mode
 

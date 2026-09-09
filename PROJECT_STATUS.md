@@ -2,6 +2,92 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1
+(alias **N16-5-F-5-B2R2-IMPL**) — Privileged Production Factory
+Consumer-Authenticity Repair: Mutable-State Elimination / Trust-Boundary
+Repair. CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1`
+(alias `N16-5-F-5-B2R-IV`) (same series/branch, strict order —
+`pcae.core.phase_id.compare` == `greater` — unique against full git
+history; independently re-derived via `pcae.core.phase_id`, alias
+display-only, no discrepancy).
+
+**STATUS: N16-5-F-5-B2R2-IMPL COMPLETE — BLOCKED.**
+
+Reconstructed the trust model behind `_verified_production_caller_name` in
+`src/pcae/core/hpac_protected_admin_writer.py` from primary source (not
+accepted from the predecessor's report), confirming the predecessor's
+disclosed finding still reproduces: `_PINNED_CODE_OBJECTS` /
+`_PINNED_TRUSTED_MODULES` / `_CODE_OBJECT_KEEPALIVE` remain ordinary,
+unencapsulated, directly caller-writable module-level state.
+
+Performed the required Section 8 same-process threat-model adjudication
+with three independently authored and executed PoCs
+(`tests/test_phase_n16_5_f5b2r2_impl.py`, 3/3 passed):
+(1) the predecessor's direct-dict-mutation bypass still mints a genuine
+`ProductionWriterHandle` — unchanged; (2) a trust dict held purely as a
+local closure variable — never assigned to any module-level name, never
+returned — is still located and mutated by ordinary code using only
+`import gc; gc.get_objects()`, with **zero reference chain** to the
+closure, proving no pure-Python encapsulation technique (class attribute,
+name-mangling, `MappingProxyType`, `WeakValueDictionary`, closure) can hide
+authority-bearing mutable state from same-process code; (3) the
+authorizing prompt's own preferred alternative — eliminate the cache
+entirely, re-derive trust fresh from `vars(module)` at every call — is
+**also** unsafe: an ordinary caller can define a new function directly
+inside the trusted module's own namespace via `exec()` against
+`module.__dict__` (an ordinary operation on an already-imported module
+object) and have a fresh-every-call scan correctly-by-its-own-logic
+recognize it as trusted, because by scan time it genuinely is present in
+the module's namespace.
+
+**Verdict: the frozen HPAC-PAWA-001 consumer-authenticity property is
+UNSATISFIABLE within the current same-process Python interpreter
+boundary**, for all four privileged factories, under every design shape
+considered (cache-based, cache-free, or conventional encapsulation of
+either) — a same-interpreter, standard-library capability limitation
+(`gc.get_objects()`/`gc.get_referrers()` require no reference chain), not
+a coding defect fixable by better hiding of state. Per governed early-stop
+discipline, **no cosmetic re-encapsulation was implemented**: building a
+repair that only obscures rather than removes the defect would produce
+false assurance. `src/pcae/core/hpac_protected_admin_writer.py` is
+byte-unchanged by this phase; contracts (`HPAC-PAWA-001` v1.4 and others)
+byte-unchanged. No live production/HPAC/PPA/FIDO2 mutation; no real
+certification ceremony performed. Runtime posture unchanged: Observed /
+observe / unavailable / 0 plugins / 0 capabilities; first governed runtime
+external effect remains ABSENT / UNREACHABLE.
+
+Broader regression check (`pytest -m fast_green -n auto`): 9667
+passed / 352 failed / 5 skipped / 9 errors, with **0 attributable
+regressions** — a stashed-new-test-file baseline run produced an identical
+failed-test-ID set (modulo one unrelated pre-existing flake), confirming
+the ~352 failures are the repository's known population of
+fixed-commit-hash self-checks across dozens of historical phases, not
+introduced or worsened by this phase.
+
+**Verdict: F-5-B2 BLOCKED.** F-5: CERTIFICATION BLOCKED. N-16-5: NOT
+CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).
+
+**Recommended successor (derived, NOT begun): a fresh governed
+architecture phase** defining a stronger trust boundary than pure
+same-process Python (e.g. a separate minimally-privileged helper process
+holding the authority state behind an IPC surface, or a C-extension-backed
+opaque capability not represented as a Python heap object reachable via
+`gc`). This phase does not design or implement that architecture. An IV of
+this phase's (non-)implementation is not applicable, since no repair was
+implemented. Do not begin that architecture phase, N16-6, or N16-7 without
+their own explicit human authorization.
+
+Canonical report: `docs/PHASE_N16_5_F5B2R2_IMPL.md`.
+
+New test suite: `tests/test_phase_n16_5_f5b2r2_impl.py` (3 tests, all
+passing — 1 regression reconfirmation + 2 same-process-unsatisfiability
+architectural PoCs).
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1
 (alias **N16-5-F-5-B2R-IV**) — Fresh Independent Verification of Privileged
 Production Factory Consumer-Authenticity Repair. CPIPC: valid direct `.1`
