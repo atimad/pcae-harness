@@ -2,13 +2,91 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
+(alias **N16-5-F-5-B2-IV**) — Independent Verification of Privileged
+Production Factory Consumer-Authenticity Repair. **STATUS: NOT VERIFIED /
+BLOCKED.** CPIPC: valid direct `.1R` successor of `N16-5-F-5-B2-IMPL` (same
+series/branch, strict order, unique against full git history; independently
+re-derived via `pcae.core.phase_id`, alias display-only, no discrepancy).
+
+Independently reconstructed the B2 defect/repair from primary source (not
+from the predecessor's report): the repaired `_detect_caller_module` in
+`src/pcae/core/hpac_protected_admin_writer.py` unconditionally discards the
+`explicit`/`_caller_module` keyword and instead walks `inspect.stack()`,
+trusting `frame.f_globals.get("__name__")` for the first non-contextlib
+frame beyond the factory call. This closes the originally-disclosed
+keyword-argument spoof path (confirmed: `test_E2` still denies it), but
+**does not establish trusted build-time/import-time provenance** as
+`HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md` §32 requires —
+`f_globals["__name__"]` is an ordinary dict key on the caller's own frame,
+settable by any in-process code via `exec()` with a hand-built globals
+dict, with no import-machinery registration (`sys.modules`) required.
+
+New independent adversarial suite
+(`tests/test_phase_n16_5_f5b2_iv_adversarial.py`, 20 tests): **18 passed /
+2 failed**. Ambient-identity spoofing (USER/LOGNAME/SUDO_USER/PATH/argv/cwd)
+correctly denied; a genuinely-imported decoy module under a different
+dotted path correctly denied; five-role closure negative sweep
+(terminator/unknown/empty/wildcard/case/near-miss/multi-role) correctly
+denied, exact 5-role set confirmed intact; no new public factory symbol.
+**BLOCKING FINDING:** using the exact `exec()`-with-crafted-`__name__`-
+globals technique the repository's own `tests/_caller_identity_helper.py`
+already relies on to simulate a "legitimate" caller, an ordinary in-process
+caller with no special privilege forges `__name__` to an enumerated
+authorized-consumer string and obtains a genuine, fully-usable capability
+handle — independently reproduced and confirmed (not merely a fork/agent
+claim) against `production_writer` (`ProductionWriterHandle`) and
+`certification_writer` (`CertificationWriterHandle`). This reproduces the
+B2 defect's authority consequence through a different mechanical route:
+the repair relocated trust from the disclosed `_caller_module` keyword to
+an equally caller-controllable implicit global, rather than eliminating
+caller-controlled recognition. Not independently exercised against
+`recognized_certification_read_authority` or
+`mint_protected_presentation_evidence_writer` or the clean-installed wheel
+in this phase (time-bounded); given the shared primitive, the same class
+of failure is likely present there too, but that is inference, not direct
+proof, for those two paths.
+
+Per governed independence discipline (§18/§27 of the operator prompt), this
+defect is **recorded, not repaired**, in this IV phase. No `src/pcae`
+source, no frozen contract (`HPAC-PAWA-001` byte-unchanged), and no
+security semantics were modified. The predecessor's original 49-test suite
+still passes 49/49 unchanged (it never exercised this vector).
+
+**Verdict: N16-5-F-5-B2: NOT VERIFIED / BLOCKED.** F-5: CERTIFICATION
+remains BLOCKED. N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED
+(N-16-7 strictly last). Runtime posture unchanged: Observed / observe /
+unavailable / 0 plugins / 0 capabilities; first governed runtime external
+effect remains ABSENT / UNREACHABLE. No live production/HPAC/PPA/FIDO2
+mutation; no real certification ceremony performed.
+
+**Required successor (derived, NOT begun): a fresh governed repair phase**
+for the `__name__`-forgery consumer-recognition defect (new CPIPC-valid
+child of this IV phase), covering all four factories including the two not
+directly re-tested here and the clean-installed wheel boundary. Only after
+that repair is independently verified may `N16-5-F-5-B2-IV` retry / a fresh
+`N16-5-FINAL-CERT` be authorized. Do not begin the repair phase, N16-6, or
+N16-7 without their own explicit human authorization.
+
+Canonical report:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_N16_5_F5B2_IV.md`.
+
+New test suite:
+`tests/test_phase_n16_5_f5b2_iv_adversarial.py` (20 tests, 18 pass / 2
+fail-as-designed, documenting the blocking finding).
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R
 (alias **N16-5-F-5-B2-IMPL**) — Privileged Production Factory
 Consumer-Authenticity Repair. **STATUS: F-5-B2 REPAIR IMPLEMENTED / IV
-PENDING.** CPIPC: valid direct `.1R` successor of `N16-5-F-5-B2` (same
-series/branch, strict order, unique, no active conflict; independently
-re-derived via `pcae.core.phase_id`, alias display-only, no discrepancy).
-**I0 = `585f6b42`** (phase-entry SHA).
+PENDING (superseded — see Current Phase: independent verification found the
+repair insufficient).** CPIPC: valid direct `.1R` successor of
+`N16-5-F-5-B2` (same series/branch, strict order, unique, no active
+conflict; independently re-derived via `pcae.core.phase_id`, alias
+display-only, no discrepancy). **I0 = `585f6b42`** (phase-entry SHA).
 
 Repaired the single shared primitive `_detect_caller_module` in
 `src/pcae/core/hpac_protected_admin_writer.py`: the caller-controlled early

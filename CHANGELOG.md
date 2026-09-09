@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
+  (alias **N16-5-F-5-B2-IV**) — **Independent Verification of Privileged
+  Production Factory Consumer-Authenticity Repair**. Independently
+  reconstructed the predecessor's repair from primary source and found it
+  insufficient: the repaired `_detect_caller_module` trusts
+  `frame.f_globals["__name__"]`, which any in-process caller can forge via
+  `exec()` with a hand-built globals dict — no import-machinery
+  registration required. New independent adversarial suite
+  (`tests/test_phase_n16_5_f5b2_iv_adversarial.py`, 20 tests, 18 passed / 2
+  failed) reproduces the B2 defect's authority consequence through this
+  different mechanical route against `production_writer` and
+  `certification_writer` (genuine capability handles obtained from a
+  forged identity). Ambient-identity spoofing, a genuinely-imported decoy
+  module, and the five-role closure all remain correctly denied. No
+  production source or contract modified in this IV phase (defect
+  recorded, not repaired, per governed independence discipline).
+  **Verdict: N16-5-F-5-B2 NOT VERIFIED / BLOCKED. F-5 CERTIFICATION
+  remains BLOCKED. N-16-5 NOT CLOSED.** A fresh governed repair phase for
+  the `__name__`-forgery defect is required before any retry.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-F-5-B2-IMPL**) — **Privileged Production Factory
   Consumer-Authenticity Repair**. Repaired the shared `_detect_caller_module`
