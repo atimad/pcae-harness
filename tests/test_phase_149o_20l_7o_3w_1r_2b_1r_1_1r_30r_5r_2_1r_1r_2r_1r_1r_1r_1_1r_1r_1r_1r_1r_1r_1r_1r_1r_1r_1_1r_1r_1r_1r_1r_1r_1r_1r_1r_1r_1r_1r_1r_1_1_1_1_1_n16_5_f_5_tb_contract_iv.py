@@ -128,24 +128,37 @@ def test_00_cpipc_child_is_exact_canonical_direct_successor() -> None:
     assert len(CANONICAL_PHASE_ID.split(".")) == len(PREDECESSOR_PHASE_ID.split(".")) + 1
 
 
-def test_00b_child_id_absent_from_history_and_tree() -> None:
-    assert CANONICAL_PHASE_ID not in _git("log", "--all", "--format=%H %s")
+def test_00b_child_id_is_a_distinct_new_cpipc_identity() -> None:
+    """A strict CPIPC child of the predecessor that, at the phase-entry SHA
+    (before this phase's own commits), appeared nowhere in git or the tree --
+    it reuses no completed or blocked phase identity."""
+    from pcae.core import phase_id as p
+
+    assert CANONICAL_PHASE_ID != PREDECESSOR_PHASE_ID
+    assert p.compare(p.parse(PREDECESSOR_PHASE_ID), p.parse(CANONICAL_PHASE_ID)) == "less"
+    assert CANONICAL_PHASE_ID not in _git("log", ENTRY, "--format=%H %s")
     hits = subprocess.run(
         ["git", "grep", "-lF", CANONICAL_PHASE_ID, ENTRY, "--", "docs", "tasks", ".pcae"],
         cwd=ROOT, capture_output=True, text=True,
     )
     assert hits.stdout.strip() == ""
+    # after finalization it is carried by this phase's own canonical report
+    assert CANONICAL_PHASE_ID in text(REPORT)
 
 
 def test_00c_predecessor_is_completed_contract_freeze() -> None:
-    import json
-
-    meta = json.loads((ROOT / ".pcae/phase-completion-metadata.json").read_text())
-    assert meta["phase_id"] == PREDECESSOR_PHASE_ID
-    assert meta["status"] == "completed"
-    assert "PROJECT_STATUS.md" in text(PPA.parent.parent.parent / "PROJECT_STATUS.md")[:200] or True
-    ps = (ROOT / "PROJECT_STATUS.md").read_text()
-    assert "N16-5-F-5-TB-CONTRACT COMPLETE" in ps
+    """Confirmed from immutable primary sources -- the predecessor's own
+    canonical report doc and the frozen HPAC-PAWA-001 v2.0 header -- not the
+    live (now-superseded) metadata / PROJECT_STATUS."""
+    pred_report = ROOT / (
+        "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F_5_TB_CONTRACT.md"
+    )
+    assert pred_report.exists()
+    rt = text(pred_report)
+    assert "COMPLETE — CONTRACT FROZEN" in rt
+    assert PREDECESSOR_PHASE_ID in rt
+    assert text(PAWA).splitlines()[0].startswith("# HPAC-PAWA-001 v2.0 —")
+    assert text(HELPER).splitlines()[0].startswith("# HPAC-PAWA-HELPER-001 v1.0 —")
 
 
 # ==========================================================================
