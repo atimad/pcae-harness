@@ -120,9 +120,17 @@
         {
             "hash": "392de05d4e280a6e5db0b76f9ddf2cdedeb40d2f",
             "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1 (N16-5-F-5-TB-ARCH): stage phase-completion metadata and canonical report"
+        },
+        {
+            "hash": "35194572be5ec774e929cea727972972b17ce919",
+            "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1 (N16-5-F-5-TB-ARCH): sync pushed_status / origin_main_head / phase_commits trust fields post-push"
+        },
+        {
+            "hash": "c52e1e8bcc0de7defde0ecb422a677a42cade2c9",
+            "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1 (N16-5-F-5-TB-ARCH): close phase-ID-titled task, open idle task"
         }
     ],
     "recommended_next_phase": "A fresh governed CONTRACT-EVOLUTION phase (alias e.g. N16-5-F-5-TB-CONTRACT, id NOT reserved) freezing the HPAC-PAWA-001 restructure this architecture requires: rewrite section 32 predicate 6 / section 33 step 9 (calling-module identity -> exec'd-from-the-verified-helper + deployment-owner peer credential + the section 33 OS recognition run inside the helper); section 36 / section 37 / section 38 / section 42B / section 42D (the privileged side performs the operation and returns typed evidence; no HPACWriterCapability / HPACStoreAuthority / handle crosses back); section 33B / section 49B / PAWA-INV-14 (restate factory 3 as typed enumerated reads + a ceremony-entry hand-off); and add a companion helper-protocol contract analogous to HPAC-PPA-001 (or determine HPAC-PPA-001 can be extended). It SHALL classify the magnitude definitively (this phase assesses most likely MAJOR), preserve every section 5 / section 68 wall, the five-role family, the human-approval separation, the mechanism-neutral / mobile-only future path, the non-bearer / restart-dead semantics, and the single OS filesystem trust root, and introduce no second trust root. Contract-only, no src/pcae / scripts / tests / dependency change; no protected-host mutation; no ceremony. It is to be followed by: a dedicated contract IV; a helper + protocol implementation slice; a caller-integration slice; an in-process-path removal slice (a compatibility shim MUST NOT preserve the insecure in-process authority path); a packaging / clean-install slice; a dedicated independent security IV; a production deployment; and only then a fresh N16-5-FINAL-CERT on a fresh CPIPC-valid successor id (never reuse a completed or blocked certification identity). Do NOT begin the contract-evolution phase, any implementation slice, N-16-6, or N-16-7 in this phase; each requires its own explicit human authorization. REPORTING-UX-1 remains open (non-blocking).",
     "pushed_status": "pushed",
-    "origin_main_head": "392de05d4e280a6e5db0b76f9ddf2cdedeb40d2f"
+    "origin_main_head": "c52e1e8bcc0de7defde0ecb422a677a42cade2c9"
 }

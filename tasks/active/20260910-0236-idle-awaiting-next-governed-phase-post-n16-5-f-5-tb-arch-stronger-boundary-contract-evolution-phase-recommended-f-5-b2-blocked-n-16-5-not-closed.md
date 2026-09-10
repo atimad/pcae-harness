@@ -22,13 +22,11 @@ Idle: awaiting next governed phase (post-N16-5-F-5-TB-ARCH); stronger-boundary c
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tasks/**
 
 ## Forbidden Files
 
