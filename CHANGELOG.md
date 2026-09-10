@@ -1,5 +1,42 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1`
+  (alias **N16-5-F-5-PPA-CONTRACT**) — **HPAC-PPA-001 Contract Evolution:
+  Out-of-Process Presentation-Evidence Writer Ownership Alignment.**
+  Contract-only governed phase. **HPAC-PPA-001 evolved v1.0 → v2.0 (MAJOR,
+  HPAC-PPA-REQ-069).** Resolves the N16-5-F-5-TB-CONTRACT-IV blocking finding
+  (evidence-writer-delivery adjudication option B) **at contract level**: the
+  bounded `HPAC-PRESENTATION-EVIDENCE/2.0` write moves into the verified
+  protected presentation helper process (**HPAC-PPA-REQ-077**), no
+  evidence-writer object / capability / handle / seal / reconstructable
+  descriptor crosses any process boundary (**HPAC-PPA-REQ-078 / -087**,
+  **PPA-INV-9**), `pcae.core.protected_presentation` is no longer the
+  evidence-writer issuer — the write is a protected-side-internal helper
+  operation, never minted / returned / serialised / delivered
+  (**HPAC-PPA-REQ-081**), and **PPA-INV-2** is re-derived as *semantic*
+  trust-action separation preserved even within one verified helper process
+  (**PPA-INV-2 (v2.0)**, **HPAC-PPA-REQ-083**). New `HPAC-PPA-REQ-077..103`,
+  `PPA-INV-9..12`, §21 / §21A delta table / §22 v2.0 freeze verdict; every v1.0
+  requirement body kept **byte-verbatim**. Human-approval / human-authentication
+  / Gate 5 / PB / runtime / execution walls preserved verbatim
+  (**HPAC-PPA-REQ-093..095**); single trust root unchanged, **no second trust
+  root** (**HPAC-PPA-REQ-088**); **NO SCHEMA CHANGE** (**HPAC-PPA-REQ-097**);
+  **no new `pawa_failure_code` / RHAMP `terminal_reason_code`**
+  (**HPAC-PPA-REQ-098**); mechanism neutrality / mobile future preserved
+  (**HPAC-PPA-REQ-096**). HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2,
+  RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1, HPAC-PAWA-001 v2.0,
+  HPAC-PAWA-HELPER-001 v1.0 byte-unchanged and now semantically consistent.
+  Added a 39-assertion contract-verification suite; reconciled 18 downstream
+  point-in-time guard suites widen-not-weaken (A/B: **0 attributable
+  regressions**, no test renamed / removed / disabled). **No `src/pcae` /
+  `scripts` / `pyproject.toml` / `schemas` change; no protected-host mutation;
+  no ceremony.** Runtime `not_implemented` / Observed / observe / unavailable;
+  0 plugins / 0 capabilities; first governed runtime external effect **ABSENT /
+  UNREACHABLE**. **F-5-B2: BLOCKED. F-5: CERTIFICATION BLOCKED. N-16-5: NOT
+  CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last).**
+  Recommended next (derived, **NOT begun**): dedicated IV
+  **N16-5-F-5-PPA-CONTRACT-IV**, then the resolved-trio cross-contract IV, then
+  the HPAC-PAWA-REQ-340 implementation sequence.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1`
   (alias **N16-5-F-5-TB-CONTRACT-IV**) — **Dedicated Independent Verification of
   HPAC-PAWA-001 v2.0 and HPAC-PAWA-HELPER-001 v1.0**. Contract-verification-only

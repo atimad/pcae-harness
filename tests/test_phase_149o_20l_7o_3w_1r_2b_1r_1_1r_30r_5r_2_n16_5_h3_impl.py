@@ -1290,6 +1290,18 @@ def test_127_certification_capabilities_are_process_local_non_bearer(rig):
 
 
 def test_128_admin_script_status_does_not_mutate_and_exits_cleanly_or_2():
+    # Reconciled by phase N16-5-F-5-PPA-CONTRACT: compare the tracked-file diff
+    # before and after running the script rather than asserting the working
+    # tree is free of contract-path changes -- an unrelated in-flight governed
+    # contract evolution (HPAC-PPA-001 v1.0 -> v2.0) may legitimately have
+    # docs/contracts edits staged in the working tree; the property under test
+    # is that the bounded `status` read introduces NO new tracked-file change.
+    def _diff() -> set[str]:
+        return set(subprocess.run(
+            ["git", "-C", str(REPO), "diff", "--name-only"], capture_output=True, text=True
+        ).stdout.split())
+
+    before = _diff()
     r = subprocess.run(
         [sys.executable, str(REPO / "scripts" / "hpac_certification_admin.py"), "status"],
         capture_output=True, text=True,
@@ -1297,10 +1309,7 @@ def test_128_admin_script_status_does_not_mutate_and_exits_cleanly_or_2():
     assert r.returncode in (0, 2)  # 0 if a real root exists, 2 (reported) otherwise
     # the bounded `status` entry performs only a read; it touches no protected
     # store and no tracked source file.
-    changed = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only"], capture_output=True, text=True
-    ).stdout.split()
-    assert not any(p.startswith(("src/", "scripts/", "docs/contracts/", "schemas/")) for p in changed)
+    assert _diff() == before
 
 
 def test_129_no_new_terminal_reason_and_rhamp_contract_unedited_since_i0():

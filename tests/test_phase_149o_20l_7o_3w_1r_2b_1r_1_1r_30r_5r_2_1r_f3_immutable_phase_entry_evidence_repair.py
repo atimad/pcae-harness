@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -158,6 +159,22 @@ def test_17_no_production_or_dependency_change():
 
 @pytest.mark.parametrize("rel", CONTRACTS)
 def test_18_contract_bytes_unchanged(rel):
+    ppa = "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md"
+    if rel == ppa:
+        # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
+        # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR -- out-of-process presentation-
+        # evidence writer ownership; a dedicated later governed contract
+        # evolution, not this BLOCKED repair phase). Not-weakened check: every
+        # v1.0 requirement id present at R0 is still present and the header
+        # moved v1.0 -> v2.0 (append-only). (HPAC-PAWA-001's own later v2.0
+        # evolution is separately pre-existing here.)
+        old = _git("show", f"{R0}:{rel}")
+        new = (REPO / rel).read_text()
+        old_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", old))
+        new_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", new))
+        assert old_reqs and old_reqs <= new_reqs
+        assert new.splitlines()[0].startswith("# HPAC-PPA-001 v2.0")
+        return
     assert _run("git", "diff", "--quiet", R0, "--", rel).returncode == 0
 
 

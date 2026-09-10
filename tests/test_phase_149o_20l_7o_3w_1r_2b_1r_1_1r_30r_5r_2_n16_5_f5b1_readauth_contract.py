@@ -352,8 +352,19 @@ def test_71_only_this_contract_changed_in_docs_contracts_since_c0() -> None:
 
 def test_72_schemas_byte_unchanged_since_c0() -> None:
     assert at_c0(SCHEMAS) == SCHEMAS.read_bytes()
-    for c in (PPA, RHAMP, HPAC, HBDC):
+    for c in (RHAMP, HPAC, HBDC):
         assert at_c0(c) == c.read_bytes()
+    # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR -- out-of-process presentation-evidence
+    # writer ownership). The byte-freeze on HPAC-PPA-001 becomes a not-weakened
+    # check: every v1.0 requirement id present at C0 is still present, the
+    # numbering only grew, and the header moved v1.0 -> v2.0 (append-only).
+    old = at_c0(PPA).decode()
+    new = PPA.read_text()
+    old_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", old))
+    new_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", new))
+    assert old_reqs and old_reqs <= new_reqs and len(new_reqs) >= len(old_reqs)
+    assert new.splitlines()[0].startswith("# HPAC-PPA-001 v2.0")
 
 
 def test_73_no_instance_ids_frozen_normatively() -> None:

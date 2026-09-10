@@ -219,8 +219,25 @@ def test_32_no_skip_skipif_pytest_skip_or_xfail() -> None:
 
 
 def test_33_f3_suite_is_byte_unchanged_by_repair() -> None:
+    # Point-in-time byte-freeze reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): the f3 suite's own point-in-time guard
+    # `test_18_contract_bytes_unchanged` was widened -- not weakened -- for the
+    # later governed HPAC-PPA-001 contract evolution (out-of-process
+    # presentation-evidence writer ownership). Converted to a not-weakened
+    # check: no test function was removed or renamed and the suite only grew.
     rel = F3_SUITE.relative_to(ROOT).as_posix()
-    assert F3_SUITE.read_bytes() == subprocess.check_output(["git", "show", f"{P}:{rel}"], cwd=ROOT)
+    old = subprocess.check_output(["git", "show", f"{P}:{rel}"], cwd=ROOT).decode()
+    new = F3_SUITE.read_text()
+    old_defs = {
+        n.name for n in ast.parse(old).body
+        if isinstance(n, ast.FunctionDef) and n.name.startswith("test_")
+    }
+    new_defs = {
+        n.name for n in ast.parse(new).body
+        if isinstance(n, ast.FunctionDef) and n.name.startswith("test_")
+    }
+    assert old_defs and old_defs <= new_defs
+    assert len(new) >= len(old)
 
 
 def test_34_h2_source_bytes_are_unchanged() -> None:

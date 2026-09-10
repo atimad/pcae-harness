@@ -312,8 +312,19 @@ def test_34_schemas_byte_unchanged_clause() -> None:
 
 
 def test_35_related_frozen_contracts_byte_unchanged_at_h0() -> None:
-    for path in (PPA, RHAMP, HPAC, HBDC):
+    for path in (RHAMP, HPAC, HBDC):
         assert at_h0(path) == path.read_bytes()
+    # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR -- out-of-process presentation-evidence
+    # writer ownership). Not-weakened check on HPAC-PPA-001: every v1.0
+    # requirement id present at H0 is still present, numbering only grew, and
+    # the header moved v1.0 -> v2.0 (append-only evolution).
+    old = at_h0(PPA).decode()
+    new = PPA.read_text()
+    old_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", old))
+    new_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", new))
+    assert old_reqs and old_reqs <= new_reqs and len(new_reqs) >= len(old_reqs)
+    assert new.splitlines()[0].startswith("# HPAC-PPA-001 v2.0")
 
 
 # --- 9. MINOR classification --------------------------------------
@@ -357,9 +368,11 @@ def test_39_only_this_contract_changed_in_docs_contracts() -> None:
         ).decode().split()
     )
     # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): the later MAJOR adds one new companion contract file.
+    # Reconciled again by phase N16-5-F-5-PPA-CONTRACT (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): the later governed successor evolves the HPAC-PPA-001 document in place (out-of-process presentation-evidence writer ownership).
     assert out <= {
         "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
         "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
+        "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
     }, out
 
 

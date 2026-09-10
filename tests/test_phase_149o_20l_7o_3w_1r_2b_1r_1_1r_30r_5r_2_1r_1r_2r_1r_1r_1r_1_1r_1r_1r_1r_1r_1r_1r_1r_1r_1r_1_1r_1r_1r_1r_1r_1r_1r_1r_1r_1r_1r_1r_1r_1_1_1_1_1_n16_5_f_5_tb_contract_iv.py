@@ -200,7 +200,12 @@ def test_04_sibling_contracts_byte_unchanged_since_pawa_v2_0_freeze() -> None:
 def test_05_sibling_version_headers_match_v2_0_claims() -> None:
     assert text(HPAC).splitlines()[0].startswith("# HPAC-001 v2.1 —")
     assert text(RHAMP).splitlines()[0].startswith("# RHAMP-001 v1.0 —")
-    assert text(PPA).splitlines()[0].startswith("# HPAC-PPA-001 v1.0 —")
+    # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): v2.0 is the current in-place evolution
+    # (out-of-process presentation-evidence writer ownership); v1.0 is the floor.
+    assert text(PPA).splitlines()[0].startswith(
+        ("# HPAC-PPA-001 v1.0 —", "# HPAC-PPA-001 v2.0 —")
+    )
     assert text(RIHAC).splitlines()[0].startswith("# RIHAC-001 v2.0 —")
     assert text(RIASC).splitlines()[0].startswith("# RIASC-001 v3.0 —")
     assert text(RDGO).splitlines()[0].startswith("# RDGO-001 v3.1 —")

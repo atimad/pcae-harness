@@ -2,6 +2,160 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1
+(alias **N16-5-F-5-PPA-CONTRACT**) — HPAC-PPA-001 Contract Evolution:
+Out-of-Process Presentation-Evidence Writer Ownership Alignment. CPIPC: valid
+direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1`
+(alias `N16-5-F-5-TB-CONTRACT-IV`) — same series `149` / branch `O`, strict
+order (`pcae.core.phase_id.compare` == `less`), exactly one appended `.1`
+segment (51 subphase segments vs 50), exact canonical text
+(`normalize(id) == id`), unique against full git history and `docs/` / `tasks/`
+/ `.pcae/`, no conflicting active governed phase; alias display-only, no
+`<digit><letter>` token.
+
+**STATUS: N16-5-F-5-PPA-CONTRACT COMPLETE — CONTRACT FROZEN. HPAC-PPA-001
+evolved v1.0 → v2.0 (MAJOR, HPAC-PPA-REQ-069).**
+
+Contract-only governed phase. Entry state: branch `main`, HEAD == `origin/main`
+== `8c0e2e0a`, `origin/main..HEAD` = 0, tree clean. Predecessor
+**N16-5-F-5-TB-CONTRACT-IV** confirmed COMPLETE — NOT VERIFIED / BLOCKED
+(`PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json` `status: blocked`
+terminal, canonical Phase Report, governed done task).
+
+**Resolution of the predecessor blocking finding (option B).** The predecessor
+contract IV blocked because HPAC-PAWA-HELPER-001 v1.0 §17
+(HPAC-PAWA-HELPER-REQ-070) and HPAC-PAWA-001 v2.0 §42B note freeze
+`presentation_evidence_write` as *invoked by the HPAC-PPA-001 presentation
+helper itself*, materially conflicting with HPAC-PPA-001 v1.0 HPAC-PPA-REQ-041
+(*"held only by the trusted launcher mediator … never sent to the helper"*),
+HPAC-PPA-REQ-054 (*"evidence producer is only the launcher mediator"*),
+HPAC-PPA-REQ-052 (a distinct evidence-writer-issuer module), and PPA-INV-2. This
+phase evolves HPAC-PPA-001 to authorise the stronger model.
+
+**Version classification (independent): MAJOR (v1.0 → v2.0).** Moving the
+evidence-writer holder from the launcher mediator into the verified helper
+process, and collapsing two of PPA-INV-2's four trust actions into one process,
+is an authority-ownership restructure — outside HPAC-PPA-REQ-070's MINOR permits
+(REQ-041's parenthetical governs *which primitive*, not *which component holds
+it*). Re-derived from the primary REQ-069 / REQ-070 text.
+
+**The v2.0 normative delta** (sole change:
+`docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md`, in place;
+new `HPAC-PPA-REQ-077..103`, `PPA-INV-9..12`, re-derived `PPA-INV-2 (v2.0)`,
+`(v2.0) §8 / §10 / §14 notes`, §21 / §21A delta table / §22 v2.0 freeze
+verdict; every v1.0 requirement body **byte-verbatim**):
+
+- **HPAC-PPA-REQ-077** — the verified protected presentation helper process
+  that conducts a ceremony is the **sole author** of the one create-only
+  `HPAC-PRESENTATION-EVIDENCE/2.0` record for that ceremony, after one valid
+  `APPROVE`. Supersedes REQ-054 and the launcher-holder clause of REQ-041.
+- **HPAC-PPA-REQ-078 / -087 / PPA-INV-9** — no `HPACWriterCapability`, HPAC
+  writer, capability token, serialised seal, reconstructable authority
+  descriptor, or opaque bearer handle crosses **any** process boundary; the
+  helper is admitted through the protected-process trust boundary and performs
+  exactly one bounded persistence operation itself; only typed evidence /
+  result leaves; the authorization is gone at helper exit.
+- **HPAC-PPA-REQ-079** — the helper-held write authorization is seal-guarded,
+  process-local, non-serialisable, non-copyable, restart-dead, single-use,
+  bound to the exact ceremony `(invocation_id, attempt_id)` / request digest /
+  nonce / approval id / challenge id / presentation digest / mechanism /
+  installation / generation / digest / descriptor digest / renderer profile /
+  human election / freshness / helper generation; **never returned, minted as a
+  factory result, or delivered** (no returnable writer). REQ-042 / -044 / -045
+  / -046 apply unchanged.
+- **HPAC-PPA-REQ-081** — `pcae.core.protected_presentation` is **no longer**
+  the evidence-writer issuer (REQ-052); the evidence-write is a
+  **protected-side-internal operation of the helper process**
+  (`pcae.protected_presentation_helper`), never minted / returned / serialised
+  / delivered; no `mint_*` factory returns a writer.
+- **HPAC-PPA-REQ-082** — helper response ≠ evidence-writer authority ≠ human
+  approval ≠ real authentication ≠ Gate-5 result; the caller cannot
+  reconstruct writer authority from the response.
+- **PPA-INV-2 (v2.0) / HPAC-PPA-REQ-083** — semantic (not process-location)
+  trust-action separation, preserved even within one verified helper process;
+  the v1.0 four-action wording is preserved.
+- **HPAC-PPA-REQ-084 / PPA-INV-12** — HPAC-PPA-001 owns presentation semantics
+  and the definition of valid presentation evidence / human election;
+  HPAC-PAWA-HELPER-001 §17 is the transport; no circular authority.
+- **HPAC-PPA-REQ-088 / PPA-INV-10** — same verified helper object/process
+  conducts the ceremony and writes the evidence (open-no-symlink,
+  type/link/owner/mode/ACL, SHA-256 == `helper_sha256`, same opened file object
+  exec or **STOPS BLOCKED**); single trust root **unchanged** (OS filesystem
+  write authority on the out-of-band protected root); **no second trust root**;
+  helper hash / path / registration metadata ≠ trust root.
+- **HPAC-PPA-REQ-093 / -094 / -095** — `APPROVE` / `REJECT` from the actual
+  protected interaction only; `approved=true` never creates approval; YubiKey
+  touch = UP ≠ approval; peer credential ≠ human identity ≠ human approval;
+  presentation evidence ≠ authentication proof; `APPROVE` ≠ authenticated
+  principal; human-auth proof still requires its own RHAMP / HPAC chain;
+  presentation evidence write ≠ Gate 5 ALLOW ≠ PB permission ≠ runtime
+  capability ≠ execution; no runtime / plugin capability / `DispatchEnvelope` /
+  Gate 6+ / adapter admission / external-effect permission.
+- **HPAC-PPA-REQ-090 / -091 / -092** — freshness / replay / currentness
+  preserved; seven-state failure model
+  (`CEREMONY_REQUEST_RECEIVED` → … → `EVIDENCE_WRITE_ATTEMPT_STARTED` (no-auto-retry
+  boundary) → `EVIDENCE_COMMITTED` → `RESPONSE_EMITTED`); a missing response is
+  not proof no evidence exists; reconcile against protected-root canonical
+  evidence.
+- **HPAC-PPA-REQ-096** — mechanism neutrality / mobile-only / passkey future
+  preserved.
+- **HPAC-PPA-REQ-097** — **NO SCHEMA CHANGE REQUIRED** (producer process
+  location is verification state, not an evidence field).
+- **HPAC-PPA-REQ-098** — **no new `pawa_failure_code`, no new RHAMP
+  `terminal_reason_code`**; RHAMP-001 v1.0 byte-unchanged.
+- **HPAC-PPA-REQ-099** — a compatibility shim may translate old→new typed
+  requests but SHALL NOT recreate the launcher-held writer, mint an in-process
+  writer, return a handle, transfer a writer to the helper, or permit two
+  production authority paths; the v1.0 in-process path is **superseded and
+  non-production**, removed in a later governed slice.
+- **HPAC-PPA-REQ-100** — bounded security claims (resists compromised ordinary
+  interpreter / malicious plugin / gc introspection / fake helper / forged
+  request / replay / launcher-side fabrication; no overclaim against hostile
+  root, compromised kernel, or a compromised registered helper binary).
+- **HPAC-PPA-REQ-101** — cross-contract conflict **resolved at contract
+  level**; HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2, RIHAC-001 v2.0,
+  RIASC-001 v3.0, RDGO-001 v3.1, HPAC-PAWA-001 v2.0, HPAC-PAWA-HELPER-001 v1.0,
+  and the descriptor + current-generation schemas **byte-unchanged**.
+- **HPAC-PPA-REQ-103** — required successors **derived, NOT begun**: (1)
+  dedicated IV **N16-5-F-5-PPA-CONTRACT-IV** (mandatory — a MAJOR carries its
+  own IV); (2) a fresh/scoped cross-contract IV of the resolved trio; (3) the
+  HPAC-PAWA-REQ-340 implementation sequence, each under its own fresh human
+  authorization, ending with a fresh `N16-5-FINAL-CERT` on a fresh CPIPC-valid
+  successor id.
+
+**Downstream guard reconciliation.** 18 completed-predecessor guard suites
+carried point-in-time "no contract change / still v1.0 / numbering closed
+1..76 / sibling contracts byte-unchanged" assertions. A/B run at phase-entry
+SHA `f0ca3423` (changes stashed) vs the reconciled tree: every attributable
+failure reconciled **widen-not-weaken** (subset `<=` orientation kept; byte-freezes
+→ not-weakened checks; no wildcard / glob / `fnmatch` / `.rglob(` added; no test
+function renamed, removed, or disabled; string-scan meta-guards not tripped).
+**Final A/B: 0 attributable regressions** — the pre-existing BLOCKED-phase
+`f3`/`f4`/`f6`/`f7`/`f8`/`f9` immutable-evidence-suite failures (red from the
+predecessor's unreconciled `src/pcae` + PAWA v2.0 changes) are unchanged, not
+introduced and not repaired by this phase.
+
+**Contract-verification suite:**
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py`
+— 39/39 static assertions.
+
+**No `src/pcae` / `scripts` / `pyproject.toml` / `schemas` change. No
+protected-host mutation. No ceremony. No evidence write.** Runtime
+`not_implemented` / Observed / observe / unavailable; 0 plugins / 0
+capabilities; first governed runtime external effect **ABSENT / UNREACHABLE**;
+N-16-6 / N-16-7 untouched.
+
+**F-5-B2 BLOCKED; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED; N-16-6 / N-16-7
+OPEN / UNTOUCHED (N-16-7 strictly last). REPORTING-UX-1 open (non-blocking).**
+
+Canonical doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F_5_PPA_CONTRACT.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1
 (alias **N16-5-F-5-TB-CONTRACT-IV**) — Dedicated Independent Verification of
 HPAC-PAWA-001 v2.0 and HPAC-PAWA-HELPER-001 v1.0 (Out-of-Process Consumer

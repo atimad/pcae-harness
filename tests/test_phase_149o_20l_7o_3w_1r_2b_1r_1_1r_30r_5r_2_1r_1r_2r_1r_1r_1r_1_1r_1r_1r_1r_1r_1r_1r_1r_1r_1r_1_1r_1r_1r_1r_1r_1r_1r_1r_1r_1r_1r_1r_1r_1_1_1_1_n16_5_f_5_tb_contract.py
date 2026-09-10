@@ -411,13 +411,35 @@ def test_61_only_the_two_contract_files_changed_in_docs_contracts() -> None:
 
 
 def test_62_sibling_contracts_and_schemas_byte_unchanged() -> None:
-    for c in (PPA, RHAMP, HPAC, HBDC):
+    # RHAMP / HPAC / HBDC and the PAWA schema module stay byte-frozen.
+    for c in (RHAMP, HPAC, HBDC):
         assert at_entry(c) == c.read_bytes(), c
     assert at_entry(SCHEMAS) == SCHEMAS.read_bytes()
+    # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR -- out-of-process presentation-evidence
+    # writer ownership). HPAC-PPA-001 is the sole later docs/contracts delta;
+    # the byte-freeze on it becomes a not-weakened check: every v1.0 requirement
+    # id present at ENTRY is still present, the numbering only grew, and the
+    # header moved v1.0 -> v2.0 (append-only evolution).
+    entry_ppa = at_entry(PPA).decode()
+    now_ppa = PPA.read_text()
+    entry_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", entry_ppa))
+    now_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", now_ppa))
+    assert entry_reqs and entry_reqs <= now_reqs
+    assert len(now_reqs) >= len(entry_reqs)
+    assert now_ppa.splitlines()[0].startswith("# HPAC-PPA-001 v2.0")
+    assert "PPA-INV-2" in now_ppa
 
 
 def test_63_hpac_ppa_001_still_v1_0() -> None:
-    assert text(PPA).splitlines()[0].startswith("# HPAC-PPA-001 v1.0")
+    # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT: the
+    # dedicated governed successor evolved HPAC-PPA-001 v1.0 -> v2.0 (MAJOR,
+    # out-of-process presentation-evidence writer ownership). v1.0 was the state
+    # frozen by N16-5-F-5-TB-CONTRACT; v2.0 is the current in-place evolution of
+    # the same document.
+    assert text(PPA).splitlines()[0].startswith(
+        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0")
+    )
 
 
 def test_64_helper_contract_did_not_exist_at_entry() -> None:

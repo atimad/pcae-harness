@@ -252,7 +252,7 @@ def test_38_no_contract_change() -> None:
   # document (verified by the v1.3 contract-reconciliation suite); nothing
   # else in docs/contracts changed. No test function was renamed or removed
   # (HPAC-PAWA-REQ-217 discipline).
-    assert set(git("diff", "--name-only", R0, "--", "docs/contracts").split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md', 'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md'}
+    assert set(git("diff", "--name-only", R0, "--", "docs/contracts").split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md', 'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md', 'docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md'}  # N16-5-F-5-PPA-CONTRACT: HPAC-PPA-001 v1.0 -> v2.0 MAJOR (out-of-process presentation-evidence writer ownership) is a later in-place doc evolution; subset orientation preserved, no OTHER contract changed, no test renamed/removed
 
 
 def test_39_f5_remains_absent() -> None:

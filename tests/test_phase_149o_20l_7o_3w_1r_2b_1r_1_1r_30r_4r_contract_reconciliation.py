@@ -269,6 +269,10 @@ def test_32_pawa_and_new_companion_are_only_contract_delta() -> None:
     # NO normative contract byte. Reconciled by phase N16-5-H3-PAWA13
     # (HPAC-PAWA-001 v1.2 -> v1.3, MINOR): the only later normative-contract
     # delta is the in-place v1.3 evolution of this same PAWA document.
+    # N16-5-F-5-PPA-CONTRACT (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): the later
+    # docs/contracts delta also includes the in-place v2.0 evolution of the
+    # HPAC-PPA-001 document itself (out-of-process presentation-evidence writer
+    # ownership). Still no unrelated contract.
     assert set(
         subprocess.check_output(
             ["git", "diff", "--name-only", R4R_FINALIZED, "--", "docs/contracts"], cwd=ROOT, text=True
@@ -276,6 +280,7 @@ def test_32_pawa_and_new_companion_are_only_contract_delta() -> None:
     ) <= {
         "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
         "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
+        "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
     }
 
 
@@ -292,7 +297,10 @@ def test_33_requirement_numbering_is_closed_and_sequential() -> None:
     assert sorted(pawa_nums) in (
         list(range(1, 234)), list(range(1, 276)), list(range(1, 310)), list(range(1, 341)),
     )
-    assert sorted(ppa_nums) == list(range(1, 77))
+    # N16-5-F-5-PPA-CONTRACT (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): v1.0 froze
+    # REQ-001..076; v2.0 appends REQ-077..103. Still closed, sequential, no
+    # gaps/dupes; only the ceiling moves.
+    assert sorted(ppa_nums) in (list(range(1, 77)), list(range(1, 104)))
 
 
 def test_34_exact_future_module_inventory_has_no_wildcard() -> None:

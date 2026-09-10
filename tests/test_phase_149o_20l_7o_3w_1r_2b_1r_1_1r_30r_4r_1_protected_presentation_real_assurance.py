@@ -219,10 +219,20 @@ def test_01_hpac_pawa_001_v1_2_identity():
 
 def test_02_hpac_ppa_001_v1_0_identity():
     c = PPA_CONTRACT.read_text()
-    assert "HPAC-PPA-001 v1.0" in c
+    # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR under HPAC-PPA-REQ-069 -- out-of-process
+    # presentation-evidence writer ownership). The v1.0 identity is preserved as
+    # the floor; v2.0 is the current in-place evolution of the same document.
+    # The property under test -- the contract still names HPAC-PPA-001, is still
+    # implementation/IV-pending, and its requirement numbering is still closed
+    # and starts at 1 -- is unchanged; only the header version and the ceiling
+    # move (v2.0 appends REQ-077..103).
+    assert c.splitlines()[0].startswith(
+        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0")
+    )
     assert "IMPLEMENTATION AND INDEPENDENT VERIFICATION PENDING" in c
     ppa_nums = sorted(int(v) for v in __import__("re").findall(r"\*\*HPAC-PPA-REQ-(\d{3})", c))
-    assert ppa_nums[:3] == [1, 2, 3] and ppa_nums[-1] == 76
+    assert ppa_nums[:3] == [1, 2, 3] and ppa_nums[-1] in (76, 103)
 
 
 def test_03_rhamp_and_hpac_byte_unchanged_since_r4r():

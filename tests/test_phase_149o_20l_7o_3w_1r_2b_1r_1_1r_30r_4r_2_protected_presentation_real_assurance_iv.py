@@ -295,7 +295,13 @@ def test_06_no_normative_contract_changed_since_A():
 
 
 def test_07_contract_identities_are_the_frozen_versions():
-    assert "HPAC-PPA-001 v1.0" in PPA_CONTRACT.read_text()
+    # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): the v1.0 identity floor is preserved;
+    # v2.0 (out-of-process presentation-evidence writer ownership) is the
+    # current in-place evolution of the same document.
+    assert PPA_CONTRACT.read_text().splitlines()[0].startswith(
+        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0")
+    )
     # Point-in-time guard reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001
     # v1.2 -> v1.3, MINOR): the v1.2 identity requirement is preserved as the
     # floor; v1.3 is the current in-place evolution of the same document.
@@ -313,7 +319,12 @@ def test_08_ppa_requirement_numbering_is_closed_1_to_76():
     import re
 
     nums = sorted(int(v) for v in re.findall(r"\*\*HPAC-PPA-REQ-(\d{3})\.", PPA_CONTRACT.read_text()))
-    assert nums == list(range(1, 77))
+    # Point-in-time count reconciled by phase N16-5-F-5-PPA-CONTRACT
+    # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): v1.0 froze REQ-001..076; v2.0 appends
+    # REQ-077..103 (§21 out-of-process presentation-evidence writer ownership).
+    # The property under test -- closed, sequential, no gaps, no duplicates,
+    # starting at 1 -- is unchanged; only the ceiling moves.
+    assert nums in (list(range(1, 77)), list(range(1, 104)))
 
 
 # ═══════════════ 3. PAWA v1.2 configure flow + consumer + out-of-band model ═══
