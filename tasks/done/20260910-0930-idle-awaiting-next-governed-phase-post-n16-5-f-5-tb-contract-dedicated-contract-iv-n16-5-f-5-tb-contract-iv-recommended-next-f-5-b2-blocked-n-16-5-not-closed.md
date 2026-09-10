@@ -10,7 +10,7 @@ Idle: awaiting next governed phase (post-N16-5-F-5-TB-CONTRACT); dedicated contr
 
 ## Status
 
-active
+done
 
 ## Mode
 
