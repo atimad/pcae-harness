@@ -54,7 +54,7 @@
         "pcae_check": "passed before finalization",
         "pcae_status_coherence": "coherent before finalization",
         "pcae_doctor_task_memory": "warning-only pre-existing DONE.md-omission warnings for unrelated completed line tasks; no errors; the phase-ID-titled task will close cleanly to tasks/done/",
-        "pcae_push_check": "nothing_to_push before this phase's commits",
+        "pcae_push_check": "ready_to_push before push; pushed clean after push (origin/main..HEAD = 0, fd360098..c1e327db main -> main)",
         "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; Plugin count 0; Capability count 0; Permission Broker execution_unavailable; first governed runtime external effect ABSENT / UNREACHABLE",
         "telegram_runtime": "loaded and outbound-ready",
         "repository_transition_validator": "expected PASS -- phase identity agrees across the active task title, this metadata phase_id / phase_title, PROJECT_STATUS.md '## Current Phase', and the staging report; recommended_next_phase non-empty and prose-led; metadata_consistency: metadata phase_id == the proposed target",
@@ -111,6 +111,6 @@
         }
     ],
     "recommended_next_phase": "Fresh/scoped cross-contract IV (suggested alias N16-5-F-5-TB-TRIO-IV; id NOT reserved) of the resolved trio HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0 + HPAC-PPA-001 v2.0, specifically confirming the previously blocking conflict is gone across all three contracts together (this IV confirmed pairwise compatibility; the trio-level cross-contract IV is a distinct required step per the authorization's section 39/40). THEN, subject to fresh human authorization for each: a privileged helper + HPAC-PAWA-HELPER/1.0 protocol implementation; caller integration; in-process authority-path removal (no compatibility shim may preserve the insecure in-process path); packaging / clean-install; a dedicated independent security IV; production deployment; and only then a fresh N16-5-FINAL-CERT on a fresh CPIPC-valid successor id (never reuse a completed or blocked certification identity, PAWA-INV-11). Do NOT begin the resolved-trio IV, any implementation slice, N-16-6, or N-16-7 without fresh explicit human authorization for each. F-5-B2 BLOCKED pending resolved-trio IV + implementation; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED. REPORTING-UX-1 open (non-blocking).",
-    "pushed_status": "nothing_to_push",
-    "origin_main_head": "23690a89d1d74ea6af1d64bc0ec06798aeaed398"
+    "pushed_status": "pushed",
+    "origin_main_head": "c1e327db79c6f00302bd316de5cd5e20a440c809"
 }
