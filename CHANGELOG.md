@@ -1,5 +1,58 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-CONTRACT-IV**) — **Dedicated Independent Verification of
+  HPAC-PAWA-001 v2.0 and HPAC-PAWA-HELPER-001 v1.0**. Contract-verification-only
+  governed IV phase (HPAC-PAWA-REQ-330; a MAJOR carries its own IV; not
+  foldable). **VERDICT: NOT VERIFIED / BLOCKED.** The mandatory HPAC-PPA-001
+  evidence-writer-delivery adjudication resolves to **option B — HPAC-PPA-001
+  CONTRACT EVOLUTION REQUIRED**: HPAC-PAWA-HELPER-001 v1.0 §17
+  (HPAC-PAWA-HELPER-REQ-070) freezes `presentation_evidence_write` as *invoked
+  by the HPAC-PPA-001 presentation helper itself*, which materially conflicts
+  with HPAC-PPA-001 v1.0 HPAC-PPA-REQ-041 (*"held only by the trusted launcher
+  mediator … never sent to the helper"*), HPAC-PPA-REQ-054, HPAC-PPA-REQ-052,
+  and PPA-INV-2. Per §45 of the authorizing prompt, option B ⇒ NOT VERIFIED /
+  BLOCKED. Required next (derived, NOT begun): a fresh governed HPAC-PPA-001
+  contract-evolution phase moving its evidence-writer authority out of process.
+  Every other load-bearing IV criterion was independently established from
+  primary contract text: MAJOR (S-4) classification VERIFIED; the §33C
+  13-conjunct `TrustedProtectedAuthorityConsumer` conjunction VERIFIED (exact,
+  fully fail-closed, no single conjunct sufficient, no in-process fallback); the
+  same-interpreter production consumer-authenticity predicate ELIMINATED (every
+  v1.x REQ body byte-verbatim); no authority object / handle / seal /
+  reconstructable field set crosses the helper boundary (PAWA-INV-15 / -16);
+  closed 5-member operation vocabulary + unknown / prefix / wildcard / version
+  denial; `configure_privileged_helper` metadata-only, `PawaOperation` 6 → 7;
+  single trust root / no second root (PAWA-INV-17); same-file-object anti-TOCTOU
+  property feasible on macOS + Linux or STOPS BLOCKED; kernel-authenticated
+  peer-credential auth preceding admission; configured-agent identity never
+  `os.geteuid()`; closed request/response schemas; freshness / replay;
+  state-transition + no-auto-retry boundary + INDETERMINATE /
+  RECONCILIATION-REQUIRED; evidence staged before mutation; five-role closure
+  (`hpac_lifecycle_terminator` excluded); §42D typed reads cannot reconstruct
+  store authority; ceremony-entry non-authoritative; every v2.0 rejection maps
+  onto the existing 21 `pawa_failure_code` (no new code) and the existing 41
+  RHAMP `terminal_reason_code` (RHAMP-001 v1.0 byte-unchanged);
+  generic-privileged-broker prohibition; non-bearer / restart-dead as
+  process-boundary properties; deterministic-vs-real wall; every §68 / §68A /
+  §68B / §68C human-auth / approval / PB / POL / runtime / effect wall
+  preserved verbatim; mechanism neutrality + mobile-only future; bounded
+  security claims, no overclaiming; sibling contracts (HPAC-001 v2.1, RHAMP-001
+  v1.0, HBDC-001 v1.2, RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1,
+  HPAC-PPA-001 v1.0, descriptor + current-generation schemas) byte-unchanged
+  and semantically consistent EXCEPT the HPAC-PPA-001 evidence-writer conflict.
+  Requirement inventories contiguous — HPAC-PAWA-001 v2.0 REQ-001…340 / 17
+  invariants; HPAC-PAWA-HELPER-001 v1.0 REQ-001…114 / 10 invariants. New
+  independent contract-IV suite 62/0; predecessor CONTRACT suite re-run 45/0
+  (regression lock). No `src/pcae` / `scripts` / `pyproject.toml` / `schemas` /
+  `docs/contracts` change; no protected-host mutation; no ceremony. Runtime
+  `not_implemented` / Observed / observe / unavailable; 0 plugins / 0
+  capabilities; first governed runtime external effect ABSENT / UNREACHABLE.
+  **F-5-B2 BLOCKED; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED; N-16-6 /
+  N-16-7 OPEN / UNTOUCHED (N-16-7 strictly last); REPORTING-UX-1 open,
+  non-blocking.** Canonical doc
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F_5_TB_CONTRACT_IV.md`.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1`
   (alias **N16-5-F-5-TB-CONTRACT**) — **N-16-5 Privileged Production Authority
   Trust-Boundary Contract Evolution: Out-of-Process Consumer Authenticity and

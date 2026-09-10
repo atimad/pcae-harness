@@ -2,6 +2,117 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1
+(alias **N16-5-F-5-TB-CONTRACT-IV**) — Dedicated Independent Verification of
+HPAC-PAWA-001 v2.0 and HPAC-PAWA-HELPER-001 v1.0 (Out-of-Process Consumer
+Authenticity and Typed Privileged Operations). CPIPC: valid direct `.1`
+successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1`
+(alias `N16-5-F-5-TB-CONTRACT`) — same series `149` / branch `O`, strict order
+(`pcae.core.phase_id.compare` == `less`), exactly one appended `.1` segment,
+exact canonical text, unique against full git history and `docs/` / `tasks/` /
+`.pcae/`, no conflicting active governed phase; independently re-derived via
+`pcae.core.phase_id`, alias display-only.
+
+**STATUS: N16-5-F-5-TB-CONTRACT-IV COMPLETE — NOT VERIFIED / BLOCKED.**
+
+Contract-verification-only governed IV phase. Entry state: branch `main`, HEAD
+== `origin/main` == `3cdc3c08`, `origin/main..HEAD` = 0, tree clean.
+Predecessor **N16-5-F-5-TB-CONTRACT** confirmed COMPLETE (contract frozen,
+`.pcae/phase-completion-metadata.json` `status: completed`).
+
+**Blocking finding — the mandatory HPAC-PPA-001 evidence-writer-delivery
+adjudication resolves to option B.** HPAC-PAWA-HELPER-001 v1.0 §17
+(HPAC-PAWA-HELPER-REQ-070) freezes `presentation_evidence_write` as *invoked by
+the HPAC-PPA-001 presentation helper itself*, which materially conflicts with
+HPAC-PPA-001 v1.0 HPAC-PPA-REQ-041 (*"held only by the trusted launcher
+mediator … never sent to the helper"*), HPAC-PPA-REQ-054 (*"evidence producer
+is only the launcher mediator"*), HPAC-PPA-REQ-052 (a distinct evidence-writer
+issuer module), and PPA-INV-2 (helper response and evidence writer are distinct
+trust actions with no authority transfer). The HPAC-PAWA-HELPER-001 §17
+cross-contract note itself defers this question; §25 / §45 of the authorizing
+prompt forbid deferral. Option (a) *"compatible as written"* is not sustainable
+against that verbatim text. **Adjudication: B — HPAC-PPA-001 CONTRACT EVOLUTION
+REQUIRED**; per §45, option B ⇒ this IV is **NOT VERIFIED / BLOCKED**. The v2.0
+`presentation_evidence_write` design is the correct security direction; the
+block is that HPAC-PPA-001 v1.0 as frozen does not authorize it. **This IV
+edits no normative contract.**
+
+**Every other load-bearing IV criterion was independently established** from
+primary contract text (see the canonical Phase Report §41 roll-up):
+MAJOR (S-4) classification **VERIFIED** (independently re-walked the closed
+§153 MINOR-permit list and the §152 no-verbatim-trigger review); the §33C
+13-conjunct `TrustedProtectedAuthorityConsumer` conjunction **VERIFIED** —
+exact, fully fail-closed, no single conjunct sufficient, no caller
+self-assertion, no in-process fallback; the same-interpreter production
+consumer-authenticity predicate (§32 predicate 6 / §33 step 9) **ELIMINATED**
+(every v1.x REQ body kept byte-verbatim — supersession by appended notes only,
+commit `b34cc348`); no authority object / handle / seal / reconstructable field
+set crosses the helper boundary (PAWA-INV-15 / -16; HELPER §24 / PAWAH-INV-1);
+the closed five-member operation vocabulary + unknown / prefix / wildcard /
+version denial + closed-typed `operation_params` + `supported_operations`
+gating; `configure_privileged_helper` metadata-only, driven through the §33C
+helper boundary, non-circular bootstrap, `PawaOperation` count 6 → 7; the
+single trust root / **no second trust root** (PAWA-INV-17 / PAWAH-INV-7); the
+same-file-object anti-TOCTOU **property** (mechanism = platform profile;
+substitution-free exec or **STOPS BLOCKED**) feasible on both the macOS
+development host and the Linux deployment target; kernel-authenticated
+peer-credential authentication preceding admission and any protected-store
+read, never caller-asserted; configured-agent identity resolved live from
+`HPAC-PAWA-AGENT-EXCLUSION/1.0`, never `os.geteuid()` / ambient root; the
+closed request / response schemas with self-excluding digests and no
+trust-asserting fields; freshness / replay (fresh / consumed / duplicate /
+expired / unknown / conflicting-replay all distinct; a lost response never
+frees a spent request); the state-transition model with the no-auto-retry
+boundary at `MUTATION_ATTEMPT_STARTED`; the **INDETERMINATE /
+RECONCILIATION-REQUIRED** state; evidence staged before mutation, finalized
+after commit; the exact five-role certification closure (`hpac_lifecycle_terminator`
+excluded; §42B / PAWA-INV-13 substance byte-unchanged); §42D typed reads that
+**cannot** reconstruct unrestricted store authority; ceremony-entry as a bounded
+non-authoritative hand-off; every v2.0 rejection mapping deterministically onto
+the existing 21 `pawa_failure_code` (no new code) and the existing 41 RHAMP
+`terminal_reason_code` (RHAMP-001 v1.0 byte-unchanged); the generic-privileged-
+broker prohibition; installer ≠ launcher ≠ helper ≠ evidence writer ≠ approver;
+non-bearer / restart-dead as **process-boundary** properties (§49C); the
+deterministic-vs-real wall (permanent; `require_real_assurance` unchanged); every
+§5 / §68 / §68A / §68B / §68C human-authentication / approval / PB / POL /
+runtime / effect wall preserved verbatim; mechanism neutrality and the
+mobile-only future; bounded security claims with **no overclaiming**; sibling
+contracts (HPAC-001 v2.1, RHAMP-001 v1.0, HBDC-001 v1.2, RIHAC-001 v2.0,
+RIASC-001 v3.0, RDGO-001 v3.1, HPAC-PPA-001 v1.0, descriptor + current-generation
+schemas) **byte-unchanged** and semantically consistent **except** the
+HPAC-PPA-001 evidence-writer conflict above. Requirement inventories contiguous:
+HPAC-PAWA-001 v2.0 `HPAC-PAWA-REQ-001` … `-340` (17 invariants);
+HPAC-PAWA-HELPER-001 v1.0 `HPAC-PAWA-HELPER-REQ-001` … `-114` (10 invariants).
+
+New independent contract-IV suite: **62 passed / 0 failed** (static / read-only;
+`tests/test_phase_…_n16_5_f_5_tb_contract_iv.py`). Predecessor CONTRACT
+verification suite re-run at this HEAD: **45 passed / 0 failed** (regression
+lock). No `src/pcae` / `scripts` / `pyproject.toml` / `schemas` / `docs/contracts`
+change this phase. No protected-host mutation; no ceremony. Runtime
+`not_implemented` / Observed / observe / unavailable; 0 plugins / 0
+capabilities; first governed runtime external effect **ABSENT / UNREACHABLE**.
+
+**Recommended next (derived, NOT begun; own explicit human authorization
+required):** a **fresh governed HPAC-PPA-001 contract-evolution phase** — move
+HPAC-PPA-001's presentation-evidence-writer authority out of process (into the
+verified presentation helper), re-meaning HPAC-PPA-REQ-041 / -054 / -052 /
+PPA-INV-2 explicitly, aligned with HPAC-PAWA-001 v2.0 §42F /
+HPAC-PAWA-HELPER-001 §17 (likely MAJOR for HPAC-PPA-001 under HPAC-PPA-REQ-069;
+the evolution phase decides). Then a fresh / scoped contract-IV of the resolved
+point, then the HPAC-PAWA-REQ-340 implementation sequence (helper + protocol
+impl → caller integration → in-process-path removal → packaging → security IV →
+deployment → fresh `N16-5-FINAL-CERT` on a fresh CPIPC-valid successor id).
+**F-5-B2 BLOCKED; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED; N-16-6 / N-16-7
+OPEN / UNTOUCHED (N-16-7 strictly last); REPORTING-UX-1 open, non-blocking.**
+
+Canonical doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F_5_TB_CONTRACT_IV.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1
 (alias **N16-5-F-5-TB-CONTRACT**) — N-16-5 Privileged Production Authority
 Trust-Boundary Contract Evolution: Out-of-Process Consumer Authenticity and
