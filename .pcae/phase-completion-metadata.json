@@ -54,7 +54,7 @@
         "pcae_check": "passed before finalization",
         "pcae_status_coherence": "coherent before finalization",
         "pcae_doctor_task_memory": "warning-only pre-existing DONE.md-omission warnings for unrelated completed line tasks; no errors; the phase-ID-titled task will close cleanly to tasks/done/",
-        "pcae_push_check": "ready_to_push before push; pushed clean after push (origin/main..HEAD = 0, fd360098..c1e327db main -> main)",
+        "pcae_push_check": "clean",
         "pcae_runtime_inspect": "not_implemented / Observed / observe / unavailable; Plugin count 0; Capability count 0; Permission Broker execution_unavailable; first governed runtime external effect ABSENT / UNREACHABLE",
         "telegram_runtime": "loaded and outbound-ready",
         "repository_transition_validator": "expected PASS -- phase identity agrees across the active task title, this metadata phase_id / phase_title, PROJECT_STATUS.md '## Current Phase', and the staging report; recommended_next_phase non-empty and prose-led; metadata_consistency: metadata phase_id == the proposed target",
