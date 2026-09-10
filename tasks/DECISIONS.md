@@ -5110,3 +5110,188 @@ verified in this phase.
   certification on a fresh CPIPC-valid successor id. Each its own explicit human
   authorization.
 - **DELEGATED `.3` FINALIZATION / COMMIT / PUSH: UNAUTHORIZED — preserved.**
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1 (alias N16-5-F-5-TB-CONTRACT) — N-16-5 Privileged Production Authority Trust-Boundary Contract Evolution
+
+### Governance / CPIPC identity (phase entry)
+
+- **Predecessor:** alias N16-5-F-5-TB-ARCH, canonical
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1`
+  (48 subphase segments). Confirmed COMPLETE from `PROJECT_STATUS.md`
+  "## Current Phase" (STATUS: COMPLETE — contract-evolution verdict B),
+  `.pcae/phase-completion-metadata.json` (`status: "completed"`, `phase_id`
+  matches), `.pcae/phase-completion-report.md` staging header, the governed done
+  task `tasks/done/20260910-0236-…`, and `docs/PHASE_N16_5_F_5_TB_ARCH.md`.
+  Predecessor finalizing HEAD `05056eeb` (report commit `71f9e337`).
+- **Repository at entry:** branch `main`; `HEAD == origin/main == 05056eeb`;
+  `origin/main..HEAD` = 0; tree clean; no conflicting active governed phase
+  (only the idle placeholder; phase queue empty).
+- **CPIPC-valid child, independently derived via `pcae.core.phase_id`** (CPIPC-001
+  v1.0, sole authority — NOT taken from the authorizing prompt):
+  `child = <predecessor> + exactly one ".1" segment` →
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1`
+  (49 segments). `is_valid` True; `validate` returns no error;
+  `format(parse(child)) == child` (exact canonical text, no normalization drift);
+  `compare(predecessor, child) == less` (strict successor); `same_series` (149)
+  and `same_branch` (O) True; exactly one appended `(1, "")` segment (48→49);
+  `git log --all` for the exact dotted string — no match; `grep -rF` over `docs/`
+  `tasks/` `.pcae/` — no match. Alias **N16-5-F-5-TB-CONTRACT** is display-only,
+  written hyphenated in every governed identity source so the CPIPC token scanner
+  (`scan_tokens`, greedy `[0-9]+[A-Za-z]+`) extracts no stray phase token.
+
+### Decision 1 — version classification: HPAC-PAWA-001 v1.4 → **v2.0 (MAJOR)**
+
+- **Classification:** **MAJOR**. Prior version **1.4**; new version **2.0**.
+- **Governing rule:** HPAC-PAWA-REQ-152 read together with HPAC-PAWA-REQ-153 and
+  §80 (the `MAJOR.MINOR` scheme). HPAC-PAWA-REQ-153's MINOR permits are a **closed
+  enumeration** ("A MINOR **may**: re-state verified behaviour; add a
+  `pawa_failure_code` …; add an authorized-consumer **category** by explicit
+  enumeration; tighten (never loosen) a bound; clarify a platform-adapter detail;
+  add an additional macOS / Linux adapter … **provided no meaning above
+  changes**"; "It may also add **one** explicitly enumerated protected-admin
+  **metadata mutation family** …"). This evolution does something outside every
+  one of those permits: it **removes and replaces a normative recognition
+  predicate** (§32 predicate 6 / §33 step 9 — "verify the calling module is an
+  authorized factory consumer") and **restructures the authority-delivery model**
+  of §36–§38 / §41 / §42B / §42D / §49B from "an in-process factory returns an
+  `HPACWriterCapability` / `HPACStoreAuthority` / handle to a same-process caller"
+  to "a distinct out-of-process protected helper performs the bounded operation
+  and returns typed evidence only; no authority object crosses back". §153's
+  closing clause ("provided no meaning above changes") is not satisfied — the
+  meaning of §32, §33, §36–§38, §41, §42B, §42D, §46, §49B, PAWA-INV-13 and
+  PAWA-INV-14 changes materially. HPAC-PAWA-REQ-152 reserves authority-model
+  restructuring for MAJOR ("broadening the capability into … execution";
+  structural changes to the recognition topology). §80 additionally requires a
+  MAJOR to carry **explicit human authorization and independent verification** —
+  both are present (this phase's authorizing prompt; the derived
+  N16-5-F-5-TB-CONTRACT-IV, not begun).
+- **Rationale (why not MINOR):** every prior evolution (v1.1 S-1, v1.2 §80.2,
+  v1.3 S-2, v1.4 S-3) was explicitly argued as a MINOR **because it reused the
+  §33 steps 1–9 verbatim and added only a parallel sequence / an enumerated
+  consumer / a read-only accessor** (§80.3 HPAC-PAWA-REQ-270; §80.4
+  HPAC-PAWA-REQ-302 — "reuses the §33 steps 1–9 verbatim … adds no new consumer
+  category"). This phase is categorically larger: it **rewrites §33 step 9
+  itself** and the §32 predicate-6 definition, and it eliminates the
+  return-authority-object-to-caller delivery path for all four factory families.
+  The predecessor architecture (N16-5-F-5-TB-ARCH §8, §31) reached the same
+  conclusion: the change "is **not** expressible as HPAC-PAWA-REQ-153's permitted
+  MINOR moves — it **restructures the frozen recognition-sequence delivery
+  model** and the factory / handle semantics." A candidate counter-argument —
+  "replacing an unsound predicate with a stronger one is a §153 'tighten a
+  bound'" — is rejected: a tightening keeps the same predicate and narrows its
+  acceptance set; this **replaces** the predicate with a structurally different
+  one (out-of-process `exec` provenance + OS peer credential + in-helper §33
+  1–8) and changes **which OS actor performs the privileged operation**. That is
+  redefinition, not tightening.
+- **§152 verbatim-trigger review (recorded for completeness — none fires
+  literally, but MAJOR still holds on the §153-closed-list ground above):**
+  the evolution does **not** make `sudo` / `euid` / an env var sufficient
+  authority; does **not** collapse or remove the configured-agent exclusion (it
+  is preserved and executed **inside the helper**); does **not** permit a
+  same-principal agent / deployment-owner topology (two-principal requirement
+  preserved; single-account host → ineligible / fail closed, §61 / PAWA-INV-7);
+  does **not** introduce a **remote / network / cloud** authority service or
+  transport — the one-shot channel is a **local** private parent/child pipe /
+  AF_UNIX socket, not remote/network/cloud (the architecture explicitly excluded
+  a network authority service as a §80.4 MAJOR trigger); does **not** make any
+  capability bearer / durable / serialisable / reusable (strengthened —
+  non-bearer becomes a **process-boundary** property); does **not** broaden any
+  capability into runtime approval / PB / RE / runtime capability / execution
+  (the path still terminates at the bounded Gate-5 assurance result / trusted
+  reads + one ceremony entry); does **not** change the bootstrap **trust root** —
+  it remains OS filesystem write authority on the out-of-band-provisioned
+  `<HPAC_PROTECTED_ROOT>` (HPAC-PAWA-REQ-010 / REQ-300), and the helper
+  executable is registered as an **integrity-pinned artifact of the existing
+  kind** (the HPAC-PPA-001 `helper_sha256` pattern), **not** a new trust root
+  (no second root — see Decision 3); does **not** remove the `generation` /
+  rollback-prevention protection; does **not** add a signing key / pinned key /
+  keychain **authority input** (a byte-hash integrity digest of an OS-protected
+  executable is a digest, the same construct the contract already uses for the
+  descriptor / agent-exclusion / anchor — not a cryptographic authority key);
+  does **not** widen the authorized-consumer inventory by wildcard / prefix /
+  glob (exact enumeration preserved and, for the consumer identity, replaced by
+  the stronger "was `exec`'d from the verified helper executable" property).
+  The classification therefore rests on HPAC-PAWA-REQ-153's closed MINOR-permit
+  list, not on a §152 verbatim trigger.
+- **Report requirement:** the canonical Phase Report records classification,
+  governing rule, rationale, prior version (1.4), new version (2.0).
+
+### Decision 2 — companion-contract strategy: **B — new companion contract HPAC-PAWA-HELPER-001 v1.0**
+
+- **Decision:** create a **distinct companion helper-protocol contract**,
+  `docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md`, contract id
+  **HPAC-PAWA-HELPER-001**, **v1.0 FROZEN**, independent `HPAC-PAWA-HELPER-REQ-###`
+  namespace (HPSE-001 / RHAMP-001 / HPAC-PPA-001 precedent). **Not** an extension
+  of HPAC-PPA-001.
+- **Why not extend HPAC-PPA-001 (option A):** HPAC-PPA-001 is, by its own
+  §1 / §2 / §19, the **protected-presentation** installation + one-shot launch +
+  `HPAC-PRESENTATION-EVIDENCE/2.0` evidence-writer contract, scoped to
+  `pcae-protected-local-presentation` and the human-APPROVE ceremony. The helper
+  protocol this phase must freeze covers **privileged operations well beyond
+  protected presentation**: the closed §42 administrative-mutation family
+  (principal / credential enroll / revoke, bootstrap, recovery), the closed
+  five-role certification-lifecycle writes (§42B), the enumerated §42D protected
+  reads, **and** a ceremony-entry hand-off. Folding those into HPAC-PPA-001 would
+  "broaden presentation semantics into a generic privileged operation protocol"
+  — explicitly discouraged by the authorizing prompt §5 and inconsistent with
+  PPA-INV-1 / PPA-INV-2 (installer ≠ launcher ≠ evidence writer ≠ approver as
+  distinct trust actions). HPAC-PAWA-REQ-308 (v1.4) itself anticipated that a
+  genuine second-contract need means a **separate** contract, not scope creep.
+- **Why a companion and not an in-line HPAC-PAWA-001 section:** the same
+  reasoning HPAC-PPA-REQ-068 gave — "the minimum companion needed to avoid
+  overloading PAWA with runtime evidence authority" — applies here: the helper
+  wire protocol, executable-provenance / launch model, peer-authentication
+  logical properties, request/response schema, freshness / replay / crash /
+  audit-ordering semantics, and cross-platform peer-credential profiles are a
+  self-contained protocol specification. HPAC-PAWA-001 v2.0 **references** it
+  (as HPAC-PPA-001 is referenced) and owns only the recognition/authority
+  decision — "a trusted production consumer is the process `exec`'d from the
+  verified helper whose peer is the deployment owner and which itself passes §33
+  1–8".
+- **Semantic separation preserved by the split:** protected presentation
+  (HPAC-PPA-001) ≠ protected authority operations (HPAC-PAWA-HELPER-001) ≠ human
+  authentication (HPAC-001 / RHAMP-001) ≠ approval (the HPAC-PPA-001 ceremony) ≠
+  Gate 5 ≠ counter-state verification. HPAC-PAWA-HELPER-001 reuses the
+  HPAC-PPA-001 **integrity-verify + private-channel + nonce** *pattern* by
+  reference; it does not re-home presentation semantics.
+- **Companion name token-safety:** `HPAC-PAWA-HELPER-001` — no `<digit><letter>`
+  substring; safe in governed identity fields. The protocol wire id is
+  `HPAC-PAWA-HELPER/1.0` (used in contract bodies only, not identity-scanned).
+
+### Decision 3 — single trust root (non-negotiable, recorded)
+
+- The evolved HPAC-PAWA-001 v2.0 and HPAC-PAWA-HELPER-001 v1.0 preserve the
+  **one** existing trust root: OS filesystem write authority over the
+  out-of-band-provisioned `<HPAC_PROTECTED_ROOT>` (HPAC-PAWA-REQ-010 / REQ-300).
+  The helper executable's registration (`helper_sha256` + owner / mode /
+  generation binding) is an **integrity-pinned artifact under that same root**,
+  not an independent bootstrap authority. The evolution distinguishes, as
+  **separate** evidence/predicates: trust root ≠ installed helper metadata ≠
+  helper hash ≠ executable path ≠ launcher identity ≠ peer credential ≠
+  operation authorization. No second root; no new global seal / secret / magic
+  env var / persistent authority record.
+
+### Scope / boundary (recorded)
+
+- Contract-only: HPAC-PAWA-001 v2.0 evolution + new HPAC-PAWA-HELPER-001 v1.0 +
+  contract-guard reconciliation (widen-not-weaken) + a contract-verification
+  test suite + canonical phase / status / changelog / task artifacts. **No**
+  `src/pcae` / `scripts` / `pyproject.toml` / dependency change; **no**
+  protected-host mutation; **no** ceremony; **no** helper implementation,
+  launcher, IPC endpoint, or caller migration. Runtime stays
+  `not_implemented` / `Observed` / `observe` / `unavailable`; 0 plugins /
+  0 capabilities; first governed runtime external effect ABSENT / UNREACHABLE.
+- **Next (derived, NOT begun):** N16-5-F-5-TB-CONTRACT-IV (dedicated independent
+  verification of the evolved HPAC-PAWA-001 + HPAC-PAWA-HELPER-001) → helper +
+  protocol implementation → caller integration → in-process authority-path
+  removal (no compatibility shim may preserve the insecure path) → packaging /
+  clean-install → dedicated independent security IV → production deployment →
+  fresh N16-5-FINAL-CERT on a fresh CPIPC-valid successor id. Each requires its
+  own explicit human authorization. F-5-B2 BLOCKED pending contract IV +
+  implementation; F-5 CERTIFICATION BLOCKED; **N-16-5 NOT CLOSED**; N-16-6 /
+  N-16-7 OPEN / UNTOUCHED (N-16-7 strictly last). REPORTING-UX-1 open
+  (non-blocking).
+- **Historical governance integrity preserved exactly:** N16-5-F-5-B2 NOT
+  VERIFIED / BLOCKED; N16-5-F-5-B2R-IV NOT VERIFIED / BLOCKED; N16-5-F-5-B2R2-IMPL
+  COMPLETE — BLOCKED; N16-5-F-5-TB-ARCH COMPLETE;
+  `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`.
