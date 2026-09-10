@@ -10,7 +10,7 @@ Idle: awaiting explicit authorization for the N16-5-F-5-B2-R2-IMPL successor arc
 
 ## Status
 
-active
+done
 
 ## Mode
 
