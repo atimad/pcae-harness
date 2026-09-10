@@ -27,6 +27,8 @@ IV of HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0 returned NOT VERIFIED / BLO
 - .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py
+- tasks/DECISIONS.md
 
 ## Forbidden Files
 
