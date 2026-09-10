@@ -1,94 +1,165 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1 Complete — Privileged Production Factory Consumer-Authenticity Repair: Mutable-State Elimination / Trust-Boundary Repair
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1 Complete — N-16-5 Privileged Production Authority Trust-Boundary Architecture: Stronger-than-Same-Interpreter Consumer Authenticity
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1`
-- Alias: **N16-5-F-5-B2R2-IMPL** (operator readability only; the full canonical CPIPC id is authoritative in task state, lifecycle, reports, completion metadata, evidence, and canonical project status)
-- Status: **COMPLETE — BLOCKED**
-- Predecessor: **N16-5-F-5-B2R-IV** (COMPLETE — NOT VERIFIED / BLOCKED), canonical HEAD `dff27851`
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1`
+- Alias: **N16-5-F-5-TB-ARCH** (operator readability only; the full canonical CPIPC id is authoritative in task state, lifecycle, reports, completion metadata, evidence, and canonical project status)
+- Status: **COMPLETE — stronger-than-same-interpreter architecture DEFINED**
+- Predecessor: **N16-5-F-5-B2-R2-IMPL** (COMPLETE — BLOCKED), canonical HEAD `089817c8`
+- CPIPC: valid direct `.1` successor of the predecessor — independently re-derived via `pcae.core.phase_id` (`compare` == `less`; same series `149`; same branch `O`; exactly one appended `.1` segment, 47 → 48; exact canonical text; unique against `git log --all` and `docs/` / `tasks/` / `.pcae/`; no conflicting active governed phase); alias display-only, no discrepancy
 
 ## Verdict
 
-- **F-5-B2: BLOCKED**
+- **Contract-evolution decision: B — REQUIRES HPAC-PAWA-001 CONTRACT EVOLUTION**
+- **F-5-B2: BLOCKED pending stronger-boundary contract + implementation**
 - **F-5: CERTIFICATION BLOCKED**
 - **N-16-5: NOT CLOSED**
 - **N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7 strictly last)**
 
-## Same-process threat-model adjudication, and what was found
+## Entry state and predecessor confirmation
 
-Reconstructed the shared trust mechanism (`_verified_production_caller_name` /
-`_detect_caller_module`) in `src/pcae/core/hpac_protected_admin_writer.py` from primary
-source, confirming all four privileged factories share it verbatim. Reconfirmed the
-predecessor's disclosed direct-dict-mutation bypass against `_PINNED_CODE_OBJECTS` /
-`_PINNED_TRUSTED_MODULES` / `_CODE_OBJECT_KEEPALIVE` still mints a genuine
-`ProductionWriterHandle`, unchanged.
+Branch `main`; HEAD == `origin/main` == `089817c8`; `origin/main..HEAD` = 0;
+working tree clean. Predecessor **N16-5-F-5-B2-R2-IMPL** confirmed COMPLETE —
+BLOCKED from `PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json`
+(`status: completed`), the canonical report, and the governed done task.
+Carried-forward axiom (not re-adjudicated): the frozen HPAC-PAWA-001 v1.4
+consumer-authenticity property is unsatisfiable within a same-process Python
+interpreter for all four privileged factories.
 
-Performed the required Section 8 same-process threat-model adjudication with two further
-independently authored and executed architectural PoCs:
+## Baseline reconciliation — HPAC-PAWA-001 v1.3 to v1.4
 
-1. A trust dict held purely as a local closure variable — never assigned to any
-   module-level name, never returned — is still located and mutated by ordinary code
-   using only `import gc; gc.get_objects()`, with **zero reference chain** to the
-   closure. This defeats every conventional pure-Python encapsulation technique (class
-   attribute, name-mangling, `MappingProxyType`, `WeakValueDictionary`, closure), because
-   none of them remove the object from the GC's live-object graph.
-2. The cache-free "eliminate the pin, re-derive trust fresh from `vars(module)` at every
-   call" alternative is **also** unsafe: an ordinary caller can define a new function
-   directly inside the trusted module's own namespace via `exec()` against
-   `module.__dict__` (an ordinary operation on an already-imported module object) and
-   call it normally; a fresh-every-call scan correctly-by-its-own-logic recognizes it as
-   trusted, because by scan time it genuinely is present in the module's namespace.
+Reconstructed from primary artifacts (contract header, section 7C, section
+80.4, section 90.4, section 94, section 95C, PAWA-INV-14) and the predecessor
+completion metadata. v1.4 is **FROZEN**, **MINOR** (S-3): one recognized
+read-only `HPACStoreAuthority` accessor (section 33B / section 38B / section
+42D / section 42E / section 49B / section 68B). The v1.4 trust root is
+**unchanged** — OS filesystem write authority on the out-of-band-provisioned
+protected root, "never an in-process check" (HPAC-PAWA-REQ-010 / REQ-300). The
+section 33B / section 32 step-9 consumer-authenticity conjunct **reuses** the
+same-process module-identity check now known unsound. v1.4 does **not** already
+define out-of-process authority, authenticated local IPC, or a protected
+helper boundary for the four factories (only the HPAC-PPA-001 ceremony hand-off
+is out-of-process). v1.4 lineage is consistent and unambiguous — no STOP.
 
-**Verdict: the frozen HPAC-PAWA-001 consumer-authenticity property is UNSATISFIABLE
-within the current same-process Python interpreter boundary**, for all four privileged
-factories, under every design shape considered — a same-interpreter, standard-library
-capability limitation (`gc.get_objects()`/`gc.get_referrers()` require no reference
-chain), not a coding defect fixable by better hiding of state.
+## Same-interpreter failure (reconstructed)
 
-Per governed-phase discipline (a valid early-stop condition — proof of unsatisfiability),
-**no cosmetic re-encapsulation was implemented**: building a repair that only obscures
-rather than removes the defect would produce false assurance.
-`src/pcae/core/hpac_protected_admin_writer.py` is byte-unchanged by this phase.
+The section 33 recognition sequence steps 1 to 8 are OS-level; step 9 ("verify
+the calling module is an authorized factory consumer", section 32 / section 38)
+is the sole in-process Python-identity conjunct, implemented by
+`_detect_caller_module` / `_verified_production_caller_name` over the
+module-level `_PINNED_*` dicts. Two failure modes make it (and the whole
+sequence) unsound in-process: (F-A) recognition bypass — in-process code can
+mutate the pin state, `exec()` into the module namespace, or reach any object
+via `gc`; (F-B) authority exfiltration — even a perfectly recognized caller
+receives a Python authority object on a heap shared with attacker code.
 
-## Contract baseline discrepancy (disclosed, non-blocking)
+## Threat model
 
-The authorizing prompt expected `HPAC-PAWA-001 v1.3`; the contract is already at v1.4,
-legitimately frozen by a separate prior phase (`N16-5-F5B1-READAUTH`, commit
-`1877a412`) confirmed via `git merge-base --is-ancestor` to already be an ancestor of
-this phase's own predecessor commit — a stale prompt expectation, not a violation. No
-contract modified by this phase.
+T1 / T2 / T6 (ordinary same-interpreter code, malicious plugin, writable
+source) are **not mitigated today**; the selected architecture **mitigates**
+them. T7 (compromised unprivileged account on a single-account host) is
+**fail-closed** by the two-principal requirement. T15 and a hostile root TCB
+within the protected boundary are **explicitly out of scope** (bound claim
+only, HPAC-PAWA-001 section 8 / section 60 / PAWA-INV-6, inherited). Full
+T1..T15 table in the canonical report.
+
+## Candidate architectures and selection
+
+Compared: 6A persistent helper; 6B daemon; 6C short-lived one-shot privileged
+process; 6D reuse of the HPAC-PPA-001 verified-helper pattern; 6E C-extension
+opaque handle / in-process hardening.
+
+**Selected: 6C, realized as a generalization of the IV'd HPAC-PPA-001
+verified-helper pattern (6D), anchored on the unchanged HPAC-PAWA-001 section 4
+filesystem trust root.** The standalone deployment-owner launcher
+integrity-verifies the out-of-band helper executable (byte hash / owner / mode
+/ no-symlink / same-file-object exec), opens a private one-shot parent/child
+channel not inherited by agent code, and `exec`s the helper. The helper runs
+the section 33 steps 1 to 8 OS recognition **in its own interpreter** (binding
+the configured-agent identity so the negative boundary keys off the agent
+principal, not root under `sudo`), verifies its peer credential is the
+deployment owner, validates a narrow typed request bound to a certification
+session, performs **exactly one** bounded operation, writes audit evidence
+under the protected root, returns **typed evidence only**, and exits. **No
+`HPACWriterCapability` / `HPACStoreAuthority` / handle ever crosses back to the
+main interpreter or the launcher.** Section 33 step 9 is replaced by "the
+process was `exec`'d from the verified helper, its peer is the deployment
+owner, and the OS recognition passed inside it."
+
+Rejected: 6A / 6B (larger standing privileged surface, cross-request authority
+state); 6E as the boundary (recognition still runs in the shared interpreter;
+object still in-process reachable — retained only as optional in-helper
+defense-in-depth); network / cloud authority service (out of scope, would
+trigger a MAJOR).
+
+## Preserved
+
+The five-role certification family
+(`hpac_challenge_coordinator`, `hpac_assertion_recorder`,
+`human_authentication_proof_verifier`, `hpac_gate5_binder`,
+`hpac_rhamp_counter_state_verifier`) exactly — mapped to five members of the
+closed operation enum with exact internal role dispatch;
+`hpac_lifecycle_terminator` stays outside. Human approval is not authentication
+is not user presence is not PB permission is not runtime capability is not
+execution — all walls preserved; the helper is not a human approver.
+`mint_protected_presentation_evidence_writer` stays the sole author of the
+presentation evidence record; `hpac_rhamp_counter_state_verifier` stays the
+sole counter-state mutation authority. Mechanism-neutral / mobile-only future
+path preserved. No second trust root. `FILE LOCATION` is not `TRUSTED ORIGIN`;
+`HASH CONSISTENCY` is not `PROVENANCE`; `STRUCTURALLY VALID OBJECT` is not
+`TRUSTED CANONICAL STATE`.
+
+## Contract impact
+
+Verdict **B**. The v1.4 section 32 predicate 6 / section 33 step 9 ("calling
+module"), section 36 / section 37 (factory in a module returning a capability),
+section 33A / section 33B (accessor returning a handle), and the section 42B /
+section 42D / section 49B / PAWA-INV-13 / PAWA-INV-14 handle semantics are all
+written around an in-process factory returning a Python authority object.
+Delivering authority out-of-process and replacing "calling module identity"
+with "verified peer process plus OS recognition" is not a permitted MINOR move
+(HPAC-PAWA-REQ-153); it restructures the frozen recognition-sequence delivery
+model and probably adds a companion helper-protocol contract analogous to
+HPAC-PPA-001. Magnitude most likely **MAJOR**; the definitive call belongs to
+the contract phase. Default recommendation: a fresh, separately authorized
+governed contract-evolution phase.
 
 ## Evidence
 
-- New independent suite: **3/3 passed** (`tests/test_phase_n16_5_f5b2r2_impl.py`) — 1
-  regression reconfirmation of the predecessor's disclosed direct-dict-mutation bypass +
-  2 architectural PoCs establishing same-process unsatisfiability (gc-based closure
-  bypass, fresh-scan-redesign bypass).
-- `pcae runtime inspect` independently reconfirmed at session bootstrap: Observed /
-  observe / unavailable / 0 plugins / 0 capabilities — unchanged from phase entry.
-- No production dependency, contract, or protected-host state changed. No real
-  ceremony, no live protected-root mutation, no FIDO2/YubiKey interaction anywhere in
-  this phase.
-- Broader regression check: `pytest -m fast_green -n auto` — 9667 passed / 352 failed /
-  5 skipped / 9 errors, with **0 attributable regressions** (stashed-new-test-file
-  baseline run produced an identical failed-test-ID set modulo one unrelated
-  pre-existing flake, `test_fido2_library_installed_does_not_flip_substrate_operational`).
-- Clean-installed-wheel boundary and sdist verification were **not independently
-  re-run this phase** — no `src/` file changed, so wheel contents are unaffected.
-- Full detail, predicate table, and per-check PASS/FAIL results are in the canonical
-  report: `docs/PHASE_N16_5_F5B2R2_IMPL.md`.
+- Phase-ID CPIPC derivation via `pcae.core.phase_id` (independently re-derived,
+  no discrepancy).
+- Contract baseline read directly from
+  `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`
+  (HPAC-PAWA-001 v1.4) and
+  `docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md`
+  (HPAC-PPA-001 v1.0).
+- Failed mechanism reconstructed read-only from
+  `src/pcae/core/hpac_protected_admin_writer.py` (byte-unchanged by this
+  phase).
+- `pcae runtime inspect`: `not_implemented` / `Observed` / `observe` /
+  `unavailable` / 0 plugins / 0 capabilities — unchanged.
+- `git diff 089817c8 HEAD -- src/pcae scripts pyproject.toml docs/contracts` —
+  **empty**. No production, script, dependency, or contract change. No test
+  file added or changed (architecture-only phase). No real ceremony, no live
+  protected-root mutation, no FIDO2 / YubiKey interaction.
+- Full detail, threat-model table, comparison matrix, factory-to-operation
+  mapping, protocol model, migration plan, implementation slices, and IV
+  strategy are in the canonical report: `docs/PHASE_N16_5_F_5_TB_ARCH.md`.
 
-## Recommended successor (derived, NOT begun)
+## Recommended successors (derived, NOT begun)
 
-A fresh governed **architecture phase** defining a stronger trust boundary than pure
-same-process Python (e.g. a separate minimally-privileged helper process holding the
-authority state behind an IPC surface, or a C-extension-backed opaque capability not
-represented as a Python heap object reachable via `gc`). This phase does not design or
-implement that architecture. An IV of this phase's (non-)implementation is not
-applicable, since no repair was implemented. Do not begin that architecture phase,
-N16-6, or N16-7 without their own explicit human authorization.
+(1) a fresh governed **contract-evolution phase** freezing the HPAC-PAWA-001
+section 32 / section 33 / section 36 to section 38 / section 42 restructure
+plus a companion helper-protocol contract; (2) a dedicated **contract IV**;
+(3) helper plus protocol implementation; (4) caller integration; (5)
+in-process-path removal; (6) packaging / clean-install; (7) an independent
+**security IV**; (8) production deployment; (9) a **fresh** final N-16-5
+certification on a fresh CPIPC-valid id (never reuse a completed or blocked
+certification identity). Each requires its own explicit human authorization.
+Do not begin any of them, N-16-6, or N-16-7. REPORTING-UX-1 remains open
+(non-blocking).
 
 ## Governance
 
-- Tests run: 3 (new focused suite, all passing) + broader `fast_green` (9667
-  passed / 352 failed / 5 skipped / 9 errors, 0 attributable)
+- Tests run: 0 (architecture-only phase; no test changes)
+- `pcae check`: passed — `pcae health`: healthy — `pcae status` coherence: passed
 - Pushed: pushed
-- Phase commits: `c83f001d`, `610830c0`
+- Phase commits: `71f9e337`, `59c1d82d`
