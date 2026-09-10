@@ -2,6 +2,29 @@
 
 ## Accepted
 
+- **2026-09-10 — N16-5-F-5-PPA-CONTRACT-IV: independent verification of
+  HPAC-PPA-001 v2.0 → COMPLETE / INDEPENDENTLY VERIFIED.** Canonical phase
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1`,
+  the CPIPC-valid direct `.1` child of the completed predecessor
+  N16-5-F-5-PPA-CONTRACT. Independently reconstructed (not accepted from the
+  predecessor's own COMPLETE report): the MAJOR classification, the
+  evidence-writer ownership transition to the verified protected presentation
+  helper process, the no-authority-transfer property, PPA-INV-2 (v2.0)'s
+  semantic separation, NO SCHEMA CHANGE (checked against the actual
+  `TrustedApprovalPresentationEvidence` schema source), and cross-contract
+  compatibility with HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0 — the
+  prior blocking conflict is demonstrably gone. **Decision: VERIFIED, no
+  security-critical or cross-contract defect found.** No normative contract
+  text edited; no `src/pcae` / `scripts` / `pyproject.toml` / `schemas`
+  change; no protected-host mutation; no real ceremony. F-5-B2 remains
+  BLOCKED pending the resolved-trio cross-contract IV plus implementation;
+  F-5 certification remains BLOCKED; N-16-5 remains NOT CLOSED; N-16-6 /
+  N-16-7 remain OPEN / UNTOUCHED. Recommended next (derived, NOT begun):
+  fresh/scoped cross-contract IV (suggested alias N16-5-F-5-TB-TRIO-IV) of
+  the resolved trio HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0 +
+  HPAC-PPA-001 v2.0 — not begun in this phase, per its own absolute stop
+  boundary; requires fresh explicit human authorization.
+
 - **2026-09-10 — N16-5-F-5-TB-CONTRACT-IV: contract IV of HPAC-PAWA-001 v2.0 +
   HPAC-PAWA-HELPER-001 v1.0 → NOT VERIFIED / BLOCKED (HPAC-PPA-001 adjudication
   = B).** Canonical phase

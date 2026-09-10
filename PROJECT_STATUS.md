@@ -2,6 +2,74 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1
+(alias **N16-5-F-5-PPA-CONTRACT-IV**) — Independent Verification of
+HPAC-PPA-001 v2.0: Out-of-Process Presentation-Evidence Writer Ownership
+Alignment. CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1`
+(alias `N16-5-F-5-PPA-CONTRACT`) — same series `149` / branch `O`, exactly one
+appended `.1` segment (51 subphase segments vs 50), exact canonical text
+(`normalize(id) == id`), unique against full git history and `docs/` /
+`tasks/` / `.pcae/`, no conflicting active governed phase; alias display-only,
+no `<digit><letter>` token.
+
+**STATUS: N16-5-F-5-PPA-CONTRACT-IV COMPLETE — INDEPENDENTLY VERIFIED.
+HPAC-PPA-001 v2.0: INDEPENDENTLY VERIFIED.**
+
+Contract-IV-only governed phase. Entry state: branch `main`, HEAD ==
+`origin/main` == `fd360098`, `origin/main..HEAD` = 0, tree clean. Predecessor
+**N16-5-F-5-PPA-CONTRACT** confirmed COMPLETE — CONTRACT FROZEN
+(`PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json` `status:
+completed`, canonical Phase Report, governed done task).
+
+This IV independently verified — from primary source, not predecessor report
+text — that HPAC-PPA-001 v2.0 correctly resolves the N16-5-F-5-TB-CONTRACT-IV
+blocking finding: the verified protected presentation helper process is the
+sole author of the one `HPAC-PRESENTATION-EVIDENCE/2.0` record for the
+ceremony it conducts (HPAC-PPA-REQ-077); no evidence-writer object /
+capability / handle / seal / reconstructable descriptor crosses any process
+boundary (HPAC-PPA-REQ-078 / -087, PPA-INV-9); `pcae.core.protected_presentation`
+is no longer the evidence-writer issuer (HPAC-PPA-REQ-081); PPA-INV-2 is
+re-derived as semantic trust-action separation preserved even within one
+verified helper process (PPA-INV-2 (v2.0)); the MAJOR classification (HPAC-PPA-
+REQ-069) was independently re-derived from the trigger text, not inherited;
+NO SCHEMA CHANGE was independently confirmed against the actual
+`TrustedApprovalPresentationEvidence` schema source, not merely the contract's
+own claim; cross-contract compatibility with HPAC-PAWA-001 v2.0 (§42B note /
+§42F / HPAC-PAWA-REQ-322) and HPAC-PAWA-HELPER-001 v1.0 §17 was independently
+confirmed — the prior conflict is demonstrably gone. Human-approval /
+human-authentication / Gate 5 / PB / runtime / execution walls, the single
+trust root, freshness/replay, and the seven-state failure model are all
+preserved. No security-critical or cross-contract defect found.
+
+Independent contract-IV suite
+`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py`
+— 19/19 passed. `pytest -m fast_green -n auto`: 9,663 passed / 356 failed / 9
+errors, 0 attributable to this phase (pre-existing repo-wide baseline noise
+unrelated to PPA).
+
+**No `src/pcae` / `scripts` / `pyproject.toml` / `schemas` change. No
+normative contract text edited. No protected-host mutation. No ceremony. No
+evidence write.** Runtime `not_implemented` / Observed / observe /
+unavailable; 0 plugins / 0 capabilities; first governed runtime external
+effect **ABSENT / UNREACHABLE**; N-16-6 / N-16-7 untouched.
+
+**F-5-B2 BLOCKED PENDING RESOLVED-TRIO IV + IMPLEMENTATION; F-5 CERTIFICATION
+BLOCKED; N-16-5 NOT CLOSED; N-16-6 / N-16-7 OPEN / UNTOUCHED (N-16-7 strictly
+last). REPORTING-UX-1 open (non-blocking).**
+
+Recommended next (derived, NOT begun): fresh/scoped cross-contract IV
+(suggested alias **N16-5-F-5-TB-TRIO-IV**) of the resolved trio HPAC-PAWA-001
+v2.0 + HPAC-PAWA-HELPER-001 v1.0 + HPAC-PPA-001 v2.0, confirming the
+previously blocking conflict is gone across all three contracts together.
+
+Canonical doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1_1_1_1_1_1_N16_5_F_5_PPA_CONTRACT_IV.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1
 (alias **N16-5-F-5-PPA-CONTRACT**) — HPAC-PPA-001 Contract Evolution:
 Out-of-Process Presentation-Evidence Writer Ownership Alignment. CPIPC: valid

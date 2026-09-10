@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-PPA-CONTRACT-IV**) — **Independent Verification of
+  HPAC-PPA-001 v2.0: Out-of-Process Presentation-Evidence Writer Ownership
+  Alignment.** Contract-IV-only governed phase. **HPAC-PPA-001 v2.0:
+  INDEPENDENTLY VERIFIED.** Verified from primary source, not predecessor
+  report text: the MAJOR classification independently re-derived from
+  **HPAC-PPA-REQ-069/070**'s trigger text; the evidence-writer ownership
+  transition to the verified protected presentation helper process
+  (**HPAC-PPA-REQ-077**); no evidence-writer object / capability / handle /
+  seal / reconstructable descriptor crossing any process boundary
+  (**HPAC-PPA-REQ-078 / -087**, **PPA-INV-9**); the REQ-052 issuer
+  disposition to a protected-side-internal helper operation
+  (**HPAC-PPA-REQ-081**); the **PPA-INV-2 (v2.0)** semantic trust-action
+  re-derivation; **NO SCHEMA CHANGE** independently confirmed against the
+  actual `TrustedApprovalPresentationEvidence` schema source
+  (**HPAC-PPA-REQ-097**); and cross-contract compatibility with
+  HPAC-PAWA-001 v2.0 (§42B note / §42F / `HPAC-PAWA-REQ-322`) and
+  HPAC-PAWA-HELPER-001 v1.0 §17 — the prior blocking conflict is demonstrably
+  gone. No security-critical or cross-contract defect found. Added a
+  19-assertion independent contract-IV suite (distinct from the predecessor's
+  own contract-verification suite); `pytest -m fast_green -n auto`: 0
+  attributable failures. No `src/pcae` / `scripts` / `pyproject.toml` /
+  `schemas` change; no normative contract text edited; no protected-host
+  mutation; no ceremony; no evidence write. **F-5-B2 BLOCKED PENDING
+  RESOLVED-TRIO IV + IMPLEMENTATION; F-5 CERTIFICATION BLOCKED; N-16-5 NOT
+  CLOSED; N-16-6 / N-16-7 OPEN / UNTOUCHED (N-16-7 strictly last).**
+  Recommended next (derived, NOT begun): fresh/scoped cross-contract IV
+  (suggested alias **N16-5-F-5-TB-TRIO-IV**) of the resolved trio
+  HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0 + HPAC-PPA-001 v2.0.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1`
   (alias **N16-5-F-5-PPA-CONTRACT**) — **HPAC-PPA-001 Contract Evolution:
   Out-of-Process Presentation-Evidence Writer Ownership Alignment.**
