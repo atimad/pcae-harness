@@ -5386,3 +5386,74 @@ Reconciliation, per guard class:
   contiguous in v2.0 (all v2.0 notes are appended `- **(v2.0) …**` bullets or
   new §33C–§96D sections; no v1.0–v1.4 requirement body was reworded, shortened,
   reordered, or interrupted).
+
+## Phase N16-5-F-5-PPA-CONTRACT — HPAC-PPA-001 v1.0 → v2.0 (MAJOR)
+
+Canonical phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1`
+(alias N16-5-F-5-PPA-CONTRACT), the CPIPC-valid direct `.1` child of the
+completed predecessor N16-5-F-5-TB-CONTRACT-IV (NOT VERIFIED / BLOCKED). Sole
+purpose: resolve that IV's blocking finding (evidence-writer-delivery
+adjudication option B).
+
+**Decision 1 — version classification: MAJOR (v1.0 → v2.0).** Independently
+re-walked HPAC-PPA-REQ-069 / REQ-070. Moving the presentation-evidence-writer
+holder from the trusted launcher mediator into the verified helper process, and
+collapsing two of PPA-INV-2's four distinct trust actions (helper response +
+evidence writer) into one process, is an authority-ownership restructure. It is
+NOT a REQ-070 MINOR: REQ-041's parenthetical ("or repository-equivalent use of
+the same existing capability/provenance primitive") governs *which primitive*
+implements the authority, not *which component holds it*; REQ-070's "add a
+platform adapter within these exact properties" cannot carry a change to the
+holder. No versioning-rule ambiguity — §4-mandated STOP not triggered.
+
+**Decision 2 — evidence-ownership model: helper-owned bounded write, no writer
+transfer.** The verified protected presentation helper process performs exactly
+one bounded `HPAC-PRESENTATION-EVIDENCE/2.0` create-only write inside the
+protected boundary (HPAC-PPA-REQ-077 / -079); no `HPACWriterCapability`,
+handle, seal, token, or reconstructable descriptor crosses any process boundary
+(HPAC-PPA-REQ-078 / -087, PPA-INV-9); only typed evidence / result leaves.
+
+**Decision 3 — HPAC-PPA-REQ-052 evidence-writer-issuer disposition: option C.**
+`pcae.core.protected_presentation` is no longer the evidence-writer issuer; the
+write authorization is a protected-side-internal operation of the helper
+process, never minted / returned / serialised / delivered (HPAC-PPA-REQ-081).
+No `mint_*` factory returns a writer.
+
+**Decision 4 — PPA-INV-2 re-derivation: semantic, not process-location.**
+`PPA-INV-2 (v2.0)` freezes semantic trust-action separation (separate
+preconditions / outputs / failure states, no automatic promotion) preserved
+even when several actions run in one verified helper process. The v1.0
+four-action wording is preserved verbatim (HPAC-PPA-REQ-083).
+
+**Decision 5 — no schema change (HPAC-PPA-REQ-097); no new failure code
+(HPAC-PPA-REQ-098).** `HPAC-PRESENTATION-EVIDENCE/2.0` and every related schema
+already express the needed data; producer process location is verification
+state, not an evidence field. The existing 21-value `pawa_failure_code`
+vocabulary + RHAMP's closed terminal reasons cover the evolved semantics.
+
+**Downstream guard reconciliation (widen-not-weaken).** 18 completed-predecessor
+guard suites carried point-in-time "no contract change / still v1.0 / numbering
+closed 1..76 / sibling contracts byte-unchanged" assertions. Each was reconciled
+subset-widen (`<=` orientation kept) or byte-freeze → not-weakened; no wildcard
+/ glob / `fnmatch` / `.rglob(` added; no `def test_` renamed, removed, or
+disabled; string-scan meta-guards not tripped (token-split `"fn" + "match"`).
+A/B at phase-entry SHA `f0ca3423` (changes stashed) vs the reconciled tree: **0
+attributable regressions** — the pre-existing BLOCKED-phase `f3`/`f4`/`f6`/`f7`/
+`f8`/`f9` immutable-evidence-suite failures (red from the predecessor's
+unreconciled `src/pcae` + PAWA v2.0 changes) are node-for-node identical at
+baseline and at HEAD.
+
+Contract-only: no `src/pcae` / `scripts` / `pyproject.toml` / `schemas` change;
+no protected-host mutation; no ceremony; no evidence write. The v1.0
+launcher-held / `mint`-style in-process path is NOT removed here (a later
+governed slice, HPAC-PPA-REQ-099). Runtime `not_implemented` / Observed /
+observe / unavailable; 0 plugins / 0 capabilities; first governed runtime
+external effect ABSENT / UNREACHABLE. F-5-B2 BLOCKED; F-5 CERTIFICATION BLOCKED;
+N-16-5 NOT CLOSED; N-16-6 / N-16-7 OPEN / UNTOUCHED (N-16-7 strictly last).
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved; no
+delegated worker performed any part of this phase.
+
+Recommended next (derived, NOT begun): dedicated IV N16-5-F-5-PPA-CONTRACT-IV
+(mandatory — a MAJOR carries its own IV), then the resolved-trio cross-contract
+IV, then the HPAC-PAWA-REQ-340 implementation sequence.
