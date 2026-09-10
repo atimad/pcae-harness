@@ -1,5 +1,91 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1`
+  (alias **N16-5-F-5-TB-CONTRACT**) — **N-16-5 Privileged Production Authority
+  Trust-Boundary Contract Evolution: Out-of-Process Consumer Authenticity and
+  Typed Privileged Operations**. Contract-only governed phase translating the
+  N16-5-F-5-TB-ARCH verdict B into frozen normative text. **HPAC-PAWA-001
+  evolved v1.4 → v2.0 (MAJOR, finding S-4)** — governing rule HPAC-PAWA-REQ-152
+  read with HPAC-PAWA-REQ-153 (the closed MINOR-permit list) and section 80:
+  the evolution **replaces a normative recognition predicate** (section 32
+  predicate 6 / section 33 step 9, "the calling module is an authorized factory
+  consumer") and **restructures the authority-delivery model** from "an
+  in-process factory returns an `HPACWriterCapability` / `HPACStoreAuthority` /
+  handle to a same-process caller" to "a distinct out-of-process protected
+  helper performs the bounded operation and returns typed evidence only". New
+  section 33C freezes the `TrustedProtectedAuthorityConsumer(request)`
+  13-conjunct out-of-process conjunction (exec'd-from-verified-helper,
+  deployment-owner OS peer credential, section 33 steps 1–8 inside the helper,
+  configured-agent identity binding, closed-vocabulary operation bound to a
+  valid session; any conjunct fails → hard DENY; no in-process fallback). New
+  section 42F: the helper performs the operation in its own process and returns
+  typed evidence only — no authority object / handle / seal / reconstructable
+  field set ever crosses back (PAWA-INV-15 / PAWA-INV-16). New section 42G: one
+  new metadata-only mutation `configure_privileged_helper`
+  (`PawaOperation` count 6 → 7). No new `pawa_failure_code` (21 unchanged),
+  no RHAMP-001 edit, no protected-root schema change. The single OS filesystem
+  trust root is unchanged (PAWA-INV-17); the exact five-role certification
+  closure (section 42B / PAWA-INV-13), the human-authentication / approval
+  separation, the deterministic-versus-real wall, the mechanism-neutral /
+  mobile-only future path, and the section 42D enumerated-read closure are all
+  preserved verbatim (section 68C).
+- **New companion contract `HPAC-PAWA-HELPER-001 v1.0`** (adjudication B —
+  HPAC-PAWA-REQ-334), `docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md`,
+  independent `HPAC-PAWA-HELPER-REQ-###` namespace (114 requirements),
+  `PAWAH-INV-1` through `PAWAH-INV-10`. Freezes the `HPAC-PAWA-HELPER/1.0`
+  protocol: helper provenance + integrity + same-file-object exec, launcher
+  obligations, the private one-shot channel, OS peer-credential authentication
+  (`SO_PEERCRED` / `LOCAL_PEERCRED` / `getpeereid` platform profiles), the
+  closed typed request / response schemas, the closed operation vocabulary
+  (`admin_mutation` | `certification_write` over the closed five roles |
+  `certification_read` over the enumerated section 42D record set |
+  `ceremony_entry` | `presentation_evidence_write`), freshness / replay
+  semantics, the state-transition model, crash / response-loss / uncertainty
+  behaviour (an explicit INDETERMINATE / RECONCILIATION-REQUIRED state; no
+  auto-retry across the mutation-attempt boundary), and audit-write ordering
+  (evidence durably staged before the mutation, finalized after commit — the
+  phrase "audit failure means the mutation did not occur" is not frozen; the
+  ordering is). Not an extension of HPAC-PPA-001 (the protected-presentation
+  contract); the semantic wall between protected presentation, protected
+  authority operations, human authentication, approval, Gate 5, and
+  counter-state verification is preserved.
+- Cross-reference review: HPAC-001 v2.1, RHAMP-001 v1.0, HPAC-PPA-001 v1.0,
+  HBDC-001 v1.2, RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1, and the
+  protected-root schemas are byte-unchanged. One open question —
+  HPAC-PPA-001's evidence-writer delivery (HPAC-PPA-REQ-041) under the
+  out-of-process model — is recorded for the dedicated contract IV and, if it
+  needs a normative change, a fresh governed HPAC-PPA-001 evolution phase; this
+  phase does not silently edit HPAC-PPA-001.
+- Guard reconciliation (widen-not-weaken): 27 attributable point-in-time guards
+  across 17 completed-predecessor suites reconciled against the fixed entry SHA
+  `05056eeb` (subset-widen by exactly the one new companion contract file /
+  re-anchor moving `HEAD` to the fixed last-v1.4 SHA / extend the version-prefix
+  tuple and the requirement-ceiling set). A/B: 40 pre-existing baseline failures
+  node-for-node identical at baseline and HEAD; 0 attributable regressions; 0
+  test function renamed, removed, or disabled.
+- New contract-verification suite
+  `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py`
+  — 45 tests, 45 passed.
+- Contract-only: no `src/pcae` / `scripts` / `pyproject.toml` / dependency
+  change; no protected-host mutation; no ceremony; no helper / launcher /
+  channel / registration record created; the in-process `_PINNED_*` /
+  `_verified_production_caller_name` mechanism is NOT removed (a later governed
+  implementation slice; a compatibility shim MUST NOT preserve the insecure
+  in-process path). Runtime `not_implemented` / `Observed` / `observe` /
+  `unavailable`; 0 plugins / 0 capabilities; first governed runtime external
+  effect ABSENT / UNREACHABLE.
+- **F-5-B2: BLOCKED pending contract IV + implementation. F-5: CERTIFICATION
+  BLOCKED. N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN / UNTOUCHED (N-16-7
+  strictly last). REPORTING-UX-1: open, non-blocking.** Recommended next
+  (derived, NOT begun): `N16-5-F-5-TB-CONTRACT-IV` (dedicated independent
+  verification of HPAC-PAWA-001 v2.0 and HPAC-PAWA-HELPER-001 v1.0 together —
+  required, not foldable) → helper + protocol implementation → caller
+  integration → in-process authority-path removal → packaging / clean-install
+  → dedicated security IV → production deployment → a fresh
+  `N16-5-FINAL-CERT` on a fresh CPIPC-valid successor id. Canonical report:
+  `docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F_5_TB_CONTRACT.md`.
+  `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1`
   (alias **N16-5-F-5-TB-ARCH**) — **N-16-5 Privileged Production Authority
   Trust-Boundary Architecture: Stronger-than-Same-Interpreter Consumer
