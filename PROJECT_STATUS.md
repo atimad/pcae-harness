@@ -2,6 +2,127 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1
+(alias **N16-5-F-5-TB-ARCH**) — N-16-5 Privileged Production Authority
+Trust-Boundary Architecture: Stronger-than-Same-Interpreter Consumer
+Authenticity. CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1`
+(alias `N16-5-F-5-B2R2-IMPL`) — same series `149` / branch `O`, strict order
+(`pcae.core.phase_id.compare` == `less`), exactly one appended `.1` segment
+(47 → 48), exact canonical text, unique against full git history and
+`docs/` / `tasks/` / `.pcae/`, no conflicting active governed phase;
+independently re-derived via `pcae.core.phase_id`, alias display-only.
+
+**STATUS: N16-5-F-5-TB-ARCH COMPLETE — stronger-than-same-interpreter
+architecture DEFINED. Contract-evolution verdict: B — REQUIRES HPAC-PAWA-001
+CONTRACT EVOLUTION.**
+
+Architecture-only governed phase. Entry state: branch `main`, HEAD ==
+`origin/main` == `089817c8`, `origin/main..HEAD` = 0, tree clean. Predecessor
+**N16-5-F-5-B2R2-IMPL** confirmed COMPLETE — BLOCKED from `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` (`status: completed`), the canonical
+report, and the governed done task. Carried-forward axiom: the frozen
+HPAC-PAWA-001 v1.4 consumer-authenticity property is **unsatisfiable within a
+same-process Python interpreter** for all four privileged factories
+(`gc.get_objects()` / `gc.get_referrers()` reach any authority-bearing state or
+object regardless of encapsulation).
+
+Reconstructed the HPAC-PAWA-001 v1.3 → v1.4 lineage from primary artifacts
+(header, §7C, §80.4, §90.4, §94, §95C, PAWA-INV-14) — v1.4 **FROZEN**, MINOR
+(S-3), one recognized read-only `HPACStoreAuthority` accessor; trust root
+unchanged = **OS filesystem write authority on the out-of-band-provisioned
+protected root, "never an in-process check"** (HPAC-PAWA-REQ-010 / REQ-300).
+The v1.4 §33B / §32 step-9 consumer-authenticity conjunct **reuses** the
+same-process module-identity check now known unsound. Confirmed v1.4 does not
+already define out-of-process authority, authenticated local IPC, or a
+protected helper boundary for the four factories (only the HPAC-PPA-001
+ceremony hand-off is out-of-process).
+
+**Selected architecture:** a **short-lived one-shot privileged helper
+process** (candidate 6C), realized as a generalization of the IV'd
+HPAC-PPA-001 verified-helper pattern (6D) — anchored on the **unchanged**
+HPAC-PAWA-001 §4 filesystem trust root (no second trust root). The standalone
+deployment-owner launcher (already the sole authorized consumer, already run
+under the deployment-owner principal) integrity-verifies the out-of-band
+helper executable (byte hash / owner / mode / no-symlink / same-file-object
+exec), opens a private one-shot parent/child channel not inherited by agent
+code, and `exec`s the helper. The helper runs, **in its own interpreter**, the
+§33 steps 1–8 OS recognition (binding the configured-agent identity so the
+negative boundary keys off the agent principal, not root-under-`sudo`),
+verifies its peer credential is the deployment owner, validates a narrow typed
+request bound to a certification session, performs **exactly one** bounded
+operation (a §42 mutation / a five-role certification-lifecycle write / an
+enumerated §42D read / one ceremony-entry hand-off to the presentation helper
+/ one presentation-evidence write), writes audit evidence under the protected
+root, returns **typed evidence only**, and exits. **No `HPACWriterCapability`
+/ `HPACStoreAuthority` / handle ever crosses back to the main interpreter or
+the launcher.** §33 step 9 ("calling module is an authorized consumer") is
+replaced by "the process was `exec`'d from the verified helper, its peer is
+the deployment owner, and the OS recognition passed inside it."
+
+Rejected: persistent helper / daemon (6A/6B — larger standing privileged
+surface, cross-request authority state); C-extension opaque handle (6E —
+recognition still runs in the shared interpreter and the object is still
+in-process reachable; retained only as optional in-helper defense-in-depth);
+network/cloud authority service (out of scope). Five-role certification family
+(`hpac_challenge_coordinator`, `hpac_assertion_recorder`,
+`human_authentication_proof_verifier`, `hpac_gate5_binder`,
+`hpac_rhamp_counter_state_verifier`) preserved exactly and mapped to five
+members of the closed operation enum with exact internal role dispatch.
+Human-approval ≠ authentication ≠ presence ≠ PB permission ≠ runtime
+capability ≠ execution — all preserved; the helper is not a human approver.
+Mechanism-neutral / mobile-only future path preserved (helper trust is bound
+to OS process + filesystem + peer-credential facts, not to any authenticator).
+`FILE LOCATION ≠ TRUSTED ORIGIN`; `HASH CONSISTENCY ≠ PROVENANCE`;
+`STRUCTURALLY VALID OBJECT ≠ TRUSTED CANONICAL STATE` — preserved.
+
+**Contract impact:** Verdict **B**. The v1.4 §32 predicate 6 / §33 step 9
+("calling module"), §36–§37 (factory in a module returning a capability),
+§33A / §33B (accessor returning a handle), and the §42B / §42D / §49B /
+PAWA-INV-13 / PAWA-INV-14 handle semantics are all written around an
+in-process factory returning a Python authority object — the shape the
+predecessor proved cannot carry authority. Delivering authority out-of-process
+and replacing "calling module identity" with "verified peer process + OS
+recognition" is **not** a permitted MINOR move (HPAC-PAWA-REQ-153); it
+restructures the frozen recognition-sequence delivery model. Smallest
+necessary evolution: rewrite §32 / §33 step 9, §36–§38, §42B, §42D, §33B /
+§49B / PAWA-INV-14, and add (or fold into HPAC-PPA-001) a companion
+helper-protocol contract. Magnitude most likely **MAJOR**; the definitive
+MINOR/MAJOR call belongs to the contract phase. Default recommendation: a
+**fresh, separately authorized governed contract-evolution phase**.
+
+**No contract amendment, production, script, test, or dependency change by
+this phase** (`git diff 089817c8 HEAD -- src/pcae scripts pyproject.toml
+docs/contracts` is empty). No protected-host mutation; no real ceremony; no
+FIDO2 PIN / YubiKey touch; no principal / challenge / proof / counter / Gate-5
+activity. Runtime posture unchanged: `not_implemented` / `Observed` /
+`observe` / `unavailable` / 0 plugins / 0 capabilities; first governed runtime
+external effect **ABSENT / UNREACHABLE**. This phase does **not** close
+N-16-5, does **not** begin the contract phase, N-16-6, or N-16-7.
+
+**Verdict: F-5-B2 BLOCKED pending stronger-boundary contract + implementation.
+F-5: CERTIFICATION BLOCKED. N-16-5: NOT CLOSED. N-16-6 / N-16-7: OPEN /
+UNTOUCHED (N-16-7 strictly last).** Historical outcomes preserved exactly
+(`N16-5-F-5-B2` NOT VERIFIED / BLOCKED; `N16-5-F-5-B2R-IV` NOT VERIFIED /
+BLOCKED; `N16-5-F-5-B2R2-IMPL` COMPLETE — BLOCKED; delegated `.3`
+finalization / commit / push UNAUTHORIZED). **REPORTING-UX-1** remains open /
+non-blocking (phase identity verified independently via `pcae.core.phase_id`).
+
+**Recommended successors (derived, NOT begun; each needs its own explicit
+human authorization):** (1) a fresh governed **contract-evolution phase**
+freezing the HPAC-PAWA-001 §32/§33/§36–§38/§42 restructure + companion
+helper-protocol contract; (2) a dedicated **contract IV**; (3) helper +
+protocol implementation; (4) caller integration; (5) in-process-path removal;
+(6) packaging / clean-install; (7) independent **security IV**; (8) production
+deployment; (9) a **fresh** `N16-5-FINAL-CERT` on a fresh CPIPC-valid id
+(never reuse a completed / blocked certification identity).
+
+Canonical report: `docs/PHASE_N16_5_F_5_TB_ARCH.md`.
+
+---
+
+## Prior Phase
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1
 (alias **N16-5-F-5-B2R2-IMPL**) — Privileged Production Factory
 Consumer-Authenticity Repair: Mutable-State Elimination / Trust-Boundary

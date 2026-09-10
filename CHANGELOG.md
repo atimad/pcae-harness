@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1`
+  (alias **N16-5-F-5-TB-ARCH**) — **N-16-5 Privileged Production Authority
+  Trust-Boundary Architecture: Stronger-than-Same-Interpreter Consumer
+  Authenticity**. Architecture-only governed phase after the
+  N16-5-F-5-B2R2-IMPL verdict that same-process Python consumer authenticity
+  is unsatisfiable for all four HPAC-PAWA privileged factories. Selected
+  architecture: a **short-lived one-shot privileged helper process**,
+  generalizing the IV'd HPAC-PPA-001 verified-helper pattern to the four
+  factory operations, anchored on the **unchanged** HPAC-PAWA-001 §4 OS
+  filesystem trust root; the privileged side performs the bounded operation
+  and returns only typed evidence — **no `HPACWriterCapability` /
+  `HPACStoreAuthority` / handle ever crosses back into the main interpreter**.
+  Consumer authenticity is redefined as: `exec`'d from the integrity-verified
+  out-of-band helper executable + deployment-owner peer credential over a
+  private one-shot channel + the full §33 OS recognition run inside the
+  helper. Five-role certification family, human-approval/authentication
+  separation, mechanism-neutral / mobile-future path, non-bearer / restart-dead
+  semantics, and all §5/§68 walls preserved; no second trust root.
+  **Contract-evolution verdict: B — REQUIRES HPAC-PAWA-001 CONTRACT EVOLUTION**
+  (restructures §32/§33 step 9 + §36–§38/§42B/§42D delivery model; likely a
+  companion helper-protocol contract; magnitude most likely MAJOR).
+  Canonical artifact `docs/PHASE_N16_5_F_5_TB_ARCH.md`. No production /
+  script / dependency / contract change; no protected-host mutation; no
+  ceremony. Runtime unchanged: `not_implemented` / Observed / observe /
+  unavailable / 0 plugins / 0 capabilities; first external effect ABSENT /
+  UNREACHABLE. **F-5-B2 BLOCKED pending stronger-boundary contract +
+  implementation. F-5 CERTIFICATION BLOCKED. N-16-5 NOT CLOSED. N-16-6 /
+  N-16-7 OPEN / UNTOUCHED (N-16-7 strictly last).** Recommended next
+  (derived, NOT begun, needs its own human authorization): a fresh governed
+  **contract-evolution phase**.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R`
   (alias **N16-5-F-5-B2-IV**) — **Independent Verification of Privileged
   Production Factory Consumer-Authenticity Repair**. Independently
