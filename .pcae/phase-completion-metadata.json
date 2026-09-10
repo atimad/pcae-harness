@@ -120,6 +120,6 @@
         }
     ],
     "recommended_next_phase": "Fresh governed privileged-helper + HPAC-PAWA-HELPER/1.0 protocol implementation phase (suggested alias N16-5-F-5-TB-HELPER-IMPL; id NOT reserved), implementing ONLY the protected helper / protocol foundation against the now-independently-verified resolved trio. It should NOT automatically include broad caller migration, removal of every old in-process path, production deployment, or real certification -- those remain separate governed phases unless the implementation plan independently proves a tighter atomic slice is required. Expected further sequence, each requiring fresh human authorization: caller/client integration; insecure in-process production authority-path removal; packaging / clean-install verification; a dedicated independent security IV; production deployment; and only then a fresh N16-5-FINAL-CERT on a fresh CPIPC-valid successor id (never reuse a completed or blocked certification identity, PAWA-INV-11). Do NOT begin any implementation slice, N-16-6, or N-16-7 without fresh explicit human authorization for each. F-5-B2 BLOCKED PENDING IMPLEMENTATION; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED. REPORTING-UX-1 open (non-blocking).",
-    "pushed_status": "clean",
-    "origin_main_head": "90b9f9d42c515fb1f11b3e8909fcfb77500bc8b4"
+    "pushed_status": "pushed",
+    "origin_main_head": "ebbc9dd2014033f717a1ebc096eef2a643a47e43"
 }

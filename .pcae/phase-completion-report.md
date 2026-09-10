@@ -74,10 +74,9 @@ performed any commit, push, or finalization.
 
 ## Governance validation
 
-`pcae check`: passed. `pcae health`: healthy. Pushed: not_pushed
-(`origin/main..HEAD`: to be confirmed 0 after push). Governed completion
-notification: dispatched by `pcae phase complete` per policy after push and
-re-finalization.
+`pcae check`: passed. `pcae health`: healthy. Pushed: pushed
+(`origin/main..HEAD` = 0). Governed completion notification: dispatched by
+`pcae phase complete` per policy.
 
 ## Recommended next phase
 
