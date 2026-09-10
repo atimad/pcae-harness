@@ -2,6 +2,53 @@
 
 ## Accepted
 
+- **2026-09-10 — N16-5-F-5-TB-CONTRACT-IV: contract IV of HPAC-PAWA-001 v2.0 +
+  HPAC-PAWA-HELPER-001 v1.0 → NOT VERIFIED / BLOCKED (HPAC-PPA-001 adjudication
+  = B).** Canonical phase
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1`,
+  the CPIPC-valid direct `.1` child of the completed predecessor
+  N16-5-F-5-TB-CONTRACT. The authorizing prompt (§25 / §45) required a
+  conclusive A-or-B adjudication of the deferred HPAC-PPA-001
+  evidence-writer-delivery question and forbade a third "deferred" outcome.
+  **Decision: option B — HPAC-PPA-001 CONTRACT EVOLUTION REQUIRED.**
+  HPAC-PAWA-HELPER-001 v1.0 §17 (HPAC-PAWA-HELPER-REQ-070) freezes the
+  `presentation_evidence_write` operation — one of the five closed
+  operation-vocabulary members — as *"invoked by the HPAC-PPA-001 presentation
+  helper itself"*. HPAC-PPA-001 v1.0 (byte-unchanged) states the opposite:
+  HPAC-PPA-REQ-041 (*"held only by the trusted launcher mediator … never sent
+  to the helper"*), HPAC-PPA-REQ-054 (*"evidence producer is only the launcher
+  mediator"*), HPAC-PPA-REQ-052 (a distinct evidence-writer-issuer module,
+  `pcae.core.protected_presentation`, separate from
+  `pcae.protected_presentation_helper`), and PPA-INV-2 (helper response and
+  evidence writer are *distinct trust actions with no authority transfer*).
+  Moving the write into the helper merges two of PPA-INV-2's four distinct
+  trust actions and changes the writer-holder — a MAJOR-class change under
+  HPAC-PPA-REQ-069, not a within-properties platform adapter (HPAC-PPA-REQ-070).
+  The HPAC-PAWA-HELPER-001 §17 note's option-(a) framing (*"repository-equivalent
+  use of the same existing capability/provenance primitive"*) does not survive
+  independent scrutiny: REQ-041's parenthetical governs *which primitive*, not
+  *who holds it*. The v2.0 `presentation_evidence_write` design is the correct
+  security direction (HPAC-PPA-001 v1.0's launcher-mediator writer is an
+  in-interpreter `HPACWriterCapability` with the same `gc`-reachability
+  vulnerability the N-16-5 F-5 line exists to fix) — but HPAC-PPA-001 v1.0 as
+  frozen does not authorize it. **This IV edited no normative contract.** Per
+  §45, option B ⇒ NOT VERIFIED / BLOCKED. **Recommended successor (derived, NOT
+  begun; own explicit human authorization required):** a fresh governed
+  HPAC-PPA-001 contract-evolution phase moving its presentation-evidence-writer
+  authority out of process (into the verified presentation helper), re-meaning
+  HPAC-PPA-REQ-041 / -054 / -052 / PPA-INV-2 explicitly. Every other
+  load-bearing IV criterion (MAJOR S-4 classification; the §33C 13-conjunct
+  conjunction; same-interpreter predicate elimination; no authority-object
+  export; closed operation vocabulary; single trust root; peer-auth;
+  same-file-object anti-TOCTOU; freshness / replay / state-transition / crash /
+  audit ordering; five-role closure; typed-read non-reconstructibility;
+  ceremony-entry separation; failure-code / RHAMP non-expansion; generic-broker
+  prohibition; every §68C wall; deterministic-vs-real; mechanism neutrality;
+  runtime posture; sibling byte-identity) was **independently established**.
+  New contract-IV suite 62/0; predecessor CONTRACT suite re-run 45/0.
+  F-5-B2 BLOCKED; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED; N-16-6 / N-16-7
+  OPEN / UNTOUCHED (N-16-7 strictly last).
+
 - **2026-09-08 — N16-5-FINAL-CERT BLOCKED before ceremony at finding F-5-B1.**
   Live certification readiness was freshly re-confirmed on the correct
   production host (§5, §14–§21): protected root / PAWA anchor gen 1 /
