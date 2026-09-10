@@ -101,8 +101,10 @@ def test_iv03_sibling_contracts_and_schemas_and_deps_byte_unchanged():
     assert diff == []
     # Since the F-5-B1 evolution: exactly this one contract file, and nothing
     # under schemas/ or pyproject.toml (v1.4 adds no schema, no dependency).
+    # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): re-anchor the moving `HEAD` to the fixed
+    # SHA 05056eeb1d38d92d7eda749a4334f7626c5e6a8f (last v1.4 commit).
     since = _git(
-        "diff", "--name-only", _F5B1_READAUTH_ENTRY, "HEAD", "--", "docs/contracts", "schemas", "pyproject.toml"
+        "diff", "--name-only", _F5B1_READAUTH_ENTRY, "05056eeb1d38d92d7eda749a4334f7626c5e6a8f", "--", "docs/contracts", "schemas", "pyproject.toml"
     ).split()
     assert set(since) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, since
 

@@ -108,7 +108,9 @@ def test_04_contract_version_is_v1_3() -> None:
     # the current head is v1.3 or a later governed MINOR of the same contract,
     # still FROZEN, lineage never rewritten.
     cur = text(PAWA)
-    assert cur.splitlines()[0].startswith("# HPAC-PAWA-001 v1.")
+    # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): a later governed MAJOR bumps the
+    # header to v2.x; the v1.3 lineage prefix is never rewritten (asserted below).
+    assert cur.splitlines()[0].startswith(("# HPAC-PAWA-001 v1.", "# HPAC-PAWA-001 v2."))
     assert "**Status:** FROZEN" in cur
     assert "HPAC-PAWA-001 v1.0 → v1.1 → v1.2 → v1.3" in cur
 
@@ -354,7 +356,11 @@ def test_39_only_this_contract_changed_in_docs_contracts() -> None:
             ["git", "diff", "--name-only", H0, "--", "docs/contracts"], cwd=ROOT
         ).decode().split()
     )
-    assert out <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, out
+    # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): the later MAJOR adds one new companion contract file.
+    assert out <= {
+        "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
+        "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
+    }, out
 
 
 def test_40_no_instance_ids_frozen_normatively() -> None:

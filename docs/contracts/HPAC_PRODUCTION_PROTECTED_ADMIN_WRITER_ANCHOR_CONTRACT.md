@@ -1458,19 +1458,11 @@ ambiguity at any authority boundary fails closed.
   8. perform the `O_EXCL | O_NOFOLLOW` positive write probe against `.authority/`
      (§28, §29) (`write_probe_failed`);
   9. verify the calling module is an authorized factory consumer (§32, §38)
-     (`unauthorized_factory_consumer`); **(v2.0) SUPERSEDED by §33C step 9′** —
-     verify the running process is a `TrustedProtectedAuthorityConsumer` (§33C):
-     `exec`'d from the integrity-verified out-of-band helper executable
-     (HPAC-PAWA-HELPER-001 §6) by an enumerated §38C launcher, channel peer
-     credential = the deployment owner (HPAC-PAWA-HELPER-001 §10), and this
-     process itself ran steps 1–8 above;
+     (`unauthorized_factory_consumer`);
   10. mint the process-local, operation-scoped `PRODUCTION`
       `HPACWriterCapability` (§36, §41) bound to the operation / principal /
-      credential (§42–§44); **(v2.0)** the helper performs the bounded operation
-      itself in its own process (§42F); **no `HPACWriterCapability` is returned
-      to the launcher or the main interpreter** (PAWA-INV-15);
-  11. record the issuance audit evidence (§55); **(v2.0)** with the
-      evidence-staged-before-mutation ordering of HPAC-PAWA-HELPER-001 §22.
+      credential (§42–§44);
+  11. record the issuance audit evidence (§55).
 
 - **HPAC-PAWA-REQ-075.** The sequence SHALL run fresh on **every**
   `production_writer(...)` call. No result is cached across calls; no long-lived

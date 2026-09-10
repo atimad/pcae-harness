@@ -226,7 +226,10 @@ def test_03_contract_and_schema_byte_unchanged_since_i_entry():
             "git",
             "diff",
             "--name-only",
-            f"{I_ENTRY}..HEAD",
+            # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): re-anchor the moving `HEAD`
+            # to the fixed SHA 05056eeb1d38d92d7eda749a4334f7626c5e6a8f (last v1.4 commit); the v1.4 contract
+            # + schema + deps were byte-frozen through that SHA.
+            f"{I_ENTRY}..05056eeb1d38d92d7eda749a4334f7626c5e6a8f",
             "--",
             "docs/contracts",
             "src/pcae/core/hpac_pawa_schemas.py",

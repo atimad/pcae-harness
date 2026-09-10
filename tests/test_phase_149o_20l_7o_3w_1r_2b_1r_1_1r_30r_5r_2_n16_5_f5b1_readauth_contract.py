@@ -26,6 +26,12 @@ ROOT = Path(__file__).resolve().parents[1]
 #: Phase-entry SHA (C0) — the finalized predecessor N16-5-FINAL-CERT head, the
 #: last commit at which HPAC-PAWA-001 was still v1.3.
 C0 = "18d7da02435cac61159e9a90f86b2a586c4704d0"
+#: N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0) -- last commit at which HPAC-PAWA-001 was v1.4. The v1.4 freeze
+#: guards below (version string, INV-14 count, requirement ceiling, 'only this
+#: contract changed since C0') assert facts about the v1.4 freeze itself and are
+#: re-anchored from the live worktree / HEAD to this fixed SHA so a later
+#: governed MAJOR does not retroactively break them.
+R2 = "05056eeb1d38d92d7eda749a4334f7626c5e6a8f"
 #: The v1.3 git blob — byte-identical from N16-5-H3-IMPL through C0.
 PAWA_V13_BLOB = "9c816716bae2262831945ac24b1771cf79de4c55"
 
@@ -60,6 +66,15 @@ def flat(path: Path) -> str:
 
 def _git(*args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True)
+
+
+def at_r2(path: Path) -> bytes:
+    rel = path.relative_to(ROOT).as_posix()
+    return subprocess.check_output(["git", "show", f"{R2}:{rel}"], cwd=ROOT)
+
+
+def text_r2(path: Path) -> str:
+    return at_r2(path).decode("utf-8")
 
 
 def at_c0(path: Path) -> bytes:
@@ -120,7 +135,7 @@ def test_04_this_phase_report_present_with_required_verdicts() -> None:
 
 
 def test_10_contract_version_is_v1_4_frozen() -> None:
-    t = text(PAWA)
+    t = text_r2(PAWA)
     assert t.splitlines()[0].startswith("# HPAC-PAWA-001 v1.4 —")
     assert "**Version:** 1.4" in t
     assert "**Status:** FROZEN" in t
@@ -296,7 +311,7 @@ def test_53_h3_design_unchanged() -> None:
 
 
 def test_54_pawa_inv_14_present_once() -> None:
-    t = text(PAWA)
+    t = text_r2(PAWA)
     assert t.count("- **PAWA-INV-14.**") == 1
     assert re.search(r"`PAWA-INV-1` through `PAWA-INV-14`", t)
 
@@ -331,7 +346,7 @@ def test_70_no_src_or_scripts_change_since_c0() -> None:
 
 
 def test_71_only_this_contract_changed_in_docs_contracts_since_c0() -> None:
-    out = set(_git("diff", "--name-only", C0, "HEAD", "--", "docs/contracts").split())
+    out = set(_git("diff", "--name-only", C0, R2, "--", "docs/contracts").split())
     assert out == {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, out
 
 
@@ -349,7 +364,7 @@ def test_73_no_instance_ids_frozen_normatively() -> None:
 
 
 def test_74_requirement_ids_sequential_1_to_309() -> None:
-    ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d+)\.\*\*", text(PAWA)))
+    ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d+)\.\*\*", text_r2(PAWA)))
     assert ids == list(range(1, 310))
     assert len(ids) == len(set(ids)) == 309
 
@@ -357,7 +372,7 @@ def test_74_requirement_ids_sequential_1_to_309() -> None:
 def test_75_v1_4_additions_are_req_276_to_309() -> None:
     v13 = at_c0(PAWA).decode("utf-8")
     v13_ids = {int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d+)\.\*\*", v13)}
-    cur_ids = {int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d+)\.\*\*", text(PAWA))}
+    cur_ids = {int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d+)\.\*\*", text_r2(PAWA))}
     assert max(v13_ids) == 275
     assert sorted(cur_ids - v13_ids) == list(range(276, 310))
 

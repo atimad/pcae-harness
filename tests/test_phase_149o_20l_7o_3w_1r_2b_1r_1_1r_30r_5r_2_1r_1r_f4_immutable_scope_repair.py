@@ -7,6 +7,8 @@ import json
 import subprocess
 from pathlib import Path
 
+# --- Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): the point-in-time 'only the PAWA anchor file changed in docs/contracts' guard(s) below now also admit the new companion contract file. Subset (<=) orientation preserved; the property under test (no OTHER contract changed) is unchanged; no test function was renamed, removed, or disabled. ---
+
 
 ROOT = Path(__file__).resolve().parents[1]
 P = "00c077f6ff3389a8c91d503fb5341ec72775f8e0"
@@ -190,7 +192,7 @@ def test_29_no_contract_change() -> None:
   # document (verified by the v1.3 contract-reconciliation suite); nothing
   # else in docs/contracts changed. No test function was renamed or removed
   # (HPAC-PAWA-REQ-217 discipline).
-    assert set(git("diff", "--name-only", R0, "--", "docs/contracts").split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'}
+    assert set(git("diff", "--name-only", R0, "--", "docs/contracts").split()) <= {'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md', 'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md'}
 
 
 def test_30_f5_remains_absent() -> None:

@@ -472,8 +472,11 @@ def test_31_no_contract_or_production_source_modified_since_b2_0():
     -- see test_02_four_factories_share_the_primitive and the regression
     suite in test_phase_..._n16_5_f5b2_impl_consumer_authenticity.py for
     what DID change and why.)"""
+    # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): re-anchor the moving `HEAD` to the fixed
+    # SHA 05056eeb1d38d92d7eda749a4334f7626c5e6a8f (last v1.4 commit); the B2 diagnostic phase changed no contract
+    # text and no dependency, which stays true through that SHA.
     names = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only", B2_0, "HEAD", "--",
+        ["git", "-C", str(REPO), "diff", "--name-only", B2_0, "05056eeb1d38d92d7eda749a4334f7626c5e6a8f", "--",
          "docs/contracts", "pyproject.toml"],
         capture_output=True, text=True, check=True,
     ).stdout.split()

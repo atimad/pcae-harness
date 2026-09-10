@@ -5295,3 +5295,47 @@ verified in this phase.
   VERIFIED / BLOCKED; N16-5-F-5-B2R-IV NOT VERIFIED / BLOCKED; N16-5-F-5-B2R2-IMPL
   COMPLETE — BLOCKED; N16-5-F-5-TB-ARCH COMPLETE;
   `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`.
+
+### Guard reconciliation (widen-not-weaken) — N16-5-F-5-TB-CONTRACT
+
+The HPAC-PAWA-001 v1.4 → v2.0 in-place MAJOR evolution + the new companion
+contract file invalidate point-in-time guards across completed-predecessor
+suites. A/B: baseline `05056eeb` (phase entry, last v1.4 commit) vs HEAD over
+the affected guard-set + `docs/contracts` consumers — **40 pre-existing failures
+at baseline (unchanged); 27 attributable, all reconciled**; 0 test function
+renamed, removed, or disabled; `def test_` counts identical per file; no bare
+`xfail` / `fnmatch` / `.rglob(` / `@pytest.mark.skip` / `def test_` token added
+in reconciliation code or comments.
+
+Reconciliation, per guard class:
+- **"only the PAWA anchor changed under `docs/contracts`" subset (`<=`) guards**
+  (`.5R.2.1R.1R` f4 / f6-iv / f6-repair / f7 / f8 / f9-iv / f9-deployment;
+  `.30R.4R` `test_32`; `.30R.4R.1` `test_03`; H3-PAWA13 `test_39`;
+  H3-IV cascade) — widened the allowed set by **exactly** the one new companion
+  file `docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md`; `<=`
+  orientation and the "no OTHER contract changed" property preserved.
+- **"no contract byte change since <SHA>" moving-`HEAD` guards** (f5b1_impl
+  `test_02`; f5b1_iv `test_03`; h3_impl `test_93`; h3-iv `test_iv03`; f5b2
+  `test_31`) — re-anchored the moving `HEAD` endpoint to the fixed SHA
+  `05056eeb` (the last commit at which HPAC-PAWA-001 was v1.4); the guarded
+  phase changed no contract text, which stays true through that SHA (the
+  N16-5-F5B1-READAUTH re-anchor-to-fixed-SHA precedent).
+- **v1.4-freeze-fact guards** (f5b1_readauth_contract `test_10` version string,
+  `test_54` INV-14 count + "PAWA-INV-1 through PAWA-INV-14", `test_71` `==`
+  single-file, `test_74`/`test_75` requirement ceiling 309) — re-anchored the
+  contract read from the live worktree to the fixed SHA `05056eeb` via a new
+  `R2` const + `at_r2` / `text_r2` helpers; these assert facts about the v1.4
+  freeze itself and remain exactly true at that SHA.
+- **contract-version-header `startswith` guards** (H3-PAWA13 `test_04`,
+  f5b1_impl `test_01`, r4r_2-iv `test_07`) — extended the accepted prefix tuple
+  by `"# HPAC-PAWA-001 v2."` / `"# HPAC-PAWA-001 v2.0"`; the v1.3/v1.4 lineage
+  prefix `HPAC-PAWA-001 v1.0 → v1.1 → v1.2 → v1.3` is preserved verbatim in the
+  contract and still asserted.
+- **requirement-numbering closure guard** (`.30R.4R` `test_33`) — added
+  `list(range(1, 341))` to the accepted set; the property (closed, sequential
+  from 1, no gaps, no duplicates) is unchanged.
+- **byte-freeze / verbatim-body guards** (`pawa_v1_3_contract_iv` `test_06`) —
+  pass unchanged: every v1.3 `HPAC-PAWA-REQ-###` body survives verbatim and
+  contiguous in v2.0 (all v2.0 notes are appended `- **(v2.0) …**` bullets or
+  new §33C–§96D sections; no v1.0–v1.4 requirement body was reworded, shortened,
+  reordered, or interrupted).

@@ -38,6 +38,9 @@ _R4R1_IMPLEMENTATION_FILES = frozenset(
 )
 PAWA = ROOT / "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"
 PPA = ROOT / "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md"
+# N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): the v2.0 MAJOR adds one new companion contract file; guards that
+# enumerate 'only PAWA (+PPA) changed under docs/contracts' now also admit it.
+HELPER = ROOT / "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md"
 RHAMP = ROOT / "docs/contracts/REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md"
 HPAC = ROOT / "docs/contracts/HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md"
 BLOCKED = ROOT / "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_4_N_16_5_PROTECTED_PRESENTATION_REAL_ASSURANCE_BLOCKED.md"
@@ -243,7 +246,7 @@ def test_30_hpac_rhamp_and_writer_provenance_do_not_evolve() -> None:
 
 def test_31_all_preexisting_contracts_except_pawa_are_byte_identical_to_a() -> None:
     for path in sorted((ROOT / "docs/contracts").glob("*.md")):
-        if path in {PAWA, PPA}:
+        if path in {PAWA, PPA, HELPER}:
             continue
         assert path.read_bytes() == at_a(path), path
 
@@ -259,6 +262,7 @@ def test_32_pawa_and_new_companion_are_only_contract_delta() -> None:
     assert changed <= {
         "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
         "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md",
+        "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
     }
     assert PPA.exists()
     # Phase .1R.30R.4R.1 reconciliation — the implementation successor changed
@@ -269,7 +273,10 @@ def test_32_pawa_and_new_companion_are_only_contract_delta() -> None:
         subprocess.check_output(
             ["git", "diff", "--name-only", R4R_FINALIZED, "--", "docs/contracts"], cwd=ROOT, text=True
         ).split()
-    ) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}
+    ) <= {
+        "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
+        "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
+    }
 
 
 def test_33_requirement_numbering_is_closed_and_sequential() -> None:
@@ -281,7 +288,10 @@ def test_33_requirement_numbering_is_closed_and_sequential() -> None:
     # REQ-276..309 (F-5-B1 recognized read / ceremony-entry authority). The
     # property under test — closed, sequential, no gaps, no duplicates — is
     # unchanged; only the ceiling moves.
-    assert sorted(pawa_nums) in (list(range(1, 234)), list(range(1, 276)), list(range(1, 310)))
+    # N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): v2.0 adds REQ-310..340 (still closed, sequential, no gaps/dupes).
+    assert sorted(pawa_nums) in (
+        list(range(1, 234)), list(range(1, 276)), list(range(1, 310)), list(range(1, 341)),
+    )
     assert sorted(ppa_nums) == list(range(1, 77))
 
 

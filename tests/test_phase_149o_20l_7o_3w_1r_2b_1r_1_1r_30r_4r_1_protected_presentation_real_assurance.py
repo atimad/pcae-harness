@@ -245,7 +245,12 @@ def test_03_rhamp_and_hpac_byte_unchanged_since_r4r():
         ["git", "diff", "--name-only", r4r, "HEAD", "--", "docs/contracts"],
         cwd=REPO, capture_output=True, text=True,
     ).stdout.split()
-    assert set(changed) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, changed
+    # N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): v2.0 also adds one new companion contract file; RHAMP-001 / HPAC-001
+    # themselves remain byte-unchanged (asserted below).
+    assert set(changed) <= {
+        "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
+        "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
+    }, changed
     for c in ("REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md",
               "HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md"):
         assert subprocess.run(

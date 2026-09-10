@@ -169,12 +169,17 @@ def rig(tmp_path):
 
 def test_01_pawa_contract_version_is_v1_4():
     text = (REPO / "docs" / "contracts" / "HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md").read_text()
-    assert text.splitlines()[0].strip().startswith("# HPAC-PAWA-001 v1.4")
+    # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): v1.4 was the state this phase implemented against;
+    # a later governed MAJOR evolves the same document to v2.x (lineage never rewritten).
+    assert text.splitlines()[0].strip().startswith(("# HPAC-PAWA-001 v1.4", "# HPAC-PAWA-001 v2."))
 
 
 def test_02_no_contract_diff_since_i0():
+    # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): re-anchor the moving `HEAD` endpoint to the fixed
+    # SHA 05056eeb1d38d92d7eda749a4334f7626c5e6a8f (the last commit at which HPAC-PAWA-001 was v1.4); this phase
+    # implemented no contract change, which stays true at that SHA.
     names = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only", I0, "HEAD", "--", "docs/contracts"],
+        ["git", "-C", str(REPO), "diff", "--name-only", I0, "05056eeb1d38d92d7eda749a4334f7626c5e6a8f", "--", "docs/contracts"],
         capture_output=True, text=True, check=True,
     ).stdout.split()
     assert names == [], names

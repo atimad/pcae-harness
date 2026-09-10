@@ -796,8 +796,11 @@ def test_93_pawa_and_frozen_contracts_byte_unchanged_since_i0():
     assert names == [], names
     # And since the F-5-B1 read/ceremony-entry evolution: it touches exactly
     # this one contract file and nothing under schemas/ (v1.4 adds no schema).
+    # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): re-anchor the moving `HEAD` to the fixed
+    # SHA 05056eeb1d38d92d7eda749a4334f7626c5e6a8f (last v1.4 commit); through that SHA exactly the one PAWA
+    # anchor file changed under docs/contracts and nothing under schemas/.
     since = subprocess.run(
-        ["git", "-C", str(REPO), "diff", "--name-only", _F5B1_READAUTH_ENTRY, "HEAD", "--", "docs/contracts", "schemas"],
+        ["git", "-C", str(REPO), "diff", "--name-only", _F5B1_READAUTH_ENTRY, "05056eeb1d38d92d7eda749a4334f7626c5e6a8f", "--", "docs/contracts", "schemas"],
         capture_output=True, text=True, check=True,
     ).stdout.split()
     assert set(since) <= {"docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md"}, since
