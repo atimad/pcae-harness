@@ -2,6 +2,54 @@
 
 ## Accepted
 
+- **2026-09-11 — N16-5-F-5-TB-TRIO-IV: resolved-trio cross-contract
+  independent verification of HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0
+  + HPAC-PPA-001 v2.0 → COMPLETE / INDEPENDENTLY VERIFIED (RESOLVED-TRIO
+  VERIFIED).** Canonical phase
+  `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1`,
+  the CPIPC-valid direct `.1` child of the completed predecessor
+  N16-5-F-5-PPA-CONTRACT-IV. Independently re-derived from the three primary
+  contract texts, not from any predecessor report text: the trio composes
+  into exactly one coherent, non-circular, fail-closed, non-bearer
+  production authority path; HPAC-PAWA-001 §33C
+  `TrustedProtectedAuthorityConsumer` remains the sole production
+  protected-consumer admission model, unweakened by either companion
+  contract; the trust graph bottoms out only in the frozen OS filesystem
+  write authority on the out-of-band protected root, with no second trust
+  root; `presentation_evidence_write` has exactly one production owner (the
+  verified presentation helper) across all three documents; no authority
+  object or semantic equivalent crosses either process boundary (ordinary
+  process ↔ PAWA helper, launcher ↔ presentation helper); the closed
+  five-member `HPAC-PAWA-HELPER/1.0` operation vocabulary and the five-role
+  certification family are both unwidened by PPA; `ceremony_entry`
+  composition, human-election / authentication-separation / Gate5-PB-runtime
+  walls, replay / no-auto-retry / composed state-transition semantics all
+  agree across the trio; **NO SCHEMA CHANGE** re-confirmed against the
+  actual `TrustedApprovalPresentationEvidence` schema source; no new failure
+  or terminal-reason code; sibling contracts (HPAC-001 v2.1, RHAMP-001 v1.0,
+  HBDC-001 v1.2, RIHAC-001 v2.0, RIASC-001 v3.0, RDGO-001 v3.1)
+  byte-unchanged and semantically unwidened. **The exact prior blocker —
+  HELPER v1.0 §17 vs PPA v1.0 launcher-held evidence-writer ownership — is
+  explicitly confirmed RESOLVED / VERIFIED, absent across the current
+  v2.0/v1.0/v2.0 trio.** **Decision: RESOLVED-TRIO VERIFIED, no
+  security-critical or compositional defect found.** New independent
+  29-assertion trio-IV suite (distinct from the predecessor's own
+  19-assertion pairwise suite); `pytest -m fast_green -n auto`: 9663 passed /
+  356 failed / 9 errors, identical failed/error node profile to the
+  pre-existing repo-wide baseline, 0 attributable. No normative contract
+  text edited; no `src/pcae` / `scripts` / `pyproject.toml` / `schemas`
+  change; no protected-host mutation; no real ceremony; no FIDO2/YubiKey
+  interaction; no helper implementation. Trust-boundary contract set now
+  READY FOR IMPLEMENTATION. F-5-B2 remains BLOCKED PENDING IMPLEMENTATION;
+  F-5 certification remains BLOCKED; N-16-5 remains NOT CLOSED; N-16-6 /
+  N-16-7 remain OPEN / UNTOUCHED (N-16-7 strictly last). Recommended next
+  (derived, NOT begun): a fresh governed privileged-helper +
+  `HPAC-PAWA-HELPER/1.0` protocol implementation phase (suggested alias
+  N16-5-F-5-TB-HELPER-IMPL) — implementing ONLY the protected helper /
+  protocol foundation, not caller migration, not in-process-path removal,
+  not deployment, not real certification; not begun in this phase, per its
+  own absolute stop boundary; requires fresh explicit human authorization.
+
 - **2026-09-10 — N16-5-F-5-PPA-CONTRACT-IV: independent verification of
   HPAC-PPA-001 v2.0 → COMPLETE / INDEPENDENTLY VERIFIED.** Canonical phase
   `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1`,
