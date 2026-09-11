@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-HELPER-IV**) — **Fresh Independent Verification of
+  the Privileged Helper / HPAC-PAWA-HELPER-001 Protocol Foundation.**
+  COMPLETE — NOT VERIFIED / BLOCKED. Entry check first found a load-bearing
+  identity problem in a proposed follow-on repair phase's authorization
+  prompt: it presupposed this exact IV had already run and finished
+  BLOCKED, but direct repository inspection proved it had never run at all
+  (no commit/task/report/metadata; `PROJECT_STATUS.md` itself said "NOT
+  begun"). Correctly ran the real IV, with the real predecessor
+  N16-5-F-5-TB-HELPER-IMPL.1, before any repair phase could be considered.
+  Reconstructed the helper/protocol foundation from source and added 7
+  disposable, subprocess-isolated verification tests, all 7 passed.
+  **REPLAY-AFTER-RESTART independently CONFIRMED**, reproduced across two
+  genuinely separate OS processes: a fresh helper process reports a
+  previously-consumed mutating `(request_id, nonce)` as `FRESH`, because
+  `ReplayLedger` is process-local/in-memory with no durable backing — root
+  cause structurally confirmed via source inspection (no I/O, no
+  durable-location constructor argument), not merely inferred. Same result
+  under response-loss and crash-before-terminal-disposition framings.
+  macOS same-file-object execution reconfirmed fail-closed on the actual
+  unpatched platform. Regression: helper-foundation focused suite unchanged
+  at 51 passed / 0 failed / 1 skipped; `fast_green` 355 failed / 9664
+  passed / 5 skipped / 9 errors, independently A/B'd against the entry
+  baseline via `git stash` — byte-identical failure sets, **zero**
+  attributable regressions (all 355 are this repo's own pre-existing
+  floating-`ENTRY`-baseline anti-pattern). Full unmarked `pytest -n auto`
+  blocked by a pre-existing, independently-confirmed-pre-existing
+  `pytest-xdist` worker-collection-mismatch defect (not attributable to
+  this phase, not fixed — out of scope); single-process `--collect-only`
+  succeeds cleanly at 42,665 tests. No production repair performed: 0
+  `src/pcae`/contract/schema/dependency change; helper production files
+  byte-unchanged. 0 live protected-host writes; 0 real ceremony. F-5-B2
+  BLOCKED PENDING HELPER IMPLEMENTATION REPAIR; F-5 CERTIFICATION BLOCKED;
+  N-16-5 NOT CLOSED. Recommended next (NOT begun):
+  N16-5-F-5-TB-REPLAY-REPAIR.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-HELPER-IMPL.1**) — **Privileged Helper Implementation
   Scope-Fence Reconciliation.** Reconciled exactly 3 stale point-in-time

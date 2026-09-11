@@ -2,6 +2,93 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-HELPER-IV**) — Fresh Independent Verification of the
+Privileged Helper / HPAC-PAWA-HELPER-001 Protocol Foundation. CPIPC: valid
+direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-HELPER-IMPL.1`) — same series `149` / branch `O`,
+exactly one appended `.1` segment (57 subphase segments vs 56), `is_valid`
+True, `normalize(id) == id`, unique against `git log --all` and `git grep`
+at entry, no conflicting active governed phase; alias display-only.
+
+**STATUS: N16-5-F-5-TB-HELPER-IV COMPLETE — NOT VERIFIED / BLOCKED.** Entry
+state: branch `main`, HEAD == `origin/main` == `7dcfcd7f`,
+`origin/main..HEAD` = 0, tree clean. **Predecessor check first surfaced a
+load-bearing finding**: a would-be follow-on repair phase's authorization
+prompt presupposed this exact IV phase had already run and finished BLOCKED
+— direct inspection (`git log --all`, `PROJECT_STATUS.md`'s own "NOT begun"
+language, absence of any task/report/metadata) proved it had never run at
+all. Correctly identified the real predecessor as **N16-5-F-5-TB-HELPER-IMPL.1**
+(COMPLETE, confirmed via `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` `status: completed`, canonical Phase
+Report) and ran the IV for real before any repair phase could be considered.
+
+Reconstructed the full helper/protocol foundation from source
+(`hpac_pawa_helper_protocol.py`/`_operations.py`/`_os.py`, 1,291 lines)
+before writing any test. Added 7 new disposable, subprocess-isolated
+verification tests (`tests/…_n16_5_f_5_tb_helper_iv.py`), all **7 passed**:
+
+- **REPLAY-AFTER-RESTART independently CONFIRMED**, reproduced across two
+  genuinely separate OS processes (not two objects in one process): a fresh
+  helper process B, started with no shared state, reports `FRESH` for a
+  mutating `(request_id, nonce)` that a prior helper process A already
+  admitted and consumed. Same result under response-loss and
+  crash-before-terminal-disposition framings. Root cause structurally
+  confirmed via source inspection: `ReplayLedger`/`ProtectedStoreFoundation`
+  perform no filesystem/network I/O anywhere and take no durable-location
+  constructor argument — "process-local in-memory" is source-verifiable,
+  not inferred.
+- macOS same-file-object execution reconfirmed fail-closed on the actual
+  (unpatched) current platform (`execute_verified` raises
+  `UnsupportedPlatformProfile`, no substitution-free exec primitive
+  available) — closes a gap left by the existing suite's
+  `monkeypatch`-only coverage of this path. Not implemented here (out of
+  scope).
+- `VerifiedExecutable`'s fd-based authority confirmed to have no
+  serialization/reconstruction method — the correct half of "authority
+  dies / history persists"; only the history half is broken.
+
+Regression: `tests/test_hpac_pawa_helper_protocol_foundation.py`
+(unmodified) **51 passed / 0 failed / 1 skipped**, byte-identical to the
+`…IMPL.1` baseline. `fast_green` (`-m "fast_green" -n auto`): **355 failed /
+9664 passed / 5 skipped / 9 errors**, independently re-run against both the
+candidate tree and the entry baseline (`git stash push -u` / `pop`) — the
+two `FAILED` node-id lists diffed **byte-identical, zero difference**. Zero
+attributable Fast Green regressions; all 355 pre-existing failures are this
+repo's own well-documented floating-`ENTRY`-baseline anti-pattern, unrelated
+to this phase. `python -m pytest -n auto` (full suite, no marker): blocked
+by a pre-existing `pytest-xdist` worker-collection-mismatch defect,
+independently confirmed present against the entry baseline via the same
+stash method (not attributable to this phase, not fixed here — out of
+scope); `pytest --collect-only -q` (single-process) succeeds cleanly at
+42,665 tests / 0 errors, so collection itself is deterministic and only the
+multi-worker split disagrees. `pcae check` passed (after one governed
+`pcae task update` correcting an initially-incomplete `--allowed-file` set,
+corrected in a single call before any commit). No `src/pcae` file,
+contract, schema, or dependency changed; helper production files byte-
+unchanged. 0 live protected-host writes; 0 real ceremony. Runtime
+`Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities; first
+governed runtime external effect **ABSENT / UNREACHABLE**.
+
+Recommended next (derived, **NOT begun**): **N16-5-F-5-TB-REPLAY-REPAIR** —
+implement durable, reconstructible spent-request state under the existing
+protected-root trust boundary to close the confirmed REPLAY-AFTER-RESTART
+defect; smallest contract-preserving repair, contracts unchanged. Do NOT
+begin caller/client integration, legacy in-process-path removal,
+packaging/install, real certification, N-16-6, or N-16-7 without fresh
+explicit human authorization for each. F-5-B2 **BLOCKED PENDING HELPER
+IMPLEMENTATION REPAIR** (the IV predicate is now satisfied — BLOCKED, not
+verified); F-5 **CERTIFICATION BLOCKED**; **N-16-5 NOT CLOSED**; N-16-6 /
+N-16-7 **OPEN / UNTOUCHED** (N-16-7 strictly last).
+
+Canonical doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1_1_1_1_1_1_1_1_1_1_N16_5_F_5_TB_HELPER_IV.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-HELPER-IMPL.1**) — Privileged Helper Implementation
 Scope-Fence Reconciliation. CPIPC: valid direct `.1` successor of
