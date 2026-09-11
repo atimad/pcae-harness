@@ -25,6 +25,7 @@ Finalize governed phase N16-5-F-5-TB-REPLAY-REPAIR: sync metadata/report trust f
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - tasks/done/20260911-2053-n16-5-f-5-tb-replay-repair-privileged-helper-replay-durability-repair.md
+- .pcae/fast-green-attribution/8d261b50bfb408b54b929d7a45accbe540665589a526b30864489d8a307e041c.json
 
 ## Forbidden Files
 
