@@ -225,7 +225,18 @@ def test_no_pcae_agent_principal_symbol_in_production() -> None:
     # (unimplemented) resolution entry point at the .1R.30R.2A.1 baseline;
     # .1R.30R.3.1 implements it in hpac_pawa_agent_exclusion.py inside the
     # non-agent-importable fence (HPAC-PAWA-REQ-165/208).
-    _RESOLVER_FENCE = {"hpac_pawa_agent_exclusion.py", "hpac_protected_admin_writer.py"}
+    # Reconciled by .1R.30R.5R.2...1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-IMPL.1):
+    # hpac_pawa_helper_os.py legitimately imports and reuses (does not
+    # re-derive) resolve_configured_agent_identity from
+    # hpac_pawa_agent_exclusion.py per N16-5-F-5-TB-HELPER-IMPL's own
+    # authorization S10/S26. hpac_pawa_helper_protocol.py and
+    # hpac_pawa_helper_operations.py do not reference the symbol and are
+    # deliberately NOT added here (minimum exact set only).
+    _RESOLVER_FENCE = {
+        "hpac_pawa_agent_exclusion.py",
+        "hpac_protected_admin_writer.py",
+        "hpac_pawa_helper_os.py",
+    }
     for path in SRC.rglob("*.py"):
         if "test" in path.name:
             continue

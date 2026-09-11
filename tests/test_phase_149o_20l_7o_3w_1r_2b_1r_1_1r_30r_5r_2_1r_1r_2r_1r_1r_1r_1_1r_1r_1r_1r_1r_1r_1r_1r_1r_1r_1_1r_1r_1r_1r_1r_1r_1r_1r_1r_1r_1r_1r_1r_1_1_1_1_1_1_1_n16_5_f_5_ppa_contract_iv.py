@@ -277,8 +277,19 @@ def test_09_evidence_schema_carries_no_producer_location_field_by_design() -> No
     assert "PRESENTATION_EVIDENCE_SCHEMA_VERSION = \"HPAC-PRESENTATION-EVIDENCE/2.0\"" in src
 
 
+#: This phase's own finalized head — reconciled by N16-5-F-5-TB-HELPER-IMPL.1:
+#: re-pinned from an implicit floating working-tree/HEAD endpoint (which
+#: predates the later, unrelated, legitimately-authorized
+#: N16-5-F-5-TB-HELPER-IMPL phase's 3 new hpac_pawa_helper_*.py files) to
+#: this suite's own point-in-time window close. Later authorized phases
+#: legitimately move src/pcae; each carries its own dedicated verification.
+FINALIZED_HEAD = "90b9f9d42c515fb1f11b3e8909fcfb77500bc8b4"
+
+
 def test_10_no_pcae_source_change_since_entry_confirms_schema_untouched() -> None:
-    changed = _git("diff", "--name-only", ENTRY, "--", "src", "scripts", "pyproject.toml", "schemas").split()
+    changed = _git(
+        "diff", "--name-only", ENTRY, FINALIZED_HEAD, "--", "src", "scripts", "pyproject.toml", "schemas"
+    ).split()
     assert changed == [], changed
 
 

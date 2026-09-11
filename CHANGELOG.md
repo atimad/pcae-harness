@@ -1,5 +1,31 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-HELPER-IMPL.1**) — **Privileged Helper Implementation
+  Scope-Fence Reconciliation.** Reconciled exactly 3 stale point-in-time
+  production-file/consumer-inventory guards that predated
+  N16-5-F-5-TB-HELPER-IMPL's 3 new `hpac_pawa_helper_*.py` modules, per
+  widen-not-weaken discipline, minimum-necessary-set only: (1)
+  `_RESOLVER_FENCE` widened by exactly `hpac_pawa_helper_os.py` (the sole new
+  module that legitimately reuses, not re-derives,
+  `resolve_configured_agent_identity`); (2)/(3) two `git diff ENTRY` guards
+  (`…n16_5_f_5_ppa_contract.py::test_32…`,
+  `…n16_5_f_5_ppa_contract_iv.py::test_10…`) with a floating working-tree/HEAD
+  endpoint re-pinned to each phase's own immutable finalized-head SHA — same
+  anti-pattern already reconciled once in this project's `…30R.3.1`
+  precedent. Independent A/B regression (isolated worktree, 3 files + their
+  test moved aside as baseline) isolated exactly these 3 attributable new
+  failures — not the 3 literal test names guessed by the authorization
+  prompt; adjudicated as the same non-security stale-scope category per S13,
+  not a material difference. All 3 target nodes PASS post-edit; helper
+  foundation suite unchanged (51 passed / 0 failed / 1 skipped); full
+  103-file regression 195 failed / 4280 passed / 9 skipped — zero new
+  attributable regressions, 192 pre-existing unrelated failures untouched. No
+  `src/pcae`, contract, schema, or dependency change; helper production files
+  byte-unchanged; 0 live protected-host writes; 0 real ceremony. F-5-B2
+  BLOCKED PENDING HELPER IMPLEMENTATION IV; F-5 CERTIFICATION BLOCKED; N-16-5
+  NOT CLOSED. Recommends N16-5-F-5-TB-HELPER-IV next, not begun.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-TRIO-IV**) — **Resolved-Trio Cross-Contract
   Independent Verification of HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0

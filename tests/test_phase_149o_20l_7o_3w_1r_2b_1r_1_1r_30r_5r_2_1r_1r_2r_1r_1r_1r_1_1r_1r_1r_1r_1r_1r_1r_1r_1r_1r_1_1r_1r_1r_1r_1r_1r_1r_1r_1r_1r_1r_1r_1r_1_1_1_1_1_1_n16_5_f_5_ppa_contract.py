@@ -412,8 +412,19 @@ def test_31_pawa_v2_0_and_helper_headers_are_the_frozen_versions() -> None:
 # Scope fence — this phase changes only contract prose + guards + docs
 # --------------------------------------------------------------------------
 
+#: This phase's own finalized head — reconciled by N16-5-F-5-TB-HELPER-IMPL.1:
+#: re-pinned from an implicit floating working-tree/HEAD endpoint (which
+#: predates the later, unrelated, legitimately-authorized
+#: N16-5-F-5-TB-HELPER-IMPL phase's 3 new hpac_pawa_helper_*.py files) to
+#: this suite's own point-in-time window close. Later authorized phases
+#: legitimately move src/pcae; each carries its own dedicated verification.
+FINALIZED_HEAD = "fd3600988040af898af05614fe54e02adf6d5180"
+
+
 def test_32_no_src_scripts_pyproject_or_schema_change() -> None:
-    changed = _git("diff", "--name-only", ENTRY, "--", "src", "scripts", "pyproject.toml", "schemas").split()
+    changed = _git(
+        "diff", "--name-only", ENTRY, FINALIZED_HEAD, "--", "src", "scripts", "pyproject.toml", "schemas"
+    ).split()
     assert changed == [], changed
 
 

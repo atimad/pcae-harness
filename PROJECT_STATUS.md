@@ -2,6 +2,96 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-HELPER-IMPL.1**) — Privileged Helper Implementation
+Scope-Fence Reconciliation. CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-HELPER-IMPL`) — same series `149` / branch `O`, exactly
+one appended `.1` segment (54 subphase segments vs 53), `is_valid` True,
+`normalize(id) == id`, unique against `git log --all` and `git grep` at
+entry, no conflicting active governed phase; alias display-only.
+
+**STATUS: N16-5-F-5-TB-HELPER-IMPL.1 COMPLETE — SCOPE-FENCE RECONCILIATION
+WIDEN-NOT-WEAKEN, NO PRODUCT DEFECT.** Entry state: branch `main`, HEAD ==
+`origin/main` == `d37f4446`, `origin/main..HEAD` = 0, tree clean. Predecessor
+**N16-5-F-5-TB-HELPER-IMPL** confirmed COMPLETE via `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` `status: completed`, and the canonical
+Phase Report.
+
+Independently reproduced a same-tree A/B regression comparison (103
+pawa/ppa/hpac-content-matched test files plus the helper focused suite, in an
+isolated git worktree with the 3 new `hpac_pawa_helper_*.py` files and their
+test moved aside as the baseline): present-state (files included) **198
+failed / 4277 passed / 9 skipped**; baseline (files absent) **205 failed /
+4219 passed / 8 skipped**. The raw FAILED-node diff isolated exactly 3 gross
+new, individually root-caused failures — **not** the 3 literal test names
+guessed by this phase's authorization prompt (`test_only_expected_production_
+files_changed` and the `pcae health` zone check both already passed
+independently of this phase; the actual 2 non-resolver new failures live in
+different, previously-unnamed test nodes). Adjudicated per authorization S13:
+the failure *reason* — a stale point-in-time production-file/consumer-inventory
+guard predating the 3 new modules — matched the prompt's intended category
+exactly, so this was not a material difference requiring an early stop.
+
+Reconciled exactly 3 guards, widen-not-weaken, minimum-necessary-set only:
+(1) `test_no_pcae_agent_principal_symbol_in_production`'s `_RESOLVER_FENCE`
+set widened by exactly one file, `hpac_pawa_helper_os.py` (the only one of
+the 3 new modules that imports/reuses, not re-derives,
+`resolve_configured_agent_identity` from the existing
+`hpac_pawa_agent_exclusion` module — `hpac_pawa_helper_protocol.py` and
+`hpac_pawa_helper_operations.py` deliberately NOT added); (2)
+`…n16_5_f_5_ppa_contract.py::test_32_no_src_scripts_pyproject_or_schema_
+change` and (3) `…n16_5_f_5_ppa_contract_iv.py::test_10_no_pcae_source_
+change_since_entry_confirms_schema_untouched` — both a `git diff ENTRY` with
+an implicit floating working-tree/HEAD endpoint (the exact anti-pattern
+already reconciled once before in this project's `…30R.3.1` precedent for a
+sibling test) — each re-pinned to that phase's own immutable finalized-head
+SHA (`fd360098` for N16-5-F-5-PPA-CONTRACT, `90b9f9d4` for
+N16-5-F-5-PPA-CONTRACT-IV), independently confirmed empty (`git diff ENTRY
+FINALIZED_HEAD -- src scripts pyproject.toml schemas` == `""`) before
+editing. No wildcard, prefix, directory, or dynamic-discovery widening
+anywhere; negative check confirmed an arbitrary unauthorized resolver-user
+file is still rejected by the widened fence. All 3 target nodes PASS
+post-edit; helper-foundation focused suite unchanged at **51 passed / 0
+failed / 1 skipped**; full 103-file regression re-run **195 failed / 4280
+passed / 9 skipped** — exactly the 3 target nodes fixed, **zero** new
+attributable failures, all pre-existing unrelated failures (192 of them,
+confirmed present in both present-state and baseline runs) untouched. A task
+allowed-zone gap (missing `tests` zone) caused one transient self-inflicted
+`pcae health` failure mid-phase (`Changed file touches architecture zone
+'tests' outside Allowed Zones`) — corrected via `pcae task update`
+before any commit; `pcae health`/`pcae check` re-confirmed clean and
+hardware-ceremony-independent afterward. No `src/pcae` file, contract,
+schema, or dependency changed; helper production files
+(`hpac_pawa_helper_protocol.py`/`_operations.py`/`_os.py`) byte-unchanged. 0
+live protected-host writes; 0 real ceremony. macOS same-file-object gap
+status unchanged: **FAIL-CLOSED, NOT IMPLEMENTED, not re-adjudicated here**
+(explicitly deferred to helper IV per this phase's authorization S17).
+Runtime `Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities;
+first governed runtime external effect **ABSENT / UNREACHABLE**.
+
+Recommended next (derived, **NOT begun**): **N16-5-F-5-TB-HELPER-IV** — fresh
+independent verification of the helper/protocol foundation implemented by
+N16-5-F-5-TB-HELPER-IMPL (process isolation, no ordinary-interpreter
+authority access, same-file-object execution, helper provenance, peer
+credentials, configured-agent exclusion, closed dispatch, replay/currentness,
+state transitions, uncertainty/no-auto-retry, no authority export,
+generic-broker prohibition, five-role/typed-read closure, ceremony-entry/
+presentation-evidence-write boundedness, deterministic-vs-real separation,
+runtime/effect non-expansion). Do NOT begin caller/client integration, legacy
+in-process-path removal, packaging/install, real certification, N-16-6, or
+N-16-7 without fresh explicit human authorization for each. F-5-B2
+**BLOCKED PENDING HELPER IMPLEMENTATION IV**; F-5 **CERTIFICATION BLOCKED**;
+**N-16-5 NOT CLOSED**; N-16-6 / N-16-7 **OPEN / UNTOUCHED** (N-16-7 strictly
+last).
+
+Canonical doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1_1_1_1_1_1_1_1_1_N16_5_F_5_TB_HELPER_IMPL_1.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-HELPER-IMPL**) — Privileged Helper +
 `HPAC-PAWA-HELPER/1.0` Protocol Foundation Implementation. CPIPC: valid direct
