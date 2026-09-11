@@ -529,14 +529,38 @@ class _LedgerEntry:
 
 
 class ReplayLedger:
-    """Durable-ledger stand-in (§19/§77). Production wiring persists this
-    under ``<HPAC_PROTECTED_ROOT>``; this in-memory version is the
-    deterministic foundation used by the state machine and by tests."""
+    """§19/§77 one-shot replay ledger.
 
-    def __init__(self) -> None:
+    Two backings:
+
+    * ``ReplayLedger()`` — the deterministic **in-memory** foundation. It is
+      scoped to one process, so it CANNOT enforce §19 across the one-shot
+      helper process lifetime (N16-5-F-5-TB-HELPER-IV proved a consumed
+      request becomes ``FRESH`` again in a new helper process). It remains
+      only as the NON_REAL deterministic harness for protocol-shape tests.
+    * ``ReplayLedger(durable_store=...)`` — backed by a
+      :class:`~pcae.core.hpac_pawa_helper_replay_state.DurableReplayStore`
+      under the existing ``<HPAC_PROTECTED_ROOT>/pawa-helper/`` trust
+      boundary. This is the only backing that satisfies
+      HPAC-PAWA-HELPER-REQ-076/077 and PAWAH-INV-10. Production wiring MUST
+      use :func:`~pcae.core.hpac_pawa_helper_replay_state.open_durable_replay_ledger`.
+
+    The public surface is identical either way, so dispatch/admission code is
+    unchanged by the choice of backing.
+    """
+
+    def __init__(self, *, durable_store: Optional[object] = None) -> None:
         self._entries: Dict[Tuple[str, str], _LedgerEntry] = {}
+        self._durable = durable_store
+
+    @property
+    def is_durable(self) -> bool:
+        """True iff spent state survives this process (and a crash)."""
+        return self._durable is not None
 
     def check_and_mark_in_flight(self, request: HelperRequest, *, now: Optional[datetime] = None) -> ReplayOutcome:
+        if self._durable is not None:
+            return self._durable.check_and_reserve(request, now=now)
         now = now or datetime.now(timezone.utc)
         try:
             expiry = datetime.strptime(request.expiry, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
@@ -561,17 +585,48 @@ class ReplayLedger:
             return ReplayOutcome.DUPLICATE_IN_FLIGHT
         return ReplayOutcome.CONSUMED
 
-    def mark_consumed(self, request: HelperRequest) -> None:
+    def mark_consumed(self, request: HelperRequest, *, evidence_ref: Optional[str] = None) -> None:
+        """Spend the ``(request_id, nonce)`` at the ``MUTATION_ATTEMPT_STARTED``
+        boundary (HPAC-PAWA-HELPER-REQ-077).
+
+        On a durable ledger the state change is persisted **before this
+        returns**, i.e. before the caller performs the mutation, so a crash
+        anywhere at or after the boundary leaves the request spent.
+        """
+        if self._durable is not None:
+            from pcae.core.hpac_pawa_helper_replay_state import DurableReplayState
+
+            self._durable.transition(
+                request, DurableReplayState.MUTATION_ATTEMPT_STARTED, evidence_ref=evidence_ref
+            )
+            return
         key = (request.request_id, request.nonce)
         entry = self._entries.get(key)
         if entry is not None:
             entry.in_flight = False
             entry.consumed = True
 
+    def mark_durable_state(self, request: HelperRequest, state_name: str, **fields: object) -> None:
+        """Advance the durable §20 state for a spent request. A no-op on the
+        in-memory backing (which has no durable state to advance)."""
+        if self._durable is None:
+            return
+        from pcae.core.hpac_pawa_helper_replay_state import DurableReplayState
+
+        self._durable.transition(request, DurableReplayState(state_name), **fields)
+
     def release_in_flight_without_consuming(self, request: HelperRequest) -> None:
         """Only valid BEFORE the no-retry boundary is crossed (a request
         that never reached MUTATION_ATTEMPT_STARTED leaves no protected-root
-        effect, HPAC-PAWA-HELPER-REQ-083)."""
+        effect, HPAC-PAWA-HELPER-REQ-083).
+
+        On a durable ledger this can only ever remove a record still in
+        ``REQUEST_RECEIVED`` and owned by this process — a spent record is
+        never removed, so this is not a replay reset.
+        """
+        if self._durable is not None:
+            self._durable.release_reservation(request)
+            return
         key = (request.request_id, request.nonce)
         entry = self._entries.get(key)
         if entry is not None and not entry.consumed:

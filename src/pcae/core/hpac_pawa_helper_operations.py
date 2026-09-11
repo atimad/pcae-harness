@@ -39,14 +39,27 @@ def _run_mutation(
     mutation_fn,
 ) -> HelperResponse:
     """Shared §20/§22 ordering: stage evidence, cross the no-retry boundary,
-    perform the bounded mutation, commit, finalize, respond."""
+    perform the bounded mutation, commit, finalize, respond.
+
+    Each §20 state is mirrored into the replay ledger's durable record as it
+    is reached, so the same record that makes the request *spent* is also what
+    a later reconciliation reads to learn how far the dead helper process got
+    (HPAC-PAWA-HELPER-REQ-081/083/084). The spend itself is persisted
+    **before** ``mutation_fn`` runs: a crash at any point from the boundary
+    onwards leaves the request consumed, never replayable.
+    """
     ref = context.evidence_stager.stage(request=request)
     machine.assert_may_start_mutation_attempt()
     machine.advance_to(HelperState.MUTATION_ATTEMPT_STARTED)
-    context.replay_ledger.mark_consumed(request)  # spent the instant the boundary is crossed (§77)
+    # Spent the instant the boundary is crossed (§77) — durably, before the
+    # mutation is attempted.
+    context.replay_ledger.mark_consumed(request, evidence_ref=ref)
 
     committed_digest = mutation_fn()
     machine.advance_to(HelperState.MUTATION_COMMITTED)
+    context.replay_ledger.mark_durable_state(
+        request, HelperState.MUTATION_COMMITTED.value, committed_digest=committed_digest
+    )
 
     try:
         ref, evidence_digest = context.evidence_stager.finalize(ref, committed_digest=committed_digest)
@@ -54,8 +67,10 @@ def _run_mutation(
         # §21/§22: committed but not finalized -> INDETERMINATE / RECONCILIATION
         # REQUIRED. This is NOT reported as REJECTED/failure and NOT retried.
         machine.advance_to(HelperState.INDETERMINATE)
+        context.replay_ledger.mark_durable_state(request, "RECONCILIATION_REQUIRED")
         raise
     machine.advance_to(HelperState.EVIDENCE_WRITTEN)
+    context.replay_ledger.mark_durable_state(request, HelperState.EVIDENCE_WRITTEN.value)
     response = performed_response(
         request,
         state_reached=HelperState.EVIDENCE_WRITTEN,
@@ -63,6 +78,7 @@ def _run_mutation(
         evidence_digest=evidence_digest,
     )
     machine.advance_to(HelperState.RESPONSE_EMITTED)
+    context.replay_ledger.mark_durable_state(request, HelperState.RESPONSE_EMITTED.value)
     return response
 
 
@@ -149,6 +165,10 @@ def handle_ceremony_entry(request: HelperRequest, context: HelperContext, machin
 
     context.store.ceremonies_started[request.session_id] = ceremony_request_bytes
     machine.advance_to(HelperState.RESULT_EMITTED)
+    # ceremony_entry is non-mutating but still one-shot (§16): unlike
+    # certification_read (idempotent, REQ-078, never replay-tracked) its
+    # reservation must be durably spent, not left in flight.
+    context.replay_ledger.mark_durable_state(request, HelperState.RESULT_EMITTED.value)
     return performed_response(
         request,
         state_reached=HelperState.RESULT_EMITTED,

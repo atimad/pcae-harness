@@ -1,5 +1,52 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-REPLAY-REPAIR**) — **Privileged Helper
+  Replay-Durability Repair: Cross-Process Spent-Request Preservation.**
+  COMPLETE. Repairs the REPLAY-AFTER-RESTART defect confirmed by
+  N16-5-F-5-TB-HELPER-IV: `ReplayLedger` was process-local/in-memory, so a
+  mutating request consumed by one one-shot helper process became `FRESH`
+  again in the next. Implemented a durable, cross-process, crash-surviving
+  replay source of truth (new `hpac_pawa_helper_replay_state.py`, 907
+  lines) reusing the existing `<HPAC_PROTECTED_ROOT>/pawa-helper/`
+  protected-root trust boundary — no new trust root, datastore, schema,
+  `pawa_failure_code`, or RHAMP `terminal_reason_code`. Atomic reservation
+  via fsynced-temp + `link()` publish (a bare `O_CREAT|O_EXCL` was tried
+  first and a concurrency test caught it publishing the record name before
+  its content); state transitions via temp + `os.replace()`; all paths
+  through an `O_NOFOLLOW|O_DIRECTORY` `dir_fd` chain (no symlink
+  traversal); durable replay key is a length-prefixed `sha256` over
+  `(installation_id, generation, request_id, nonce)` (caller values are
+  hashed, never used as path fragments). `ReplayLedger` gained an optional
+  `durable_store=` backing; the in-memory default is unchanged, so the
+  predecessor's 51-test foundation baseline stays byte-identical; the
+  production entry point is `open_durable_replay_ledger(...)`.
+  69 new subprocess-isolated tests (`test_n16_5_f_5_tb_replay_repair.py`),
+  all 69 passed, covering: real-subprocess concurrent-duplicate race
+  (exactly one admission, effect counted once), clean restart, response
+  loss, crash after `MUTATION_ATTEMPT_STARTED` (real `SIGKILL`) yielding
+  `RECONCILIATION_REQUIRED` with no auto-retry, crash before the attempt
+  boundary (fails closed), commit/finalize gap, conflicting replay
+  (operation/session/subject/role/payload-digest — original record
+  unchanged), 13 malformed-durable-state variants all failing closed,
+  restart-dead-authority-vs-persistent-history, ordinary-caller-cannot-reset,
+  per-operation/per-role semantics (`certification_read` idempotent with
+  zero replay records), retention (never prunes
+  `RECONCILIATION_REQUIRED`), and generation/installation mismatch as
+  `CONFLICTING` (a real gap the tests found and closed: a G-bound request
+  against a G+1 store previously read as `FRESH`). Regression: foundation
+  suite unmodified, 51 passed/0 failed/1 skipped, unchanged;
+  `fast_green` A/B (git-stash baseline) diffs to exactly 18 new candidate
+  failures, every one an unrelated pre-existing
+  "no uncommitted `src/pcae` changes" scope-fence guard that clears on
+  commit — zero attributable regressions. Contract trio
+  (HPAC-PAWA-001/HPAC-PAWA-HELPER-001/HPAC-PPA-001) byte-unchanged
+  (sha256-verified). No schema/dependency change. macOS same-file-object
+  profile untouched, still FAIL-CLOSED/NOT IMPLEMENTED. 0 live
+  protected-host writes; 0 real ceremony. Recommended next:
+  N16-5-F-5-TB-HELPER-IV-R (fresh helper-IV retry), not begun. N-16-5 NOT
+  CLOSED; N-16-6/N-16-7 untouched.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-HELPER-IV**) — **Fresh Independent Verification of
   the Privileged Helper / HPAC-PAWA-HELPER-001 Protocol Foundation.**
