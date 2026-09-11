@@ -96,6 +96,6 @@
         }
     ],
     "recommended_next_phase": "N16-5-F-5-TB-REPLAY-REPAIR, to implement durable, reconstructible spent-request state under the existing protected-root trust boundary and close the confirmed REPLAY-AFTER-RESTART defect (smallest contract-preserving repair; HPAC-PAWA-001 v2.0 / HPAC-PAWA-HELPER-001 v1.0 / HPAC-PPA-001 v2.0 confirmed byte-unchanged this phase). Not begun. Do NOT begin caller/client integration, legacy in-process-path removal, packaging/install, real certification, N-16-6, or N-16-7 without fresh explicit human authorization for each. F-5-B2 BLOCKED PENDING HELPER IMPLEMENTATION REPAIR; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED.",
-    "pushed_status": "clean",
-    "origin_main_head": "7dcfcd7fc6216f6b18a7ac1d7a1750b16bae39c9"
+    "pushed_status": "pushed",
+    "origin_main_head": "c0fc5719c0c0e936c78956e53cb59a1efee7901b"
 }
