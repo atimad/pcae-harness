@@ -3585,3 +3585,37 @@
   behavior, negative in-range sensitivity, no weakening, and no-go boundaries.
 - Kept F-7 fresh IV pending, F-5 retry pending combined F-7/F-8 IV, F-5 absent,
   N-16-5 not closed, and production/runtime state unchanged.
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1 — N16-5-F-5-TB-HELPER-IMPL
+
+- Implemented the privileged-helper + `HPAC-PAWA-HELPER/1.0` protocol
+  foundation as three new `src/pcae/core/` files (no existing production file
+  modified): closed request/response schema, closed 5-operation vocabulary
+  and 5-role certification closure, explicit no-reflection dispatch, the
+  `REQUEST_RECEIVED`→`RESPONSE_EMITTED` state machine with the
+  no-auto-retry boundary, replay/freshness ledger, evidence stager
+  (stage/commit/finalize/INDETERMINATE), and a recursive no-authority-export
+  scanner (`hpac_pawa_helper_protocol.py`); conjunctive helper-provenance
+  checks plus same-file-object anti-TOCTOU exec (Linux `/proc/self/fd`,
+  fail-closed elsewhere), a private one-shot `AF_UNIX` channel, and OS
+  peer-credential authentication reusing the existing configured-agent
+  exclusion resolver (`hpac_pawa_helper_os.py`); bounded per-operation
+  handlers against an injected NON_REAL in-memory store
+  (`hpac_pawa_helper_operations.py`).
+- New focused suite: 51 passed / 0 failed / 1 skipped (Linux-only exec test
+  correctly skipped on macOS). Broader regression across all 124 existing
+  `pawa`/`ppa`/`hpac` test files: 219 failed / 6197 passed / 10 skipped vs. an
+  independently re-run same-tree baseline (new files moved aside) of 217
+  failed / 6148 passed / 9 skipped — net 3 attributable failures, all
+  non-security point-in-time production-file-scope guards from three
+  historical phases, individually root-caused; one baseline failure vanished
+  and was confirmed flaky (unrelated).
+- No contract, schema, `pyproject.toml`, or existing production file changed;
+  no new dependency; 0 live protected-host writes; 0 real ceremony/hardware
+  code paths; caller migration and legacy in-process-path removal explicitly
+  out of scope and untouched.
+- Recommends a small `N16-5-F-5-TB-HELPER-IMPL.1` scope-fence reconciliation
+  phase next (to widen the three stale guards' expected-file allowlists),
+  then the previously derived `N16-5-F-5-TB-HELPER-IV` independent
+  verification. Neither begun. F-5-B2 remains BLOCKED PENDING
+  IMPLEMENTATION IV; F-5 remains CERTIFICATION BLOCKED; N-16-5 remains NOT
+  CLOSED; N-16-6/N-16-7 remain OPEN/UNTOUCHED.

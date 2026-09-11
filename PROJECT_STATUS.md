@@ -2,6 +2,105 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-HELPER-IMPL**) — Privileged Helper +
+`HPAC-PAWA-HELPER/1.0` Protocol Foundation Implementation. CPIPC: valid direct
+`.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-TRIO-IV`) — same series `149` / branch `O`, exactly one
+appended `.1` segment (53 subphase segments vs 54), `is_valid` True,
+`normalize(id) == id`, unique against `git log --all` and `git grep` at
+entry, no conflicting active governed phase; alias display-only, no
+`<digit><letter>` token.
+
+**STATUS: N16-5-F-5-TB-HELPER-IMPL COMPLETE — HELPER / PROTOCOL FOUNDATION
+IMPLEMENTED, INDEPENDENT VERIFICATION PENDING.** Entry state: branch `main`,
+HEAD == `origin/main` == `3ef7e7d8`, `origin/main..HEAD` = 0, tree clean.
+Predecessor **N16-5-F-5-TB-TRIO-IV** confirmed COMPLETE — INDEPENDENTLY
+VERIFIED (RESOLVED-TRIO VERIFIED) via `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` `status: completed`, the canonical
+Phase Report, and the governed done task.
+
+Implemented, as new files (no existing `src/pcae` file modified), the
+foundation authorized by this phase's governed prompt:
+`src/pcae/core/hpac_pawa_helper_protocol.py` (closed
+`HPAC-PAWA-HELPER/1.0` request/response schema; the closed 5-member operation
+vocabulary `admin_mutation` / `certification_write` / `certification_read` /
+`ceremony_entry` / `presentation_evidence_write`; the closed 5-role
+certification family with `hpac_lifecycle_terminator` excluded; explicit
+closed-mapping dispatch — no `getattr` reflection; the
+`REQUEST_RECEIVED → … → RESPONSE_EMITTED` / `RESULT_EMITTED` /
+`INDETERMINATE` state machine with the `MUTATION_ATTEMPT_STARTED`
+no-auto-retry boundary; a replay ledger distinguishing
+fresh/consumed/duplicate-in-flight/expired/conflicting; an evidence stager
+implementing stage-before-mutate / finalize-after-commit /
+INDETERMINATE-on-post-commit-failure; and a recursive no-authority-export
+scanner asserted on every dispatched response); `hpac_pawa_helper_os.py`
+(conjunctive helper-provenance verification — regular-file, single-hard-link,
+owner, mode, no-symlink, complete-byte SHA-256, all against one already-open
+`O_NOFOLLOW` descriptor; same-file-object anti-TOCTOU execution via
+`/proc/self/fd/<fd>` re-exec on Linux, fail-closed
+(`UnsupportedPlatformProfile`) on macOS/other per HPAC-PAWA-HELPER-REQ-104 —
+a disclosed, not silently weakened, platform gap; a private one-shot
+`AF_UNIX` channel under a `0700` directory with a `0600` socket, single
+`accept()`; OS peer-credential authentication via Linux `SO_PEERCRED` /
+macOS `getpeereid`, never request-supplied identity; configured-agent
+exclusion wired to the existing, unmodified `hpac_pawa_agent_exclusion`
+resolver); `hpac_pawa_helper_operations.py` (bounded per-operation handlers
+for all five closed operations against an injected, NON_REAL, in-memory
+`ProtectedStoreFoundation` — no live protected-root wiring). The closed
+21-value `pawa_failure_code` vocabulary is re-stated verbatim, not
+duplicated, and a test asserts byte-for-byte equality against
+`hpac_protected_admin_writer.PAWA_FAILURE_CODES`. No contract, schema,
+`pyproject.toml`, or existing production file changed; no new dependency; 0
+live protected-host writes; 0 real ceremony/hardware code paths.
+
+Focused suite `tests/test_hpac_pawa_helper_protocol_foundation.py`: **51
+passed, 0 failed, 1 skipped** (the Linux-only same-file-object exec test,
+correctly skipped on this macOS development host). Broader regression across
+all 124 pre-existing `pawa`/`ppa`/`hpac`-referencing test files plus the new
+suite: **219 failed / 6197 passed / 10 skipped**, independently re-run
+against a same-tree baseline with the four new files moved aside (**217
+failed / 6148 passed / 9 skipped**) to isolate attribution. Net attributable
+delta: **+3 failed, +49 passed, +1 skipped** (the +49/+1 being this phase's
+own new suite; one baseline failure disappeared and was independently
+confirmed flaky — 2 of 3 reruns pass — unrelated to this phase). All 3
+attributable failures are **non-security, point-in-time production-file-scope
+guards** from three separate historical phases
+(`test_no_pcae_agent_principal_symbol_in_production`,
+`test_only_expected_production_files_changed`, and the `pcae health`
+docs/allowed-file zone check inside
+`test_ordinary_pcae_health_and_check_do_not_require_hardware_ceremony`) that
+enumerate an exact expected file set predating this phase's three new files
+— the same category of guard this project has repeatedly closed via a
+dedicated small reconciliation phase (see e.g. `…30R.2A.1` →
+`…30R.2A.2`/`…30R.2A.3`, `…30R.3.1` → `…30R.3.2`). None touch PAWA/PPA/HELPER
+security logic, RHAMP, Gate5, or packaging; independently root-caused, not
+papered over. **Recommended next (derived, NOT begun): a small dedicated
+`N16-5-F-5-TB-HELPER-IMPL.1` scope-fence reconciliation phase** to widen
+those three guards' expected-file allowlists, followed by the previously
+derived **N16-5-F-5-TB-HELPER-IV** (fresh independent verification of this
+phase's implementation — process isolation, no ordinary-interpreter
+authority access, same-file-object execution, provenance, peer credentials,
+configured-agent exclusion, closed dispatch, replay/currentness, state
+transitions, no-authority-export, generic-broker prohibition, five-role/
+typed-read closure, ceremony-entry/presentation-evidence-write boundedness,
+deterministic-vs-real separation, runtime/effect non-expansion). Neither
+begun. Caller/client migration, legacy in-process-path removal, packaging/
+install, and real certification remain explicitly out of scope and untouched.
+F-5-B2 remains **BLOCKED PENDING HELPER IMPLEMENTATION IV + REMAINING
+MIGRATION SLICES**; F-5 remains **CERTIFICATION BLOCKED**; **N-16-5 remains
+NOT CLOSED**; N-16-6 / N-16-7 **OPEN / UNTOUCHED** (N-16-7 strictly last).
+Runtime `Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities;
+first governed runtime external effect **ABSENT / UNREACHABLE**.
+
+Canonical doc:
+`docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1_1_1_1_1_1_1_1_N16_5_F_5_TB_HELPER_IMPL.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-TRIO-IV**) — Resolved-Trio Cross-Contract Independent
 Verification of HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0 +
