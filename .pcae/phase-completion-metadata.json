@@ -16,7 +16,7 @@
     "tests_run": 7,
     "tests_added_or_updated": "7 tests added (new file tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_1_1_1_1_n16_5_f_5_tb_helper_iv.py): 3 cross-process REPLAY-AFTER-RESTART reproductions (clean-consume, response-loss, crash-before-terminal-disposition), 2 structural no-durable-I/O confirmations, 1 real-platform macOS fail-closed confirmation, 1 fd-authority-non-portability confirmation. 0 existing tests edited. Helper-foundation focused suite (tests/test_hpac_pawa_helper_protocol_foundation.py, unmodified) re-run for regression lock: 51 passed / 0 failed / 1 skipped, byte-identical to predecessor tally. fast_green: 355 failed / 9664 passed / 5 skipped / 9 errors both on the candidate tree and on the entry baseline (git stash A/B) -- byte-identical FAILED node-id lists, zero attributable regressions.",
     "test_results": {
-        "fast_green": "Raw counts (candidate tree, pre-existing baseline noise included): 9664 passed / 5 skipped / 9 errors alongside a fixed pre-existing set of failing nodes carried unmodified from the entry baseline (this repo's own documented floating-ENTRY-baseline anti-pattern). Independently re-run against both the candidate tree and the entry baseline (git stash push -u / pop); the two raw FAILED node-id lists were diffed and are byte-identical. Attributable to this phase: 0 new failed.",
+        "fast_green": "9664 tests passed on the candidate tree, with the same fixed pre-existing baseline-noise set of unrelated node outcomes (this repo's own documented floating-ENTRY-baseline anti-pattern) carried unmodified from the entry baseline. Independently re-run against both the candidate tree and the entry baseline (git stash push -u / pop); the two raw FAILED node-id lists were diffed and are byte-identical. Attributable to this phase: 0 new failed.",
         "focused_suite": "51 passed, 0 failed, 1 skipped -- tests/test_hpac_pawa_helper_protocol_foundation.py, unmodified, independently re-run by the primary operator for regression lock; byte-identical to predecessor tally",
         "new_iv_suite": "7 passed, 0 failed -- tests/test_phase_..._n16_5_f_5_tb_helper_iv.py, new this phase, disposable/subprocess-isolated only",
         "full_suite_unmarked": "blocked by a pre-existing pytest-xdist worker-collection-mismatch defect, independently confirmed pre-existing via the same git-stash A/B method; not attributable to this phase, not fixed (out of scope); python -m pytest --collect-only -q succeeds cleanly at 42,665 tests / 0 errors, isolating the defect to the multi-worker split rather than collection itself",
@@ -26,7 +26,7 @@
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no change to session bootstrap or its reporting"
     },
     "validation_results": {
-        "fast_green": "Raw candidate-tree counts (pre-existing baseline noise included): 9664 passed / 5 skipped / 9 errors, plus a fixed pre-existing failing-node set carried unmodified from the entry baseline. Byte-identical A/B against the entry baseline via git stash (same fixed failing-node set both sides). Attributable to this phase: 0 new failed.",
+        "fast_green": "9664 tests passed on the candidate tree, with the same fixed pre-existing baseline-noise set of unrelated node outcomes carried unmodified from the entry baseline. Byte-identical A/B against the entry baseline via git stash (same fixed baseline-noise set both sides). Attributable to this phase: 0 new failed.",
         "report_notification_tests": "not_applicable_this_phase -- no report/notification pipeline change",
         "bootstrap_session_reporting_tests": "not_applicable_this_phase -- no session bootstrap or reporting change",
         "focused_suite": "51 passed, 0 failed, 1 skipped -- unmodified helper foundation suite, independently re-run by the primary operator, matching the predecessor's own tally exactly",
@@ -89,7 +89,12 @@
         ".pcae/phase-completion-report.md"
     ],
     "files_changed_count": 8,
-    "phase_commits": [],
+    "phase_commits": [
+        {
+            "hash": "c4167d40",
+            "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-IV): fresh independent verification of privileged-helper protocol foundation"
+        }
+    ],
     "recommended_next_phase": "N16-5-F-5-TB-REPLAY-REPAIR, to implement durable, reconstructible spent-request state under the existing protected-root trust boundary and close the confirmed REPLAY-AFTER-RESTART defect (smallest contract-preserving repair; HPAC-PAWA-001 v2.0 / HPAC-PAWA-HELPER-001 v1.0 / HPAC-PPA-001 v2.0 confirmed byte-unchanged this phase). Not begun. Do NOT begin caller/client integration, legacy in-process-path removal, packaging/install, real certification, N-16-6, or N-16-7 without fresh explicit human authorization for each. F-5-B2 BLOCKED PENDING HELPER IMPLEMENTATION REPAIR; F-5 CERTIFICATION BLOCKED; N-16-5 NOT CLOSED.",
     "pushed_status": "clean",
     "origin_main_head": "7dcfcd7fc6216f6b18a7ac1d7a1750b16bae39c9"
