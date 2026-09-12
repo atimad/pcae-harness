@@ -561,7 +561,13 @@ class DurableReplayStore:
         return f"{key}.json"
 
     def _read(self, key: str) -> Optional[ReplayRecord]:
-        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        # O_NONBLOCK: a FIFO placed at the record slot must never make this
+        # open() block waiting for a writer (N16-5-F-5-TB-REPLAY-STORE-FIFO-
+        # HARDEN). It has no effect on regular files. The opened-object
+        # S_ISREG check below still runs against the fd this open() actually
+        # returned, so a nonblocking-opened FIFO is rejected before any bytes
+        # are read from it, exactly like today's directory/symlink handling.
+        flags = os.O_RDONLY | os.O_NONBLOCK | getattr(os, "O_NOFOLLOW", 0)
         try:
             fd = os.open(self._name(key), flags, dir_fd=self._chain.fd)
         except FileNotFoundError:

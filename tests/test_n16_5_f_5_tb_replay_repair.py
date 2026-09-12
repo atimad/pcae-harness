@@ -813,6 +813,186 @@ def test_unexpected_file_type_in_record_slot_refused(protected_root):
         _store(protected_root).check_and_reserve(request)
 
 
+# ---------------------------------------------------------------------------
+# N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN: a FIFO at the record slot must never
+# make ``_read()`` block waiting for a writer. Bounded via a real subprocess
+# with a hard ``timeout=`` (never a bare in-process call, and never
+# ``multiprocessing`` fork, which is known to deadlock post-fork under
+# pytest's own capture machinery on macOS) so a regression that reintroduces
+# blocking fails the suite promptly instead of hanging it.
+# ---------------------------------------------------------------------------
+
+_FIFO_READ_TIMEOUT = 5.0
+
+_READ_SLOT_SCRIPT = r'''
+import sys
+sys.path.insert(0, {src!r})
+from pathlib import Path
+from pcae.core.hpac_pawa_helper_protocol import build_signed_request, HelperOperation
+from pcae.core.hpac_pawa_helper_replay_state import DurableReplayStore, ReplayStateCorruption
+
+request = build_signed_request(
+    operation=HelperOperation.ADMIN_MUTATION,
+    session_id="sess-1",
+    operation_params={{"mutation": "enroll_principal", "transaction_id": "txn-1"}},
+    request_id={request_id!r},
+    nonce={nonce!r},
+    expiry="2999-01-01T00:00:00.000000Z",
+    installation_id={installation_id!r},
+    generation={generation!r},
+)
+store = DurableReplayStore(
+    protected_root={protected_root!r},
+    installation_id={installation_id!r},
+    generation={generation!r},
+)
+try:
+    store.check_and_reserve(request)
+except ReplayStateCorruption:
+    sys.exit(0)
+except Exception:
+    sys.exit(2)
+sys.exit(1)  # did not raise -- also a failure
+'''
+
+
+def _read_slot_expect_corruption(protected_root: Path, request_id: str, nonce: str) -> int:
+    """Run the reservation attempt in a real subprocess, bounded by
+    ``_FIFO_READ_TIMEOUT``. Returns the child's exit code. A hang raises
+    ``subprocess.TimeoutExpired`` -- reported as a clean test failure, never
+    a hung test process."""
+    src_root = str(Path(__file__).resolve().parents[1] / "src")
+    script = _READ_SLOT_SCRIPT.format(
+        src=src_root,
+        request_id=request_id,
+        nonce=nonce,
+        installation_id=INSTALLATION_ID,
+        generation=GENERATION,
+        protected_root=str(protected_root),
+    )
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-c", script], timeout=_FIFO_READ_TIMEOUT, capture_output=True
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail(f"child process did not return within {_FIFO_READ_TIMEOUT}s (blocking regression)")
+    return proc.returncode
+
+
+def test_fifo_at_record_slot_without_writer_fails_closed_promptly(protected_root):
+    """§13.1: a FIFO with no writer connected must not hang ``_read()``."""
+    request = _local_request(request_id="req-fifo-nowriter", nonce="1" * 64)
+    slot = _slot(protected_root, request)
+    slot.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.mkfifo(str(slot), 0o600)
+    assert stat.S_ISFIFO(slot.stat().st_mode)
+
+    exitcode = _read_slot_expect_corruption(protected_root, "req-fifo-nowriter", "1" * 64)
+    assert exitcode == 0, "expected ReplayStateCorruption, not a hang or silent success"
+
+
+def test_fifo_at_record_slot_with_writer_still_rejected(tmp_path, protected_root):
+    """§13.2: even with a writer connected, the slot is still a FIFO, not a
+    regular file -- rejected before any bytes are read as replay JSON."""
+    request = _local_request(request_id="req-fifo-writer", nonce="2" * 64)
+    slot = _slot(protected_root, request)
+    slot.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.mkfifo(str(slot), 0o600)
+
+    # A background writer opens the FIFO write side. Its own open() blocks
+    # until a reader connects -- exactly the nonblocking read side under
+    # test -- so it is run via subprocess.Popen (fire-and-forget, killed in
+    # the finally block), never joined synchronously.
+    writer_script = (
+        "import os, time, sys\n"
+        f"fd = os.open({str(slot)!r}, os.O_WRONLY)\n"
+        "time.sleep(30)\n"
+        "os.close(fd)\n"
+    )
+    writer = subprocess.Popen([sys.executable, "-c", writer_script])
+    try:
+        exitcode = _read_slot_expect_corruption(protected_root, "req-fifo-writer", "2" * 64)
+        assert exitcode == 0, "FIFO bytes must never be parsed as a valid replay record"
+    finally:
+        writer.kill()
+        writer.wait(timeout=_FIFO_READ_TIMEOUT)
+
+
+def test_fifo_replacing_previously_valid_record_fails_closed(protected_root):
+    """§13.3: a FIFO substituted over a previously-valid record must fail
+    closed, exactly like the directory-substitution case above."""
+    request = _local_request(request_id="req-fifo-replace", nonce="3" * 64)
+    _reserved(protected_root, request)
+    path = _slot(protected_root, request)
+    path.unlink()
+    os.mkfifo(str(path), 0o600)
+
+    exitcode = _read_slot_expect_corruption(protected_root, "req-fifo-replace", "3" * 64)
+    assert exitcode == 0
+
+
+def test_fifo_under_noncanonical_namespace_has_no_effect_on_canonical_read(protected_root):
+    """§13.4: a FIFO placed elsewhere under the protected root (not at the
+    canonical content-addressed slot) must not affect an ordinary, unrelated
+    reservation."""
+    os.mkfifo(str(protected_root / "decoy.fifo"), 0o600)
+
+    request = _local_request(request_id="req-fifo-decoy", nonce="4" * 64)
+    assert _store(protected_root).check_and_reserve(request) is ReplayOutcome.FRESH
+
+
+def test_symlink_to_fifo_record_slot_refused(protected_root):
+    """§13.5: a symlink pointed at a FIFO must be refused as a symlink (the
+    existing O_NOFOLLOW policy), never traversed to reach the FIFO."""
+    request = _local_request(request_id="req-fifo-symlink", nonce="5" * 64)
+    slot = _slot(protected_root, request)
+    slot.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    real_fifo = protected_root / "real.fifo"
+    os.mkfifo(str(real_fifo), 0o600)
+    slot.symlink_to(real_fifo)
+
+    with pytest.raises(ReplayStateCorruption):
+        _store(protected_root).check_and_reserve(request)
+
+
+def test_unix_socket_at_record_slot_refused(protected_root, tmp_path_factory):
+    """§13.7: a UNIX domain socket at the record slot is non-regular and must
+    be refused just like the FIFO and directory cases."""
+    import socket as _socket
+
+    request = _local_request(request_id="req-socket", nonce="6" * 64)
+    slot = _slot(protected_root, request)
+    slot.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+    # AF_UNIX bind() enforces a short path-length limit (~104 bytes on
+    # macOS/BSD), which the content-addressed slot path routinely exceeds.
+    # bind() at a short scratch path instead, then move the resulting socket
+    # special file into place -- rename() has no such length restriction.
+    short_dir = tmp_path_factory.mktemp("sock", numbered=True)
+    short_path = short_dir / "s"
+    sock = _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM)
+    try:
+        sock.bind(str(short_path))
+        os.rename(str(short_path), str(slot))
+        with pytest.raises(ReplayStateCorruption):
+            _store(protected_root).check_and_reserve(request)
+    finally:
+        sock.close()
+
+
+def test_regular_replay_record_unaffected_by_nonblocking_open(protected_root):
+    """§9: O_NONBLOCK must have no observable effect on an ordinary regular
+    replay record -- it opens, reads, and validates exactly as before."""
+    request = _local_request(request_id="req-regular-post-fix", nonce="7" * 64)
+    store = _store(protected_root)
+    assert store.check_and_reserve(request) is ReplayOutcome.FRESH
+    slot = _slot(protected_root, request)
+    assert stat.S_ISREG(slot.stat().st_mode)
+    record = store._read(store._key(request))
+    assert record is not None
+    assert record.request_id == request.request_id
+
+
 def test_world_writable_record_file_refused(protected_root):
     """§36 'wrong owner/mode': a record anyone could have rewritten is not
     trusted state."""

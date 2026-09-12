@@ -984,25 +984,19 @@ def test_record_slot_group_writable_refused(protected_root):
         store.check_and_reserve(req)
 
 
-def test_record_slot_fifo_blocks_open_instead_of_failing_closed_fast(protected_root):
-    """ADVERSARIAL FINDING (documented, not patched — see
-    docs/PHASE_N16_5_F_5_TB_HELPER_IV_R.md): ``DurableReplayStore._read``
-    opens the candidate record with a plain blocking
-    ``O_RDONLY | O_NOFOLLOW`` (no ``O_NONBLOCK``) *before* it can check
-    ``S_ISREG``. POSIX ``open()`` on a FIFO in blocking read-only mode
-    blocks the calling thread until a writer opens the other end. So a slot
-    replaced with a named pipe (mkfifo) does not fail closed quickly with
-    ``ReplayStateCorruption("... not a regular file")`` as the *intent* of
-    the S_ISREG check suggests — the open() call itself never returns,
-    which is an availability (denial-of-service) exposure inside the
-    otherwise-fail-closed provenance-check design, not a confidentiality or
-    integrity break (no record content or authority is exposed or forged).
+def test_record_slot_fifo_fails_closed_fast_not_blocking_open(protected_root):
+    """REPAIRED by N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN (previously an
+    ADVERSARIAL FINDING documented in docs/PHASE_N16_5_F_5_TB_HELPER_IV_R.md):
+    ``DurableReplayStore._read`` now opens the candidate record with
+    ``O_RDONLY | O_NONBLOCK | O_NOFOLLOW``, so a slot replaced with a named
+    pipe (mkfifo) no longer blocks the calling thread waiting for a writer.
+    The open returns immediately, the existing ``S_ISREG`` check on the
+    actually-opened fd rejects it, and the caller sees
+    ``ReplayStateCorruption("... not a regular file")`` promptly, not a hang.
 
-    This test proves the hang exists without hanging the suite: it runs the
-    open in a background thread with a bounded join timeout and treats
-    "the call is still blocked after the deadline" as reproduction of the
-    finding, then leaves the thread as a (harmless, GC'able) daemon so the
-    test process itself can exit.
+    This test proves the read returns promptly: it runs the attempt in a
+    background thread with a bounded join timeout and asserts the thread has
+    already finished (not still blocked) by the deadline.
     """
     key = compute_replay_key(installation_id=INSTALLATION_ID, generation=GENERATION, request_id="req-notreg", nonce="6" * 64)
     gen_dir = _gen_dir(protected_root)
@@ -1022,20 +1016,12 @@ def test_record_slot_fifo_blocks_open_instead_of_failing_closed_fast(protected_r
     thread = threading.Thread(target=_attempt, daemon=True)
     thread.start()
     thread.join(timeout=2.0)
-    assert thread.is_alive(), (
-        "EXPECTED-FINDING: opening a FIFO planted at a replay-record slot "
-        "should have hung the read per the documented gap; if this "
-        "assertion ever fails it means the finding was independently "
-        "repaired (e.g. O_NONBLOCK added) and this test should be updated "
-        "to assert the fail-closed ReplayStateCorruption instead"
+    assert not thread.is_alive(), (
+        "the FIFO-hardening repair should make this read return promptly, "
+        "not block waiting for a writer"
     )
-    # Unblock the hung open() so the daemon thread can eventually exit when
-    # the interpreter tears down, by providing a writer.
-    try:
-        wfd = os.open(str(gen_dir / f"{key}.json"), os.O_WRONLY | os.O_NONBLOCK)
-        os.close(wfd)
-    except OSError:
-        pass
+    assert isinstance(outcome.get("result"), ReplayStateCorruption)
+    assert "not a regular file" in str(outcome["result"])
 
 
 def test_replay_namespace_group_other_writable_directory_refused(tmp_path):
