@@ -293,6 +293,7 @@
     "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
     "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
     "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+    "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
     "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
     "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
     "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -367,9 +368,10 @@
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-    "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
+    "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
+    "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
   ],
-  "candidate_commit": "a5c8202be19f540de5a954690d0a5d5766ecc67c",
+  "candidate_commit": "0818a804ec8a37c90a96d0743ac9be16c00cbc47",
   "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
   "excluded_environment_failures": [],
   "excluded_preexisting_failures": [
@@ -2151,11 +2153,6 @@
     {
       "baseline_commit": "578c0455fbda53629a414d1e025a62abf86e4a4d",
       "baseline_evidence": "failed_in_baseline",
-      "node_id": "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_1_ctap2_pin_uv_repair_iv.py::test_32_n_16_5_not_closed_everywhere"
-    },
-    {
-      "baseline_commit": "578c0455fbda53629a414d1e025a62abf86e4a4d",
-      "baseline_evidence": "failed_in_baseline",
       "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestClassBTermIsNarrowerThanFullConformance::test_storage_check_never_calls_the_class_b_aggregator"
     },
     {
@@ -2189,14 +2186,8 @@
       "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
     }
   ],
-  "expected_phase_artifacts": [
-    {
-      "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-      "predicted_by": "pushed_status",
-      "predicted_value": "not_pushed"
-    }
-  ],
-  "generated_at": "2026-09-12T12:20:51.616338+00:00",
+  "expected_phase_artifacts": [],
+  "generated_at": "2026-09-12T12:41:04.012888+00:00",
   "method": "baseline_vs_candidate_isolated_worktree",
   "raw_errors": [
     "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -2489,7 +2480,6 @@
     "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
     "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
     "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-    "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
     "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
     "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
     "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -2557,7 +2547,6 @@
     "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance.py::test_03_rhamp_and_hpac_byte_unchanged_since_r4r",
     "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv.py::test_61_the_r4r1_suite_still_passes_unchanged",
     "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_1_ctap2_pin_uv_repair_iv.py::test_19_r30r5r_repair_suite_still_passes",
-    "tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_1_ctap2_pin_uv_repair_iv.py::test_32_n_16_5_not_closed_everywhere",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestClassBTermIsNarrowerThanFullConformance::test_storage_check_never_calls_the_class_b_aggregator",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_every_readiness_term_can_be_forced_true_in_isolation",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_readiness_result_carries_no_field_that_could_have_observed_class_b",

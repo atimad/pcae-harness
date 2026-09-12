@@ -26,6 +26,9 @@ Idle placeholder awaiting fresh explicit human authorization for the next govern
 - CHANGELOG.md
 - tasks/done/20260911-2227-idle-post-n16-5-f-5-tb-replay-repair-complete-n16-5-f-5-tb-helper-iv-r-next-n-16-5-not-closed.md
 - tasks/done/20260912-1217-n16-5-f-5-tb-helper-iv-r-fresh-independent-reverification-of-privileged-helper-durable-replay-foundation.md
+- .pcae/phase-completion-metadata.json
+- .pcae/fast-green-attribution/f6cd5377ea15d94aec3093d4e31573a626ef219fecab371369d0656c8710a8d2.json
+- .pcae/fast-green-attribution/36a33b16a1549746ff76391aba389bac17c5c533d57c0d1ce571d42a74e23ae4.json
 
 ## Forbidden Files
 
