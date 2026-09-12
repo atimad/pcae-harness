@@ -32,6 +32,7 @@ Independently verify the Section-0 predecessor/current-source assumptions of the
 - tasks/done/20260912-1918-n16-5-f-5-tb-cert-read-client-impl-section-0-verification-finds-authorization-premise-false-blocked-no-production-change.md
 - .pcae/fast-green-attribution/566c58d62898206bb0b58c0b86568d2a58dc52cbd0f3bea94b8daca16fd8725f.json
 - .pcae/fast-green-attribution/a0481a82bd7b3d90fe22d298992ec43ce1bb8ae189afd5c1bc6ace4c6da99219.json
+- .pcae/fast-green-attribution/ee63569d46ed00fc66c191d6d9fded15b259020ad77969f635f1043781600367.json
 
 ## Forbidden Files
 
