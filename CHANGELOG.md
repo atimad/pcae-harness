@@ -1,5 +1,26 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-CALLER-MAP-CORRECTION**) — **Caller Reachability
+  and Migration-Order Architecture Correction.** COMPLETE. Corrected the
+  architecture using real call-graph reachability rather than
+  factory-import relationships: `hpac_verifier.py` has no relationship
+  at all to `certification_read` (re-confirmed by a fresh full source
+  read); `hpac_certification_coordinator.py` has zero live callers
+  anywhere, including its own designated `scripts/hpac_certification_admin.py`
+  launcher (which only names it in a docstring, never imports it) — a
+  stronger dead-code finding than previously stated; and a new fact —
+  `presentation_evidence_write` (`protected_presentation.py`'s evidence-writer
+  call site) is also gated behind the same uncalled coordinator, via
+  `CertificationReadAuthority.enter_ceremony`, correcting the predecessor
+  ARCH phase's "Migration priority HIGH" classification of that call
+  site. `admin_mutation` is the only helper operation with any non-test
+  live caller today, reachable solely via two unpackaged
+  `scripts/hpac_*.py` admin launchers, not any CLI/runtime/automated
+  path. Corrected migration order and exactly one recommended successor
+  (a packaging/deployment-decision phase for `admin_mutation`) derived.
+  Zero production/contract/schema/dependency/test changes this phase.
+  See `docs/PHASE_N16_5_F_5_TB_CALLER_MAP_CORRECTION.md`.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-CERT-READ-CLIENT-IMPL**) — **Typed
   `certification_read` Client Implementation + `hpac_verifier` Read-Path
