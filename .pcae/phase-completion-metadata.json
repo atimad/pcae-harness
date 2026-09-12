@@ -5232,14 +5232,14 @@
     "repository_transition_validator": "expected PASS -- phase identity agrees across the active task title, this metadata phase_id / phase_title, PROJECT_STATUS.md '## Current Phase', and the staging report; recommended_next_phase non-empty and prose-led",
     "pcae_bootstrap": "expected coherent post-finalization"
   },
-  "no_go_confirmation": "No production caller code was changed.\nNo helper code was changed.\nNo replay code was changed.\nNo contract was evolved.\nNo schema was evolved.\nNo dependency was changed.\nNo macOS same-file-object implementation was performed.\nNo packaging or install change was made.\nNo live protected-host mutation occurred.\nNo real certification ceremony, session, challenge, or FIDO2/YubiKey interaction was performed.\nNo typed certification_read client was implemented.\nNo hpac_verifier.py read-path migration was begun.",
+  "no_go_confirmation": "No production caller code was changed.\nNo helper code was changed.\nNo replay code was changed.\nNo contract was evolved.\nNo schema was evolved.\nNo dependency was changed.\nNo macOS same-file-object implementation was performed.\nNo packaging or install change was made.\nNo live protected-host mutation occurred.\nNo real certification ceremony, session, challenge, or FIDO2/YubiKey interaction was performed.\nNo typed certification_read client module was created.\nNo hpac_verifier.py read-path migration was begun.",
   "no_go_confirmations": [
     "No production caller code was changed.",
     "No helper code was changed.",
     "No replay code was changed.",
     "No contract, schema, pawa_failure_code, or RHAMP terminal_reason_code was evolved.",
     "No dependency was changed.",
-    "No macOS same-file-object profile was implemented.",
+    "No macOS same-file-object execution path was added.",
     "No helper executable was installed, launched, or registered against any live location.",
     "No packaging or install change was made.",
     "No live protected-host mutation of any kind occurred.",
