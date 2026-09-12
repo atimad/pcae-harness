@@ -30,6 +30,8 @@ Independently verify the Section-0 predecessor/current-source assumptions of the
 - tasks/active/20260912-1918-n16-5-f-5-tb-cert-read-client-impl-section-0-verification-finds-authorization-premise-false-blocked-no-production-change.md
 - tasks/done/20260912-1828-idle-post-n16-5-f-5-tb-caller-integration-arch-complete-first-implementation-slice-next-not-begun-n-16-5-not-closed.md
 - tasks/done/20260912-1918-n16-5-f-5-tb-cert-read-client-impl-section-0-verification-finds-authorization-premise-false-blocked-no-production-change.md
+- .pcae/fast-green-attribution/566c58d62898206bb0b58c0b86568d2a58dc52cbd0f3bea94b8daca16fd8725f.json
+- .pcae/fast-green-attribution/a0481a82bd7b3d90fe22d298992ec43ce1bb8ae189afd5c1bc6ace4c6da99219.json
 
 ## Forbidden Files
 
