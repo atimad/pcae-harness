@@ -1,140 +1,119 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — Durable Replay Store FIFO-at-Slot Nonblocking Hardening
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — Caller/Client Integration Architecture for Privileged Helper Consumption
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-- Alias: **N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN** (operator readability only; the full canonical CPIPC id is authoritative)
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+- Alias: **N16-5-F-5-TB-CALLER-INTEGRATION-ARCH** (operator readability only; the full canonical CPIPC id is authoritative)
 - Status: **COMPLETE**
-- Predecessor: **N16-5-F-5-TB-HELPER-IV-R** (COMPLETE / INDEPENDENTLY VERIFIED), entry HEAD == `origin/main` == `3eff8b80`
-- CPIPC: valid direct `.1` successor of the predecessor — independently re-derived via `pcae.core.phase_id` (`is_valid` True; `normalize(id) == id`; same series `149`; same branch `O`; exactly one appended `.1` segment, 59 vs 58; `compare` = less; exact canonical text; unique against `git log --all` and `git grep` across the working tree; no conflicting active governed phase); alias display-only, no discrepancy
+- Predecessor: **N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN** (COMPLETE), entry HEAD == `origin/main` == `3be2b318`
+- CPIPC: valid direct `.1` successor of the predecessor — independently re-derived via `pcae.core.phase_id` (`is_valid` True; same series `149`; same branch `O`; exactly one appended `.1` segment, 61 vs 60; `compare` = less; exact canonical text; unique against `git log --all -F --grep`; no conflicting active governed phase); alias display-only, no discrepancy
 
 ## Summary
 
-Closed exactly the one documented, non-blocking, availability-only finding
-N16-5-F-5-TB-HELPER-IV-R left unrepaired: `DurableReplayStore._read()`
-(`hpac_pawa_helper_replay_state.py`) opened a candidate replay record with a
-blocking `O_RDONLY | O_NOFOLLOW` (no `O_NONBLOCK`) before its `S_ISREG`
-check, so a FIFO planted at a record slot hung the read indefinitely
-instead of failing closed quickly.
+Architecture-only phase (no production implementation). Independently
+inventoried every current production caller of the HPAC/PAWA
+privileged-authority subsystem and every remaining legacy in-process
+authority mechanism from primary source. Top-line finding: **zero
+orchestration-layer (CLI/agent-reachable) production callers exist
+today** — the entire subsystem is a self-contained `src/pcae/core/`
+island reached only by 4 standalone, unpackaged `scripts/hpac_*.py`
+admin launchers. Exactly four legacy in-process factory functions were
+found in `hpac_protected_admin_writer.py` (`production_writer`,
+`certification_writer`, `recognized_certification_read_authority`,
+`mint_protected_presentation_evidence_writer`), each gated by the
+`_detect_caller_module`/`_verified_production_caller_name` frame-pinning
+mechanism the predecessor lineage (N16-5-F5B2R2-IMPL) already proved
+insufficient. `hpac_certification_coordinator.py` has zero live
+production callers today (real ceremony deferred to the not-yet-begun
+N16-5-FINAL-CERT), flagged as noteworthy but non-blocking.
 
-Before any change, the hang was independently reproduced against unmodified
-HEAD (`3eff8b80`) in a genuinely separate OS process (`multiprocessing.Process`),
-bounded by a 5-second `.join(timeout=...)` — the child process did not
-return within the bound. The security classification was reconfirmed
-availability-only by re-reading `_read()`'s exact control flow: the opened
-descriptor's `S_ISREG` check runs before any `os.read()` call, both before
-and after the repair, so a FIFO (with or without a writer connected) can
-never have its bytes interpreted as replay content, and cannot bypass
-provenance binding, generation binding, or turn an absent record into
-`FRESH`.
+Every one of the 5 closed helper operations (`admin_mutation`,
+`certification_write`, `certification_read`, `ceremony_entry`,
+`presentation_evidence_write`) maps cleanly onto an existing in-process
+factory/consumer pair. **No caller was found requiring a sixth
+operation or a read outside the closed typed set; no contract/schema gap
+was discovered.**
 
-**Production change:** exactly one call site — added `os.O_NONBLOCK` to the
-open flags in `DurableReplayStore._read()`. No other production line,
-contract, schema, or dependency changed.
+Designed (architecture only, not implemented): the typed client
+request-builder architecture, the one-shot transport-client
+architecture, launcher design considerations, the platform model
+(Linux/macOS-fail-closed/deterministic-NON_REAL), the request
+identity/currentness/replay-binding model, timeout/no-auto-retry
+semantics, error mapping, response-trust model, no-authority-export
+requirement, Gate5/RHAMP/challenge/assertion/proof-verifier integration
+flows preserving every named semantic wall, the one-shot process model,
+multi-operation orchestration and cross-operation binding, partial-
+workflow failure semantics, the absolute no-legacy-fallback rule, a
+legacy-path retirement plan, a 6-slice migration order derived from the
+actual caller inventory, a concrete first implementation slice, and a
+20-row threat matrix.
 
-**7 new focused tests** added to `tests/test_n16_5_f_5_tb_replay_repair.py`:
-FIFO at the slot with no writer (fails closed promptly, not a hang), FIFO
-with a background writer connected (still rejected as non-regular before
-any byte is read), FIFO substituted over a previously-valid record (fails
-closed), FIFO under a noncanonical namespace path (no effect on an
-unrelated canonical reservation), symlink pointed at a FIFO (refused as a
-symlink by the existing `O_NOFOLLOW` policy, never traversed to reach the
-FIFO), a UNIX domain socket at the slot (rejected identically), and an
-ordinary regular replay record proven unaffected by the nonblocking open.
-Every FIFO/timing-sensitive test is bounded via a real subprocess with a
-hard `timeout=` (never a bare in-process assertion, and never
-`multiprocessing` fork, which was independently observed during this phase
-to deadlock post-fork under pytest's own capture machinery on this
-macOS/CPython 3.14 host) so a regression that reintroduces blocking fails
-the suite promptly instead of hanging it.
-
-The predecessor's own documented-finding test in
-`tests/test_n16_5_f_5_tb_helper_iv_r.py` (renamed
-`test_record_slot_fifo_blocks_open_instead_of_failing_closed_fast` →
-`test_record_slot_fifo_fails_closed_fast_not_blocking_open`) was updated to
-assert the now-repaired prompt fail-closed behavior instead of a hang, per
-that test's own embedded instruction for exactly this case.
-
-**Regression (independently re-run by the primary operator):** focused
-replay-repair suite (now 76 tests: 69 predecessor + 7 new) — **76 passed, 0
-failed**; IV-R suite (one test updated, tally unchanged) — **137 passed, 0
-failed**; helper foundation suite (unmodified, `git diff` empty) — **51
-passed, 0 failed, 1 skipped**, identical to the predecessor's tally. All of
-the required replay-security-regression-lock scenarios (clean restart,
-response loss, crash/indeterminate, concurrent duplicate, conflicting
-replay, generation rotation, ordinary reset denial,
-restart-dead-authority-vs-persistent-history) are part of the 76-test
-replay-repair suite and all passed unchanged.
+**Zero production source, contract, schema, or dependency changes this
+phase.** The bulk of the source inventory and drafting was performed by
+a bounded delegated research worker (read-only, no commit/push/
+finalization/task/production-mutation authority); the primary operator
+independently re-verified every load-bearing factual claim directly
+against source before accepting it (see the canonical Phase Report's
+Independent Verification Log).
 
 `fast_green` attribution performed via the governed
 `pcae phase fast-green-attribution` tool (isolated-worktree
-baseline-vs-candidate comparison), final run against the truly pushed
-candidate: baseline commit `3eff8b80` (parent of this phase's own first
-attributed commit; 359 raw failed / 9 errors); candidate commit
-`102c91e3`, the final pushed HEAD (357 raw failed / 9 errors — 2 fewer,
-both accounted for: the pre-push HEAD==origin/main scope-fence guard now
-trivially passes, and one flaky unrelated node
+baseline-vs-candidate comparison). First run against candidate `75f605c4`
+produced one attributable node
 (`tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record`)
-did not reproduce). `attributable_failures: []` (empty). Tool status:
-**PASS**.
+— the same node the immediate predecessor phase's own report
+independently documented as spuriously flaky. A `--rerun-node` isolated
+rerun passed the node cleanly, `attributable_failures: []`. Final run
+against the truly pushed candidate `6900c1a4` (baseline `3be2b318`)
+independently reproduced a clean `attributable_failures: []` directly,
+no rerun needed. Tool status: **PASS**.
 
-**Note on a self-corrected process mistake:** an earlier, local-only
-attempt at this phase's implementation commit put the display alias in
-parentheses before the colon (`Phase <id> (alias): ...`), which the
-attribution tool's commit-subject regex does not parse — it silently
-collapsed to a degenerate self-compare baseline (`baseline_commit ==
-candidate_commit`, both the malformed commit itself), producing a spurious
-359-failure tally and one spurious flaky attributable node
-(`tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record`).
-This was caught by the primary operator before accepting any attribution
-result, root-caused to the subject-line format, corrected by amending the
-sole unpushed local commit's message (content unchanged) to the bare
-`Phase <id>: <message>` form, and the tool was re-run to produce the
-evidence above.
+Contract trio byte-unchanged throughout this phase (`git diff` against
+`origin/main` for `docs/contracts/` empty). No schema or dependency
+change. 0 live protected-host writes; 0 real ceremony; no FIDO2/YubiKey;
+no production principal. Runtime `Observed` / `observe` / `unavailable`;
+0 plugins / 0 capabilities; first governed runtime external effect
+**ABSENT / UNREACHABLE**.
 
-Contract trio byte-unchanged throughout this phase (sha256 independently
-reconfirmed by the primary operator). No schema or dependency change. 0
-live protected-host writes; 0 real ceremony; no FIDO2/YubiKey; no
-production principal. Runtime `Observed` / `observe` / `unavailable`; 0
-plugins / 0 capabilities; first governed runtime external effect **ABSENT
-/ UNREACHABLE**.
+**Verdict: N16-5-F-5-TB-CALLER-INTEGRATION-ARCH COMPLETE.** Caller/client
+integration architecture: **DEFINED / READY FOR IMPLEMENTATION**.
+Production caller migration: **NOT BEGUN**. Legacy authority retirement:
+**PLANNED / NOT BEGUN**. macOS same-file-object execution: **FAIL-CLOSED
+/ NOT IMPLEMENTED** (untouched). Helper foundation: **REMAINS
+INDEPENDENTLY VERIFIED**. Replay durability: **REMAINS VERIFIED /
+HARDENED**. F-5-B2 **BLOCKED PENDING REMAINING PLATFORM / CALLER
+MIGRATION / PACKAGING SLICES**; F-5 **CERTIFICATION BLOCKED**; **N-16-5
+NOT CLOSED**; N-16-6 / N-16-7 **OPEN / UNTOUCHED** (N-16-7 strictly
+last). This phase begins neither the migration itself, macOS
+same-file-object implementation, packaging/install, real certification,
+N-16-6, nor N-16-7.
 
-**Verdict: N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN COMPLETE.**
-FIFO-at-slot blocking-open finding: **CLOSED / HARDENED**. Durable replay
-store: **HARDENED**. Replay-after-restart: **REMAINS CLOSED**. Helper
-foundation: **REMAINS INDEPENDENTLY VERIFIED**, subject to this narrow
-change, covered by this phase's own focused evidence. macOS same-file-object
-execution: **FAIL-CLOSED / NOT IMPLEMENTED** (untouched). F-5-B2 **BLOCKED
-PENDING REMAINING PLATFORM / CALLER MIGRATION / PACKAGING SLICES**; F-5
-**CERTIFICATION BLOCKED**; **N-16-5 NOT CLOSED**; N-16-6 / N-16-7 **OPEN /
-UNTOUCHED** (N-16-7 strictly last). This phase begins neither
-caller/client integration, legacy in-process-path removal, packaging/install,
-real certification, macOS same-file-object implementation, N-16-6, nor
-N-16-7.
-
-Full detail: `docs/PHASE_N16_5_F_5_TB_REPLAY_STORE_FIFO_HARDEN.md`.
+Full detail: `docs/PHASE_N16_5_F_5_TB_CALLER_INTEGRATION_ARCH.md`.
 
 ## Contract Baseline
 
-| Contract | File | sha256 |
+| Contract | File | Version |
 |---|---|---|
-| HPAC-PAWA-001 v2.0 | `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md` | `b8809e5119a9955863a8b947301e781f25a26c9a4107a9a917f0de083336323e` |
-| HPAC-PAWA-HELPER-001 v1.0 | `docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md` | `e7b30daeb1f6967fe985cf7394834e76a81acefb538a0038672aa026a5b58815` |
-| HPAC-PPA-001 v2.0 | `docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md` | `27acaabcde8d1ac1793946f5858a391f1cd18deb9f20cbaeee2121db29cc9cd2` |
+| HPAC-PAWA-001 | `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md` | v2.0 |
+| HPAC-PAWA-HELPER-001 | `docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md` | v1.0 |
+| HPAC-PPA-001 | `docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md` | v2.0 |
 
-Byte-unchanged before and after this phase's work (independently
-reconfirmed by the primary operator).
+Byte-unchanged before and after this phase's work (`git diff` against
+`origin/main` for `docs/contracts/` empty).
 
-## Production Repair Performed
+## Production Changes Performed
 
-Exactly one call site changed: `os.O_NONBLOCK` added to
-`DurableReplayStore._read()`'s open flags in
-`src/pcae/core/hpac_pawa_helper_replay_state.py`. `git diff` against
-`origin/main` for `docs/contracts/`, `schemas/`, `pyproject.toml` is empty
-for the entire duration of this phase.
+**None.** This is an architecture-only phase per the authorization
+prompt's absolute stop boundary. `git diff` against `origin/main` for
+`src/pcae/`, `scripts/`, `docs/contracts/`, `schemas/`,
+`pyproject.toml` is empty for the entire duration of this phase.
 
 ## Recommended Next
 
-A caller/client integration architecture slice (design only, not
-implementation) — **NOT begun**. Beyond that, per the absolute stop
-boundary: no migration itself, no macOS same-file-object implementation,
-no packaging/install, no real certification, no N-16-6, no N-16-7 without
-fresh explicit human authorization for each.
+The first concrete implementation slice named in the canonical Phase
+Report: a read-only `certification_read` client library
+(`src/pcae/core/hpac_pawa_helper_client.py`) migrating
+`hpac_verifier.py`'s read path, with the named guard tests. **NOT
+begun.** Requires fresh explicit human authorization. Beyond that, per
+the absolute stop boundary: no migration of any other operation, no
+macOS same-file-object implementation, no packaging/install, no real
+certification, no N-16-6, no N-16-7 without fresh explicit human
+authorization for each.
