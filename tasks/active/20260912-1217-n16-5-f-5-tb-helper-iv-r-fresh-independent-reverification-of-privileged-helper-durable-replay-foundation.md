@@ -28,6 +28,7 @@ Restart independent verification from scratch of the privileged helper foundatio
 - .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/fast-green-attribution/36a33b16a1549746ff76391aba389bac17c5c533d57c0d1ce571d42a74e23ae4.json
 
 ## Forbidden Files
 

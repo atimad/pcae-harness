@@ -1,5 +1,45 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-HELPER-IV-R**) — **Fresh Independent Reverification
+  of Privileged Helper + Durable Replay Foundation.** COMPLETE /
+  INDEPENDENTLY VERIFIED. Restarted verification from scratch (neither
+  predecessor's suite/conclusions trusted): reconstructed all 4 helper/
+  replay modules from source; wrote a fresh 137-test adversarial suite
+  (`tests/test_n16_5_f_5_tb_helper_iv_r.py`), all 137 passed. Confirmed the
+  CRITICAL generation-rotation-resurrection property holds (a G-bound spent
+  request replayed against a G+1 store is denied `CONFLICTING`, never
+  resurrected `FRESH`); confirmed no same-interpreter authority
+  reintroduction (no `inspect`/`sys.modules`/frame-global/ambient-identity
+  trust pattern in any of the 4 modules); confirmed semantic
+  no-authority-export via full `FORBIDDEN_AUTHORITY_TOKENS` fuzzing;
+  confirmed closed operation/role/mutation/read-record vocabularies are
+  source-derived and near-miss-rejecting; confirmed no generic-broker
+  reconstruction by composition; confirmed deterministic-vs-real separation
+  (`ReplayLedger`'s constructor has no flag/env-var path to fake
+  durability). macOS same-file-object exec path: FAIL-CLOSED / NOT
+  IMPLEMENTED (security-complete, completeness-absent, as expected — not
+  implemented this phase); macOS peer credentials: implemented and
+  exercised for real via `getpeereid`. One low-severity, non-blocking
+  finding documented (not repaired, per this phase's IV-only mandate):
+  `DurableReplayStore._read()` opens a candidate record with a blocking
+  `O_RDONLY` (no `O_NONBLOCK`) before its `S_ISREG` check, so a FIFO
+  planted at a record slot hangs the read instead of failing closed
+  quickly — an availability/DoS exposure only, no confidentiality/integrity
+  impact; suggested smallest repair is adding `O_NONBLOCK` to that one
+  open call, not applied here. Regression: both existing helper/replay
+  suites unmodified (120 passed/1 skipped/0 failed); fast_green attribution
+  via the governed `pcae phase fast-green-attribution` tool (isolated
+  baseline `578c0455` vs candidate `a5c8202b`): `attributable_failures: []`
+  (empty), the sole new node correctly classified as the expected pre-push
+  HEAD==origin/main scope-fence guard — 0 attributable regressions.
+  Contract trio
+  byte-unchanged. 0 production/contract/schema files touched. 0 live
+  protected-host writes; 0 real ceremony. F-5-B2 BLOCKED PENDING REMAINING
+  PLATFORM/CALLER MIGRATION/PACKAGING SLICES; F-5 CERTIFICATION BLOCKED;
+  N-16-5 NOT CLOSED; N-16-6/N-16-7 OPEN/UNTOUCHED. Recommended next: a
+  narrow one-line hardening phase for the FIFO finding, not begun.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-REPLAY-REPAIR**) — **Privileged Helper
   Replay-Durability Repair: Cross-Process Spent-Request Preservation.**

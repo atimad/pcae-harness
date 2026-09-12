@@ -2,6 +2,206 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-HELPER-IV-R**) — Fresh Independent Reverification of
+Privileged Helper + Durable Replay Foundation. CPIPC: valid direct `.1`
+successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-REPLAY-REPAIR`) — same series `149` / branch `O`,
+exactly one appended `.1` segment (59 subphase segments vs 58), `is_valid`
+True, `normalize(id) == id`, `compare` = less (strict forward ordering),
+unique against `git log --all` and `git grep` at entry, no conflicting
+active governed phase; alias display-only. Independently re-derived via
+`pcae.core.phase_id` (`parse`/`is_valid`/`same_series`/`same_branch`/
+`compare`) by the primary operator, not trusted from the authorization
+prompt's precomputed successor text.
+
+**STATUS: N16-5-F-5-TB-HELPER-IV-R COMPLETE / INDEPENDENTLY VERIFIED** (with
+one documented, non-blocking, non-security low-severity availability
+finding — see below). Entry state: branch `main`, HEAD == `origin/main` ==
+`578c0455`, `origin/main..HEAD` = 0, tree clean. Predecessor
+N16-5-F-5-TB-REPLAY-REPAIR confirmed COMPLETE via `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` (`status: completed`), and the
+canonical Phase Report, all agreeing; the prior BLOCKED helper-IV
+(N16-5-F-5-TB-HELPER-IV) historical outcome is preserved exactly, not
+rewritten.
+
+This phase restarted independent verification from scratch: neither
+predecessor's test suite nor conclusions were trusted as inherited PASS.
+The full helper/protocol/replay foundation
+(`hpac_pawa_helper_protocol.py` / `_operations.py` / `_os.py` /
+`_replay_state.py`, 4 modules) was reconstructed independently from source
+by a bounded delegated worker (no commit/push/task-close/phase-complete
+authority); the primary operator independently re-read the new 1467-line
+adversarial suite and the doc in full, independently re-ran the new suite
+(137 passed), the two untouched regression suites (120 passed/1 skipped,
+byte-identical via `git diff`), fast_green baseline-vs-candidate (via a
+real file move, not `git stash`, after `git stash push -u` was observed to
+leave untracked new files in the tree), and re-verified the contract-trio
+sha256 values, before accepting the work.
+
+**Core security question (verified):** ordinary PCAE interpreter authority
+!= protected helper authority (no import-graph path from any of the four
+helper modules to `hpac_protected_admin_writer`, verified via AST inspection,
+not substring search; independently grepped for `inspect.*`/`sys.modules`/
+`__module__`/`__name__`/frame-globals/ambient-identity trust patterns —
+none found in any of the four modules). Helper authority dies with the
+process; only a durable, negative, no-authority-export fact ("this
+(installation, generation, request_id, nonce) is spent") persists across
+restarts (`record_exports_no_authority()`, fuzzed against every
+`FORBIDDEN_AUTHORITY_TOKENS` member).
+
+**Generation-rotation resurrection (§15, CRITICAL) — verified no resurrection
+path.** A request consumed under generation G, replayed verbatim (same
+request_id/nonce/request_digest, generation field still literally G)
+against a store rotated to G+1, is denied `CONFLICTING`, never resurrected
+`FRESH`; G's own consumed history is untouched. A distinct, legitimately
+G+1-signed request (different `request_digest`, since generation is
+digested) correctly gets its own fresh keyspace slot — documented
+partitioning, not a defect.
+
+**Linux same-file-object execution / substitution matrix:** reconstructed
+and reasoned about from source (`/proc/self/fd/<fd>` re-exec, `O_NOFOLLOW`
+chain, descriptor identity over pathname re-lookup); the genuine Linux
+syscall path cannot be exercised as Linux on this macOS development host (no
+`/proc`), mirroring the existing foundation suite's own
+`skipif(not sys.platform.startswith("linux"))` discipline on its one
+real-exec test. **macOS classification:** same-file-object exec path —
+**FAIL-CLOSED / NOT IMPLEMENTED (SECURITY-COMPLETE, COMPLETENESS-ABSENT)**,
+verified via a forced-platform test showing it raises rather than falling
+back to a weaker path; **not implemented in this phase**, per mandate.
+Peer credentials — **IMPLEMENTED and SECURITY-COMPLETE on macOS**, genuinely
+exercised via a real `AF_UNIX` socketpair + `getpeereid` on this host
+(non-owner-uid rejected); unsupported-platform path fails closed
+(`monkeypatch`-forced `sunos5`).
+
+**Closed vocabularies verified against source, not just duplicated
+constants:** `CLOSED_OPERATIONS`/`CLOSED_CERTIFICATION_ROLES`/
+`CLOSED_ADMIN_MUTATIONS`/`CLOSED_READ_RECORD_TYPES` are derived directly
+from the protocol module's own enums (independently confirmed by the
+primary operator reading the source definitions directly, not only the
+test file's copies) — exactly 5 operations, exactly 5 certification roles
+(`hpac_lifecycle_terminator` explicitly excluded), 7 admin mutations, 9 read
+record types. Near-miss/case-variant/whitespace/NUL-byte role and
+record-type values rejected. No reflection, no dynamic import, no wildcard,
+no fallback privileged handler found or reachable. `admin_mutation` proven
+metadata-only (`configure_privileged_helper` touches only the in-memory
+store record). `ceremony_entry`/`presentation_evidence_write` proven to
+ignore self-asserted `approved`/`human_present`/`verified`/`authenticated`
+fields entirely. A two-operation composition attack (smuggling a
+`certification_read` result into an `admin_mutation` mutation field) is
+still rejected by the closed vocabulary — no generic broker reconstructible
+by composition.
+
+**State machine, no-auto-retry, evidence staging:** both the in-process
+`HelperStateMachine` and the durable `DurableReplayStore` state machine
+reject every tested skip-ahead and regression shape
+(`RESPONSE_EMITTED`→`REQUEST_RECEIVED`, `MUTATION_COMMITTED`→
+`REQUEST_RECEIVED`, `EVIDENCE_WRITTEN`→`MUTATION_ATTEMPT_STARTED`,
+`RECONCILIATION_REQUIRED`→`EVIDENCE_WRITTEN`); `CONSUMED`→`FRESH` proven
+unreachable via `check_and_reserve` re-presentation. Fault injection at
+every stage (finalization failure, staging failure before the boundary,
+expired/unparseable expiry) yields the correct disposition
+(`RECONCILIATION_REQUIRED`/`CONSUMED` denial on retry, or genuinely
+unspent/retriable pre-boundary) with no automatic re-execution.
+
+**Deterministic-vs-real separation:** `ReplayLedger.__init__`'s signature
+is exactly `{self, durable_store}` — no flag/kwarg/env-var path exists to
+make the in-memory backing durable short of injecting a real
+`DurableReplayStore`; `open_durable_replay_ledger(...)` always produces a
+durable-backed ledger.
+
+**Filesystem provenance / atomicity / namespace safety:** independently
+re-verified digest-mismatch, slot-binding mismatch (record for A copied
+into B's slot name), 8 malformed-record-field variants, truncated/torn
+JSON, symlinked slot, symlinked namespace component, group/other-writable
+slot and namespace directory all fail closed with `ReplayStateCorruption`;
+`compute_replay_key` always emits a 64-hex-char digest regardless of `../`,
+NUL, unicode, or 500-byte hostile inputs, and a hostile request_id/nonce
+cannot escape the generation directory; length-prefixing prevents
+concatenation collisions; retention never prunes `RECONCILIATION_REQUIRED`
+and only removes spent records after `expiry + retention` (without
+resurrecting them, since expiry is checked before the store is consulted);
+`iter_records` raises rather than silently skipping a corrupt entry. A real
+8-process concurrent race on an identical `(request_id, nonce)` yields
+exactly one `fresh`, seven `duplicate_in_flight`. Real separate-OS-process
+tests (clean restart, response-loss retries, `SIGKILL` after
+`MUTATION_COMMITTED`, `SIGKILL` before the boundary) all confirm
+restart-dead-authority with persistent, correctly-scoped history.
+
+**Documented, non-blocking finding (not repaired, per this phase's IV-only
+mandate):** `DurableReplayStore._read()` opens a candidate record with
+blocking `O_RDONLY | O_NOFOLLOW` (no `O_NONBLOCK`) before its `S_ISREG`
+check. A FIFO (`mkfifo`) planted at a record slot — requiring write access
+already inside the `0700`, deployment-owner-only namespace — causes the
+open to hang indefinitely instead of failing closed quickly with
+`ReplayStateCorruption("... not a regular file")`. This is an
+**availability/DoS exposure only** (no confidentiality or integrity
+break: no capability, secret, or forged disposition results), reproduced in
+`test_record_slot_fifo_blocks_open_instead_of_failing_closed_fast` (bounded
+via a daemon-thread timeout). It does not affect the CRITICAL
+generation-rotation-resurrection property. Suggested smallest repair (not
+applied): add `O_NONBLOCK` to that one `os.open()` call and treat a
+non-regular `fstat()` result the same as the existing check already does.
+
+**Regression tallies (independently re-run by the primary operator):** new
+IV-R suite `tests/test_n16_5_f_5_tb_helper_iv_r.py` — **137 passed, 0
+failed, 0 skipped**. Foundation + replay-repair suites (both unmodified,
+`git diff` empty) — **120 passed, 1 skipped, 0 failed** (the skip is the
+pre-existing Linux-only real-exec test, expected on this Darwin host).
+`fast_green` attribution performed via the governed
+`pcae phase fast-green-attribution` tool (isolated-worktree baseline-vs-
+candidate comparison, the authoritative structured evidence): baseline
+commit `578c0455` (**355** raw failed / 9 errors); candidate commit
+`a5c8202b` (**356** raw failed / 9 errors). `attributable_failures: []`
+(empty) — the sole new candidate node,
+`tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main`,
+was correctly classified by the tool itself as an `expected_phase_artifact`
+(the known pre-push HEAD==origin/main scope-fence guard, expected given
+`pushed_status=local_only` at attribution time; resolves once this phase
+is actually pushed). Tool status: **PASS**. A separate, earlier, informal
+spot-check by the primary operator (real file move, `-n auto`, non-isolated)
+had independently surfaced a single different, flaky, unrelated node
+(`tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_3_2_1_pawa_writer_capability_integrity_repair.py::test_17_concurrent_use_permits_at_most_one_success`)
+— confirmed to reference no helper/replay module at all, and to pass
+standalone in 3 consecutive isolated runs — which did not reproduce in the
+tool's own isolated-worktree run; both independent methods agree on **0
+attributable security/replay/semantic regressions.**
+`tests/test_n16_5_f_5_tb_helper_iv_r.py` and both existing helper/replay
+test files are not collected under the `fast_green` marker at all
+(`FAST_GREEN_MODULES` allowlist does not include them), independently
+confirmed via `--collect-only`. Contract trio byte-unchanged throughout
+(sha256 independently reconfirmed by the primary operator both before
+delegation and after accepting the work:
+`HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md` =
+`b8809e51…36323e`, `HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md` =
+`e7b30dae…b58815`, `HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md` =
+`27acaabc…9cc9cd2`). 0 production/contract/schema files touched
+(`git diff` against `origin/main` for `src/`, `docs/contracts/`, `schemas/`
+empty for the entire phase). 0 live protected-host writes; 0 real ceremony;
+no FIDO2/YubiKey; no production principal. Runtime `Observed` / `observe` /
+`unavailable`; 0 plugins / 0 capabilities; first governed runtime external
+effect **ABSENT / UNREACHABLE**.
+
+Recommended next (derived, **NOT begun**): given the single finding is
+non-blocking and low-severity (availability-only), the smallest useful
+successor is a narrow one-line hardening phase (e.g.
+**N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN**) adding `O_NONBLOCK` to
+`DurableReplayStore._read()`'s open call — not a re-open of this IV. Beyond
+that, per the absolute stop boundary: do NOT begin caller/client
+integration, legacy in-process-path removal, packaging/install, real
+certification, macOS same-file-object implementation, N-16-6, or N-16-7
+without fresh explicit human authorization for each. F-5-B2 **BLOCKED
+PENDING REMAINING PLATFORM / CALLER MIGRATION / PACKAGING SLICES**; F-5
+**CERTIFICATION BLOCKED**; **N-16-5 NOT CLOSED**; N-16-6 / N-16-7 **OPEN /
+UNTOUCHED** (N-16-7 strictly last).
+
+Canonical doc: `docs/PHASE_N16_5_F_5_TB_HELPER_IV_R.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-REPLAY-REPAIR**) — Privileged Helper Replay-Durability
 Repair: Cross-Process Spent-Request Preservation. CPIPC: valid direct `.1`
