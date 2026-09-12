@@ -2,6 +2,78 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-CALLER-INTEGRATION-ARCH**) — Caller/Client
+Integration Architecture for Privileged Helper Consumption
+(architecture-only, no implementation). CPIPC: valid direct `.1`
+successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN`) — same series `149` /
+branch `O`, exactly one appended `.1` segment (61 subphase segments vs
+60), `is_valid` True, `compare` = less (strict forward ordering), unique
+against `git log --all -F --grep` at entry, no conflicting active
+governed phase. Independently re-derived via `pcae.core.phase_id`
+(`parse`/`is_valid`/`same_series`/`same_branch`/`compare`) by the primary
+operator, not trusted from the authorization prompt's precomputed
+successor text.
+
+**STATUS: N16-5-F-5-TB-CALLER-INTEGRATION-ARCH COMPLETE.** Entry state:
+branch `main`, HEAD == `origin/main` == `3be2b318`, `origin/main..HEAD` =
+0, tree clean. Predecessor N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN
+confirmed COMPLETE via `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` (`status: completed`), and the
+canonical Phase Report, all agreeing.
+
+This architecture-only phase independently inventoried every current
+production caller of the HPAC/PAWA privileged-authority subsystem
+(finding: zero orchestration-layer callers exist — the subsystem is a
+self-contained `src/pcae/core/` island reached only by 4 standalone,
+unpackaged `scripts/hpac_*.py` admin launchers), inventoried every
+remaining legacy in-process authority mechanism (the frame-pinning
+factory-recognition mechanism and the three bearer-typed capability
+objects `HPACWriterCapability`/`HPACStoreAuthority`/
+`ProductionWriterHandle` family — all already named as forbidden
+cross-boundary exports by the frozen contracts), and mapped every one of
+those callers cleanly onto one of the 5 existing closed helper
+operations with **no sixth operation required and no contract/schema
+gap found**. It designed (but did not implement) the client request
+builder, transport client, launcher, platform model, no-fallback rule,
+legacy retirement plan, a 6-slice migration order, a concrete first
+implementation slice (a read-only `certification_read` client library
+migrating `hpac_verifier.py`), and a 20-row threat matrix. Full detail:
+`docs/PHASE_N16_5_F_5_TB_CALLER_INTEGRATION_ARCH.md`.
+
+**Zero production source, contract, schema, or dependency changes this
+phase.** Zero live protected-host writes; zero real ceremony. Runtime
+`Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities; first
+governed runtime external effect **ABSENT / UNREACHABLE** (unchanged).
+
+**Disposition:** Caller/client integration architecture **DEFINED /
+READY FOR IMPLEMENTATION**. Production caller migration **NOT BEGUN**.
+Legacy authority retirement **PLANNED / NOT BEGUN**. macOS same-file-object
+execution: **FAIL-CLOSED / NOT IMPLEMENTED** (untouched). Helper
+foundation **REMAINS INDEPENDENTLY VERIFIED**. Replay durability
+**REMAINS VERIFIED / HARDENED**. F-5-B2 **BLOCKED PENDING REMAINING
+PLATFORM / CALLER MIGRATION / PACKAGING SLICES**; F-5 **CERTIFICATION
+BLOCKED**; **N-16-5 NOT CLOSED**; N-16-6 / N-16-7 **OPEN / UNTOUCHED**
+(N-16-7 strictly last).
+
+**Recommended next (derived, NOT begun):** the first concrete
+implementation slice named above — a read-only `certification_read`
+client library (`src/pcae/core/hpac_pawa_helper_client.py`) migrating
+`hpac_verifier.py`'s read path, with typed request builders, response-
+trust validation, a no-legacy-fallback guard test, and a no-auto-retry
+guard test. Requires fresh explicit human authorization. Per the
+absolute stop boundary: do NOT begin the migration itself, macOS
+same-file-object implementation, packaging/install, real certification,
+N-16-6, or N-16-7 without fresh explicit human authorization for each.
+
+Canonical doc: `docs/PHASE_N16_5_F_5_TB_CALLER_INTEGRATION_ARCH.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN**) — Durable Replay Store
 FIFO-at-Slot Nonblocking Hardening. CPIPC: valid direct `.1` successor of

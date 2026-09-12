@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-CALLER-INTEGRATION-ARCH**) — **Caller/Client
+  Integration Architecture for Privileged Helper Consumption
+  (architecture-only, no implementation).** COMPLETE. Independently
+  inventoried every current production caller of the HPAC/PAWA
+  privileged-authority subsystem from primary source — finding zero
+  orchestration-layer callers exist today (the subsystem is a
+  self-contained `src/pcae/core/` island reached only by 4 standalone,
+  unpackaged `scripts/hpac_*.py` admin launchers) — and every remaining
+  legacy in-process authority mechanism (the frame-code-object-pinning
+  factory-recognition check and the bearer-typed
+  `HPACWriterCapability`/`HPACStoreAuthority`/`ProductionWriterHandle`
+  family, all already named as forbidden cross-boundary exports by the
+  frozen contracts). Mapped every caller cleanly onto one of the 5
+  existing closed helper operations — no sixth operation required, no
+  contract/schema gap found. Designed (not implemented): typed
+  client-request-builder architecture, one-shot transport-client
+  architecture, launcher considerations, the Linux/macOS-fail-closed/
+  deterministic-NON_REAL platform model, the no-legacy-fallback rule, a
+  legacy-path retirement plan, a 6-slice migration order (read-only
+  `certification_read` client first, no macOS dependency), a concrete
+  first implementation slice (`hpac_pawa_helper_client.py` migrating
+  `hpac_verifier.py`'s read path), and a 20-row threat matrix. Zero
+  production source, contract, schema, or dependency changes; zero live
+  protected-host writes; zero real ceremony. F-5-B2 BLOCKED PENDING
+  REMAINING PLATFORM / CALLER MIGRATION / PACKAGING SLICES; F-5
+  CERTIFICATION BLOCKED; N-16-5 NOT CLOSED. Recommends the first
+  implementation slice next, not begun, requires fresh explicit human
+  authorization. See `docs/PHASE_N16_5_F_5_TB_CALLER_INTEGRATION_ARCH.md`.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN**) — **Durable Replay
   Store FIFO-at-Slot Nonblocking Hardening.** COMPLETE. Closed the one
