@@ -10,7 +10,7 @@ N16-5-F-5-TB-CERT-READ-CLIENT-IMPL: Section-0 verification finds authorization p
 
 ## Status
 
-active
+done
 
 ## Mode
 
