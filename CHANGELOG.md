@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN**) — **Durable Replay
+  Store FIFO-at-Slot Nonblocking Hardening.** COMPLETE. Closed the one
+  finding N16-5-F-5-TB-HELPER-IV-R documented and left unrepaired:
+  `DurableReplayStore._read()` opened a candidate replay record with a
+  blocking `O_RDONLY | O_NOFOLLOW` (no `O_NONBLOCK`) before its `S_ISREG`
+  check, so a FIFO (`mkfifo`) planted at a record slot hung the read
+  indefinitely instead of failing closed quickly. Reproduced the hang
+  independently against unmodified HEAD in a bounded separate-process
+  check before making any change; reconfirmed the defect is
+  availability-only (the opened descriptor's `S_ISREG` check always runs
+  before any byte is read, so a FIFO can never be interpreted as replay
+  content, with or without a writer connected). Production change: one
+  call site, adding `O_NONBLOCK` to `_read()`'s open flags — no other
+  production line, contract, schema, or dependency changed. Added 7
+  focused tests (FIFO without/with a writer, FIFO replacing a valid
+  record, FIFO under a noncanonical namespace, symlink-to-FIFO, UNIX
+  socket at the slot, regular record unaffected), each bounded via a real
+  subprocess with a hard timeout. Updated the predecessor's own
+  documented-finding test to assert the now-repaired fail-closed-fast
+  behavior, per that test's own embedded instruction. Regression:
+  replay-repair suite 76 passed / 0 failed (69 predecessor + 7 new); IV-R
+  suite 137 passed / 0 failed (tally unchanged, one assertion direction
+  updated); helper foundation suite 51 passed / 0 failed / 1 skipped,
+  identical to predecessor. `fast_green` attribution via the governed
+  `pcae phase fast-green-attribution` tool — see
+  `.pcae/phase-completion-metadata.json` for the embedded structured
+  evidence. 0 contract/schema/dependency changes; 0 live protected-host
+  writes; 0 real ceremony. Runtime unchanged: `Observed` / `observe` /
+  `unavailable`; 0/0 plugins/capabilities; first external effect ABSENT /
+  UNREACHABLE. F-5-B2 BLOCKED PENDING REMAINING PLATFORM / CALLER
+  MIGRATION / PACKAGING SLICES; F-5 CERTIFICATION BLOCKED; N-16-5 NOT
+  CLOSED. Recommended next: a caller/client integration architecture
+  slice (not begun; own human authorization required). See
+  `docs/PHASE_N16_5_F_5_TB_REPLAY_STORE_FIFO_HARDEN.md`.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-HELPER-IV-R**) — **Fresh Independent Reverification
   of Privileged Helper + Durable Replay Foundation.** COMPLETE /

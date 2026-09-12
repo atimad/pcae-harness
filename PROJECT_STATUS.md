@@ -2,6 +2,107 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN**) — Durable Replay Store
+FIFO-at-Slot Nonblocking Hardening. CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-HELPER-IV-R`) — same series `149` / branch `O`,
+exactly one appended `.1` segment (59 subphase segments vs 58), `is_valid`
+True, `normalize(id) == id`, `compare` = less (strict forward ordering),
+unique against `git log --all` and `git grep` at entry, no conflicting
+active governed phase; alias display-only. Independently re-derived via
+`pcae.core.phase_id` (`parse`/`is_valid`/`same_series`/`same_branch`/
+`compare`) by the primary operator, not trusted from the authorization
+prompt's precomputed successor text.
+
+**STATUS: N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN COMPLETE.** Entry state:
+branch `main`, HEAD == `origin/main` == `3eff8b80`, `origin/main..HEAD` = 0,
+tree clean. Predecessor N16-5-F-5-TB-HELPER-IV-R confirmed COMPLETE /
+INDEPENDENTLY VERIFIED via `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` (`status: completed`), and the
+canonical Phase Report, all agreeing.
+
+This phase closed exactly the one finding N16-5-F-5-TB-HELPER-IV-R
+documented and left unrepaired: `DurableReplayStore._read()`
+(`hpac_pawa_helper_replay_state.py`) opened a candidate replay record with
+a blocking `O_RDONLY | O_NOFOLLOW` (no `O_NONBLOCK`) before its `S_ISREG`
+check, so a FIFO (`mkfifo`) planted at a record slot hung the read
+indefinitely instead of failing closed quickly. Before any change, the
+hang was independently reproduced against unmodified HEAD (`3eff8b80`) in
+a genuinely separate OS process bounded by a 5-second join timeout. The
+security classification was reconfirmed availability-only: the opened
+descriptor's `S_ISREG` check runs before any byte is read, so a FIFO
+(with or without a writer connected) is always rejected before its
+content could be interpreted as a replay record — no confidentiality,
+integrity, replay, or authority defect exists.
+
+**Production change:** exactly one call site, adding `O_NONBLOCK` to
+`_read()`'s open flags. No other production line, no contract, no schema,
+no dependency changed. 7 new focused tests added
+(`tests/test_n16_5_f_5_tb_replay_repair.py`): FIFO without a writer, FIFO
+with a writer connected, FIFO substituted over a previously-valid record,
+FIFO under a noncanonical namespace path (no effect on an unrelated
+canonical read), symlink-to-FIFO (refused as a symlink, per the existing
+`O_NOFOLLOW` policy), UNIX domain socket at the slot, and an ordinary
+regular record proven unaffected by the nonblocking open. Every FIFO/
+timing-sensitive test is bounded via a real subprocess with a hard
+`timeout=` (never a bare in-process assertion, and never
+`multiprocessing` fork, which was observed during this phase to deadlock
+post-fork under pytest's own capture machinery on this macOS/CPython
+3.14 host) — a regression that reintroduces blocking fails the suite
+promptly instead of hanging it. The predecessor's own documented-finding
+test (`test_record_slot_fifo_blocks_open_instead_of_failing_closed_fast`)
+was updated to `test_record_slot_fifo_fails_closed_fast_not_blocking_open`
+and its assertion inverted to expect the now-repaired prompt fail-closed
+behavior, per that test's own embedded instruction for exactly this case.
+
+**Regression tallies (independently re-run by the primary operator):**
+focused replay-repair suite (now 76 tests: 69 predecessor + 7 new) —
+**76 passed, 0 failed**; IV-R suite (one test updated, tally unchanged) —
+**137 passed, 0 failed**; helper foundation suite (unmodified) — **51
+passed, 0 failed, 1 skipped**, identical to the predecessor's tally.
+`fast_green` attribution performed via the governed
+`pcae phase fast-green-attribution` tool: see
+`.pcae/phase-completion-metadata.json` for the embedded structured
+evidence (baseline/candidate commits, raw tallies, `attributable_failures`).
+
+0 contract/schema/dependency files touched (`git diff` against
+`origin/main` for `docs/contracts/`, `schemas/`, `pyproject.toml` empty
+for the entire phase). 0 live protected-host writes; 0 real ceremony; no
+FIDO2/YubiKey; no production principal. Runtime `Observed` / `observe` /
+`unavailable`; 0 plugins / 0 capabilities; first governed runtime
+external effect **ABSENT / UNREACHABLE**.
+
+**Disposition:** FIFO-at-slot blocking-open finding **CLOSED / HARDENED**.
+Durable replay store **HARDENED**. Replay-after-restart **REMAINS
+CLOSED**. Helper foundation **REMAINS INDEPENDENTLY VERIFIED**, subject
+to this narrow change, covered by this phase's own focused evidence.
+macOS same-file-object execution: **FAIL-CLOSED / NOT IMPLEMENTED**
+(untouched). F-5-B2 **BLOCKED PENDING REMAINING PLATFORM / CALLER
+MIGRATION / PACKAGING SLICES**; F-5 **CERTIFICATION BLOCKED**; **N-16-5
+NOT CLOSED**; N-16-6 / N-16-7 **OPEN / UNTOUCHED** (N-16-7 strictly last).
+
+**Recommended next (derived, NOT begun):** per this phase's own
+next-slice dependency analysis (direct repository evidence: macOS
+same-file-object execution is FAIL-CLOSED/NOT-IMPLEMENTED by design and
+no caller has been migrated to the durable helper/replay path yet;
+caller/client integration is architecturally independent of macOS helper
+execution and can proceed using a deterministic/Linux execution
+abstraction while macOS remains explicitly unsupported) — the smallest
+useful successor is a **caller/client integration architecture slice**
+(not the implementation itself), beginning to design how an existing
+caller (e.g. the certification coordinator) is migrated to invoke the
+durable helper/replay path. Beyond that, per the absolute stop boundary:
+do NOT begin the migration itself, macOS same-file-object implementation,
+packaging/install, real certification, N-16-6, or N-16-7 without fresh
+explicit human authorization for each.
+
+Canonical doc: `docs/PHASE_N16_5_F_5_TB_REPLAY_STORE_FIFO_HARDEN.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-HELPER-IV-R**) — Fresh Independent Reverification of
 Privileged Helper + Durable Replay Foundation. CPIPC: valid direct `.1`

@@ -30,6 +30,11 @@ Close the FIFO-at-slot blocking-open availability finding documented by N16-5-F-
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- tasks/active/20260912-1506-n16-5-f-5-tb-replay-store-fifo-harden-durablereplaystore-fifo-at-slot-nonblocking-hardening.md
+- tasks/done/20260912-1422-idle-post-n16-5-f-5-tb-helper-iv-r-complete-independently-verified-n16-5-f-5-tb-replay-store-fifo-harden-next-not-begun-n-16-5-not-closed.md
+- tasks/done/20260912-1506-n16-5-f-5-tb-replay-store-fifo-harden-durablereplaystore-fifo-at-slot-nonblocking-hardening.md
+- tasks/active/*.md
+- .pcae/fast-green-attribution/*.json
 
 ## Forbidden Files
 
