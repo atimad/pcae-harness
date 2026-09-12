@@ -66,10 +66,15 @@ replay-repair suite and all passed unchanged.
 
 `fast_green` attribution performed via the governed
 `pcae phase fast-green-attribution` tool (isolated-worktree
-baseline-vs-candidate comparison): baseline commit `3eff8b80` (parent of
-this phase's own first attributed commit; 358 raw failed / 9 errors);
-candidate commit `64c747dd` (358 raw failed / 9 errors — byte-identical raw
-tallies). `attributable_failures: []` (empty). Tool status: **PASS**.
+baseline-vs-candidate comparison), final run against the truly pushed
+candidate: baseline commit `3eff8b80` (parent of this phase's own first
+attributed commit; 359 raw failed / 9 errors); candidate commit
+`102c91e3`, the final pushed HEAD (357 raw failed / 9 errors — 2 fewer,
+both accounted for: the pre-push HEAD==origin/main scope-fence guard now
+trivially passes, and one flaky unrelated node
+(`tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record`)
+did not reproduce). `attributable_failures: []` (empty). Tool status:
+**PASS**.
 
 **Note on a self-corrected process mistake:** an earlier, local-only
 attempt at this phase's implementation commit put the display alias in
