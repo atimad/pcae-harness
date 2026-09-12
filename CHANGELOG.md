@@ -1,5 +1,18 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-CERT-READ-CLIENT-IMPL**) — **Typed
+  `certification_read` Client Implementation + `hpac_verifier` Read-Path
+  Migration.** **BLOCKED at Section 0, before any production change.**
+  The authorization's premise — that `hpac_verifier.py` is a live
+  consumer of the legacy `certification_read` authority path — is false
+  on direct evidence: `hpac_verifier.py` imports nothing from the
+  HPAC/PAWA subsystem and its own docstring states it has zero
+  production consumers; the legacy factory's only real consumer is
+  `hpac_certification_coordinator.py`, which the predecessor phase's own
+  evidence already found has zero live production callers itself. Zero
+  production/contract/schema/test changes this phase. See
+  `docs/PHASE_N16_5_F_5_TB_CERT_READ_CLIENT_IMPL_BLOCKED.md`.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-CALLER-INTEGRATION-ARCH**) — **Caller/Client
   Integration Architecture for Privileged Helper Consumption

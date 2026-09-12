@@ -2,6 +2,83 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-CERT-READ-CLIENT-IMPL**) — Typed
+`certification_read` Client Implementation + `hpac_verifier` Read-Path
+Migration. **BLOCKED at Section 0 governance validation, before any
+production change.** CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-CALLER-INTEGRATION-ARCH`) — same series `149` /
+branch `O`, exactly one appended `.1` segment (62 subphase segments vs
+61), `is_valid` True, `compare` = less (strict forward ordering), unique
+against `git log --all -F --grep` at entry, no conflicting active
+governed phase. Independently re-derived via `pcae.core.phase_id`
+(`parse`/`is_valid`/`same_series`/`same_branch`/`compare`) by the primary
+operator, not trusted from the authorization prompt's precomputed
+successor text.
+
+**STATUS: N16-5-F-5-TB-CERT-READ-CLIENT-IMPL BLOCKED.** Entry state:
+branch `main`, HEAD == `origin/main` == `73655087`, `origin/main..HEAD` =
+0, tree clean. Predecessor N16-5-F-5-TB-CALLER-INTEGRATION-ARCH confirmed
+COMPLETE via `PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json`
+(`status: completed`), and the canonical Phase Report, all agreeing.
+
+The authorization's core factual premise — that `hpac_verifier.py` is an
+existing live consumer of the legacy `certification_read` authority path
+and must be migrated onto a new typed client — is **false on direct
+repository evidence**, independently verified by the primary operator:
+`src/pcae/core/hpac_verifier.py` (908 lines, read in full) imports
+nothing from the HPAC/PAWA privileged-helper subsystem, contains zero
+references to `certification_read`/`CertificationReadAuthority`, and its
+own docstring states it "still has zero production consumers, so no such
+call site exists yet." The legacy factory named in the authorization
+(`recognized_certification_read_authority`, defined in
+`hpac_protected_admin_writer.py:2546`) has exactly one production
+import/call site — `hpac_certification_coordinator.py:62,218` — not
+`hpac_verifier.py`, matching the predecessor phase's own "certification
+coordinator" example (not `hpac_verifier.py`). The predecessor's own
+embedded evidence additionally already documents that
+`hpac_certification_coordinator.py` itself has zero live production
+callers today. Per the authorization's own Section 0/51 instruction to
+stop rather than improvise on a disproven premise, this phase performed
+zero production/contract/schema/test changes and finalized this truthful
+BLOCKED disposition. Full detail:
+`docs/PHASE_N16_5_F_5_TB_CERT_READ_CLIENT_IMPL_BLOCKED.md`.
+
+**Zero production source, contract, schema, dependency, or test changes
+this phase.** Zero live protected-host writes; zero real ceremony.
+Runtime `Observed` / `observe` / `unavailable`; 0 plugins / 0
+capabilities; first governed runtime external effect **ABSENT /
+UNREACHABLE** (unchanged).
+
+**Disposition:** Typed `certification_read` client implementation:
+**NOT BEGUN (BLOCKED — false premise)**. `hpac_verifier.py` migration:
+**NOT BEGUN — no such legacy read path exists in this module**. Helper
+foundation **REMAINS INDEPENDENTLY VERIFIED**. Caller/client integration
+architecture **REMAINS DEFINED** (predecessor outcome preserved exactly,
+not rewritten). macOS same-file-object execution: **FAIL-CLOSED / NOT
+IMPLEMENTED** (untouched). F-5-B2 **BLOCKED PENDING REMAINING PLATFORM /
+CALLER MIGRATION / PACKAGING SLICES**; F-5 **CERTIFICATION BLOCKED**;
+**N-16-5 NOT CLOSED**; N-16-6 / N-16-7 **OPEN / UNTOUCHED** (N-16-7
+strictly last).
+
+**Recommended next (derived, NOT begun):** a narrow **architecture
+correction slice** re-scoping the caller-mapping question specifically to
+`hpac_certification_coordinator.py` (the actual, sole consumer of the
+legacy `certification_read` factory, despite having zero live production
+callers of its own) versus identifying a different, actually-live caller
+as the true first implementation slice. Requires fresh explicit human
+authorization. Per the absolute stop boundary: do not begin any caller
+migration, macOS same-file-object implementation, packaging/install, real
+certification, N-16-6, or N-16-7 without fresh explicit human
+authorization for each.
+
+Canonical doc: `docs/PHASE_N16_5_F_5_TB_CERT_READ_CLIENT_IMPL_BLOCKED.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-CALLER-INTEGRATION-ARCH**) — Caller/Client
 Integration Architecture for Privileged Helper Consumption
