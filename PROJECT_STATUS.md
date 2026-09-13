@@ -2,6 +2,99 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION**) — admin_mutation
+Packaging / Deployment Topology Decision Architecture. **COMPLETE.**
+CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-CALLER-MAP-CORRECTION`) — same series `149` / branch
+`O`, exactly one appended `.1` segment, `is_valid` True, unique against
+`git log --all` at entry, no conflicting active governed phase.
+Independently re-derived and validated via `pcae.core.phase_id.parse`
+by the primary operator, not trusted from the authorization prompt's
+own alias-only guidance.
+
+**STATUS: N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION COMPLETE.**
+Entry state: branch `main`, HEAD == `origin/main` == `39db7690`,
+`origin/main..HEAD` = 0, tree clean. Predecessor
+N16-5-F-5-TB-CALLER-MAP-CORRECTION confirmed COMPLETE via
+`PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json`
+(`status: completed`), and `.pcae/phase-reports/latest.json`, all
+agreeing.
+
+Decided the supported operational topology for `admin_mutation`-style
+administrative operations: **Model D (explicit split) selected.**
+Helper/root installation-and-registration operations
+(`scripts/hpac_protected_root_admin.py`'s `provision`/
+`set-agent-exclusion`/`rotate`/`revoke`; `scripts/hpac_protected_presentation_admin.py`'s
+`install`/`rotate`/`revoke` metadata registration) stay
+source-checkout-only **permanently** — installing/registering a helper
+is definitionally an out-of-band act with nothing yet to verify
+against. Routine operational flows
+(`scripts/hpac_principal_admin.py`'s `enroll-first-credential`/
+`revoke-credential`; `hpac_protected_root_admin.py`'s
+`enroll-principal`/`revoke-principal`) are slated to migrate to a
+**typed admin client over the verified helper protocol** (Model C)
+once `HPAC-PAWA-HELPER-001` is wired to real canonical stores and a
+launcher exists — never falling back to the legacy `production_writer`
+in-process authority. Model B (packaging the in-process authority into
+`src/pcae` with a real `pcae hpac ...` entry point) was **rejected**:
+it regresses the existing non-agent-importable least-authority fence
+and moves directly against `HPAC-PAWA-001` v2.0's own already-frozen
+requirement that privileged production operations execute
+out-of-process.
+
+This phase independently **corrected a caller-map gap** in the
+predecessor: `scripts/hpac_protected_root_admin.py` is a third live
+`production_writer` mutation caller, not accounted for in that phase's
+two-script framing. `scripts/hpac_certification_admin.py` was checked
+and confirmed read-only (not a mutation caller); the four
+`scripts/hatp_*_admin.py` scripts were checked and confirmed to belong
+to an unrelated subsystem (HATP, not HPAC-PAWA). Contract versions were
+also confirmed ahead of the authorization prompt's stated background:
+`HPAC-PAWA-001` and `HPAC-PPA-001` are both already at **v2.0**
+(not v1.1/v1.0), both already requiring out-of-process helper
+execution for privileged operations — strengthening the case against
+Model B.
+
+**Zero production source, packaging, contract, schema, dependency, or
+live-host change this phase.** Zero live protected-host writes; zero
+real ceremony. Runtime `Observed` / `observe` / `unavailable`; 0
+plugins / 0 capabilities; first governed runtime external effect
+**ABSENT / UNREACHABLE** (unchanged). Fast Green attribution: 0
+attributable failures (one initially-flagged node reclassified via
+governed `--rerun-node` isolation as a pre-existing flake unrelated to
+this phase's changes).
+
+**Disposition:** admin_mutation operational topology: **DECIDED**
+(Model D). Source-checkout vs. installed-package status: **CANONICALLY
+ADJUDICATED**. Typed admin client: **NOT IMPLEMENTED**. Packaging
+changes: **NOT IMPLEMENTED**. Launcher changes: **NOT IMPLEMENTED**.
+Legacy admin authority: **UNCHANGED / SUNSET PLAN DEFINED**. macOS
+helper execution: **FAIL-CLOSED / NOT IMPLEMENTED** (untouched). F-5-B2
+**BLOCKED PENDING SELECTED NEXT DEPENDENCY**; F-5 **CERTIFICATION
+BLOCKED**; **N-16-5 NOT CLOSED**; N-16-6 / N-16-7 **OPEN / UNTOUCHED**
+(N-16-7 strictly last).
+
+**Recommended next (derived, NOT begun):** wire the foundation-only
+helper protocol (`hpac_pawa_helper_protocol.py` /
+`hpac_pawa_helper_operations.py`) to the real canonical stores
+(`HumanPrincipalRegistryStore`, RHAMP, `ProtectedPresentationInstallationStore`)
+and build the actual out-of-process one-shot launcher, Linux-first —
+before any typed-client or packaging implementation, since there is
+currently nothing store-wired for a client to call. Requires fresh
+explicit human authorization. Per the absolute stop boundary: do not
+implement the typed client, migrate any caller, modify packaging,
+implement macOS same-file-object support, install/register the
+helper, perform real certification, N-16-6, or N-16-7 without fresh
+explicit human authorization for each.
+
+Canonical doc: `docs/architecture/ADMIN_MUTATION_PACKAGING_DEPLOYMENT_DECISION.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-CALLER-MAP-CORRECTION**) — Caller Reachability and
 Migration-Order Architecture Correction. **COMPLETE.** CPIPC: valid

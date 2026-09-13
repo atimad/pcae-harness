@@ -10,7 +10,7 @@ N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION: admin_mutation packaging/deploym
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -29,6 +29,7 @@ Decide the supported operational topology (source-checkout-only, installed-packa
 - tasks/active/20260913-1422-n16-5-f-5-tb-admin-mutation-packaging-decision-admin-mutation-packaging-deployment-topology-decision-architecture.md
 - tasks/done/20260913-0301-idle-post-n16-5-f-5-tb-caller-map-correction-complete-admin-mutation-packaging-deployment-decision-phase-next-not-begun-n-16-5-not-closed.md
 - .pcae/fast-green-attribution/7651bef59313ae35c4877c73839b235c403861057cfd3705b92584881e6f95ae.json
+- .pcae/fast-green-attribution/395c797c2b6b416d4aca198bf2f5f803d9ac941a59a7b90b7e159e65e904824e.json
 
 ## Forbidden Files
 
