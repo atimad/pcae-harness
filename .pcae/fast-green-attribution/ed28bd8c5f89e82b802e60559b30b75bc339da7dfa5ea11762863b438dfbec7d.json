@@ -368,9 +368,16 @@
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
   ],
-  "candidate_commit": "f922c8b18e0fc75bccc79bec51692660aa58536b",
+  "candidate_commit": "73f99c740726f1c7ea74f12b1ef4acfaa06de8fd",
   "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
-  "excluded_environment_failures": [],
+  "excluded_environment_failures": [
+    {
+      "node_id": "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record",
+      "rerun_at": "2026-09-13T16:59:24.934914+00:00",
+      "rerun_commit": "73f99c740726f1c7ea74f12b1ef4acfaa06de8fd",
+      "rerun_result": "pass"
+    }
+  ],
   "excluded_preexisting_failures": [
     {
       "baseline_commit": "18453885735657f549804c71c3257ec0a3760f11",
@@ -2190,7 +2197,7 @@
       "predicted_value": "not_pushed"
     }
   ],
-  "generated_at": "2026-09-13T16:04:56.549622+00:00",
+  "generated_at": "2026-09-13T16:59:25.177015+00:00",
   "method": "baseline_vs_candidate_isolated_worktree",
   "raw_errors": [
     "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -2557,7 +2564,8 @@
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
     "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-    "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
+    "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
+    "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
   ],
   "schema_version": "fast_green_attribution.v1"
 }

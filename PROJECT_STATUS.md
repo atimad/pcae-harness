@@ -2,6 +2,102 @@
 
 ## Current Phase
 
+Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL**) — Linux-First
+Canonical-Store Wiring and One-Shot Privileged Helper Launcher
+Implementation. **COMPLETE — BLOCKED.** CPIPC: valid direct `.1` successor
+of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION`) — same series `149`
+/ branch `O`, exactly one appended `.1` segment, `is_valid` True,
+`normalize(candidate) == candidate`, `same_series`/`same_branch` True,
+`compare` = less, unique against `git log --all` at entry, no conflicting
+active governed phase. Independently re-derived and validated via
+`pcae.core.phase_id` (`parse`/`is_valid`/`normalize`/`same_series`/
+`same_branch`/`compare`) by the primary operator, not trusted from the
+authorization prompt's own precomputed successor text.
+
+**STATUS: N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL COMPLETE — BLOCKED.**
+Entry state: branch `main`, HEAD == `origin/main` == `18453885`,
+`origin/main..HEAD` = 0, tree clean. Predecessor
+N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION confirmed COMPLETE via
+`PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json` (`status:
+completed`), and `.pcae/phase-reports/latest.json`, all agreeing.
+
+Implemented a narrow real-canonical-store read adapter
+(`hpac_pawa_helper_store_adapter.py`) genuinely wiring `certification_read`
+and the store-side half of `ceremony_entry` to `HumanPrincipalRegistryStore`,
+the RHAMP sidecar/counter stores, and the protected-presentation
+installation/descriptor/evidence stores (2 of 5 helper operations). The
+remaining 3 — `admin_mutation`, `certification_write`,
+`presentation_evidence_write` — are **contract-confirmed BLOCKED**: every
+real canonical-store write needs an `HPACWriterCapability` minted
+exclusively by `hpac_protected_admin_writer.py`'s sealed factory, and
+`HPAC-PAWA-HELPER-REQ-033` forbids the helper from importing that module —
+independently re-verified by the primary operator (seal, every mint call
+site, and the exact requirement text), not merely trusted from the delegated
+implementation worker's own report. The blocker is not routed around: the
+new adapter's write paths fail closed with the documented reason rather than
+crashing or silently succeeding against fake state (a real correctness gap
+the primary operator found and fixed during independent review — the
+original adapter's `presentation_evidence` was a plain dict that would have
+silently "succeeded").
+
+Also implemented the Linux-first one-shot privileged helper launcher
+(`hpac_pawa_helper_launcher.py`) and helper-process entrypoint
+(`hpac_pawa_helper_entrypoint.py`): same-file-object exec verification, a
+private one-shot `AF_UNIX` channel, `SO_PEERCRED` peer authentication,
+bounded single-request/response framing, no-auto-retry-after-mutation-attempt
+semantics — composing the pre-existing OS primitives in
+`hpac_pawa_helper_os.py`. `main()` still defaults to the foundation-only
+in-memory store: wiring it to the real adapter safely requires a
+disposable-root test seam distinct from `HPACStoreAuthority.production()`'s
+fixed, non-overridable live path — a deliberate, disclosed deferral, not an
+oversight (full rationale in the canonical doc below).
+
+28 new tests (3 skipped — genuine-separate-process / cross-process-replay /
+substitution-matrix subprocess scenarios require Linux; this session ran on
+macOS, honestly reported per §60 rather than fabricated). Broad regression
+slice (~1850 tests): identical failure set before/after (0 attributable),
+independently re-verified via `git stash` diff by the primary operator.
+Governed Fast Green attribution (full suite, `--pushed-status not_pushed`):
+0 attributable failures, 362 pre-existing, 1 correctly-predicted expected
+pre-push artifact, verdict **PASS**.
+
+**Zero contract, schema, dependency, packaging, or live-host change this
+phase.** Zero live protected-host writes; zero real ceremony. Runtime
+`Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities; first
+governed runtime external effect **ABSENT / UNREACHABLE** (unchanged).
+
+**Disposition:** Canonical-store helper wiring: **PARTIAL (2/5),
+REMAINDER CONTRACT-BLOCKED**. Linux one-shot launcher: **IMPLEMENTED**
+(genuine-subprocess Linux verification pending). Real protected helper
+process boundary: **IMPLEMENTED / PENDING FRESH INDEPENDENT VERIFICATION**.
+Typed admin client: **NOT IMPLEMENTED**. Packaging: **UNCHANGED**. Helper
+installation/registration: **NOT PERFORMED LIVE**. macOS same-file-object
+execution: **FAIL-CLOSED / NOT IMPLEMENTED** (untouched). F-5-B2 **BLOCKED
+PENDING (a) a helper writer-authority contract-evolution decision and (b) a
+fresh Linux IV**; F-5 **CERTIFICATION BLOCKED**; **N-16-5 NOT CLOSED**;
+N-16-6 / N-16-7 **OPEN / UNTOUCHED** (N-16-7 strictly last).
+
+**Recommended next (derived, NOT begun):** two candidate successors, not yet
+adjudicated between them — (1) N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV,
+a fresh independent verification of this phase's implementation on a genuine
+Linux host; or (2) a narrow helper writer-authority contract-evolution
+phase to resolve the REQ-033 blocker (a normative-contract decision, not an
+implementation task). Requires fresh explicit human authorization. Per the
+absolute stop boundary: do not begin either successor, implement the typed
+client, migrate any caller, modify packaging, implement macOS
+same-file-object support, install/register the helper, perform real
+certification, N-16-6, or N-16-7 without fresh explicit human authorization
+for each.
+
+Canonical doc: `docs/PHASE_N16_5_F_5_TB_REAL_HELPER_STORE_LAUNCHER_IMPL.md`.
+
+---
+
+## Prior Phase (superseded)
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION**) — admin_mutation
 Packaging / Deployment Topology Decision Architecture. **COMPLETE.**

@@ -1,5 +1,27 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL**) — **Linux-First
+  Canonical-Store Wiring and One-Shot Privileged Helper Launcher
+  Implementation.** COMPLETE — BLOCKED. Wired `certification_read` and
+  `ceremony_entry` (2 of 5 helper operations) to real canonical stores
+  (`HumanPrincipalRegistryStore`, RHAMP sidecar/counter stores, protected
+  presentation installation/descriptor/evidence stores) via a new narrow
+  read adapter. The remaining 3 operations (`admin_mutation`,
+  `certification_write`, `presentation_evidence_write`) are
+  contract-confirmed BLOCKED: every real canonical write needs an
+  `HPACWriterCapability` minted exclusively by
+  `hpac_protected_admin_writer.py`'s sealed factory, which
+  `HPAC-PAWA-HELPER-REQ-033` forbids the helper from importing — not
+  routed around; the blocked write paths fail closed with the documented
+  reason. Implemented the Linux-first one-shot privileged helper launcher
+  and helper-process entrypoint (same-file-object exec, private
+  `AF_UNIX` channel, `SO_PEERCRED` peer authentication, bounded
+  single-request/response framing). 28 new tests (3 skipped — genuine
+  subprocess/Linux-only scenarios; this session ran on macOS). 0
+  attributable Fast Green regressions. Zero contract/schema/dependency/
+  packaging/live-host change. See
+  `docs/PHASE_N16_5_F_5_TB_REAL_HELPER_STORE_LAUNCHER_IMPL.md`.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-CALLER-MAP-CORRECTION**) — **Caller Reachability
   and Migration-Order Architecture Correction.** COMPLETE. Corrected the
