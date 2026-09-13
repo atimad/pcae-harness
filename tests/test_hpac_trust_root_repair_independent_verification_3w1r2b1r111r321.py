@@ -1012,6 +1012,15 @@ def test_foundation_has_no_production_consumers_or_gate_wiring():
         ("hpac_certification_coordinator.py", "pcae.core.human_authentication_proof"),
         ("hpac_certification_coordinator.py", "pcae.core.approval_presentation"),
         ("hpac_certification_coordinator.py", "pcae.core.human_principal_registry"),
+        # N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL — the new narrow
+        # real-canonical-store read adapter for HPAC-PAWA-HELPER/1.0's
+        # `certification_read`/`ceremony_entry` (read-only resolution only;
+        # deliberately not the admin-writer fence — see the mirrored guard
+        # in test_hpac_foundation_independent_verification_3w1r2b1r111r31.py
+        # for the full rationale). Exact filename, no wildcard.
+        ("hpac_pawa_helper_store_adapter.py", "pcae.core.hpac_foundation"),
+        ("hpac_pawa_helper_store_adapter.py", "pcae.core.human_principal_registry"),
+        ("hpac_pawa_helper_store_adapter.py", "pcae.core.approval_presentation"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

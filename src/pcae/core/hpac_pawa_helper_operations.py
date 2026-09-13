@@ -163,6 +163,15 @@ def handle_ceremony_entry(request: HelperRequest, context: HelperContext, machin
     if not ceremony_request_bytes:
         raise HelperProtocolError("operation_scope_invalid", "missing ceremony_request_digest")
 
+    # §19/§66 — when wired to the real canonical store adapter, fail closed
+    # unless the request is bound to the live, non-revoked current
+    # protected-presentation generation (foundation/in-memory store has no
+    # such notion and is unaffected: `verify_current_generation` is only
+    # present on `RealCanonicalReadAdapter`).
+    verify = getattr(context.store, "verify_current_generation", None)
+    if verify is not None:
+        verify(installation_id=request.installation_id, generation=request.generation)
+
     context.store.ceremonies_started[request.session_id] = ceremony_request_bytes
     machine.advance_to(HelperState.RESULT_EMITTED)
     # ceremony_entry is non-mutating but still one-shot (§16): unlike

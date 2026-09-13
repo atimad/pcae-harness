@@ -888,6 +888,21 @@ def test_new_hpac_modules_have_zero_preexisting_production_consumers():
         # same read-only stores `hpac_certification_coordinator.py` already
         # consumes above. Exact filename, no wildcard.
         ("hpac_protected_admin_writer.py", "pcae.core.approval_presentation"),
+        # N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL: the new narrow
+        # real-canonical-store read adapter for the HPAC-PAWA-HELPER/1.0
+        # `certification_read` / `ceremony_entry` operations consumes the
+        # Layer-1/2 foundation (`HPACStoreAuthority`, read-only resolution)
+        # and the human-principal registry's read-only
+        # `resolve_principal`/`resolve_credential`. It deliberately does NOT
+        # import `hpac_protected_admin_writer` (HPAC-PAWA-HELPER-REQ-033) —
+        # every real *write* path this adapter would need for the remaining
+        # three helper operations requires a writer capability only that
+        # forbidden module can mint, which is exactly this phase's reported
+        # blocker, not something this module routes around. Exact filename,
+        # no wildcard.
+        ("hpac_pawa_helper_store_adapter.py", "pcae.core.hpac_foundation"),
+        ("hpac_pawa_helper_store_adapter.py", "pcae.core.human_principal_registry"),
+        ("hpac_pawa_helper_store_adapter.py", "pcae.core.approval_presentation"),
     }
     unauthorized = set(consumers) - AUTHORIZED_CONSUMERS
     assert unauthorized == set(), (

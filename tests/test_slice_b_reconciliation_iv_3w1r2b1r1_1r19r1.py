@@ -155,6 +155,17 @@ _N16_5_H3_IMPL_TUPLES = {
     ("hpac_certification_coordinator.py", "pcae.core.approval_presentation"),
     ("hpac_certification_coordinator.py", "pcae.core.human_principal_registry"),
 }
+# N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL — the new narrow
+# real-canonical-store read adapter for HPAC-PAWA-HELPER/1.0's
+# `certification_read`/`ceremony_entry` (read-only resolution only; it
+# deliberately does not import the admin-writer fence — see the guard's own
+# comment in test_hpac_foundation_independent_verification_3w1r2b1r111r31.py
+# for the full rationale). Exact filename, no wildcard.
+_N16_5_F_5_TB_REAL_HELPER_STORE_LAUNCHER_IMPL_TUPLES = {
+    ("hpac_pawa_helper_store_adapter.py", "pcae.core.hpac_foundation"),
+    ("hpac_pawa_helper_store_adapter.py", "pcae.core.human_principal_registry"),
+    ("hpac_pawa_helper_store_adapter.py", "pcae.core.approval_presentation"),
+}
 BASE_TUPLES = {
     ("runtime_dispatch_gate5.py", "pcae.core.hpac_lifecycle"),
     ("runtime_dispatch_gate9.py", "pcae.core.hpac_foundation"),
@@ -277,13 +288,14 @@ def test_guard_authorized_set_grew_by_exactly_the_two_slice_b_tuples(path, node)
     old_set = _authorized_set(old_seg)
     assert new_set - old_set == (
         set(SLICE_B_TUPLES) | _R30R31_TUPLES | _R30R34_TUPLES | _R30R4R1_TUPLES
-        | _N16_5_H3_IMPL_TUPLES
+        | _N16_5_H3_IMPL_TUPLES | _N16_5_F_5_TB_REAL_HELPER_STORE_LAUNCHER_IMPL_TUPLES
     ), (path, new_set - old_set)
     assert old_set - new_set == set(), "nothing was dropped from the authorized set"
     assert old_set == BASE_TUPLES
     assert new_set == (
         BASE_TUPLES | set(SLICE_B_TUPLES) | _R30R31_TUPLES
-        | _R30R34_TUPLES | _R30R4R1_TUPLES | _N16_5_H3_IMPL_TUPLES
+        | _R30R34_TUPLES | _N16_5_H3_IMPL_TUPLES | _R30R4R1_TUPLES
+        | _N16_5_F_5_TB_REAL_HELPER_STORE_LAUNCHER_IMPL_TUPLES
     )
     # subset-invariant orientation unchanged
     assert "- AUTHORIZED_CONSUMERS" in new_seg
