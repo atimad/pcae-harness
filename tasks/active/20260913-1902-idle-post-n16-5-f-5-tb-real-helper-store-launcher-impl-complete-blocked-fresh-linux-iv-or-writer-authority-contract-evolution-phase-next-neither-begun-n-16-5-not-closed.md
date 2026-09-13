@@ -26,6 +26,7 @@ Idle placeholder awaiting fresh explicit human authorization for either a fresh 
 - .pcae/phase-completion-report.md
 - PROJECT_STATUS.md
 - tasks/active/**
+- tasks/done/20260913-1725-n16-5-f-5-tb-real-helper-store-launcher-impl-canonical-store-wiring-linux-one-shot-launcher-2-of-5-ops-wired-3-blocked-by-req-033-writer-seal-exclusivity.md
 
 ## Forbidden Files
 
