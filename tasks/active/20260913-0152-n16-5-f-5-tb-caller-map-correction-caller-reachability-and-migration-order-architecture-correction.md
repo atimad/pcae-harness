@@ -31,6 +31,7 @@ Correct the caller-integration architecture using real call-graph reachability; 
 - tasks/done/20260913-0152-n16-5-f-5-tb-caller-map-correction-caller-reachability-and-migration-order-architecture-correction.md
 - tasks/done/20260912-2029-idle-post-n16-5-f-5-tb-cert-read-client-impl-blocked-architecture-correction-slice-next-not-begun-n-16-5-not-closed.md
 - tasks/active/20260912-2029-idle-post-n16-5-f-5-tb-cert-read-client-impl-blocked-architecture-correction-slice-next-not-begun-n-16-5-not-closed.md
+- .pcae/fast-green-attribution/386dce480239e8b476e42fd08689d12dab048e6fa6ca4a926665b080b18d419e.json
 
 ## Forbidden Files
 
