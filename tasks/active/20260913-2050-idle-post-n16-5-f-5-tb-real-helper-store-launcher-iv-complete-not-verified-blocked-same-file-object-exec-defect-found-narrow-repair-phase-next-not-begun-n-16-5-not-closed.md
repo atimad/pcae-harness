@@ -24,6 +24,10 @@ Idle placeholder pending fresh explicit human authorization for the narrow repai
 
 - tasks/active/*.md
 - tasks/done/*.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/*.json
+- .pcae/phase-reports/*
 
 ## Forbidden Files
 
