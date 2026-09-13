@@ -10,7 +10,7 @@ N16-5-F-5-TB-CALLER-MAP-CORRECTION: caller reachability and migration-order arch
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -32,6 +32,8 @@ Correct the caller-integration architecture using real call-graph reachability; 
 - tasks/done/20260912-2029-idle-post-n16-5-f-5-tb-cert-read-client-impl-blocked-architecture-correction-slice-next-not-begun-n-16-5-not-closed.md
 - tasks/active/20260912-2029-idle-post-n16-5-f-5-tb-cert-read-client-impl-blocked-architecture-correction-slice-next-not-begun-n-16-5-not-closed.md
 - .pcae/fast-green-attribution/386dce480239e8b476e42fd08689d12dab048e6fa6ca4a926665b080b18d419e.json
+- .pcae/fast-green-attribution/6fbef5e32447c6d436f82a57a51a34236262ed4f3715a62a0f4d4addc2afe2d0.json
+- .pcae/fast-green-attribution/a179ea8be6c7a29262efb7061b9616f4ef847cb949f1095d5fc4ce3a481b6131.json
 
 ## Forbidden Files
 

@@ -1,75 +1,139 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — Typed certification_read Client Implementation + hpac_verifier Read-Path Migration
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — Caller Reachability and Migration-Order Architecture Correction
 
-- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-- Alias: **N16-5-F-5-TB-CERT-READ-CLIENT-IMPL** (operator readability only; the full canonical CPIPC id is authoritative)
-- Status: **BLOCKED** (at Section 0 governance validation, before any production change)
-- Predecessor: **N16-5-F-5-TB-CALLER-INTEGRATION-ARCH** (COMPLETE), entry HEAD == `origin/main` == `73655087`
-- CPIPC: valid direct `.1` successor of the predecessor — independently re-derived via `pcae.core.phase_id` (`is_valid` True; same series `149`; same branch `O`; exactly one appended `.1` segment, 62 vs 61; `compare` = less; exact canonical text; unique against `git log --all`; no conflicting active governed phase); alias display-only, no discrepancy
+- Phase: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+- Alias: **N16-5-F-5-TB-CALLER-MAP-CORRECTION** (operator readability only; the full canonical CPIPC id is authoritative)
+- Status: **COMPLETE**
+- Predecessor: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias `N16-5-F-5-TB-CERT-READ-CLIENT-IMPL`), COMPLETE — BLOCKED, final pushed commit `4557cb86`.
+- Commits (this phase): `341add0b`, `ac68837d`
+- Pushed: yes — `origin/main..HEAD` = 0 at finalization
+- Origin/main HEAD: `ac68837d430892bb55d60b59f9ca0c58901df17e`
 
 ## Summary
 
-**BLOCKED, not implemented.** The authorization's core factual premise —
-that `hpac_verifier.py` is an existing live consumer of the legacy
-`certification_read` authority path and must be migrated onto a new typed
-client — is **false on direct repository evidence**. Independently verified
-by the primary operator: `src/pcae/core/hpac_verifier.py` (908 lines, read
-in full) imports nothing from the HPAC/PAWA privileged-helper subsystem,
-contains zero references to `certification_read`/`CertificationReadAuthority`,
-and its own docstring states it "still has zero production consumers, so no
-such call site exists yet." The legacy factory named in the authorization
-(`recognized_certification_read_authority`, `hpac_protected_admin_writer.py:2546`)
-has exactly one production import/call site — `hpac_certification_coordinator.py:62,218`
-— not `hpac_verifier.py`, matching the predecessor phase's own "certification
-coordinator" example. The predecessor's own embedded evidence additionally
-already documents that `hpac_certification_coordinator.py` itself has zero
-live production callers today. Per the authorization's own Section 0/51
-instruction to stop rather than improvise on a disproven premise, this phase
-performed **zero production/contract/schema/test changes** and finalized
-this truthful BLOCKED disposition instead. Full detail:
-`docs/PHASE_N16_5_F_5_TB_CERT_READ_CLIENT_IMPL_BLOCKED.md`.
+Using real call-graph reachability rather than factory-import
+relationships, this phase independently re-derived and corrected the
+HPAC/PAWA caller-integration architecture. Key findings, all
+independently re-verified by the primary operator from direct source
+(see `docs/PHASE_N16_5_F_5_TB_CALLER_MAP_CORRECTION.md` for full detail
+and evidence tables):
 
-**Zero production source, contract, schema, dependency, or test changes
-this phase.** Zero live protected-host writes; zero real ceremony. Runtime
-`Observed` / `observe` / `unavailable`; 0 plugins / 0 capabilities; first
-governed runtime external effect **ABSENT / UNREACHABLE** (unchanged).
+1. `hpac_verifier.py` has **no relationship at all** to
+   `certification_read`/the HPAC-PAWA subsystem — re-confirmed via a
+   fresh, full 908-line source read, not merely re-litigating the
+   predecessor's BLOCKED finding.
+2. `hpac_certification_coordinator.py` is the sole production
+   import/call site of both `certification_writer` and
+   `recognized_certification_read_authority`, but has **zero live
+   callers anywhere in the repository, including its own designated
+   `scripts/hpac_certification_admin.py` launcher** (which only names it
+   in a docstring and never imports it) — a stronger dead-code finding
+   than either the coordinator's own docstring or this phase's own
+   delegated research worker's initial report independently stated.
+3. **New fact beyond the authorization's own framing**:
+   `presentation_evidence_write` is also gated behind that same uncalled
+   coordinator (traced through `enter_ceremony`'s full method body),
+   correcting the predecessor architecture phase's "Migration priority
+   HIGH" classification of that call site to `FUTURE_IF_ACTIVATED`.
+4. `admin_mutation` is the **only** helper operation with any non-test
+   live caller today, reachable solely via two unpackaged
+   `scripts/hpac_*.py` admin launchers a human operator runs manually —
+   not via any CLI command, runtime coordinator, or automated process.
+5. Zero CLI/commands-layer reachability into HPAC/PAWA/RHAMP/Gate5
+   exists (every matching grep hit is the unrelated
+   `notification_certification` mechanism); zero dynamic-dispatch/plugin
+   path to any HPAC module.
 
-**Fast Green attribution:** PASS against the final pushed commit
-(baseline `736550878b`, candidate `4557cb86`) — `attributable_failures: []`.
-An initial pre-push run against the not-yet-pushed commit attributed a
-single currentness-check node (`test_head_equals_origin_main`), expected
-noise from running attribution before push; a `--rerun-node` attempt on the
-same unpushed commit additionally surfaced one unrelated transient flake
-(`test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record`).
-Neither reappeared once attribution was re-run against the actually-pushed
-final commit, per this repository's established precedent.
+Derived a corrected migration order (admin_mutation
+packaging/deployment-decision first, not the predecessor's
+`certification_read`-first order, which had no valid live target) and
+recommends exactly one next governed phase.
 
-**Disposition:** Typed `certification_read` client implementation: **NOT
-BEGUN (BLOCKED — false premise)**. `hpac_verifier.py` migration: **NOT
-BEGUN — no such legacy read path exists in this module**. Helper foundation
-**REMAINS INDEPENDENTLY VERIFIED**. Caller/client integration architecture
-**REMAINS DEFINED** (predecessor outcome preserved exactly, not rewritten).
-macOS same-file-object execution: **FAIL-CLOSED / NOT IMPLEMENTED**
-(untouched). F-5-B2 **BLOCKED PENDING REMAINING PLATFORM / CALLER MIGRATION
-/ PACKAGING SLICES**; F-5 **CERTIFICATION BLOCKED**; **N-16-5 NOT CLOSED**;
-N-16-6 / N-16-7 **OPEN / UNTOUCHED** (N-16-7 strictly last).
+## Governance
 
-**Recommended next (derived, NOT begun):** a narrow **architecture
-correction slice** re-scoping the caller-mapping question specifically to
-`hpac_certification_coordinator.py` (the actual, sole consumer of the
-legacy `certification_read` factory, despite having zero live production
-callers of its own) versus identifying a different, actually-live caller as
-the true first implementation slice. Requires fresh explicit human
-authorization. Per the absolute stop boundary: do not begin any caller
-migration, macOS same-file-object implementation, packaging/install, real
-certification, N-16-6, or N-16-7 without fresh explicit human authorization
-for each.
+- CPIPC: valid direct `.1` successor of the confirmed COMPLETE — BLOCKED
+  predecessor, independently re-derived via `pcae.core.phase_id`
+  (`parse`/`is_valid`/`same_series`/`same_branch`/`compare`), unique
+  against `git log --all -F --grep` at entry.
+- Entry state: branch `main`, HEAD == `origin/main` == `293eb057`,
+  `origin/main..HEAD` = 0, tree clean, no conflicting active governed
+  phase.
+- Contract trio (HPAC-PAWA-001 v2.0 / HPAC-PAWA-HELPER-001 v1.0 /
+  HPAC-PPA-001 v2.0): byte-unchanged this phase.
+- `pcae health`: healthy. `pcae check`: passed. `pcae push`: clean,
+  pushed.
 
-Canonical doc: `docs/PHASE_N16_5_F_5_TB_CERT_READ_CLIENT_IMPL_BLOCKED.md`.
+## Test evidence
 
-## Delegation
+`pcae phase fast-green-attribution` run three times against this
+phase's identity:
 
-No delegated worker was used for this phase. All Section 0 verification
-(repository state, predecessor confirmation, source inspection of
-`hpac_verifier.py`, `hpac_certification_coordinator.py`,
-`hpac_protected_admin_writer.py`) was performed directly by the primary
-operator.
+1. Pre-push, against commit `341add0b`: PASS, `attributable_failures: []`.
+2. Post-push, against the final pushed commit `ac68837d`: initial FAIL
+   with one attributable failure,
+   `tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record`.
+3. `--rerun-node` isolated reclassification of that single node against
+   the same pushed commit: PASS — confirmed as a transient environment
+   failure (the same known flake recorded in the predecessor phase's own
+   fast_green history), not a real regression from this phase's
+   doc-only changes.
+
+Final structured evidence (embedded in
+`.pcae/phase-completion-metadata.json`'s `test_results.fast_green`):
+baseline commit `293eb0578cc5f46e9235127b80fd5b026459438f` (predecessor's
+final pushed HEAD), candidate commit
+`ac68837d430892bb55d60b59f9ca0c58901df17e`, `attributable_failures: []`,
+Tool status: **PASS**.
+
+## No-go confirmation
+
+No production caller code was changed.
+No helper code was changed.
+No replay code was changed.
+No contract was evolved.
+No schema was evolved.
+No dependency was changed.
+No macOS same-file-object implementation was performed.
+No packaging or install change was made.
+No live protected-host mutation occurred.
+No real certification ceremony, session, challenge, or FIDO2/YubiKey interaction was performed.
+No caller migration was begun.
+No typed helper client module was created.
+
+## Files changed
+
+- `docs/PHASE_N16_5_F_5_TB_CALLER_MAP_CORRECTION.md` (new)
+- `PROJECT_STATUS.md`
+- `CHANGELOG.md`
+- `.pcae/phase-completion-metadata.json`
+- `.pcae/phase-completion-report.md` (this file)
+- `.pcae/fast-green-attribution/*.json` (new evidence file)
+- `tasks/active/*.md` / `tasks/done/*.md` (task lifecycle)
+
+**Production source changes: NONE.** **Contracts changed: NONE.**
+**Schemas changed: NONE.** **Dependencies changed: NONE.** **Live
+protected-host writes: 0.** **Real ceremony: NOT PERFORMED.**
+
+## Status wall
+
+- F-5-B2: BLOCKED PENDING THE CORRECTED NEXT DEPENDENCY.
+- F-5: CERTIFICATION BLOCKED.
+- N-16-5: NOT CLOSED.
+- N-16-6: OPEN / UNTOUCHED.
+- N-16-7: OPEN / UNTOUCHED — strictly last.
+- Runtime: Observed / observe / unavailable. Plugins: 0. Capabilities: 0.
+  First governed runtime external effect: ABSENT / UNREACHABLE.
+
+## Recommended next phase (NOT begun)
+
+A narrow packaging/deployment-decision architecture phase for
+`admin_mutation` — resolving whether its two script-invoked
+`production_writer` callers (or the future typed client replacing them)
+are meant to run only from a source checkout (status quo) or from an
+installed wheel (requiring a new packaged launcher entry point).
+Requires fresh explicit human authorization. Per the absolute stop
+boundary: do not implement the typed client, migrate any caller, modify
+packaging, implement macOS same-file-object support, install/register
+the helper, perform real certification, N-16-6, or N-16-7 without fresh
+explicit human authorization for each.
+
+Full canonical detail: `docs/PHASE_N16_5_F_5_TB_CALLER_MAP_CORRECTION.md`.
