@@ -2,6 +2,104 @@
 
 ## Current Phase
 
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV**) — Fresh Independent
+Linux Verification of Canonical-Store Wiring and One-Shot Privileged Helper
+Boundary. **COMPLETE — NOT VERIFIED / BLOCKED.** CPIPC: valid direct `.1`
+successor of `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias `N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL`)
+— same series `149` / branch `O`, exactly one appended `.1` segment,
+`is_valid` True, `normalize(candidate) == candidate`, `same_series`/
+`same_branch` True, `compare` = less, unique against `git log --all` at entry,
+no conflicting active governed phase. Independently re-derived and validated
+via `pcae.core.phase_id` by the primary operator before dispatch, not trusted
+from the authorization prompt's own precomputed successor text.
+
+**STATUS: N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV COMPLETE — NOT VERIFIED /
+BLOCKED.** Entry state: branch `main`, HEAD == `origin/main` ==
+`942f2f04`, `origin/main..HEAD` = 0, tree clean. Predecessor
+N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL confirmed COMPLETE — BLOCKED via
+`PROJECT_STATUS.md`, `.pcae/phase-completion-metadata.json` (`status:
+completed`), and `.pcae/phase-reports/latest.json`, all agreeing.
+
+**Genuine-Linux verification was performed** (via SSH to the real Ubuntu
+24.04 host `hac-dell`, confined to disposable directories, no live/protected
+PCAE state touched) and found a **load-bearing same-file-object execution
+defect**: `hpac_pawa_helper_os.py::verify_helper_executable()` opens the
+helper candidate with a bare `os.open()`, which CPython (PEP 446) makes
+non-inheritable (`O_CLOEXEC`) by default; `execute_verified()` then
+`execve()`s `/proc/self/fd/<fd>` without first calling
+`os.set_inheritable(fd, True)`. For the only realistic deployment shape of
+this helper — a Python script that must run
+`pcae.core.hpac_pawa_helper_entrypoint.main()`, invoked via shebang/binfmt —
+the kernel's script-interpreter re-open of its own `argv[1]` path happens
+*after* the O_CLOEXEC descriptor has already been closed by the (successful)
+outer exec, so the interpreter's re-open of `/proc/self/fd/<fd>` fails
+`ENOENT` and the helper never runs. A directly-loaded ELF binary is
+unaffected (no secondary re-open needed) — this bounds the defect precisely
+to the shebang/interpreter double-open interaction, which is exactly the
+shape this specific helper requires.
+
+This was independently reproduced twice: once by a bounded delegated worker
+(no finalization authority) using 12 new, independent tests in
+`tests/test_n16_5_f_5_tb_real_helper_store_launcher_iv.py` calling the real,
+unmodified production functions on real Linux (12 passed, including the
+primary defect-demonstrating test and an observational confirmation that
+`os.set_inheritable(fd, True)` is the minimal fix direction, not applied to
+production code); and again, separately, by the primary operator with a
+from-scratch minimal repro script run directly over SSH on `hac-dell`
+(reproducing the exact `ENOENT` failure and the `set_inheritable` fix
+working), and by independently re-running the delegated worker's 12-test file
+against a fresh `pip install -e .` of the actual package on `hac-dell`
+(12 passed, 0 skipped, 0 failed).
+
+A secondary, independent finding: `hpac_pawa_helper_entrypoint.main()`
+hardcodes the NON_REAL `ProtectedStoreFoundation`, never
+`RealCanonicalReadAdapter` — so even a repaired launcher could not today
+demonstrate a genuinely real-store-backed subprocess run without a further
+narrow wiring change; this matches a limitation the predecessor itself
+disclosed.
+
+Per phase-authorization §64/§76 this is a mandatory STOP condition. Items
+independent of successful helper launch (peer-credential semantics, framing,
+single-request property, no-authority-export, no-generic-broker, the
+write-capability-blocker reconstruction, REQ-033 disposition, and the
+symlink/FIFO/directory/socket/hardlink/digest/mode provenance-predicate
+adversarial checks) were genuinely verified on real Linux and pass; items
+that depend on a successfully-launched helper process (cross-process replay,
+SO_PEERCRED, fd inheritance, environment/PYTHONPATH/cwd/sitecustomize
+attacks, genuine `certification_read`/`ceremony_entry` real-store subprocess
+tests) could not be genuinely exercised end-to-end and are honestly reported
+as NOT VERIFIED rather than fabricated.
+
+**Regression suites re-run clean**: predecessor's own 28 tests (28 passed, 3
+honestly skipped on macOS, matching predecessor's own tally exactly),
+`test_hpac_pawa_helper_protocol_foundation.py` +
+`test_n16_5_f_5_tb_replay_repair.py` (127 passed, 1 skipped). Zero production
+source, contract, schema, dependency, or packaging changes (`git diff` empty
+against predecessor HEAD `942f2f04` except the one new IV test file). Zero
+live-host mutation — all Linux work on `hac-dell` confined to disposable
+`/tmp` directories and a fresh `pip install -e .` checkout, no existing PCAE
+checkout or protected root read/touched.
+
+Full details: `docs/PHASE_N16_5_F_5_TB_REAL_HELPER_STORE_LAUNCHER_IV.md`.
+
+Runtime unchanged: Observed / observe / unavailable, 0 plugins, 0
+capabilities, first governed external effect ABSENT/UNREACHABLE. macOS
+helper execution unchanged: FAIL-CLOSED / NOT IMPLEMENTED. No real FIDO2, no
+real protected presentation, no real certification. N-16-5 remains NOT
+CLOSED (unchanged — was already not-closed, and this phase does not close
+it). N-16-6/N-16-7 remain OPEN/UNTOUCHED.
+
+**Recommended next: a narrow repair phase fixing exactly (1) the
+`O_CLOEXEC`/`os.set_inheritable` same-file-object-exec defect (needs its own
+security-reviewed fix and fresh IV, not the one-liner demonstrated only
+observationally here) and (2) the `main()` real-store wiring gap** — NOT
+begun. Per phase-authorization §68, do NOT proceed to writer-authority
+contract-evolution until the process boundary itself independently verifies;
+that candidate remains explicitly deferred, not adjudicated as next.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL) Complete
+
 Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL**) — Linux-First
 Canonical-Store Wiring and One-Shot Privileged Helper Launcher

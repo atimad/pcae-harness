@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV**) — **Fresh
+  Independent Linux Verification of Canonical-Store Wiring and One-Shot
+  Privileged Helper Boundary.** COMPLETE — NOT VERIFIED / BLOCKED. Genuine
+  Linux verification (via SSH to `hac-dell`, disposable directories only, 0
+  live-host mutation) found a load-bearing same-file-object execution
+  defect: `hpac_pawa_helper_os.py::execute_verified` `execve`s
+  `/proc/self/fd/<fd>` without first calling `os.set_inheritable(fd, True)`,
+  so the O_CLOEXEC descriptor (CPython default) is already closed by the
+  time the script-shaped helper's own interpreter re-opens its `argv[1]`
+  path — the only realistic deployment shape fails to launch at all
+  (`ENOENT`). Independently reproduced twice (a bounded delegated worker's
+  12 new tests, and the primary operator's own from-scratch repro plus an
+  independent re-run of those 12 tests against a fresh `pip install -e .`
+  on real Linux) — 12/12 pass, all honestly demonstrating or bounding the
+  defect, not fabricating a pass. Items independent of a successful launch
+  (write-capability-blocker reconstruction, REQ-033 disposition,
+  provenance-predicate adversarial checks, no-authority-export,
+  no-generic-broker) were independently verified and pass; items requiring
+  a live launched helper (replay across processes, SO_PEERCRED, fd/env
+  isolation attacks, genuine `certification_read`/`ceremony_entry`
+  subprocess tests) are honestly reported NOT VERIFIED rather than
+  fabricated. Zero production source, contract, schema, dependency, or
+  packaging changes (one new IV test file only,
+  `tests/test_n16_5_f_5_tb_real_helper_store_launcher_iv.py`). Regression
+  suites clean (28+3-skipped predecessor tests, 127+1-skipped foundation/
+  replay tests, identical to predecessor tallies). Recommends a narrow
+  repair phase for exactly this defect (plus `main()`'s real-store wiring
+  gap) before any writer-authority contract-evolution phase — not begun.
+  N-16-5 remains NOT CLOSED; N-16-6/N-16-7 remain OPEN/UNTOUCHED. See
+  `docs/PHASE_N16_5_F_5_TB_REAL_HELPER_STORE_LAUNCHER_IV.md`.
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL**) — **Linux-First
   Canonical-Store Wiring and One-Shot Privileged Helper Launcher
