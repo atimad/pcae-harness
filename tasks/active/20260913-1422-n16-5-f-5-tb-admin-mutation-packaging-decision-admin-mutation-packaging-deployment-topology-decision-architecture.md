@@ -28,6 +28,7 @@ Decide the supported operational topology (source-checkout-only, installed-packa
 - docs/architecture/ADMIN_MUTATION_PACKAGING_DEPLOYMENT_DECISION.md
 - tasks/active/20260913-1422-n16-5-f-5-tb-admin-mutation-packaging-decision-admin-mutation-packaging-deployment-topology-decision-architecture.md
 - tasks/done/20260913-0301-idle-post-n16-5-f-5-tb-caller-map-correction-complete-admin-mutation-packaging-deployment-decision-phase-next-not-begun-n-16-5-not-closed.md
+- .pcae/fast-green-attribution/7651bef59313ae35c4877c73839b235c403861057cfd3705b92584881e6f95ae.json
 
 ## Forbidden Files
 
