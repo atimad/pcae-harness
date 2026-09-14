@@ -22,6 +22,7 @@ Idle placeholder task. No active governed work. Awaiting fresh human authorizati
 
 ## Allowed Files
 
+- tasks/done/*
 - PROJECT_STATUS.md
 
 ## Forbidden Files
