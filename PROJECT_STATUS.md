@@ -2,8 +2,48 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-(alias **N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR**) — Real Helper Boundary
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE**) — CPIPC Canonical Lineage
+Reconciliation for the Helper/Replay/Boundary Branch. **COMPLETE.**
+Governance/evidence-only reconciliation phase (no production, contract, or
+schema change). CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR`) — independently derived
+and validated via `pcae.core.phase_id` by the primary operator (`is_valid`
+True, `same_series`/`same_branch` True, `compare` = less, unique against
+`git log --all` at entry) before task creation.
+
+**Disposition: A — NO LINEAGE DEFECT.** The claimed `...30R.5R.2B.1R...` vs
+`...30R.5R.2.1R...` discrepancy does not exist in canonical repository
+evidence: these are two different segments (position 5 `2B` and position 11
+`2`) of the same single unchanging ID string, not competing forms of one
+segment. `git log --all -p | grep -c '30R\.5R\.2B\.1R'` = 0 across the
+entire history. Every canonical artifact (task, metadata, PROJECT_STATUS,
+report, commit message) at every transition from N16-5-F-5-TB-REPLAY-REPAIR
+through N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR agrees unanimously on the
+real form. Historical canonical phase IDs: UNCHANGED. Git history:
+UNCHANGED. Separately disclosed (deferred, non-blocking): the transition
+validator and phase-creation path check only intra-phase self-consistency,
+never predecessor-link/direct-child/ancestor-chain validity — a real scope
+gap, orthogonal to this (nonexistent) discrepancy, recommended as a future
+FOLLOW-UP GOVERNANCE HARDENING phase. Full evidence:
+`docs/CPIPC_HELPER_BRANCH_LINEAGE_RECONCILIATION.md`.
+
+Production source, contracts, schemas, dependencies: NONE changed. Finding
+C (in-place same-inode content mutation, undefended) remains OPEN, deferred
+to the fresh helper-boundary repair IV. Predecessor test-file template
+change deferred to that IV. Runtime unchanged: Observed / observe /
+unavailable. **N-16-5 remains NOT CLOSED.** N-16-6/N-16-7 untouched.
+Preserved exactly: DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
+
+**Recommended next: N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV** (fresh
+independent Linux verification of the boundary repair, plus Finding C and
+test-template adjudication) — NOT begun, requires fresh explicit human
+authorization per phase-authorization §68.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR) Complete
+
+Real Helper Boundary
 Repair: Same-File-Object Exec Inheritance + Canonical-Store Entrypoint
 Wiring. **COMPLETE.** CPIPC: valid direct `.1` successor of
 `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias

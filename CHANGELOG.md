@@ -1,5 +1,24 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE**) — **CPIPC Canonical
+  Lineage Reconciliation for the Helper/Replay/Boundary Branch.** COMPLETE.
+  Governance/evidence-only. Resolved a claimed `...30R.5R.2B.1R...` vs
+  `...30R.5R.2.1R...` lineage discrepancy: **Disposition A — NO LINEAGE
+  DEFECT.** The two forms are different segments (position 5 `2B`, position
+  11 `2`) of the same unchanging ID, not competing forms of one segment; the
+  disputed "with B at position 11" form has never appeared in any repository
+  artifact at any commit (`git log --all -p | grep -c` = 0). Every canonical
+  artifact across N16-5-F-5-TB-REPLAY-REPAIR through
+  N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR agrees unanimously. Historical
+  phase IDs and git history: UNCHANGED. Separately disclosed, deferred
+  finding: the transition validator and phase-creation path check only
+  intra-phase self-consistency, never ancestry — recommended as a future
+  FOLLOW-UP GOVERNANCE HARDENING phase. Zero production/contract/schema
+  change. Full evidence: `docs/CPIPC_HELPER_BRANCH_LINEAGE_RECONCILIATION.md`.
+  N-16-5 remains NOT CLOSED. Recommended next:
+  N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV, NOT begun.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR**) — **Real Helper
   Boundary Repair: Same-File-Object Exec Inheritance + Canonical-Store

@@ -10,7 +10,7 @@ Idle post-N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR (COMPLETE); both predecessor 
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -28,6 +28,7 @@ Idle placeholder task. No active governed work. Awaiting fresh human authorizati
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/fast-green-attribution/*
+- .pcae/architecture-history.json
 
 ## Forbidden Files
 
