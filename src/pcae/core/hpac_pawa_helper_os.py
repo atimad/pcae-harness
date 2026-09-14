@@ -145,11 +145,40 @@ def execute_verified(verified: VerifiedExecutable, argv, env) -> int:
     Any other platform (including macOS, the development host): this
     module has no substitution-free exec primitive available through the
     standard library, so it fails closed rather than weaken the check
-    (HPAC-PAWA-HELPER-REQ-029/104 — a valid STOP-BLOCKED condition)."""
+    (HPAC-PAWA-HELPER-REQ-029/104 — a valid STOP-BLOCKED condition).
+
+    Descriptor inheritance (N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR,
+    Repair A): ``verify_helper_executable`` obtains its descriptor via a
+    bare :func:`os.open`, which CPython makes **non-inheritable**
+    (``O_CLOEXEC``) by default (PEP 446). The kernel closes such a
+    descriptor as part of the ``execve`` syscall itself. For a directly
+    loaded ELF image that is harmless (the kernel has already mapped the
+    image from the descriptor before the close takes effect), but for the
+    only realistic shape this helper can take — a shebang script, since it
+    must run ``hpac_pawa_helper_entrypoint.main()`` — the kernel's
+    ``binfmt_script`` handler re-execs the *interpreter* with the original
+    exec pathname (``/proc/self/fd/<fd>``) as its ``argv[1]``, and the
+    interpreter then re-opens that pathname itself, **after** the exec
+    already closed the descriptor. The re-open therefore fails with
+    ``ENOENT`` and a correctly verified, legitimately installed helper can
+    never be launched.
+
+    The repair is the minimum that closes this: mark **only** the exact
+    already-verified descriptor inheritable, **only** in the child, and
+    **only** immediately before ``execve`` — after every §6 provenance
+    predicate has already been evaluated in the parent. No other descriptor
+    is made inheritable; no pathname is re-resolved (the exec target is
+    still the verified file *description*, so the anti-TOCTOU property of
+    §29 is unchanged); and no cleanup is required on failure, because the
+    child's ``finally: os._exit(127)`` terminates the whole process image,
+    which closes every descriptor it holds. The parent's own copy of the
+    descriptor keeps its default non-inheritable disposition and is closed
+    below exactly as before."""
     if sys.platform.startswith("linux"):
         pid = os.fork()
         if pid == 0:  # pragma: no cover - child branch, exercised via subprocess-level test
             try:
+                os.set_inheritable(verified.fd, True)
                 os.execve(f"/proc/self/fd/{verified.fd}", argv, env)
             finally:
                 os._exit(127)

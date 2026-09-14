@@ -2,10 +2,122 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-(alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV**) — Fresh Independent
-Linux Verification of Canonical-Store Wiring and One-Shot Privileged Helper
-Boundary. **COMPLETE — NOT VERIFIED / BLOCKED.** CPIPC: valid direct `.1`
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR**) — Real Helper Boundary
+Repair: Same-File-Object Exec Inheritance + Canonical-Store Entrypoint
+Wiring. **COMPLETE.** CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias
+`N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV`) — same series `149` / branch
+`O`, exactly one appended `.1` segment, `is_valid` True,
+`normalize(candidate) == candidate`, `same_series`/`same_branch` True,
+`compare` = less, unique against `git log --all` at entry, no conflicting
+active governed phase. Independently re-derived and validated via
+`pcae.core.phase_id` by the primary operator before task creation, not
+trusted from the authorization prompt's own precomputed successor text.
+
+**STATUS: N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR COMPLETE.** Entry state:
+branch `main`, HEAD == `origin/main` == `5b1596b0`, `origin/main..HEAD` = 0,
+tree clean. Predecessor N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV confirmed
+COMPLETE — NOT VERIFIED / BLOCKED via `PROJECT_STATUS.md`,
+`.pcae/phase-completion-metadata.json` (`status: completed`), and
+`.pcae/phase-reports/latest.json`, all agreeing.
+
+Repaired **exactly** the two defects the predecessor found, both
+independently reconstructed from current source before any mutation:
+
+**Repair A** (`src/pcae/core/hpac_pawa_helper_os.py::execute_verified`) —
+added one statement, `os.set_inheritable(verified.fd, True)`, in the fork's
+child branch immediately before `execve`. `verify_helper_executable` opens
+the candidate via bare `os.open()`, non-inheritable by default (PEP 446);
+for the realistic shebang-script deployment shape the kernel's
+`binfmt_script` re-open of `/proc/self/fd/<fd>` happens after the outer
+`execve` already closed the descriptor, failing `ENOENT`. Verified fixed on
+genuine Linux (`hac-dell`): a real shebang script, opened/verified/executed
+through the unmodified production functions, now runs end-to-end. No
+pathname reopen introduced; unrelated fds (regular file/pipe/socket) remain
+non-inheritable; directory-entry substitution-after-verify still executes
+the original object; symlink/nonregular/digest rejections unchanged.
+
+**Repair B** (`src/pcae/core/hpac_pawa_helper_entrypoint.py::main()`) — was
+hardcoded to `ProtectedStoreFoundation()` (NON_REAL). Now: `main()` derives
+a store profile via `resolve_store_profile(protected_root)`, which accepts
+`real` **only** when the launcher-supplied bootstrap root is byte-identical
+to `pcae.core.hpac_foundation.resolve_hpac_protected_root()`'s single fixed
+canonical root (independently re-verified: that function takes no
+parameters and accepts no override; `HPACStoreAuthority.production()` takes
+no root argument and `_validate_production_boundary()` independently re-pins
+and rejects any redirect attempt with `"production HPAC authority cannot be
+redirected"`). On `real`, `build_helper_context()` wires
+`RealCanonicalReadAdapter(HPACStoreAuthority.production())` — the adapter
+the predecessor phase already built, reused verbatim, no second
+implementation. NON_REAL is reachable only via an explicit, keyword-only,
+in-process test seam never touched by `main()`. A request cannot select the
+profile (structurally unreachable — the request isn't even read yet when
+the profile is resolved, and the schema is closed regardless). REAL
+construction failure never falls back to the foundation — it fails closed
+with a distinct exit code. `certification_read` and `ceremony_entry` now
+reach `RealCanonicalReadAdapter` end-to-end through a genuinely launched
+helper process on real Linux (disposable test roots only). The three write
+operations remain correctly blocked; HPAC-PAWA-HELPER-REQ-033 independently
+reconfirmed (no helper module imports `hpac_protected_admin_writer`).
+`hpac_pawa_helper_launcher.py` required **no change** — byte-unchanged.
+
+**Delegated-worker disclosure**: a bounded delegated worker (isolated
+worktree, no finalization authority — DELEGATED .3 FINALIZATION / COMMIT /
+PUSH: UNAUTHORIZED) performed the initial repair, test construction, and
+genuine-Linux verification. The primary operator independently re-verified
+every load-bearing claim before incorporating any of it: independently
+re-read both defect sites and the full diff; independently re-read
+`hpac_foundation.py` to confirm the trusted-profile-source argument;
+independently re-packaged the candidate source onto a **separate, fresh**
+disposable directory on `hac-dell` and re-ran the new 60-test file (60
+passed, exact match) plus four regression files (1 expected failure —
+Finding C below — plus 170 passed, exact match) plus the historical
+umask-sensitive suite (12 failed / 123 passed / 2 skipped, exact match);
+independently stood up a **separate unmodified-baseline** venv on the same
+host at the same commit and confirmed the exact 3-test delta the repair
+fixes, with Finding C and the 12 pre-existing failures identical in both;
+confirmed zero live-host mutation before and after (`/etc/pcae` unchanged,
+`/etc/pcae/hpac/protected-root` absent on the host); deleted all disposable
+verification directories afterward.
+
+**Finding C (NOT repaired, out of scope, disclosed)**: one predecessor test,
+`test_helper_substitution_after_verification_is_rejected`, fails both before
+and after this repair — it exercises **in-place content mutation of the
+same inode** (not directory-entry substitution), which the same-file-object
+property as implemented does not defend against. Repairing it would require
+sealing verified bytes into an independent copy (e.g. a `memfd`) — a
+broader production redesign outside this phase's narrow two-defect scope.
+Recommended for the fresh repair-IV successor's adjudication.
+
+**Regression tallies (Linux, `hac-dell`, independently re-run by the primary
+operator)**: combined baseline 16 failed / 290 passed / 2 skipped → candidate
+13 failed / 353 passed / 2 skipped (60 new + 3 pre-existing failures
+repaired; 12 pre-existing umask-artifact failures and Finding C unchanged in
+both). macOS (all six files): 199 passed, 32 skipped, 0 failed.
+
+Zero contract, schema, failure-vocabulary, dependency, or packaging changes.
+Zero live-host mutation. No writer-authority contract evolution. No caller
+migration. No packaging/deployment. macOS same-file-object execution remains
+FAIL-CLOSED / NOT IMPLEMENTED, unchanged. Runtime unchanged: Observed /
+observe / unavailable, 0 plugins, 0 capabilities, first governed external
+effect ABSENT/UNREACHABLE. N-16-5 remains NOT CLOSED. N-16-6/N-16-7 remain
+OPEN/UNTOUCHED.
+
+**Recommended next: fresh independent Linux verification of this repair**
+(`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`,
+tentatively N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV) — derived and
+validated, NOT begun. Per phase-authorization §68, do not proceed to
+writer-authority contract evolution, caller migration, packaging, or live
+deployment until that fresh IV completes.
+
+Full details: `docs/PHASE_N16_5_F_5_TB_REAL_HELPER_BOUNDARY_REPAIR.md`.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV) COMPLETE — NOT VERIFIED /
+BLOCKED
+
+CPIPC: valid direct `.1`
 successor of `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias `N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL`)
 — same series `149` / branch `O`, exactly one appended `.1` segment,
 `is_valid` True, `normalize(candidate) == candidate`, `same_series`/

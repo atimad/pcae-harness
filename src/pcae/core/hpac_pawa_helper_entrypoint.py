@@ -148,6 +148,124 @@ def run_one_shot(
     return 0 if response is not None else 3
 
 
+#: §31 — process exit codes this entrypoint can produce *before* any request
+#: is read. All are transport/bootstrap-level failures the launcher must
+#: treat as failure, never as a protocol decision.
+EXIT_BOOTSTRAP_COORDINATES_MISSING = 2
+EXIT_NO_RESPONSE = 3
+EXIT_STORE_PROFILE_UNESTABLISHED = 4
+EXIT_REAL_STORE_UNAVAILABLE = 5
+
+#: The only store profile this entrypoint can select for itself. ``NON_REAL``
+#: is deliberately absent: it is reachable **only** through
+#: :func:`build_helper_context`'s explicit in-process ``_test_only_store``
+#: seam, never from the environment, argv, or a request field.
+STORE_PROFILE_REAL = "real"
+
+
+def resolve_store_profile(protected_root: str) -> str:
+    """Decide, from **trusted execution context only**, whether this process
+    is entitled to back its dispatch with the real canonical protected
+    stores (N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR, Repair B).
+
+    The decision is derived from the bootstrap protected root the launcher
+    already sets in its closed child environment (§31), and is accepted as
+    ``real`` **only** when that root is byte-identical to the platform's
+    single fixed canonical protected root as reported by
+    :func:`pcae.core.hpac_foundation.resolve_hpac_protected_root` — a
+    function that, by its own contract, "accepts no override input".
+
+    Why this is not caller-controlled trust:
+
+    * It is not reachable from a request. ``main()`` builds its
+      :class:`HelperContext` *before* the one-shot socket is even connected,
+      and the §11 request schema is closed (``HelperRequest.from_mapping``
+      rejects any unknown field), so no ``profile`` / ``real`` /
+      ``store_backend`` / protected-root field can exist, let alone reach
+      here.
+    * It is not reachable from argv: nothing here reads ``sys.argv``.
+    * The environment variable it reads cannot be *redirected*. The only
+      value that selects ``real`` is the one fixed canonical root, so a
+      hostile environment cannot point the real profile at a root of its
+      own choosing — the classic escalation this check exists to prevent.
+    * Selecting ``real`` grants no privilege the invoking process does not
+      already hold. The authority this profile constructs is
+      ``HPACStoreAuthority.production()``, which (a) takes no root argument
+      at all, (b) re-pins itself to ``resolve_hpac_protected_root()`` in
+      ``_validate_production_boundary``, (c) re-runs the live
+      ``_effective_write_access`` / ``_ancestor_chain_safe`` topology
+      evaluation against the *configured agent principal*, and (d) reads
+      through ordinary ``0700`` deployment-owner-only filesystem
+      permissions. A direct, untrusted invocation by a non-owner therefore
+      fails at authority construction / first read, not merely at this env
+      check — the OS backstop is real and independent of anything the
+      caller can set.
+
+    Anything else — a missing, relative, differently-spelled, or
+    disposable-test root, or a platform with no fixed canonical root — is
+    ambiguous and fails closed by raising, never by degrading to the
+    NON_REAL in-memory foundation."""
+    from pathlib import Path
+
+    from pcae.core.hpac_foundation import resolve_hpac_protected_root
+
+    canonical = resolve_hpac_protected_root().absolute()
+    if Path(protected_root).absolute() == canonical:
+        return STORE_PROFILE_REAL
+    raise HelperProtocolError(
+        "descriptor_root_identity_mismatch",
+        "helper bootstrap protected root is not the fixed canonical protected root; "
+        "no store profile can be established from trusted execution context",
+    )
+
+
+def build_helper_context(
+    *,
+    protected_root: str,
+    installation_id: str,
+    generation: int,
+    store_profile: str,
+    _test_only_store: object = None,
+) -> HelperContext:
+    """Assemble the process-local :class:`HelperContext`.
+
+    ``_test_only_store`` is an explicit, keyword-only, in-process seam: the
+    ONLY way a NON_REAL
+    :class:`~pcae.core.hpac_pawa_helper_protocol.ProtectedStoreFoundation`
+    (or a fixture-rooted adapter) can ever back a helper dispatch. It is not
+    reachable from the environment, from argv, or from a request — ``main()``
+    never passes it.
+
+    On the ``real`` profile the store is the real canonical read adapter over
+    a real ``PRODUCTION`` authority. If that construction fails for any
+    reason the exception propagates; it is NEVER replaced by
+    ``ProtectedStoreFoundation``."""
+    from pcae.core.hpac_pawa_helper_protocol import CLOSED_OPERATIONS, EvidenceStager
+    from pcae.core.hpac_pawa_helper_replay_state import open_durable_replay_ledger
+
+    if _test_only_store is not None:
+        store = _test_only_store
+    elif store_profile == STORE_PROFILE_REAL:
+        from pcae.core.hpac_foundation import HPACStoreAuthority
+        from pcae.core.hpac_pawa_helper_store_adapter import RealCanonicalReadAdapter
+
+        store = RealCanonicalReadAdapter(HPACStoreAuthority.production())
+    else:
+        raise HelperProtocolError(
+            "internal_fail_closed", f"unsupported helper store profile {store_profile!r}"
+        )
+
+    ledger = open_durable_replay_ledger(
+        protected_root=protected_root, installation_id=installation_id, generation=generation
+    )
+    return HelperContext(
+        replay_ledger=ledger,
+        evidence_stager=EvidenceStager(),
+        supported_operations=CLOSED_OPERATIONS,
+        store=store,
+    )
+
+
 def main(argv=None) -> int:  # pragma: no cover - exercised via subprocess integration tests
     """Minimal process entrypoint. Reads its bootstrap coordinates from a
     closed set of environment variables the launcher sets (§31 — never from
@@ -158,21 +276,31 @@ def main(argv=None) -> int:  # pragma: no cover - exercised via subprocess integ
     installation_id = os.environ.get("PAWA_HELPER_INSTALLATION_ID")
     generation_raw = os.environ.get("PAWA_HELPER_GENERATION")
     if not channel_path or not protected_root or not installation_id or not generation_raw:
-        return 2
+        return EXIT_BOOTSTRAP_COORDINATES_MISSING
+    try:
+        generation = int(generation_raw)
+    except ValueError:
+        return EXIT_BOOTSTRAP_COORDINATES_MISSING
 
-    from pcae.core.hpac_pawa_helper_protocol import ProtectedStoreFoundation
-    from pcae.core.hpac_pawa_helper_replay_state import open_durable_replay_ledger
-    from pcae.core.hpac_pawa_helper_protocol import EvidenceStager, CLOSED_OPERATIONS
+    try:
+        store_profile = resolve_store_profile(protected_root)
+    except Exception:
+        # Fail closed: no store profile could be established from trusted
+        # execution context. Never a NON_REAL fallback.
+        return EXIT_STORE_PROFILE_UNESTABLISHED
 
-    ledger = open_durable_replay_ledger(
-        protected_root=protected_root, installation_id=installation_id, generation=int(generation_raw)
-    )
-    context = HelperContext(
-        replay_ledger=ledger,
-        evidence_stager=EvidenceStager(),
-        supported_operations=CLOSED_OPERATIONS,
-        store=ProtectedStoreFoundation(),
-    )
+    try:
+        context = build_helper_context(
+            protected_root=protected_root,
+            installation_id=installation_id,
+            generation=generation,
+            store_profile=store_profile,
+        )
+    except Exception:
+        # REAL store construction failed. Fail closed — never degrade to
+        # ProtectedStoreFoundation, never answer a request unbacked.
+        return EXIT_REAL_STORE_UNAVAILABLE
+
     return run_one_shot(channel_path=channel_path, context=context)
 
 

@@ -248,9 +248,50 @@ def _authority(root: Path):
     return HPACStoreAuthority._production_test_fixture(root, _seal=_PRODUCTION_TEST_FIXTURE_SEAL, _topology_probe=_locked_probe())
 
 
+#: Updated by N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR (Repair B).
+#:
+#: This template previously called ``hpac_pawa_helper_entrypoint.main()``
+#: directly and relied on it wiring a store from the env-supplied
+#: ``PAWA_HELPER_PROTECTED_ROOT``. Repair B makes the REAL store profile
+#: **non-redirectable**: ``main()`` accepts the real profile only for the one
+#: fixed canonical protected root and constructs
+#: ``HPACStoreAuthority.production()``, which takes no root argument at all.
+#: A disposable-root exercise therefore cannot go through ``main()`` without
+#: reintroducing exactly the redirection the repair exists to prevent.
+#:
+#: The script below still runs the genuine production code path
+#: (``build_helper_context`` + ``run_one_shot``) in a genuine separate
+#: process against the genuine ``RealCanonicalReadAdapter``; the only
+#: test-only substitution is the already-disclosed
+#: ``_production_test_fixture`` authority seal seam (HPAC-PAWA-REQ-166),
+#: supplied through ``build_helper_context``'s explicit, keyword-only,
+#: in-process ``_test_only_store`` seam. Nothing here is reachable from the
+#: environment, argv, or a request.
 _HELPER_SCRIPT_TEMPLATE = """#!{python}
-import sys
-sys.exit(__import__("pcae.core.hpac_pawa_helper_entrypoint", fromlist=["main"]).main())
+import os, sys, types
+from pathlib import Path
+from pcae.core.hpac_foundation import HPACStoreAuthority, _PRODUCTION_TEST_FIXTURE_SEAL
+from pcae.core.hpac_pawa_helper_entrypoint import (
+    STORE_PROFILE_REAL, build_helper_context, run_one_shot,
+)
+from pcae.core.hpac_pawa_helper_store_adapter import RealCanonicalReadAdapter
+
+root = os.environ["PAWA_HELPER_PROTECTED_ROOT"]
+probe = types.SimpleNamespace(
+    effective_write_access=lambda p, u, g: (False, "fixture_locked", ()),
+    ancestor_chain_safe=lambda s, u, g: (True, ("fixture_root_reached",)),
+)
+authority = HPACStoreAuthority._production_test_fixture(
+    Path(root), _seal=_PRODUCTION_TEST_FIXTURE_SEAL, _topology_probe=probe
+)
+context = build_helper_context(
+    protected_root=root,
+    installation_id=os.environ["PAWA_HELPER_INSTALLATION_ID"],
+    generation=int(os.environ["PAWA_HELPER_GENERATION"]),
+    store_profile=STORE_PROFILE_REAL,
+    _test_only_store=RealCanonicalReadAdapter(authority),
+)
+sys.exit(run_one_shot(channel_path=os.environ["PAWA_HELPER_CHANNEL_PATH"], context=context))
 """
 
 

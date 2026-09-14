@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR**) — **Real Helper
+  Boundary Repair: Same-File-Object Exec Inheritance + Canonical-Store
+  Entrypoint Wiring.** COMPLETE. Repaired exactly the two defects found by
+  the predecessor IV phase: (1) `hpac_pawa_helper_os.py::execute_verified`
+  now calls `os.set_inheritable(verified.fd, True)` on the exact verified
+  fd, in the child, immediately before `execve` — script-shaped helpers
+  (the only realistic deployment shape) now launch successfully on real
+  Linux; (2) `hpac_pawa_helper_entrypoint.py::main()` no longer hardcodes
+  `ProtectedStoreFoundation`; it now derives a `real`/non-redirectable store
+  profile from the launcher's bootstrap protected root (accepted only when
+  byte-identical to `hpac_foundation.resolve_hpac_protected_root()`'s single
+  fixed canonical root) and wires the existing `RealCanonicalReadAdapter`
+  over `HPACStoreAuthority.production()`; NON_REAL is reachable only via an
+  explicit in-process test seam. `certification_read`/`ceremony_entry` now
+  reach the real canonical store end-to-end through a genuinely launched
+  helper process on real Linux (disposable roots only); the three write
+  operations remain correctly blocked; REQ-033 reconfirmed. A bounded
+  delegated worker performed the initial repair and Linux verification (no
+  finalization authority); the primary operator independently re-verified
+  every load-bearing claim (re-read the diff and `hpac_foundation.py`,
+  re-ran the new 60-test file plus regressions on a separately-packaged
+  `hac-dell` checkout, stood up a separate unmodified-baseline comparison)
+  before incorporating any of it. One out-of-scope finding disclosed, not
+  repaired: in-place same-inode content mutation after verify is not
+  defended against (directory-entry substitution still is) — recommended
+  for the fresh repair-IV successor. Zero contract/schema/dependency/
+  packaging changes; zero live-host mutation; no writer-authority contract
+  evolution; N-16-5 remains NOT CLOSED. Recommends a fresh independent Linux
+  IV of this repair — derived, not begun.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV**) — **Fresh
   Independent Linux Verification of Canonical-Store Wiring and One-Shot
