@@ -22,8 +22,12 @@ Idle placeholder task. No active governed work. Awaiting fresh human authorizati
 
 ## Allowed Files
 
-- tasks/done/*
 - PROJECT_STATUS.md
+- tasks/done/*
+- tasks/active/*
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/*
 
 ## Forbidden Files
 
