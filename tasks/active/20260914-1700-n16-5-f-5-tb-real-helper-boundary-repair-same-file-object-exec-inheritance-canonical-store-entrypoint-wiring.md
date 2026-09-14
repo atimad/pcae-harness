@@ -25,11 +25,15 @@ Repair exactly (1) the O_CLOEXEC/os.set_inheritable same-file-object-exec defect
 - src/pcae/core/hpac_pawa_helper_os.py
 - src/pcae/core/hpac_pawa_helper_entrypoint.py
 - tests/test_n16_5_f_5_tb_real_helper_boundary_repair.py
+- tests/test_n16_5_f_5_tb_real_helper_store_launcher_impl.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/*
 - docs/PHASE_N16_5_F_5_TB_REAL_HELPER_BOUNDARY_REPAIR.md
+- tasks/active/20260914-1700-n16-5-f-5-tb-real-helper-boundary-repair-same-file-object-exec-inheritance-canonical-store-entrypoint-wiring.md
+- tasks/done/20260913-2050-idle-post-n16-5-f-5-tb-real-helper-store-launcher-iv-complete-not-verified-blocked-same-file-object-exec-defect-found-narrow-repair-phase-next-not-begun-n-16-5-not-closed.md
 
 ## Forbidden Files
 
