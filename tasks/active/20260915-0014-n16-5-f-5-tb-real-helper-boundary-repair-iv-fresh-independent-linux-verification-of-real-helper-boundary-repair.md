@@ -29,6 +29,7 @@ Fresh, independent, genuine-Linux verification of the repaired real helper bound
 - tasks/**
 - tests/**
 - docs/**
+- .pcae/fast-green-attribution/**
 
 ## Forbidden Files
 
@@ -40,6 +41,7 @@ Fresh, independent, genuine-Linux verification of the repaired real helper bound
 - tests
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
