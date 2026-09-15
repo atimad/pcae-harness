@@ -22,6 +22,8 @@ Idle placeholder awaiting the next explicitly human-authorized governed phase.
 
 ## Allowed Files
 
+- .pcae/phase-completion-metadata.json
+- .pcae/fast-green-attribution/10df0f61f8174069c2f603dc411bddc4b24e7a91ca252fde95f33105bd4e2c12.json
 - tasks/done/20260915-1230-n16-5-f-5-tb-helper-writer-authority-contract-arch-helper-scoped-writer-authority-architecture-and-contract-evolution.md
 
 ## Forbidden Files
@@ -33,6 +35,7 @@ Idle placeholder awaiting the next explicitly human-authorized governed phase.
 
 - tasks
 - docs
+- config
 
 ## Forbidden Zones
 
