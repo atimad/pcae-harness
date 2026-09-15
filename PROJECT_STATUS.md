@@ -2,44 +2,113 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-(alias **N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE**) — CPIPC Canonical Lineage
-Reconciliation for the Helper/Replay/Boundary Branch. **COMPLETE.**
-Governance/evidence-only reconciliation phase (no production, contract, or
-schema change). CPIPC: valid direct `.1` successor of
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV**) — Fresh Independent
+Linux Verification of Real Helper Boundary Repair. **COMPLETE —
+INDEPENDENTLY VERIFIED, WITH WRITER-AUTHORITY CONTRACT BLOCKER.** CPIPC:
+valid direct `.1` successor of
 `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-(alias `N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR`) — independently derived
-and validated via `pcae.core.phase_id` by the primary operator (`is_valid`
-True, `same_series`/`same_branch` True, `compare` = less, unique against
-`git log --all` at entry) before task creation.
+(alias `N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE`) — independently derived and
+validated via `pcae.core.phase_id` by the primary operator (`is_valid`
+True, `same_series`/`same_branch` True, `compare` = less, `equals` = False,
+unique against `git log --all` at entry) before task creation.
 
-**Disposition: A — NO LINEAGE DEFECT.** The claimed `...30R.5R.2B.1R...` vs
-`...30R.5R.2.1R...` discrepancy does not exist in canonical repository
-evidence: these are two different segments (position 5 `2B` and position 11
-`2`) of the same single unchanging ID string, not competing forms of one
-segment. `git log --all -p | grep -c '30R\.5R\.2B\.1R'` = 0 across the
-entire history. Every canonical artifact (task, metadata, PROJECT_STATUS,
-report, commit message) at every transition from N16-5-F-5-TB-REPLAY-REPAIR
-through N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR agrees unanimously on the
-real form. Historical canonical phase IDs: UNCHANGED. Git history:
-UNCHANGED. Separately disclosed (deferred, non-blocking): the transition
-validator and phase-creation path check only intra-phase self-consistency,
-never predecessor-link/direct-child/ancestor-chain validity — a real scope
-gap, orthogonal to this (nonexistent) discrepancy, recommended as a future
-FOLLOW-UP GOVERNANCE HARDENING phase. Full evidence:
-`docs/CPIPC_HELPER_BRANCH_LINEAGE_RECONCILIATION.md`.
+Fresh, genuine-Linux (`hac-dell`, Ubuntu 24.04, kernel 7.0.0) verification
+of commit `43813b16832b2b5d3940163a8879f6808f8315f4` (N16-5-F-5-TB-REAL-
+HELPER-BOUNDARY-REPAIR). Repair A (same-file-object exec fd inheritance)
+and Repair B (REAL/NON_REAL canonical-store profile wiring) independently
+reconstructed from current source and confirmed genuine end-to-end on real
+Linux via the unmodified production launcher path.
 
-Production source, contracts, schemas, dependencies: NONE changed. Finding
-C (in-place same-inode content mutation, undefended) remains OPEN, deferred
-to the fresh helper-boundary repair IV. Predecessor test-file template
-change deferred to that IV. Runtime unchanged: Observed / observe /
+**Finding C** (in-place same-inode content mutation after verification) —
+**Disposition C-A: NOT EXPLOITABLE** under governed deployment invariants.
+Empirically confirmed, not merely asserted: a genuine second, unprivileged
+OS principal (`nobody`, uid 65534, via passwordless `sudo -n -u nobody` on
+`hac-dell`) cannot open the verified inode for writing (`EACCES`) and
+cannot even connect to the private one-shot channel socket (`0700`
+directory / `0600` socket). Only the deployment-owner uid — already the
+single most-trusted principal this boundary's own peer authentication
+exists to admit, per `hpac_pawa_helper_os.authenticate_peer` — can reach
+the mutation, reproducing the predecessor's own disclosed positive control.
+
+**Predecessor test-file template change** (in
+`test_n16_5_f_5_tb_real_helper_store_launcher_impl.py`) — **Disposition
+T-A: legitimate fixture update, no security-coverage weakening.** Repair B
+made the REAL profile non-redirectable, so the old template's disposable-
+root "real store via `main()`" scenario became structurally impossible by
+design; the replacement exercises the same production path via the
+already-disclosed `_test_only_store` seam, and the same repair commit
+independently added new `main()`-level adversarial tests that did not
+exist before — coverage was relocated and, on inspection, broadened.
+
+Five new fresh IV tests added
+(`tests/test_n16_5_f_5_tb_real_helper_boundary_repair_iv.py`) covering the
+two gaps the predecessor's 60-test suite left untested: Finding C against
+a genuine non-owner principal, and a transitive-import attack (hostile
+`PYTHONPATH` / cwd-shadow module) against the real end-to-end
+`launch_and_exchange` path. All subsystem verdicts — exec inheritance, fd
+isolation, path substitution, symlink/FIFO/directory/digest/mode/
+generation attacks, REAL profile selection, no-foundation-fallback,
+`certification_read`/`ceremony_entry` real-store wiring, blocked
+`admin_mutation`/`certification_write`/`presentation_evidence_write`,
+REQ-033 (no new `HPACWriterCapability` mint path), `SO_PEERCRED`,
+transitive import, replay, framing — independently **VERIFIED** by the
+primary operator (re-derived/re-executed directly, not merely accepted
+from the delegated worker's report; see `.pcae/phase-completion-metadata.json`
+`derived_correctness`).
+
+**One new, non-security finding disclosed:** predecessor test
+`test_helper_substitution_after_verification_is_rejected` uses
+`Path.write_bytes()` on the verified path, which mutates the **same**
+inode in place rather than swapping the directory entry — it is actually
+re-testing Finding C's already-disclosed in-place-mutation gap under a
+directory-entry-substitution docstring/label, and fails deterministically
+on real Linux (independently reproduced by the primary operator). Not a
+security regression; not fixed in this phase (out of file-touch scope);
+flagged for a future narrow test-repair phase.
+
+Fast Green: **PASS — 0 attributable failures** (baseline
+`6053766710966618abc7a2f0ad8b99840e3c5ca3`, candidate
+`15112255e6743872fd44bd3fde2fe0b8f123324f`, final pushed HEAD).
+
+Production source, contracts, schemas, dependencies, packaging: NONE
+changed — verification only. Runtime unchanged: Observed / observe /
 unavailable. **N-16-5 remains NOT CLOSED.** N-16-6/N-16-7 untouched.
 Preserved exactly: DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
 
-**Recommended next: N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV** (fresh
-independent Linux verification of the boundary repair, plus Finding C and
-test-template adjudication) — NOT begun, requires fresh explicit human
-authorization per phase-authorization §68.
+**Recommended next:** a narrow, human-authorized helper writer-authority
+contract architecture/evolution phase (to close the
+`admin_mutation`/`certification_write`/`presentation_evidence_write`
+blocker, REQ-033-preserving) — NOT begun, requires fresh explicit human
+authorization. Separately still deferred: a FOLLOW-UP GOVERNANCE HARDENING
+phase for the transition-validator ancestry-checking gap — NOT this
+phase's successor.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE) Complete
+
+CPIPC Canonical Lineage Reconciliation for the Helper/Replay/Boundary
+Branch. **COMPLETE.** Governance/evidence-only reconciliation phase (no
+production, contract, or schema change). **Disposition: A — NO LINEAGE
+DEFECT.** The claimed `...30R.5R.2B.1R...` vs `...30R.5R.2.1R...`
+discrepancy does not exist in canonical repository evidence: these are two
+different segments (position 5 `2B` and position 11 `2`) of the same
+single unchanging ID string, not competing forms of one segment. `git log
+--all -p | grep -c '30R\.5R\.2B\.1R'` = 0 across the entire history. Every
+canonical artifact (task, metadata, PROJECT_STATUS, report, commit
+message) at every transition from N16-5-F-5-TB-REPLAY-REPAIR through
+N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR agrees unanimously on the real
+form. Historical canonical phase IDs: UNCHANGED. Git history: UNCHANGED.
+Separately disclosed (deferred, non-blocking): the transition validator
+and phase-creation path check only intra-phase self-consistency, never
+predecessor-link/direct-child/ancestor-chain validity — a real scope gap,
+orthogonal to this (nonexistent) discrepancy, recommended as a future
+FOLLOW-UP GOVERNANCE HARDENING phase. Full evidence:
+`docs/CPIPC_HELPER_BRANCH_LINEAGE_RECONCILIATION.md`. Production source,
+contracts, schemas, dependencies: NONE changed. Finding C and the
+predecessor test-file template change were deferred to
+N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV (now COMPLETE, see "Current
+Phase" above). N-16-5 remained NOT CLOSED. Preserved exactly: DELEGATED .3
+FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
 
 ## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR) Complete
 

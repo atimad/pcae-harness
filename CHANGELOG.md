@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV**) — **Fresh
+  Independent Linux Verification of Real Helper Boundary Repair.** COMPLETE
+  — INDEPENDENTLY VERIFIED, WITH WRITER-AUTHORITY CONTRACT BLOCKER. Fresh,
+  genuine-Linux (hac-dell) verification of commit `43813b16` (N16-5-F-5-TB-
+  REAL-HELPER-BOUNDARY-REPAIR). Independently reconstructed Repair A
+  (same-file-object exec fd inheritance) and Repair B (REAL/NON_REAL
+  canonical-store profile wiring) from current source. **Finding C**
+  (in-place same-inode content mutation) disposed **C-A — not exploitable**:
+  a genuine second, unprivileged OS principal (`nobody`, uid 65534) cannot
+  open the verified inode for writing (`EACCES`) and cannot even connect to
+  the private one-shot channel socket; only the deployment-owner uid,
+  already the maximal trust principal this boundary admits, can reach the
+  mutation. **Predecessor test-template change** disposed **T-A —
+  legitimate fixture update**, coverage relocated and broadened, not
+  weakened. Five new fresh IV tests added covering Finding C (genuine
+  non-owner principal) and a transitive-import attack (hostile PYTHONPATH /
+  cwd-shadow module) against the real end-to-end launch path — both
+  previously untested gaps. All subsystem verdicts (exec inheritance, fd
+  isolation, path substitution, symlink/digest attacks, REAL profile
+  selection, certification_read/ceremony_entry real-store wiring, blocked
+  writes, REQ-033, SO_PEERCRED, transitive import, replay, framing)
+  independently VERIFIED. One new non-security finding disclosed:
+  predecessor test `test_helper_substitution_after_verification_is_rejected`
+  is mislabeled (tests in-place same-inode mutation via `write_bytes`, not
+  directory-entry substitution as its docstring claims) and fails
+  deterministically on real Linux — not fixed, flagged for a future narrow
+  test-repair phase. Fast Green: PASS, 0 attributable failures (baseline
+  `60537667`, candidate `15112255`). Zero production/contract/schema/
+  dependency/packaging change. N-16-5 remains NOT CLOSED. Recommended
+  next: a narrow, human-authorized helper writer-authority contract
+  architecture/evolution phase (to close the admin_mutation/certification_
+  write/presentation_evidence_write blocker), NOT begun.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE**) — **CPIPC Canonical
   Lineage Reconciliation for the Helper/Replay/Boundary Branch.** COMPLETE.
