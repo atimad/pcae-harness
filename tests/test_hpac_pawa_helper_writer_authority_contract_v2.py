@@ -73,14 +73,28 @@ def legacy_factory_text() -> str:
 
 
 def test_contract_title_is_v2_0(contract_text: str) -> None:
+    """The live contract has legitimately evolved to v3.0 (N16-5-F-5-TB-
+    HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR, contract section 30B) since
+    this ARCH-phase test was authored. That evolution's own literal
+    MAJOR-trigger (HPAC-PAWA-HELPER-REQ-130) was pre-declared by this very
+    v2.0 freeze, so asserting the live title is still v2.0 would itself be
+    stale. This test now asserts the current live title, while the ARCH
+    phase's own historical v2.0 title text is separately confirmed still
+    preserved (unedited) inside the immutable section 30A body."""
+
     assert contract_text.startswith(
-        "# HPAC-PAWA-HELPER-001 v2.0 — HPAC-PAWA Protected One-Shot "
+        "# HPAC-PAWA-HELPER-001 v3.0 — HPAC-PAWA Protected One-Shot "
         "Privileged Helper Protocol Contract"
     )
+    # The historical v2.0 title text is not reproduced verbatim as an H1
+    # anywhere in the body (per the same in-place-header precedent this
+    # v2.0 freeze itself used for v1.0 -> v2.0); its content survives
+    # instead via the unedited section 30A prose, checked separately by
+    # test_v1_0_freeze_record_preserved_immutable.
 
 
 def test_contract_version_field_is_2_0(contract_text: str) -> None:
-    assert "**Version:** 2.0\n" in contract_text
+    assert "**Version:** 3.0\n" in contract_text
     assert "**Version:** 1.0\n" not in contract_text
 
 
@@ -103,11 +117,17 @@ def _all_req_numbers(text: str) -> list[int]:
 
 
 def test_requirement_ids_span_001_through_140_no_gaps(contract_text: str) -> None:
+    """v2.0 defined REQ-001..140 contiguously; v3.0 (contract-repair,
+    N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR) additively
+    extends this to REQ-001..171 with no gap at the v2.0/v3.0 boundary."""
+
     unique = sorted(set(_all_req_numbers(contract_text)))
     assert unique[0] == 1
-    assert unique[-1] == 140
-    missing = [n for n in range(1, 141) if n not in unique]
+    assert unique[-1] == 171
+    missing = [n for n in range(1, 172) if n not in unique]
     assert missing == [], f"missing requirement ids: {missing}"
+    # The v2.0 boundary itself must still be present and contiguous.
+    assert 140 in unique and 141 in unique
 
 
 def test_requirement_114a_present_and_lettered(contract_text: str) -> None:
@@ -118,11 +138,15 @@ def test_requirement_114a_present_and_lettered(contract_text: str) -> None:
 
 
 def test_invariant_ids_span_1_through_18_no_gaps(contract_text: str) -> None:
+    """v3.0 additively extends the v2.0 invariant range (1..18) to 1..24
+    (PAWAH-INV-19..24, contract section 30C)."""
+
     unique = sorted(set(int(n) for n in re.findall(r"PAWAH-INV-(\d+)\b", contract_text)))
     assert unique[0] == 1
-    assert unique[-1] == 18
-    missing = [n for n in range(1, 19) if n not in unique]
+    assert unique[-1] == 24
+    missing = [n for n in range(1, 25) if n not in unique]
     assert missing == [], f"missing invariant ids: {missing}"
+    assert 18 in unique and 19 in unique
 
 
 def test_new_invariants_each_defined_exactly_once(contract_text: str) -> None:
@@ -132,14 +156,18 @@ def test_new_invariants_each_defined_exactly_once(contract_text: str) -> None:
 
 
 def test_requirement_count_trailer_matches_actual_count(contract_text: str) -> None:
+    # The v2.0 trailer is preserved, unedited, as historical text; v3.0
+    # additively defines its own current-state trailer alongside it.
     assert "HPAC-PAWA-HELPER-001 v2.0 defines **141**" in contract_text
+    assert "HPAC-PAWA-HELPER-001 v3.0 defines **172**" in contract_text
     unique = set(_all_req_numbers(contract_text))
-    # 001-140 plus the lettered 114A => 141 distinct normative ids
-    assert len(unique) == 140
+    # 001-171 plus the lettered 114A => 172 distinct normative ids
+    assert len(unique) == 171
 
 
 def test_invariant_count_trailer_matches_actual_count(contract_text: str) -> None:
     assert "**Invariant count (v2.0):** 18" in contract_text
+    assert "**Invariant count (v3.0):** 24" in contract_text
 
 
 # ---------------------------------------------------------------------------
@@ -172,13 +200,22 @@ def test_all_four_models_discussed(contract_text: str) -> None:
 
 
 def test_model_d_is_selected(contract_text: str) -> None:
+    """v2.0's own §30A.1 comparison table selected Model D — that historical
+    selection is preserved, unedited. v3.0's §30B.2 re-comparison, run after
+    Model D was independently found NOT VERIFIED, selects Model E instead
+    (a repaired hybrid of B+C) and marks Model D's row superseded. Both
+    "**SELECTED**" markers are therefore expected to coexist: one per
+    section, each historically accurate for its own epoch."""
+
     assert "**SELECTED**" in contract_text
     selected_row = [
         line
         for line in contract_text.splitlines()
         if "**SELECTED**" in line
     ]
-    assert len(selected_row) == 1
+    assert len(selected_row) == 2
+    assert any("Model D" in line or "| **D**" in line for line in selected_row)
+    assert any("Model E" in line or "E (SELECTED)" in line for line in selected_row)
     assert "Model D" in contract_text
     assert "**FROZEN:**" in contract_text
 
@@ -380,13 +417,25 @@ def test_no_production_writer_authority_module_created_by_this_phase() -> None:
 def test_phase_doc_references_correct_contract_sha256(
     phase_doc_text: str, contract_text: str
 ) -> None:
+    """The ARCH phase doc is an immutable historical record of the contract
+    file's content *as it stood when v2.0 was frozen* — it must never be
+    rewritten to chase the live file's hash across later legitimate
+    evolutions (v3.0's own repair phase records its own hash in its own,
+    separate phase-evidence document). This test therefore pins the
+    ARCH doc's recorded digest to the known-frozen v2.0 hash (independently
+    recomputed from commit 79b2582b, the v2.0 freeze commit) rather than
+    recomputing against the current, since-evolved live file."""
+
+    frozen_v2_0_sha256 = (
+        "912405307089ba4d050bad9200bad2d7d7af28cde87f19c3d23e428523a8e4da"
+    )
+    assert frozen_v2_0_sha256 in phase_doc_text
+    # The live file has legitimately moved on since; confirm this test does
+    # not accidentally still pass by coincidence against a stale live hash.
     import hashlib
 
-    digest = hashlib.sha256(contract_text.encode("utf-8")).hexdigest()
-    assert digest in phase_doc_text, (
-        "phase doc's recorded contract sha256 is stale relative to the "
-        "contract file's current content"
-    )
+    live_digest = hashlib.sha256(contract_text.encode("utf-8")).hexdigest()
+    assert live_digest != frozen_v2_0_sha256
 
 
 def test_phase_doc_references_existing_predecessor_commit(phase_doc_text: str) -> None:

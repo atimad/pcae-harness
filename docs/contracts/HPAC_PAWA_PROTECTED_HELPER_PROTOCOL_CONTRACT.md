@@ -1,10 +1,38 @@
-# HPAC-PAWA-HELPER-001 v2.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract
+# HPAC-PAWA-HELPER-001 v3.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract
 
 ## Contract identity and status
 
 **Contract:** HPAC-PAWA-HELPER-001
-**Version:** 2.0
-**Status:** FROZEN — IMPLEMENTATION AND INDEPENDENT VERIFICATION PENDING
+**Version:** 3.0
+**Status:** REPAIRED / FROZEN — PENDING INDEPENDENT RE-VERIFICATION
+**Evolved to v3.0 by:** Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR**) — Writer-
+Authority Repair: Helper-Process-Isolated Mutation Facades (new section 30B).
+**v2.0 -> v3.0 is a MAJOR evolution**, fired explicitly by
+HPAC-PAWA-HELPER-REQ-130 ("introducing any new internal writer-authority
+derivation / mint mechanism, even if narrowly scoped, closed-vocabulary-bound,
+and never exported, is a MAJOR change requiring explicit human authorization
+and independent verification") — a literal trigger the v2.0 freeze itself
+pre-declared for exactly this situation, not a re-derived judgment call. The
+externally-visible wire vocabulary (§11-§17), the three operation ids, the
+five certification roles, the three admin-mutation subtypes, and every
+`pawa_failure_code` mapping are **UNCHANGED**; only the internal
+mint-pathway architecture and the store-recognition mechanism are replaced.
+See §30B.9 for the full versioning rationale (why REQ-130 controls the
+classification even though the external contract surface alone would have
+been MINOR-shaped).
+
+v2.0's own §30A specification (Model D: `_mint_helper_scoped_writer_capability`
+as a sibling primitive inside the shared `hpac_foundation` module) is
+**preserved immutably below as history** and is **SUPERSEDED, NOT DELETED**:
+a fresh independent verification
+(`docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_IV.md`, alias
+**N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV**) found it
+**NOT VERIFIED / BLOCKED** on two independently source-confirmed defects (see
+§30B.1 for the verbatim reconstruction). Model D's specification MUST NOT be
+implemented; the repaired Model E hybrid of §30B is the sole forward-
+authorized pathway for a future implementation phase.
 **Frozen by:** Phase
 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH**) — Helper-Scoped
@@ -1586,6 +1614,568 @@ into general protected-writer authority.
   phase-authorization prompt).
 
 
+## 30B. Writer-Authority Repair (v3.0): Helper-Process-Isolated Mutation Facades (Model E)
+
+This section is the v3.0 MAJOR addition. It repairs the two defects a fresh
+independent verification found in v2.0's §30A (Model D), preserved there
+immutably. Section 30A's text above is **not** edited by this section; it
+remains the historical record of the specification that was frozen, found
+NOT VERIFIED, and is now superseded.
+
+### 30B.1 Predecessor status and defect reconstruction (immutable finding, reproduced verbatim from source)
+
+`docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_IV.md` reached
+**COMPLETE — NOT VERIFIED / BLOCKED** on Model D. Its central finding (§7 of
+that document), independently source-confirmed against
+`src/pcae/core/hpac_foundation.py`:
+
+> `_mint_production_writer_capability` (`hpac_foundation.py:753-780`) … calls
+> **none** of `_run_recognition_sequence`, `_detect_caller_module`,
+> `_verified_production_caller_name`, or `AUTHORIZED_FACTORY_CONSUMERS` — that
+> machinery exists **one layer up**, in `hpac_protected_admin_writer.py`'s
+> `production_writer()` factory wrapper, not in the primitive itself. The
+> primitive's only caller-facing gate is object-identity equality against
+> `_PRODUCTION_WRITER_FACTORY_SEAL`, which is confirmed at
+> `hpac_foundation.py:124` to be a **bare, unprotected module-level global**:
+> `_PRODUCTION_WRITER_FACTORY_SEAL = object()`. … any ordinary Python code
+> that already has `hpac_foundation` imported (which the contract's own
+> `HPAC-PAWA-HELPER-REQ-129`/§30A.4 discloses is already true of
+> agent-reachable code, since `hpac_foundation` is shared with the
+> agent-reachable read-path module `hpac_pawa_helper_store_adapter.py`) can
+> read `_PRODUCTION_WRITER_FACTORY_SEAL` via ordinary `getattr` and pass it to
+> `_mint_production_writer_capability` directly, skipping the entire §33
+> eleven-step recognition sequence.
+
+And its threat-matrix-completeness finding (§15 of that document), quoted
+verbatim — the **two clear gaps**:
+
+> 1. **No threat-matrix row addresses "ordinary process invokes the
+>    low-level mint primitive directly, bypassing the higher-level factory's
+>    recognition sequence"** — the closest rows (row #1, "ordinary caller
+>    constructs a scoped authority object directly"; row #22, "ordinary
+>    caller influences a helper-local registry/seal") do not cover this
+>    distinct attack shape: reading (not influencing) an already-instantiated
+>    real seal and calling the mint primitive with it. …
+> 2. **No threat-matrix row addresses "role/subject field mutation on an
+>    already-legitimately-issued capability by its own holder"** — the actual
+>    mitigation for this exists (registry-bound scope dominates mutable
+>    fields, §8 above), but no row names the attack.
+
+**HPAC-PAWA-HELPER-REQ-141.** These two defects, and the NOT VERIFIED /
+BLOCKED verdict itself, are preserved immutably as the record this repair
+answers. This section does not re-litigate whether Model D's specification
+text was internally coherent (it was, per the IV's own §1-§14 verdicts) —
+only its two identified BLOCKING defects.
+
+**HPAC-PAWA-HELPER-REQ-142.** Model D's mint pathway (`REQ-115` through
+`REQ-140`, `PAWAH-INV-11..18`, §30A) remains, as of this repair, **absent**
+from `src/pcae/**` (independently re-confirmed by repo-wide grep at repair
+time: `_mint_helper_scoped_writer_capability`, `_HELPER_WRITER_FACTORY_SEAL`,
+and `hpac_pawa_helper_writer_authority` do not exist anywhere under
+`src/pcae/**`). It is **superseded specification history**, not a live
+pathway; it SHALL NOT be implemented. A future implementation phase
+implements **this** section's Model E hybrid instead.
+
+### 30B.2 Model re-comparison and selection (Model E — hybrid of B and C)
+
+Phase-authorization §12 permits an "other" model (Model E) only if it is
+**both stronger and simpler** than a repaired A/B/C/D, by combining B's and
+C's strengths. Re-evaluated at repair time, against the root cause identified
+above (the failure was **architectural placement** — a same-interpreter
+object-identity seal can never be a real trust boundary once attacker-
+reachable Python shares that interpreter — not a missing individual check):
+
+| Model | Description | Disposition at repair time |
+|---|---|---|
+| **A** — helper-local scoped capability mint | (as §30A.1) an unexportable, operation-scoped authority object constructed post-admission | still subsumed; does not by itself address *where* the mint code executes |
+| **pure repaired D** — tightened seal + a caller-identity check moved into `_mint_production_writer_capability` itself (the IV's own §19 characterization) | adds a frame/module-provenance check *inside* the primitive, still living in the shared `hpac_foundation` module | **rejected**: this is still an in-process, same-interpreter check — stronger than a bare seal, but still a convention-strength control the phase-authorization's own standard (§13: *"failure must rely on non-forgeable/process-local trust state, not a convention"*) treats as insufficient once the gating code shares a process with attacker-reachable code. It repeats Model D's root-cause mistake at one layer's remove. |
+| **pure B** — helper-only mutation facades (canonical stores expose helper-specific entrypoints) alone | (as §30A.1) new store-layer entrypoints per canonical store | **rejected alone**: solves *where the mint call is reachable from* (process boundary) but, without a distinguishing authority type, still hands the store the **same** `HPACWriterCapability` class Model D produced — the store still cannot mechanically tell a helper-scoped from a legacy-broad capability (defect 2 persists) |
+| **pure C** — store-local internal authority constructor, one per store | (as §30A.1) each store mints its own permit from a verified helper-admission context | **rejected alone**: gives every capability a distinguishing authority family (closes defect 2) but does not by itself relocate the *mint-eligibility gate* out of a shared, agent-reachable module (defect 1 persists) unless *also* confined to the helper process |
+| **E (SELECTED)** — hybrid of B + C: **helper-process-isolated mutation facades**, each minting **and** performing its bounded mutation in one call, entirely inside the already-isolated one-shot helper subprocess (B's placement), where each facade's authority is a distinct, non-shared-base-recognized authority family with an explicit store-side recognition predicate (C's typing) | three narrow, closed, typed facades: `mint_and_perform_admin_mutation`, `mint_and_perform_certification_write`, `mint_and_perform_presentation_evidence_write` | **SELECTED** — closes both defects **simultaneously**: defect 1 by moving mint-eligibility to a real OS-process boundary (not a bigger in-process convention); defect 2 by giving the store a mechanical, non-isinstance way to recognize which pathway produced a capability |
+
+**HPAC-PAWA-HELPER-REQ-143.** **Selection rationale.** Model E is simpler
+than a fully generalized Model B (only three facades, not one per canonical
+store call site — reusing the existing five-store read enumeration of §15 is
+not required because these are write-only facades bound to the exact three
+v1.0-blocked operations) and stronger than either B or C alone, because it
+answers the phase-authorization's own diagnostic question directly: *"how
+does a mint call prove `PRODUCTION`-class, helper-admitted,
+operation/role-scoped authority without importing the legacy factory"* — by
+(a) never being reachable outside the helper subprocess at all (a hard OS
+boundary, not a checkable token) and (b) being typed so the store's
+acceptance predicate does not have to trust convention to distinguish it from
+legacy authority.
+
+### 30B.3 Mint eligibility and the OS-process trust mechanism
+
+**HPAC-PAWA-HELPER-REQ-144.** **Physical relocation, not a new convention.**
+The three facades, their sole seal, and the low-level mint entrypoint they
+call are defined in a **new module**, `pcae.core.hpac_pawa_helper_writer_authority`
+(the module name provisionally reserved by REQ-131 for a "caller"; under this
+repair it is the **exclusive owner of the mint primitive itself**, not merely
+its caller — this supersedes REQ-131's Model-D-specific location choice for
+the repaired pathway; REQ-131's own text is unchanged, historical). This
+module is imported **only** by the privileged one-shot helper's own dispatch
+code (`pcae.core.hpac_pawa_helper_operations`'s `CLOSED_DISPATCH_TABLE`, which
+already executes exclusively inside the `exec`'d helper child per
+HPAC-PAWA-HELPER-REQ-031) — **never** by `pcae.core.hpac_foundation`, **never**
+by `pcae.core.hpac_protected_admin_writer`, **never** by any read-path,
+CLI, plugin, or runtime module, and **never** by the launcher (§26 threat
+model). This is a specification for the implementation phase (§31
+discipline); no such module is created by this contract-only repair.
+
+**HPAC-PAWA-HELPER-REQ-145.** **The mint-eligibility boundary is OS-process
+absence-of-shared-memory, not an in-process check.** Because the new module
+is never imported on any code path reachable from the configured agent
+principal's own process, its module-level seal object (an `object()`,
+constructed once per process at import time, exactly like
+`_PRODUCTION_WRITER_FACTORY_SEAL`) is **never instantiated in, and therefore
+never readable from, the agent's own interpreter** — there is no shared
+address space across which a `getattr` could ever retrieve it, unlike the
+v2.0 defect where the seal-defining module (`hpac_foundation`) was already
+loaded in the agent's own process for unrelated (read-path) reasons.
+"Ordinary configured-agent Python" is excluded by **literal absence of the
+object**, not by a name, a leading underscore, an import-discipline
+convention, or a checkable-but-forgeable token. This is the exact standard
+phase-authorization §13 requires ("non-forgeable/process-local trust state,
+not a convention") and directly repairs defect 1 (§30B.1): there is no
+`getattr`-style bypass across a genuine OS process boundary the way there was
+across modules sharing one interpreter.
+
+**HPAC-PAWA-HELPER-REQ-146.** **Process-local seal retained, defense-in-depth
+only, never the sole boundary (PAWAH-INV-19).** Inside the helper process,
+each facade MAY additionally gate its own call into the mint primitive with a
+process-local seal — created **fresh per helper-process invocation**, closed
+over the facade's own call frame, **never** a module-level global, **never**
+exported, and destroyed at process exit. This mirrors defense-in-depth
+practice elsewhere in this codebase (e.g. the process-local issuance registry
+added to `require_writer` after a bare seal-identity check was found
+insufficient, `hpac_foundation.py:825-834`) but is explicitly **not** treated
+as sufficient by itself — the primary boundary is §145's OS-process
+exclusion, and this contract states that explicitly rather than leaning on
+the seal the way v2.0's Model D did (which would repeat Model D's mistake at
+a smaller scale, per phase-authorization guidance).
+
+**HPAC-PAWA-HELPER-REQ-147.** **No second trust root (PAWAH-INV-17,
+reaffirmed).** The real trust root remains OS filesystem write authority over
+`<HPAC_PROTECTED_ROOT>` (§3), re-validated on every mint via `_ensure_root` /
+`_validate_production_boundary` exactly as today. Each facade still calls
+down into `HPACStoreAuthority` (or a narrowly-scoped sibling construction
+path) which still re-checks that boundary; the facade module introduces no
+independent root, credential, or bootstrap authority of its own.
+
+### 30B.4 Store recognition mechanism — distinct, non-isinstance authority families
+
+**HPAC-PAWA-HELPER-REQ-148.** **Three new, distinct authority classes.**
+`HelperAdminMutationAuthority`, `HelperCertificationWriteAuthority` (closed
+over the five-role vocabulary of §14.2 with **no** role wildcard —
+PAWAH-INV-13 tightened), and `HelperPresentationEvidenceAuthority` are
+specification-only new types (not authored in this contract-only phase),
+each constructed **exclusively** by its own facade in the new module (§30B.3)
+under that facade's own process-local seal. None subclasses the legacy
+`HPACWriterCapability` in a way that would let it satisfy a bare
+`isinstance(x, HPACWriterCapability)` check; if a shared base class is used
+at all for code reuse (e.g. a common non-serializable-slots mixin), the
+store's recognition predicate SHALL use an exact-type or sealed-family check
+(`type(x) is HelperCertificationWriteAuthority`, never `isinstance(x,
+SharedBase)`), so that neither direction of confusion is possible: a
+helper-scoped authority can never satisfy legacy broad-writer recognition,
+and a legacy broad writer can never satisfy a helper-scoped recognition
+predicate.
+
+**HPAC-PAWA-HELPER-REQ-149.** **Store-side recognition predicates.** Each
+authority family has its own explicit recognition predicate —
+`recognize_helper_admin_mutation(store, authority, *, mutation, subject)`,
+`recognize_helper_certification_write(store, authority, *, role, subject,
+session_id)`, `recognize_helper_presentation_evidence_write(store, authority,
+*, invocation_id, attempt_id)` — that is **not** a bare
+`isinstance(x, HPACWriterCapability)` test and does **not** delegate to
+`require_writer`'s existing role/subject-registry check as its *only*
+mechanism (though it MAY reuse the existing process-local issuance registry
+as an *additional* defense-in-depth layer, exactly as §146 permits for the
+seal). This is the mechanical, structural answer to defect 2 (§30B.1): the
+store no longer has "no concept of which mint entrypoint produced this
+capability" — the **type itself** is the provenance marker, checked at
+recognition time, not a decorative field on a shared object.
+
+**HPAC-PAWA-HELPER-REQ-150.** **Target/request/installation-generation/
+currentness binding enforced at the recognition predicate.** Each recognition
+predicate SHALL check, as explicit fields compared against the live
+protected-root state at recognition time (not merely at mint time, closing
+the gap that a mint-time-only check would leave to the store layer to
+enforce identically to the legacy path per §30A.6): the bound `session_id` /
+`request_id` / `nonce`; the `installation_id` and `generation` against the
+current-generation anchor; and the exact operation/role/subtype/subject the
+authority was minted for. Any mismatch → the existing `pawa_failure_code`
+mapping (§30B.7), never a partial or best-effort acceptance.
+
+**HPAC-PAWA-HELPER-REQ-151.** **No shared-base `isinstance` escape
+(PAWAH-INV-20).** A capability minted for `certification_write` role R (type
+`HelperCertificationWriteAuthority`) cannot satisfy
+`recognize_helper_admin_mutation`, `require_writer` (the legacy path), or any
+other family's predicate, because acceptance requires an exact-type match,
+not a shared ancestor. This directly answers the IV's characterization of
+Model D's own capability shape as "classification D … same runtime class with
+a different provenance, indistinguishable to the store" (§30B.1) — the
+repaired design is classification **A/B** from the IV's own §10 list (a
+genuinely distinguishable type), not classification D.
+
+### 30B.5 Per-operation facade specification
+
+**HPAC-PAWA-HELPER-REQ-152.** Each facade both **mints and performs** its
+exact bounded mutation in **one call**, entirely within the helper subprocess
+— there is **no** generic `helper_write(store, method, args)` broker (banned
+identically to §25 / PAWAH-INV-15). `operation_params` for each facade is the
+**same closed typed struct** already frozen by §57 (admin mutations) / §14.2
+(certification roles) / §17 (presentation evidence) — no new field, no new
+shape, no wire-visible change (consistent with the "external vocabulary
+unchanged" versioning premise of §30B.9).
+
+**HPAC-PAWA-HELPER-REQ-153.** `mint_and_perform_admin_mutation(mutation,
+subject, *, session_id, request_id, nonce, installation_id, generation)`
+mints a `HelperAdminMutationAuthority` scoped to exactly one member of the
+closed §57 mutation enum and performs that one HPAC-PAWA-001 §42 mutation
+class, identically in effect to §14.1's existing description, through the
+same canonical stores' writer-transaction semantics.
+
+**HPAC-PAWA-HELPER-REQ-154.** `mint_and_perform_certification_write(role,
+subject, *, session_id, request_id, nonce, installation_id, generation)`
+mints a `HelperCertificationWriteAuthority` scoped to exactly one member of
+the closed five-role allowlist (§14.2 — `hpac_lifecycle_terminator` is still
+explicitly not a member) and performs that one HPAC-PAWA-001 §42B per-role
+bounded action.
+
+**HPAC-PAWA-HELPER-REQ-155.** `mint_and_perform_presentation_evidence_write(
+invocation_id, attempt_id, *, session_id, request_id, nonce, installation_id,
+generation)` mints a `HelperPresentationEvidenceAuthority` scoped to the exact
+ceremony `(invocation_id, attempt_id)` and performs the one create-only
+`HPAC-PRESENTATION-EVIDENCE/2.0` write after one valid `APPROVE`
+(HPAC-PAWA-HELPER-REQ-070/071/072 unchanged).
+
+**HPAC-PAWA-HELPER-REQ-156.** **Certification-role mechanical exclusivity
+(restated for the new family, PAWAH-INV-13 tightened).** A
+`HelperCertificationWriteAuthority` minted for role R carries `role = R`
+immutably (no caller-reachable setter); `recognize_helper_certification_write`
+rejects any role mismatch. Mirrors and tightens REQ-125.
+
+**HPAC-PAWA-HELPER-REQ-157.** **`admin_mutation` subtype exclusivity
+(restated).** A `HelperAdminMutationAuthority` minted for `mutation = M`
+carries exactly the scoped subject the existing §42 per-mutation store call
+requires for `M`; no broader "any admin mutation" authority is ever minted.
+Mirrors and tightens REQ-126.
+
+**HPAC-PAWA-HELPER-REQ-158.** **Presentation-evidence create-only /
+single-purpose (restated).** Unchanged from REQ-127; the
+`HelperPresentationEvidenceAuthority` adds only the missing writer authority,
+never altering the existing create-only / non-forgeable-approval semantics.
+
+**HPAC-PAWA-HELPER-REQ-159.** **Helper-installation authority excluded
+(restated).** Unchanged from REQ-128: the `admin_mutation` facade's
+`configure_privileged_helper` binding covers only the existing bounded
+metadata-registration mutation — no authority to install, replace, `chmod`,
+`chown`, or otherwise mutate helper executable bytes.
+
+### 30B.6 Replay ordering, currentness, and no-auto-retry — reuse, not reinvention
+
+**HPAC-PAWA-HELPER-REQ-160.** **Replay-ledger integration.** Each facade's
+post-mint consumption step SHALL plug into the **same** durable, cross-process
+replay reservation-then-commit protocol already implemented in
+`src/pcae/core/hpac_pawa_helper_replay_state.py` for read operations (the
+`(installation_id, generation, request_id, nonce)`-keyed reservation records
+under `<HPAC_PROTECTED_ROOT>/pawa-helper/`) — **no parallel replay mechanism**
+is introduced for the new write facades (PAWAH-INV-24). The mint call is
+placed identically to §30A.6's placement, strictly between
+`OPERATION_ADMITTED` and `MUTATION_ATTEMPT_STARTED`:
+
+```
+REQUEST_RECEIVED -> REQUEST_AUTHENTICATED -> OPERATION_ADMITTED
+  -> [replay reservation via hpac_pawa_helper_replay_state, this section]
+  -> [facade mint-and-perform, §30B.5]
+  -> MUTATION_ATTEMPT_STARTED -> MUTATION_COMMITTED -> EVIDENCE_WRITTEN -> RESPONSE_EMITTED
+```
+
+**HPAC-PAWA-HELPER-REQ-161.** **Currentness (restated, unchanged
+responsibility split).** Identically to REQ-135: if the installation/
+generation anchor rotates between the facade's mint-and-perform call and the
+canonical-store write's own currentness check, the existing store/record
+layer's own check (unchanged) rejects the write; the facade's own §150
+binding does not re-check currentness a second time at store-write commit.
+
+**HPAC-PAWA-HELPER-REQ-162.** **No-auto-retry preserved (restated).**
+Identically to REQ-136: a spent single-use facade-minted authority cannot be
+reused for a retry; the caller reconciles against durable protected-root
+evidence exactly as for every other mutating operation.
+
+**HPAC-PAWA-HELPER-REQ-163.** **Failure-code mapping — no new code
+(restated, extended).** Every new denial mode this section introduces maps
+onto the **existing** 21 `pawa_failure_code` values: authority-family type
+mismatch at recognition (§149) → `target_scope_invalid`; a mint attempt
+outside the §160 replay window → `capability_stale`; closed-enum violation
+at mint (§150/§119-equivalent) → `operation_scope_invalid`; installation/
+generation disagreement at mint → `descriptor_installation_mismatch` /
+`descriptor_generation_stale`; an internal facade invariant failure (e.g. a
+non-`PRODUCTION` authority class reaching a facade) → `internal_fail_closed`.
+No new `pawa_failure_code` is added (REQ-004 preserved).
+
+### 30B.7 Deterministic-vs-real separation (reaffirmed)
+
+**HPAC-PAWA-HELPER-REQ-164.** Each facade requires
+`self.authority_class is HPACAuthorityClass.PRODUCTION` before minting,
+identical in spirit to `_mint_production_writer_capability`'s own check. A
+`FIXTURE_NON_REAL`-class authority — the only class a deterministic test
+helper context can ever hold — SHALL raise and mint nothing through any of
+the three facades. Restates REQ-138 for the new family.
+
+### 30B.8 Two-path coexistence and no-fallback (extended)
+
+**HPAC-PAWA-HELPER-REQ-165.** **Legacy path and superseded Model D both
+remain not implemented / not to be implemented.** The legacy in-process
+`production_writer` / `certification_writer` /
+`mint_protected_presentation_evidence_writer` factories
+(`pcae.core.hpac_protected_admin_writer`) are **not removed, retired, or
+altered** by this repair (unchanged from REQ-140). Model D's specification
+(§30A) is superseded and MUST NOT be implemented (§30B.1). The **only**
+forward-authorized new pathway is this section's Model E hybrid.
+
+**HPAC-PAWA-HELPER-REQ-166.** **No fallback on facade failure
+(PAWAH-INV-23).** A facade mint-and-perform failure is **terminal** for that
+request; the caller reconciles or issues a fresh request exactly as for any
+other mutating-operation failure. There is no implicit fallback to the
+legacy in-process factory and no implicit fallback to an ad hoc
+reimplementation of Model D's superseded specification. Extends PAWAH-INV-18
+to name the superseded pathway explicitly.
+
+### 30B.9 Versioning rationale — why v3.0, not v2.1
+
+**HPAC-PAWA-HELPER-REQ-167.** Considered purely against the external-surface
+MINOR criteria of §108 (a bounded addition, no wire schema change, no new
+operation id, no new failure code, consumed only by already-enumerated
+consumers), this repair would be MINOR-shaped: §11-§17's wire schemas, the
+three operation ids, the five certification roles, the three admin-mutation
+subtypes, and the `pawa_failure_code` mapping are all byte-unchanged.
+**However**, HPAC-PAWA-HELPER-REQ-130 (added by v2.0 specifically to close
+this future classification question) states, without qualification, that
+*"introducing any new internal writer-authority derivation / mint mechanism,
+even if narrowly scoped, closed-vocabulary-bound, and never exported, is a
+MAJOR change requiring explicit human authorization and independent
+verification."* This repair does exactly that (it replaces Model D's
+specification with Model E's). REQ-130 is a literal, already-frozen,
+unconditional trigger — honoring it is more conservative and more faithful to
+this repository's evolution discipline than re-deriving a MINOR classification
+from the external-surface criteria alone. **Decision: v2.0 -> v3.0, MAJOR.**
+
+**HPAC-PAWA-HELPER-REQ-168.** No `src/pcae/**` code exists implementing
+either Model D or Model E as of this repair (confirmed by repo-wide grep,
+§30B.1); this MAJOR version bump governs a **specification** change only,
+identically in scope to how v1.0 -> v2.0 governed a specification-only MAJOR
+change (§30A).
+
+### 30B.10 PAWA and PPA cross-contract impact adjudication
+
+**HPAC-PAWA-HELPER-REQ-169.** **HPAC-PAWA-001 remains v2.0, byte-unchanged**
+by this repair. The authority decision ("is this a trusted production
+consumer?") stays owned by HPAC-PAWA-001 §32/§33/§33B (REQ-006, unchanged);
+this repair supplies only a corrected mechanism for the *derivation* of
+writer authority *after* that decision, fully contained within
+HPAC-PAWA-HELPER-001's own delegated scope. No trust-predicate or authority-
+family concept HPAC-PAWA-001 itself defines is altered, widened, or narrowed
+by this section — the three new authority-family types are internal to
+HPAC-PAWA-HELPER-001's own mechanism layer. **Finding: no HPAC-PAWA-001
+evolution needed.**
+
+**HPAC-PAWA-HELPER-REQ-170.** **HPAC-PPA-001 remains v2.0, byte-unchanged**
+by this repair. §17's open cross-contract question (whether
+`presentation_evidence_write`'s authority-derivation location is within
+HPAC-PPA-REQ-041/070's existing bounds, or needs a fresh HPAC-PPA-001
+evolution) is **unaffected and unresolved by this section** — it remains
+exactly the question §17 already assigns to a dedicated contract IV
+(N16-5-F-5-TB-CONTRACT-IV or its successor). This repair's
+`HelperPresentationEvidenceAuthority` facade (§30B.5) changes only *where the
+mint primitive is defined and what type it produces*, not *which process
+performs the write* (already the out-of-process presentation helper, per
+HPAC-PPA-001 §6/§7, unchanged) — so it does not itself newly bear on that
+open question either way. **Finding: no HPAC-PPA-001 evolution needed by this
+repair; the pre-existing open question is explicitly carried forward, not
+silently dropped, per phase-authorization §56/§57's "if a trust predicate or
+authority family changes leak upward, evolve narrowly" discipline — this
+repair concludes no such leak occurs.**
+
+### 30B.11 Threat matrix (v3.0 — merged and extended; §44 of the phase-authorization prompt)
+
+Rows 1-30 are reproduced unchanged from the v2.0 architecture record
+(`docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_ARCH.md` §10) —
+every mitigation cited there for "all"/"A/D"/"D" models applies identically
+to the Model E hybrid, since Model E reuses the same `HPACWriterCapability`-
+family primitives (`__reduce__`, `__slots__`, single-use/`_spent`, the
+existing response schema) for its own new authority types. Rows 31-40 are new
+to this repair: rows 31-32 close the two predecessor-IV gaps (§30B.1); rows
+33-40 name the attack shapes the Model E hybrid architecture itself
+introduces and must defend. **Final count: 40** — the ≥36 floor of
+phase-authorization §44 is met by 30 inherited + 2 predecessor-gap closures +
+8 architecture-specific rows the hybrid design newly requires (process-
+boundary-as-primary-vs-seal-as-defense-in-depth split; per-family
+non-isinstance recognition; no-shared-base escape; module-relocation
+boundary; replay-reuse-not-reinvention; no-fallback-to-superseded-D-or-legacy;
+second-broad-trust-root rejection for the new family cluster; and the
+module-boundary REQ-033 disposition itself) — not a padded count.
+
+| # | Attack | Affected model(s) | Mitigation (frozen) | Future test |
+|---|---|---|---|---|
+| 1 | Ordinary caller constructs a scoped authority object directly | A/D | `HPACWriterCapability.__init__` requires `_seal is _WRITER_CONSTRUCTOR_SEAL`, never exported; the new mint entrypoint is the only path (§30A.2) | guard test: no non-mint construction succeeds |
+| 2 | Request forges `operation` | all | §119 closed enum at mint time; unknown → `operation_scope_invalid`, no mint | vocabulary-closure test |
+| 3 | Certification role A capability used for role B store action | B/C/D | `role` field bound at mint (§119); per-role store checks unchanged (§125) | role-mismatch rejection test |
+| 4 | Admin subtype A capability used for subtype B | all | §119/§126 closed subtype binding | subtype-mismatch rejection test |
+| 5 | Authority reused for a second request | all | single-use (`_spent`), request-bound (§121); `capability_stale` on reuse | replay test |
+| 6 | Authority reused after helper restart | all | process-local seal + registry destroyed at exit (§123, PAWAH-INV-16) | restart-dead test |
+| 7 | Authority serialized into the response | all | §124/PAWAH-INV-11; `__reduce__` raises; response schema (§12) has no authority field | export-guard test |
+| 8 | Authority persisted to disk | all | §124; never written to replay store/audit/env/cache | persistence-guard test |
+| 9 | Authority copied/deepcopied | all | `__reduce__` raises `TypeError`; `__slots__` prevents arbitrary attribute injection | copy-guard test |
+| 10 | Authority reconstructed from response fields | all | response carries only `decision`/`evidence_ref`/`evidence_digest`/`result_payload` (§12, unchanged) — no reconstructable field set | field-inventory test |
+| 11 | Arbitrary target id substituted | all | §119 `subject` bound to the exact resolved target; store-layer target validation unchanged | subject-binding test |
+| 12 | Generation rotated after mint | all | §121 binds installation/generation at mint; §30A.6/§30B.6 store-write-time currentness check (existing, unchanged) rejects a rotated-generation write | currentness test |
+| 13 | Helper installation changed after mint | all | same as #12 (installation_id bound at §121) | installation-mismatch test |
+| 14 | Replay conflict after mint | all | §20/§21 state model unchanged; `MUTATION_ATTEMPT_STARTED` boundary unaffected by which mint entrypoint produced the capability | conflicting-replay test |
+| 15 | Partial write then automatic retry | all | §20-23 no-auto-retry unchanged; §136/§162 reaffirms | no-auto-retry test |
+| 16 | Presentation evidence overwritten | D/E (presentation_evidence_write) | existing create-only store semantics unchanged (§127/§158); this phase supplies authority only | overwrite-rejection test |
+| 17 | Presentation evidence written without a genuine APPROVE | D/E | HPAC-PAWA-HELPER-REQ-071 unchanged — request cannot self-assert `approved=true` | self-assertion-rejection test |
+| 18 | Generic filesystem path supplied to the mint call | all | §119 has no free-path field; `subject` is a resolved id, never a path | schema-closure test |
+| 19 | Arbitrary canonical store selected | all | store recognition unchanged/extended (§123/§149); the mint call itself selects no store | dispatch-mapping test |
+| 20 | Generic mutation callable invoked via the new pathway | all | §133/PAWAH-INV-15; §119/§150 closed enum is the only mint surface | no-generic-broker test |
+| 21 | Helper imports the legacy `hpac_protected_admin_writer` factory | all | REQ-033 unchanged, reaffirmed by §30A.4/§30B.4(REQ-033 disposition below) | import-allowlist test |
+| 22 | Ordinary caller influences a helper-local registry/seal | all | §30A.5/§30B.3: new module never imported by agent-reachable code | process-isolation regression |
+| 23 | Helper response leaks a permit | all | §12/§124 unchanged — response schema has no capability field | response-schema test |
+| 24 | Exception / log leaks authority | all | §124 — no logging of capability objects | log-redaction test (future) |
+| 25 | Authority survives helper exit | all | PAWAH-INV-16 — process memory only | restart-dead test (shared with #6) |
+| 26 | Deterministic test authority accepted as REAL | all | §138/§164 — `authority_class is not PRODUCTION` → `HPACAuthorityError` | deterministic-vs-real test |
+| 27 | Admin authority used for certification write | all | disjoint `operation` binding at mint (§119); disjoint **type** for E (§148) | cross-operation-rejection test |
+| 28 | Certification authority used for admin mutation | all | same as #27 | cross-operation-rejection test (shared) |
+| 29 | Evidence authority used for a general store write | D/E | `subject`/`role` bound to the exact ceremony (§127/§155); no general-write role is ever minted | scope-rejection test |
+| 30 | New helper authority becomes a second broad trust root | all | §132/PAWAH-INV-17 | no-second-root structural test |
+| **31** | **Ordinary process invokes the low-level mint primitive directly, reading (not influencing) an already-instantiated real seal** — predecessor-IV gap #1, §30B.1 | D (superseded) | **E**: the mint primitive and its seal are never loaded into any process that shares memory with agent-reachable code (§145) — the primitive is simply **absent** from that process's address space, not merely gated by a readable attribute | process-import-graph structural test: no agent-reachable module transitively imports `hpac_pawa_helper_writer_authority` |
+| **32** | **Role/subject field mutation on an already-legitimately-issued capability by its own holder** — predecessor-IV gap #2, §30B.1 | all | recognition is keyed on registry/type membership, never on the object's own mutable fields (§149-§151, extends the existing `hpac_foundation.py:825-834` registry-dominates-mutable-fields pattern to the new families) | field-mutation-after-issuance rejection test |
+| 33 | Facade treats its own process-local seal (§146) as sufficient by itself, omitting the §145 process-boundary check | E | contract text explicitly designates §145 as primary and §146 as defense-in-depth-only (PAWAH-INV-19); a structural test asserts the contract does not describe the seal as sufficient alone | contract-text assertion test (no "seal alone suffices" claim present) |
+| 34 | A helper-scoped authority object is accepted by a bare `isinstance(x, HPACWriterCapability)` check somewhere in the store layer | E | §148/§151 (PAWAH-INV-20): recognition predicates use exact-type/sealed-family checks, never base-class `isinstance`; a structural/guard test enumerates every acceptance predicate | isinstance-escape structural test |
+| 35 | A legacy broad `HPACWriterCapability` is accepted by a helper-scoped recognition predicate (the reverse-direction confusion) | E | §151 explicitly two-directional; exact-type check rejects a legacy instance at a helper-scoped predicate | reverse-confusion rejection test |
+| 36 | The new mint primitive is left inside (or later moved back into) the shared `hpac_foundation` module, recreating defect 1 at the next evolution | E | §144/REQ-033 disposition below designates the module boundary as a normative property of this contract, not an implementation accident, so a future regression is a **contract violation**, not merely a code-review miss | module-location structural test (asserts the mint primitive's defining module, not merely its caller, is helper-process-exclusive) |
+| 37 | A future facade failure silently falls back to Model D's superseded specification (rather than the legacy factory) as an "obvious" repair path | E | §166/PAWAH-INV-23 explicitly names Model D's specification as a forbidden fallback target, not only the legacy factory | no-fallback-to-superseded-model test |
+| 38 | The new write facades invent a second, parallel replay/reservation mechanism instead of reusing the existing durable ledger | E | §160/PAWAH-INV-24: facades SHALL reuse `hpac_pawa_helper_replay_state`'s existing reservation-then-commit protocol; a structural test asserts no new replay-record schema is introduced | single-replay-mechanism structural test |
+| 39 | The three new authority-family types are treated, in aggregate, as a second general-purpose broad trust root (rather than three narrow, disjoint families) | E | §147/§169 — no second trust root; each family's mint-time closed enum (§150) is a strict subset, never a union, of the legacy factory's arbitrary `role: str` surface | no-second-root structural test (extended to the three-family cluster) |
+| 40 | REQ-033's module-exclusivity boundary is satisfied by convention (e.g. a code comment) rather than a checkable structural property | E | the REQ-033 disposition below requires the boundary to be independently verifiable by import-graph analysis, not by a docstring claim alone | import-graph independent-verifiability test |
+
+### 30B.12 Store-recognition matrix (authority family x canonical mutation surface — all non-listed cells DENY)
+
+| Authority family | `admin_mutation` write | `certification_write` (per-role) write | `presentation_evidence_write` | any other/unlisted store write |
+|---|---|---|---|---|
+| `HelperAdminMutationAuthority` | **PERMIT** (exact bound mutation subtype only, §150/§157) | DENY | DENY | DENY |
+| `HelperCertificationWriteAuthority` | DENY | **PERMIT** (exact bound role only, §150/§156) | DENY | DENY |
+| `HelperPresentationEvidenceAuthority` | DENY | DENY | **PERMIT** (exact bound ceremony only, §150/§158) | DENY |
+| legacy `HPACWriterCapability` (broad production, unmigrated callers) | PERMIT (unchanged, existing role/subject registry check, §123) | PERMIT (unchanged) | PERMIT (unchanged) | DENY (role/subject-registry-bound, unchanged) |
+| any other object / forged shell | DENY | DENY | DENY | DENY |
+
+### 30B.13 Certification five-role matrix (diagonal = PERMIT, off-diagonal = DENY)
+
+| minted for \ store gate | `hpac_challenge_coordinator` | `hpac_assertion_recorder` | `human_authentication_proof_verifier` | `hpac_gate5_binder` | `hpac_rhamp_counter_state_verifier` |
+|---|---|---|---|---|---|
+| `hpac_challenge_coordinator` | **PERMIT** | DENY | DENY | DENY | DENY |
+| `hpac_assertion_recorder` | DENY | **PERMIT** | DENY | DENY | DENY |
+| `human_authentication_proof_verifier` | DENY | DENY | **PERMIT** | DENY | DENY |
+| `hpac_gate5_binder` | DENY | DENY | DENY | **PERMIT** | DENY |
+| `hpac_rhamp_counter_state_verifier` | DENY | DENY | DENY | DENY | **PERMIT** |
+
+`hpac_lifecycle_terminator` is not a row or column — it is not a member of
+the closed five-role allowlist (§59, unchanged) and any attempted mint or
+recognition against it is DENY at the closed-enum boundary (§150), never
+reaching this matrix.
+
+### 30B.14 Admin-mutation subtype matrix (diagonal = PERMIT, off-diagonal = DENY)
+
+| minted for \ store gate | `enroll_principal` | `revoke_principal` | `enroll_credential` | `revoke_credential` | `initialize_credential_sidecar_state` | `configure_presentation_mechanism` | `configure_privileged_helper` |
+|---|---|---|---|---|---|---|---|
+| `enroll_principal` | **PERMIT** | DENY | DENY | DENY | DENY | DENY | DENY |
+| `revoke_principal` | DENY | **PERMIT** | DENY | DENY | DENY | DENY | DENY |
+| `enroll_credential` | DENY | DENY | **PERMIT** (`multi_write=True`, §122 unchanged) | DENY | DENY | DENY | DENY |
+| `revoke_credential` | DENY | DENY | DENY | **PERMIT** | DENY | DENY | DENY |
+| `initialize_credential_sidecar_state` | DENY | DENY | DENY | DENY | **PERMIT** | DENY | DENY |
+| `configure_presentation_mechanism` | DENY | DENY | DENY | DENY | DENY | **PERMIT** | DENY |
+| `configure_privileged_helper` | DENY | DENY | DENY | DENY | DENY | DENY | **PERMIT** (metadata-registration only, §159; never the helper executable bytes themselves) |
+
+### 30B.15 REQ-033 disposition (v3.0 — further narrowed; REQ-033's and REQ-129's own text unchanged)
+
+**HPAC-PAWA-HELPER-REQ-171.** HPAC-PAWA-HELPER-REQ-033's own text (§7) and
+HPAC-PAWA-HELPER-REQ-129's own text (§30A.4) remain **byte-unchanged** — this
+is a further **additive clarification**, the second one REQ-033 has
+received, made necessary because this repair is the first case where the
+exact **module boundary of the mint primitive itself** (not merely its
+caller) matters operationally:
+
+1. REQ-129 already established that `pcae.core.hpac_foundation` is not "the
+   in-process PAWA factory module" REQ-033 names, and that the helper may
+   import it for its closed type surface. That reading is **unaffected** by
+   this repair.
+2. **New clarification**: REQ-033's prohibition on the helper importing
+   "any agent-reachable module" for the §7 recognition logic is now
+   understood to apply with equal force to **the writer-authority-derivation
+   logic this repair adds** — and, going further than REQ-129 had to for
+   Model D, this repair holds that the **defining module of the low-level
+   mint primitive itself**, not only its immediate caller, SHALL be a module
+   that is never imported on any code path reachable from the configured
+   agent principal's own process. Model D's defect (§30B.1) arose precisely
+   because its mint primitive was specified to live in `hpac_foundation` — a
+   module REQ-129 correctly established as agent-reachable for reads. This
+   repair's facades and their mint primitive therefore live in the **new**,
+   genuinely helper-process-exclusive module (§30B.3), not in
+   `hpac_foundation`.
+3. This is **not** "reintroducing a second factory" in the sense the v1.0/
+   v2.0 contract forbade (§30A.5's own no-second-trust-root rationale
+   applies unchanged): there remains exactly **one** production-authority
+   trust root (§3, OS filesystem write authority) and **one** canonical
+   `HPACWriterCapability`-family construction discipline per store
+   (`require_writer`/`record_write`, unchanged, §123). What changes is
+   **where the helper-scoped facade code executes and is defined** — a
+   deployment/module-boundary fact — not the introduction of a second
+   authority root, a second bootstrap mechanism, or a second independently-
+   trusted party. The facade still terminates in the same
+   `HPACStoreAuthority` primitives, still re-validates the same
+   `<HPAC_PROTECTED_ROOT>` boundary, and still produces objects the same
+   `require_writer`-family discipline (extended per §149) recognizes.
+4. **Independent verifiability requirement (closes threat-matrix row 40).**
+   This module-boundary property SHALL be independently checkable by static
+   import-graph analysis (e.g. "no module reachable from
+   `pcae.cli`/`pcae.runtime`/any plugin entrypoint transitively imports
+   `pcae.core.hpac_pawa_helper_writer_authority`"), not asserted only by a
+   docstring or a code comment — mirroring the existing guard-test pattern
+   already used for `_PRODUCTION_TEST_FIXTURE_SEAL` (§26.2) and
+   `_HELPER_WRITER_FACTORY_SEAL` (§30A.5).
+
+## 30C. Security invariants added by v3.0 (PAWAH-INV-19 .. PAWAH-INV-24)
+
+- **PAWAH-INV-19.** **The OS-process boundary is the primary mint-eligibility
+  gate; a process-local seal is defense-in-depth only, never the sole
+  boundary.** The new mint primitive and its seal are defined in a module
+  never imported on any agent-reachable code path; any additional
+  process-local seal check inside the helper is supplementary, not
+  load-bearing by itself (§30B.3).
+- **PAWAH-INV-20.** **Helper-scoped authority families are recognized by
+  exact-type / sealed-family check, never bare `isinstance` against a shared
+  base class.** No helper-scoped authority can satisfy legacy broad-writer
+  recognition, and no legacy broad writer can satisfy a helper-scoped
+  recognition predicate, in either direction (§30B.4).
+- **PAWAH-INV-21.** **No authority-minting code is ever loaded into the
+  shared, agent-reachable `hpac_foundation` module.** The mint primitive and
+  its seal live exclusively in a helper-process-exclusive module; this is an
+  independently verifiable import-graph property, not a naming convention
+  (§30B.3, §30B.15).
+- **PAWAH-INV-22.** **Cross-role, cross-subtype, and cross-operation
+  isolation for the new authority families is enforced by construction (the
+  closed enum at mint, §150), never by a post-hoc filter.** Tightens
+  PAWAH-INV-12/13 for the new families (§30B.4/§30B.5).
+- **PAWAH-INV-23.** **No fallback from a repaired-pathway facade failure to
+  the superseded Model D specification or to the legacy in-process factory.**
+  A facade failure is terminal for that request (§30B.8).
+- **PAWAH-INV-24.** **Replay ordering for the new facades reuses the
+  existing durable cross-process replay ledger; no parallel replay mechanism
+  is introduced.** (§30B.6).
+
 ## 31. Testability requirements (specifications for future phases — not authored now)
 
 - **HPAC-PAWA-HELPER-REQ-110.** The frozen contract SHALL be independently
@@ -1699,6 +2289,17 @@ historical id block), no gaps, no duplicates within the v1.0 block
 **Invariant count (v2.0):** 18 — `PAWAH-INV-1` through `PAWAH-INV-10` (v1.0,
 §29) plus `PAWAH-INV-11` through `PAWAH-INV-18` (v2.0, §29).
 
+**Requirement count (v3.0):** HPAC-PAWA-HELPER-001 v3.0 defines **172**
+requirement items total: the v2.0 block (140 base items, `REQ-001` through
+`REQ-140`, plus lettered `114A` = 141 items) unchanged, plus
+`HPAC-PAWA-HELPER-REQ-141` through `HPAC-PAWA-HELPER-REQ-171` (31 new,
+§30B), sequential and contiguous from v2.0's 140, no gaps, no duplicates
+within the new block (141-171 = 31 items; 141 + 31 = 172 total).
+
+**Invariant count (v3.0):** 24 — `PAWAH-INV-1` through `PAWAH-INV-18` (v1.0/
+v2.0, §29, unchanged) plus `PAWAH-INV-19` through `PAWAH-INV-24` (v3.0,
+§30C).
+
 ## 34. Contract self-consistency statement
 
 This contract, at v2.0: (a) introduces no implementation dependency, in either
@@ -1732,6 +2333,20 @@ HPAC-PAWA-001 §42B / PAWA-INV-13 verbatim and weakens nothing, and §30A's
 role-scoping (PAWAH-INV-13) tightens it further, never loosens it; (f) leaves
 runtime `not_implemented` / `Observed` / `observe` / `unavailable` and the
 first external effect ABSENT.
+
+**v3.0 self-consistency addendum (§30B):** this MAJOR evolution (a) introduces
+no implementation dependency on `src/pcae/**` or `scripts/**` beyond
+specification-only normative references — no `hpac_foundation` change, no new
+module, is made by this contract-only repair; (b) does not amend HPAC-001
+v2.1, RHAMP-001 v1.0, HBDC-001 v1.2, HPAC-PAWA-001 v2.0, or HPAC-PPA-001 v2.0
+(§30B.10 impact adjudication: both remain byte-unchanged, independently
+confirmed via `sha256sum` matching their pre-repair values); (c) is internally
+traceable — `HPAC-PAWA-HELPER-REQ-141` through `REQ-171` are sequential with
+no gaps or duplicates, and `PAWAH-INV-19` through `PAWAH-INV-24` each appear
+in §30C exactly once; (d) resolves both defects the predecessor IV found
+(§30B.1) without re-opening any dimension that IV's own subsystem verdict
+table (§17 of that document) already marked VERIFIED; (e) supersedes, without
+deleting, v2.0's §30A Model D specification, which MUST NOT be implemented.
 
 ## 35. Freeze verdict
 
@@ -1782,3 +2397,36 @@ still blocked in production until a fresh contract IV plus implementation.
 N-16-5 remains **NOT CLOSED**. Runtime remains **Observed / observe /
 unavailable** with **0 plugins / 0 capabilities**. First governed runtime
 external effect remains **ABSENT / UNREACHABLE**.
+
+**v3.0 additionally FREEZES (§30B): REPAIRED / FROZEN — PENDING INDEPENDENT
+RE-VERIFICATION** (never claimed VERIFIED by this repair itself). v2.0's
+§30A Model D specification is preserved as history and is **superseded, not
+implemented, and must not be implemented**. The repaired pathway — **Model E,
+a hybrid of Model B (helper-only mutation facades) and Model C (store-local
+scoped permits)** — is selected: three narrow, closed, typed facades
+(`mint_and_perform_admin_mutation`, `mint_and_perform_certification_write`,
+`mint_and_perform_presentation_evidence_write`), each minting and performing
+its bounded mutation in one call, entirely inside the already-isolated
+one-shot helper subprocess, where the mint-eligibility boundary is the OS
+process's absence of shared memory with agent-reachable code (not a
+same-interpreter seal-identity convention), and each mint produces one of
+three distinct, non-shared-base-recognized authority types
+(`HelperAdminMutationAuthority`, `HelperCertificationWriteAuthority`,
+`HelperPresentationEvidenceAuthority`) recognized at the store layer by
+exact-type / sealed-family check, never bare `isinstance`. This repairs both
+defects the predecessor IV found NOT VERIFIED / BLOCKED (§30B.1): ordinary-
+process mint exclusion is now a real process boundary, and store recognition
+can now mechanically distinguish helper-scoped from legacy-broad authority.
+Threat matrix: **40 rows** (30 inherited + 2 predecessor-gap closures + 8
+architecture-specific new rows, §30B.11). REQ-033 disposition: a further
+additive clarification (§30B.15) — REQ-033's and REQ-129's own text
+unchanged — that the mint primitive's defining module, not only its caller,
+SHALL be helper-process-exclusive and independently import-graph-
+verifiable. Zero canonical-store recognition-mechanism ambiguity remains
+undisclosed. No new trust root, no new `pawa_failure_code`, no IPC export,
+no persistence, no legacy-factory or superseded-Model-D fallback. HPAC-PAWA-
+001 v2.0 and HPAC-PPA-001 v2.0 both remain byte-unchanged (§30B.10). Contract
+structural / source-fact tests only — **no production implementation**
+(none of the three facades, their authority types, or their defining module
+exist yet). `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` for
+this repair phase, preserved.
