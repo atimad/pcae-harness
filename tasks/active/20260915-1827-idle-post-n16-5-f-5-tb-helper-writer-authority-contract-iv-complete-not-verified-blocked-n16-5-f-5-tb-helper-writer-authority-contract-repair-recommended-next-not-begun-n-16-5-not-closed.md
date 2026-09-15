@@ -22,8 +22,10 @@ Idle placeholder awaiting the next explicitly human-authorized governed phase.
 
 ## Allowed Files
 
-- tasks/done/20260915-1736-n16-5-f-5-tb-helper-writer-authority-contract-iv-fresh-independent-verification-of-hpac-pawa-helper-001-v2-0-model-d-writer-authority-contract.md
-- tasks/active/20260915-1827-idle-post-n16-5-f-5-tb-helper-writer-authority-contract-iv-complete-not-verified-blocked-n16-5-f-5-tb-helper-writer-authority-contract-repair-recommended-next-not-begun-n-16-5-not-closed.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/013d3d40dba1c3011c131bf5c888df315da14a5dca0867cb2d871368a0379412.json
+- .pcae/fast-green-attribution/3437e4413855a2d53efabf76f7db5cc84f8c308b7b9cdd239584034a20ad18f8.json
 
 ## Forbidden Files
 
