@@ -2,84 +2,113 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-(alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH**) —
-Helper-Scoped Writer Authority Architecture and Contract Evolution for
-Protected Canonical Mutations. **COMPLETE — CONTRACT FROZEN, PENDING
-INDEPENDENT VERIFICATION.** CPIPC: valid direct `.1` successor of
-`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-(alias `N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV`) — independently
-derived and validated via `pcae.core.phase_id` by the primary operator
-(`is_valid` True on predecessor and candidate, `same_series`/`same_branch`
-True, `compare` = less, `equals` = False, unique against `git log --all` at
-entry) before task creation.
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV**) — Fresh
+Independent Verification of Helper-Scoped Writer Authority Contract
+Architecture. **COMPLETE — NOT VERIFIED / BLOCKED.** CPIPC: valid direct
+`.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH`) —
+independently derived and validated via `pcae.core.phase_id` by the
+primary operator (`is_valid` True on predecessor and candidate,
+`same_series`/`same_branch` True, `compare` = less, `equals` = False,
+unique against `git log --all` at entry) before task creation.
 
-Architecture + contract evolution only phase, resolving the writer-authority
-blocker preventing the protected one-shot helper (HPAC-PAWA-HELPER-001)
-from performing `admin_mutation`, `certification_write`, and
-`presentation_evidence_write`. Independently reconstructed the current
-writer-authority inventory, exact mint-path (legacy
-`hpac_protected_admin_writer.py` sealed factory gated by
-`_PRODUCTION_WRITER_FACTORY_SEAL`), and REQ-033's exact text/scope.
-Evaluated Models A-D; **selected Model D** — an evolved
-`HPACWriterCapability` minted via a second, additive, narrower low-level
-primitive gated by a new, distinct seal, owned by a new helper-only module,
-requiring **zero canonical-store production code changes** since store-side
-recognition (`require_writer`/`record_write`) already keys on seal identity
-plus a process-local issuance registry rather than mint entrypoint.
-Models A/B/C evaluated and rejected (A subsumed by D; B/C require larger,
-duplicated store-layer surface with no compensating security benefit).
+Fresh, independent adversarial verification of the frozen
+`HPAC-PAWA-HELPER-001` v2.0 "Model D" writer-authority architecture.
+Delegated the bulk of the contract reconstruction, source-fact
+cross-checking, and adversarial test authoring to one bounded worker
+(docs/tests zones only, read-only against `src/pcae/**`, no
+commit/push/finalization authority per phase-authorization §88); the
+primary operator independently re-read the worker's full evidence file and
+**independently re-derived the central finding directly against
+production source** (`src/pcae/core/hpac_foundation.py:124,753-780,
+813-854`) rather than accepting the worker's summary, and independently
+re-ran all three test suites.
 
-**REQ-033 disposition: Option B** — additive clarifying requirement
-(new `HPAC-PAWA-HELPER-REQ-129`), byte-unchanged security intent. REQ-033's
-own text does not forbid a new, narrowly-scoped, non-agent-reachable mint
-pathway; the new requirement additionally, explicitly names
-`_PRODUCTION_WRITER_FACTORY_SEAL` as forbidden by identity to foreclose any
-remaining reading gap.
+**Central finding — ordinary-process mint exclusion NOT VERIFIED**:
+`_mint_production_writer_capability`, the existing low-level primitive
+Model D's own new primitive is contractually specified to structurally
+mirror, calls **none** of the §33 recognition-sequence machinery
+(`_run_recognition_sequence`/`_detect_caller_module`) — that lives one
+layer up, in the factory wrapper. Its only caller-facing gate is object-
+identity equality against `_PRODUCTION_WRITER_FACTORY_SEAL`, confirmed to
+be a bare, unprotected module-level `object()` global. Any ordinary
+same-process code that already has `hpac_foundation` imported (which the
+contract's own text discloses is already true of agent-reachable code)
+can read that seal via plain `getattr` and invoke the mirrored primitive
+directly, skipping the entire recognition sequence — demonstrated live,
+not hypothetically. Store recognition (`require_writer`/`record_write`)
+is real and mechanically enforces role/subject scope via the
+process-local issuance registry, but has **no concept of which mint
+entrypoint produced a capability** (contractually disclosed, REQ-123) —
+so Model D's advertised narrowness exists **only** at mint-time input
+validation, a layer that is itself not exclusively reachable by the
+intended caller. This directly matches the phase-authorization prompt's
+own unconditional blocking criteria ("ordinary Python can invoke mint";
+"scope fields are descriptive but not enforced"). Not a total defeat of
+the security posture — the true trust root (OS filesystem write
+authority over `<HPAC_PROTECTED_ROOT>`) remains intact and independently
+re-checked on every mint — but a genuine contract-verification blocker
+per this repository's own stated verification posture.
 
-`HPAC-PAWA-HELPER-001` **v1.0 → v2.0 (MAJOR)** — new sha256
-`912405307089ba4d050bad9200bad2d7d7af28cde87f19c3d23e428523a8e4da`. Adds
-`REQ-115`–`REQ-140` plus `REQ-114A` (141 requirements total, contiguous,
-independently counted), `PAWAH-INV-11`–`INV-18`, a 30-item threat matrix
-(phase-authorization prompt §54), and full requirement→future-test
-traceability. `HPAC-PAWA-001` v2.0 and `HPAC-PPA-001` v2.0 remain
-**byte-unchanged** (confirmed via sha256sum).
+Two threat-matrix gaps also independently found relative to the fifteen
+required attack-expansion scenarios: no row for "ordinary process invokes
+the low-level mint primitive directly" (the central finding's own attack
+shape), and no row for "role/subject field mutation on an
+already-issued capability by its own holder." Predecessor evidence
+reconciliation: the `79b2582b` (freeze) vs `0aa8b2bb` (task-close)
+discrepancy is bookkeeping, not material — both are commits within the
+same predecessor phase's own finalization sequence — but the
+predecessor's final `pcae_push_check` was left as `"to be re-verified
+after push"`, never resolved, a governance-hygiene gap flagged for future
+finalizations. REQ-033/versioning/PAWA/PPA cross-consistency/
+serialization/restart/IPC-export/certification-role-isolation all
+independently VERIFIED (see full canonical report). Requirement inventory
+(REQ-114/114A/115-140) and 30-item threat matrix both independently
+re-counted and confirmed present as specified.
 
-39 new contract structural/source-fact tests added
-(`tests/test_hpac_pawa_helper_writer_authority_contract_v2.py`), all
-passing. Work was delegated to one bounded fork worker (docs/tests/tasks
-zones only, no `src/**` access, no commit/push/finalization authority per
-phase-authorization §78); the primary operator independently re-read the
-full diff and **found and fixed a real defect** the worker introduced — the
-contract's own "Frozen by" phase-ID field recorded a truncated 145-character
-ANCESTOR phase ID instead of the independently-validated 185-character
-CPIPC candidate — corrected directly, with the resulting sha256 change
-propagated to the two now-stale cross-references in the companion phase
-architecture doc.
+Fresh IV tests (`tests/test_n16_5_f_5_tb_helper_writer_authority_contract_iv.py`,
+newly authored, independent of predecessor's suite): 24 passed.
+Predecessor's 39-test suite (unmodified, regression only): 39 passed.
+Helper-boundary regression (`-k hpac_pawa_helper`): 96 passed / 1 skipped
+/ 0 failed. All three re-run directly by the primary operator.
 
-Fast Green: **PASS — 0 attributable failures** (baseline
-`cda6b70e959cae91a9b0b037f8600f991e625a1f`, candidate
-`79b2582b7d807a0e86d4b534d339fa4163de8c5a`; one initially-flagged failure,
-`test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record`,
-reclassified as environment/flaky via an isolated `--rerun-node` rerun and
-confirmed passing standalone). hpac_pawa_helper-scoped regression: 96
-passed / 1 skipped / 0 failed.
+Production source: **NONE** changed — verification only, zero
+`src/pcae/**` changes (confirmed via `git status --porcelain` before and
+after). No implementation successor begun. No live deployment. No real
+ceremony/authentication/certification. Runtime unchanged: Observed /
+observe / unavailable. **N-16-5 remains NOT CLOSED.** N-16-6/N-16-7
+untouched. Preserved exactly: DELEGATED .3 FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED.
 
-Production source: **NONE** changed — architecture/contract only. No
-caller migration. No live deployment. No real ceremony/authentication/
-certification. Runtime unchanged: Observed / observe / unavailable.
-**N-16-5 remains NOT CLOSED.** N-16-6/N-16-7 untouched. Preserved exactly:
-DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
-
-**Recommended next:** N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV (or
-repository-conformant CPIPC-derived equivalent) — fresh independent
-verification of this phase's frozen writer-authority architecture,
-independently reconstructing and attacking the frozen model before any
-implementation begins. NOT begun. Separately still deferred: a FOLLOW-UP
+**Recommended next:** N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR
+(or repository-conformant CPIPC-derived equivalent) — a narrow
+contract-repair phase addressing the ordinary-process mint-exclusion gap
+(move a caller-identity/frame-provenance check into the low-level mint
+primitive itself, the same class of defense already used one layer up)
+and the two threat-matrix gaps, before any implementation phase proceeds.
+NOT begun. Do NOT proceed to
+N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL until the repair phase
+independently verifies clean. Separately still deferred: a FOLLOW-UP
 GOVERNANCE HARDENING phase for the transition-validator ancestry-checking
 gap — NOT this phase's successor.
 
-## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV) Complete
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH) Complete
+
+Helper-Scoped Writer Authority Architecture and Contract Evolution for
+Protected Canonical Mutations. **COMPLETE — CONTRACT FROZEN, PENDING
+INDEPENDENT VERIFICATION** (superseded above: independent verification
+now COMPLETE — NOT VERIFIED / BLOCKED). Evaluated Models A-D; selected
+Model D — an evolved `HPACWriterCapability` minted via a second,
+additive, narrower low-level primitive gated by a new, distinct seal,
+owned by a new helper-only module. `HPAC-PAWA-HELPER-001` v1.0 → v2.0
+(MAJOR), new sha256
+`912405307089ba4d050bad9200bad2d7d7af28cde87f19c3d23e428523a8e4da`.
+`HPAC-PAWA-001` v2.0 and `HPAC-PPA-001` v2.0 remain byte-unchanged. Full
+detail in `docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_ARCH.md`.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV) Complete
 
 Fresh Independent Linux Verification of Real Helper Boundary Repair. **COMPLETE —
 INDEPENDENTLY VERIFIED, WITH WRITER-AUTHORITY CONTRACT BLOCKER.** CPIPC:
