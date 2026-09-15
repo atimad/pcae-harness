@@ -23,6 +23,14 @@ Contract-repair-only (no production implementation): independently reconstruct b
 ## Allowed Files
 
 - tasks/done/20260915-1827-idle-post-n16-5-f-5-tb-helper-writer-authority-contract-iv-complete-not-verified-blocked-n16-5-f-5-tb-helper-writer-authority-contract-repair-recommended-next-not-begun-n-16-5-not-closed.md
+- docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md
+- docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_REPAIR.md
+- tests/test_hpac_pawa_helper_writer_authority_contract_v2.py
+- tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair.py
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/23495247355c18c9ac2b45855dbc96dc642ee682dbf3b88942bdbf86b94a6232.json
+- PROJECT_STATUS.md
 
 ## Forbidden Files
 

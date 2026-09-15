@@ -2,6 +2,124 @@
 
 ## Current Phase
 
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR**) — Helper
+Writer-Authority Contract Repair and Re-Architecture After Model D
+Independent Verification Failure. **COMPLETE — REPAIRED / FROZEN — PENDING
+INDEPENDENT RE-VERIFICATION.** CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV`) —
+independently derived and validated via `pcae.core.phase_id` by the
+primary operator (`is_valid` True on predecessor and candidate,
+`same_series`/`same_branch` True, `compare` = less, `equals` = False,
+unique against `git log --all` at entry) before task creation.
+
+Contract-repair-only phase (no production implementation): repaired the
+predecessor's two independently-confirmed HPAC-PAWA-HELPER-001 v2.0 "Model
+D" writer-authority defects. Delegated the bulk of contract drafting and
+structural-test authoring to one bounded worker (docs/tests zones only,
+read-only against `src/pcae/**`, no commit/push/finalization authority);
+the primary operator independently re-derived both defects directly against
+production source (`hpac_foundation.py:124,318-470,753-780,813-854`) before
+delegating, then independently re-verified every load-bearing claim in the
+worker's output (REQ/INV numbering contiguity and non-collision, all four
+required matrices, PAWA/PPA hash-unchanged proof, the two IV-gap quotes
+against source) rather than accepting the summary, and personally re-ran
+all test suites.
+
+**Selected repair — Model E, a hybrid of Model B (helper-only mutation
+facades) and Model C (store-local scoped permits):** three narrow facades
+mint-and-perform their exact bounded mutation inside the already-isolated
+one-shot helper subprocess — a genuine OS-process boundary, not a
+same-interpreter seal convention like the failed Model D — each producing a
+distinct, non-isinstance-recognized authority family
+(`HelperAdminMutationAuthority` / `HelperCertificationWriteAuthority` /
+`HelperPresentationEvidenceAuthority`). This closes both predecessor
+defects simultaneously: mint exclusion by physical relocation (the new
+primitive and its seal are defined only in a module never imported by any
+agent-reachable code path) and store recognition by typing (exact-type /
+sealed-family checks, never bare `isinstance` against a shared base class).
+Model D's v2.0 specification is preserved immutably as history and marked
+SUPERSEDED, not deleted.
+
+**Contract version: v2.0 -> v3.0 (MAJOR)**, not v2.1 — the external wire
+vocabulary (three operations, five certification roles, three admin
+subtypes, all failure codes) is unchanged (MINOR-shaped on that basis
+alone), but `HPAC-PAWA-HELPER-REQ-130` — a trigger v2.0 itself pre-declared
+— states unconditionally that introducing any new internal writer-authority
+mint mechanism, however narrow, is MAJOR. Independently confirmed this
+requirement's literal text exists pre-worker at v2.0 freeze; honored it
+rather than force a MINOR bump. Status: **REPAIRED / FROZEN — PENDING
+INDEPENDENT RE-VERIFICATION** (never marked VERIFIED).
+
+New requirements REQ-141 through REQ-171 (31 new, contiguous from v2.0's
+140, independently re-counted — no gaps, no collisions, all 140 prior
+requirement IDs preserved). New invariants PAWAH-INV-19 through
+PAWAH-INV-24 (6 new). Threat matrix: 40 rows (30 inherited unchanged + 2
+closing the predecessor's own IV-found gaps + 8 for attack shapes the
+hybrid design itself introduces) — independently re-verified against the
+frozen threat-matrix section, count reasoned not padded. Store-recognition
+matrix (4 authority families x 4 mutation surfaces, all non-listed cells
+DENY), certification 5x5 role matrix, and 7x7 admin-subtype matrix all
+present and independently checked diagonal-PERMIT/off-diagonal-DENY.
+REQ-033's own text byte-unchanged; a further additive clarification
+(REQ-171) narrows its module-boundary reading to cover the mint
+primitive's own defining module, not only its caller. HPAC-PAWA-001 v2.0
+and HPAC-PPA-001 v2.0: independently confirmed byte-identical
+(sha256-verified before/after) — no evolution needed by this repair.
+
+Two predecessor-IV threat-matrix gaps, independently re-confirmed verbatim
+against `docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_IV.md`
+§15: (1) no row for "ordinary process invokes the low-level mint primitive
+directly, bypassing the higher-level factory's recognition sequence"; (2)
+no row for "role/subject field mutation on an already-legitimately-issued
+capability by its own holder." Both now closed as threat-matrix rows 31-32.
+
+New structural tests (`tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair.py`,
+newly authored): 48 passed, independently re-run. Predecessor's IV suite
+(`tests/test_n16_5_f_5_tb_helper_writer_authority_contract_iv.py`,
+unmodified): 24 passed. Helper-boundary regression (`-k hpac_pawa_helper`):
+96 passed / 1 skipped / 0 failed — matches predecessor baseline exactly. 7
+attributable-but-expected failures were found in the pre-existing ARCH-phase
+test file (`tests/test_hpac_pawa_helper_writer_authority_contract_v2.py`,
+which hard-asserted v2.0-epoch facts — title, version field, REQ/INV
+ranges, exact-one-SELECTED-row, and a live-hash recompute against an
+immutable historical document); the primary operator corrected these 7
+assertions in place to be version-epoch-correct (the ARCH doc's own
+historical v2.0 hash is now pinned explicitly rather than recomputed live)
+rather than leaving them red or silently deleting them; all now pass, 0
+remaining unexplained failures.
+
+Disclosed, non-blocking, explicitly out-of-scope finding: `HPACStoreAuthority
+._new_capability` (`hpac_foundation.py:711-743`) has no seal check of its
+own and is reachable from any code holding a `PRODUCTION`-class authority
+via the public, unseal-gated `HPACStoreAuthority.production()` classmethod
+— a pre-existing property equally affecting the legacy path today, not one
+of the two defects this phase was directed to repair, not worsened by the
+Model E facades (which call down into the same primitive the legacy path
+already relies on). Independently verified against source by the primary
+operator. Flagged for a future IV or dedicated hardening phase to assess.
+
+Production source: **NONE** changed — contract-repair only, zero
+`src/pcae/**` changes (confirmed via `git diff --stat -- src/pcae` before
+and after, both empty). No implementation successor begun. No caller
+migration. No live deployment. No real ceremony/authentication/
+certification. Runtime unchanged: Observed / observe / unavailable.
+**N-16-5 remains NOT CLOSED.** N-16-6/N-16-7 untouched. Preserved exactly:
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
+
+**Recommended next:** N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV
+(or repository-conformant CPIPC-derived equivalent) — a fresh, independent
+adversarial verification of this repair's Model E hybrid (mint exclusion
+via process-import-graph analysis, store recognition via non-isinstance
+matrix testing, all cross-family/role/subtype isolation, restart-dead/
+non-serialization/no-fallback properties). NOT begun. Do NOT proceed to any
+implementation phase until that IV independently verifies clean. Separately
+still deferred: a FOLLOW-UP GOVERNANCE HARDENING phase for the
+transition-validator ancestry-checking gap — NOT this phase's successor.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV) Complete
+
 Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
 (alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV**) — Fresh
 Independent Verification of Helper-Scoped Writer Authority Contract
