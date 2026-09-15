@@ -1,5 +1,33 @@
 # Changelog
 
+- Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+  (alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH**) —
+  **Helper-Scoped Writer Authority Architecture and Contract Evolution for
+  Protected Canonical Mutations.** COMPLETE — CONTRACT FROZEN, PENDING
+  INDEPENDENT VERIFICATION. Architecture + contract evolution only.
+  Independently reconstructed the writer-authority inventory, exact
+  mint-path (legacy `hpac_protected_admin_writer.py` sealed factory gated
+  by `_PRODUCTION_WRITER_FACTORY_SEAL`), and REQ-033's exact text/scope.
+  Evaluated Models A-D; **selected Model D** — an evolved
+  `HPACWriterCapability` minted via a second, additive, narrower low-level
+  primitive gated by a new, distinct seal, requiring zero canonical-store
+  production code changes. REQ-033 disposition: **Option B** (additive
+  clarifying `HPAC-PAWA-HELPER-REQ-129`, byte-unchanged security intent).
+  `HPAC-PAWA-HELPER-001` v1.0 → **v2.0 (MAJOR)** — new sha256
+  `912405307089ba4d050bad9200bad2d7d7af28cde87f19c3d23e428523a8e4da`;
+  +REQ-115-140/+REQ-114A (141 requirements, contiguous), +PAWAH-INV-11-18,
+  30-item threat matrix, full requirement→future-test traceability.
+  `HPAC-PAWA-001` v2.0 and `HPAC-PPA-001` v2.0 byte-unchanged. 39 new
+  contract structural tests added, all passing. Delegated worker introduced
+  and the primary operator independently found/fixed a CPIPC-identity
+  defect (wrong "Frozen by" phase-ID string) before finalization. Fast
+  Green: PASS, 0 attributable failures (baseline `cda6b70e`, candidate
+  `79b2582b`; one initially-flagged failure reclassified as environment/
+  flaky via isolated rerun). Zero production source/caller-migration/live-
+  deployment change. N-16-5 remains NOT CLOSED. Recommended next:
+  N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV (fresh independent
+  verification of the frozen architecture), NOT begun.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV**) — **Fresh
   Independent Linux Verification of Real Helper Boundary Repair.** COMPLETE

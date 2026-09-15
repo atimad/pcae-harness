@@ -25,10 +25,11 @@ Architecture + contract evolution only: define and freeze a narrowly-scoped help
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - tasks/done/20260915-0221-idle-post-n16-5-f-5-tb-real-helper-boundary-repair-iv-complete-finding-c-c-a-template-t-a-n-16-5-not-closed.md
-- docs/**
-- tests/**
-- tasks/**
+- .pcae/fast-green-attribution/5fd6832c767318592aef2aa31718786fa0fffbadd1827be393fd9ea7b1a9e126.json
+- .pcae/fast-green-attribution/ccbd5d59574b23f741a2309a57e6fbafcd8d301b7e4ab806975dc55509557507.json
+- .pcae/fast-green-attribution/3a55fac0a0c5e0037599b0dbf73678db1295bb847acc17668155de407ca6281d.json
 
 ## Forbidden Files
 
@@ -47,6 +48,7 @@ Architecture + contract evolution only: define and freeze a narrowly-scoped help
 - docs
 - tests
 - tasks
+- config
 
 ## Forbidden Zones
 
