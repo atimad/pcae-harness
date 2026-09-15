@@ -22,7 +22,16 @@ Independently verify (not merely re-read) whether the frozen Model D writer-auth
 
 ## Allowed Files
 
-- TBD
+- .pcae/phase-completion-report.md
+- .pcae/fast-green-attribution/4d8bff8474279f51d920426d99f70c51c9a0ef7f8e56c8d93cc55aff5ee8b4e0.json
+- .pcae/fast-green-attribution/c13319dba939e1fdb7a8916581cbafa018fb139eea4ebff76ed741a6a53ed218.json
+- docs/N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_IV_EVIDENCE.md
+- docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_CONTRACT_IV.md
+- tests/test_n16_5_f_5_tb_helper_writer_authority_contract_iv.py
+- tasks/done/20260915-1356-idle-post-n16-5-f-5-tb-helper-writer-authority-contract-arch-complete-n16-5-f-5-tb-helper-writer-authority-contract-iv-recommended-next-not-begun-n-16-5-not-closed.md
+- tasks/active/20260915-1736-n16-5-f-5-tb-helper-writer-authority-contract-iv-fresh-independent-verification-of-hpac-pawa-helper-001-v2-0-model-d-writer-authority-contract.md
+- PROJECT_STATUS.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -54,7 +63,7 @@ Independently verify (not merely re-read) whether the frozen Model D writer-auth
 
 ## Enforcement Mode
 
-TBD
+strict
 
 ## Forbidden Changes
 
