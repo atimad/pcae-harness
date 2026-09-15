@@ -31,9 +31,9 @@
       "method": "baseline_vs_candidate_isolated_worktree",
       "baseline_commit": "078c82dc7dc61d68ae9d83ead6054e47ac7dd4c7",
       "baseline_method": "parent_of_oldest_phase_attributed_commit",
-      "candidate_commit": "1888770e3ae5ab010b4af8a02cb841002662e188",
+      "candidate_commit": "5bcc5d495ad1993f0932e001428e4361fbdded61",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
-      "generated_at": "2026-09-15T19:03:58.507235+00:00",
+      "generated_at": "2026-09-15T19:36:19.818343+00:00",
       "baseline_raw_failed": [
         "tests/test_hatp_mandatory_certification_models.py::test_certified_at_rejects_non_three_non_six_digit_fractions[1]",
         "tests/test_hatp_mandatory_certification_models.py::test_certified_at_rejects_non_three_non_six_digit_fractions[2]",
@@ -314,6 +314,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -387,8 +388,7 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
-        "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
+        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
       "baseline_raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -681,7 +681,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -2582,20 +2581,14 @@
         }
       ],
       "excluded_environment_failures": [],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "local_only"
-        }
-      ],
+      "expected_phase_artifacts": [],
       "provenance": {
         "generated_by_command": "pcae phase fast-green-attribution",
-        "artifact_path": ".pcae/fast-green-attribution/23495247355c18c9ac2b45855dbc96dc642ee682dbf3b88942bdbf86b94a6232.json",
-        "artifact_digest": "23495247355c18c9ac2b45855dbc96dc642ee682dbf3b88942bdbf86b94a6232"
+        "artifact_path": ".pcae/fast-green-attribution/063c4bc66e8318faff7e714a91923934eec6ae6e117d030553b908eb0df8a116.json",
+        "artifact_digest": "063c4bc66e8318faff7e714a91923934eec6ae6e117d030553b908eb0df8a116"
       }
     },
-    "fast_green_attribution": "governed pcae phase fast-green-attribution run by the primary operator directly (never delegated): status PASS, baseline_commit 078c82dc7dc61d68ae9d83ead6054e47ac7dd4c7 (predecessor final commit, parent_of_oldest_phase_attributed_commit), candidate_commit 1888770e3ae5ab010b4af8a02cb841002662e188 (this phase's own commit), 0 attributable failures, 0 excluded_environment_failures needed on the first invocation, 362 pre-existing baseline failures correctly excluded, raw_failed_count=354, raw_errors_count=9.",
+    "fast_green_attribution": "governed pcae phase fast-green-attribution run by the primary operator directly (never delegated), FINAL post-push run: status PASS, baseline_commit 078c82dc7dc61d68ae9d83ead6054e47ac7dd4c7 (predecessor final commit, parent_of_oldest_phase_attributed_commit), candidate_commit 5bcc5d495ad1993f0932e001428e4361fbdded61 (this phase's own final pushed commit), 0 attributable failures, 0 excluded_environment_failures needed, 362 pre-existing baseline failures correctly excluded, raw_failed_count=353, raw_errors_count=9.",
     "bootstrap_session_reporting_tests": "covered by governed fast_green run, passing (0 attributable failures)",
     "phase_identity_confirmation": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: new structural tests (48 passed), predecessor IV regression (24 passed), helper-boundary regression (96 passed/1 skipped), and governed fast_green attribution (0 attributable failures) were all re-run directly by the primary operator for this exact phase."
   },
@@ -2607,7 +2600,7 @@
     "pcae_check": "passed before and after finalization",
     "pcae_doctor_task_memory": "warning-only pre-existing tasks/DONE.md-omission entries across many historical tasks, unrelated to this phase (same category the predecessor phase disclosed).",
     "pcae_health": "healthy before and after finalization",
-    "pcae_push_check": "to be re-verified after push",
+    "pcae_push_check": "clean (nothing_to_push)",
     "telegram_runtime": "notification dispatched by pcae phase complete on promotion to COMPLETE"
   },
   "phase_commits": [
@@ -2619,5 +2612,6 @@
       "hash": "1888770e3ae5ab010b4af8a02cb841002662e188",
       "message": "repair HPAC-PAWA-HELPER-001 writer-authority contract to v3.0 (Model E hybrid)"
     }
-  ]
+  ],
+  "files_changed": 5
 }
