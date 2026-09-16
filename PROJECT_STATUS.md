@@ -2,6 +2,103 @@
 
 ## Current Phase
 
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV**) — Fresh
+Independent Adversarial Verification of HPAC-PAWA-HELPER-001 v3.0 Model E
+Writer-Authority Repair. **COMPLETE — INDEPENDENTLY VERIFIED.** CPIPC: valid
+direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR`) —
+independently derived and validated via `pcae.core.phase_id` by the primary
+operator (`is_valid` True on predecessor and candidate, `same_series`/
+`same_branch` True, `compare` = less, `equals` = False, zero collisions
+against `git log --all`) before task creation.
+
+Verification-only phase, no production implementation and no contract
+edits: independently, adversarially re-verified whether HPAC-PAWA-HELPER-001
+v3.0 Model E genuinely closes the two Model D writer-authority defects, or
+merely renamed them. Delegated the bulk of the investigative work (contract
+reconstruction, matrix rebuilding, attack-case walkthroughs, fresh IV test
+drafting) to one bounded worker (docs/tests zones only, read-only against
+`src/pcae/**` and all three contract files, no commit/push/finalization
+authority). The primary operator independently re-verified every
+load-bearing claim before accepting it: re-walked the predecessor's commit
+chain directly via `git show --stat` (not from any report text); re-read
+REQ-130/REQ-033/REQ-171 and both predecessor-IV gap quotes directly from
+source; independently re-derived the requirement/invariant ID ranges
+(171 numeric + `REQ-114A` = 172 total, contiguous; `PAWAH-INV-1`..`24`,
+contiguous); independently re-counted the 40-row threat matrix by direct
+table reading (an initial regex pass under-counted at 38 due to markdown
+bold-asterisk formatting on rows 31/32 — corrected by direct inspection);
+independently re-ran all three test suites; and independently re-verified
+the contract trio's sha256 before and after.
+
+**Verdict: HPAC-PAWA-HELPER-001 v3.0 Model E — INDEPENDENTLY VERIFIED at the
+contract level.** The repair is architecturally different in kind from
+Model D, not a rename: mint exclusion now rests on a genuine OS-process
+boundary (the mint primitive and its seal are defined only in a module
+never imported by any agent-reachable code path — REQ-145), and store
+recognition now rests on type-level, non-isinstance, sealed-family
+distinction (REQ-148/151, PAWAH-INV-20), explicitly two-directional. All
+three matrices (store-recognition, certification 5x5, admin-subtype 7x7)
+independently reconstructed from raw contract text and confirmed
+diagonal-PERMIT/off-diagonal-DENY. Both predecessor-IV threat-matrix gaps
+(rows 31/32) independently confirmed closed. REQ-033/REQ-171 disposition
+confirmed compatible; PAWA v2.0/PPA v2.0 confirmed byte-identical and
+correctly left unevolved. No blocking contract-text defect found. Since no
+production implementation exists yet (expected for a contract-only IV),
+several properties are VERIFIED AT THE CONTRACT LEVEL / untestable at
+runtime until an implementation phase exists — a legitimate limitation of
+this phase, not a finding against the contract.
+
+**Predecessor completion-evidence reconciliation: EVIDENCE-MINOR-MISMATCH.**
+Commit sequence, hashes (`f75b5b76`/`1888770e`/`5bcc5d49`/`f7f999aa`), and
+push state (`origin/main..HEAD` = 0) all independently confirmed accurate.
+One real but non-material governance-hygiene defect found and corrected
+this phase: `.pcae/phase-completion-metadata.json`'s
+`validation_results.pcae_push_check` field still literally read "to be
+re-verified after push" (a leftover from the pre-push staging commit,
+never overwritten), even though a separate, later `governance_results.
+pcae_push_check` field correctly read "clean (nothing_to_push)". Corrected
+the stale field this phase.
+
+New fresh IV test file (`tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py`,
+independently authored, not derived from the predecessor's 48): 40 passed,
+independently re-run. Combined with predecessor's 48-test repair suite and
+24-test IV suite: 112 passed. Helper-boundary regression
+(`-k hpac_pawa_helper`): 96 passed / 1 skipped / 0 failed — matches
+predecessor baseline exactly.
+
+Non-blocking items carried forward to the next phase (not contract
+defects, not repaired here): (1) REQ-171's independent-verifiability
+obligation (import-graph structural test) cannot be tested until the
+defining module exists; (2) the pre-existing, previously-disclosed
+`HPACStoreAuthority._new_capability`-has-no-own-seal observation remains
+present and merely disclosed, not worsened by Model E.
+
+Production source: **NONE** changed — verification-only, zero
+`src/pcae/**` changes (confirmed via `git diff --stat -- src/pcae` before
+and after, both empty). Contract trio (HELPER v3.0, PAWA v2.0, PPA v2.0)
+byte-identical before and after (sha256-verified). No implementation
+successor begun. No caller migration. No live deployment. No real
+ceremony/authentication/certification. Runtime unchanged: Observed /
+observe / unavailable. **N-16-5 remains NOT CLOSED.** N-16-6/N-16-7
+untouched. Preserved exactly: DELEGATED .3 FINALIZATION / COMMIT / PUSH:
+UNAUTHORIZED.
+
+**Recommended next:** N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL (or
+repository-conformant CPIPC-derived equivalent) — a separately
+human-authorized implementation-planning/implementation phase scoped
+strictly to the three process-local Model E authority families, the three
+typed helper mutation facades, sink/store recognition, and the three
+currently-blocked helper write operations. Explicitly NOT in scope: caller
+migration, legacy writer retirement, transition-validator governance
+hardening. NOT begun. Separately still deferred: a FOLLOW-UP GOVERNANCE
+HARDENING phase for the transition-validator ancestry-checking gap — NOT
+this phase's successor.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR) Complete
+
 Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
 (alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR**) — Helper
 Writer-Authority Contract Repair and Re-Architecture After Model D
