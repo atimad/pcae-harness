@@ -22,14 +22,16 @@ Independently, adversarially re-verify whether HPAC-PAWA-HELPER-001 v3.0 Model E
 
 ## Allowed Files
 
-- TBD
+- docs/**
+- tests/**
+- tasks/**
+- .pcae/**
 
 ## Forbidden Files
 
 - docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md
 - docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md
 - docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md
-
 
 ## Allowed Zones
 
