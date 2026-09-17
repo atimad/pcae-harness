@@ -563,21 +563,26 @@ def perform_recognized_presentation_evidence_write(
     from pcae.core.hpac_pawa_helper_writer_authority import _new_internal_capability
     from pcae.core.hpac_foundation import canonical_digest
 
-    mechanism_id = str(operation_params["mechanism_id"])
-    body = {
-        "presentation_schema_version": "HPAC-PRESENTATION-EVIDENCE/2.0",
-        "presentation_id": str(operation_params["presentation_id"]),
-        "approval_id": str(operation_params["approval_id"]),
-        "canonical_subject": dict(operation_params["canonical_subject"]),
-        "approval_subject_digest": str(operation_params["approval_subject_digest"]),
-        "mechanism_ref": dict(operation_params["mechanism_ref"]),
-        "human_visible_facts": dict(operation_params["human_visible_facts"]),
-        "human_visible_representation_digest": str(operation_params["human_visible_representation_digest"]),
-        "presented_at": str(operation_params["presented_at"]),
-        "election": dict(operation_params["election"]),
-        "mechanism_attestation": str(operation_params["mechanism_attestation"]),
-        "mechanism_attestation_digest": str(operation_params["mechanism_attestation_digest"]),
-    }
+    try:
+        mechanism_id = str(operation_params["mechanism_id"])
+        body = {
+            "presentation_schema_version": "HPAC-PRESENTATION-EVIDENCE/2.0",
+            "presentation_id": str(operation_params["presentation_id"]),
+            "approval_id": str(operation_params["approval_id"]),
+            "canonical_subject": dict(operation_params["canonical_subject"]),
+            "approval_subject_digest": str(operation_params["approval_subject_digest"]),
+            "mechanism_ref": dict(operation_params["mechanism_ref"]),
+            "human_visible_facts": dict(operation_params["human_visible_facts"]),
+            "human_visible_representation_digest": str(operation_params["human_visible_representation_digest"]),
+            "presented_at": str(operation_params["presented_at"]),
+            "election": dict(operation_params["election"]),
+            "mechanism_attestation": str(operation_params["mechanism_attestation"]),
+            "mechanism_attestation_digest": str(operation_params["mechanism_attestation_digest"]),
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HelperProtocolError(
+            "operation_scope_invalid", f"presentation_evidence_write operation_params malformed or incomplete: {exc}"
+        ) from exc
     presentation_digest = canonical_digest(body)
     evidence = TrustedApprovalPresentationEvidence(
         presentation_schema_version=body["presentation_schema_version"],

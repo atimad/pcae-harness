@@ -1042,7 +1042,22 @@ def test_repair_b_certification_write_still_blocked_under_the_real_profile(insta
     assert response.terminal_code == "internal_fail_closed"
 
 
-def test_repair_b_presentation_evidence_write_still_blocked_under_the_real_profile(installed):
+def test_repair_b_presentation_evidence_write_rejects_incomplete_evidence_payload(installed):
+    """Re-scoped (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL): this test was
+    written when ``presentation_evidence_write`` was unconditionally blocked
+    (no writer-mint code path existed at all, REQ-033) and asserted
+    ``internal_fail_closed`` for that reason. Model E has since wired this
+    operation through a real, typed facade (HPAC-PAWA-HELPER-REQ-155) that
+    requires the full ``HPAC-PRESENTATION-EVIDENCE/2.0`` evidence-field
+    payload (presentation_id/approval_id/canonical_subject/etc.) — this test
+    supplies only ``ceremony_approve_ref``, which is no longer sufficient.
+    The call still correctly REJECTS, but now for the honest reason (an
+    incomplete/malformed request payload, ``operation_scope_invalid``), not
+    the old total-blocker reason. This is an implementation-independent
+    staleness correction to the *expected failure code* only; the
+    still-blocked-in-real-deployment finding this phase separately
+    discovered (real-profile write-boundary gap, phase completion report) is
+    a distinct, deeper issue this narrow request-shape test does not probe."""
     root, authority, resolved = installed
     context = _real_context(authority)
     started = dispatch(
@@ -1073,7 +1088,7 @@ def test_repair_b_presentation_evidence_write_still_blocked_under_the_real_profi
         CLOSED_DISPATCH_TABLE,
     )
     assert response.decision == "REJECTED"
-    assert response.terminal_code == "internal_fail_closed"
+    assert response.terminal_code == "operation_scope_invalid"
 
 
 # -- HPAC-PAWA-HELPER-REQ-033 ----------------------------------------------
