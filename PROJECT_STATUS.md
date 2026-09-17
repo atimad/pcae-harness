@@ -2,11 +2,69 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
-(alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV**) — Fresh
-Independent Adversarial Verification of HPAC-PAWA-HELPER-001 v3.0 Model E
-Writer-Authority Repair. **COMPLETE — INDEPENDENTLY VERIFIED.** CPIPC: valid
-direct `.1` successor of
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL**) — Model E Helper
+Writer-Authority Production Implementation. **COMPLETE — BLOCKED /
+IMPLEMENTATION NOT VERIFIED.** CPIPC: valid direct `.1` successor of
+`149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+(alias `N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV`) —
+independently re-derived via `pcae.core.phase_id` (`is_valid` True on
+predecessor and candidate, `same_series`/`same_branch` True, `compare` =
+less, `equals` = False, zero collisions against `git log --all`) before
+task creation.
+
+Implementation phase for HPAC-PAWA-HELPER-001 v3.0 Model E (helper-process-
+isolated mutation facades + three distinct sealed authority families for
+`admin_mutation`/`certification_write`/`presentation_evidence_write`).
+Delegated the bulk of the implementation drafting and initial test
+authorship to one bounded worker (`src/pcae/core/**`/`tests/**` only, the
+three contract files and the legacy `hpac_protected_admin_writer.py`
+forbidden, no commit/push/finalization authority). The primary operator
+independently re-derived CPIPC; independently re-read the full §30B
+contract text and the legacy `HPACWriterCapability`/`HPACStoreAuthority`
+mint machinery from source before review; independently reviewed every
+changed/new file; discovered and repaired a field-shape robustness defect
+in `presentation_evidence_write`'s error handling; and performed the
+phase-authorization-mandated genuine-Linux validation (§78) on a disposable
+real host (`hac-dell`), which **surfaced a structural blocker**: the
+privileged helper process, which legitimately runs as the same OS identity
+that owns `<HPAC_PROTECTED_ROOT>` (contract §4), cannot pass
+`HPACStoreAuthority._validate_production_boundary()`'s check for any real
+write, because that check requires a "configured agent principal" identity
+binding (`_bind_configured_agent_identity`) reachable only through the
+legacy factory's seal (`_PRODUCTION_WRITER_FACTORY_SEAL`) — which
+HPAC-PAWA-HELPER-REQ-033 forbids the helper from ever obtaining. Confirmed
+empirically on real Linux against a genuinely-provisioned, `0700`,
+deployment-owner-owned disposable protected root (removed after use); also
+confirmed this is write-path-specific, not a regression of the
+already-shipped, already-verified read path (`certification_read`/
+`ceremony_entry`'s store-side half never invoke this check at all — reads
+are "open to any caller" by design).
+
+**Verdict: Model E's Python-level authority-family/facade/matrix design is
+independently sound and fully unit-tested (44 new tests, all regressions
+clean, 0 attributable Fast Green failures) — but the three write operations
+cannot yet perform a real write against a genuinely, correctly-permissioned
+live protected root, so this phase is finalized BLOCKED / IMPLEMENTATION
+NOT VERIFIED rather than COMPLETE**, per phase-authorization §67/§82 (do
+not reinterpret the contract or `hpac_foundation.py`'s shared trust-boundary
+primitive silently inside this narrowly-scoped implementation phase;
+recommend a dedicated successor instead). Full finding, empirical evidence,
+and recommended successor direction: `docs/PHASE_N16_5_F_5_TB_HELPER_WRITER_AUTHORITY_IMPL.md`.
+
+**Recommended next:** N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-FOUNDATION-REPAIR
+(or repository-conformant CPIPC-derived equivalent) — a narrow
+contract-evolution-plus-`hpac_foundation.py`-repair phase to give the
+privileged helper a REQ-033-compliant way to establish the configured-agent-
+principal distinction the real write boundary requires. **NOT begun.**
+N-16-5 remains **NOT CLOSED**. N-16-6/N-16-7 untouched. Preserved exactly:
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED.
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV) Complete
+
+Fresh Independent Adversarial Verification of HPAC-PAWA-HELPER-001 v3.0
+Model E Writer-Authority Repair. **COMPLETE — INDEPENDENTLY VERIFIED.**
+CPIPC: valid direct `.1` successor of
 `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
 (alias `N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR`) —
 independently derived and validated via `pcae.core.phase_id` by the primary
