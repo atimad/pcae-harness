@@ -22,7 +22,9 @@ Idle placeholder pending explicit human authorization of the next phase (impleme
 
 ## Allowed Files
 
-- TBD
+- tasks/**
+- docs/**
+- .pcae/**
 
 ## Forbidden Files
 
