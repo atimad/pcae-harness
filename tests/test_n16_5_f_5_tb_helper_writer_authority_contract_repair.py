@@ -196,12 +196,29 @@ def test_recognition_is_explicitly_not_bare_isinstance(section_30b: str) -> None
 
 
 def test_new_authority_types_do_not_exist_in_repository_yet() -> None:
-    """This is contract-repair only — no production implementation."""
+    """This phase itself was contract-repair only — no production
+    implementation. N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL (a later,
+    separately authorized MAJOR production-implementation phase) has since
+    implemented Model E. Re-scoped: the authority types are now expected to
+    exist, and exactly once, owned by the one module this contract names
+    (HPAC-PAWA-HELPER-REQ-144) -- not duplicated or renamed elsewhere. Full
+    correctness of that later implementation is independently tested by
+    tests/test_n16_5_f_5_tb_helper_writer_authority_impl.py; this is only an
+    implementation-independent staleness correction to this phase's own
+    frozen record."""
 
-    src_text = _all_src_text()
+    from pcae.core import hpac_pawa_helper_writer_authority as impl_module
+
     for type_name in NEW_AUTHORITY_TYPES:
-        assert type_name not in src_text
-    assert "hpac_pawa_helper_writer_authority" not in src_text
+        obj = getattr(impl_module, type_name, None)
+        assert obj is not None, f"{type_name} expected in {impl_module.__name__} (Model E implemented)"
+        assert obj.__module__ == impl_module.__name__
+
+    other_src_text = _all_src_text().replace(
+        (SRC_ROOT / "core" / "hpac_pawa_helper_writer_authority.py").read_text(encoding="utf-8"), ""
+    )
+    for type_name in NEW_AUTHORITY_TYPES:
+        assert f"class {type_name}" not in other_src_text
 
 
 # ---------------------------------------------------------------------------
@@ -407,10 +424,18 @@ def test_phase_evidence_preserves_delegated_finalization_unauthorized_wording(
 
 
 def test_no_facade_functions_exist_yet() -> None:
-    src_text = _all_src_text()
+    """Re-scoped for the same reason as
+    test_new_authority_types_do_not_exist_in_repository_yet above: the
+    facades are now implemented by an authorized later phase. Assert they
+    exist and are owned by exactly the one module the contract names."""
+
+    from pcae.core import hpac_pawa_helper_writer_authority as impl_module
+
     for name in (
         "mint_and_perform_admin_mutation",
         "mint_and_perform_certification_write",
         "mint_and_perform_presentation_evidence_write",
     ):
-        assert name not in src_text
+        obj = getattr(impl_module, name, None)
+        assert obj is not None, f"{name} expected in {impl_module.__name__} (Model E implemented)"
+        assert obj.__module__ == impl_module.__name__

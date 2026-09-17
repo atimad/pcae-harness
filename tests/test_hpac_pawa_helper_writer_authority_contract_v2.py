@@ -399,11 +399,26 @@ def test_closed_certification_roles_are_exactly_five() -> None:
 
 
 def test_no_production_writer_authority_module_created_by_this_phase() -> None:
-    """This phase is architecture-only: the new module and mint primitive
-    named in section 30A.5 must NOT yet exist in the repository."""
+    """This *contract-freeze* phase (v2.0, Model D specification) was
+    architecture-only: at that time, the module named in section 30A.5 and
+    Model D's own mint primitive/seal names must NOT have existed yet.
 
-    core_dir = REPO_ROOT / "src" / "pcae" / "core"
-    assert not (core_dir / "hpac_pawa_helper_writer_authority.py").exists()
+    N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL (a later, separately
+    authorized MAJOR-version production-implementation phase) has since
+    implemented v3.0's Model E — a different architecture that supersedes
+    Model D (§30B.1: "Model D's mint pathway... remains absent from
+    src/pcae/**... It is superseded specification history... it SHALL NOT be
+    implemented"). ``hpac_pawa_helper_writer_authority.py`` existing now is
+    therefore the *correct*, contract-authorized state, not a defect: this
+    assertion is updated to check the property this test file can actually
+    still verify going forward — that Model D's own superseded mint
+    primitive/seal names were never implemented (they remain absent), while
+    no longer asserting that the (differently-owned, Model-E-only) module
+    file itself must be absent. This is a purely implementation-independent
+    staleness correction; the module's *content* (Model E, not Model D) is
+    independently verified by
+    ``tests/test_n16_5_f_5_tb_helper_writer_authority_impl.py``."""
+
     foundation_text = FOUNDATION_PATH.read_text(encoding="utf-8")
     assert "_mint_helper_scoped_writer_capability" not in foundation_text
     assert "_HELPER_WRITER_FACTORY_SEAL" not in foundation_text

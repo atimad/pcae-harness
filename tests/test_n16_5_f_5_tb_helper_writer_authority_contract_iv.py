@@ -90,10 +90,31 @@ def test_helper_writer_factory_seal_does_not_exist_in_repository() -> None:
 
 def test_helper_writer_authority_module_does_not_exist() -> None:
     """HPAC-PAWA-HELPER-REQ-131's new caller module
-    (``pcae.core.hpac_pawa_helper_writer_authority``) does not exist yet."""
+    (``pcae.core.hpac_pawa_helper_writer_authority``) did not exist at the
+    time of this historical IV (v2.0-era, Model D). This test file's own
+    BLOCKED verdict on Model D (the seal/mint-primitive adversarial findings
+    elsewhere in this file) is a historical record and is NOT weakened or
+    re-litigated here (phase-authorization §76: do not weaken historical
+    defect assertions).
 
-    assert not (SRC_ROOT / "core" / "hpac_pawa_helper_writer_authority.py").exists()
-    assert "hpac_pawa_helper_writer_authority" not in _all_src_text()
+    HPAC-PAWA-HELPER-001 v3.0 (Model E, a later, separately frozen and
+    independently verified contract repair) explicitly repurposes this same
+    module name as the exclusive owner of a *different* mint primitive
+    (§30B.3/REQ-144: "the module name provisionally reserved by REQ-131 for
+    a 'caller'; under this repair it is the exclusive owner of the mint
+    primitive itself... this supersedes REQ-131's Model-D-specific location
+    choice for the repaired pathway"). N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL
+    has since implemented that Model E module. Re-scoped: assert the module
+    now exists (correctly, per the superseding v3.0 repair) and does NOT
+    contain Model D's own superseded mint-primitive/seal names — i.e. Model D
+    itself, the thing this historical IV found BLOCKED, was never
+    implemented under this module, only Model E was."""
+
+    module_path = SRC_ROOT / "core" / "hpac_pawa_helper_writer_authority.py"
+    assert module_path.exists()
+    text = module_path.read_text(encoding="utf-8")
+    assert "_mint_helper_scoped_writer_capability" not in text
+    assert "_HELPER_WRITER_FACTORY_SEAL" not in text
 
 
 # ---------------------------------------------------------------------------

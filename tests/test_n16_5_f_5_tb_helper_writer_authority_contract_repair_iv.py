@@ -544,7 +544,24 @@ def test_section_33_requirement_count_statement_matches_independently_derived_ma
 
 
 def test_model_e_authority_types_absent_from_src_pcae() -> None:
-    text = _all_src_text()
+    """This IV phase (verification-only, no production implementation) ran
+    against a repository state where Model E's authority types did not yet
+    exist -- this test's own original comment anticipated exactly the event
+    that has since occurred: "Model E may now be implemented; re-scope this
+    IV." N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL (a later, separately
+    authorized MAJOR production-implementation phase) has implemented Model
+    E. Re-scoped per that anticipation: this test now asserts the symbols
+    exist (implementation landed) and are owned by exactly the one module
+    the contract requires (HPAC-PAWA-HELPER-REQ-144), not scattered/duplicated
+    elsewhere in src/pcae/**. Full Model E correctness (exact-type recognition,
+    no-isinstance-escape, seal-gating, etc.) is independently tested by
+    tests/test_n16_5_f_5_tb_helper_writer_authority_impl.py -- this IV suite
+    only re-confirms this narrow, implementation-independent staleness
+    correction, not a re-verification of the later phase's own work."""
+
+    from pcae.core import hpac_pawa_helper_writer_authority as impl_module
+
+    owning_module = impl_module.__name__
     for symbol in (
         "HelperAdminMutationAuthority",
         "HelperCertificationWriteAuthority",
@@ -553,11 +570,38 @@ def test_model_e_authority_types_absent_from_src_pcae() -> None:
         "mint_and_perform_certification_write",
         "mint_and_perform_presentation_evidence_write",
     ):
-        assert symbol not in text, f"{symbol} unexpectedly present in src/pcae -- Model E may now be implemented; re-scope this IV"
+        obj = getattr(impl_module, symbol, None)
+        assert obj is not None, f"{symbol} expected to exist in {owning_module} (Model E implemented)"
+        defining_module = getattr(obj, "__module__", owning_module)
+        assert defining_module == owning_module, f"{symbol} must be owned by {owning_module}, not {defining_module}"
+
+    other_core_text = _all_src_text().replace(
+        (SRC_ROOT / "core" / "hpac_pawa_helper_writer_authority.py").read_text(encoding="utf-8"), ""
+    )
+    for symbol in (
+        "HelperAdminMutationAuthority",
+        "HelperCertificationWriteAuthority",
+        "HelperPresentationEvidenceAuthority",
+    ):
+        # Recognition-site references (e.g. in the store adapter) legitimately
+        # name these types for type(...)-is comparisons; a *class definition*
+        # (a second, duplicate one) elsewhere would be the actual regression.
+        assert f"class {symbol}" not in other_core_text, f"{symbol} must not be redefined outside its owning module"
 
 
 def test_model_e_module_does_not_exist_as_a_file() -> None:
-    assert not (SRC_ROOT / "core" / "hpac_pawa_helper_writer_authority.py").exists()
+    """Re-scoped (see test_model_e_authority_types_absent_from_src_pcae
+    above): the module now exists, as the later implementation phase's own
+    authorization required (§30B.3/§144). What this IV's own record can
+    still usefully assert going forward is that the module is exactly the
+    one this contract names -- not a differently-named duplicate -- and that
+    it is a single file, not split across a package."""
+
+    module_path = SRC_ROOT / "core" / "hpac_pawa_helper_writer_authority.py"
+    assert module_path.exists() and module_path.is_file()
+    assert not (SRC_ROOT / "core" / "hpac_pawa_helper_writer_authority").exists(), (
+        "must remain a single module file, not a package"
+    )
 
 
 def test_legacy_seal_and_mint_primitive_still_present_and_unmodified_in_shape() -> None:

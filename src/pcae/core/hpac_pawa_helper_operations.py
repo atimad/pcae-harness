@@ -1,15 +1,25 @@
-"""HPAC-PAWA-HELPER-001 v1.0 — bounded per-operation foundations (§14-§17).
+"""HPAC-PAWA-HELPER-001 v1.0/v3.0 — bounded per-operation foundations
+(§14-§17; Model E write wiring per N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL).
 
 Each function implements the *shape* and the *bounded* semantics of exactly
-one closed-vocabulary operation against the injected
-:class:`~pcae.core.hpac_pawa_helper_protocol.ProtectedStoreFoundation`
-(NON_REAL). No function here accepts a free path, expression, shell command,
-module name, or JSON-patch blob (§25 generic-broker prohibition); every
-input is the operation's own closed typed ``operation_params`` shape.
+one closed-vocabulary operation. No function here accepts a free path,
+expression, shell command, module name, or JSON-patch blob (§25 generic-broker
+prohibition); every input is the operation's own closed typed
+``operation_params`` shape.
 
-None of these functions perform a real store mutation, a real ceremony, or a
-real presentation-evidence write — that wiring is explicitly out of scope
-for this phase (phase-authorization §2/§40/§41).
+When ``context.store`` is the deterministic, in-memory
+:class:`~pcae.core.hpac_pawa_helper_protocol.ProtectedStoreFoundation`
+(NON_REAL — the default for protocol-shape tests), the three write handlers
+below keep their original, unmodified foundation-only behavior byte-for-byte.
+When ``context.store`` is
+:class:`~pcae.core.hpac_pawa_helper_store_adapter.RealCanonicalReadAdapter`
+(carrying a real, ``PRODUCTION``-class ``.authority``), the three write
+handlers instead go through
+:mod:`pcae.core.hpac_pawa_helper_writer_authority`'s Model E mint-and-perform
+facades, which write through the real canonical stores under exact-type,
+sealed-authority recognition (HPAC-PAWA-HELPER-REQ-148/149/152-155).
+``certification_read``/``ceremony_entry`` are unchanged either way — still
+non-writer.
 """
 
 from __future__ import annotations
@@ -94,7 +104,22 @@ def handle_admin_mutation(request: HelperRequest, context: HelperContext, machin
     if mutation != "configure_privileged_helper" and not transaction_id:
         raise HelperProtocolError("operation_scope_invalid", "missing transaction_id")
 
+    real_authority = getattr(context.store, "authority", None)
+
     def _do_write() -> str:
+        if real_authority is not None:
+            from pcae.core.hpac_pawa_helper_writer_authority import mint_and_perform_admin_mutation
+
+            return mint_and_perform_admin_mutation(
+                real_authority,
+                mutation=mutation,
+                subject=transaction_id,
+                session_id=request.session_id,
+                request_id=request.request_id,
+                installation_id=request.installation_id,
+                generation=request.generation,
+                operation_params=request.operation_params,
+            )
         key = f"{request.session_id}:{mutation}:{request.request_id}"
         record = {
             "mutation": mutation,
@@ -118,7 +143,22 @@ def handle_certification_write(request: HelperRequest, context: HelperContext, m
     if not subject:
         raise HelperProtocolError("target_scope_invalid", "missing role-appropriate subject binding")
 
+    real_authority = getattr(context.store, "authority", None)
+
     def _do_write() -> str:
+        if real_authority is not None:
+            from pcae.core.hpac_pawa_helper_writer_authority import mint_and_perform_certification_write
+
+            return mint_and_perform_certification_write(
+                real_authority,
+                role=request.role,
+                subject=subject,
+                session_id=request.session_id,
+                request_id=request.request_id,
+                installation_id=request.installation_id,
+                generation=request.generation,
+                operation_params=request.operation_params,
+            )
         key = f"{request.role}:{subject}:{request.session_id}"
         context.store.put_record(
             "certification_write_record",
@@ -205,7 +245,24 @@ def handle_presentation_evidence_write(request: HelperRequest, context: HelperCo
     if not approve_ref or context.store.ceremonies_started.get(request.session_id) is None:
         raise HelperProtocolError("target_scope_invalid", "no bound, started ceremony for this session")
 
+    real_authority = getattr(context.store, "authority", None)
+
     def _do_write() -> str:
+        if real_authority is not None:
+            from pcae.core.hpac_pawa_helper_writer_authority import mint_and_perform_presentation_evidence_write
+
+            invocation_id = str(request.operation_params.get("invocation_id") or request.session_id)
+            attempt_id = str(request.operation_params.get("attempt_id") or request.request_id)
+            return mint_and_perform_presentation_evidence_write(
+                real_authority,
+                invocation_id=invocation_id,
+                attempt_id=attempt_id,
+                session_id=request.session_id,
+                request_id=request.request_id,
+                installation_id=request.installation_id,
+                generation=request.generation,
+                operation_params=request.operation_params,
+            )
         key = f"{request.session_id}:{approve_ref}"
         context.store.presentation_evidence[key] = {
             "session_id": request.session_id,

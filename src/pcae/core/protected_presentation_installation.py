@@ -46,7 +46,7 @@ import stat
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Mapping, Optional
 
 from pcae.core.approval_presentation import (
     PRESENTATION_MECHANISM_SCHEMA_VERSION,
@@ -105,6 +105,17 @@ VERIFIER_KIND = "pcae-protected-local-presentation/1.0"
 #: HPAC-PPA-REQ-005/015 — the installer writer role (already frozen by
 #: ``approval_presentation.PresentationMechanismDescriptorStore``).
 INSTALLER_WRITER_ROLE = "presentation_mechanism_installer"
+
+#: N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL (Model E) — the narrow role
+#: bound to the ``configure_privileged_helper`` admin-mutation subtype
+#: (HPAC-PAWA-HELPER-REQ-159): metadata-registration only, never the helper
+#: executable bytes themselves. Deliberately distinct from
+#: ``INSTALLER_WRITER_ROLE`` (which gates the full mechanism-installation
+#: transaction via :meth:`ProtectedPresentationInstallationStore.apply_configuration`)
+#: so the two admin-mutation subtypes remain isolated at this inner
+#: role-binding layer too, in addition to Model E's own outer exact-type
+#: authority-family isolation.
+HELPER_METADATA_WRITER_ROLE = "privileged_helper_metadata_registrar"
 
 #: HPAC-PPA-REQ-014 — closed ``lifecycle_action`` enum.
 LIFECYCLE_ACTIONS = ("install", "rotate", "revoke")
@@ -614,6 +625,60 @@ class ProtectedPresentationInstallationStore:
 
     def helper_path_for(self, helper_sha256: str) -> Path:
         return helper_content_addressed_path(self._root, helper_sha256)
+
+    def _helper_metadata_path(self) -> Path:
+        return self._mechanism_dir() / "helper-metadata.json"
+
+    # -- N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL (Model E) --------------
+    # configure_privileged_helper (HPAC-PAWA-HELPER-REQ-159): a narrow,
+    # metadata-only registration write, distinct from apply_configuration's
+    # full mechanism-installation transaction. Never touches helper
+    # executable bytes, never chmod/chown, never the content-addressed
+    # helper path.
+
+    def register_helper_metadata(
+        self,
+        capability: HPACWriterCapability,
+        *,
+        transaction_id: str,
+        metadata: Mapping[str, object],
+        registered_at: str,
+    ) -> dict:
+        if not isinstance(metadata, Mapping):
+            raise ProtectedPresentationInstallationError("metadata must be a mapping")
+        forbidden_keys = {"helper_sha256", "helper_path", "chmod", "chown"}
+        if forbidden_keys & set(metadata):
+            raise ProtectedPresentationInstallationError(
+                "configure_privileged_helper metadata cannot reference helper bytes/paths"
+            )
+        document = {
+            "schema_version": "HPAC-PPA-HELPER-METADATA/1.0",
+            "transaction_id": _require_nonempty(transaction_id, field="transaction_id"),
+            "metadata": dict(metadata),
+            "registered_at": _require_timestamp(registered_at, field="registered_at"),
+        }
+        path = self._helper_metadata_path()
+        reject_symlink(self._root)
+        with self._authority.writer_transaction(capability, HELPER_METADATA_WRITER_ROLE, subject=transaction_id):
+            payload = canonical_json_bytes(document)
+            if path.exists():
+                write_atomic_replace(path, payload)
+                replace = True
+            else:
+                write_atomic_create_only(path, payload)
+                replace = False
+            self._authority.record_write(
+                path,
+                canonical_digest(document),
+                capability,
+                role=HELPER_METADATA_WRITER_ROLE,
+                subject=transaction_id,
+                replace=replace,
+            )
+            readback = read_canonical_json_document(path)
+            if readback != document:
+                raise ProtectedPresentationInstallationError("helper-metadata read-back verification failed after write")
+        return document
 
     # -- resolution (HPAC-PPA-REQ-019/020) -----------------------------
 
