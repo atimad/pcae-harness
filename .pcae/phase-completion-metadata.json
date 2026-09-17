@@ -34,7 +34,7 @@
       "status": "PASS",
       "issues": [],
       "baseline_commit": "3d5232cacd9267290e5a9f239828862a0ff2c37b",
-      "candidate_commit": "d742e9e355609ac5f8a6545e828a6a39c8072434",
+      "candidate_commit": "910d4c82c46183b29268ef681571b113c4c91316",
       "raw_failed_count": 354,
       "raw_errors_count": 9,
       "attributable_failures": [],
@@ -1863,9 +1863,9 @@
         "method": "baseline_vs_candidate_isolated_worktree",
         "baseline_commit": "3d5232cacd9267290e5a9f239828862a0ff2c37b",
         "baseline_method": "parent_of_oldest_phase_attributed_commit",
-        "candidate_commit": "d742e9e355609ac5f8a6545e828a6a39c8072434",
+        "candidate_commit": "910d4c82c46183b29268ef681571b113c4c91316",
         "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
-        "generated_at": "2026-09-17T18:21:51.381362+00:00",
+        "generated_at": "2026-09-17T18:45:52.821065+00:00",
         "baseline_raw_failed": [
           "tests/test_hatp_mandatory_certification_models.py::test_certified_at_rejects_non_three_non_six_digit_fractions[1]",
           "tests/test_hatp_mandatory_certification_models.py::test_certified_at_rejects_non_three_non_six_digit_fractions[2]",
@@ -2219,8 +2219,7 @@
           "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
           "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
           "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-          "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
-          "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
+          "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
         ],
         "baseline_raw_errors": [
           "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -4423,8 +4422,8 @@
         ],
         "provenance": {
           "generated_by_command": "pcae phase fast-green-attribution",
-          "artifact_path": ".pcae/fast-green-attribution/223192e542c341255c1b1490a71baa3228071c1206c3f850b81c6e4a00e1b7b5.json",
-          "artifact_digest": "223192e542c341255c1b1490a71baa3228071c1206c3f850b81c6e4a00e1b7b5"
+          "artifact_path": ".pcae/fast-green-attribution/1bc44beb8a7441e7f8804eeb910333ef7c267817c23a9319b75dc52f3154423e.json",
+          "artifact_digest": "1bc44beb8a7441e7f8804eeb910333ef7c267817c23a9319b75dc52f3154423e"
         }
       }
     },
@@ -4445,6 +4444,12 @@
     },
     {
       "hash": "d742e9e355609ac5f8a6545e828a6a39c8072434"
+    },
+    {
+      "hash": "ddfc0e4ba22172141d028f75a8151558a76cf820"
+    },
+    {
+      "hash": "910d4c82c46183b29268ef681571b113c4c91316"
     }
   ],
   "files_changed_count": 11

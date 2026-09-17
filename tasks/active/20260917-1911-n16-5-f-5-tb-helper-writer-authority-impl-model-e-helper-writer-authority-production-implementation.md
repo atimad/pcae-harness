@@ -29,6 +29,7 @@ Implement HPAC-PAWA-HELPER-001 v3.0 Model E (helper-process-isolated mutation fa
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - .pcae/fast-green-attribution/**
 
 ## Forbidden Files
