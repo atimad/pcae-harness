@@ -9,6 +9,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 
 import pytest
 
@@ -286,11 +287,44 @@ def test_authority_and_runtime_walls_are_explicit():
         assert clause in HELPER
 
 
-def test_all_production_sources_remain_byte_identical_to_recorded_baseline():
+_HISTORICAL_ENTRY_COMMIT = '79ea7e1644535d011da6ca3869b5557b44c50737'
+_HISTORICAL_FINAL_COMMIT = 'c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4'
+
+
+def _git(*args):
+    return subprocess.run(['git', *args], cwd=ROOT, capture_output=True,
+                           text=True, check=True).stdout
+
+
+def test_historical_identity_contract_repair_phase_touched_zero_production_sources():
+    """Repaired by N16-5-F-5-TB-FAST-GREEN-BASELINE-FREEZE-EVIDENCE-REPAIR.
+
+    This test used to assert that every current-HEAD `src/pcae/**` file's
+    bytes equal this phase's entry-commit (79ea7e16) baseline hashes forever
+    -- a permanent global freeze that broke on the very next legitimate
+    `src/pcae/**` edit by construction (it was never that; see below).
+
+    The historical N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR
+    phase (contract-text only, no production changes authorized) actually
+    only ever claimed: THIS phase, from its own entry commit (79ea7e16) to
+    its own final commit (c4f452c6), made zero `src/pcae/**` changes. That
+    claim is a fixed historical fact, checkable forever against those two
+    pinned commits, and does not care what `src/pcae/**` looks like today.
+    """
     baseline = json.loads((ROOT / 'docs/evidence/helper-installation-identity/baseline.json').read_text())
-    assert baseline['baseline'] == '79ea7e1644535d011da6ca3869b5557b44c50737'
-    source_hashes = {p: digest for p, digest in baseline['hashes'].items() if p.startswith('src/pcae/')}
-    assert source_hashes
-    assert set(source_hashes) == {str(p.relative_to(ROOT)) for p in (ROOT / 'src/pcae').rglob('*.py')}
-    for path, expected in source_hashes.items():
-        assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == expected, path
+    assert baseline['baseline'] == _HISTORICAL_ENTRY_COMMIT
+    recorded_source_hashes = {p: digest for p, digest in baseline['hashes'].items() if p.startswith('src/pcae/')}
+    assert recorded_source_hashes
+
+    # baseline.json is an accurate historical record of commit 79ea7e16
+    # itself (not of today's disk) -- verified against git's own historical
+    # blob content at that pinned commit.
+    for path, expected in recorded_source_hashes.items():
+        historical_bytes = _git('show', f'{_HISTORICAL_ENTRY_COMMIT}:{path}').encode('utf-8')
+        assert hashlib.sha256(historical_bytes).hexdigest() == expected, path
+
+    # The actual historical claim: zero src/pcae/** paths differ between this
+    # specific phase's own entry and final commits.
+    changed = _git('diff', '--name-only', _HISTORICAL_ENTRY_COMMIT,
+                    _HISTORICAL_FINAL_COMMIT, '--', 'src/pcae').strip()
+    assert changed == '', f'historical phase unexpectedly touched src/pcae paths: {changed}'
