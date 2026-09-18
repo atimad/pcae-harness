@@ -47,7 +47,7 @@
   "pushed_status": "pushed",
   "recommended_next_phase": "Smallest, not begun: narrow source-only conformance-repair phase removing configure_privileged_helper/configure_presentation_mechanism from CLOSED_ADMIN_MUTATIONS in hpac_pawa_helper_protocol.py and the now-forbidden dispatch branches in hpac_pawa_helper_store_adapter.py/hpac_pawa_helper_operations.py. N-16-5 remains NOT CLOSED.",
   "report_consistency": "phase-completion-report.md matches this metadata file's disposition and evidence.",
-  "status": "COMPLETE_NOT_VERIFIED_BLOCKED",
+  "status": "blocked",
   "summary": "Fresh independent adversarial IV of N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR. F1-A/F1-B independently re-confirmed repaired at the contract-text level (HELPER v5.0 SS30E, PAWA v4.0 SS98); activating prompt's claimed predecessor self-contradiction adjudicated as not present in repository truth. BLOCKED on a new finding: already-existing production source (hpac_pawa_helper_protocol.py, hpac_pawa_helper_store_adapter.py, hpac_pawa_helper_operations.py) still implements the pre-repair circular configure_privileged_helper dispatch through H's own admin_mutation handler, contradicting frozen HELPER-REQ-184. Zero attributable Fast Green regressions.",
   "test_evidence_classification": "fresh_adversarial_iv_plus_unmodified_predecessor_regression_rerun",
   "test_evidence_classification_rationale": "14 new fresh tests (tests/test_n16_5_f5_tb_prov_repair_iv.py) written and run by this IV, distinct from and not overlapping the predecessor's own test_n16_5_f5_tb_prov_repair_contract.py (23 tests, re-run unmodified, still pass). No src/pcae test or production file edited.",
