@@ -315,7 +315,7 @@ first governed runtime external effect remains absent/unreachable.
 
 ## 8. Disposition and recommended successor
 
-**SOURCE CONFORMANCE REPAIRED — PENDING FRESH INDEPENDENT VERIFICATION.**
+**SOURCE CONFORMANCE REPAIRED / FAST GREEN TRUST GATE BLOCKED — PENDING FRESH INDEPENDENT VERIFICATION.**
 
 This phase is *not* an independent verification of itself. It removed the
 live source divergence the predecessor IV found, added fresh conformance

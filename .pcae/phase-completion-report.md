@@ -1,10 +1,10 @@
-# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 Complete — Source Conformance Repaired / Pending Fresh Independent Verification — Provisioning Source Conformance Repair
+# Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 Complete — Source Conformance Repaired / Fast Green Trust Gate Blocked — Provisioning Source Conformance Repair
 
 Canonical Phase ID: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
 
 Alias: **N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR**
 
-Status: **SOURCE CONFORMANCE REPAIRED — PENDING FRESH INDEPENDENT VERIFICATION**. Narrow source-only conformance repair; no contract change; no helper-admission implementation; no foundation repair; no PAWA §98 standalone-script implementation; no live host mutation.
+Status: **SOURCE CONFORMANCE REPAIRED / FAST GREEN TRUST GATE BLOCKED (1 disclosed, non-security attributable item) — PENDING FRESH INDEPENDENT VERIFICATION**. Narrow source-only conformance repair; no contract change; no helper-admission implementation; no foundation repair; no PAWA §98 standalone-script implementation; no live host mutation. The governed `pcae phase complete` trust gate unconditionally refuses full non-partial certification while *any* nonzero Fast Green failure count is reported, "regardless of how the failure is narrated" (by design, per `src/pcae/core/phase_reports.py::validate_derived_correctness`) — this phase's one disclosed, fully-explained, non-security attributable item (§5 below) therefore blocks full certification; this report is accepted as PARTIAL via `--allow-partial-report` rather than by weakening or bypassing that gate's evidence.
 
 CPIPC: independently derived and validated direct `.1` successor of `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR-IV) via `pcae.core.phase_id` (`is_valid` True on predecessor and candidate; no collision found against a working-tree/history text search).
 
@@ -32,7 +32,7 @@ Governance: `pcae check` / `pcae health` / status-coherence / push-readiness run
 
 ## Disposition
 
-**SOURCE CONFORMANCE REPAIRED — PENDING FRESH INDEPENDENT VERIFICATION.** Not claimed: independent verification of this repair, or N-16-5 closure. No contract change, no foundation repair, no helper-admission implementation, no live host mutation. N-16-5 remains **NOT CLOSED**; N-16-6/N-16-7 untouched. The one Fast Green attributable item is a pre-existing test-design property (full-tree source freeze) colliding with this phase's own authorized and mandated edit, disclosed above rather than suppressed or silently reclassified as zero.
+**SOURCE CONFORMANCE REPAIRED / FAST GREEN TRUST GATE BLOCKED — PENDING FRESH INDEPENDENT VERIFICATION.** Not claimed: independent verification of this repair, or N-16-5 closure, or a clean (zero-attributable) Fast Green result. No contract change, no foundation repair, no helper-admission implementation, no live host mutation. N-16-5 remains **NOT CLOSED**; N-16-6/N-16-7 untouched. The one Fast Green attributable item is a pre-existing test-design property (full-tree source freeze) colliding with this phase's own authorized and mandated edit, disclosed above rather than suppressed or silently reclassified as zero; this is what makes the governed completion PARTIAL rather than fully certified.
 
 Recommended next (not begun): `N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV` — a fresh, independent adversarial re-verification of this repair, before N-16-5 is reassessed for closure.
 
