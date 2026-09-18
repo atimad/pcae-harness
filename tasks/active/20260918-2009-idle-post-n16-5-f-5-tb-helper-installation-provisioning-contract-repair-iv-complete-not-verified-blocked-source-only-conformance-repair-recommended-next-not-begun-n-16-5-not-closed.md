@@ -24,6 +24,10 @@ Housekeeping placeholder: finalize push-state bookkeeping after governed phase c
 
 - .pcae/phase-completion-metadata.json
 - tasks/*
+- tasks/done/*
+- tasks/active/*
+- tasks/DONE.md
+- CHANGELOG.md
 
 ## Forbidden Files
 
