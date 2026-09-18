@@ -80,9 +80,7 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
+- TBD
 
 ## Documentation Requirements
 
