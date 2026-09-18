@@ -20,7 +20,7 @@
     "pcae_check": "PASS",
     "pcae_doctor_task_memory": "No new unresolved task-memory defect introduced by this phase; historical warnings preserved.",
     "pcae_health": "healthy",
-    "pcae_push_check": "clean; pushed 360efe36..fe001e79 to origin/main",
+    "pcae_push_check": "clean",
     "pcae_status_coherence": "coherent",
     "repository_transition_validator": "PASS intra-phase identity/lifecycle checks after phase_commits/metadata repair.",
     "telegram_runtime": "Configured/enabled; governed completion transaction owns actual delivery outcome."
