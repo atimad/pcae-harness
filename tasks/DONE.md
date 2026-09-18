@@ -83,6 +83,8 @@
 
 ## Completed
 
+- Housekeeping: push closure commit for N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR task-finish (20260918-1836-housekeeping-push-closure-commit-for-n16-5-f-5-tb-helper-installation-provisioning-contract-repair-task-finish)
+- Idle after installation identity contract IV blocked - provisioning contract repair NOT begun (20260918-1204-idle-after-installation-identity-contract-iv-blocked-provisioning-contract-repair-not-begun)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR): Provisioning/Rotation Contract Repair for HPAC-PAWA-HELPER-001, HPAC-PAWA-001, HPAC-PPA-001 (20260918-1659-n16-5-f-5-tb-prov-repair)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Independent Adversarial Verification of Model I-B Installation Identity and Helper Admission Contracts (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV) (20260918-1127-n16-5-f-5-tb-helper-installation-identity-contract-repair-iv)
 - Idle after helper installation identity contract repair - fresh IV not begun (20260918-1014-idle-after-helper-installation-identity-contract-repair-fresh-iv-not-begun)
