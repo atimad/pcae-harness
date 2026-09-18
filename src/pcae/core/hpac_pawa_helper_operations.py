@@ -93,15 +93,17 @@ def _run_mutation(
 
 
 def handle_admin_mutation(request: HelperRequest, context: HelperContext, machine: HelperStateMachine) -> HelperResponse:
-    """§14.1. ``configure_privileged_helper`` remains metadata-only — it
-    never creates/copies helper bytes and never chmod/chowns a path
-    (phase-authorization §14); this foundation enforces that by construction
-    (it only ever writes a metadata record to the injected store)."""
+    """§14.1. Provisioning operations (``configure_privileged_helper``,
+    ``configure_presentation_mechanism``) are not members of
+    ``CLOSED_ADMIN_MUTATIONS`` and are therefore unreachable from here
+    (HPAC-PAWA-HELPER-REQ-184): they are dispatched only through the PAWA
+    deployment-root-mediated standalone-script path, never through this
+    admitted helper's own admin_mutation route."""
     mutation = request.operation_params.get("mutation")
     if mutation not in CLOSED_ADMIN_MUTATIONS:
         raise HelperProtocolError("operation_scope_invalid", f"unknown admin mutation {mutation!r}")
     transaction_id = request.operation_params.get("transaction_id")
-    if mutation != "configure_privileged_helper" and not transaction_id:
+    if not transaction_id:
         raise HelperProtocolError("operation_scope_invalid", "missing transaction_id")
 
     real_authority = getattr(context.store, "authority", None)

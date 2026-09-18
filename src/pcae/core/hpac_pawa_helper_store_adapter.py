@@ -362,32 +362,16 @@ def perform_recognized_admin_mutation(
             created = sidecar_store.create_canonical(cap, sidecar, transaction_subject=subject)
             return f"rhamp_credential_sidecar:{created.credential_id}"
 
-        if mutation == "configure_presentation_mechanism":
-            install_store = ProtectedPresentationInstallationStore(store_authority)
-            cap = _new_internal_capability(store_authority, role="presentation_mechanism_installer", subject=subject)
-            resolved = install_store.apply_configuration(
-                cap,
-                action=str(operation_params["action"]),
-                helper_sha256=str(operation_params["helper_sha256"]),
-                helper_implementation_version=str(operation_params["helper_implementation_version"]),
-                verifier_configuration_digest=str(operation_params["verifier_configuration_digest"]),
-                renderer_profile=str(operation_params["renderer_profile"]),
-                descriptor_version=str(operation_params["descriptor_version"]),
-                installed_at=str(operation_params["installed_at"]),
-                installation_id=operation_params.get("installation_id"),
-            )
-            return f"protected_presentation_installation:{resolved.anchor.installation_id}"
-
-        if mutation == "configure_privileged_helper":
-            install_store = ProtectedPresentationInstallationStore(store_authority)
-            cap = _new_internal_capability(store_authority, role="privileged_helper_metadata_registrar", subject=subject)
-            document = install_store.register_helper_metadata(
-                cap,
-                transaction_id=subject,
-                metadata=dict(operation_params.get("metadata", {})),
-                registered_at=str(operation_params["registered_at"]),
-            )
-            return f"protected_presentation_installation:helper_metadata:{document['transaction_id']}"
+        # N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR:
+        # ``configure_presentation_mechanism`` and ``configure_privileged_helper``
+        # are no longer dispatchable through this admitted helper's own
+        # admin_mutation route (HPAC-PAWA-HELPER-REQ-184/HPAC-PAWA-REQ-345).
+        # Both are provisioning operations that exist outside
+        # ``CLOSED_ADMIN_MUTATIONS`` and are unreachable here by construction;
+        # they are dispatched only through the PAWA deployment-root-mediated
+        # standalone-script path (Model P-D) —
+        # ``pcae.core.hpac_protected_presentation_admin`` for
+        # ``configure_presentation_mechanism``.
     except (
         HumanPrincipalRegistryError,
         HumanPrincipalRegistryConflictError,

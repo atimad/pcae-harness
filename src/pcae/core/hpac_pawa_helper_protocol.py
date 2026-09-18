@@ -118,6 +118,13 @@ assert "hpac_lifecycle_terminator" not in CLOSED_CERTIFICATION_ROLES
 #: §14.1 — the closed HPAC-PAWA-001 §42 admin_mutation classes this protocol
 #: can transport (HPAC-PAWA-HELPER-REQ-057). Not a new vocabulary: mirrors
 #: hpac_protected_admin_writer.PawaOperation's members by literal value.
+#:
+#: N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR —
+#: ``configure_presentation_mechanism`` and ``configure_privileged_helper``
+#: are deliberately absent (HPAC-PAWA-HELPER-REQ-184/HPAC-PAWA-REQ-345): both
+#: are provisioning operations dispatched only through the PAWA
+#: deployment-root-mediated standalone-script path (Model P-D), never
+#: through this admitted helper's own admin_mutation route.
 CLOSED_ADMIN_MUTATIONS: FrozenSet[str] = frozenset(
     {
         "enroll_principal",
@@ -125,8 +132,6 @@ CLOSED_ADMIN_MUTATIONS: FrozenSet[str] = frozenset(
         "enroll_credential",
         "revoke_credential",
         "initialize_credential_sidecar_state",
-        "configure_presentation_mechanism",
-        "configure_privileged_helper",
     }
 )
 
