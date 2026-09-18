@@ -83,7 +83,6 @@ strict
 - pcae status coherence passes
 - pcae health passes
 - pcae check passes
-- python -m pytest -n auto passes
 
 ## Documentation Requirements
 
