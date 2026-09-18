@@ -7,8 +7,12 @@
   "execution_availability": "unavailable",
   "tests_added_or_updated": "41 fresh specification tests; twelve historical suites narrowly epoch-updated",
   "tests_run": 1412,
-  "files_changed_count": 48,
+  "files_changed_count": 49,
   "phase_commits": [
+    {
+      "hash": "c2bca0bd4e870bd41d940d645fba740600a60af0",
+      "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: record pushed attribution and final contract repair report"
+    },
     {
       "hash": "27a4d731d04852918429795c99dcf9ae7116a319",
       "subject": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: close contract task and record passing attribution checkpoint"
@@ -2610,6 +2614,7 @@
   "test_evidence_classification_rationale": "Inherited suite regression with41 separately identified fresh current-phase contract-model tests; neither source admission nor production writes claimed.",
   "pushed_status": "pushed",
   "files_changed": [
+    ".pcae/fast-green-attribution/327983757c726604cd0ab97d1e8e3441a1a758bb81de09549183822fed1d1a8a.json",
     ".pcae/fast-green-attribution/3d6b6cccb70a071619a23b57237d84b3bb665b390dd23b3cb1fd75d8bd220905.json",
     ".pcae/fast-green-attribution/42f12ef3bea08159fbbe17bae6be59bd2b7a81492f4c7c636971cf2818f8c881.json",
     ".pcae/phase-completion-metadata.json",

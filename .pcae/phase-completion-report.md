@@ -358,3 +358,5 @@ PCAE push succeeded; checkpoint HEAD==origin/main, ahead0, working tree clean. C
 - `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_n16_5_h3_pawa13_v1_3_contract_reconciliation.py`
 
 Report completeness: technical requirements complete; canonical completion/push/notification verdict is the generated final phase report and transaction. No production code or live host changed; no successor begun.
+
+Final inventory correction:49 changed paths including the pushed checkpoint artifact `.pcae/fast-green-attribution/327983757c726604cd0ab97d1e8e3441a1a758bb81de09549183822fed1d1a8a.json`. Pushed report-record commit `c2bca0bd4e870bd41d940d645fba740600a60af0` contains only3 Class B files. Shell-gate audit persistence intermittent failure is excluded only after a PASS isolated rerun on27a4d731, timestamp2026-09-18T08:34:28.103271+00:00, embedded by governed tool; no manual exclusion. The final inventory synchronization commit changes only this report and metadata.
