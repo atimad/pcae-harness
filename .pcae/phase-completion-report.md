@@ -1,3 +1,21 @@
+# Canonical Phase Report — identity contract IV
+
+Canonical Phase ID: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
+
+Alias: **N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV**
+
+Status: **COMPLETE — NOT VERIFIED / BLOCKED (F1)**. Technical report complete; governed promotion/receipt supplies lifecycle completion. Contract set NOT READY FOR IMPLEMENTATION; NOT IMPLEMENTED.
+
+Finalization evidence checkpoint HEAD: `73303ea7b1198f1e517a0d6c9f8c0735b532ced6`. Pushed: not_pushed; origin/main..HEAD: 1. Exact phase-owned commits below exclude only any enclosing metadata/report commit that cannot self-embed. Generated canonical Phase Report and final git snapshot carry the actual terminal HEAD.
+
+Files changed: 40; no source/contracts. Fresh IV161 passed; focused371 passed; helper97 passed/1 Linux-only skip; historical PAWA/PPA272 passed/21 baseline failures; source431 passed/6 baseline failures/37 platform skips; governance1646 passed/6 baseline failures/2 skips; bootstrap/session166 passed/4 baseline metadata failures, then repaired recommendation rerun179 passed (18 bootstrap+161 IV); historical13 epoch nodes passed. No candidate-only targeted regression. Overlapping selections are not summed.
+
+Governed Fast Green: baseline `c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4` (parent_of_oldest_phase_attributed_commit), candidate `73303ea7b1198f1e517a0d6c9f8c0735b532ced6`. Raw failures 353, errors 9; pre-existing exclusions 361; isolated environment exclusions 0; predicted phase artifacts 1; **attributable failures0**. Unmodified machine artifact: `.pcae/fast-green-attribution/1692a711475c32b71323af90b657d77b2fd6ef2e28d9c5d618555a912960b534.json`. Post-checkpoint deltas restricted to Class B lifecycle/reporting and governed focused validation.
+
+Governance: check PASS; health healthy; coherence coherent; doctor268 historical warnings/0 errors; transition validator intra-phase PASS (ancestry limitation preserved). Push check awaits governed push; no success claimed. Actual final post-push gate and notification receipt are recorded by canonical completion; technical evidence contains no authority to bypass them.
+
+- `73303ea7b1198f1e517a0d6c9f8c0735b532ced6` — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: independently verify identity contracts and record F1 provisioning blocker
+
 # Independent Model I-B identity contract verification
 
 Canonical Phase ID: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
@@ -10,7 +28,7 @@ Independent technical verdict: **COMPLETE — NOT VERIFIED / BLOCKED**. Finding 
 
 ## Governance, entry and predecessor reconstruction
 
-Baseline/final predecessor HEAD: `c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4`; main clean and synchronized with origin/main, ahead 0 at entry. No active governed phase; the explicit idle task was transitioned through PCAE. Check PASS, health healthy, status coherence coherent before activation. Agent codex-local acquired the governed lock. Full source/contract SHA-256 baseline is [baseline.json](evidence/helper-installation-identity-iv/baseline.json).
+Baseline/final predecessor HEAD: `c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4`; main clean and synchronized with origin/main, ahead 0 at entry. No active governed phase; the explicit idle task was transitioned through PCAE. Check PASS, health healthy, status coherence coherent before activation. Agent codex-local acquired the governed lock. Full source/contract SHA-256 baseline is [baseline.json](../docs/evidence/helper-installation-identity-iv/baseline.json).
 
 Actual predecessor: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` — N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR. Its completed transaction, completed task, finalized delivery receipt and delivered canonical report establish canonical completion. Historical pending-completion prose is non-authoritative generation residue. A separate reconciliation diagnostic re-rendered JSON fast_green dictionary keys in a different order; semantic object equality and original delivered Markdown/marker/transaction digest agree. No historical report or notification was rewritten/reissued.
 
@@ -67,7 +85,7 @@ flowchart LR
  D --> O[Scoped operation predicates and Model E family]
 ```
 
-PAWA verifier roots in fixed-root OS/provenance predicates, never the component it verifies. Component verifier consumes live recognized parent and checks exact tuple. Kernel peer is independent OS evidence. PPA launch proves only selected execution object/currentness, never admission or actual APPROVE. No runtime loop was found. **Creating the component registration graph still has F1 below.** Machine graph: [trust-graph.json](evidence/helper-installation-identity-iv/trust-graph.json).
+PAWA verifier roots in fixed-root OS/provenance predicates, never the component it verifies. Component verifier consumes live recognized parent and checks exact tuple. Kernel peer is independent OS evidence. PPA launch proves only selected execution object/currentness, never admission or actual APPROVE. No runtime loop was found. **Creating the component registration graph still has F1 below.** Machine graph: [trust-graph.json](../docs/evidence/helper-installation-identity-iv/trust-graph.json).
 
 ## F1 concrete reproduction and affected clauses
 
@@ -93,7 +111,7 @@ Exact tuple at admission and immediately before mutation: profile, component ins
 
 ## Fresh matrices and normative inventory
 
-All matrices are machine-readable in [matrices.json](evidence/helper-installation-identity-iv/matrices.json). Each row specifies source, consumer, origin, currentness, installation/generation/peer/agent binding, request influence, replayability, failure, conveyed authority and explicitly unconveyed authority. No load-bearing blank cells. PERMIT means the stated contract combination is allowed, not production authorization; DEFERRED IMPLEMENTATION DEPENDENCY is never permission.
+All matrices are machine-readable in [matrices.json](../docs/evidence/helper-installation-identity-iv/matrices.json). Each row specifies source, consumer, origin, currentness, installation/generation/peer/agent binding, request influence, replayability, failure, conveyed authority and explicitly unconveyed authority. No load-bearing blank cells. PERMIT means the stated contract combination is allowed, not production authorization; DEFERRED IMPLEMENTATION DEPENDENCY is never permission.
 
 | Matrix | Cases |
 |---|---:|
@@ -283,13 +301,13 @@ All matrices are machine-readable in [matrices.json](evidence/helper-installatio
 | historical records solely read for external migration | PERMIT | HELPER181 |
 | external generation1/provenance producer | DEFERRED IMPLEMENTATION DEPENDENCY | PAWA328, PAWA343 |
 
-The independently extracted full inventory in [inventory.json](evidence/helper-installation-identity-iv/inventory.json) preserves exact clause text, line/section, invariant and threat rows. HELPER: 184 unique declarations, numeric001–183 plus historical114A, 24 invariants; PAWA344/17; PPA108/12. Gap-free numeric namespaces and unique IDs hold. Fully qualified self-references resolve. HELPER's 40-row Model E matrix remains plus12 identity rows; PPA adds4 identity rows. Inventory integrity does not cure F1's prose/lifecycle inconsistency. All new trust rows map to identified requirements; F1 is the concrete semantic contradiction despite syntactic traceability.
+The independently extracted full inventory in [inventory.json](../docs/evidence/helper-installation-identity-iv/inventory.json) preserves exact clause text, line/section, invariant and threat rows. HELPER: 184 unique declarations, numeric001–183 plus historical114A, 24 invariants; PAWA344/17; PPA108/12. Gap-free numeric namespaces and unique IDs hold. Fully qualified self-references resolve. HELPER's 40-row Model E matrix remains plus12 identity rows; PPA adds4 identity rows. Inventory integrity does not cure F1's prose/lifecycle inconsistency. All new trust rows map to identified requirements; F1 is the concrete semantic contradiction despite syntactic traceability.
 
 ## Version and epoch audit
 
 No blocking version-classification defect: HELPER3.0→4.0 changes identity meanings/profile execution and exceeds REQ108 permitted MINOR no-remeaning; PAWA2.0→3.0 changes shared identity/generic-only admission beyond REQ153; PPA2.0→2.1 tightens parent/currentness acceptance under REQ070 without changing protected ceremony owner/evidence authority, consistent with REQ069. Schema2 incompatibility alone is not a MAJOR trigger under this contract's semantic version rule. Current headers/frozen-by identity/dependencies match the repair phase; historical header banners scope old status/version/count claims to their epochs. HELPER174's unqualified §33 shorthand is contextually PAWA §33, a clarity issue rather than another blocker.
 
-[version-review.md](evidence/helper-installation-identity-iv/version-review.md) independently classifies all13 changed historical assertions, with git-diff inspection and13 passing isolated nodes. They are exact version/count updates or pins to immutable pre-identity endpoint79ea7e1; no security assertion deletion/skip/xfailed/inversion/arbitrary-version wildcard. Historical byte tests no longer prove current integrity; this IV's complete source/contract baseline hashes supply that distinct current check. Existing unmodified old suites still contain historical expectations, classified by isolated baseline comparison rather than excused by label.
+[version-review.md](../docs/evidence/helper-installation-identity-iv/version-review.md) independently classifies all13 changed historical assertions, with git-diff inspection and13 passing isolated nodes. They are exact version/count updates or pins to immutable pre-identity endpoint79ea7e1; no security assertion deletion/skip/xfailed/inversion/arbitrary-version wildcard. Historical byte tests no longer prove current integrity; this IV's complete source/contract baseline hashes supply that distinct current check. Existing unmodified old suites still contain historical expectations, classified by isolated baseline comparison rather than excused by label.
 
 ## Source implementability and foundation sequencing
 
@@ -334,6 +352,6 @@ DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 | bootstrap/session3 suites |166 pass /4 fail|166 pass /4 fail|same stale successor metadata failures; IV-owned planning metadata then repaired and rerun|
 |13 historical edited epoch nodes |13 pass|independent git-diff classification|legitimate bounded epoch changes|
 
-Raw logs and exact failure-name sets are retained in [regression-attribution.json](evidence/helper-installation-identity-iv/regression-attribution.json) and adjacent candidate/baseline logs. No candidate-only failure in these selections; do not add overlapping tallies as unique tests. Governance Fast Green is separately generated against the parent of first IV commit and recorded unmodified in final metadata. Technical evidence predates that immutable-HEAD run; final canonical report owns its actual result and pushed HEAD.
+Raw logs and exact failure-name sets are retained in [regression-attribution.json](../docs/evidence/helper-installation-identity-iv/regression-attribution.json) and adjacent candidate/baseline logs. No candidate-only failure in these selections; do not add overlapping tallies as unique tests. Governance Fast Green is separately generated against the parent of first IV commit and recorded unmodified in final metadata. Technical evidence predates that immutable-HEAD run; final canonical report owns its actual result and pushed HEAD.
 
 Final focused rerun after current-phase planning metadata synchronization: **179 passed** (161 IV +18 bootstrap/TODO consistency). Baseline-only stale metadata was corrected in IV-owned status/TODO; no production parser or historical tests changed. Local isolated worktree removed; no remote artifacts created.

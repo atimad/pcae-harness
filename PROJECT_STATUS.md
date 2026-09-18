@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` — N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV. **ACTIVE — IV VERDICT NOT VERIFIED / BLOCKED (F1); governed finalization in progress**. Baseline `c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4`; no production or contract mutation. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` — N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV. **COMPLETE — NOT VERIFIED / BLOCKED (F1)**. Baseline `c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4`; no production or contract mutation. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
 
 Finding F1: PAWA328 requires registered helper execution to create registration, while HELPER175 mandates external provisioning and prohibits active-lineage self-rotation. Contract set NOT READY FOR IMPLEMENTATION. Full evidence: `docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_IDENTITY_CONTRACT_REPAIR_IV.md`.
 
