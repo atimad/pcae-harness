@@ -1,13 +1,29 @@
-# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract
+# HPAC-PAWA-HELPER-001 v5.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract
 
 
-> **Current identity epoch: v4.0.** Section 30D is the normative identity reconciliation, frozen by Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR). Status: CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION. Earlier freeze verdicts, counts, no-change statements and implementation-absence claims describe their named historical epochs only. Explicit supersessions below control current identity/profile semantics; all other security predicates remain mandatory. No production implementation is claimed.
+> **Current identity epoch: v5.0.** Section 30E is the normative provisioning/rotation dispatch reconciliation, frozen by Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR). Status: CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION. Section 30D's identity reconciliation remains in force; this epoch narrows the closed `admin_mutation` operation-params vocabulary of §13/§14.1 (REQ-053/REQ-057) by removing `configure_privileged_helper` and `configure_presentation_mechanism`, which HPAC-PAWA-001 §98 (v4.0) now dispatches directly by a standalone script rather than through this protocol's helper boundary. Earlier freeze verdicts, counts, no-change statements and implementation-absence claims describe their named historical epochs only. Explicit supersessions below control current dispatch semantics; all other security predicates remain mandatory. No production implementation is claimed.
 
 ## Contract identity and status
 
 **Contract:** HPAC-PAWA-HELPER-001
-**Version:** 4.0
+**Version:** 5.0
 **Status:** REPAIRED / FROZEN — PENDING INDEPENDENT RE-VERIFICATION
+**Evolved to v5.0 by:** Phase
+149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
+(alias **N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR**) —
+Component-Lifecycle Dispatch Correction (new section 30E), repairing finding
+**F1** (`docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_IDENTITY_CONTRACT_REPAIR_IV.md`).
+**v4.0 -> v5.0 is a MAJOR evolution** (§30E.7): the closed `admin_mutation`
+`operation_params.mutation` allowlist of REQ-057 narrows — removing
+`configure_privileged_helper` and `configure_presentation_mechanism`, now
+dispatched directly by HPAC-PAWA-001 §98 without ever reaching this protocol's
+helper boundary — which is outside REQ-108's no-remeaning MINOR allowance
+because it changes the closed operation vocabulary's membership, even though
+it is a **narrowing**, not a widening, and removes rather than adds a
+consumer path. Model E (§30B) is **untouched**: `admin_mutation` retains its
+three remaining subtypes plus `certification_write` / `certification_read` /
+`ceremony_entry` / `presentation_evidence_write`, all five operations keep
+their exact families, facades, and sinks.
 **Evolved to v3.0 by:** Phase
 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
 (alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR**) — Writer-
@@ -53,13 +69,18 @@ by Phase
 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1
 (alias **N16-5-F-5-TB-CONTRACT**) — N-16-5 Privileged Production Authority
 Trust-Boundary Contract Evolution.
-**Companion of:** HPAC-PAWA-001 **v2.0** (`HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`)
-— HPAC-PAWA-001 v2.0 §32 / §33 / §36–§38 / §42B / §42D / §49B / §33B now require
+**Companion of:** HPAC-PAWA-001 **v4.0** (`HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`)
+— HPAC-PAWA-001 v2.0 §32 / §33 / §36–§38 / §42B / §42D / §49B / §33B require
 that every privileged production operation be performed by a distinct
-out-of-process protected helper; HPAC-PAWA-HELPER-001 supplies the helper
-provenance, launch, private-channel, peer-authentication, request/response,
+out-of-process protected helper **except** the two component-lifecycle
+mutation families carved out by v4.0 §98 (`configure_privileged_helper`,
+`configure_presentation_mechanism`), which cannot presuppose the component
+they themselves install and are instead dispatched directly by an enumerated
+standalone script; HPAC-PAWA-HELPER-001 supplies the helper provenance,
+launch, private-channel, peer-authentication, request/response,
 operation-vocabulary, freshness, replay, one-shot, crash / uncertainty, and
-audit-ordering semantics that were previously unspecified.
+audit-ordering semantics that were previously unspecified for every operation
+this protocol still carries.
 **Parent semantics:** HPAC-001 v2.1 (`HUMAN_PRINCIPAL_AUTHENTICATION_CONTRACT.md`);
 RHAMP-001 v1.0
 (`REAL_HUMAN_AUTHENTICATION_MECHANISM_AND_PROTECTED_PRESENTATION_PROFILE_CONTRACT.md`).
@@ -605,7 +626,7 @@ COMPLETE.
 
   | Operation id | Family | Consumer (HPAC-PAWA-001 v2.0) | Bounded action | Result / evidence | Replay rule |
   |---|---|---|---|---|---|
-  | `admin_mutation` with `operation_params.mutation ∈ { enroll_principal, revoke_principal, enroll_credential, revoke_credential, initialize_credential_sidecar_state, configure_presentation_mechanism, configure_privileged_helper }` | §14.1 administrative mutation | the standalone principal-admin / bootstrap / recovery launcher (HPAC-PAWA-001 v2.0 §38 / §80.2) | exactly **one** HPAC-PAWA-001 §42 bounded mutation, performed by the helper under `<HPAC_PROTECTED_ROOT>` | `PERFORMED` + `evidence_ref` / `evidence_digest` of one `HPAC-PAWA-ISSUANCE-EVIDENCE/1.0` record the helper wrote | single-use per `(request_id, nonce)`; a consumed request cannot be re-admitted |
+  | `admin_mutation` with `operation_params.mutation ∈ { enroll_principal, revoke_principal, enroll_credential, revoke_credential, initialize_credential_sidecar_state }` (§30E.2 — `configure_presentation_mechanism` and `configure_privileged_helper` are **no longer members**: HPAC-PAWA-001 v4.0 §98 dispatches both directly, never through this protocol) | §14.1 administrative mutation | the standalone principal-admin / bootstrap / recovery launcher (HPAC-PAWA-001 v2.0 §38) | exactly **one** HPAC-PAWA-001 §42 bounded mutation, performed by the helper under `<HPAC_PROTECTED_ROOT>` | `PERFORMED` + `evidence_ref` / `evidence_digest` of one `HPAC-PAWA-ISSUANCE-EVIDENCE/1.0` record the helper wrote | single-use per `(request_id, nonce)`; a consumed request cannot be re-admitted |
   | `certification_write` with `role ∈` the closed five (§14.2) | §14.2 certification-lifecycle write | `pcae.core.hpac_certification_coordinator` via `scripts/hpac_certification_admin.py` (HPAC-PAWA-001 v2.0 §38A) | exactly **one** five-role lifecycle write (HPAC-PAWA-001 §42B per-role authority) | `PERFORMED` + `evidence_ref` / `evidence_digest` | single-use per `(role, subject, session_id, request_id)` |
   | `certification_read` | §15 enumerated read | the same §38A / §38B coordinator | return the enumerated §15 record contents for the bound session | `PERFORMED` + `result_payload` (record contents); audit `operation = "certification_read_authority"` | idempotent read; each call re-runs §7 / §10 / §13 validation |
   | `ceremony_entry` | §16 ceremony hand-off | the same §38A / §38B coordinator | hand the canonical ceremony request to the HPAC-PPA-001 presentation helper for **exactly one** ceremony in the bound session | `PERFORMED` + `result_payload` = ceremony-entry acknowledgement (a reference to the started HPAC-PPA-001 ceremony) — **no** authority object, **no** ceremony outcome | single-use per `session_id`; a second `ceremony_entry` for the same session → `capability_stale` |
@@ -634,15 +655,16 @@ COMPLETE.
   writer-transaction semantics (expected-current compare-and-write, read-back
   verified). No `HPACWriterCapability` is returned to the launcher; the caller
   receives `PERFORMED` + the evidence reference.
-- **HPAC-PAWA-HELPER-REQ-057.** `operation_params` for each mutation is a
-  **closed typed struct**: exactly the target id(s) and the closed enumerated
-  parameters HPAC-PAWA-001 §42–§44 / §80.2 already define for that mutation
+- **HPAC-PAWA-HELPER-REQ-057.** `operation_params` for each remaining mutation
+  is a **closed typed struct**: exactly the target id(s) and the closed
+  enumerated parameters HPAC-PAWA-001 §42–§44 already define for that mutation
   (e.g. `enroll_principal` → `{ transaction_id }`; `revoke_credential` →
-  `{ credential_id }`; `configure_presentation_mechanism` →
-  `{ mechanism_id, lifecycle_action ∈ {install, rotate, revoke}, transaction_id }`;
-  `configure_privileged_helper` →
-  `{ helper_installation_generation, lifecycle_action ∈ {install, rotate, revoke},
-  transaction_id }`). No free path, no expression, no JSON blob.
+  `{ credential_id }`). No free path, no expression, no JSON blob.
+  `configure_presentation_mechanism` (`{ mechanism_id, lifecycle_action,
+  transaction_id }`) and `configure_privileged_helper`
+  (`{ helper_installation_generation, lifecycle_action, transaction_id }`)
+  remain closed typed structs at HPAC-PAWA-001 §98, which now defines them
+  directly — this protocol no longer carries either struct (§30E.2).
 - **HPAC-PAWA-HELPER-REQ-058.** `request for operation` **≠** `permission to
   perform arbitrary related operations`; `successful helper admission` **≠**
   `reusable authority`; `typed result` **≠** `writer capability`;
@@ -2615,3 +2637,74 @@ Identity threat traceability (additive to the preserved v3.0 40-row matrix):
 
 **Requirement count (v4.0):** existing 172 declarations (including 114A) plus
 REQ-172..183 = 184 declarations. Earlier counts remain epoch-specific.
+
+## 30E. Provisioning/rotation dispatch reconciliation (v5.0)
+
+**HPAC-PAWA-HELPER-REQ-184.** This protocol's closed `admin_mutation`
+`operation_params.mutation` allowlist (REQ-053/REQ-057) no longer includes
+`configure_privileged_helper` or `configure_presentation_mechanism`.
+HPAC-PAWA-001 v4.0 §98 dispatches both directly, by an enumerated standalone
+deployment-owner script holding a process-local PAWA writer capability, never
+through this protocol's §33C helper boundary, never `exec`ing H, and never
+touching the private one-shot channel (§9) or peer authentication (§10) this
+protocol governs. This section exists only to **reconcile** the two
+contracts' closed vocabularies; it grants no authority and defines no new
+mechanism (all substantive rules live in HPAC-PAWA-001 §98).
+
+**HPAC-PAWA-HELPER-REQ-185.** HELPER175 (§30D/REQ-175) — "a helper cannot
+register/rotate/revoke its own active executing lineage via `admin_mutation`"
+— is now **satisfied by construction**: since `configure_privileged_helper`
+is no longer a member of the operations any H can ever be asked to perform
+(REQ-184), there is no `admin_mutation` request through which H's own
+lineage transition could be routed even in error. The genesis/rotation/
+recovery states for H's own lineage are defined exclusively by
+HPAC-PAWA-001 §98 (REQ-346/347/348); this protocol's §6 (REQ-018..030)
+continues to govern only the **pre-launch integrity recognition** of
+whichever generation HPAC-PAWA-001 §98 has made current — it does not
+itself perform, request, or admit the registration.
+
+**HPAC-PAWA-HELPER-REQ-186.** REQ-024's "non-circular bootstrap" language and
+REQ-025's "rotation" language are **preserved as accurate descriptions of
+outcome** (helper bytes installed out of band, then one generation-1 record
+created; rotation is monotonic `G → G+1`) but are no longer descriptions of
+an `admin_mutation`-mediated *mechanism* — the mechanism is HPAC-PAWA-001
+§98. No re-derivation of REQ-018..030's filesystem / integrity / anti-TOCTOU
+predicates is required or permitted; those govern the artifact's shape and
+the launcher's pre-launch recognition of it, independent of which process
+authored it.
+
+**HPAC-PAWA-HELPER-REQ-187.** Adversarial cases specific to this
+reconciliation (additive to the §30D table): an ordinary Python call, the
+configured agent principal, or H itself (current, retired, or a would-be
+successor) attempting to invoke `configure_privileged_helper` as an
+`admin_mutation` fails closed at `operation_scope_invalid` (REQ-052/054 —
+unknown operation-params member) **before** any §7/§10 admission logic runs,
+because the mutation id is no longer in the closed enum at all, not merely
+denied by role or context. A request that renames or aliases
+`configure_privileged_helper` to smuggle it through as
+`enroll_principal`/etc. fails the closed typed `operation_params` struct
+match (REQ-057) — the enumerated mutations' structs share no fields wide
+enough to alias one into another.
+
+**HPAC-PAWA-HELPER-REQ-188.** **v4.0 -> v5.0 is MAJOR** (rationale restated
+from the header block): narrowing the closed `admin_mutation` vocabulary is
+outside REQ-108's no-remeaning MINOR allowance because it changes which
+operation-params values are valid members of an externally-visible closed
+enum, even though the change is a removal, not an addition, and strictly
+reduces H's own attack surface (two entire mutation families can no longer
+reach H's process at all). Model E (§30B), the three sealed authority
+families, the five certification roles, and every `pawa_failure_code`
+mapping for the five **remaining** operations are unchanged.
+
+Identity threat traceability addendum (additive to the §30D table):
+
+| Attack | Required denial / requirement |
+|---|---|
+| H itself, current or retired, is asked to perform its own registration/rotation/revocation | not a member of the closed `admin_mutation` enum at all, 184/187 |
+| a request aliases `configure_privileged_helper` into another mutation's params shape | closed typed struct match per mutation, 057/187 |
+| a caller assumes `configure_presentation_mechanism` is still H-dispatched (stale precedent) | HPAC-PPA-REQ-021/022 unchanged; PAWA-REQ-351 confirms already-correct, 184 |
+
+**Requirement count (v5.0):** existing 184 declarations (including 114A)
+plus REQ-184..188 = 189 declarations. Earlier counts remain epoch-specific.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.

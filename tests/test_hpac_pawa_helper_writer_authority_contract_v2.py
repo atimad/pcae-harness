@@ -83,7 +83,7 @@ def test_contract_title_is_v2_0(contract_text: str) -> None:
     preserved (unedited) inside the immutable section 30A body."""
 
     assert contract_text.startswith(
-        "# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot "
+        "# HPAC-PAWA-HELPER-001 v5.0 — HPAC-PAWA Protected One-Shot "
         "Privileged Helper Protocol Contract"
     )
     # The historical v2.0 title text is not reproduced verbatim as an H1
@@ -94,7 +94,7 @@ def test_contract_title_is_v2_0(contract_text: str) -> None:
 
 
 def test_contract_version_field_is_2_0(contract_text: str) -> None:
-    assert "**Version:** 4.0\n" in contract_text
+    assert "**Version:** 5.0\n" in contract_text
     assert "**Version:** 1.0\n" not in contract_text
 
 
@@ -123,8 +123,8 @@ def test_requirement_ids_span_001_through_140_no_gaps(contract_text: str) -> Non
 
     unique = sorted(set(_all_req_numbers(contract_text)))
     assert unique[0] == 1
-    assert unique[-1] == 183  # v4 identity reconciliation adds172..183
-    missing = [n for n in range(1, 184) if n not in unique]
+    assert unique[-1] == 188  # v5 provisioning/rotation dispatch reconciliation adds 184..188
+    missing = [n for n in range(1, 189) if n not in unique]
     assert missing == [], f"missing requirement ids: {missing}"
     # The v2.0 boundary itself must still be present and contiguous.
     assert 140 in unique and 141 in unique
@@ -161,8 +161,8 @@ def test_requirement_count_trailer_matches_actual_count(contract_text: str) -> N
     assert "HPAC-PAWA-HELPER-001 v2.0 defines **141**" in contract_text
     assert "HPAC-PAWA-HELPER-001 v3.0 defines **172**" in contract_text
     unique = set(_all_req_numbers(contract_text))
-    # 001-171 plus the lettered 114A => 172 distinct normative ids
-    assert len(unique) == 183
+    # 001-183 plus the lettered 114A, plus 184..188 (v5.0) => 188 distinct normative ids
+    assert len(unique) == 188
 
 
 def test_invariant_count_trailer_matches_actual_count(contract_text: str) -> None:

@@ -1,12 +1,12 @@
-# HPAC-PAWA-001 v3.0 — HPAC Production Protected Administration Writer Anchor Contract
+# HPAC-PAWA-001 v4.0 — HPAC Production Protected Administration Writer Anchor Contract
 
 
-> **Current identity epoch: v3.0.** Section 97 is the normative identity reconciliation, frozen by Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR). Status: CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION. Earlier freeze verdicts, counts, no-change statements and implementation-absence claims describe their named historical epochs only. Explicit supersessions below control current identity/profile semantics; all other security predicates remain mandatory. No production implementation is claimed.
+> **Current identity epoch: v4.0.** Section 98 is the normative component-lifecycle dispatch correction, frozen by Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR). Status: CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION. Section 97's identity reconciliation remains in force; this epoch does not amend `hpahi`/`hpawi`/`hppi` identity, only the dispatch mechanism for the `configure_privileged_helper` mutation family (§42G/§98). Earlier freeze verdicts, counts, no-change statements and implementation-absence claims describe their named historical epochs only. Explicit supersessions below control current dispatch semantics; all other security predicates remain mandatory. No production implementation is claimed.
 
 ## Contract identity and status
 
 **Contract:** HPAC-PAWA-001
-**Version:** 3.0
+**Version:** 4.0
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2 — HPAC-PAWA-001 v1.0
 Production Protected-Admin Writer Anchor Contract Freeze (initial freeze,
@@ -233,7 +233,15 @@ authentication / presence / verification / informed-intent / approval /
 PB-permission / Runtime-Enforcement / runtime-capability / execution concerns.
 The current lineage is **HPAC-PAWA-001 v1.0 → v1.1 → v1.2 → v1.3 → v1.4**
 (every evolution MINOR) **→ v2.0** (**MAJOR**, S-4 — the out-of-process
-privileged-helper delivery model; §80.5). The v1.2 companion HPAC-PPA-001 v1.0
+privileged-helper delivery model; §80.5) **→ v3.0** (**MAJOR**, §97 — typed
+component-installation-binding identity reconciliation) **→ v4.0** (**MAJOR**,
+§98 — component-lifecycle dispatch correction: `configure_privileged_helper`
+(§42G) is repointed from the §33C out-of-process helper boundary to the same
+direct-standalone-script dispatch already governing its own declared §80.2
+`configure_presentation_mechanism` precedent, resolving the provisioning-
+circularity finding **F1** independently reproduced by
+`docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_IDENTITY_CONTRACT_REPAIR_IV.md`).
+The v1.2 companion HPAC-PPA-001 v1.0
 is new and, at v1.3 / v1.4 / v2.0, **byte-unchanged**. v2.0 adds **one** new
 companion, **HPAC-PAWA-HELPER-001 v1.0**
 (`HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md`), which owns the helper
@@ -5473,3 +5481,147 @@ N-16-7 strictly last. **REPORTING-UX-1** remains open and non-blocking.
   the typed reference. Fresh independent IV precedes implementation/migration.
   Configured-agent identity is the existing protected-record/live-OS resolution,
   never task label or caller claim; None/unresolved fails agent_principal_unknown.
+
+## 98. Component-lifecycle dispatch correction (v4.0) — F1 provisioning/rotation repair
+
+**Context (independently reconstructed, not merely accepted from prior prose).**
+REQ-326 introduces `configure_privileged_helper` explicitly **"the §80.2
+`configure_presentation_mechanism` model"** — i.e. REQ-326 itself declares that
+this mutation family is a sibling of, and dispatched identically to, PPA's
+`configure_presentation_mechanism`. HPAC-PPA-001 §5 (HPAC-PPA-REQ-021/022,
+byte-unchanged, independently frozen and **never amended by this section**)
+specifies that `configure_presentation_mechanism` is dispatched by the
+standalone module `pcae.core.hpac_protected_presentation_admin`
+(`scripts/hpac_protected_presentation_admin.py`) obtaining **one process-local
+PAWA capability directly** — it is **not** dispatched through any out-of-process
+helper boundary, because at the time §5 was frozen (v1.2) no helper (§33C)
+existed to require one. REQ-328, added later, instead requires
+`configure_privileged_helper` to be **"driven through the §33C helper
+boundary"** — an `admin_mutation` operation whose consumer is itself an
+admitted, current H. This is a **direct contradiction of REQ-326's own declared
+precedent**, and it is the exact mechanism of finding **F1**: at genesis, no H
+is admitted (REQ-327's own "non-circular bootstrap" claim requires exactly this
+absence), so no `admin_mutation` can be admitted through the §33C boundary to
+create H's own first record (**F1-A**); at rotation, the only admitted H is the
+**current, about-to-be-superseded** generation, so dispatching its own
+successor's registration "through" it would necessarily make the active
+executing lineage a participant in changing itself, which HPAC-PAWA-HELPER-001
+§30D (HELPER175) explicitly forbids (**F1-B**). REQ-328 is the defect; REQ-326
+and HPAC-PPA-REQ-021/022 already state the correct, non-circular model. This
+section corrects REQ-328 to match its own declared precedent. It is Model
+**P-D** (deployment-root-mediated generation transition), realized as the exact
+reuse of the already-frozen, already-independently-verified §5 PPA dispatch
+shape — **no second trust root, no new authority class, no generic broker**.
+
+- **HPAC-PAWA-REQ-345.** **REQ-328 is corrected: `configure_privileged_helper`
+  is dispatched exactly as `configure_presentation_mechanism` already is
+  (HPAC-PPA-REQ-021/022), never through the §33C out-of-process helper
+  boundary.** The exact future production factory consumer remains the
+  standalone principal-administration / helper-admin script (§38 / §38C:
+  recommended `scripts/hpac_pawa_helper_admin.py`, or a shared entry point with
+  the existing `hpac_protected_root_admin.py` under an explicit subcommand); it
+  runs as the deployment owner, imports no agent-reachable code, and obtains
+  **one process-local, single-use PAWA writer capability** scoped exactly to
+  `configure_privileged_helper` (subject = `helper_implementation_id`,
+  transaction = the one `privileged_helper_configuration_transaction_id`) via
+  the existing production writer-mint path (HPAC-PAWA-001 §36-§38 pre-v2.0
+  in-process mint, retained **only** for this component-lifecycle family and
+  for `configure_presentation_mechanism`, since neither can presuppose an
+  admitted component of the kind it is itself installing). This capability is
+  never returned to, held by, or reachable from H, the launcher, or the
+  configured agent principal (PAWA-INV-15 continues to apply to every **other**
+  §42 family; this is the sole, explicitly enumerated exception, matching the
+  exception §5 of HPAC-PPA-001 already carries for `configure_presentation_mechanism` —
+  not a new exception class).
+- **HPAC-PAWA-REQ-346.** **Genesis (no current H generation exists).** The
+  helper-admin script installs helper bytes out of band (HPAC-PAWA-HELPER-001
+  §6.18-§6.20), then — in its own process, as the deployment owner, holding the
+  REQ-345 capability — performs one create-only write of the
+  `HPAC-PAWA-HELPER-INSTALLATION/2.0` generation-1 record and the matching
+  `HPAC-PAWA-HELPER-CURRENT-GENERATION/2.0` anchor (HPAC-PAWA-HELPER-001
+  §30D/REQ-174), each carrying its `HPAC-WRITER-PROVENANCE/1.0` sidecar. **No
+  admitted H, no ceremony, no prior PCAE principal, and no `admin_mutation`
+  dispatch through any helper process is required or permitted for generation
+  1.** First-caller-wins, self-install, repository install, environment
+  install, and deterministic-fixture promotion remain prohibited
+  (HPAC-PAWA-HELPER-REQ-024, unchanged).
+- **HPAC-PAWA-REQ-347.** **Rotation (exactly one current H generation G
+  exists).** The helper-admin script — never the current H=G itself, never
+  dispatched through G's §33C boundary — installs the new immutable helper
+  bytes at their derived content-addressed path, then performs one bounded
+  write, in its own process, holding a **fresh** REQ-345 capability: a new
+  generation record `G+1` with `lifecycle_action == rotate`, exact
+  `supersedes = {G, helper_installation_digest(G)}`, and an atomic
+  current-generation anchor switch to `G+1` in the same bounded transaction
+  (HPAC-PAWA-HELPER-001 §6.25). `G` becomes stale by derivation, never
+  rewritten. Because dispatch is **never** routed through any H process at
+  all — genesis or rotation alike — G is never a participant, executor, or
+  consumer in the transition that supersedes it, and HELPER175's self-lineage
+  prohibition is **satisfied by construction**, not by a runtime check that
+  could be bypassed.
+- **HPAC-PAWA-REQ-348.** **Recovery (current generation missing, corrupted, or
+  otherwise unusable).** Identical to genesis (REQ-346) except `supersedes` is
+  omitted or explicitly null and a **new** `installation_id` is minted
+  (HPAC-PAWA-HELPER-001 §6.26/§6.27, HPAC-PPA-REQ-027 pattern): recovery is
+  explicit deployment-owner reprovisioning under a new lineage, never an
+  automatic retry, self-heal, or fallback to a stale record.
+- **HPAC-PAWA-REQ-349.** **Atomicity / crash / replay.** REQ-345's capability
+  is process-local, non-bearer, and dies with the helper-admin script's
+  process (PAWA-INV-15 discipline, applied here to the script instead of the
+  launcher). A crash before the create-only / compare-and-write completes
+  leaves no record (create-only semantics reject a partial write on retry
+  cleanly); a crash after the record is written but before the anchor switch
+  leaves the **old** anchor authoritative (the new generation record exists but
+  is not yet current — a re-run of the transaction is **not** automatic; the
+  operator re-invokes the script, which detects the orphaned non-current record
+  via its `supersedes` linkage and either completes the anchor switch as an
+  explicit **repeat of the same bounded transaction id** or the operator marks
+  it abandoned); a crash after the anchor switch is a completed rotation. No
+  automatic retry exists at any point (HPAC-PAWA-HELPER-REQ-025/REQ-027
+  discipline). Exactly one anchor is current at all times; the anchor's
+  create-then-atomic-replace-with-readback semantics (HPAC-PAWA-HELPER-REQ-022)
+  make two simultaneous "current" generations structurally unrepresentable.
+- **HPAC-PAWA-REQ-350.** **Configured-agent exclusion for the provisioning
+  executor.** The helper-admin script's OS process principal SHALL be the
+  deployment owner and SHALL NOT be the configured agent principal
+  (`ConfiguredAgentAuthorityIdentity`, resolved live exactly as REQ-192/193
+  already require — never from `os.geteuid()`, an environment variable, argv,
+  or a caller-supplied field). This is the **same** predicate REQ-056/REQ-194
+  already apply to root and agent-exclusion-record bootstrap: provisioning
+  authority is infrastructure/deployment authority, established once by an
+  operator physically invoking the script as the deployment owner, never
+  re-derived from request data. An ambiguous, missing, or unresolvable
+  identity fails closed (`agent_principal_unknown`); the configured agent
+  principal, an ordinary PCAE agent process, and H itself (whether current,
+  retired, or a successor) are **never** eligible executors of REQ-345's
+  capability.
+- **HPAC-PAWA-REQ-351.** **`configure_presentation_mechanism` is unaffected and
+  confirmed already-correct.** HPAC-PPA-REQ-021/022 already specify exactly the
+  REQ-345-REQ-350 shape for P's own lifecycle; this section does not amend
+  HPAC-PPA-001, which remains **v2.1, byte-unchanged**. The two mutation
+  families (`configure_privileged_helper`, `configure_presentation_mechanism`)
+  are now dispatched **identically** — direct standalone-script PAWA capability,
+  never an H-mediated `admin_mutation` — for the same underlying reason: a
+  component-lifecycle mutation cannot presuppose the very component it installs
+  as its own admission conjunct.
+- **HPAC-PAWA-REQ-352.** **v3.0 -> v4.0 is MAJOR.** Repointing an existing §42
+  mutation family's dispatch mechanism away from the out-of-process helper
+  boundary that v2.0 (§80.5, MAJOR) established as the general delivery model
+  for privileged production operations is outside REQ-153's no-remeaning MINOR
+  allowances — it changes which process performs the compare-and-write and
+  which capability-mint pathway authorizes it, even though the trust root
+  (§3/REQ-010), the capability's non-bearer/process-local/single-use
+  properties (PAWA-INV-15), and the deployment-owner identity predicate are
+  **all unchanged**. REQ-152 security prohibitions are not relaxed: no new
+  trust root, no bearer token, no generic broker, no widened consumer
+  inventory (§88/§224/§240 preserved — the sole consumer remains the one
+  enumerated helper-admin script). Fresh independent IV precedes
+  implementation. This is a narrower MAJOR than v2.0's or v3.0's: it corrects
+  one mutation family's dispatch route to match a precedent (§80.2) the
+  contract itself already declared and a sibling contract (HPAC-PPA-001 §5)
+  already independently froze; it does not introduce a new mechanism.
+
+**Requirement count (v4.0):** existing 344 declarations plus REQ-345..352 = 352
+declarations. Earlier counts remain epoch-specific.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — preserved.
