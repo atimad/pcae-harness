@@ -142,8 +142,9 @@ No model changes actual election ownership or confers authority from digest cons
 
 ## Identity supply, readability and persistence rules
 
-For every persisted identity/digest row in the inventory, creation is reserved to the existing
-external deployment-owner provisioning/lifecycle role; canonical storage is under its listed
+For the persisted installation/anchor/store/root-binding identity and configuration-digest
+rows, creation is reserved to the existing deployment-owner provisioning/lifecycle role;
+canonical storage is under its listed
 single-root namespace. Readability follows existing protected OS permissions and enumerated
 canonical reads, not public authority export. An ordinary caller may carry an echoed assertion
 only where the closed schema names it; it cannot select or replace trusted resolution.
@@ -152,7 +153,9 @@ survive restart as verification inputs. All active admission/writer objects are 
 process-local, non-copyable/non-serializable/restart-dead and never persisted or exported.
 OS identity comes exclusively from kernel/process/account/filesystem facts as its row specifies;
 request payload cannot influence these facts. Human/producer identity remains its own existing
-registry/provenance vocabulary; no cross-category equality is an authorization predicate.
+registry/provenance vocabulary: principal IDs originate through protected enrollment,
+producer provenance through its designated producer and record authorship. Human evidence
+creation is not installation provisioning. No cross-category equality is an authorization predicate.
 
 Configured agent is the OS account configured in protected HPAC-PAWA-AGENT-EXCLUSION/1.0,
 not codex-local/claude-local/task lock. Resolver validates PAWA/root/digest/anchor/currentness,
@@ -264,3 +267,19 @@ NOT begun. No immediate admission implementation or foundation repair authorizat
 - Fast Green and final lifecycle results follow in canonical .pcae report.
 
 Source delta inventory: no src files/symbols changed. Contract deltas: HELPER header/REQ021 +§30D; PAWA header/component-equality claims +§97; PPA header +§23; normative JSON constraint annex. Tests: one41-test fresh suite, four older suites narrowly version/count/historical-hash epoch scoped. Documentation: report/baseline/logs/status/decisions/changelog/task lifecycle/canonical metadata. Production effects remain absent.
+
+## Additional contract-epoch reconciliation
+
+Six historical PAWA/PPA/helper contract suites were rerun at both entry79ea and candidate.
+Baseline24 failures; initial candidate34 with13 candidate-only failures and3 resolved.
+The13 candidate-only tests were exclusively version/header/count/historical-byte-delta
+assertions. Primary reviewed their narrow update across5 existing files; security checks
+remain. Final run272 passed/21 failed, with zero candidate-only failure nodes. Full logs,
+set comparison and per-test rationale are retained in evidence. This is a separate
+comparison from governed Fast Green, whose final result controls finalization.
+Total historical suites epoch-updated is9 (4 initial +5 additional), plus the fresh41-test
+specification suite. Source, contracts and Model E were not altered by test reconciliation.
+
+### First full Fast Green attribution disposition
+
+Candidate `2c91cce42f42ffa79d38e9b730d12f46aee1c30d` produced 357 raw failures and 9 collection/runtime errors; comparison against isolated baseline identified exactly four attributable contract-version/count guards across three older presentation/F5B1 suites. These retain all security assertions and now recognize the authorized PPA 2.1 (REQ-001..108) / PAWA 3.0 epochs. Their isolated rerun passed 4/4. This failed run is preserved, not represented as a passing checkpoint. A fresh governed full attribution is required after the corrective commit. Additional broader historical contract tests were reconciled as documented above. Task-memory warning count returned to baseline 268 (0 errors) after restoring a predecessor idle-task link lost by the task transition updater.

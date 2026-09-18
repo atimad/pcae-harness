@@ -1,0 +1,441 @@
+..........F.....FF..F...........................FF.FF.F.....FFFF........ [ 24%]
+.................F............................F...................FF.... [ 49%]
+............FF....F..F.................................................. [ 73%]
+........................................................................ [ 98%]
+.....                                                                    [100%]
+=================================== FAILURES ===================================
+______________ test_11_sibling_contracts_byte_identical_at_entry _______________
+
+    def test_11_sibling_contracts_byte_identical_at_entry() -> None:
+        for c in (PAWA, HELPER, RHAMP, HPAC, HBDC, RIHAC, RIASC, RDGO):
+            assert c.exists(), c
+>           assert at_entry(c) == c.read_bytes(), c
+E           AssertionError: PosixPath('/Users/atilamadai/repos/pcae-harness/docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md')
+E           assert b'# HPAC-PAWA...n-blocking.\n' == b'# HPAC-PAWA...al_unknown.\n'
+E             
+E             At index 17 diff: b'2' != b'3'
+E             Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py:304: AssertionError
+_______________ test_17_this_iv_adds_no_normative_contract_edit ________________
+
+    def test_17_this_iv_adds_no_normative_contract_edit() -> None:
+        changed = set(_git("diff", "--name-only", ENTRY, "--", "docs/contracts").split())
+>       assert changed == set(), changed
+E       AssertionError: {'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md', 'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRI...cts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md', 'docs/contracts/helper_installation_identity_constraints.json'}
+E       assert {'docs/contra...traints.json'} == set()
+E         
+E         Extra items in the left set:
+E         'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'
+E         'docs/contracts/helper_installation_identity_constraints.json'
+E         'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md'
+E         'docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md'
+E         Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py:370: AssertionError
+________ test_18_this_iv_performs_no_protected_host_or_ceremony_action _________
+
+    def test_18_this_iv_performs_no_protected_host_or_ceremony_action() -> None:
+        # Exclude this test file's own diff: it necessarily contains the banned
+        # substrings as string literals inside its own assertions.
+        this_file = Path(__file__).resolve().relative_to(ROOT).as_posix()
+        diff = _git("diff", ENTRY, "--", "tests", "docs", f":(exclude){this_file}")
+        for banned in ("getAssertion", "makeCredential", "FIDO2_PIN", "real_ceremony=True", "YubiKey.touch("):
+>           assert banned not in diff, banned
+E           AssertionError: getAssertion
+E           assert 'getAssertion' not in 'diff --git ...in new_seg\n'
+E             
+E             'getAssertion' is contained here:
+E               o PIN, no getAssertion/makeCredential, no
+E             ?           ++++++++++++
+E               +  production challenge, no presentation evidence write, no counter mutation,
+E               +  no production principal issuance, no Gate5 certification).
+E               +- Runtime: `Observed` / `observe` / `unavailable`; plugins 0; capabilities 0;...
+E             
+E             ...Full output truncated (20369 lines hidden), use '-vv' to show
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py:379: AssertionError
+_____________ test_02_phase_id_is_unique_against_history_and_docs ______________
+
+    def test_02_phase_id_is_unique_against_history_and_docs() -> None:
+        # The trailing token appears only in this phase's own commit subjects.
+        token = "1R.1.1.1.1.1.1 ("
+        subjects = [l for l in _git("log", "--all", "--pretty=%s").splitlines() if token in l]
+        assert subjects and all("N16-5-F-5-PPA-CONTRACT" in l for l in subjects)
+        # no successor id (this id + .1) is reserved anywhere yet
+        for base in ("docs", "tasks", ".pcae"):
+            out = subprocess.run(
+                ["grep", "-rlF", CANONICAL_PHASE_ID + ".1", str(ROOT / base)],
+                capture_output=True, text=True,
+            )
+>           assert out.stdout.strip() == ""
+E           AssertionError: assert '/Users/atila...ORITY_IMPL.md' == ''
+E             
+E             + /Users/atilamadai/repos/pcae-harness/docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_IDENTITY_CONTRACT_REPAIR.md
+E             + /Users/atilamadai/repos/pcae-harness/docs/PHASE_N16_5_F_5_TB_REAL_HELPER_BOUNDARY_REPAIR.md
+E             + /Users/atilamadai/repos/pcae-harness/docs/PHASE_N16_5_F_5_TB_REPLAY_REPAIR.md
+E             + /Users/atilamadai/repos/pcae-harness/docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_1R_1R_2R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1R_1_1_1_1_1_1_1_1_1_N16_5_F_5_TB_HELPER_IMPL.md
+E             + /Users/atilamadai/repos/pcae-harness/docs/PHASE_N16_5_F_5_TB_CERT_READ_CLIENT_IMPL_BLOC...
+E             
+E             ...Full output truncated (23 lines hidden), use '-vv' to show
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py:101: AssertionError
+_____ test_30_cross_contract_conflict_resolved_and_siblings_byte_unchanged _____
+
+    def test_30_cross_contract_conflict_resolved_and_siblings_byte_unchanged() -> None:
+        t = norm(PPA)
+        assert "HPAC-PPA-REQ-101." in text(PPA)
+        assert "resolved **at contract\n  level**" in text(PPA) or "resolved at contract level" in t
+        # siblings byte-unchanged since ENTRY
+        for c in (PAWA, HELPER, RHAMP, HPAC, HBDC, RIHAC, RIASC, RDGO):
+>           assert at_entry(c) == c.read_bytes(), c
+E           AssertionError: PosixPath('/Users/atilamadai/repos/pcae-harness/docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md')
+E           assert b'# HPAC-PAWA...n-blocking.\n' == b'# HPAC-PAWA...al_unknown.\n'
+E             
+E             At index 17 diff: b'2' != b'3'
+E             Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py:406: AssertionError
+_________ test_31_pawa_v2_0_and_helper_headers_are_the_frozen_versions _________
+
+    def test_31_pawa_v2_0_and_helper_headers_are_the_frozen_versions() -> None:
+>       assert text(PAWA).splitlines()[0].startswith("# HPAC-PAWA-001 v2.0 —")
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x109ac8f30>('# HPAC-PAWA-001 v2.0 —')
+E        +    where <built-in method startswith of str object at 0x109ac8f30> = '# HPAC-PAWA-001 v3.0 — HPAC Production Protected Administration Writer Anchor Contract'.startswith
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py:411: AssertionError
+_____________ test_33_docs_contracts_delta_is_exactly_hpac_ppa_001 _____________
+
+    def test_33_docs_contracts_delta_is_exactly_hpac_ppa_001() -> None:
+        changed = set(_git("diff", "--name-only", ENTRY, "--", "docs/contracts").split())
+>       assert changed == {"docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md"}, changed
+E       AssertionError: {'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md', 'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRI...cts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md', 'docs/contracts/helper_installation_identity_constraints.json'}
+E       assert {'docs/contra...traints.json'} == {'docs/contra..._CONTRACT.md'}
+E         
+E         Extra items in the left set:
+E         'docs/contracts/helper_installation_identity_constraints.json'
+E         'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md'
+E         'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md'
+E         Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py:438: AssertionError
+___________ test_34_no_adapter_dispatch_or_effect_symbol_introduced ____________
+
+    def test_34_no_adapter_dispatch_or_effect_symbol_introduced() -> None:
+        diff = _git("diff", ENTRY, "--", "docs/contracts", "tests")
+>       assert "adapter.dispatch(" not in diff
+E       assert 'adapter.dispatch(' not in 'diff --git ...in new_seg\n'
+E         
+E         'adapter.dispatch(' is contained here:
+E             assert "adapter.dispatch(" not in diff
+E           +    assert ".dispatch(" not in diff
+E           +
+E           +
+E           +# --------------------------------------------------------------------------...
+E         
+E         ...Full output truncated (1392 lines hidden), use '-vv' to show
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py:443: AssertionError
+_________ test_36_downstream_guard_reconciliation_is_widen_not_weaken __________
+
+    def test_36_downstream_guard_reconciliation_is_widen_not_weaken() -> None:
+        """Every touched pre-existing guard suite keeps or grows its test-function
+        set — no test renamed, removed, or disabled — and adds no wildcard/glob."""
+        import ast
+    
+        touched = [
+            p for p in _git("diff", "--name-only", ENTRY, "--", "tests").split()
+            if p.endswith(".py") and "n16_5_f_5_ppa_contract" not in p
+        ]
+        assert touched, "expected downstream guard reconciliations"
+        for rel in touched:
+>           old_src = _git("show", f"{ENTRY}:{rel}")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py:471: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py:62: in _git
+    return subprocess.check_output(["git", *args], cwd=ROOT, text=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py:473: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = False, timeout = None, check = True
+popenargs = (['git', 'show', 'f0ca3423ece0a54052dd1195f5c889865eb19c3d:tests/test_hpac_pawa_helper_protocol_foundation.py'],)
+kwargs = {'cwd': PosixPath('/Users/atilamadai/repos/pcae-harness'), 'stdout': -1, 'text': True}
+process = <Popen: returncode: 128 args: ['git', 'show', 'f0ca3423ece0a54052dd1195f5c88...>
+stdout = '', stderr = None, retcode = 128
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['git', 'show', 'f0ca3423ece0a54052dd1195f5c889865eb19c3d:tests/test_hpac_pawa_helper_protocol_foundation.py']' returned non-zero exit status 128.
+
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py:578: CalledProcessError
+----------------------------- Captured stderr call -----------------------------
+fatal: path 'tests/test_hpac_pawa_helper_protocol_foundation.py' exists on disk, but not in 'f0ca3423ece0a54052dd1195f5c889865eb19c3d'
+______________ test_00c_predecessor_is_completed_contract_freeze _______________
+
+    def test_00c_predecessor_is_completed_contract_freeze() -> None:
+        """Confirmed from immutable primary sources -- the predecessor's own
+        canonical report doc and the frozen HPAC-PAWA-001 v2.0 header -- not the
+        live (now-superseded) metadata / PROJECT_STATUS."""
+        pred_report = ROOT / (
+            "docs/PHASE_149O_20L_7O_3W_1R_2B_1R_1_1R_30R_5R_2_N16_5_F_5_TB_CONTRACT.md"
+        )
+        assert pred_report.exists()
+        rt = text(pred_report)
+        assert "COMPLETE — CONTRACT FROZEN" in rt
+        assert PREDECESSOR_PHASE_ID in rt
+>       assert text(PAWA).splitlines()[0].startswith("# HPAC-PAWA-001 v2.0 —")
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x109bf7960>('# HPAC-PAWA-001 v2.0 —')
+E        +    where <built-in method startswith of str object at 0x109bf7960> = '# HPAC-PAWA-001 v3.0 — HPAC Production Protected Administration Writer Anchor Contract'.startswith
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py:160: AssertionError
+_______________ test_01_pawa_v2_0_and_helper_v1_0_frozen_headers _______________
+
+    def test_01_pawa_v2_0_and_helper_v1_0_frozen_headers() -> None:
+>       assert text(PAWA).splitlines()[0].startswith("# HPAC-PAWA-001 v2.0 —")
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x109aca790>('# HPAC-PAWA-001 v2.0 —')
+E        +    where <built-in method startswith of str object at 0x109aca790> = '# HPAC-PAWA-001 v3.0 — HPAC Production Protected Administration Writer Anchor Contract'.startswith
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py:169: AssertionError
+_____________________ test_02_iv_changes_no_contract_byte ______________________
+
+    def test_02_iv_changes_no_contract_byte() -> None:
+        """This IV is contract-verification only: no docs/contracts edit at all."""
+        changed = _git("diff", "--name-only", ENTRY, "HEAD", "--", "docs/contracts").split()
+>       assert changed == []
+E       AssertionError: assert ['docs/contra...traints.json'] == []
+E         
+E         Left contains 4 more items, first extra item: 'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md'
+E         Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py:180: AssertionError
+______________ test_03_no_production_or_schema_change_this_phase _______________
+
+    def test_03_no_production_or_schema_change_this_phase() -> None:
+        for area in ("src/pcae", "scripts", "pyproject.toml", "schemas"):
+>           assert _git("diff", "--name-only", ENTRY, "HEAD", "--", area).split() == [], area
+E           AssertionError: src/pcae
+E           assert ['src/pcae/co...tate.py', ...] == []
+E             
+E             Left contains 9 more items, first extra item: 'src/pcae/core/hpac_pawa_helper_entrypoint.py'
+E             Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py:185: AssertionError
+__________________ test_70_helper_req_ids_contiguous_1_to_114 __________________
+
+    def test_70_helper_req_ids_contiguous_1_to_114() -> None:
+        ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PAWA-HELPER-REQ-(\d{3})\.\*\*", text(HELPER)))
+>       assert ids == list(range(1, 115))
+E       assert [1, 2, 3, 4, 5, 6, ...] == [1, 2, 3, 4, 5, 6, ...]
+E         
+E         Left contains 69 more items, first extra item: 115
+E         Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py:499: AssertionError
+_______________ test_d1_predecessor_contract_suite_still_passes ________________
+
+    def test_d1_predecessor_contract_suite_still_passes() -> None:
+        proc = subprocess.run(
+            ["python", "-m", "pytest", "-q", PRED_SUITE.as_posix()],
+            cwd=ROOT, capture_output=True, text=True,
+        )
+>       assert proc.returncode == 0, proc.stdout[-3000:]
+E       AssertionError: N_WRITER_ANCHOR_CONTRACT.md",
+E                     "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
+E                 }, changed
+E         E       AssertionError: {'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md', 'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRI...cts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md', 'docs/contracts/helper_installation_identity_constraints.json'}
+E         E       assert {'docs/contra...traints.json'} == {'docs/contra..._CONTRACT.md'}
+E         E         
+E         E         Extra items in the left set:
+E         E         'docs/contracts/helper_installation_identity_constraints.json'
+E         E         'docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md'
+E         E         Use -v to get more diff
+E         
+E         tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py:412: AssertionError
+E         __________ test_66_no_protected_root_or_helper_installation_artifact ___________
+E         
+E             def test_66_no_protected_root_or_helper_installation_artifact() -> None:
+E                 changed = _git("diff", "--name-only", ENTRY, "HEAD").splitlines()
+E                 assert not any(p.startswith((".pcae/protected-root", "protected-root/", "pawa-helper/")) for p in changed)
+E         >       assert not any("helper-installation" in p.lower() for p in changed)
+E         E       assert not True
+E         E        +  where True = any(<generator object test_66_no_protected_root_or_helper_installation_artifact.<locals>.<genexpr> at 0x1092f5d20>)
+E         
+E         tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py:469: AssertionError
+E         =========================== short test summary info ============================
+E         FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_30_helper_header_is_v1_0_frozen
+E         FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_31_helper_requirement_ids_contiguous_1_to_114
+E         FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_60_no_src_scripts_pyproject_change_since_entry
+E         FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_61_only_the_two_contract_files_changed_in_docs_contracts
+E         FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_66_no_protected_root_or_helper_installation_artifact
+E         5 failed, 40 passed in 0.59s
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['python', '-m', 'pytest', '-q', '/Users/atilamadai/repos/pcae-harness/tests/test_phase_149o_20l..._tb_contract.py::test_66_no_protected_root_or_helper_installation_artifact\n5 failed, 40 passed in 0.59s\n', stderr='').returncode
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py:833: AssertionError
+_____________________ test_30_helper_header_is_v1_0_frozen _____________________
+
+    def test_30_helper_header_is_v1_0_frozen() -> None:
+        t = text(HELPER)
+>       assert t.splitlines()[0].startswith("# HPAC-PAWA-HELPER-001 v1.0 —")
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0x109ae7730>('# HPAC-PAWA-HELPER-001 v1.0 —')
+E        +    where <built-in method startswith of str object at 0x109ae7730> = '# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract'.startswith
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py:264: AssertionError
+______________ test_31_helper_requirement_ids_contiguous_1_to_114 ______________
+
+    def test_31_helper_requirement_ids_contiguous_1_to_114() -> None:
+        ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PAWA-HELPER-REQ-(\d{3})\.\*\*", text(HELPER)))
+>       assert ids == list(range(1, 115))
+E       assert [1, 2, 3, 4, 5, 6, ...] == [1, 2, 3, 4, 5, 6, ...]
+E         
+E         Left contains 69 more items, first extra item: 115
+E         Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py:272: AssertionError
+_____________ test_60_no_src_scripts_pyproject_change_since_entry ______________
+
+    def test_60_no_src_scripts_pyproject_change_since_entry() -> None:
+        names = _git("diff", "--name-only", ENTRY, "HEAD", "--",
+                     "src/pcae", "scripts", "pyproject.toml").split()
+>       assert names == [], names
+E       AssertionError: ['src/pcae/core/hpac_pawa_helper_entrypoint.py', 'src/pcae/core/hpac_pawa_helper_launcher.py', 'src/pcae/core/hpac_paw...awa_helper_os.py', 'src/pcae/core/hpac_pawa_helper_protocol.py', 'src/pcae/core/hpac_pawa_helper_replay_state.py', ...]
+E       assert ['src/pcae/co...tate.py', ...] == []
+E         
+E         Left contains 9 more items, first extra item: 'src/pcae/core/hpac_pawa_helper_entrypoint.py'
+E         Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py:407: AssertionError
+________ test_61_only_the_two_contract_files_changed_in_docs_contracts _________
+
+    def test_61_only_the_two_contract_files_changed_in_docs_contracts() -> None:
+        changed = set(_git("diff", "--name-only", ENTRY, "HEAD", "--", "docs/contracts").split())
+>       assert changed == {
+            "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md",
+            "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md",
+        }, changed
+E       AssertionError: {'docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md', 'docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRI...cts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md', 'docs/contracts/helper_installation_identity_constraints.json'}
+E       assert {'docs/contra...traints.json'} == {'docs/contra..._CONTRACT.md'}
+E         
+E         Extra items in the left set:
+E         'docs/contracts/helper_installation_identity_constraints.json'
+E         'docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md'
+E         Use -v to get more diff
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py:412: AssertionError
+__________ test_66_no_protected_root_or_helper_installation_artifact ___________
+
+    def test_66_no_protected_root_or_helper_installation_artifact() -> None:
+        changed = _git("diff", "--name-only", ENTRY, "HEAD").splitlines()
+        assert not any(p.startswith((".pcae/protected-root", "protected-root/", "pawa-helper/")) for p in changed)
+>       assert not any("helper-installation" in p.lower() for p in changed)
+E       assert not True
+E        +  where True = any(<generator object test_66_no_protected_root_or_helper_installation_artifact.<locals>.<genexpr> at 0x109a8ac00>)
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py:469: AssertionError
+_____________________ test_01_v0_phase_entry_sha_resolves ______________________
+
+    def test_01_v0_phase_entry_sha_resolves() -> None:
+>       assert _git("rev-parse", "HEAD").strip() == V0
+E       AssertionError: assert '2c91cce42f42...12f46aee1c30d' == '4977a2e5db36...578f00e8051f5'
+E         
+E         - 4977a2e5db362e9e86f898cf438578f00e8051f5
+E         + 2c91cce42f42ffa79d38e9b730d12f46aee1c30d
+
+tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_pawa_v1_3_contract_iv.py:120: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py::test_11_sibling_contracts_byte_identical_at_entry
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py::test_17_this_iv_adds_no_normative_contract_edit
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py::test_18_this_iv_performs_no_protected_host_or_ceremony_action
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py::test_02_phase_id_is_unique_against_history_and_docs
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py::test_30_cross_contract_conflict_resolved_and_siblings_byte_unchanged
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py::test_31_pawa_v2_0_and_helper_headers_are_the_frozen_versions
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py::test_33_docs_contracts_delta_is_exactly_hpac_ppa_001
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py::test_34_no_adapter_dispatch_or_effect_symbol_introduced
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py::test_36_downstream_guard_reconciliation_is_widen_not_weaken
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py::test_00c_predecessor_is_completed_contract_freeze
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py::test_01_pawa_v2_0_and_helper_v1_0_frozen_headers
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py::test_02_iv_changes_no_contract_byte
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py::test_03_no_production_or_schema_change_this_phase
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py::test_70_helper_req_ids_contiguous_1_to_114
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py::test_d1_predecessor_contract_suite_still_passes
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_30_helper_header_is_v1_0_frozen
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_31_helper_requirement_ids_contiguous_1_to_114
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_60_no_src_scripts_pyproject_change_since_entry
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_61_only_the_two_contract_files_changed_in_docs_contracts
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py::test_66_no_protected_root_or_helper_installation_artifact
+FAILED tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_pawa_v1_3_contract_iv.py::test_01_v0_phase_entry_sha_resolves
+21 failed, 272 passed in 5.87s

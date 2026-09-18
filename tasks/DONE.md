@@ -83,6 +83,8 @@
 
 ## Completed
 
+- Idle predecessor handoff state closed on admission-phase activation (20260917-2109-idle-post-n16-5-f-5-tb-helper-writer-authority-impl-complete-blocked-implementation-not-verified-n16-5-f-5-tb-helper-writer-authority-foundation-repair-recommended-next-not-begun-n-16-5-not-closed). This closes only the idle task; the recommended FOUNDATION-REPAIR was never activated or completed.
+
 - Idle: post-HELPER-ADMISSION-PROVENANCE-REPAIR blocked; helper installation identity contract repair recommended, not begun (20260918-0205-idle-post-helper-admission-provenance-repair-blocked-helper-installation-identity-contract-repair-recommended-not-begun)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair (N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR) (20260918-0151-n16-5-f-5-tb-helper-admission-provenance-repair)
 - N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV: Fresh Independent Linux Verification of Real Helper Boundary Repair (20260915-0014-n16-5-f-5-tb-real-helper-boundary-repair-iv-fresh-independent-linux-verification-of-real-helper-boundary-repair)

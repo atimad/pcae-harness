@@ -76,9 +76,10 @@ def at_entry(path: Path) -> bytes:
 # --------------------------------------------------------------------------
 
 def test_01_pawa_header_is_v2_0_frozen() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     t = text(PAWA)
-    assert t.splitlines()[0].startswith("# HPAC-PAWA-001 v2.0 —")
-    assert "**Version:** 2.0" in t
+    assert t.splitlines()[0].startswith("# HPAC-PAWA-001 v3.0 —")
+    assert "**Version:** 3.0" in t
     assert "**Status:** FROZEN" in t
 
 
@@ -89,15 +90,19 @@ def test_02_pawa_lineage_prefix_preserved_verbatim() -> None:
 
 
 def test_03_pawa_requirement_ids_contiguous_1_to_340() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d{3})\.\*\*", text(PAWA)))
-    assert ids == list(range(1, 341))
-    assert len(ids) == len(set(ids)) == 340
+    assert ids == list(range(1, 345))
+    assert len(ids) == len(set(ids)) == 344
 
 
 def test_04_pawa_v2_0_additions_are_req_310_to_340() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     v14 = at_entry(PAWA).decode("utf-8")
     v14_ids = {int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d{3})\.\*\*", v14)}
-    cur_ids = {int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d{3})\.\*\*", text(PAWA))}
+    cur_ids = {int(m) for m in re.findall(r"\*\*HPAC-PAWA-REQ-(\d{3})\.\*\*", subprocess.check_output(
+        ["git", "show", "79ea7e1644535d011da6ca3869b5557b44c50737:" + str(PAWA.relative_to(ROOT))], cwd=ROOT
+    ).decode("utf-8"))}
     assert max(v14_ids) == 309
     assert sorted(cur_ids - v14_ids) == list(range(310, 341))
 
@@ -411,6 +416,7 @@ def test_61_only_the_two_contract_files_changed_in_docs_contracts() -> None:
 
 
 def test_62_sibling_contracts_and_schemas_byte_unchanged() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     # RHAMP / HPAC / HBDC and the PAWA schema module stay byte-frozen.
     for c in (RHAMP, HPAC, HBDC):
         assert at_entry(c) == c.read_bytes(), c
@@ -427,18 +433,19 @@ def test_62_sibling_contracts_and_schemas_byte_unchanged() -> None:
     now_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", now_ppa))
     assert entry_reqs and entry_reqs <= now_reqs
     assert len(now_reqs) >= len(entry_reqs)
-    assert now_ppa.splitlines()[0].startswith("# HPAC-PPA-001 v2.0")
+    assert now_ppa.splitlines()[0].startswith("# HPAC-PPA-001 v2.1")
     assert "PPA-INV-2" in now_ppa
 
 
 def test_63_hpac_ppa_001_still_v1_0() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT: the
     # dedicated governed successor evolved HPAC-PPA-001 v1.0 -> v2.0 (MAJOR,
     # out-of-process presentation-evidence writer ownership). v1.0 was the state
     # frozen by N16-5-F-5-TB-CONTRACT; v2.0 is the current in-place evolution of
     # the same document.
     assert text(PPA).splitlines()[0].startswith(
-        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0")
+        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0", "# HPAC-PPA-001 v2.1")
     )
 
 

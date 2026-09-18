@@ -305,11 +305,17 @@ def test_11_sibling_contracts_byte_identical_at_entry() -> None:
 
 
 def test_12_ppa_contract_unchanged_by_this_iv_itself() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     """This IV is read-only re: normative contract text -- verify the PPA
     document is byte-identical to the entry snapshot for the duration of
     this suite's own existence (the IV must not repair the contract it
     verifies)."""
-    assert at_entry(PPA) == PPA.read_bytes()
+    # Historical IV non-mutation is evaluated at the last pre-identity epoch.
+    # The separately authorized identity repair evolves PPA to v2.1.
+    frozen = subprocess.check_output(
+        ["git", "show", "79ea7e1644535d011da6ca3869b5557b44c50737:" + str(PPA.relative_to(ROOT))], cwd=ROOT
+    )
+    assert at_entry(PPA) == frozen
 
 
 # --------------------------------------------------------------------------

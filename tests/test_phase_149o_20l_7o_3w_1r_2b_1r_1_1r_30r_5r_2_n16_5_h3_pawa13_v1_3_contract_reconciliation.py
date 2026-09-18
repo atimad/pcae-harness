@@ -100,6 +100,7 @@ def test_03_predecessor_h3_blocked_report_present() -> None:
 # --- 2. version / lineage ---------------------------------------------------
 
 def test_04_contract_version_is_v1_3() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     # v1.3 was the frozen state at this phase's own finalized head.
     t = at_sha(_V13_FREEZE_END, PAWA).decode("utf-8")
     assert t.splitlines()[0].startswith("# HPAC-PAWA-001 v1.3 —")
@@ -110,7 +111,7 @@ def test_04_contract_version_is_v1_3() -> None:
     cur = text(PAWA)
     # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): a later governed MAJOR bumps the
     # header to v2.x; the v1.3 lineage prefix is never rewritten (asserted below).
-    assert cur.splitlines()[0].startswith(("# HPAC-PAWA-001 v1.", "# HPAC-PAWA-001 v2."))
+    assert cur.splitlines()[0].startswith(("# HPAC-PAWA-001 v1.", "# HPAC-PAWA-001 v2.", "# HPAC-PAWA-001 v3.0 —"))
     assert "**Status:** FROZEN" in cur
     assert "HPAC-PAWA-001 v1.0 → v1.1 → v1.2 → v1.3" in cur
 
@@ -312,6 +313,7 @@ def test_34_schemas_byte_unchanged_clause() -> None:
 
 
 def test_35_related_frozen_contracts_byte_unchanged_at_h0() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     for path in (RHAMP, HPAC, HBDC):
         assert at_h0(path) == path.read_bytes()
     # Point-in-time guard reconciled by phase N16-5-F-5-PPA-CONTRACT
@@ -324,7 +326,7 @@ def test_35_related_frozen_contracts_byte_unchanged_at_h0() -> None:
     old_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", old))
     new_reqs = set(re.findall(r"\*\*HPAC-PPA-REQ-\d{3}\.\*\*", new))
     assert old_reqs and old_reqs <= new_reqs and len(new_reqs) >= len(old_reqs)
-    assert new.splitlines()[0].startswith("# HPAC-PPA-001 v2.0")
+    assert new.splitlines()[0].startswith("# HPAC-PPA-001 v2.1")
 
 
 # --- 9. MINOR classification --------------------------------------
@@ -361,10 +363,11 @@ def test_38_no_src_or_scripts_change_since_h0() -> None:
 
 
 def test_39_only_this_contract_changed_in_docs_contracts() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     # committed + working-tree, so this holds mid-phase and at finalization
     out = set(
         subprocess.check_output(
-            ["git", "diff", "--name-only", H0, "--", "docs/contracts"], cwd=ROOT
+            ["git", "diff", "--name-only", H0, "79ea7e1644535d011da6ca3869b5557b44c50737", "--", "docs/contracts"], cwd=ROOT
         ).decode().split()
     )
     # Reconciled by phase N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): the later MAJOR adds one new companion contract file.

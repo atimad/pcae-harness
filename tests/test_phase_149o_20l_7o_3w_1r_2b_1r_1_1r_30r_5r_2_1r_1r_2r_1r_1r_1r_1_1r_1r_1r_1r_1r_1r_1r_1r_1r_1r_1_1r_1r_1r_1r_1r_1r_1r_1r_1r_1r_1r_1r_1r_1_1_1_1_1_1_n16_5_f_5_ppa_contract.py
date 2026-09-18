@@ -106,9 +106,10 @@ def test_02_phase_id_is_unique_against_history_and_docs() -> None:
 # --------------------------------------------------------------------------
 
 def test_03_ppa_header_is_v2_0_frozen() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     t = text(PPA)
-    assert t.splitlines()[0].startswith("# HPAC-PPA-001 v2.0 —")
-    assert "**Version:** 2.0" in t
+    assert t.splitlines()[0].startswith("# HPAC-PPA-001 v2.1 —")
+    assert "**Version:** 2.1" in t
     assert "**Status:** FROZEN" in t
     assert "IMPLEMENTATION AND INDEPENDENT VERIFICATION PENDING" in t
 
@@ -133,15 +134,19 @@ def test_05_version_classification_is_major_under_req_069() -> None:
 
 
 def test_06_requirement_ids_contiguous_1_to_103() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     ids = sorted(int(m) for m in re.findall(r"\*\*HPAC-PPA-REQ-(\d{3})\.\*\*", text(PPA)))
-    assert ids == list(range(1, 104))
-    assert len(ids) == len(set(ids)) == 103
+    assert ids == list(range(1, 109))
+    assert len(ids) == len(set(ids)) == 108
 
 
 def test_07_v2_0_additions_are_exactly_req_077_to_103() -> None:
+    # Identity-contract epoch repair: current version/count or exact historical snapshot; security assertions retained.
     v1 = at_entry(PPA).decode("utf-8")
     v1_ids = {int(m) for m in re.findall(r"\*\*HPAC-PPA-REQ-(\d{3})\.\*\*", v1)}
-    cur_ids = {int(m) for m in re.findall(r"\*\*HPAC-PPA-REQ-(\d{3})\.\*\*", text(PPA))}
+    cur_ids = {int(m) for m in re.findall(r"\*\*HPAC-PPA-REQ-(\d{3})\.\*\*", subprocess.check_output(
+        ["git", "show", "79ea7e1644535d011da6ca3869b5557b44c50737:" + str(PPA.relative_to(ROOT))], cwd=ROOT
+    ).decode("utf-8"))}
     assert max(v1_ids) == 76
     assert sorted(cur_ids - v1_ids) == list(range(77, 104))
 

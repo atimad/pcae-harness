@@ -299,8 +299,9 @@ def test_07_contract_identities_are_the_frozen_versions():
     # (HPAC-PPA-001 v1.0 -> v2.0, MAJOR): the v1.0 identity floor is preserved;
     # v2.0 (out-of-process presentation-evidence writer ownership) is the
     # current in-place evolution of the same document.
+    # Installation identity contract repair: PPA 2.1 / PAWA 3.0; security assertions retained.
     assert PPA_CONTRACT.read_text().splitlines()[0].startswith(
-        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0")
+        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0", "# HPAC-PPA-001 v2.1")
     )
     # Point-in-time guard reconciled by phase N16-5-H3-PAWA13 (HPAC-PAWA-001
     # v1.2 -> v1.3, MINOR): the v1.2 identity requirement is preserved as the
@@ -310,7 +311,7 @@ def test_07_contract_identities_are_the_frozen_versions():
     # N16-5-F-5-TB-CONTRACT (HPAC-PAWA-001 v1.4 -> v2.0, MAJOR S-4; new companion HPAC-PAWA-HELPER-001 v1.0): v1.4 floor extended -- v2.0 (out-of-process helper delivery, MAJOR)
     # is the current in-place evolution of the same document.
     assert PAWA_CONTRACT.read_text().splitlines()[0].startswith(
-        ("# HPAC-PAWA-001 v1.2", "# HPAC-PAWA-001 v1.3", "# HPAC-PAWA-001 v1.4", "# HPAC-PAWA-001 v2.0")
+        ("# HPAC-PAWA-001 v1.2", "# HPAC-PAWA-001 v1.3", "# HPAC-PAWA-001 v1.4", "# HPAC-PAWA-001 v2.0", "# HPAC-PAWA-001 v3.0")
     )
     assert "RHAMP-001 v1.0" in RHAMP_CONTRACT.read_text()
 
@@ -324,7 +325,7 @@ def test_08_ppa_requirement_numbering_is_closed_1_to_76():
     # REQ-077..103 (§21 out-of-process presentation-evidence writer ownership).
     # The property under test -- closed, sequential, no gaps, no duplicates,
     # starting at 1 -- is unchanged; only the ceiling moves.
-    assert nums in (list(range(1, 77)), list(range(1, 104)))
+    assert nums in (list(range(1, 77)), list(range(1, 104)), list(range(1, 109)))
 
 
 # ═══════════════ 3. PAWA v1.2 configure flow + consumer + out-of-band model ═══

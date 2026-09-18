@@ -227,12 +227,13 @@ def test_02_hpac_ppa_001_v1_0_identity():
     # implementation/IV-pending, and its requirement numbering is still closed
     # and starts at 1 -- is unchanged; only the header version and the ceiling
     # move (v2.0 appends REQ-077..103).
+    # Installation identity contract repair appends PPA REQ-104..108 in v2.1.
     assert c.splitlines()[0].startswith(
-        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0")
+        ("# HPAC-PPA-001 v1.0", "# HPAC-PPA-001 v2.0", "# HPAC-PPA-001 v2.1")
     )
     assert "IMPLEMENTATION AND INDEPENDENT VERIFICATION PENDING" in c
     ppa_nums = sorted(int(v) for v in __import__("re").findall(r"\*\*HPAC-PPA-REQ-(\d{3})", c))
-    assert ppa_nums[:3] == [1, 2, 3] and ppa_nums[-1] in (76, 103)
+    assert ppa_nums[:3] == [1, 2, 3] and ppa_nums[-1] in (76, 103, 108)
 
 
 def test_03_rhamp_and_hpac_byte_unchanged_since_r4r():
