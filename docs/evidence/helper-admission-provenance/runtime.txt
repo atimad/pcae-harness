@@ -1,0 +1,14 @@
+PCAE Runtime Inspect
+
+Runtime status:            not_implemented
+Runtime state:             Observed
+Execution capability:      unavailable
+Maximum plugin capability: observe
+Registry status:           empty
+Plugin count:              0
+Capability count:          0
+Observation integrations:  4
+Permission Broker status:  execution_unavailable
+Governance posture:        non-executing
+Runtime principles:        11 frozen (Modular, Pluggable, Connected, Observable, Automatable, Governed, Fail-closed, Least privilege, Human-controlled, Deterministic, Testable)
+Runtime-adapter surfaces:  3 coexisting, all non-effecting, execution unavailable (observational; use --verbose)

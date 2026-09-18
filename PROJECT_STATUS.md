@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR**) — Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair. **COMPLETE — BLOCKED / ADMISSION NOT REPAIRED** (governed finalization in progress).
+
+Activated after canonical preflight from `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`. Confirmed missing helper admission; discovered HELPER REQ-021 hpahi identity cannot equal PAWA hpawi identity, while launcher/Model E use PPA hppi lineage. Genuine Linux also proves presentation metadata reads traverse foundation boundary. Narrow draft removed completely; source/contracts byte-unchanged. Evidence: `docs/PHASE_N16_5_F_5_TB_HELPER_ADMISSION_PROVENANCE_REPAIR.md`.
+
+FOUNDATION-REPAIR was PRE-ACTIVATION PREFLIGHT STOP / NOT A GOVERNED PHASE COMPLETION. Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR), NOT begun. No IV of unlanded repair. Foundation repair remains deferred. F-5-B2/F-5 blocked; N-16-5 NOT CLOSED; N-16-6/N-16-7 untouched. Runtime Observed / observe / unavailable, plugins/capabilities 0/0.
+
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
+## Previous Completed Phase
+
 Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
 (alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL**) — Model E Helper
 Writer-Authority Production Implementation. **COMPLETE — BLOCKED /

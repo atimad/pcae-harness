@@ -1,5 +1,9 @@
 # Changelog
 
+## Helper admission provenance investigation
+
+Recorded the blocked admission repair: helper/PAWA/PPA installation identities conflict, and presentation metadata reads reach the known foundation boundary. Added 13 evidence tests and disposable Linux reproduction. No production or contract change.
+
 - Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`
   (alias **N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH**) —
   **Helper-Scoped Writer Authority Architecture and Contract Evolution for

@@ -1,0 +1,35 @@
+............................................s........................... [ 73%]
+..........................                                               [100%]
+=============================== warnings summary ===============================
+src/pcae/core/canonical_engineering_evidence.py:586
+  /Users/atilamadai/repos/pcae-harness/src/pcae/core/canonical_engineering_evidence.py:586: PytestCollectionWarning: cannot collect test class 'TestResultItem' because it has a __init__ constructor (from: tests/test_evidence_extraction_134e2.py)
+    @dataclass(frozen=True)
+
+src/pcae/core/canonical_engineering_evidence.py:586
+  /Users/atilamadai/repos/pcae-harness/src/pcae/core/canonical_engineering_evidence.py:586: PytestCollectionWarning: cannot collect test class 'TestResultItem' because it has a __init__ constructor (from: tests/test_evidence_extraction_134e2v_verification.py)
+    @dataclass(frozen=True)
+
+src/pcae/core/canonical_engineering_evidence.py:586
+  /Users/atilamadai/repos/pcae-harness/src/pcae/core/canonical_engineering_evidence.py:586: PytestCollectionWarning: cannot collect test class 'TestResultItem' because it has a __init__ constructor (from: tests/test_operator_report_view_134e4.py)
+    @dataclass(frozen=True)
+
+src/pcae/core/canonical_engineering_evidence.py:586
+  /Users/atilamadai/repos/pcae-harness/src/pcae/core/canonical_engineering_evidence.py:586: PytestCollectionWarning: cannot collect test class 'TestResultItem' because it has a __init__ constructor (from: tests/test_operator_report_view_134e4v_verification.py)
+    @dataclass(frozen=True)
+
+src/pcae/core/canonical_engineering_evidence.py:586
+  /Users/atilamadai/repos/pcae-harness/src/pcae/core/canonical_engineering_evidence.py:586: PytestCollectionWarning: cannot collect test class 'TestResultItem' because it has a __init__ constructor (from: tests/test_phase_report_view_134e3.py)
+    @dataclass(frozen=True)
+
+src/pcae/core/canonical_engineering_evidence.py:586
+  /Users/atilamadai/repos/pcae-harness/src/pcae/core/canonical_engineering_evidence.py:586: PytestCollectionWarning: cannot collect test class 'TestResultItem' because it has a __init__ constructor (from: tests/test_phase_report_view_134e3v_verification.py)
+    @dataclass(frozen=True)
+
+src/pcae/core/canonical_engineering_evidence.py:586
+  /Users/atilamadai/repos/pcae-harness/src/pcae/core/canonical_engineering_evidence.py:586: PytestCollectionWarning: cannot collect test class 'TestResultItem' because it has a __init__ constructor (from: tests/test_rendering_134e5.py)
+    @dataclass(frozen=True)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_hpac_pawa_helper_protocol_foundation.py:613: fexecve-equivalent path is Linux-specific
+97 passed, 1 skipped, 43096 deselected, 7 warnings in 4.39s

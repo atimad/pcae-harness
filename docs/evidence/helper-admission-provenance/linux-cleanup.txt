@@ -1,0 +1,2 @@
+disposable directory removed
+host canonical root absent

@@ -1,0 +1,35 @@
+{
+  "kernel": "Linux",
+  "helper_uid": 0,
+  "agent_uid": 65534,
+  "root_mode": "0o700",
+  "pawa_id": "hpawi-c8e6be1e10904466993f063e9bf8a68b",
+  "ppa_id": "hppi-de32bc07373c4c02951022b5162cba6d",
+  "legacy_imported": false,
+  "production_metadata_read_error": "installer provenance verification failed for installation.json: production HPAC root is not protected from the configured agent principal (root=agent_is_owner_with_write_bit, ancestors=('ancestor_writable:/etc/pcae/hpac:agent_is_owner_with_write_bit',))",
+  "kernel_peer": {
+    "uid": 0,
+    "gid": 0,
+    "pid": 702498
+  },
+  "none_admission": {
+    "uid": 0,
+    "gid": 0,
+    "pid": 702498
+  },
+  "explicit_same_identity": "current_context_is_agent: peer uid is the configured agent principal",
+  "explicit_distinct_identity": {
+    "uid": 0,
+    "gid": 0,
+    "pid": 702498
+  },
+  "contract_hpahi": {
+    "type": "HelperProtocolError",
+    "error": "descriptor_missing: no current protected-presentation generation: installer provenance verification failed for installation.json: production HPAC root is not protected from the configured agent principal (root=agent_is_owner_with_write_bit, ancestors=('ancestor_writable:/etc/pcae/hpac:agent_is_owner_with_write_bit',))"
+  },
+  "current_hppi": {
+    "type": "HelperProtocolError",
+    "error": "descriptor_missing: no current protected-presentation generation: installer provenance verification failed for installation.json: production HPAC root is not protected from the configured agent principal (root=agent_is_owner_with_write_bit, ancestors=('ancestor_writable:/etc/pcae/hpac:agent_is_owner_with_write_bit',))"
+  },
+  "foundation": "production HPAC root is not protected from the configured agent principal (root=agent_is_owner_with_write_bit, ancestors=('ancestor_writable:/etc/pcae/hpac:agent_is_owner_with_write_bit',))"
+}

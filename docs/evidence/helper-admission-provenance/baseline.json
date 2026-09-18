@@ -1,0 +1,20 @@
+{
+  "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1",
+  "predecessor": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1",
+  "baseline": "fabbfac07276b7e9b44b25295943d24e77a27229",
+  "hashes": {
+    "src/pcae/core/hpac_pawa_helper_replay_state.py": "ff366b6334041291640763b58e59c585b6e55ebb72e67a4278385b9f99d3564a",
+    "src/pcae/core/hpac_pawa_helper_launcher.py": "83610a2d2c484166ee72357e90ff1a58dda08db2df6192e64490cdc2152d59b5",
+    "src/pcae/core/hpac_pawa_helper_operations.py": "d79c40bdee6f2711d621f34c0fc2856c9f932922a4bac4214e8b37208beb13e5",
+    "src/pcae/core/hpac_pawa_helper_writer_authority.py": "4a81aecfced8fb22367a72eaf7fec59e102632ed4cb76c31c112f6dcfb9a401c",
+    "src/pcae/core/hpac_pawa_helper_os.py": "aa2155ddb572bccb010d1f622c201d1cb5573c356fcf9dc8f44e0e7265275881",
+    "src/pcae/core/hpac_pawa_helper_store_adapter.py": "0fa76d27cf1f4812373813b0f18b94c5be2f2986bcec46876189ef1ddcb588f0",
+    "src/pcae/core/hpac_pawa_helper_entrypoint.py": "b959321a4e6c81dacb04bb81665bf910f3246e31754273ef529d74ec4e1edcc6",
+    "src/pcae/core/hpac_pawa_helper_protocol.py": "0563f4d6b5a36c947b97f93fcfc8d108f404a8fe102ea850f8f37bebc2b32a01",
+    "src/pcae/core/hpac_foundation.py": "2a33d7e9238f135ae3a034372b88b0b47e96545d88d1229dbf3518a73b5442f9",
+    "src/pcae/core/hpac_protected_admin_writer.py": "28c02d5a7525e466933fb2c2403ea6188e66d981bd2642d14bb20c6d767721ef",
+    "docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md": "b8809e5119a9955863a8b947301e781f25a26c9a4107a9a917f0de083336323e",
+    "docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md": "21e18a872d90cf89892e44b6ee612ba1359e828d46aa13aecb8c6b5dc0561a55",
+    "docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md": "27acaabcde8d1ac1793946f5858a391f1cd18deb9f20cbaeee2121db29cc9cd2"
+  }
+}
