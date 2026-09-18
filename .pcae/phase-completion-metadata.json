@@ -11,12 +11,13 @@
     ".pcae/fast-green-attribution/48b6350e8de00d9801fca48e53b4415891cf208ef5b059272b4ad51a162f9f37.json",
     ".pcae/fast-green-attribution/3e46c9072b55dc149f5dfe803070e4d59f862a2d7f90c4fece9a0fd0377ab1c7.json",
     "tasks/active/20260918-2223-n16-5-f-5-tb-fast-green-baseline-freeze-evidence-repair-repair-stale-full-tree-src-pcae-hash-freeze-test-blocking-fast-green.md",
-    "tasks/done/20260918-2155-idle-post-n16-5-f-5-tb-helper-provisioning-source-conformance-repair-source-conformance-repaired-fast-green-trust-gate-blocked-recommended-next-baseline-freeze-refresh-housekeeping-then-fresh-iv-n-16-5-not-closed.md"
+    "tasks/done/20260918-2155-idle-post-n16-5-f-5-tb-helper-provisioning-source-conformance-repair-source-conformance-repaired-fast-green-trust-gate-blocked-recommended-next-baseline-freeze-refresh-housekeeping-then-fresh-iv-n-16-5-not-closed.md",
+    ".pcae/fast-green-attribution/c0bd9bbcfd3b2dab862794d52a670ea7fe2c6d5e69cc7bf6004f02c3b136aacd.json"
   ],
   "governance_results": {
     "pcae_check": "PASS",
     "pcae_health": "healthy",
-    "pcae_push_check": "pending",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "Pre-existing tasks/DONE.md bookkeeping warnings (predate this phase, unrelated to this phase's diff); no error-level task-memory defect; no new defect introduced by this phase.",
     "repository_transition_validator": "accept (complete_phase -> canonical phase report)",
@@ -29,15 +30,17 @@
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "3dbd28082e407f65686cd8d754252f46c89a073f",
-      "subject": "repair stale historical full-tree src/pcae hash-freeze test, Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1"
+      "hash": "3dbd28082e407f65686cd8d754252f46c89a073f"
+    },
+    {
+      "hash": "e3d415f7"
     }
   ],
   "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1",
   "phase_name": "Fast Green Baseline-Freeze Evidence Repaired / Trust Gate Clean — N16-5-F-5-TB-FAST-GREEN-BASELINE-FREEZE-EVIDENCE-REPAIR",
   "phase_title": "Fast Green Baseline-Freeze Evidence Repaired / Trust Gate Clean — N16-5-F-5-TB-FAST-GREEN-BASELINE-FREEZE-EVIDENCE-REPAIR",
   "provisioning_model_selected": "Not applicable; this phase performs no provisioning-model work (test/evidence/governance repair only).",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "recommended_next_phase": "N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV: a fresh, independent adversarial re-verification of the source-conformance repair, now unblocked against a clean Fast Green trust gate, before N-16-5 is reassessed for closure. Not begun.",
   "report_consistency": ".pcae/phase-completion-report.md matches this metadata file's disposition and evidence.",
   "status": "completed",
@@ -352,6 +355,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -429,16 +433,9 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
-      "candidate_commit": "3dbd28082e407f65686cd8d754252f46c89a073f",
+      "candidate_commit": "e3d415f7a14741d5ef133b4c26c0ec1561881ef5",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
-      "excluded_environment_failures": [
-        {
-          "node_id": "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record",
-          "rerun_at": "2026-09-18T21:11:35.854314+00:00",
-          "rerun_commit": "3dbd28082e407f65686cd8d754252f46c89a073f",
-          "rerun_result": "pass"
-        }
-      ],
+      "excluded_environment_failures": [],
       "excluded_preexisting_failures": [
         {
           "baseline_commit": "4ddd5dd460355c39e842cf25e92532933b3343e9",
@@ -2286,14 +2283,8 @@
           "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
         }
       ],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "pending"
-        }
-      ],
-      "generated_at": "2026-09-18T21:11:36.116261+00:00",
+      "expected_phase_artifacts": [],
+      "generated_at": "2026-09-18T22:52:22.277262+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -2591,7 +2582,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -2667,14 +2657,13 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
-        "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
+        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
       "schema_version": "fast_green_attribution.v1",
       "provenance": {
-        "generated_by_command": "pcae phase fast-green-attribution --phase-id 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 --pushed-status pending --timeout 900 --rerun-node tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record --json",
-        "artifact_path": ".pcae/fast-green-attribution/48b6350e8de00d9801fca48e53b4415891cf208ef5b059272b4ad51a162f9f37.json",
-        "artifact_digest": "48b6350e8de00d9801fca48e53b4415891cf208ef5b059272b4ad51a162f9f37"
+        "generated_by_command": "pcae phase fast-green-attribution --phase-id 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 --pushed-status pushed --timeout 900 --rerun-node tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record --json",
+        "artifact_path": ".pcae/fast-green-attribution/c0bd9bbcfd3b2dab862794d52a670ea7fe2c6d5e69cc7bf6004f02c3b136aacd.json",
+        "artifact_digest": "c0bd9bbcfd3b2dab862794d52a670ea7fe2c6d5e69cc7bf6004f02c3b136aacd"
       }
     },
     "finalization_checkpoint": "Primary operator performed all preflight, reconstruction, repair, testing, Fast Green adjudication, and finalization steps directly; no delegated worker involved in this phase.",
