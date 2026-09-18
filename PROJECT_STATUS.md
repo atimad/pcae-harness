@@ -2,9 +2,11 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR**) — Protected Helper Installation Identity, PAWA Identity, PPA Launch Identity, and Configured-Agent Exclusion Contract Reconciliation. **ACTIVE — CONTRACT / ARCHITECTURE REPAIR ONLY**.
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR**) — Protected Helper Installation Identity, PAWA Identity, PPA Launch Identity, and Configured-Agent Exclusion Contract Reconciliation. **COMPLETE — CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION**.
 
 Preflight passes at `79ea7e1644535d011da6ca3869b5557b44c50737`: main clean/synchronized, no active governed phase, predecessor canonical completion confirmed. Its pending-completion sentence is stale pre-finalization validation prose; completed transaction/report/notification are authoritative. CPIPC direct child normalized and unused. No production changes authorized. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+
+Model I-B frozen: distinct hpahi/helper, hpawi/PAWA, hppi/PPA identities with typed directional parent/currentness bindings. HELPER4.0 / PAWA3.0 / PPA2.1. Trusted configured-agent exclusion is mandatory; no production implementation. Fast Green0 attributable regressions. Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV), NOT begun. Governed push/notification details remain in canonical phase report.
 
 ## Previous Completed Admission Phase
 
@@ -13,7 +15,7 @@ Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.
 
 Activated after canonical preflight from `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`. Confirmed missing helper admission; discovered HELPER REQ-021 hpahi identity cannot equal PAWA hpawi identity, while launcher/Model E use PPA hppi lineage. Genuine Linux also proves presentation metadata reads traverse foundation boundary. Narrow draft removed completely; source/contracts byte-unchanged. Evidence: `docs/PHASE_N16_5_F_5_TB_HELPER_ADMISSION_PROVENANCE_REPAIR.md`.
 
-FOUNDATION-REPAIR was PRE-ACTIVATION PREFLIGHT STOP / NOT A GOVERNED PHASE COMPLETION. Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR), NOT begun. No IV of unlanded repair. Foundation repair remains deferred. F-5-B2/F-5 blocked; N-16-5 NOT CLOSED; N-16-6/N-16-7 untouched. Runtime Observed / observe / unavailable, plugins/capabilities 0/0.
+Historical predecessor disposition: FOUNDATION-REPAIR was PRE-ACTIVATION PREFLIGHT STOP / NOT A GOVERNED PHASE COMPLETION. Recommended next: `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR), NOT begun. No IV of unlanded repair. Foundation repair remains deferred. F-5-B2/F-5 blocked; N-16-5 NOT CLOSED; N-16-6/N-16-7 untouched. Runtime Observed / observe / unavailable, plugins/capabilities 0/0.
 
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 

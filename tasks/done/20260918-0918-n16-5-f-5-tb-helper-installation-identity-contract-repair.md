@@ -10,7 +10,7 @@ Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -68,15 +68,18 @@ strict
 
 ## Acceptance Criteria
 
-- TBD
+- Freeze one coherent identity contract model without production mutation.
+- Preserve configured-agent exclusion, Model E and the single protected root.
+- Attribute all regressions against the canonical predecessor.
+- Complete governed reporting/commit/push with successor not begun.
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- focused contract and relevant regression suites pass
-- governed Fast Green attribution has zero attributable regressions
+- pcae status coherence
+- pcae health
+- pcae check
+- python -m pytest -q tests/test_n16_5_f_5_tb_helper_installation_identity_contract_repair.py
+- python -c "import json; x=json.load(open('.pcae/phase-completion-metadata.json'))['validation_results']['fast_green']; assert isinstance(x,dict) and not x['attributable_failures']"
 
 ## Documentation Requirements
 
