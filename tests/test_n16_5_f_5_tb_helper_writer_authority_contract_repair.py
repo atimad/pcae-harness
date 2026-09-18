@@ -83,7 +83,7 @@ def _matrix_data_rows(section_text: str, heading: str, next_heading: str) -> lis
 
 def test_contract_title_and_version_field_are_v3(contract_text: str) -> None:
     assert "HPAC-PAWA-HELPER-001 v3.0" in contract_text
-    assert "**Version:** 3.0" in contract_text
+    assert "**Version:** 4.0" in contract_text  # current identity epoch, Model E preserved
 
 
 def test_contract_status_is_repaired_pending_reverification(contract_text: str) -> None:
@@ -381,14 +381,14 @@ def test_pawa_and_ppa_declared_byte_unchanged(section_30b: str) -> None:
 
 
 def test_pawa_and_ppa_files_not_modified() -> None:
-    """This repair explicitly must not touch these two contract files."""
+    """v3 Model E no-change disposition remains history; identity repair evolves both."""
 
     assert PAWA_CONTRACT_PATH.exists()
     assert PPA_CONTRACT_PATH.exists()
     pawa_text = PAWA_CONTRACT_PATH.read_text(encoding="utf-8")
     ppa_text = PPA_CONTRACT_PATH.read_text(encoding="utf-8")
-    assert "# HPAC-PAWA-001 v2.0" in pawa_text
-    assert "# HPAC-PPA-001 v2.0" in ppa_text
+    assert "# HPAC-PAWA-001 v3.0" in pawa_text
+    assert "# HPAC-PPA-001 v2.1" in ppa_text
 
 
 # ---------------------------------------------------------------------------

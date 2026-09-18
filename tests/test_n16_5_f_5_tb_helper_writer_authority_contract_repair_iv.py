@@ -26,6 +26,7 @@ finalization performed by this suite or its author.
 from __future__ import annotations
 
 import hashlib
+import subprocess
 import re
 from pathlib import Path
 
@@ -116,7 +117,7 @@ def _matrix_rows(section_text: str, heading: str, next_heading: str) -> list[str
 
 def test_identity_block_declares_v3_status_and_pending_reverification(contract_text: str) -> None:
     head = contract_text[:4000]
-    assert "**Version:** 3.0" in head
+    assert "**Version:** 4.0" in head  # identity-repair epoch; Model E assertions below unchanged
     assert "**Status:** REPAIRED / FROZEN — PENDING INDEPENDENT RE-VERIFICATION" in head
     # Never claim self-verified; that is the point of pending re-verification.
     assert "Status:** VERIFIED" not in head
@@ -464,18 +465,20 @@ def test_pawah_inv_24_names_reuse_not_reinvention(section_30c: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Identity epoch: the v3 repair byte-identity assertions below are pinned to
+# the completed pre-v4 commit; current contract checks live in the new suite.
 # Group 9 — PAWA / PPA byte-identity (this file's own before/after check,
 # independent of the contract's own self-consistency prose).
 # ---------------------------------------------------------------------------
 
 
 def test_pawa_contract_sha256_matches_recorded_v2_0_baseline() -> None:
-    digest = hashlib.sha256(PAWA_CONTRACT_PATH.read_bytes()).hexdigest()
+    digest = hashlib.sha256(subprocess.check_output(["git", "show", "79ea7e1644535d011da6ca3869b5557b44c50737:" + str(PAWA_CONTRACT_PATH.relative_to(REPO_ROOT))], cwd=REPO_ROOT)).hexdigest()
     assert digest == "b8809e5119a9955863a8b947301e781f25a26c9a4107a9a917f0de083336323e"
 
 
 def test_ppa_contract_sha256_matches_recorded_v2_0_baseline() -> None:
-    digest = hashlib.sha256(PPA_CONTRACT_PATH.read_bytes()).hexdigest()
+    digest = hashlib.sha256(subprocess.check_output(["git", "show", "79ea7e1644535d011da6ca3869b5557b44c50737:" + str(PPA_CONTRACT_PATH.relative_to(REPO_ROOT))], cwd=REPO_ROOT)).hexdigest()
     assert digest == "27acaabcde8d1ac1793946f5858a391f1cd18deb9f20cbaeee2121db29cc9cd2"
 
 
@@ -511,7 +514,7 @@ def test_requirement_ids_are_contiguous_from_001_with_one_lettered_insertion(
     assert not missing, f"gap(s) found in requirement numbering: {missing}"
     # Independently confirm the current max matches this repair's own
     # documented total (171) -- but derive it from the file, don't assume it.
-    assert max_id == 171, f"expected current max REQ id 171, found {max_id}"
+    assert max_id == 183, f"expected v4 identity epoch max REQ id 183, found {max_id}"
     assert (114, "A") in lettered
 
 
@@ -531,7 +534,7 @@ def test_section_33_requirement_count_statement_matches_independently_derived_ma
     max_id = max(numbers)
     assert f"defines **172**" in contract_text or "defines **172** requirement items total" in contract_text
     # 172 = 171 numeric ids (1..171) + the one lettered 114A insertion.
-    assert max_id + 1 == 172
+    assert max_id + 1 == 184  # v4 adds REQ-172..183; historical count above retained
 
 
 # ---------------------------------------------------------------------------

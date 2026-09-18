@@ -1,0 +1,110 @@
+.........................................................F.............. [ 42%]
+.............FF.F.F......F.........................................F.... [ 85%]
+.........................                                                [100%]
+=================================== FAILURES ===================================
+______ test_identity_block_declares_v3_status_and_pending_reverification _______
+
+contract_text = '# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract\n\n\n> **Current ident...sting 172 declarations (including 114A) plus\nREQ-172..183 = 184 declarations. Earlier counts remain epoch-specific.\n'
+
+    def test_identity_block_declares_v3_status_and_pending_reverification(contract_text: str) -> None:
+        head = contract_text[:4000]
+>       assert "**Version:** 3.0" in head
+E       AssertionError: assert '**Version:** 3.0' in '# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract\n\n\n> **Current ident...3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1'
+
+tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py:119: AssertionError
+___________ test_pawa_contract_sha256_matches_recorded_v2_0_baseline ___________
+
+    def test_pawa_contract_sha256_matches_recorded_v2_0_baseline() -> None:
+        digest = hashlib.sha256(PAWA_CONTRACT_PATH.read_bytes()).hexdigest()
+>       assert digest == "b8809e5119a9955863a8b947301e781f25a26c9a4107a9a917f0de083336323e"
+E       AssertionError: assert 'ff423c24198d...1fc0959221ef1' == 'b8809e5119a9...0de083336323e'
+E         
+E         - b8809e5119a9955863a8b947301e781f25a26c9a4107a9a917f0de083336323e
+E         + ff423c24198d082b945add48397ac2e40e801367663ed614b711fc0959221ef1
+
+tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py:474: AssertionError
+___________ test_ppa_contract_sha256_matches_recorded_v2_0_baseline ____________
+
+    def test_ppa_contract_sha256_matches_recorded_v2_0_baseline() -> None:
+        digest = hashlib.sha256(PPA_CONTRACT_PATH.read_bytes()).hexdigest()
+>       assert digest == "27acaabcde8d1ac1793946f5858a391f1cd18deb9f20cbaeee2121db29cc9cd2"
+E       AssertionError: assert 'cc9b0e983d50...cf9e598daf765' == '27acaabcde8d...121db29cc9cd2'
+E         
+E         - 27acaabcde8d1ac1793946f5858a391f1cd18deb9f20cbaeee2121db29cc9cd2
+E         + cc9b0e983d506673c280f3b63fbaf498392c6deae0569d443d7cf9e598daf765
+
+tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py:479: AssertionError
+___ test_requirement_ids_are_contiguous_from_001_with_one_lettered_insertion ___
+
+contract_text = '# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract\n\n\n> **Current ident...sting 172 declarations (including 114A) plus\nREQ-172..183 = 184 declarations. Earlier counts remain epoch-specific.\n'
+
+    def test_requirement_ids_are_contiguous_from_001_with_one_lettered_insertion(
+        contract_text: str,
+    ) -> None:
+        numbers = set()
+        lettered = set()
+        for num_str, letter in REQ_ID_RE.findall(contract_text):
+            num = int(num_str)
+            if letter:
+                lettered.add((num, letter))
+            else:
+                numbers.add(num)
+        assert numbers, "no HPAC-PAWA-HELPER-REQ ids found at all"
+        max_id = max(numbers)
+        missing = sorted(set(range(1, max_id + 1)) - numbers)
+        assert not missing, f"gap(s) found in requirement numbering: {missing}"
+        # Independently confirm the current max matches this repair's own
+        # documented total (171) -- but derive it from the file, don't assume it.
+>       assert max_id == 171, f"expected current max REQ id 171, found {max_id}"
+E       AssertionError: expected current max REQ id 171, found 183
+E       assert 183 == 171
+
+tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py:514: AssertionError
+_ test_section_33_requirement_count_statement_matches_independently_derived_max _
+
+contract_text = '# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract\n\n\n> **Current ident...sting 172 declarations (including 114A) plus\nREQ-172..183 = 184 declarations. Earlier counts remain epoch-specific.\n'
+
+    def test_section_33_requirement_count_statement_matches_independently_derived_max(
+        contract_text: str,
+    ) -> None:
+        numbers = {int(n) for n, _ in REQ_ID_RE.findall(contract_text)}
+        max_id = max(numbers)
+        assert f"defines **172**" in contract_text or "defines **172** requirement items total" in contract_text
+        # 172 = 171 numeric ids (1..171) + the one lettered 114A insertion.
+>       assert max_id + 1 == 172
+E       assert (183 + 1) == 172
+
+tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py:534: AssertionError
+_________________ test_contract_title_and_version_field_are_v3 _________________
+
+contract_text = '# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract\n\n\n> **Current ident...sting 172 declarations (including 114A) plus\nREQ-172..183 = 184 declarations. Earlier counts remain epoch-specific.\n'
+
+    def test_contract_title_and_version_field_are_v3(contract_text: str) -> None:
+        assert "HPAC-PAWA-HELPER-001 v3.0" in contract_text
+>       assert "**Version:** 3.0" in contract_text
+E       AssertionError: assert '**Version:** 3.0' in '# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract\n\n\n> **Current ident...sting 172 declarations (including 114A) plus\nREQ-172..183 = 184 declarations. Earlier counts remain epoch-specific.\n'
+
+tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair.py:86: AssertionError
+_____________________ test_pawa_and_ppa_files_not_modified _____________________
+
+    def test_pawa_and_ppa_files_not_modified() -> None:
+        """This repair explicitly must not touch these two contract files."""
+    
+        assert PAWA_CONTRACT_PATH.exists()
+        assert PPA_CONTRACT_PATH.exists()
+        pawa_text = PAWA_CONTRACT_PATH.read_text(encoding="utf-8")
+        ppa_text = PPA_CONTRACT_PATH.read_text(encoding="utf-8")
+        assert "# HPAC-PAWA-001 v2.0" in pawa_text
+>       assert "# HPAC-PPA-001 v2.0" in ppa_text
+E       AssertionError: assert '# HPAC-PPA-001 v2.0' in '# HPAC-PPA-001 v2.1 — HPAC Protected Presentation Installation and Evidence Authority Contract\n\n\n> **Current ident...nt/schema1 auto-upgrade | 107 |\n\nRequirements 001..108 remain gap-free; prior freeze counts describe their epochs.\n'
+
+tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair.py:391: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py::test_identity_block_declares_v3_status_and_pending_reverification
+FAILED tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py::test_pawa_contract_sha256_matches_recorded_v2_0_baseline
+FAILED tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py::test_ppa_contract_sha256_matches_recorded_v2_0_baseline
+FAILED tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py::test_requirement_ids_are_contiguous_from_001_with_one_lettered_insertion
+FAILED tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py::test_section_33_requirement_count_statement_matches_independently_derived_max
+FAILED tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair.py::test_contract_title_and_version_field_are_v3
+FAILED tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair.py::test_pawa_and_ppa_files_not_modified
+7 failed, 162 passed in 2.82s

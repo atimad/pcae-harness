@@ -5540,3 +5540,13 @@ REQ-031/032 admission clauses are sufficient, but HELPER REQ-021 requires hpahi 
 ### Admission phase finalization evidence status alignment
 
 Finalization tooling observation: the initial attribution CLI defaulted to `local_only`, but completion's live push reconciliation uses `not_pushed`. The pending-report attempt correctly quarantined the mismatched evidence; no canonical report promotion or notification occurred. Its command nevertheless printed `Phase complete` and released the lock because `stage_pending_report` contributes to the command's logical return path even when staging fails. The primary reacquired the lock through governed bootstrap, refreshed the session, and regenerated attribution with explicit `--pushed-status not_pushed`. This is recorded as existing tooling behavior, not repaired or bypassed in this phase.
+
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — identity contract repair activation
+
+Predecessor canonical completed transaction, report, metadata, Git history and sent notification agree at 79ea7e1644535d011da6ca3869b5557b44c50737; "governed completion still pending" is stale report-generation residue. FOUNDATION-REPAIR remains a pre-activation stop, no lineage node. Contract-only task activated after clean/coherent/healthy preflight and CPIPC validation. Production source forbidden. Historical ancestry reconciliation is not reopened.
+
+
+## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — freeze I-B identity model
+
+Distinct hpahi/hpawi/hppi logical lineages with current PAWA parent bindings; closed existing H/P profiles preserve P sole evidence authorship. HELPER4.0/PAWA3.0 semantic MAJOR; PPA2.1 tightening with schema2 migration. Configured agent stays protected exclusion record + live OS, never agent lock/request. Parent rotation invalidates components; external installer historical validation only avoids migration deadlock. Foundation provenance reads and writes remain deferred. No src changes. Fresh41 specification tests do not prove production admission. Six broad regression failures reproduce at entry; epoch assertions updated without removing security assertions.

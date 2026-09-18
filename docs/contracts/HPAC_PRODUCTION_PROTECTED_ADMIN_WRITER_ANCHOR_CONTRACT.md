@@ -1,9 +1,12 @@
-# HPAC-PAWA-001 v2.0 — HPAC Production Protected Administration Writer Anchor Contract
+# HPAC-PAWA-001 v3.0 — HPAC Production Protected Administration Writer Anchor Contract
+
+
+> **Current identity epoch: v3.0.** Section 97 is the normative identity reconciliation, frozen by Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR). Status: CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION. Earlier freeze verdicts, counts, no-change statements and implementation-absence claims describe their named historical epochs only. Explicit supersessions below control current identity/profile semantics; all other security predicates remain mandatory. No production implementation is claimed.
 
 ## Contract identity and status
 
 **Contract:** HPAC-PAWA-001
-**Version:** 2.0
+**Version:** 3.0
 **Status:** FROZEN
 **Frozen by:** Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.2 — HPAC-PAWA-001 v1.0
 Production Protected-Admin Writer Anchor Contract Freeze (initial freeze,
@@ -571,7 +574,7 @@ ambiguity at any authority boundary fails closed.
 | authorized launchers | §38 / §38A / §38B enumerate the standalone deployment-owner **consumer modules** that reach the in-process factories | **§38C** additionally enumerates the standalone deployment-owner **launchers** that `exec` the privileged helper — the same standalone scripts (`scripts/hpac_certification_admin.py`; the principal-admin / bootstrap / recovery script), now the **launch authority**, importing no agent-reachable code and holding no returned authority object | additive; MAJOR context (delivery-model change) but exact-enumeration discipline preserved (PAWA-INV-9) | the launcher must be a bounded, enumerated, non-agent-reachable entry point; possession of / access to it is **not** authority (§38C / HPAC-PAWA-HELPER-REQ-036) |
 | §42 mutation vocabulary | 6 closed mutation classes (v1.3 added `certification_write` family — not a `PawaOperation`; v1.2 added `configure_presentation_mechanism`) | **7 closed mutation classes** — v2.0 adds exactly `configure_privileged_helper`, role `privileged_helper_installer` (§42G), a metadata-only install / rotate / revoke transaction for the out-of-band helper-registration record `HPAC-PAWA-HELPER-INSTALLATION/1.0`; it SHALL NOT copy / chmod / chown / execute helper bytes (the HPAC-PPA-REQ-004 / §80.2 model) | additive; the v1.2 `configure_presentation_mechanism` precedent — one explicitly enumerated protected-admin metadata mutation family inside the same protected root | the helper executable is registered exactly as the presentation helper is (`helper_sha256` + owner / mode + generation binding); an integrity-pinned artifact of the existing kind, not a new trust root |
 | `pawa_failure_code` taxonomy | 21 closed values | **21 closed values, unchanged** — every v2.0 rejection (helper provenance, peer-credential, channel, unknown operation / role, replay, freshness, session / subject binding, `configure_privileged_helper` input) maps onto #1–#21 (§42H); RHAMP §57 map unchanged; RHAMP-001 v1.0 byte-unchanged | no change | no vocabulary expansion; the helper's fail-closed outcomes are the existing recognition / issuance failure classes moved to a new process boundary |
-| `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` / `HPAC-PAWA-CURRENT-GENERATION/1.0` schemas | closed field sets | **byte-unchanged** — the helper-registration record (`HPAC-PAWA-HELPER-INSTALLATION/1.0`) and its current-generation anchor are **new sibling records** in a new `pawa-helper/` namespace under `<HPAC_PROTECTED_ROOT>`, bound to the same `installation_id`; they add no field to any existing schema | additive; MAJOR context | the existing anchor / descriptor stay authoritative for the deployment-owner recognition; the helper registration is a parallel integrity pin |
+| `HPAC-PAWA-AUTHORITY-DESCRIPTOR/1.0` / `HPAC-PAWA-CURRENT-GENERATION/1.0` schemas | closed field sets | **byte-unchanged** — the helper-registration record (`HPAC-PAWA-HELPER-INSTALLATION/1.0`) and its current-generation anchor are **new sibling records** in a new `pawa-helper/` namespace under `<HPAC_PROTECTED_ROOT>`, bound through the typed PAWA parent binding in §97 (not equal component IDs); they add no field to any existing schema | additive; MAJOR context | the existing anchor / descriptor stay authoritative for the deployment-owner recognition; the helper registration is a parallel integrity pin |
 | non-bearer / process-local / non-serialisable / restart-dead (§45–§49 / §49A / §49B) | properties of a fragile in-heap Python authority object | **preserved and strengthened** — they become properties of the **process boundary**: there is no returnable object to serialise or capture; the helper process (and any authority it held) is gone at exit; a fresh launch re-runs the entire §33 sequence (§49C) | strengthened; MAJOR context | "privileged authority never becomes a generic transferable bearer token because it never becomes a returnable object at all" (`TB-ARCH` §18) |
 | PAWA-INV-13 / PAWA-INV-14 wording | "the certification-lifecycle writer family … minted only by a dedicated `certification_writer(...)` factory"; "one recognized … `HPACStoreAuthority` accessor … returns a `CertificationReadAuthority` handle" | **restated** by PAWA-INV-15 / -16 / -17 — the five-role closure and the enumerated-read closure are **unchanged in substance**; only the delivery clause moves out of process (the factory / accessor becomes a helper operation, no handle returned). PAWA-INV-13 / -14 are annotated "(v2.0) delivery superseded by §33C — substance unchanged" | restated, not weakened | the authority *semantics* (who, over what, with what prohibitions, terminating where) are identical; the *mechanism* (in-process object vs out-of-process typed operation) is what v2.0 replaces |
 | §96 (verifier-only lifecycle records) | specialized by the §42B narrow write exception; further specialized by the §42D read-only exception | **unchanged in intent** — the same enumerated exceptions apply; only the delivery mechanism moves out of process. Outside a bounded certification session the trusted verifier remains the sole author; `HPAC-PRESENTATION-EVIDENCE/2.0` stays with `mint_protected_presentation_evidence_writer` (now the `presentation_evidence_write` helper operation, invoked by the presentation helper itself) | no substantive change | v2.0 is a delivery-model MAJOR, not a scope widening; the enumerated exceptions are not touched |
@@ -5276,8 +5279,7 @@ the protocol / launch / integrity / peer-authentication / failure semantics.
   `HPAC-PAWA-CURRENT-GENERATION/1.0` schemas are byte-unchanged by v2.0.** The
   helper-registration record (`HPAC-PAWA-HELPER-INSTALLATION/1.0`) and its
   current-generation anchor are **new sibling records** in the
-  `<HPAC_PROTECTED_ROOT>/pawa-helper/` namespace, bound to the same
-  `installation_id`; they add **no** field to any existing protected-root
+  `<HPAC_PROTECTED_ROOT>/pawa-helper/` namespace, bound through the typed PAWA parent binding in §97 (not equal component IDs); they add **no** field to any existing protected-root
   schema and require **no** change to the existing descriptor / anchor / agent-
   exclusion machinery, which the helper's §33 1–8 recognition consumes exactly
   as the §36 / §33A factories do.
@@ -5438,3 +5440,36 @@ approval.
 **Do not begin any of them. Do not begin N-16-6 / N-16-7 / Slice C. Do not
 implement or call the first external effect. Do not enable execution.**
 N-16-7 strictly last. **REPORTING-UX-1** remains open and non-blocking.
+
+## 97. Typed component installation bindings (v3.0)
+
+- **HPAC-PAWA-REQ-341.** PAWA installation_id remains hpawi and retains the
+  existing descriptor/current-anchor/exclusion schemas and recognition order.
+  Helper sibling installation_id is hpahi; presentation installation_id is hppi.
+  The shared-installation claim of REQ-336 and the v2.0 impact table is replaced
+  by the closed pawa_binding in HELPER REQ-174. PAWA never needs H/P registration
+  to recognize its own deployment owner. Components refer to PAWA, not vice versa.
+- **HPAC-PAWA-REQ-342.** REQ-311 RegisteredGenerationMatch resolves the exact
+  closed execution profile in HELPER REQ-173: H uses helper schema2; P uses PPA
+  schema2. Both require verified current component + exact current PAWA parent
+  binding. REQ-311 RequestSchemaValid uses HELPER Request/2.0 for H and the
+  existing PPA ceremony request for P; P local evidence event is not new IPC.
+  ClosedOperationMembershipValid intersects the closed profile operation set
+  with H supported_operations for H; P permits only its local fifth operation
+  and has no invented supported_operations schema field. All other conjuncts
+  remain unchanged. P is the already-enumerated
+  protected presentation consumer and exclusively owns its local fifth operation.
+  H cannot broker its evidence write. No new consumer, generic capability or role.
+- **HPAC-PAWA-REQ-343.** Component binding records/anchors remain under the
+  single existing root, authored by their existing deployment-owner installer
+  roles. PAWA rotation invalidates bindings; only external recognized installer
+  lifecycle may validate old records for monotonic supersedes repair as HELPER
+  REQ-181, never runtime use. The unregistered helper cannot provision itself.
+  PAWA bootstrap/root identity/account exclusion remain independent of components.
+- **HPAC-PAWA-REQ-344.** v2.0 -> v3.0 is MAJOR: replacing required same-ID and
+  generic-only registration semantics is outside REQ-153's no-remeaning MINOR
+  allowances. REQ-152 security prohibitions are not relaxed. Existing descriptor,
+  anchor and exclusion schemas stay unchanged; PPA/helper component schemas carry
+  the typed reference. Fresh independent IV precedes implementation/migration.
+  Configured-agent identity is the existing protected-record/live-OS resolution,
+  never task label or caller claim; None/unresolved fails agent_principal_unknown.

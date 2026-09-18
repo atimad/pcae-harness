@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR**) — Protected Helper Installation Identity, PAWA Identity, PPA Launch Identity, and Configured-Agent Exclusion Contract Reconciliation. **ACTIVE — CONTRACT / ARCHITECTURE REPAIR ONLY**.
+
+Preflight passes at `79ea7e1644535d011da6ca3869b5557b44c50737`: main clean/synchronized, no active governed phase, predecessor canonical completion confirmed. Its pending-completion sentence is stale pre-finalization validation prose; completed transaction/report/notification are authoritative. CPIPC direct child normalized and unused. No production changes authorized. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+
+## Previous Completed Admission Phase
+
+
 Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR**) — Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair. **COMPLETE — BLOCKED / ADMISSION NOT REPAIRED**.
 
 Activated after canonical preflight from `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`. Confirmed missing helper admission; discovered HELPER REQ-021 hpahi identity cannot equal PAWA hpawi identity, while launcher/Model E use PPA hppi lineage. Genuine Linux also proves presentation metadata reads traverse foundation boundary. Narrow draft removed completely; source/contracts byte-unchanged. Evidence: `docs/PHASE_N16_5_F_5_TB_HELPER_ADMISSION_PROVENANCE_REPAIR.md`.

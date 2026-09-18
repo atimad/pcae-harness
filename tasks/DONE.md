@@ -83,6 +83,7 @@
 
 ## Completed
 
+- Idle: post-HELPER-ADMISSION-PROVENANCE-REPAIR blocked; helper installation identity contract repair recommended, not begun (20260918-0205-idle-post-helper-admission-provenance-repair-blocked-helper-installation-identity-contract-repair-recommended-not-begun)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair (N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR) (20260918-0151-n16-5-f-5-tb-helper-admission-provenance-repair)
 - N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV: Fresh Independent Linux Verification of Real Helper Boundary Repair (20260915-0014-n16-5-f-5-tb-real-helper-boundary-repair-iv-fresh-independent-linux-verification-of-real-helper-boundary-repair)
 - N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL: canonical-store wiring + Linux one-shot launcher (2 of 5 ops wired; 3 blocked by REQ-033 writer-seal exclusivity) (20260913-1725-n16-5-f-5-tb-real-helper-store-launcher-impl-canonical-store-wiring-linux-one-shot-launcher-2-of-5-ops-wired-3-blocked-by-req-033-writer-seal-exclusivity)
@@ -2618,9 +2619,3 @@
 - 2026-09-07: 20260907-1427-n16-5-h3-pawa13-iv-hpac-pawa-001-v1-3-contract-iv (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R -- Independent Verification of HPAC-PAWA-001 v1.3; INDEPENDENTLY VERIFIED)
 - 2026-09-07: 20260907-1830-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-n16-5-h3-iv (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R -- Independent Verification of the N-16-5 Production Certification Authority-Path Implementation; H-3 INDEPENDENTLY VERIFIED; N-16-5 NOT CLOSED)
 - 2026-09-10: 20260910-1119-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1-1-1-1-n16-5-f-5-tb-contract-iv (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1 -- Dedicated Independent Verification of HPAC-PAWA-001 v2.0 and HPAC-PAWA-HELPER-001 v1.0; NOT VERIFIED / BLOCKED -- HPAC-PPA-001 evidence-writer adjudication B; N-16-5 NOT CLOSED)
-
-## Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair
-
-Task `20260918-0151-n16-5-f-5-tb-helper-admission-provenance-repair` closed COMPLETE — BLOCKED / ADMISSION NOT REPAIRED. 13 evidence tests, 169 focused passes, real Linux kernel/metadata boundary reproduction; no production/contract change. Canonical report: docs/PHASE_N16_5_F_5_TB_HELPER_ADMISSION_PROVENANCE_REPAIR.md. Successor NOT begun.
-
-- Idle predecessor handoff state closed on admission-phase activation (20260917-2109-idle-post-n16-5-f-5-tb-helper-writer-authority-impl-complete-blocked-implementation-not-verified-n16-5-f-5-tb-helper-writer-authority-foundation-repair-recommended-next-not-begun-n-16-5-not-closed). This closes only the idle task; the recommended FOUNDATION-REPAIR was never activated or completed.

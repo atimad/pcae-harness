@@ -1,0 +1,170 @@
+{
+  "specification": "HPAC-INSTALLATION-IDENTITY-CONSTRAINTS/1.0",
+  "status": "FROZEN_PENDING_INDEPENDENT_VERIFICATION",
+  "selected_model": "I-B",
+  "production_implemented": false,
+  "contract_versions": {
+    "HPAC-PAWA-HELPER-001": "4.0",
+    "HPAC-PAWA-001": "3.0",
+    "HPAC-PPA-001": "2.1"
+  },
+  "identities": {
+    "pawa": {
+      "prefix": "hpawi-",
+      "category": "logical_installation"
+    },
+    "privileged": {
+      "prefix": "hpahi-",
+      "category": "logical_installation"
+    },
+    "presentation": {
+      "prefix": "hppi-",
+      "category": "logical_installation"
+    }
+  },
+  "profiles": {
+    "privileged": {
+      "identity": "privileged",
+      "operations": [
+        "admin_mutation",
+        "certification_write",
+        "certification_read",
+        "ceremony_entry"
+      ],
+      "families": [
+        "HelperAdminMutationAuthority",
+        "HelperCertificationWriteAuthority"
+      ],
+      "executable": "pawa-helper/installations/<helper_sha256>/hpac-pawa-privileged-helper"
+    },
+    "presentation": {
+      "identity": "presentation",
+      "operations": [
+        "presentation_evidence_write"
+      ],
+      "families": [
+        "HelperPresentationEvidenceAuthority"
+      ],
+      "executable": "presentation-helper/installations/<helper_sha256>/pcae-protected-local-presentation",
+      "requires_actual_election": "APPROVE",
+      "event_source": "admitted_same_process_ceremony"
+    }
+  },
+  "pawa_binding_fields": [
+    "installation_id",
+    "generation",
+    "descriptor_digest",
+    "agent_exclusion_digest",
+    "protected_root_identity"
+  ],
+  "execution_binding_fields": [
+    "profile",
+    "installation_id",
+    "generation",
+    "installation_digest",
+    "helper_sha256",
+    "pawa_binding"
+  ],
+  "authority_dependencies": [
+    [
+      "pawa",
+      "root_os_boundary"
+    ],
+    [
+      "privileged",
+      "pawa"
+    ],
+    [
+      "presentation",
+      "pawa"
+    ]
+  ],
+  "constraints": [
+    {
+      "left": "helper_uid",
+      "relation": "==",
+      "right": "deployment_owner_uid",
+      "source": "HELPER-178"
+    },
+    {
+      "left": "peer_uid",
+      "relation": "==",
+      "right": "deployment_owner_uid",
+      "source": "HELPER-178"
+    },
+    {
+      "left": "configured_agent_uid",
+      "relation": "!=",
+      "right": "helper_uid",
+      "source": "HELPER-178"
+    },
+    {
+      "left": "configured_agent_uid",
+      "relation": "!=",
+      "right": "peer_uid",
+      "source": "HELPER-178"
+    },
+    {
+      "left": "configured_agent_uid",
+      "relation": "!=",
+      "right": "deployment_owner_uid",
+      "source": "HELPER-178"
+    },
+    {
+      "left": "privileged_id",
+      "relation": "!=",
+      "right": "pawa_id",
+      "source": "HELPER-172"
+    },
+    {
+      "left": "presentation_id",
+      "relation": "!=",
+      "right": "pawa_id",
+      "source": "HELPER-172"
+    },
+    {
+      "left": "privileged_id",
+      "relation": "!=",
+      "right": "presentation_id",
+      "source": "HELPER-172"
+    }
+  ],
+  "configured_agent": {
+    "source": ".authority/agent-exclusion.json",
+    "schema": "HPAC-PAWA-AGENT-EXCLUSION/1.0",
+    "resolver": "resolve_configured_agent_identity",
+    "live_account": true,
+    "uid_pin": true,
+    "live_groups": true,
+    "unresolved": "agent_principal_unknown",
+    "request_authority": false,
+    "logical_agent_label_mapping": false
+  },
+  "admission_order": [
+    "verified_execution",
+    "private_channel",
+    "kernel_peer_and_pawa_recognition",
+    "request_schema_and_profile",
+    "freshness_and_durable_replay",
+    "dispatch"
+  ],
+  "currentness": {
+    "component_and_parent_exact": true,
+    "independent_generation_counters": true,
+    "parent_rotation_invalidates_components": true,
+    "pre_mutation_recheck": true,
+    "schema1_real_accepted": false,
+    "historical_migration_is_runtime_admission": false
+  },
+  "walls": {
+    "second_trust_root": false,
+    "legacy_factory_import": false,
+    "authority_export": false,
+    "authority_persistence": false,
+    "generic_writer": false,
+    "request_selects_profile": false,
+    "runtime": "Observed / observe / unavailable",
+    "plugins": 0,
+    "capabilities": 0
+  }
+}

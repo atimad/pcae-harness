@@ -1,0 +1,22 @@
+{
+  "baseline": "79ea7e1644535d011da6ca3869b5557b44c50737",
+  "method": "detached_worktree_same_test_set",
+  "baseline_failed_cases": [
+    "test_87_contract_byte_identity_hpac_rhamp_hbdc_unchanged_since_entry",
+    "test_contract_byte_identity[HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md-e7b30daeb1f6967fe985cf7394834e76a81acefb538a0038672aa026a5b58815]",
+    "test_no_contract_change_since_g0",
+    "test_no_contract_change_since_v0",
+    "test_no_production_source_change_since_g0",
+    "test_targeted_suites_still_reproduce_exactly_the_five_predecessor_failures"
+  ],
+  "candidate_failed_cases": [
+    "test_87_contract_byte_identity_hpac_rhamp_hbdc_unchanged_since_entry",
+    "test_contract_byte_identity[HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md-e7b30daeb1f6967fe985cf7394834e76a81acefb538a0038672aa026a5b58815]",
+    "test_no_contract_change_since_g0",
+    "test_no_contract_change_since_v0",
+    "test_no_production_source_change_since_g0",
+    "test_targeted_suites_still_reproduce_exactly_the_five_predecessor_failures"
+  ],
+  "attributable": [],
+  "note": "Failure headings compared because -rs omits failure summary nodes; full traceback source paths retained. Six historical failures; two new contract hash assertions explicitly epoch-scoped. Not Fast Green substitute."
+}

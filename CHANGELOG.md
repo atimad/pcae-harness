@@ -1754,6 +1754,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle: post-HELPER-ADMISSION-PROVENANCE-REPAIR blocked; helper installation identity contract repair recommended, not begun to N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair (N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR) to Idle: post-HELPER-ADMISSION-PROVENANCE-REPAIR blocked; helper installation identity contract repair recommended, not begun; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1 N16-5-F-5-PPA-CONTRACT to Idle post-N16-5-F-5-PPA-CONTRACT (COMPLETE / CONTRACT FROZEN); dedicated IV N16-5-F-5-PPA-CONTRACT-IV next; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-N16-5-F-5-TB-CONTRACT-IV (BLOCKED); HPAC-PPA-001 contract-evolution phase next; N-16-5 NOT CLOSED to Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1 N16-5-F-5-PPA-CONTRACT; session refreshed and governance continuity revalidated.
@@ -4038,3 +4039,5 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
   verification. Neither begun. F-5-B2 remains BLOCKED PENDING
   IMPLEMENTATION IV; F-5 remains CERTIFICATION BLOCKED; N-16-5 remains NOT
   CLOSED; N-16-6/N-16-7 remain OPEN/UNTOUCHED.
+
+- Installation identity contracts reconciled: distinct PAWA/helper/PPA lineages, typed parent/currentness bindings, closed existing executable profiles; implementation remains blocked pending fresh IV.

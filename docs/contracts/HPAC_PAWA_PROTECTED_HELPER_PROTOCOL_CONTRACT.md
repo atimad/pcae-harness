@@ -1,9 +1,12 @@
-# HPAC-PAWA-HELPER-001 v3.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract
+# HPAC-PAWA-HELPER-001 v4.0 — HPAC-PAWA Protected One-Shot Privileged Helper Protocol Contract
+
+
+> **Current identity epoch: v4.0.** Section 30D is the normative identity reconciliation, frozen by Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR). Status: CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION. Earlier freeze verdicts, counts, no-change statements and implementation-absence claims describe their named historical epochs only. Explicit supersessions below control current identity/profile semantics; all other security predicates remain mandatory. No production implementation is claimed.
 
 ## Contract identity and status
 
 **Contract:** HPAC-PAWA-HELPER-001
-**Version:** 3.0
+**Version:** 4.0
 **Status:** REPAIRED / FROZEN — PENDING INDEPENDENT RE-VERIFICATION
 **Evolved to v3.0 by:** Phase
 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1
@@ -292,7 +295,7 @@ COMPLETE.
   | Field | Exact meaning |
   |---|---|
   | `helper_installation_schema_version` | const `HPAC-PAWA-HELPER-INSTALLATION/1.0` |
-  | `installation_id` | `^hpahi-[0-9a-f]{32}$`; stable for one protected-root installation lineage; **equal to** the PAWA `installation_id` of the same root (bound, not independent) |
+  | `installation_id` | `^hpahi-[0-9a-f]{32}$`; privileged-helper component lineage only; **distinct from** PAWA `hpawi-*` and PPA `hppi-*`; bound through the typed `pawa_binding` in §30D |
   | `helper_implementation_id` | const `hpac-pawa-privileged-helper` |
   | `helper_implementation_version` | non-empty version identifier bound to the installed PCAE helper build |
   | `helper_path` | exact absolute normalized path derived by HPAC-PAWA-HELPER-REQ-019 |
@@ -2430,3 +2433,185 @@ structural / source-fact tests only — **no production implementation**
 (none of the three facades, their authority types, or their defining module
 exist yet). `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` for
 this repair phase, preserved.
+
+## 30D. Installation identity reconciliation (v4.0, Model I-B)
+
+**HPAC-PAWA-HELPER-REQ-172.** Exactly three component identity categories exist:
+PAWA authority installation `hpawi-<hex32>`, privileged-helper installation
+`hpahi-<hex32>`, and presentation installation `hppi-<hex32>`. The suffix is
+32 lowercase hex digits. They are distinct logical lineages, never OS identities,
+permissions, producer provenance or human principals. REQ-021's former equality
+with PAWA is replaced by typed parent binding; sharing a root does not imply ID
+equality. Numeric generation coincidence also implies nothing. The machine-readable
+specification `helper_installation_identity_constraints.json` is normative for
+these closed categories/profiles/relations and test vectors; it grants no authority.
+
+**HPAC-PAWA-HELPER-REQ-173.** The existing two executable roles are exactly two
+closed execution profiles, fixed by the independently verified launcher and
+opened installation, never chosen by request/environment/argv:
+
+| Profile | Installation | Fixed executable path suffix under protected root | Operations |
+|---|---|---|---|
+| `privileged` | hpahi | `pawa-helper/installations/<helper_sha256>/hpac-pawa-privileged-helper` | admin_mutation, certification_write, certification_read, ceremony_entry |
+| `presentation` | hppi | `presentation-helper/installations/<helper_sha256>/pcae-protected-local-presentation` | presentation_evidence_write, internal post-APPROVE only |
+
+REQ-019/021 fixed generic executable applies only to privileged profile. The
+presentation profile uses PPA REQ-010/014 installation and executable; it does not
+pretend to be an hpahi executable. REQ-013 and REQ-144's protected helper/dispatch
+mean the protected dispatch inside the corresponding profile, not a generic
+broker. No sixth operation, new launcher consumer, wildcard profile, imported
+ordinary-process mint or shared heap is authorized. Both retain REQ-020 equivalent
+filesystem checks, same-file-object exec and all PAWA admission conjuncts.
+
+**HPAC-PAWA-HELPER-REQ-174.** Parent binding is the closed non-bearer value
+`pawa_binding = {installation_id, generation, descriptor_digest,
+agent_exclusion_digest, protected_root_identity}`. `installation_id` has hpawi
+grammar, generation is positive integer (bool forbidden), both digests are 64
+lowercase hex, and protected_root_identity is the existing exact `{device,inode}`
+OS-root identity shape. Every value is compared to independently recognized live
+PAWA state under §33 steps 1–8; a consistent self-authored tuple proves nothing.
+The helper generation record and anchor evolve to
+`HPAC-PAWA-HELPER-INSTALLATION/2.0` and
+`HPAC-PAWA-HELPER-CURRENT-GENERATION/2.0`: exactly REQ-021/022 fields with
+updated schema constants and one additional `pawa_binding` field in each.
+Their protocol_version is `HPAC-PAWA-HELPER/2.0`. All shared fields, including
+parent binding, agree exactly. Their own installation_id remains hpahi. Paths,
+create-only records, atomic anchors, canonical digests/provenance and installer
+role remain unchanged. PPA profile uses PPA2.1 schema2, not this registration.
+
+**HPAC-PAWA-HELPER-REQ-175.** Registration/currentness recognition is directional:
+fixed root + live OS security + existing PAWA descriptor/anchor/exclusion first;
+then component provenance/record/anchor/executable against that recognized parent.
+PAWA recognition never depends on H/P installation or an operation it must admit.
+No new root, key, secret, registry of configured agents or independent identity
+issuer is introduced. Initial component registration uses existing external
+recognized deployment-owner provisioning, not a call to an unregistered helper.
+A helper cannot register/rotate/revoke its own active executing lineage via
+admin_mutation; lifecycle control remains external deployment-owner provisioning.
+REQ-024 bootstrap and current Model E administration do not authorize self-trust.
+
+**HPAC-PAWA-HELPER-REQ-176.** At admission and immediately before mutation,
+check the exact current tuple `(profile, component installation_id, component
+generation, component installation_digest, helper_sha256, pawa_binding)`.
+The execution tuple installation_digest is H record.helper_installation_digest
+for privileged and P record.installation_digest for presentation; this normalized
+slot does not rename persisted fields. Presentation additionally binds its descriptor_digest, renderer_profile and
+verifier_configuration_digest. Component generations are independent monotonic
+counters; never compare H generation to P or PAWA generation. REQ-150 and every
+Model E installation/generation scope use this typed tuple. Three families,
+exact-type/seal recognition, role/subtype restrictions and one-call mint-and-perform
+semantics remain unchanged; profile/currentness is an additional necessary
+condition, never a replacement writer. No H context authorizes the presentation
+family, nor P the admin/certification families. No base-class/generic capability.
+
+**HPAC-PAWA-HELPER-REQ-177.** Privileged IPC evolves to
+`HPAC-PAWA-HELPER-REQUEST/2.0`, protocol `HPAC-PAWA-HELPER/2.0`, and
+`HPAC-PAWA-HELPER-RESPONSE/2.0`. REQ-046/049 field sets otherwise remain exact,
+but request installation_id/generation are replaced by one closed
+`execution_binding = {profile, installation_id, generation, installation_digest,
+helper_sha256, pawa_binding}` (types as REQ-172/174/176). Profile on privileged
+IPC must equal `privileged`; the registered profile is resolved first. Binding
+fields are echoes/assertions, never authority or root/path selectors. Response/2.0 additionally REQUIRES `request_digest` (64 lowercase hex), exactly
+equal to the canonical admitted request digest; absence/mismatch rejects the
+response. This is a new field, not present in REQ-049 Response/1.0. It binds the
+entire canonical request.
+Unknown schemas/profiles/extra fields and wrong operation/profile deny. Existing
+PPA ceremony request remains PPA-owned; its protected helper derives the same
+presentation execution tuple internally from its verified launch and schema2
+installation. There is no generic IPC request that can invoke the fifth operation,
+no new channel and no exported admission object. Typed local event bindings are
+not serialized active authority. REQ-034/046/049 version references are superseded
+only as stated here; no silent schema1 upgrade or alias-prefix translation.
+
+**HPAC-PAWA-HELPER-REQ-178.** REQ-031/032/042/043 remain mandatory for BOTH
+profiles before operation-driven reads or ceremony: authenticate the actual peer
+inside the helper, resolve the configured account from protected PAWA
+`HPAC-PAWA-AGENT-EXCLUSION/1.0`, validate digest/current anchor/root/installation,
+resolve symbolic_account live and require uid == provisioned_uid, enumerate live
+primary/supplementary groups. Task-agent labels have no implied OS mapping.
+Missing/unresolvable/None identity -> `agent_principal_unknown`, never a guessed
+username, current uid, SUDO_USER, argv or request binding. Helper process uid and
+helper-observed peer uid must each equal the verified root deployment-owner uid
+and differ from configured-agent uid. Kernel SO_PEERCRED supplies peer pid/uid/gid;
+request values cannot replace it; checking the opposite endpoint is not sufficient.
+Effective group/ACL/ancestor write access by configured agent denies independently
+of uid inequality. Same-uid owner/helper/agent is unsupported and denies. Human
+principal is never inferred from OS credentials. Helper uid alone is no authority.
+
+**HPAC-PAWA-HELPER-REQ-179.** Verified execution precedes channel/peer checks;
+trusted bootstrap reads needed for PAWA recognition are not request-driven reads.
+Perform those using the fixed-root trusted primitive recognition sequence, not a
+circular assertion of already-admitted context. Complete PAWA, peer and schema/
+profile checks before durable replay reservation and before operation dispatch;
+reserve before the existing mutation-attempt boundary. Preserve durable replay
+and uncertainty semantics. Replay/currentness binding includes profile, component
+ID/generation and parent generation/digests as well as existing request_id/nonce/
+session/operation/subject; changing the tuple cannot make a consumed ceremony
+unused. No active admission state persists in replay/audit/response. Restart,
+clone, JSON/pickle/deepcopy preserve descriptors only, never active authority.
+
+**HPAC-PAWA-HELPER-REQ-180.** PPA admission authenticates its original private
+ceremony channel before presentation. Only that same protected presentation
+process, after independently observing one valid APPROVE for that admitted
+request, invokes its local presentation facade once. The internal event cannot
+supply approval or bootstrap admission. Generic H neither brokers nor authors PPA
+evidence. REJECT/cancel/expiry/currentness failure yields no evidence. All actual
+election, exact invocation/attempt/subject/digest/renderer bindings and create-only
+ownership remain PPA's. This explicitly reconciles REQ-070/071/073/144 with
+PPA REQ-077/079/081; no authority relocation occurs.
+
+**HPAC-PAWA-HELPER-REQ-181.** Any PAWA parent generation/digest/exclusion/root
+change invalidates outstanding admission and all old component bindings. Any
+component rotation/revocation invalidates outstanding tuples for that component;
+PPA rotation does not change H identity, but invalidates dependent ceremony work.
+Never rewrite immutable records. Generation1 schema1 installations are historical,
+not implicitly eligible for schema2 REAL use. After fresh independent IV and
+separately authorized implementation/provisioning, an external recognized installer
+may read/validate historical records and provenance SOLELY to construct exact
+monotonic supersedes under current PAWA authority. Historical validation does not
+make stale records runtime-current. Existing lineage upgrades increment component
+generation with immutable schema2 record and atomic schema2 anchor; first schema2
+registration with no prior lineage starts at1. Corruption/revocation recovery uses
+existing explicit new-lineage reprovisioning. No live migration is authorized here.
+
+**HPAC-PAWA-HELPER-REQ-182.** Missing component/parent -> `descriptor_missing`;
+wrong component/profile/parent installation -> `descriptor_installation_mismatch`;
+stale generation/binding -> `descriptor_generation_stale`; unresolved agent ->
+`agent_principal_unknown`; same-agent process/peer -> `current_context_is_agent`;
+agent writable root -> `agent_has_protected_write_authority`; malformed/unknown
+schema/profile/operation -> `operation_scope_invalid`. Existing filesystem,
+integrity, probe, replay and target-specific failures retain their closed codes.
+No permissive fallback, no schema1 REAL acceptance, no new failure vocabulary.
+
+**HPAC-PAWA-HELPER-REQ-183.** This is v4.0 MAJOR: replacing impossible identity
+equality and singular execution/currentness interpretation exceeds REQ-108's
+no-remeaning MINOR permit. It does not introduce a new writer mint mechanism;
+Model E remains the mechanism. PAWA3.0 owns parent recognition and typed component
+admission; PPA2.1 tightens presentation parent binding without moving evidence
+ownership. REQ-033/129/171 prohibition remains exact: no legacy factory/seal import,
+no Model D, no same-interpreter provenance substitute, no second trust root.
+Contracts do not repair source: current PPA-backed H resolvers, missing helper
+admission/registration, and foundation provenance-read/write blocker remain open.
+Foundation's future repair must distinguish configured agent from verified
+helper/deployment owner for canonical reads AND writes; only writes additionally
+need Model E/legacy writer authority. No _ensure_root bypass is authorized.
+
+Identity threat traceability (additive to the preserved v3.0 40-row matrix):
+
+| Attack | Required denial / requirement |
+|---|---|
+| hpahi equals hpawi; hppi relabeled hpahi | typed grammar/inequality, 172/174 |
+| request selects profile, installation, account or executable | independently resolved profile + echoes only, 173/177/178 |
+| PPA currentness substituted for generic H | exact profile tuple, 176 |
+| parent points back to component to prove itself | directional bootstrap, 175 |
+| same uid, missing agent, fake peer | canonical live resolution and kernel channel credentials, 178 |
+| stale parent or component; equal generation numbers | full tuple, independent counters, 176/181 |
+| stale component blocks authorized migration forever | historical-only validation, never runtime admission, 181 |
+| H writes PPA evidence or caller fabricates APPROVE | P-only same-process election, 180 |
+| copied admission, authority exported/persisted | process boundary and non-bearer descriptors, 179 |
+| Model E family confused with generic capability | exact family/profile and separate writer requirement, 176/183 |
+| schema1 auto-promoted to schema2 | explicit migration only, 181/182 |
+| read skips admission or foundation check | pre-dispatch gate + deferred foundation distinction, 178/179/183 |
+
+**Requirement count (v4.0):** existing 172 declarations (including 114A) plus
+REQ-172..183 = 184 declarations. Earlier counts remain epoch-specific.

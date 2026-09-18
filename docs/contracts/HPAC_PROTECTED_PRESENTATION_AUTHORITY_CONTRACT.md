@@ -1,9 +1,12 @@
-# HPAC-PPA-001 v2.0 — HPAC Protected Presentation Installation and Evidence Authority Contract
+# HPAC-PPA-001 v2.1 — HPAC Protected Presentation Installation and Evidence Authority Contract
+
+
+> **Current identity epoch: v2.1.** Section 23 is the normative identity reconciliation, frozen by Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR). Status: CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION. Earlier freeze verdicts, counts, no-change statements and implementation-absence claims describe their named historical epochs only. Explicit supersessions below control current identity/profile semantics; all other security predicates remain mandatory. No production implementation is claimed.
 
 ## Contract identity and status
 
 **Contract:** HPAC-PPA-001  
-**Version:** 2.0  
+**Version:** 2.1
 **Status:** FROZEN — IMPLEMENTATION AND INDEPENDENT VERIFICATION PENDING  
 **Frozen by:** Phase
 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.4R — N-16-5 Protected-Presentation
@@ -931,3 +934,56 @@ N-16-6 / N-16-7 remain **OPEN / UNTOUCHED** (N-16-7 strictly last).
 Protected presentation and Gate real-assurance consumption remain **NOT
 IMPLEMENTED**. N-16-5 remains **NOT CLOSED**. Runtime remains **Observed /
 observe / unavailable**. First external effect remains **ABSENT**.
+
+## 23. Explicit PAWA parent binding (v2.1)
+
+- **HPAC-PPA-REQ-104.** Presentation installation remains hppi, distinct from
+  helper hpahi and PAWA hpawi. The fixed presentation executable, mechanism,
+  descriptor_digest, renderer_profile and verifier_configuration_digest retain
+  their meanings. PPA helper deployment generation is this PPA installation's
+  generation, never H or PAWA generation. Equal integer values do not bind them.
+- **HPAC-PPA-REQ-105.** Installation/current-anchor schemas evolve to
+  HPAC-PRESENTATION-INSTALLATION/2.0 and
+  HPAC-PRESENTATION-CURRENT-GENERATION/2.0. Exactly REQ-014/018 fields remain,
+  with updated constants plus one pawa_binding field in EACH, whose closed shape
+  and recognition is HELPER REQ-174. Self-excluding digests cover the new field.
+  Record/anchor parent binding must agree exactly and match current independently
+  recognized PAWA. Paths, provenance roles, descriptor and evidence schemas remain
+  unchanged. No reverse PAWA reference to PPA is required or allowed for trust.
+- **HPAC-PPA-REQ-106.** The presentation helper remains sole evidence author.
+  Its existing private ceremony channel is authenticated before ceremony; the
+  internal presentation_evidence_write event derives only from that admission and
+  actual APPROVE, never from generic H IPC. HELPER REQ-173/178/180 specialize the
+  existing PPA REQ-088/089 admission predicates for this existing profile. All
+  invocation/attempt/session/subject/digest/renderer/election/create-only checks
+  remain mandatory. REQ-084 transport wording is specialized: the existing PPA channel carries
+  ceremony request bytes and acknowledgement; the fifth operation is the internal
+  post-election persistence action, never a second H transport request. This
+  restricts the ambiguous generic-transport reading, without relocating the
+  evidence holder or adding a channel. No evidence writer crosses IPC or persists; no human identity
+  is inferred from OS credentials; no new authentication method is introduced.
+- **HPAC-PPA-REQ-107.** Parent/component rotation invalidates outstanding
+  tuples as HELPER REQ-181. Schema1 records do not silently become schema2 REAL
+  state. Historical-only validation for external installer monotonic upgrade is
+  allowed under fresh current PAWA authority, never as stale runtime admission.
+  No migration/deployment occurs in this contract phase. Failures use existing
+  descriptor_installation_mismatch/descriptor_generation_stale/descriptor_missing
+  and existing PAWA exclusion/integrity codes.
+- **HPAC-PPA-REQ-108.** v2.0 -> v2.1 is MINOR under REQ-070: a stricter parent
+  lineage/currentness bound, with schema2 explicit migration, preserving the
+  existing process that owns evidence, PPA generation meaning, fixed local helper,
+  ceremony semantics, descriptor/evidence schemas and all authority walls. No
+  REQ-069 ownership/transport/bearer trigger fires. This is not a synchronized
+  version bump: the new parent binding is the tightened acceptance requirement. REQ-106
+  resolves ambiguous transport wording consistently with existing REQ-077/081/086
+  same-process ownership; ceremony request and response still cross exactly the
+  existing PPA private channel. No prior valid evidence gains new authority.
+
+| Identity attack | Requirement |
+|---|---|
+| hppi/hpahi alias or generation conflation | 104 |
+| caller forged parent/self-consistent digest | 105 + PAWA full recognition |
+| H broker or fabricated local approval event | 106 |
+| old parent/schema1 auto-upgrade | 107 |
+
+Requirements 001..108 remain gap-free; prior freeze counts describe their epochs.
