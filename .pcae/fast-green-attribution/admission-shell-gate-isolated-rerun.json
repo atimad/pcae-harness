@@ -1,0 +1,7 @@
+{
+  "candidate_commit": "d190344c5126daf9b30e004f7e0f5551826c7fee",
+  "node": "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record",
+  "result": "pass",
+  "method": "repository _rerun_single_node in fresh exact-HEAD _IsolatedWorktree",
+  "timestamp": "2026-09-18T01:15:59.092211+00:00"
+}
