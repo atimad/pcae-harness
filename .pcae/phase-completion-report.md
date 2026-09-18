@@ -22,9 +22,9 @@ Fresh adversarial tests: `tests/test_n16_5_f5_tb_prov_repair_iv.py` (14/14 pass)
 
 Files changed: `docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_PROVISIONING_CONTRACT_REPAIR_IV.md` (new, full evidence), `tests/test_n16_5_f5_tb_prov_repair_iv.py` (new, 14 tests), `PROJECT_STATUS.md`, `tasks/DECISIONS.md`, `tasks/DONE.md`, task-lifecycle files, `CHANGELOG.md`. Zero `src/pcae/**` changes. Zero `docs/contracts/**` changes.
 
-Attributed commit: `66a7f5097761b8bd9e8c3a60278b72f83195c88a` — fresh independent adversarial verification of provisioning contract repair. Phase-entry baseline: `93580bc470bb0053fff6b7ac8ba1fc644b15e65c`.
+Attributed commits: `66a7f5097761b8bd9e8c3a60278b72f83195c88a` (fresh independent adversarial verification content) and `28f8baf3771c97ff6770fd32ac6134e0a108873a` (canonical report/metadata/attribution bookkeeping). Phase-entry baseline: `93580bc470bb0053fff6b7ac8ba1fc644b15e65c`.
 
-Governed Fast Green attribution (`pcae phase fast-green-attribution`): **PASS**. Baseline `93580bc470bb0053fff6b7ac8ba1fc644b15e65c` (method: `parent_of_oldest_phase_attributed_commit`), candidate `66a7f5097761b8bd9e8c3a60278b72f83195c88a`. Raw failed 370 (361 failed / 9 errors); attributable failures: **0**; pre-existing 369; environment 0; expected-artifact 1. Machine artifact: `.pcae/fast-green-attribution/adb50621e1faa897f03f7d99725cb2b002f65870317071b6472170c749512150.json`.
+Governed Fast Green attribution (`pcae phase fast-green-attribution`), run twice (pre-push and post-push, both **PASS**): post-push run is authoritative — baseline `93580bc470bb0053fff6b7ac8ba1fc644b15e65c` (method: `parent_of_oldest_phase_attributed_commit`), candidate `28f8baf3771c97ff6770fd32ac6134e0a108873a`. Raw failed 369 (360 failed / 9 errors); attributable failures: **0**; pre-existing 369; environment 0; expected-artifact 0. Machine artifact: `.pcae/fast-green-attribution/5b2a44c4b4ab2e04278ac35f2073fb041839d3b55462d553cf719d0449606a4e.json`.
 
 Governance: `pcae check` PASS; `pcae health` healthy; `pcae status coherence` coherent.
 

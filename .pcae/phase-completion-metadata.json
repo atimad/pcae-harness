@@ -1,6 +1,6 @@
 {
   "commit_attribution": "Primary-only exact-phase commit 66a7f5097761b8bd9e8c3a60278b72f83195c88a -- fresh independent adversarial verification of provisioning contract repair. Phase-entry baseline: 93580bc470bb0053fff6b7ac8ba1fc644b15e65c. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED",
-  "derived_correctness": "Primary operator independently re-read HPAC-PAWA-001 REQ-345-352 and HPAC-PAWA-HELPER-001 REQ-184-188 from the frozen contract text; independently traced the live call graph of hpac_pawa_helper_protocol.py / hpac_pawa_helper_store_adapter.py / hpac_pawa_helper_operations.py to confirm the source/contract divergence is real and reachable (not dead code); wrote and ran 14 fresh adversarial tests directly; ran the predecessor's own test files unmodified (113 passed, 1 skipped); ran the governed Fast Green attribution tool end-to-end (real baseline/candidate, not a collapsed baseline==candidate degenerate case).",
+  "derived_correctness": "Primary operator independently re-read HPAC-PAWA-001 REQ-345-352 and HPAC-PAWA-HELPER-001 REQ-184-188 from the frozen contract text; independently traced the live call graph of hpac_pawa_helper_protocol.py / hpac_pawa_helper_store_adapter.py / hpac_pawa_helper_operations.py to confirm the source/contract divergence is real and reachable (not dead code); wrote and ran 14 fresh adversarial tests directly; ran the predecessor own test files unmodified (113 passed, 1 skipped); ran the governed Fast Green attribution tool twice end-to-end (pre-push and post-push), both PASS with zero attributable regressions.",
   "execution_availability": "unavailable",
   "files_changed": [
     "docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_PROVISIONING_CONTRACT_REPAIR_IV.md",
@@ -18,25 +18,29 @@
     "pcae_health": "healthy",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "Pre-existing tasks/DONE.md bookkeeping warnings unchanged by this phase; no new defect introduced.",
-    "pcae_push_check": "to_be_verified_post_push",
-    "repository_transition_validator": "to_be_re-verified_post_finalization",
+    "pcae_push_check": "clean",
+    "repository_transition_validator": "PASS post-push identity/lifecycle checks.",
     "telegram_runtime": "Configured/enabled; governed completion transaction owns actual delivery outcome."
   },
   "internal_evidence_coherence": "Evidence doc, phase-completion-report.md, and PROJECT_STATUS.md all state the same disposition (COMPLETE -- NOT VERIFIED / BLOCKED) and the same load-bearing finding.",
   "internal_report_coherence": "No contradictory disposition strings present anywhere in this phase's own artifacts.",
   "metadata_consistency": "phase_id/phase_name match report title; to be re-checked by metadata-repair if drift is found.",
   "no_go_confirmation": "No production source change.\nNo contract change.\nNo helper admission implementation.\nNo foundation repair.\nNo Model E production change.\nNo legacy writer factory import.\nNo live protected-host mutation.\nNo real FIDO2 ceremony.\nNo real protected human approval.\nNo certification performed.\nNo PB/runtime/effect-enablement change.\nNo release/version/tag/publication action.\nNo successor phase begun.",
-  "origin_main_head_count": 1,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "66a7f5097761b8bd9e8c3a60278b72f83195c88a",
       "subject": "fresh independent adversarial verification of provisioning contract repair (N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR-IV)"
+    },
+    {
+      "hash": "28f8baf3771c97ff6770fd32ac6134e0a108873a",
+      "subject": "record canonical phase report, metadata, and Fast Green attribution artifact"
     }
   ],
   "phase_id": "149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1",
   "phase_name": "N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR-IV",
   "phase_title": "N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR-IV",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "Smallest, not begun: narrow source-only conformance-repair phase removing configure_privileged_helper/configure_presentation_mechanism from CLOSED_ADMIN_MUTATIONS in hpac_pawa_helper_protocol.py and the now-forbidden dispatch branches in hpac_pawa_helper_store_adapter.py/hpac_pawa_helper_operations.py. N-16-5 remains NOT CLOSED.",
   "report_consistency": "phase-completion-report.md matches this metadata file's disposition and evidence.",
   "status": "COMPLETE_NOT_VERIFIED_BLOCKED",
@@ -359,6 +363,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -434,10 +439,9 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
-        "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
+        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
-      "candidate_commit": "66a7f5097761b8bd9e8c3a60278b72f83195c88a",
+      "candidate_commit": "28f8baf3771c97ff6770fd32ac6134e0a108873a",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
       "excluded_environment_failures": [],
       "excluded_preexisting_failures": [
@@ -2287,14 +2291,8 @@
           "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
         }
       ],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "local_only"
-        }
-      ],
-      "generated_at": "2026-09-18T17:27:23.238751+00:00",
+      "expected_phase_artifacts": [],
+      "generated_at": "2026-09-18T18:05:57.308150+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -2592,7 +2590,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -2673,11 +2670,11 @@
       "schema_version": "fast_green_attribution.v1",
       "provenance": {
         "generated_by_command": "pcae phase fast-green-attribution",
-        "artifact_path": ".pcae/fast-green-attribution/adb50621e1faa897f03f7d99725cb2b002f65870317071b6472170c749512150.json",
-        "artifact_digest": "adb50621e1faa897f03f7d99725cb2b002f65870317071b6472170c749512150"
+        "artifact_path": ".pcae/fast-green-attribution/5b2a44c4b4ab2e04278ac35f2073fb041839d3b55462d553cf719d0449606a4e.json",
+        "artifact_digest": "5b2a44c4b4ab2e04278ac35f2073fb041839d3b55462d553cf719d0449606a4e"
       }
     },
-    "finalization_checkpoint": "66a7f5097761b8bd9e8c3a60278b72f83195c88a",
+    "finalization_checkpoint": "28f8baf3771c97ff6770fd32ac6134e0a108873a",
     "focused_tests": "tests/test_n16_5_f5_tb_prov_repair_iv.py 14/14 pass; tests/test_n16_5_f5_tb_prov_repair_contract.py + test_hpac_pawa_helper_writer_authority_contract_v2.py + test_hpac_pawa_helper_protocol_foundation.py 113 passed/1 skipped",
     "foundation_dependency": "verify_record -> _ensure_root -> _validate_production_boundary proves read AND write dependency. Safe independent configured-agent/root recognition required before successful admission reads; deferred source/contract repair, no bypass or source change.",
     "helper_admission": "All protected operations require mandatory helper-side peer, configured-agent exclusion, currentness, request/freshness/replay and operation predicates; current production omission is unchanged and NOT IMPLEMENTED.",
@@ -2686,9 +2683,9 @@
     "predecessor_finalization": "Canonical completed transaction/task/receipt and git chain verified. Entry79ea7e1;2c91cce4 contracts;7e73083a epochs;27a4d731 Fast Green checkpoint;c2bca0bd reporting;c4f452c6 final bookkeeping/entry baseline. No authority drift. Historical pending prose non-authoritative; foundation preflight never a phase.",
     "provisioning_model_selected": "Model P-D (deployment-root-mediated generation transition), realized as exact reuse of HPAC-PPA-001 section 5's already-frozen, already-independently-verified standalone-script dispatch shape. P-A/P-B/P-C explicitly compared and rejected (see docs evidence report section 2).",
     "regression_attribution": {
-      "method": "direct_construction_plus_governed_fast_green_attribution",
+      "method": "governed_fast_green_attribution_post_push",
       "baseline": "93580bc470bb0053fff6b7ac8ba1fc644b15e65c",
-      "candidate": "66a7f5097761b8bd9e8c3a60278b72f83195c88a",
+      "candidate": "28f8baf3771c97ff6770fd32ac6134e0a108873a",
       "attributable_failures": [],
       "verdict": "PASS"
     },
