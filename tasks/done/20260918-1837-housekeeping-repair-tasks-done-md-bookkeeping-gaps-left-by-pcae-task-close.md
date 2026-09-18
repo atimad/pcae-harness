@@ -10,7 +10,7 @@ Housekeeping: repair tasks/DONE.md bookkeeping gaps left by pcae task close
 
 ## Status
 
-active
+done
 
 ## Mode
 
