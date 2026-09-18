@@ -16,13 +16,7 @@
   "internal_evidence_coherence": "Source/contracts byte-identical; F1 contract defect distinguished from deferred foundation read/write implementation.",
   "internal_report_coherence": "BLOCKED verdict; no READY FOR IMPLEMENTATION claim; historical predecessor completed chain preserved.",
   "report_consistency": "Detailed IV report,113 matrix rows and161 tests support F1.",
-  "no_go_confirmation": [
-    "No source or contract changes; no identity/admission implementation or foundation repair.",
-    "No live host/deployment/protected writes, FIDO2, human approval or certification.",
-    "No caller migration, legacy retirement, release/publication, PB or runtime change.",
-    "Runtime Observed / observe / unavailable; plugins/capabilities0/0; first external effect ABSENT / UNREACHABLE.",
-    "N-16-5 OPEN; N-16-6/N-16-7 untouched; successor NOT begun."
-  ],
+  "no_go_confirmation": "No production source change.\nNo contract change.\nNo helper admission implementation.\nNo foundation repair.\nNo Model E production change.\nNo legacy writer factory fallback.\nNo second trust root.\nNo caller migration.\nNo legacy retirement.\nNo packaging or deployment change.\nNo live helper installation or generation rotation.\nNo live protected-root writes.\nNo real FIDO2 ceremony.\nNo real human approval or certification.\nNo PB or runtime change.\nNo runtime external effect.\nNo release version tag or publication work.\nNo private research repository work.\nNo N-16-5 closure.\nNo N-16-6 or N-16-7 work.\nNo successor phase begun.",
   "test_evidence_classification": "inherited_regression",
   "test_evidence_classification_rationale": "161 fresh current-IV constraint tests distinct from inherited regression suites; no production enforcement or genuine Linux execution claimed.",
   "pushed_status": "not_pushed",
