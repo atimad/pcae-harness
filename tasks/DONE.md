@@ -83,6 +83,7 @@
 
 ## Completed
 
+- N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR-IV: fresh independent adversarial verification (20260918-1855-n16-5-f-5-tb-helper-installation-provisioning-contract-repair-iv-fresh-independent-adversarial-verification)
 - Housekeeping: push final task-closure bookkeeping commit (20260918-1838-housekeeping-push-final-task-closure-bookkeeping-commit)
 - Housekeeping: push closure commit for N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR task-finish (20260918-1836-housekeeping-push-closure-commit-for-n16-5-f-5-tb-helper-installation-provisioning-contract-repair-task-finish)
 - Idle after installation identity contract IV blocked - provisioning contract repair NOT begun (20260918-1204-idle-after-installation-identity-contract-iv-blocked-provisioning-contract-repair-not-begun)
