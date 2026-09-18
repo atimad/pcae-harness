@@ -24,14 +24,19 @@
     "fast_green": "not yet run; required before finalization",
     "linux": "Real Linux SO_PEERCRED; missing identity permissive baseline; explicit same identity DENY; distinct primitive PASS; metadata read and Model E paths hit unchanged foundation boundary; no repaired admission claimed",
     "pcae_status_coherence": "coherent",
-    "repository_transition_validator": "162-test governance bundle includes validator and completion integration; live completion verdict pending; known ancestry limitation unchanged"
+    "repository_transition_validator": "validator + phase completion integration passed within 162-test governance suite; governed completion still pending; known ancestry-check limitation unchanged"
   },
   "governance_results": {
     "pcae_health": "healthy",
-    "pcae_check": "passed",
+    "pcae_check": "passed after governed session write repaired stale task binding",
     "pcae_doctor_task_memory": "pre-existing warning-only task memory entries; no unrelated cleanup",
     "pcae_push_check": "clean (nothing_to_push) at entry; final post-push validation required",
     "telegram_runtime": "loaded"
   },
-  "no_go_confirmation": "No production changes remain.\nNo contract changes occurred.\nNo foundation repair was performed.\nNo Model E redesign occurred.\nNo caller migration occurred.\nNo legacy writer retirement occurred.\nNo packaging or live helper installation occurred.\nNo live generation rotation occurred.\nNo live protected-host writes occurred.\nNo real FIDO2 ceremony occurred.\nNo real protected human approval occurred.\nNo real certification occurred.\nNo PB or runtime changes occurred.\nNo new trust root or identity vocabulary was introduced.\nNo successor phase was begun.\nNo delegated finalization, commit or push occurred.\nNo N-16-5 closure occurred; N-16-6/N-16-7 untouched."
+  "no_go_confirmation": "No production changes remain.\nNo contract changes occurred.\nNo foundation repair was performed.\nNo Model E redesign occurred.\nNo caller migration occurred.\nNo legacy writer retirement occurred.\nNo packaging or live helper installation occurred.\nNo live generation rotation occurred.\nNo live protected-host writes occurred.\nNo real FIDO2 ceremony occurred.\nNo real protected human approval occurred.\nNo real certification occurred.\nNo PB or runtime changes occurred.\nNo new trust root or identity vocabulary was introduced.\nNo successor phase was begun.\nNo delegated finalization, commit or push occurred.\nNo N-16-5 closure occurred; N-16-6/N-16-7 untouched.",
+  "phase_commits": [
+    {
+      "hash": "9be8a842ff686c59528e284c2aac44bad3b9dd05"
+    }
+  ]
 }
