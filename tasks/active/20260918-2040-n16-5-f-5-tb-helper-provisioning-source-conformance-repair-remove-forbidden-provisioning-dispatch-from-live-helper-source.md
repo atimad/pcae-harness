@@ -34,6 +34,7 @@ Narrow source-only conformance repair: remove configure_privileged_helper/config
 - CHANGELOG.md
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-metadata-repairs.log
 - .pcae/fast-green-attribution/*
 - .pcae/session.json
 - .pcae/agent-locks/latest.json
