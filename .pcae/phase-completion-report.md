@@ -106,6 +106,11 @@ DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 
 One bounded worker assisted read-only reconstruction and baseline evidence tests only. Primary independently reviewed source and every retained test, discovered/corrected the PAWA hpawi grammar detail, added dynamic currentness/read-boundary tests, performed Linux validation, removed the draft, and alone handles lifecycle/commit/push/notification.
 
+
+Finalization tooling observation: the initial attribution CLI defaulted to `local_only`, but completion's live push reconciliation uses `not_pushed`. The pending-report attempt correctly quarantined the mismatched evidence; no canonical report promotion or notification occurred. Its command nevertheless printed `Phase complete` and released the lock because `stage_pending_report` contributes to the command's logical return path even when staging fails. The primary reacquired the lock through governed bootstrap, refreshed the session, and regenerated attribution with explicit `--pushed-status not_pushed`. This is recorded as existing tooling behavior, not repaired or bypassed in this phase.
+
 ## Final lifecycle validation supplement
 
 The exact final pushed HEAD, full phase commit list, final-HEAD governed Fast Green result and byte-identical machine evidence archive, final post-push checks, canonical completion state, and notification receipt are recorded after push in `.pcae/phase-reports/helper-admission-final-validation.json`. This generated report-output supplement is part of the final report; keeping final-HEAD evidence in the generated report namespace avoids embedding a Git commit's own hash in that commit. The committed metadata contains the earlier technical evidence snapshot, explicitly superseded only for final lifecycle observations by the supplement. No source/test result is altered by that archival step.
+
+Governed attribution checkpoint `bec131195caaaa6607653a256c12c880ec70dde4`: PASS, 0 attributable regressions, 353 raw failures / 9 raw errors, 361 baseline-proven exclusions, 0 environment exclusions, 1 expected pre-push artifacts. Artifact `.pcae/fast-green-attribution/b04f99d3a7f2098c7191b0bbde9287d3c416652073b5f548aecc683c62d98226.json`. The original technical report's earlier checkpoint remains historical evidence; this entry is the newer lifecycle checkpoint.
