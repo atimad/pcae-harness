@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR**) — Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair. **COMPLETE — BLOCKED / ADMISSION NOT REPAIRED** (governed finalization in progress).
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR**) — Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair. **COMPLETE — BLOCKED / ADMISSION NOT REPAIRED**.
 
 Activated after canonical preflight from `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`. Confirmed missing helper admission; discovered HELPER REQ-021 hpahi identity cannot equal PAWA hpawi identity, while launcher/Model E use PPA hppi lineage. Genuine Linux also proves presentation metadata reads traverse foundation boundary. Narrow draft removed completely; source/contracts byte-unchanged. Evidence: `docs/PHASE_N16_5_F_5_TB_HELPER_ADMISSION_PROVENANCE_REPAIR.md`.
 
