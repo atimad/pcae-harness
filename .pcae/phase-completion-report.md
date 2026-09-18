@@ -293,3 +293,68 @@ Focused tests:41; predecessor suites13+44+40+48+24=169; helper97/1skip; broader4
 Governance check PASS; health healthy; status coherent; task-memory0errors/268baselinewarnings. Repository transition tests PASS; known historical ancestry limitation unchanged. Commit/push and notification entries below are completed through PCAE governance only.
 
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
+## Pushed validation checkpoint
+
+Governed pushed-state Fast Green: PASS,0 attributable regressions. Candidate/pushed checkpoint `27a4d731d04852918429795c99dcf9ae7116a319`; baseline `79ea7e1644535d011da6ca3869b5557b44c50737`; raw failed 352, raw errors 9. Machine provenance: `.pcae/fast-green-attribution/327983757c726604cd0ab97d1e8e3441a1a758bb81de09549183822fed1d1a8a.json`. No pre-push exception is carried into this pushed checkpoint. Remaining commits contain only repository-defined Class B finalization files; checkpoint reuse is governed by the existing attribution validator.
+
+PCAE push succeeded; checkpoint HEAD==origin/main, ahead0, working tree clean. Check PASS; health healthy; status coherent; post-push push check clean/nothing to push; report identity/trust passed. Task finish passed all acceptance checks and moved the phase task to done; a narrowly scoped idle task satisfies repository health without beginning a phase. Completed notification and final pushed HEAD are recorded by the generated finalization transaction/report, created after the enclosing bookkeeping commit. This report and metadata list all phase commits through the validation checkpoint; the enclosing self-referential report commit is identified by exact canonical phase ID in git history.
+
+### Governed commits through checkpoint
+
+- `27a4d731d04852918429795c99dcf9ae7116a319` — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: close contract task and record passing attribution checkpoint
+- `7e73083ac2b327254dc64dc9ae83b55fb30c0d01` — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: reconcile historical identity contract epochs and preserve attribution evidence
+- `2c91cce42f42ffa79d38e9b730d12f46aee1c30d` — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: reconcile protected helper installation identity contracts
+
+### Exact changed-file inventory
+
+- `.pcae/fast-green-attribution/3d6b6cccb70a071619a23b57237d84b3bb665b390dd23b3cb1fd75d8bd220905.json`
+- `.pcae/fast-green-attribution/42f12ef3bea08159fbbe17bae6be59bd2b7a81492f4c7c636971cf2818f8c881.json`
+- `.pcae/phase-completion-metadata.json`
+- `.pcae/phase-completion-report.md`
+- `CHANGELOG.md`
+- `PROJECT_STATUS.md`
+- `docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_IDENTITY_CONTRACT_REPAIR.md`
+- `docs/contracts/HPAC_PAWA_PROTECTED_HELPER_PROTOCOL_CONTRACT.md`
+- `docs/contracts/HPAC_PRODUCTION_PROTECTED_ADMIN_WRITER_ANCHOR_CONTRACT.md`
+- `docs/contracts/HPAC_PROTECTED_PRESENTATION_AUTHORITY_CONTRACT.md`
+- `docs/contracts/helper_installation_identity_constraints.json`
+- `docs/evidence/helper-installation-identity/baseline.json`
+- `docs/evidence/helper-installation-identity/bootstrap-notification.txt`
+- `docs/evidence/helper-installation-identity/contract-suite-attribution.json`
+- `docs/evidence/helper-installation-identity/fast-green-epoch-rerun.log`
+- `docs/evidence/helper-installation-identity/first-fast-green-summary.json`
+- `docs/evidence/helper-installation-identity/focused-attribution.json`
+- `docs/evidence/helper-installation-identity/focused-initial.txt`
+- `docs/evidence/helper-installation-identity/focused.txt`
+- `docs/evidence/helper-installation-identity/governance-tests.txt`
+- `docs/evidence/helper-installation-identity/helper-final.txt`
+- `docs/evidence/helper-installation-identity/identity-contract-baseline.log`
+- `docs/evidence/helper-installation-identity/identity-contract-epoch-repair-rationale.md`
+- `docs/evidence/helper-installation-identity/identity-contract-regressions-repaired.log`
+- `docs/evidence/helper-installation-identity/identity-contract-regressions.log`
+- `docs/evidence/helper-installation-identity/regressions-baseline.txt`
+- `docs/evidence/helper-installation-identity/regressions-final.txt`
+- `docs/evidence/helper-installation-identity/regressions-initial.txt`
+- `docs/evidence/helper-installation-identity/runtime.txt`
+- `tasks/DECISIONS.md`
+- `tasks/DONE.md`
+- `tasks/TODO.md`
+- `tasks/active/20260918-1014-idle-after-helper-installation-identity-contract-repair-fresh-iv-not-begun.md`
+- `tasks/done/20260918-0205-idle-post-helper-admission-provenance-repair-blocked-helper-installation-identity-contract-repair-recommended-not-begun.md`
+- `tasks/done/20260918-0918-n16-5-f-5-tb-helper-installation-identity-contract-repair.md`
+- `tests/test_hpac_pawa_helper_writer_authority_contract_v2.py`
+- `tests/test_n16_5_f_5_tb_helper_installation_identity_contract_repair.py`
+- `tests/test_n16_5_f_5_tb_helper_iv_r.py`
+- `tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair.py`
+- `tests/test_n16_5_f_5_tb_helper_writer_authority_contract_repair_iv.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_2_protected_presentation_real_assurance_iv.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_1_n16_5_f_5_ppa_contract_iv.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_1_n16_5_f_5_ppa_contract.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_1_n16_5_f_5_tb_contract_iv.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_1r_1r_2r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1r_1_1_1_1_n16_5_f_5_tb_contract.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_n16_5_f5b1_impl.py`
+- `tests/test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_5r_2_n16_5_h3_pawa13_v1_3_contract_reconciliation.py`
+
+Report completeness: technical requirements complete; canonical completion/push/notification verdict is the generated final phase report and transaction. No production code or live host changed; no successor begun.
