@@ -31,6 +31,11 @@ Fresh independent adversarial IV of N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONIN
 - CHANGELOG.md
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- .pcae/fast-green-attribution/*
+- .pcae/session.json
+- .pcae/agent-locks/latest.json
+- .pcae/handoffs/*
+- .pcae/architecture-history.json
 - tasks/active/*
 - tasks/done/*
 
