@@ -5554,3 +5554,10 @@ Distinct hpahi/hpawi/hppi logical lineages with current PAWA parent bindings; cl
 ## Identity contract repair validation and closure
 
 Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1`: Model I-B frozen, no source changes. Governed Fast Green on7e73083 against79ea7e1 reports0 attributable regressions; first failed candidate retained. Historical version/count/hash assertions are epoch-scoped with evidence, not removed. Governed task finish passed every acceptance check; phase task moved to done. Idle task exists only because repository health requires an active task contract; it authorizes finalization bookkeeping, not any successor. Predecessor DONE narrative restored after updater dropped its appended section.
+
+
+## 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — independent identity contract IV
+
+Model I-B runtime graph is directionally sound, but F1 provisioning/executor/provenance and sole-current-lineage rotation contradiction blocks implementation readiness. No contract/source repair in IV. PAWA328/311/342 versus HELPER023/024/175 and PAWA343 require a narrow contract successor. Full report and machine matrices in docs/evidence/helper-installation-identity-iv. Historical version changes independently justified. Successor 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR) NOT begun. Runtime Observed / observe / unavailable; N-16-5 OPEN.
+
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED

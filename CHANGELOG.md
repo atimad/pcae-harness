@@ -1754,6 +1754,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle after helper installation identity contract repair - fresh IV not begun to N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: post-HELPER-ADMISSION-PROVENANCE-REPAIR blocked; helper installation identity contract repair recommended, not begun to N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Protected Helper Admission Provenance and Configured-Agent Exclusion Production Repair (N16-5-F-5-TB-HELPER-ADMISSION-PROVENANCE-REPAIR) to Idle: post-HELPER-ADMISSION-PROVENANCE-REPAIR blocked; helper installation identity contract repair recommended, not begun; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1 N16-5-F-5-PPA-CONTRACT to Idle post-N16-5-F-5-PPA-CONTRACT (COMPLETE / CONTRACT FROZEN); dedicated IV N16-5-F-5-PPA-CONTRACT-IV next; N-16-5 NOT CLOSED; session refreshed and governance continuity revalidated.
@@ -4043,3 +4044,8 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 - Installation identity contracts reconciled: distinct PAWA/helper/PPA lineages, typed parent/currentness bindings, closed existing executable profiles; implementation remains blocked pending fresh IV.
 
 - Completed identity contract repair technical work and governed task acceptance: HELPER4.0 / PAWA3.0 / PPA2.1,41 fresh tests and0 attributable Fast Green regressions; fresh independent IV remains not begun. Production/runtime/live-host behavior unchanged.
+
+
+### N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV — independent contract IV
+
+Added161 fresh IV cases,113 matrix rows and full normative inventory. Found F1 helper registration/provisioning trust-bootstrap and rotation contradiction; contract set NOT VERIFIED / BLOCKED. No source or contract changes. Recommended contract-only successor 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 NOT begun.

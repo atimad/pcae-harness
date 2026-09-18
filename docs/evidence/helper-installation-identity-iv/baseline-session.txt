@@ -1,0 +1,71 @@
+........................................................................ [ 42%]
+........................................................................ [ 84%]
+..........F........F.FF...                                               [100%]
+=================================== FAILURES ===================================
+___________ test_recommended_next_phase_matches_real_project_status ____________
+
+    def test_recommended_next_phase_matches_real_project_status() -> None:
+        """The real repo's own PROJECT_STATUS.md must parse cleanly -- this is
+        the exact sentence format every 108D+ phase has used."""
+        root = HarnessPath(REPO_ROOT)
+        pack = build_context_pack(root)
+        recommended = pack.roadmap_summary["recommended_next_phase"]
+>       recommended_phase_id = _real_recommended_next_phase_id()
+
+tests/test_bootstrap_todo_consistency.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _real_recommended_next_phase_id() -> str:
+        root = HarnessPath(REPO_ROOT)
+        pack = build_context_pack(root)
+        recommended = pack.roadmap_summary["recommended_next_phase"]
+>       assert recommended is not None
+E       assert None is not None
+
+tests/test_bootstrap_todo_consistency.py:39: AssertionError
+_______________ test_real_todo_no_longer_marks_90_series_as_next _______________
+
+    def test_real_todo_no_longer_marks_90_series_as_next() -> None:
+        text = (REPO_ROOT / "tasks" / "TODO.md").read_text(encoding="utf-8")
+>       recommended_phase_id = _real_recommended_next_phase_id()
+
+tests/test_bootstrap_todo_consistency.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _real_recommended_next_phase_id() -> str:
+        root = HarnessPath(REPO_ROOT)
+        pack = build_context_pack(root)
+        recommended = pack.roadmap_summary["recommended_next_phase"]
+>       assert recommended is not None
+E       assert None is not None
+
+tests/test_bootstrap_todo_consistency.py:39: AssertionError
+________ test_real_todo_current_roadmap_lists_recommended_phase_as_next ________
+
+    def test_real_todo_current_roadmap_lists_recommended_phase_as_next() -> None:
+        text = (REPO_ROOT / "tasks" / "TODO.md").read_text(encoding="utf-8")
+>       recommended_phase_id = _real_recommended_next_phase_id()
+
+tests/test_bootstrap_todo_consistency.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _real_recommended_next_phase_id() -> str:
+        root = HarnessPath(REPO_ROOT)
+        pack = build_context_pack(root)
+        recommended = pack.roadmap_summary["recommended_next_phase"]
+>       assert recommended is not None
+E       assert None is not None
+
+tests/test_bootstrap_todo_consistency.py:39: AssertionError
+_________ test_real_todo_not_flagged_stale_against_real_project_status _________
+
+    def test_real_todo_not_flagged_stale_against_real_project_status() -> None:
+        root = HarnessPath(REPO_ROOT)
+        pack = build_context_pack(root)
+        status = pack.roadmap_summary["todo_status"]
+        assert status["todo_next_phase"] is not None
+>       assert status["stale"] is False
+E       assert True is False
+
+tests/test_bootstrap_todo_consistency.py:299: AssertionError
+4 failed, 166 passed in 24.03s

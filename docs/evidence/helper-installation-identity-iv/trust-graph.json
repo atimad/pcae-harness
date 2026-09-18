@@ -1,0 +1,63 @@
+{
+  "runtime_edges": [
+    [
+      "root_OS",
+      "PAWA_records"
+    ],
+    [
+      "PAWA_records",
+      "agent_resolution"
+    ],
+    [
+      "PAWA_records",
+      "component_records"
+    ],
+    [
+      "component_records",
+      "verified_execution"
+    ],
+    [
+      "agent_resolution",
+      "admission"
+    ],
+    [
+      "verified_execution",
+      "admission"
+    ],
+    [
+      "kernel_peer",
+      "admission"
+    ],
+    [
+      "admission",
+      "scoped_operation"
+    ]
+  ],
+  "bootstrap_edges": [
+    [
+      "H_registration",
+      "registered_H_admission"
+    ],
+    [
+      "registered_H_admission",
+      "H_registration"
+    ]
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "verdict": "BLOCKING",
+      "requirements": [
+        "PAWA311",
+        "PAWA327",
+        "PAWA328",
+        "PAWA342",
+        "PAWA343",
+        "HELPER023",
+        "HELPER024",
+        "HELPER175"
+      ],
+      "reproduction": "root and PAWA valid; no H registration/anchor; initial registration required; PAWA328 requires registered H executor, unavailable. P profile cannot admin. Direct external mutation conflicts with328 and lacks reconciled writer/provenance path. Sole H rotate conflicts with175 self-lineage prohibition."
+    }
+  ]
+}

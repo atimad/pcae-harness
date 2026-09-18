@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` — N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV. **ACTIVE — IV VERDICT NOT VERIFIED / BLOCKED (F1); governed finalization in progress**. Baseline `c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4`; no production or contract mutation. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+
+Finding F1: PAWA328 requires registered helper execution to create registration, while HELPER175 mandates external provisioning and prohibits active-lineage self-rotation. Contract set NOT READY FOR IMPLEMENTATION. Full evidence: `docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_IDENTITY_CONTRACT_REPAIR_IV.md`.
+
+Recommended next phase: 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 — N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR (NOT begun; contract repair only, then fresh IV).
+
+## Previous Completed Identity Contract Repair
+
+
 Phase `149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1` (alias **N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR**) — Protected Helper Installation Identity, PAWA Identity, PPA Launch Identity, and Configured-Agent Exclusion Contract Reconciliation. **COMPLETE — CONTRACT REPAIRED / FROZEN — PENDING INDEPENDENT VERIFICATION**.
 
 Preflight passes at `79ea7e1644535d011da6ca3869b5557b44c50737`: main clean/synchronized, no active governed phase, predecessor canonical completion confirmed. Its pending-completion sentence is stale pre-finalization validation prose; completed transaction/report/notification are authoritative. CPIPC direct child normalized and unused. No production changes authorized. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.

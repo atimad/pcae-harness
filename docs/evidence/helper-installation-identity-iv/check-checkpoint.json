@@ -1,0 +1,65 @@
+{
+  "active_task": {
+    "id": "20260918-1127-n16-5-f-5-tb-helper-installation-identity-contract-repair-iv",
+    "title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Independent Adversarial Verification of Model I-B Installation Identity and Helper Admission Contracts (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV)"
+  },
+  "agent_lock": {
+    "age_seconds": 905,
+    "agent_id": "codex-local",
+    "locked": true,
+    "stale": false,
+    "stale_after_seconds": 14400
+  },
+  "architecture_zones_touched": {
+    "docs": 8,
+    "tasks": 4,
+    "tests": 1
+  },
+  "dependency_warnings": [],
+  "enforcement_mode": "strict",
+  "git_status": {
+    "changed_file_count": 9,
+    "changed_files": [
+      {
+        "path": "CHANGELOG.md",
+        "status": "M"
+      },
+      {
+        "path": "PROJECT_STATUS.md",
+        "status": "M"
+      },
+      {
+        "path": "tasks/DONE.md",
+        "status": "M"
+      },
+      {
+        "path": "tasks/active/20260918-1014-idle-after-helper-installation-identity-contract-repair-fresh-iv-not-begun.md",
+        "status": "D"
+      },
+      {
+        "path": "docs/PHASE_N16_5_F_5_TB_HELPER_INSTALLATION_IDENTITY_CONTRACT_REPAIR_IV.md",
+        "status": "??"
+      },
+      {
+        "path": "docs/evidence/helper-installation-identity-iv",
+        "status": "??"
+      },
+      {
+        "path": "tasks/active/20260918-1127-n16-5-f-5-tb-helper-installation-identity-contract-repair-iv.md",
+        "status": "??"
+      },
+      {
+        "path": "tasks/done/20260918-1014-idle-after-helper-installation-identity-contract-repair-fresh-iv-not-begun.md",
+        "status": "??"
+      },
+      {
+        "path": "tests/test_n16_5_f_5_tb_helper_installation_identity_contract_repair_iv.py",
+        "status": "??"
+      }
+    ]
+  },
+  "session_continuity": "verified",
+  "status": "passed",
+  "violations": [],
+  "warnings": []
+}

@@ -1,0 +1,1191 @@
+........................................s............................... [  4%]
+.......................................................................F [  8%]
+F....................................................................... [ 13%]
+....................................FF.................................. [ 17%]
+........................................................................ [ 21%]
+........................................................................ [ 26%]
+......................................s..............F.........F........ [ 30%]
+........................................................................ [ 34%]
+........................................................................ [ 39%]
+........................................................................ [ 43%]
+.........................FF............................................. [ 47%]
+........................................................................ [ 52%]
+........................................................................ [ 56%]
+........................FF.............................................. [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 69%]
+........................................................................ [ 74%]
+...............................................................F........ [ 78%]
+...F..FF....................F........................................... [ 82%]
+........................................................................ [ 87%]
+..............................F......................................... [ 91%]
+................FF...................................................... [ 95%]
+......................................................................   [100%]
+=================================== FAILURES ===================================
+_______ test_136t_wheel_contains_group10_schemas_no_group9_or_11_schema ________
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136t_wheel_contains_group0')
+
+    @pytest.mark.slow
+    def test_136t_wheel_contains_group10_schemas_no_group9_or_11_schema(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+>       subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+tests/test_cltr_cutover_136t_notification_marker_receipt_binding_schema.py:1067: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136t_wheel_contains_group0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-wq2q7n9y.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-wq2q7n9y.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136t_wheel_contains_group0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+___ test_136t_installed_wheel_validates_group10_fixtures_outside_repository ____
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136t_installed_wheel_vali0')
+
+    @pytest.mark.slow
+    def test_136t_installed_wheel_validates_group10_fixtures_outside_repository(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+>       subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+tests/test_cltr_cutover_136t_notification_marker_receipt_binding_schema.py:1091: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136t_installed_wheel_vali0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-d270hll6.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-d270hll6.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136t_installed_wheel_vali0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+______ test_136aq_wheel_build_contains_group_9_module_and_no_later_family ______
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136aq_wheel_build_contain0')
+
+    @pytest.mark.slow
+    def test_136aq_wheel_build_contains_group_9_module_and_no_later_family(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+>       subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py:1053: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136aq_wheel_build_contain0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-4ny39vmg.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-4ny39vmg.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136aq_wheel_build_contain0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+___ test_136aq_isolated_install_all_fourteen_families_import_and_round_trip ____
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136aq_isolated_install_al0')
+
+    @pytest.mark.slow
+    def test_136aq_isolated_install_all_fourteen_families_import_and_round_trip(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+>       subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py:1072: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136aq_isolated_install_al0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-c2_04f2a.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-c2_04f2a.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136aq_isolated_install_al0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+_ test_136u_no_runtime_code_references_group10_families_outside_schema_resources _
+
+    def test_136u_no_runtime_code_references_group10_families_outside_schema_resources():
+        # Phases 136AL-136AQ legitimately implement the Group 10 families
+        # (NotificationAuthorityBinding, MarkerAuthorityBinding,
+        # FinalizationReceiptAuthorityBinding) in
+        # src/pcae/cltr/authority/bindings.py and their shared enums in
+        # src/pcae/cltr/authority/enums.py. Narrowed here, matching the same
+        # disclosed-amendment precedent this module's own docstring cites for
+        # 136N/136R: this test's original intent -- proving no runtime code
+        # references these families before they are legitimately implemented --
+        # is preserved by excluding exactly those two authorized files instead
+        # of the whole src/pcae tree.
+        tracked = subprocess.run(
+            ["git", "grep", "-l", "-e", "notification_authority_binding", "-e", "marker_authority_binding",
+             "-e", "receipt_authority_binding", "--", "src/pcae"],
+            cwd=REPO_ROOT, capture_output=True, text=True,
+        )
+        authorized_files = (
+            "src/pcae/cltr/authority/bindings.py",
+            "src/pcae/cltr/authority/enums.py",
+        )
+        hits = [
+            line for line in tracked.stdout.splitlines()
+            if "schema_resources" not in line and line not in authorized_files
+        ]
+>       assert hits == [], hits
+E       AssertionError: ['src/pcae/cltr/authority_inspection.py']
+E       assert ['src/pcae/cl...nspection.py'] == []
+E         
+E         Left contains one more item: 'src/pcae/cltr/authority_inspection.py'
+E         Use -v to get more diff
+
+tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py:1094: AssertionError
+_ TestFinalizePendingPush.test_pending_push_writes_canonical_latest_non_authoritative _
+
+self = <test_phase_137i1_finalization_ordering_deadlock.TestFinalizePendingPush object at 0x10c463820>
+
+    def test_pending_push_writes_canonical_latest_non_authoritative(self):
+        with tempfile.TemporaryDirectory() as td:
+            reports_dir = Path(td)
+            fin = finalize_phase_report(
+                phase_id="900P", phase_name="Pending Test", status="completed",
+                summary="Pending push staging.", reports_dir=reports_dir,
+                pushed_status="not_pushed", origin_main_head_count=5,
+                gate=self._gate(),
+                allow_pending_push=True,
+                **_complete_except_push_kwargs(),
+            )
+>           assert fin.get("pending_push") is True
+E           assert None is True
+E            +  where None = <built-in method get of dict object at 0x10d3354c0>('pending_push')
+E            +    where <built-in method get of dict object at 0x10d3354c0> = {'blocked': True, 'blockers': ["pushed_status is 'not_pushed', not pushed/clean", 'origin/main..HEAD is 5, not 0', "re...'missing trust fields: pushed_status, origin_main_head'], 'notification_error': None, 'notification_kind': 'none', ...}.get
+
+tests/test_phase_137i1_finalization_ordering_deadlock.py:116: AssertionError
+______ test_136am_wheel_build_contains_group_7_module_and_no_later_family ______
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136am_wheel_build_contain0')
+
+    @pytest.mark.slow
+    def test_136am_wheel_build_contains_group_7_module_and_no_later_family(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+>       subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136am_notification_authority_binding_independent.py:1074: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136am_wheel_build_contain0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-0sw7bok8.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-0sw7bok8.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136am_wheel_build_contain0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+____ test_136am_isolated_install_all_twelve_families_import_and_round_trip _____
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136am_isolated_install_al0')
+
+    @pytest.mark.slow
+    def test_136am_isolated_install_all_twelve_families_import_and_round_trip(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+>       subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136am_notification_authority_binding_independent.py:1093: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136am_isolated_install_al0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-jzzo0j8l.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-jzzo0j8l.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136am_isolated_install_al0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+__________ test_136al_wheel_contains_bindings_module_no_later_family ___________
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136al_wheel_contains_bind0')
+
+    @pytest.mark.slow
+    def test_136al_wheel_contains_bindings_module_no_later_family(tmp_path: Path):
+        import subprocess as _subprocess
+    
+        dist_dir = tmp_path / "dist"
+>       _subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136al_notification_authority_binding.py:770: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136al_wheel_contains_bind0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-8ekgisdo.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-8ekgisdo.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136al_wheel_contains_bind0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+__________________ test_136al_sdist_includes_bindings_module ___________________
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136al_sdist_includes_bind0')
+
+    @pytest.mark.slow
+    def test_136al_sdist_includes_bindings_module(tmp_path: Path):
+        import subprocess as _subprocess
+    
+        dist_dir = tmp_path / "dist"
+>       _subprocess.run(
+            [sys.executable, "-m", "build", "--sdist", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136al_notification_authority_binding.py:792: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--sdist', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136al_sdist_includes_bind0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-2hz20vqh.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-2hz20vqh.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--sdist', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136al_sdist_includes_bind0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+_ TestEndToEndTransaction.test_gate_passing_report_completes_all_stages_and_invokes_callback _
+
+self = <test_finalization_transaction_134e10.TestEndToEndTransaction object at 0x10becfe50>
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_gate_passing_report_compl0')
+
+    def test_gate_passing_report_completes_all_stages_and_invokes_callback(self, tmp_path):
+        report, gate = _certified_report()
+        calls: list = []
+        result = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(report, calls),
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+        assert isinstance(result, TransactionResult)
+>       assert result.status == "completed"
+E       AssertionError: assert 'completed_re...rt_incomplete' == 'completed'
+E         
+E         - completed
+E         + completed_receipt_best_effort_incomplete
+
+tests/test_finalization_transaction_134e10.py:191: AssertionError
+_ TestPrePromotionGatingIsAuthoritative.test_receipt_creation_happens_only_after_promote_and_dispatch_returns _
+
+self = <test_finalization_transaction_134e10.TestPrePromotionGatingIsAuthoritative object at 0x10af86df0>
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_receipt_creation_happens_0')
+
+    def test_receipt_creation_happens_only_after_promote_and_dispatch_returns(self, tmp_path):
+        """Ordering proof: the receipt must be created strictly after the
+        callback returns (it needs the callback's real dispatch outcome),
+        never before or concurrently."""
+        report, gate = _certified_report(phase_id="999X.1-ordering-test")
+        order: list[str] = []
+    
+        def _callback() -> dict:
+            order.append("promote_and_dispatch")
+            report.notification_result = {"success": True}
+            return {"report": report}
+    
+        result = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=gate,
+            promote_and_dispatch=_callback,
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+>       assert result.receipt_logical_delivery_id is not None
+E       AssertionError: assert None is not None
+E        +  where None = TransactionResult(phase_id='999X.1-ordering-test', status='completed_receipt_best_effort_incomplete', steps={'pre_prom...ion_availability': 'unavailable', 'freshness': 'fresh', 'limitations': [], 'conflicts': [], 'source_provenance': {}})}).receipt_logical_delivery_id
+
+tests/test_finalization_transaction_134e10.py:418: AssertionError
+_ TestResumability.test_second_call_for_same_certified_content_does_not_reinvoke_callback _
+
+self = <test_finalization_transaction_134e10.TestResumability object at 0x10be81f40>
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_second_call_for_same_cert0')
+
+    def test_second_call_for_same_certified_content_does_not_reinvoke_callback(self, tmp_path):
+        report, gate = _certified_report(phase_id="999X.1-resume-test")
+        txn_root = tmp_path / "txns"
+        rcpt_root = tmp_path / "receipts"
+        calls: list = []
+    
+        first = run_finalization_transaction(
+            phase_id=report.phase_id, phase_name=report.phase_name,
+            report=report, gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(report, calls),
+            transaction_root=txn_root, receipt_root=rcpt_root,
+        )
+>       assert first.status == "completed"
+E       AssertionError: assert 'completed_re...rt_incomplete' == 'completed'
+E         
+E         - completed
+E         + completed_receipt_best_effort_incomplete
+
+tests/test_finalization_transaction_134e10.py:488: AssertionError
+_ TestResumability.test_distinct_certified_content_does_not_collide_with_prior_completion _
+
+self = <test_finalization_transaction_134e10.TestResumability object at 0x10af86490>
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_distinct_certified_conten0')
+
+    def test_distinct_certified_content_does_not_collide_with_prior_completion(self, tmp_path):
+        """A genuinely different certified report for the same phase_id
+        (e.g. a corrective re-run) produces its own transaction record and
+        invokes its own callback -- it must not be silently treated as the
+        already-completed one."""
+        txn_root = tmp_path / "txns"
+        rcpt_root = tmp_path / "receipts"
+        report_a, gate_a = _certified_report(
+            phase_id="999X.1-distinct-test", summary="First summary."
+        )
+        calls_a: list = []
+        result_a = run_finalization_transaction(
+            phase_id=report_a.phase_id, phase_name=report_a.phase_name,
+            report=report_a, gate=gate_a,
+            promote_and_dispatch=_successful_promote_and_dispatch(report_a, calls_a),
+            transaction_root=txn_root, receipt_root=rcpt_root,
+        )
+    
+        report_b, gate_b = _certified_report(
+            phase_id="999X.1-distinct-test", summary="Second, different summary."
+        )
+        calls_b: list = []
+        result_b = run_finalization_transaction(
+            phase_id=report_b.phase_id, phase_name=report_b.phase_name,
+            report=report_b, gate=gate_b,
+            promote_and_dispatch=_successful_promote_and_dispatch(report_b, calls_b),
+            transaction_root=txn_root, receipt_root=rcpt_root,
+        )
+        assert calls_a == [True]
+        assert calls_b == [True]  # distinct content -> its own callback invocation
+>       assert result_b.status == "completed"
+E       AssertionError: assert 'completed_re...rt_incomplete' == 'completed'
+E         
+E         - completed
+E         + completed_receipt_best_effort_incomplete
+
+tests/test_finalization_transaction_134e10.py:540: AssertionError
+_ TestExternalDeliveryIsolation.test_transaction_delivery_step_uses_recording_adapter_only _
+
+self = <test_finalization_transaction_134e10.TestExternalDeliveryIsolation object at 0x10beaaa00>
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_transaction_delivery_step0')
+
+    def test_transaction_delivery_step_uses_recording_adapter_only(self, tmp_path):
+        report, gate = _certified_report(phase_id="999X.1-isolation-test")
+        calls: list = []
+        result = run_finalization_transaction(
+            phase_id=report.phase_id, phase_name=report.phase_name,
+            report=report, gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(report, calls),
+            transaction_root=tmp_path / "txns", receipt_root=tmp_path / "receipts",
+        )
+>       assert result.status == "completed"
+E       AssertionError: assert 'completed_re...rt_incomplete' == 'completed'
+E         
+E         - completed
+E         + completed_receipt_best_effort_incomplete
+
+tests/test_finalization_transaction_134e10.py:673: AssertionError
+_ TestPhase128B1NotificationDispatchReliabilityRepair.test_public_reconciliation_requires_report_marker_checkpoint_and_receipt _
+
+self = <test_phase_reports.TestPhase128B1NotificationDispatchReliabilityRepair object at 0x10ccdd700>
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_public_reconciliation_req0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d4a0b50>
+capsys = <_pytest.capture.CaptureFixture object at 0x10d4a0c10>
+
+    def test_public_reconciliation_requires_report_marker_checkpoint_and_receipt(
+        self, tmp_path, monkeypatch, capsys,
+    ):
+        from argparse import Namespace
+        from pcae.commands.phase_reports import (
+            run_phase_report_create,
+            run_phase_report_reconcile,
+        )
+    
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        args = self._complete_args(tmp_path)
+        assert run_phase_report_create(args) == 0
+        capsys.readouterr()
+    
+        rc = run_phase_report_reconcile(Namespace(
+            phase_id="128B1-T",
+            reports_dir=args.reports_dir,
+            transaction_root=str(tmp_path / ".pcae" / "finalization-transactions"),
+            marker_path=str(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"),
+            json=True,
+        ))
+        payload = json.loads(capsys.readouterr().out)
+>       assert rc == 0
+E       assert 1 == 0
+
+/private/tmp/pcae-identity-iv-baseline/tests/test_phase_reports.py:2437: AssertionError
+__________ test_136ap_wheel_contains_bindings_module_no_later_family ___________
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136ap_wheel_contains_bind0')
+
+    @pytest.mark.slow
+    def test_136ap_wheel_contains_bindings_module_no_later_family(tmp_path: Path):
+        import subprocess as _subprocess
+    
+        dist_dir = tmp_path / "dist"
+>       _subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py:729: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136ap_wheel_contains_bind0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-avr786hq.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-avr786hq.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--wheel', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136ap_wheel_contains_bind0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+__________________ test_136ap_sdist_includes_bindings_module ___________________
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136ap_sdist_includes_bind0')
+
+    @pytest.mark.slow
+    def test_136ap_sdist_includes_bindings_module(tmp_path: Path):
+        import subprocess as _subprocess
+    
+        dist_dir = tmp_path / "dist"
+>       _subprocess.run(
+            [sys.executable, "-m", "build", "--sdist", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+
+tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py:751: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = True, timeout = None, check = True
+popenargs = (['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--sdist', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136ap_sdist_includes_bind0/dist', ...],)
+kwargs = {'stderr': -1, 'stdout': -1, 'text': True}
+process = <Popen: returncode: 1 args: ['/Users/atilamadai/repos/pcae-harness/.venv/bin...>
+stdout = '\nTraceback (most recent call last):\n  File "/Users/atilamadai/repos/pcae-harness/.venv/lib/python3.9/site-packages/.../folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-9zfayvz7.txt\']\' returned non-zero exit status 1.\n\n'
+stderr = "* Creating isolated environment: venv+pip...\n* Installing packages in isolated environment:\n  - hatchling==1.32.0\n.../var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/build-requirements-9zfayvz7.txt']' returned non-zero exit status 1.\n"
+retcode = 1
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout is given, and the process takes too long, a TimeoutExpired
+        exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['/Users/atilamadai/repos/pcae-harness/.venv/bin/python', '-m', 'build', '--sdist', '--outdir', '/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8566/test_136ap_sdist_includes_bind0/dist', '/private/tmp/pcae-identity-iv-baseline']' returned non-zero exit status 1.
+
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py:528: CalledProcessError
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_cltr_cutover_136t_notification_marker_receipt_binding_schema.py:255: got empty parameter set for (relative_path)
+SKIPPED [1] tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py:969: positive case covered elsewhere
+18 failed, 1634 passed, 2 skipped in 63.27s (0:01:03)

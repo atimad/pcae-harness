@@ -1,0 +1,185 @@
+........................................s............................... [  4%]
+........................................................................ [  8%]
+........................................................................ [ 13%]
+....................................F................................... [ 17%]
+........................................................................ [ 21%]
+........................................................................ [ 26%]
+......................................s..............F.........F........ [ 30%]
+........................................................................ [ 34%]
+........................................................................ [ 39%]
+........................................................................ [ 43%]
+.........................F.............................................. [ 47%]
+........................................................................ [ 52%]
+........................................................................ [ 56%]
+........................F............................................... [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 69%]
+........................................................................ [ 74%]
+........................................................................ [ 78%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+........................................................................ [ 91%]
+................F....................................................... [ 95%]
+......................................................................   [100%]
+=================================== FAILURES ===================================
+______ test_136aq_wheel_build_contains_group_9_module_and_no_later_family ______
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8561/test_136aq_wheel_build_contain0')
+
+    @pytest.mark.slow
+    def test_136aq_wheel_build_contains_group_9_module_and_no_later_family(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+        subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+        wheels = list(dist_dir.glob("*.whl"))
+        assert len(wheels) == 1
+    
+        import zipfile
+    
+        with zipfile.ZipFile(wheels[0]) as archive:
+            names = archive.namelist()
+        assert "pcae/cltr/authority/bindings.py" in names
+        for forbidden in ("compatibility_quarantine",):
+>           assert f"pcae/cltr/authority/{forbidden}.py" not in names
+E           AssertionError: assert 'pcae/cltr/authority/compatibility_quarantine.py' not in ['pcae/__init__.py', 'pcae/__main__.py', 'pcae/artifact_metadata.py', 'pcae/cli.py', 'pcae/hook_bypass.py', 'pcae/lifecycle.py', ...]
+
+tests/test_cltr_authority_136aq_finalization_receipt_authority_binding_independent.py:1066: AssertionError
+_ test_136u_no_runtime_code_references_group10_families_outside_schema_resources _
+
+    def test_136u_no_runtime_code_references_group10_families_outside_schema_resources():
+        # Phases 136AL-136AQ legitimately implement the Group 10 families
+        # (NotificationAuthorityBinding, MarkerAuthorityBinding,
+        # FinalizationReceiptAuthorityBinding) in
+        # src/pcae/cltr/authority/bindings.py and their shared enums in
+        # src/pcae/cltr/authority/enums.py. Narrowed here, matching the same
+        # disclosed-amendment precedent this module's own docstring cites for
+        # 136N/136R: this test's original intent -- proving no runtime code
+        # references these families before they are legitimately implemented --
+        # is preserved by excluding exactly those two authorized files instead
+        # of the whole src/pcae tree.
+        tracked = subprocess.run(
+            ["git", "grep", "-l", "-e", "notification_authority_binding", "-e", "marker_authority_binding",
+             "-e", "receipt_authority_binding", "--", "src/pcae"],
+            cwd=REPO_ROOT, capture_output=True, text=True,
+        )
+        authorized_files = (
+            "src/pcae/cltr/authority/bindings.py",
+            "src/pcae/cltr/authority/enums.py",
+        )
+        hits = [
+            line for line in tracked.stdout.splitlines()
+            if "schema_resources" not in line and line not in authorized_files
+        ]
+>       assert hits == [], hits
+E       AssertionError: ['src/pcae/cltr/authority_inspection.py']
+E       assert ['src/pcae/cl...nspection.py'] == []
+E         
+E         Left contains one more item: 'src/pcae/cltr/authority_inspection.py'
+E         Use -v to get more diff
+
+tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py:1094: AssertionError
+_ TestFinalizePendingPush.test_pending_push_writes_canonical_latest_non_authoritative _
+
+self = <test_phase_137i1_finalization_ordering_deadlock.TestFinalizePendingPush object at 0x10a21ac10>
+
+    def test_pending_push_writes_canonical_latest_non_authoritative(self):
+        with tempfile.TemporaryDirectory() as td:
+            reports_dir = Path(td)
+            fin = finalize_phase_report(
+                phase_id="900P", phase_name="Pending Test", status="completed",
+                summary="Pending push staging.", reports_dir=reports_dir,
+                pushed_status="not_pushed", origin_main_head_count=5,
+                gate=self._gate(),
+                allow_pending_push=True,
+                **_complete_except_push_kwargs(),
+            )
+>           assert fin.get("pending_push") is True
+E           assert None is True
+E            +  where None = <built-in method get of dict object at 0x10be35000>('pending_push')
+E            +    where <built-in method get of dict object at 0x10be35000> = {'blocked': True, 'blockers': ["pushed_status is 'not_pushed', not pushed/clean", 'origin/main..HEAD is 5, not 0', "re...'missing trust fields: pushed_status, origin_main_head'], 'notification_error': None, 'notification_kind': 'none', ...}.get
+
+tests/test_phase_137i1_finalization_ordering_deadlock.py:116: AssertionError
+______ test_136am_wheel_build_contains_group_7_module_and_no_later_family ______
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8561/test_136am_wheel_build_contain0')
+
+    @pytest.mark.slow
+    def test_136am_wheel_build_contains_group_7_module_and_no_later_family(tmp_path: Path):
+        dist_dir = tmp_path / "dist"
+        subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+        wheels = list(dist_dir.glob("*.whl"))
+        assert len(wheels) == 1
+    
+        import zipfile
+    
+        with zipfile.ZipFile(wheels[0]) as archive:
+            names = archive.namelist()
+        assert "pcae/cltr/authority/bindings.py" in names
+        for forbidden in ("compatibility_quarantine",):
+>           assert f"pcae/cltr/authority/{forbidden}.py" not in names
+E           AssertionError: assert 'pcae/cltr/authority/compatibility_quarantine.py' not in ['pcae/__init__.py', 'pcae/__main__.py', 'pcae/artifact_metadata.py', 'pcae/cli.py', 'pcae/hook_bypass.py', 'pcae/lifecycle.py', ...]
+
+tests/test_cltr_authority_136am_notification_authority_binding_independent.py:1087: AssertionError
+__________ test_136al_wheel_contains_bindings_module_no_later_family ___________
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8561/test_136al_wheel_contains_bind0')
+
+    @pytest.mark.slow
+    def test_136al_wheel_contains_bindings_module_no_later_family(tmp_path: Path):
+        import subprocess as _subprocess
+    
+        dist_dir = tmp_path / "dist"
+        _subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+        wheels = list(dist_dir.glob("*.whl"))
+        assert len(wheels) == 1, f"expected exactly one wheel, found {wheels}"
+    
+        import zipfile
+    
+        with zipfile.ZipFile(wheels[0]) as archive:
+            names = archive.namelist()
+    
+        assert "pcae/cltr/authority/bindings.py" in names
+        for forbidden in ("compatibility_quarantine",):
+>           assert f"pcae/cltr/authority/{forbidden}.py" not in names
+E           AssertionError: assert 'pcae/cltr/authority/compatibility_quarantine.py' not in ['pcae/__init__.py', 'pcae/__main__.py', 'pcae/artifact_metadata.py', 'pcae/cli.py', 'pcae/hook_bypass.py', 'pcae/lifecycle.py', ...]
+
+tests/test_cltr_authority_136al_notification_authority_binding.py:784: AssertionError
+__________ test_136ap_wheel_contains_bindings_module_no_later_family ___________
+
+tmp_path = PosixPath('/private/var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pytest-of-atilamadai/pytest-8561/test_136ap_wheel_contains_bind0')
+
+    @pytest.mark.slow
+    def test_136ap_wheel_contains_bindings_module_no_later_family(tmp_path: Path):
+        import subprocess as _subprocess
+    
+        dist_dir = tmp_path / "dist"
+        _subprocess.run(
+            [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
+            check=True, capture_output=True, text=True,
+        )
+        wheels = list(dist_dir.glob("*.whl"))
+        assert len(wheels) == 1, f"expected exactly one wheel, found {wheels}"
+    
+        import zipfile
+    
+        with zipfile.ZipFile(wheels[0]) as archive:
+            names = archive.namelist()
+    
+        assert "pcae/cltr/authority/bindings.py" in names
+        for forbidden in ("compatibility_quarantine",):
+>           assert f"pcae/cltr/authority/{forbidden}.py" not in names
+E           AssertionError: assert 'pcae/cltr/authority/compatibility_quarantine.py' not in ['pcae/__init__.py', 'pcae/__main__.py', 'pcae/artifact_metadata.py', 'pcae/cli.py', 'pcae/hook_bypass.py', 'pcae/lifecycle.py', ...]
+
+tests/test_cltr_authority_136ap_finalization_receipt_authority_binding.py:743: AssertionError
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_cltr_cutover_136t_notification_marker_receipt_binding_schema.py:255: got empty parameter set for (relative_path)
+SKIPPED [1] tests/test_cltr_cutover_136u_notification_marker_receipt_binding_independent_verification.py:969: positive case covered elsewhere
+6 failed, 1646 passed, 2 skipped in 80.21s (0:01:20)

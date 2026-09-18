@@ -1,0 +1,157 @@
+{
+  "runtime": {
+    "pipeline_stages": [
+      "Intent Source",
+      "Runtime",
+      "Intent Pipeline",
+      "Decision Pipeline",
+      "Execution Adapter",
+      "Evidence Pipeline",
+      "Notification Pipeline"
+    ],
+    "principles": [
+      "Modular",
+      "Pluggable",
+      "Connected",
+      "Observable",
+      "Automatable",
+      "Governed",
+      "Fail-closed",
+      "Least privilege",
+      "Human-controlled",
+      "Deterministic",
+      "Testable"
+    ],
+    "runtime_services": [
+      "Session",
+      "Task",
+      "Phase",
+      "Identity",
+      "Configuration",
+      "Plugin Registry",
+      "Policy Registry",
+      "Integration Registry",
+      "Audit Registry"
+    ]
+  },
+  "registry": {
+    "registered_plugin_count": 0,
+    "registered_capability_count": 0,
+    "registry_status": "empty",
+    "metadata_validity": "valid",
+    "plugin_ids": [],
+    "capabilities": []
+  },
+  "plugins": [],
+  "capabilities": [
+    {
+      "capability": "observe",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    },
+    {
+      "capability": "advise",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    },
+    {
+      "capability": "approve",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    },
+    {
+      "capability": "deny",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    },
+    {
+      "capability": "enforce",
+      "declaring_plugin_ids": [],
+      "undeclarable": true
+    },
+    {
+      "capability": "execute",
+      "declaring_plugin_ids": [],
+      "undeclarable": true
+    },
+    {
+      "capability": "audit",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    },
+    {
+      "capability": "notify",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    },
+    {
+      "capability": "store",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    },
+    {
+      "capability": "rollback_prepare",
+      "declaring_plugin_ids": [],
+      "undeclarable": false
+    }
+  ],
+  "health": {
+    "runtime_status": "not_implemented",
+    "registry_status": "empty",
+    "plugin_count": 0,
+    "capability_count": 0,
+    "metadata_validity": "valid",
+    "execution_availability": "unavailable",
+    "current_runtime_state": "Observed",
+    "current_maximum_plugin_capability": "observe"
+  },
+  "governance": {
+    "non_executing_posture": true,
+    "broker_implementation_status": "execution_unavailable",
+    "observed_command_paths": 4,
+    "execution_capability": "unavailable"
+  },
+  "state": {
+    "current_state": "Observed",
+    "state_model": [
+      "Intent",
+      "Observed",
+      "Advisory",
+      "Approved",
+      "Executable",
+      "Executed",
+      "Audited",
+      "Rollback Ready"
+    ]
+  },
+  "version": {
+    "release_version": "0.4.3",
+    "plugin_versions": []
+  },
+  "context": {
+    "session_id": "2026-09-18T09:35:16.363392+00:00",
+    "lifecycle_stage": "Observed",
+    "active_tasks": [
+      {
+        "task_id": "20260918-1127-n16-5-f-5-tb-helper-installation-identity-contract-repair-iv",
+        "title": "Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Independent Adversarial Verification of Model I-B Installation Identity and Helper Admission Contracts (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV)",
+        "lifecycle_stage": "Observed"
+      }
+    ],
+    "active_phase": null,
+    "intent": null,
+    "approval": null,
+    "broker_decision": null,
+    "evidence": null,
+    "observation": {
+      "observation_id": "2026-09-18T09:35:16.363392+00:00-observation",
+      "consulted_integrations": [
+        "INT-001",
+        "INT-002",
+        "INT-003",
+        "INT-004"
+      ],
+      "lifecycle_stage": "Observed"
+    }
+  }
+}

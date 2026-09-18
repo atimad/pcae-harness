@@ -564,7 +564,9 @@ Independent Verification** (not yet activated).
 | 137Q | Canonical Phase ID Parsing Contract Freeze | ✅ Complete |
 | 137R | Canonical Phase ID Parser Implementation | ✅ Complete |
 | 137S | Canonical Phase ID Parser Independent Verification | ✅ Complete (NOT VERIFIED — 1 Blocking finding repaired in-phase) |
-| 137T | Canonical Phase ID Parser Operational Hardening & Repository-Wide Conformance | 🔜 Next |
+| 137T | Canonical Phase ID Parser Operational Hardening & Repository-Wide Conformance | Historical recommendation; superseded by authoritative current phase |
+
+| 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 | N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR — F1 contract-only provisioning reconciliation; NOT begun | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 

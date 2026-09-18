@@ -83,6 +83,7 @@
 
 ## Completed
 
+- Idle after helper installation identity contract repair - fresh IV not begun (20260918-1014-idle-after-helper-installation-identity-contract-repair-fresh-iv-not-begun)
 - Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: Protected Helper Installation Identity, PAWA Identity, PPA Launch Identity, and Configured-Agent Exclusion Contract Reconciliation (N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR) (20260918-0918-n16-5-f-5-tb-helper-installation-identity-contract-repair)
 - Idle predecessor handoff state closed on admission-phase activation (20260917-2109-idle-post-n16-5-f-5-tb-helper-writer-authority-impl-complete-blocked-implementation-not-verified-n16-5-f-5-tb-helper-writer-authority-foundation-repair-recommended-next-not-begun-n-16-5-not-closed). This closes only the idle task; the recommended FOUNDATION-REPAIR was never activated or completed.
 

@@ -1,0 +1,1345 @@
+{
+  "clean": false,
+  "findings": [
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260806-1956-idle-awaiting-next-governed-phase-post-149o-1h-3' (Idle: awaiting next governed phase (post-149O.1H.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260806-2056-phase-149o-1h-4-hatp-timestamp-canonicalization-final-independent-re-verification' (Phase 149O.1H.4: HATP Timestamp Canonicalization Final Independent Re-Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260806-2114-idle-awaiting-next-governed-phase-post-149o-1h-4' (Idle: awaiting next governed phase (post-149O.1H.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260806-2153-phase-149o-1h-5-hatp-timestamp-canonicalization-lexical-guard-widening' (Phase 149O.1H.5: HATP Timestamp Canonicalization Lexical Guard Widening) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260807-0544-idle-awaiting-next-governed-phase-post-149o-1j' (Idle: awaiting next governed phase (post-149O.1J)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260807-0611-phase-149o-2-hatp-hardware-provider-human-presence-implementation-wave-5' (Phase 149O.2: HATP Hardware Provider + Human-Presence Implementation (Wave 5)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260807-0726-phase-149o-3-hatp-hardware-provider-independent-verification' (Phase 149O.3: HATP Hardware Provider Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260809-1700-idle-awaiting-next-governed-phase-post-149o-19-3' (Idle: awaiting next governed phase (post-149O.19.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260809-2236-idle-awaiting-next-governed-phase-post-149o-19-5a' (Idle: awaiting next governed phase (post-149O.19.5A)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260810-1841-idle-awaiting-next-governed-phase-post-149o-19-5e' (Idle: awaiting next governed phase (post-149O.19.5E)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260811-0010-idle-awaiting-next-governed-phase-post-149o-19-5e-3' (Idle: awaiting next governed phase (post-149O.19.5E.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260811-1611-idle-awaiting-next-governed-phase-post-149o-20b' (Idle: awaiting next governed phase (post-149O.20B)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260811-1848-phase-149o-20c-hatp-class-b-deployment-contract-independent-verification' (Phase 149O.20C: HATP Class-B Deployment Contract Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260811-1900-idle-awaiting-next-governed-phase-post-149o-20c' (Idle: awaiting next governed phase (post-149O.20C)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260811-1928-phase-149o-20d-hmic-v1-2-hbdc-bound-contract-identity-evolution' (Phase 149O.20D: HMIC v1.2 HBDC Bound-Contract Identity Evolution) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260811-1948-idle-awaiting-next-governed-phase-post-149o-20d' (Idle: awaiting next governed phase (post-149O.20D)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260811-2102-idle-awaiting-next-governed-phase-post-149o-20d-1' (Idle: awaiting next governed phase (post-149O.20D.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-0035-phase-149o-20e-hmic-v1-2-hbdc-bound-contract-identity-independent-verification' (Phase 149O.20E: HMIC v1.2 HBDC Bound-Contract Identity Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-0047-idle-awaiting-next-governed-phase-post-149o-20e' (Idle: awaiting next governed phase (post-149O.20E)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-0431-phase-149o-20f-hmic-v1-2-hbdc-25-file-5-contract-production-identity-alignment' (Phase 149O.20F: HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-0525-idle-awaiting-next-governed-phase-post-149o-20f' (Idle: awaiting next governed phase (post-149O.20F)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-0704-phase-149o-20g-hmic-v1-2-hbdc-25-file-5-contract-production-identity-alignment-independent-verification' (Phase 149O.20G: HMIC v1.2 HBDC 25-File / 5-Contract Production Identity Alignment Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-1424-idle-awaiting-next-governed-phase-post-149o-20j' (Idle: awaiting next governed phase (post-149O.20J)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-1547-phase-149o-20j-1-class-b-deployment-verifier-model-a-environment-lock-narrow-defect-repair' (Phase 149O.20J.1: Class-B Deployment Verifier / Model-A Environment-Lock Narrow Defect Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-1601-idle-awaiting-next-governed-phase-post-149o-20j-1' (Idle: awaiting next governed phase (post-149O.20J.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-1706-phase-149o-20j-2-class-b-deployment-verifier-narrow-defect-repair-independent-verification' (Phase 149O.20J.2: Class-B Deployment Verifier Narrow Defect Repair Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-2046-phase-149o-20j-5-class-b-acl-only-higher-ancestor-detection-narrow-repair-macos' (Phase 149O.20J.5: Class-B ACL-Only Higher-Ancestor Detection Narrow Repair (macOS)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-2313-idle-awaiting-next-governed-phase-post-149o-20j-6' (Idle: awaiting next governed phase (post-149O.20J.6)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-2330-phase-149o-20j-7-class-b-writesecurity-chown-acl-right-reclassification-narrow-repair' (Phase 149O.20J.7: Class-B writesecurity/chown ACL-Right Reclassification Narrow Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260812-2336-idle-awaiting-next-governed-phase-post-149o-20j-7' (Idle: awaiting next governed phase (post-149O.20J.7)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-0619-phase-149o-20j-8-class-b-writesecurity-chown-acl-right-reclassification-repair-independent-verification' (Phase 149O.20J.8: Class-B writesecurity/chown ACL-Right Reclassification Repair Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-0651-idle-awaiting-next-governed-phase-post-149o-20j-8' (Idle: awaiting next governed phase (post-149O.20J.8)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-0847-phase-149o-20k-hmic-class-b-verifier-source-scope-contract-evolution' (Phase 149O.20K: HMIC Class-B Verifier Source-Scope Contract Evolution) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-0923-idle-awaiting-next-governed-phase-post-149o-20k' (Idle: awaiting next governed phase (post-149O.20K)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-1252-phase-149o-20k-1-hmic-class-b-verifier-source-scope-contract-independent-verification' (Phase 149O.20K.1: HMIC Class-B Verifier Source-Scope Contract Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-1630-idle-awaiting-next-governed-phase-post-149o-20k-2' (Idle: awaiting next governed phase (post-149O.20K.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-1826-idle-awaiting-next-governed-phase-post-149o-20k-3' (Idle: awaiting next governed phase (post-149O.20K.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-1907-idle-awaiting-next-governed-phase-post-149o-20l' (Idle: awaiting next governed phase (post-149O.20L)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-1938-phase-149o-20l-1-full-hbdc-readiness-contract-schema-evolution' (Phase 149O.20L.1: Full-HBDC Readiness Contract / Schema Evolution) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-2003-idle-awaiting-next-governed-phase-post-149o-20l-1' (Idle: awaiting next governed phase (post-149O.20L.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-2222-idle-awaiting-next-governed-phase-post-149o-20l-1a' (Idle: awaiting next governed phase (post-149O.20L.1A)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260813-2249-idle-awaiting-next-governed-phase-post-149o-20l-1b' (Idle: awaiting next governed phase (post-149O.20L.1B)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260814-0226-idle-awaiting-next-governed-phase-post-149o-20l-2' (Idle: awaiting next governed phase (post-149O.20L.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260814-0747-idle-awaiting-next-governed-phase-post-149o-20l-3' (Idle: awaiting next governed phase (post-149O.20L.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260814-1032-idle-awaiting-next-governed-phase-post-149o-20l-4' (Idle: awaiting next governed phase (post-149O.20L.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260814-1926-idle-awaiting-next-governed-phase-post-149o-20l-6a' (Idle: awaiting next governed phase (post-149O.20L.6A)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-0220-idle-awaiting-next-governed-phase-post-149o-20l-7a' (Idle: awaiting next governed phase (post-149O.20L.7A)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-0627-idle-awaiting-next-governed-phase-post-149o-20l-7b-2' (Idle: awaiting next governed phase (post-149O.20L.7B.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-1155-idle-awaiting-next-governed-phase-post-149o-20l-7d-4' (Idle: awaiting next governed phase (post-149O.20L.7D.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-1222-idle-awaiting-next-governed-phase-post-149o-20l-7d-5' (Idle: awaiting next governed phase (post-149O.20L.7D.5)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-1236-idle-awaiting-next-governed-phase-post-149o-20l-7d-6' (Idle: awaiting next governed phase (post-149O.20L.7D.6)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-1410-idle-awaiting-next-governed-phase-post-149o-20l-7d-7' (Idle: awaiting next governed phase (post-149O.20L.7D.7)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-1915-idle-awaiting-next-governed-phase-post-149o-20l-7d-10' (Idle: awaiting next governed phase (post-149O.20L.7D.10)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260815-2049-idle-awaiting-next-governed-phase-post-149o-20l-7d-11' (Idle: awaiting next governed phase (post-149O.20L.7D.11)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260816-0139-idle-awaiting-next-governed-phase-post-149o-20l-7f' (Idle: awaiting next governed phase (post-149O.20L.7F)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260816-1317-idle-awaiting-next-governed-phase-post-149o-20l-7h' (Idle: awaiting next governed phase (post-149O.20L.7H)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260816-1944-idle-awaiting-next-governed-phase-post-149o-20l-7l' (Idle: awaiting next governed phase (post-149O.20L.7L)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260817-1231-idle-awaiting-next-governed-phase-post-149o-20l-7l-6' (Idle: awaiting next governed phase (post-149O.20L.7L.6)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260817-1358-idle-awaiting-next-governed-phase-post-149o-20l-7m' (Idle: awaiting next governed phase (post-149O.20L.7M)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260817-1859-idle-awaiting-next-governed-phase-post-149o-20l-7n-1' (Idle: awaiting next governed phase (post-149O.20L.7N.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1234-idle-awaiting-next-governed-phase-post-149o-20l-7o-2a-2' (Idle: awaiting next governed phase (post-149O.20L.7O.2A.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1516-idle-awaiting-next-governed-phase-post-149o-20l-7o-2b' (Idle: awaiting next governed phase (post-149O.20L.7O.2B)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1551-idle-awaiting-next-governed-phase-post-149o-20l-7o-2b-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2B.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1559-phase-149o-20l-7o-2c-deploymentbinding-first-use-field-resolution-architecture' (Phase 149O.20L.7O.2C: DeploymentBinding First-Use Field Resolution Architecture) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1634-idle-awaiting-next-governed-phase-post-149o-20l-7o-2c' (Idle: awaiting next governed phase (post-149O.20L.7O.2C)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1709-phase-149o-20l-7o-2d-hatp-principal-signer-enrollment-contract-architecture' (Phase 149O.20L.7O.2D: HATP Principal/Signer Enrollment Contract Architecture) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1732-idle-awaiting-next-governed-phase-post-149o-20l-7o-2d' (Idle: awaiting next governed phase (post-149O.20L.7O.2D)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1733-phase-149o-20l-7o-2d-1-hatp-principal-signer-enrollment-contract-independent-verification' (Phase 149O.20L.7O.2D.1: HATP Principal/Signer Enrollment Contract Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1946-idle-awaiting-next-governed-phase-post-149o-20l-7o-2d-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2D.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260818-1953-phase-149o-20l-7o-2d-2-hatp-principal-signer-enrollment-contract-repair' (Phase 149O.20L.7O.2D.2: HATP Principal/Signer Enrollment Contract Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0004-idle-awaiting-next-governed-phase-post-149o-20l-7o-2d-2' (Idle: awaiting next governed phase (post-149O.20L.7O.2D.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0016-phase-149o-20l-7o-2d-3-hatp-principal-signer-enrollment-contract-repair-independent-verification' (Phase 149O.20L.7O.2D.3: HATP Principal/Signer Enrollment Contract Repair Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0038-idle-awaiting-next-governed-phase-post-149o-20l-7o-2d-3' (Idle: awaiting next governed phase (post-149O.20L.7O.2D.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0124-phase-149o-20l-7o-2e-finalize-phase-completion-metadata-and-report' (Phase 149O.20L.7O.2E: finalize phase-completion metadata and report) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0125-idle-awaiting-next-governed-phase-post-149o-20l-7o-2e' (Idle: awaiting next governed phase (post-149O.20L.7O.2E)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0130-phase-149o-20l-7o-2e-1-hhce-001-trust-enrollment-implementation-plan-independent-verification' (Phase 149O.20L.7O.2E.1: HHCE-001 + Trust-Enrollment Implementation Plan Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0153-idle-awaiting-next-governed-phase-post-149o-20l-7o-2e-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2E.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0259-phase-149o-20l-7o-2f-hatp-trust-enrollment-implementation-capability' (Phase 149O.20L.7O.2F -- HATP Trust-Enrollment Implementation Capability) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0313-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f' (Idle: awaiting next governed phase (post-149O.20L.7O.2F)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0515-phase-149o-20l-7o-2f-1-hatp-trust-enrollment-implementation-capability-independent-verification' (Phase 149O.20L.7O.2F.1: HATP Trust-Enrollment Implementation Capability Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0622-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2F.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-0651-phase-149o-20l-7o-2f-2-fido2-signing-time-credential-resolution-repair' (Phase 149O.20L.7O.2F.2: FIDO2 Signing-Time Credential Resolution Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1035-idle-awaiting-next-governed-phase-post-149o-20l-7o-2f-4' (Idle: awaiting next governed phase (post-149O.20L.7O.2F.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1115-phase-149o-20l-7o-2f-5-durable-registry-signer-cross-record-consistency-and-toctou-repair-independent-verification' (Phase 149O.20L.7O.2F.5: Durable-Registry Signer Cross-Record Consistency and TOCTOU Repair Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1430-idle-awaiting-next-governed-phase-post-149o-20l-7o-2g' (Idle: awaiting next governed phase (post-149O.20L.7O.2G)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1520-phase-149o-20l-7o-2g-1-hmic-trust-enrollment-signing-target-set-reconciliation' (Phase 149O.20L.7O.2G.1 -- HMIC Trust-Enrollment / Signing Target-Set Reconciliation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1538-idle-awaiting-next-governed-phase-post-149o-20l-7o-2g-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2G.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1647-phase-149o-20l-7o-2h-hmic-001-v1-4-to-v1-5-contract-evolution-and-production-alignment-trust-enrollment-signing-closure-limb-d' (Phase 149O.20L.7O.2H: HMIC-001 v1.4-to-v1.5 Contract Evolution and Production Alignment: Trust-Enrollment/Signing Closure Limb (d)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1702-idle-awaiting-next-governed-phase-post-149o-20l-7o-2h' (Idle: awaiting next governed phase (post-149O.20L.7O.2H)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-1723-phase-149o-20l-7o-2h-0-hmic-v1-5-certificationrecord-contract-version-closed-schema-alignment-repair' (Phase 149O.20L.7O.2H.0: HMIC v1.5 CertificationRecord Contract-Version Closed-Schema Alignment Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-2135-idle-awaiting-next-governed-phase-post-149o-20l-7o-2i' (Idle: awaiting next governed phase (post-149O.20L.7O.2I)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-2146-phase-149o-20l-7o-2j-hatp-class-b-real-host-protected-root-provisioning-authorization' (Phase 149O.20L.7O.2J: HATP Class-B Real Host Protected Root Provisioning Authorization) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-2157-idle-awaiting-next-governed-phase-post-149o-20l-7o-2j' (Idle: awaiting next governed phase (post-149O.20L.7O.2J)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260819-2351-phase-149o-20l-7o-2k-hatp-prerequisite-dag-correction-and-next-real-effect-node-selection' (Phase 149O.20L.7O.2K: HATP Prerequisite DAG Correction and Next Real-Effect Node Selection) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-0021-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k' (Idle: awaiting next governed phase (post-149O.20L.7O.2K)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-0206-phase-149o-20l-7o-2k-1-hatp-hmic-certificationrecord-real-host-creation' (Phase 149O.20L.7O.2K.1: HATP HMIC CertificationRecord Real-Host Creation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-0226-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2K.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-0615-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-2' (Idle: awaiting next governed phase (post-149O.20L.7O.2K.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1012-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-3' (Idle: awaiting next governed phase (post-149O.20L.7O.2K.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1024-phase-149o-20l-7o-2k-4-post-certificationrecord-dag-re-derivation-and-next-real-effect-node-authorization' (Phase 149O.20L.7O.2K.4: Post-CertificationRecord DAG Re-Derivation and Next Real-Effect Node Authorization) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1104-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-4' (Idle: awaiting next governed phase (post-149O.20L.7O.2K.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1132-phase-149o-20l-7o-2k-5-hatp-hmic-certification-activation-existing-certification-binding-only' (Phase 149O.20L.7O.2K.5: HATP HMIC Certification Activation - Existing Certification Binding Only) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1156-idle-awaiting-next-governed-phase-post-149o-20l-7o-2k-5' (Idle: awaiting next governed phase (post-149O.20L.7O.2K.5)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1214-phase-149o-20l-7o-2l-post-hmic-activation-trust-enrollment-dag-re-derivation-and-administrative-entry-point-architecture' (Phase 149O.20L.7O.2L: Post-HMIC-Activation Trust-Enrollment DAG Re-Derivation and Administrative Entry-Point Architecture) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1224-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l' (Idle: awaiting next governed phase (post-149O.20L.7O.2L)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1318-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2L.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1504-idle-awaiting-next-governed-phase-assignment' (Idle: awaiting next governed phase assignment) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1521-phase-149o-20l-7o-2l-2-hatp-trust-enrollment-standalone-protected-admin-entry-point-independent-verification' (Phase 149O.20L.7O.2L.2: HATP Trust-Enrollment Standalone Protected Admin Entry-Point Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1526-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-2' (Idle: awaiting next governed phase (post-149O.20L.7O.2L.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1635-phase-149o-20l-7o-2l-3-hatp-hardware-credential-admin-recovery-authority-narrow-repair' (Phase 149O.20L.7O.2L.3: HATP Hardware-Credential Admin Recovery Authority Narrow Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1706-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-3' (Idle: awaiting next governed phase (post-149O.20L.7O.2L.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1752-phase-149o-20l-7o-2l-4-hatp-hardware-credential-admin-recovery-authority-repair-independent-verification' (Phase 149O.20L.7O.2L.4: HATP Hardware-Credential Admin Recovery Authority Repair Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1806-idle-awaiting-next-governed-phase-post-149o-20l-7o-2l-4' (Idle: awaiting next governed phase (post-149O.20L.7O.2L.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-1843-phase-149o-20l-7o-2m-hmic-v1-7-trust-enrollment-admin-entry-point-source-scope-evolution' (Phase 149O.20L.7O.2M: HMIC v1.7 Trust-Enrollment Admin Entry-Point Source-Scope Evolution) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-2050-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m' (Idle: awaiting next governed phase (post-149O.20L.7O.2M)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-2113-phase-149o-20l-7o-2m-1-hmic-v1-7-trust-enrollment-admin-entry-point-source-scope-evolution-independent-verification' (Phase 149O.20L.7O.2M.1: HMIC v1.7 Trust-Enrollment Admin Entry-Point Source-Scope Evolution Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-2127-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2M.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-2141-phase-149o-20l-7o-2m-2-hac-dell-hmic-v1-7-38-governed-redeployment-and-source-parity-restoration' (Phase 149O.20L.7O.2M.2: hac-dell HMIC v1.7/38 Governed Redeployment and Source-Parity Restoration) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260820-2203-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-2' (Idle: awaiting next governed phase (post-149O.20L.7O.2M.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0046-phase-149o-20l-7o-2m-3-hac-dell-hmic-v1-7-38-certificationrecord-creation-create-only' (Phase 149O.20L.7O.2M.3: hac-dell HMIC v1.7/38 CertificationRecord Creation -- Create Only) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0054-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-3' (Idle: awaiting next governed phase (post-149O.20L.7O.2M.3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0156-phase-149o-20l-7o-2m-4-hac-dell-hmic-v1-7-38-certification-activation-successor-binding-only' (Phase 149O.20L.7O.2M.4: hac-dell HMIC v1.7/38 Certification Activation -- Successor Binding Only) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0201-idle-awaiting-next-governed-phase-post-149o-20l-7o-2m-4' (Idle: awaiting next governed phase (post-149O.20L.7O.2M.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0220-phase-149o-20l-7o-2n-post-hmic-v1-7-trust-enrollment-real-effect-node-selection-and-fido2-enrollment-authorization' (Phase 149O.20L.7O.2N: Post-HMIC-v1.7 Trust-Enrollment real-effect node selection and FIDO2 enrollment authorization) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0245-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n' (Idle: awaiting next governed phase (post-149O.20L.7O.2N)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0635-phase-149o-20l-7o-2n-1-fido2-enrollment-pre-hardware-governance-confirmation-ordering-narrow-repair' (Phase 149O.20L.7O.2N.1: FIDO2 Enrollment Pre-Hardware Governance Confirmation Ordering Narrow Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0657-idle-awaiting-next-governed-phase-post-149o-20l-7o-2n-1' (Idle: awaiting next governed phase (post-149O.20L.7O.2N.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260821-0828-phase-149o-20l-7o-2n-2-fido2-enrollment-pre-hardware-governance-confirmation-ordering-repair-independent-verification' (Phase 149O.20L.7O.2N.2: FIDO2 Enrollment Pre-Hardware Governance Confirmation Ordering Repair Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260824-0919-idle-awaiting-next-governed-phase-post-149o-20l-7o-2v' (Idle: awaiting next governed phase (post-149O.20L.7O.2V)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260825-0634-idle-awaiting-next-governed-phase-post-149o-20l-7o-3a' (Idle: awaiting next governed phase (post-149O.20L.7O.3A)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260825-1830-idle-awaiting-next-governed-phase-post-149o-20l-7o-3c-3-2' (Idle: awaiting next governed phase (post-149O.20L.7O.3C.3.2)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260825-1947-idle-awaiting-next-governed-phase-post-149o-20l-7o-3c-4' (Idle: awaiting next governed phase (post-149O.20L.7O.3C.4)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260825-2009-idle-awaiting-next-governed-phase-post-149o-20l-7o-3d' (Idle: awaiting next governed phase (post-149O.20L.7O.3D)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260825-2023-idle-awaiting-next-governed-phase-post-149o-20l-7o-3e' (Idle: awaiting next governed phase (post-149O.20L.7O.3E)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260825-2118-phase-149o-20l-7o-3f-permission-broker-rollback-default-path-consumption-integration' (Phase 149O.20L.7O.3F: Permission Broker Rollback Default-Path Consumption Integration) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260825-2315-idle-awaiting-next-governed-phase-post-149o-20l-7o-3h' (Idle: awaiting next governed phase (post-149O.20L.7O.3H)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0016-idle-awaiting-next-governed-phase-post-149o-20l-7o-3h-1' (Idle: awaiting next governed phase (post-149O.20L.7O.3H.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0028-phase-149o-20l-7o-3i-post-v0-4-1-deferred-capability-consumption-priority-reassessment' (Phase 149O.20L.7O.3I: Post-v0.4.1 Deferred Capability Consumption Priority Reassessment) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0036-idle-awaiting-next-governed-phase-post-149o-20l-7o-3i' (Idle: awaiting next governed phase (post-149O.20L.7O.3I)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0122-phase-149o-20l-7o-3j-repository-intelligence-advisory-production-consumption-integration' (Phase 149O.20L.7O.3J: Repository Intelligence -> Advisory Production Consumption Integration) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0128-idle-awaiting-next-governed-phase-post-149o-20l-7o-3j' (Idle: awaiting next governed phase (post-149O.20L.7O.3J)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0506-phase-149o-20l-7o-3j-1-independent-end-to-end-repository-intelligence-advisory-consumption-verification' (Phase 149O.20L.7O.3J.1: Independent End-to-End Repository Intelligence / Advisory Consumption Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0535-idle-awaiting-next-governed-phase-post-149o-20l-7o-3j-1' (Idle: awaiting next governed phase (post-149O.20L.7O.3J.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0900-phase-149o-20l-7o-3k-post-ri-attachment-architecture-and-release-decision' (Phase 149O.20L.7O.3K: Post-RI Attachment Architecture and Release Decision) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-0905-idle-awaiting-next-governed-phase-post-149o-20l-7o-3k' (Idle: awaiting next governed phase (post-149O.20L.7O.3K)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1005-idle-awaiting-next-governed-phase-post-149o-20l-7o-3l' (Idle: awaiting next governed phase (post-149O.20L.7O.3L)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1049-phase-149o-20l-7o-3l-1-publish-v0-4-2-release-notes-header-correction' (Phase 149O.20L.7O.3L.1: publish v0.4.2 release-notes header correction) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1119-phase-149o-20l-7o-3m-rollback-readiness-evidence-automatic-consumption-architecture-and-integration' (Phase 149O.20L.7O.3M: Rollback Readiness / Evidence Automatic Consumption Architecture and Integration) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1551-idle-awaiting-next-governed-phase-post-149o-20l-7o-3m-1' (Idle: awaiting next governed phase post-149O.20L.7O.3M.1) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1559-phase-149o-20l-7o-3n-product-release-decision-and-remaining-mature-capability-gap-reset' (Phase 149O.20L.7O.3N: Product/Release Decision and Remaining Mature Capability Gap Reset) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1605-idle-awaiting-next-governed-phase-post-149o-20l-7o-3n' (Idle: awaiting next governed phase post-149O.20L.7O.3N) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1612-phase-149o-20l-7o-3n-1-mature-capability-consumer-edge-investigation' (Phase 149O.20L.7O.3N.1: Mature Capability Consumer-Edge Investigation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1622-idle-awaiting-next-governed-phase-post-149o-20l-7o-3n-1' (Idle: awaiting next governed phase post-149O.20L.7O.3N.1) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1630-phase-149o-20l-7o-3o-pcae-v0-4-3-release-hardening' (Phase 149O.20L.7O.3O: PCAE v0.4.3 Release Hardening) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1703-phase-149o-20l-7o-3n-2-deep-repository-wide-capability-discovery-and-consumption-gap-audit' (Phase 149O.20L.7O.3N.2: Deep Repository-Wide Capability Discovery and Consumption-Gap Audit) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1714-idle-awaiting-next-governed-phase-post-149o-20l-7o-3n-2' (Idle: awaiting next governed phase post-149O.20L.7O.3N.2) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1725-phase-149o-20l-7o-3o-1-pcae-v0-4-3-public-release-publication-only-verification' (Phase 149O.20L.7O.3O.1: PCAE v0.4.3 Public Release (publication-only, verification)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-1731-idle-awaiting-explicit-human-publication-authorization-post-149o-20l-7o-3o-1' (Idle: awaiting explicit human publication authorization post-149O.20L.7O.3O.1) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-2138-phase-149o-20l-7o-3s-deterministic-mock-dry-runtime-adapter-implementation' (Phase 149O.20L.7O.3S: Deterministic Mock/Dry Runtime Adapter Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-2146-idle-awaiting-human-decision-post-149o-20l-7o-3s' (Idle: awaiting human decision post-149O.20L.7O.3S) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260826-2211-phase-149o-20l-7o-3s-1-independent-end-to-end-deterministic-mock-dry-runtime-adapter-verification' (Phase 149O.20L.7O.3S.1: Independent End-to-End Deterministic Mock/Dry Runtime Adapter Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-0016-idle-awaiting-human-decision-post-149o-20l-7o-3s-2' (Idle: awaiting human decision post-149O.20L.7O.3S.2) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-0750-idle-awaiting-human-decision-post-149o-20l-7o-3s-2-1' (Idle: awaiting human decision post-149O.20L.7O.3S.2.1) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-0920-phase-149o-20l-7o-3t-real-runtime-prerequisite-dependency-and-trust-boundary-hardening-plan' (Phase 149O.20L.7O.3T: Real-Runtime Prerequisite Dependency and Trust-Boundary Hardening Plan) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-0933-idle-awaiting-human-decision-post-149o-20l-7o-3t' (Idle: awaiting human decision post-149O.20L.7O.3T) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-0952-phase-149o-20l-7o-3u-real-runtime-dispatch-authority-and-permission-contract-architecture' (Phase 149O.20L.7O.3U: Real Runtime Dispatch Authority and Permission Contract Architecture) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-1132-phase-149o-20l-7o-3v-1-independent-verification-of-local-cli-runtime-dispatch-authority-and-permission-contract-freeze' (Phase 149O.20L.7O.3V.1: Independent Verification of Local-CLI Runtime Dispatch Authority and Permission Contract Freeze) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-1237-phase-149o-20l-7o-3v-1r-local-cli-runtime-dispatch-authority-and-permission-contract-reconciliation-and-repair' (Phase 149O.20L.7O.3V.1R: Local-CLI Runtime Dispatch Authority and Permission Contract Reconciliation and Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-1319-idle-awaiting-human-decision-post-149o-20l-7o-3v-2' (Idle: awaiting human decision post-149O.20L.7O.3V.2) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-1357-phase-149o-20l-7o-3w-runtime-invocation-authority-pb-dispatch-request-foundation-implementation' (Phase 149O.20L.7O.3W: Runtime Invocation Authority + PB Dispatch Request Foundation Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-1843-phase-149o-20l-7o-3w-1r-2-runtime-invocation-authority-provenance-trusted-construction-and-identity-registry-blocking-repair' (Phase 149O.20L.7O.3W.1R.2: Runtime Invocation Authority Provenance, Trusted Construction, and Identity Registry Blocking Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-1952-phase-149o-20l-7o-3w-1r-2c-governance-record-correction-for-unauthorized-delegated-phase-finalization' (Phase 149O.20L.7O.3W.1R.2C: Governance Record Correction for Unauthorized Delegated Phase Finalization) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-1957-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2c' (Idle: awaiting human decision post-149O.20L.7O.3W.1R.2C) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260827-2013-phase-149o-20l-7o-3w-1r-2a-runtime-invocation-human-principal-authentication-and-authority-provenance-architecture' (Phase 149O.20L.7O.3W.1R.2A: Runtime Invocation Human Principal Authentication and Authority Provenance Architecture) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260828-0033-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-1-independent-verification-of-trusted-approval-presentation-evidence-and-hpac-proof-lifecycle-canonicalization-repair' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.1 \u2014 Independent Verification of Trusted Approval Presentation Evidence and HPAC Proof-Lifecycle Canonicalization Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260828-0110-idle-awaiting-human-decision-post-149o-20l-7o-3w-1r-2b-1r-1-1r-1' (Idle: awaiting human decision post-149O.20L.7O.3W.1R.2B.1R.1.1R.1) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260828-0117-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-2-human-principal-authentication-protected-approval-presentation-and-proof-lifecycle-implementation-planning' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.2: Human-Principal Authentication, Protected Approval Presentation, and Proof-Lifecycle Implementation Planning) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260828-0149-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-3-canonical-human-principal-protected-presentation-and-hpac-proof-lifecycle-foundation-implementation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.3: Canonical Human-Principal, Protected-Presentation, and HPAC Proof-Lifecycle Foundation Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260828-1737-idle-awaiting-human-authorization-post-149o-20l-7o-3w-1r-2b-1r-1-1r-5-1' (Idle: awaiting human authorization post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.1) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260828-1924-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-5-2-1' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.5.2.1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260831-1843-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-22r' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.22R)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260831-1921-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-22r-1-independent-verification-of-the-n-16-3-reconciliation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.22R.1: Independent Verification of the N-16-3 Reconciliation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260901-1412-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-26' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.26)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260901-1538-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-27-independent-verification-of-the-n-16-4-runtime-enforcement-gate-blocked' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.27: Independent Verification of the N-16-4 Runtime Enforcement Gate (BLOCKED)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260901-1549-idle-awaiting-explicit-human-authorization-for-the-1r-26r-repair-post-149o-20l-7o-3w-1r-2b-1r-1-1r-27-blocked' (Idle: awaiting explicit human authorization for the .1R.26R repair (post-149O.20L.7O.3W.1R.2B.1R.1.1R.27 BLOCKED)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260901-1550-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-27-repair-phase-recommended-before-1r-27-can-resume' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.27); repair phase recommended before .1R.27 can resume) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260901-1551-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-26r-n-16-4-scope-fence-verification-evidence-reconciliation-and-repair' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R: N-16-4 Scope-Fence / Verification-Evidence Reconciliation and Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260901-1922-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-26r-1r-1r-n-16-4-reconciliation-iv-evidence-harness-skip-detection-repair' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.26R.1R.1R: N-16-4 Reconciliation IV Evidence-Harness Skip-Detection Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260901-1944-idle-awaiting-explicit-authorization-for-1r-26r-1r-1r-1-independent-verification' (Idle: awaiting explicit authorization for .1R.26R.1R.1R.1 independent verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260902-1633-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-2-iv-of-n-16-5-pawa-production-protected-admin-writer-anchor-implementation-slice-1' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.2: IV of N-16-5 PAWA Production Protected-Admin Writer Anchor Implementation (Slice 1)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260902-2129-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-4-n-16-5-not-closed-next-1r-30r-3-5-iv' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.4); N-16-5 NOT CLOSED; next = .1R.30R.3.5 IV) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260902-2222-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-3-5-independent-verification-of-the-n-16-5-merged-rhamp-real-fido2-credential-registration-counter-state-bootstrap-authentication-mechanism-implementation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.3.5: Independent Verification of the N-16-5 Merged RHAMP Real FIDO2 Credential Registration, Counter-State, Bootstrap & Authentication Mechanism Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260904-1717-idle-awaiting-explicit-authorization-for-combined-f-7-f-8-independent-verification-f-5-retry-pending-n-16-5-not-closed' (Idle: awaiting explicit authorization for combined F-7/F-8 independent verification; F-5 retry pending; N-16-5 not closed) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260904-1747-idle-awaiting-explicit-authorization-for-f-9-immutable-f-7-repair-suite-deployment-evidence-guard-repair-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1-f-5-retry-pending-n-16-5-not-closed' (Idle: awaiting explicit authorization for F-9 Immutable F-7-Repair-Suite Deployment-Evidence Guard Repair (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1); F-5 retry pending; N-16-5 not closed) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260904-1805-idle-awaiting-explicit-authorization-for-independent-verification-of-f-9-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-f-5-retry-pending-fresh-f-9-iv-n-16-5-not-closed' (Idle: awaiting explicit authorization for Independent Verification of F-9 (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R); F-5 retry pending fresh F-9 IV; N-16-5 not closed) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260904-1830-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-f-5-retry-ready-n-16-5-not-closed' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1); F-5 RETRY: READY; N-16-5 not closed) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260904-2011-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1-production-protected-root-protected-presentation-helper-deployment-preparation-retry' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1: Production Protected-Root / Protected-Presentation Helper Deployment Preparation Retry) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260905-0506-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-f-5-hold-cleared-n-16-5-not-closed' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R); F-5 hold CLEARED; N-16-5 not closed) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260905-1018-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-rhamp-cross-test-contamination-diagnosis-evidence-reconciliation-and-f-5-readiness-re-adjudication' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R: RHAMP Cross-Test Contamination Diagnosis, Evidence Reconciliation, and F-5 Readiness Re-Adjudication) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260905-1053-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-finalize-rhamp-cross-test-contamination-diagnosis-phase-report-evidence-project-status-changelog-metadata-commit-push' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R: finalize RHAMP cross-test contamination diagnosis phase (report, evidence, PROJECT_STATUS, CHANGELOG, metadata, commit, push)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260905-1105-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-contamination-root-cause-unresolved-f-5-execution-hold-remains-n-16-5-not-closed' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R); CONTAMINATION ROOT CAUSE: UNRESOLVED; F-5 EXECUTION HOLD: REMAINS; N-16-5 not closed) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260906-1005-idle-awaiting-first-credential-enrollment-ceremony-post-n-16-5-cert-blocked-credential-absent' (Idle: awaiting first-credential enrollment ceremony (post N-16-5 cert BLOCKED, credential absent)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260906-2044-idle-awaiting-next-governed-phase-post-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1-n-16-5-not-closed-h-3' (Idle: awaiting next governed phase (post-149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1); N-16-5 NOT CLOSED (H-3)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260907-1544-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-n16-5-h3-impl' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R (N16-5-H3-IMPL)) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260907-1726-idle-post-n16-5-h3-impl' (Idle post-N16-5-H3-IMPL) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260908-2142-idle-awaiting-next-governed-phase-post-n16-5-f5b1-readauth-hpac-pawa-001-v1-4-frozen-f-5-b1-contract-blocker-resolved-implementation-pending-n-16-5-not-closed' (Idle: awaiting next governed phase (post-N16-5-F-5-B1-READAUTH); HPAC-PAWA-001 v1.4 FROZEN, F-5-B1 contract blocker RESOLVED / implementation PENDING; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260908-2230-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-n16-5-f5b1-readauth-iv-independent-verification-of-hpac-pawa-001-v1-4' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F5B1-READAUTH-IV): Independent Verification of HPAC-PAWA-001 v1.4) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260908-2250-idle-awaiting-next-governed-phase-post-n16-5-f5b1-readauth-iv-hpac-pawa-001-v1-4-independently-verified-f-5-b1-contract-blocker-independently-verified-resolved-implementation-pending-n-16-5-not-closed' (Idle: awaiting next governed phase (post-N16-5-F-5-B1-READAUTH-IV); HPAC-PAWA-001 v1.4 INDEPENDENTLY VERIFIED; F-5-B1 contract blocker INDEPENDENTLY VERIFIED RESOLVED / implementation PENDING; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-0222-n16-5-f-5-b1-impl-production-recognized-read-ceremony-authority-implementation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B1-IMPL): Production Recognized Read/Ceremony Authority Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-0231-idle-awaiting-next-governed-phase-post-n16-5-f-5-b1-impl-f-5-b1-repaired-iv-pending-n-16-5-not-closed' (Idle: awaiting next governed phase (post-N16-5-F-5-B1-IMPL); F-5-B1 REPAIRED / IV PENDING; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-0821-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-n16-5-f-5-b1-iv-independent-verification-of-f-5-b1-implementation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B1-IV): Independent Verification of F-5-B1 Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-0833-idle-awaiting-explicit-authorization-for-n16-5-f-5-b2-post-n16-5-f-5-b1-iv-f-5-b1-not-verified-blocked-n-16-5-not-closed' (Idle: awaiting explicit authorization for N16-5-F-5-B2 (post-N16-5-F-5-B1-IV); F-5-B1 NOT VERIFIED / BLOCKED; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-1147-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-n16-5-f-5-b2-consumer-authenticity-blast-radius-reconstruction' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2): consumer-authenticity blast-radius reconstruction) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-1149-idle-awaiting-explicit-authorization-for-n16-5-f-5-b2-impl-post-n16-5-f-5-b2-f-5-certification-blocked-pending-f-5-b2-repair-n-16-5-not-closed' (Idle: awaiting explicit authorization for N16-5-F-5-B2-IMPL (post-N16-5-F-5-B2); F-5 CERTIFICATION BLOCKED PENDING F-5-B2 REPAIR; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-1746-n16-5-f-5-b2-impl-privileged-production-factory-consumer-authenticity-repair' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2-IMPL): Privileged Production Factory Consumer-Authenticity Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-1755-idle-awaiting-explicit-authorization-for-n16-5-f-5-b2-iv-post-n16-5-f-5-b2-impl-f-5-b2-repair-implemented-iv-pending-n-16-5-not-closed' (Idle: awaiting explicit authorization for N16-5-F-5-B2-IV (post-N16-5-F-5-B2-IMPL); F-5-B2 REPAIR IMPLEMENTED / IV PENDING; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-1931-n16-5-f-5-b2-iv-independent-verification-of-privileged-production-factory-consumer-authenticity-repair' (N16-5-F-5-B2-IV: Independent Verification of Privileged Production Factory Consumer-Authenticity Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-1946-n16-5-f-5-b2-iv-independent-verification-of-privileged-production-factory-consumer-authenticity-repair' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2-IV): Independent Verification of Privileged Production Factory Consumer-Authenticity Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-1950-idle-awaiting-explicit-authorization-for-the-name-forgery-repair-phase-post-n16-5-f-5-b2-iv-n16-5-f-5-b2-not-verified-blocked-n-16-5-not-closed' (Idle: awaiting explicit authorization for the __name__-forgery repair phase (post-N16-5-F-5-B2-IV); N16-5-F-5-B2 NOT VERIFIED / BLOCKED; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-2049-n16-5-f-5-b2r-impl-privileged-production-factory-consumer-authenticity-repair-caller-controlled-module-identity-elimination' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R (N16-5-F-5-B2R-IMPL): Privileged Production Factory Consumer-Authenticity Repair -- Caller-Controlled Module-Identity Elimination) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-2100-idle-awaiting-explicit-authorization-for-n16-5-f-5-b2r-iv-post-n16-5-f-5-b2r-impl-f-5-b2-repair-implemented-iv-pending-n-16-5-not-closed' (Idle: awaiting explicit authorization for N16-5-F-5-B2R-IV (post-N16-5-F-5-B2R-IMPL); F-5-B2 REPAIR IMPLEMENTED / IV PENDING; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-2221-n16-5-f-5-b2r-iv-independent-verification-of-consumer-authenticity-repair' (N16-5-F-5-B2R-IV: independent verification of consumer-authenticity repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-2226-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-n16-5-f-5-b2r-iv-fresh-iv' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1 (N16-5-F-5-B2R-IV): fresh IV) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-2230-idle-awaiting-explicit-authorization-for-the-process-local-mutable-state-repair-post-n16-5-f-5-b2r-iv-f-5-b2-blocked-n-16-5-not-closed' (Idle: awaiting explicit authorization for the process-local mutable-state repair (post-N16-5-F-5-B2R-IV); F-5-B2 BLOCKED; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260909-2302-n16-5-f-5-b2r2-impl-mutable-state-trust-boundary-repair-or-unsatisfiability-adjudication' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1 (N16-5-F-5-B2R2-IMPL): mutable-state trust-boundary repair or unsatisfiability adjudication) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260910-1802-idle-post-n16-5-f-5-ppa-contract-complete-contract-frozen-dedicated-iv-n16-5-f-5-ppa-contract-iv-next-n-16-5-not-closed' (Idle post-N16-5-F-5-PPA-CONTRACT (COMPLETE / CONTRACT FROZEN); dedicated IV N16-5-F-5-PPA-CONTRACT-IV next; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260910-1945-n16-5-f-5-ppa-contract-iv-independent-verification-of-hpac-ppa-001-v2-0' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1 (N16-5-F-5-PPA-CONTRACT-IV) -- Independent Verification of HPAC-PPA-001 v2.0) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260910-2000-idle-post-n16-5-f-5-ppa-contract-iv-complete-independently-verified-resolved-trio-cross-contract-iv-n16-5-f-5-tb-trio-iv-next-n-16-5-not-closed' (Idle post-N16-5-F-5-PPA-CONTRACT-IV (COMPLETE / INDEPENDENTLY VERIFIED); resolved-trio cross-contract IV N16-5-F-5-TB-TRIO-IV next; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-0049-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1-1-1-1-1-1-1-n16-5-f-5-tb-trio-iv-resolved-trio-cross-contract-independent-verification' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-TRIO-IV) -- Resolved-Trio Cross-Contract Independent Verification) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-0055-idle-post-n16-5-f-5-tb-trio-iv-complete-independently-verified-resolved-trio-verified-fresh-governed-privileged-helper-protocol-implementation-phase-n16-5-f-5-tb-helper-impl-next-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-TRIO-IV (COMPLETE / INDEPENDENTLY VERIFIED, RESOLVED-TRIO VERIFIED); fresh governed privileged-helper + protocol implementation phase N16-5-F-5-TB-HELPER-IMPL next; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-0936-n16-5-f-5-tb-helper-impl-privileged-helper-hpac-pawa-helper-1-0-protocol-foundation-implementation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-IMPL): Privileged Helper + HPAC-PAWA-HELPER/1.0 Protocol Foundation Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-0949-idle-post-n16-5-f-5-tb-helper-impl-complete-helper-protocol-foundation-implemented-iv-pending-scope-fence-reconciliation-phase-then-n16-5-f-5-tb-helper-iv-next-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-HELPER-IMPL (COMPLETE \u2014 HELPER/PROTOCOL FOUNDATION IMPLEMENTED, IV PENDING); scope-fence reconciliation phase then N16-5-F-5-TB-HELPER-IV next; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-1813-n16-5-f-5-tb-helper-impl-1-privileged-helper-implementation-scope-fence-reconciliation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-IMPL.1): Privileged Helper Implementation Scope-Fence Reconciliation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-1828-idle-post-n16-5-f-5-tb-helper-impl-1-complete-scope-fence-reconciliation-done-n16-5-f-5-tb-helper-iv-next-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-HELPER-IMPL.1 (COMPLETE \u2014 scope-fence reconciliation done); N16-5-F-5-TB-HELPER-IV next; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-2006-n16-5-f-5-tb-helper-iv-fresh-independent-verification-of-privileged-helper-hpac-pawa-helper-001-protocol-foundation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-IV): Fresh Independent Verification of Privileged Helper / HPAC-PAWA-HELPER-001 Protocol Foundation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-2041-idle-post-n16-5-f-5-tb-helper-iv-complete-not-verified-blocked-n16-5-f-5-tb-replay-repair-next-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-HELPER-IV (COMPLETE \u2014 NOT VERIFIED / BLOCKED); N16-5-F-5-TB-REPLAY-REPAIR next; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-2053-n16-5-f-5-tb-replay-repair-privileged-helper-replay-durability-repair' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REPLAY-REPAIR): Privileged Helper Replay-Durability Repair) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-2132-n16-5-f-5-tb-replay-repair-finalization' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REPLAY-REPAIR): Finalization) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260911-2227-idle-post-n16-5-f-5-tb-replay-repair-complete-n16-5-f-5-tb-helper-iv-r-next-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-REPLAY-REPAIR (COMPLETE); N16-5-F-5-TB-HELPER-IV-R next; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260912-1217-n16-5-f-5-tb-helper-iv-r-fresh-independent-reverification-of-privileged-helper-durable-replay-foundation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-IV-R): Fresh Independent Reverification of Privileged Helper + Durable Replay Foundation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260912-1422-idle-post-n16-5-f-5-tb-helper-iv-r-complete-independently-verified-n16-5-f-5-tb-replay-store-fifo-harden-next-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-HELPER-IV-R (COMPLETE / INDEPENDENTLY VERIFIED); N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN next (not begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260912-1506-n16-5-f-5-tb-replay-store-fifo-harden-durablereplaystore-fifo-at-slot-nonblocking-hardening' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN): DurableReplayStore FIFO-at-slot nonblocking hardening) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260912-1617-idle-post-n16-5-f-5-tb-replay-store-fifo-harden-complete-caller-client-integration-architecture-slice-next-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-REPLAY-STORE-FIFO-HARDEN (COMPLETE); caller/client integration architecture slice next (not begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260912-1707-n16-5-f-5-tb-caller-integration-arch-caller-client-integration-architecture-for-privileged-helper-consumption' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-CALLER-INTEGRATION-ARCH): Caller/Client Integration Architecture for Privileged Helper Consumption) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260912-1828-idle-post-n16-5-f-5-tb-caller-integration-arch-complete-first-implementation-slice-next-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-CALLER-INTEGRATION-ARCH (COMPLETE); first implementation slice next (not begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260912-2029-idle-post-n16-5-f-5-tb-cert-read-client-impl-blocked-architecture-correction-slice-next-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-CERT-READ-CLIENT-IMPL (BLOCKED); architecture-correction slice next (not begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260913-0152-n16-5-f-5-tb-caller-map-correction-caller-reachability-and-migration-order-architecture-correction' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-CALLER-MAP-CORRECTION): caller reachability and migration-order architecture correction -- COMPLETE) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260913-0301-idle-post-n16-5-f-5-tb-caller-map-correction-complete-admin-mutation-packaging-deployment-decision-phase-next-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-CALLER-MAP-CORRECTION (COMPLETE); admin_mutation packaging/deployment-decision phase next (not begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260913-1422-n16-5-f-5-tb-admin-mutation-packaging-decision-admin-mutation-packaging-deployment-topology-decision-architecture' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION): admin_mutation packaging/deployment topology decision architecture -- COMPLETE) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260913-1532-idle-post-n16-5-f-5-tb-admin-mutation-packaging-decision-complete-helper-store-wiring-linux-first-launcher-next-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-ADMIN-MUTATION-PACKAGING-DECISION (COMPLETE); helper store-wiring + Linux-first launcher next (not begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260913-1902-idle-post-n16-5-f-5-tb-real-helper-store-launcher-impl-complete-blocked-fresh-linux-iv-or-writer-authority-contract-evolution-phase-next-neither-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IMPL (COMPLETE \u2014 BLOCKED); fresh Linux IV or writer-authority contract-evolution phase next (neither begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260913-1956-phase-149o-20l-7o-3w-1r-2b-1r-1-1r-30r-5r-2-1r-1r-2r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1r-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-n16-5-f-5-tb-helper-iv-blocked' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1: N16-5-F-5-TB-HELPER-IV BLOCKED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260913-2050-idle-post-n16-5-f-5-tb-real-helper-store-launcher-iv-complete-not-verified-blocked-same-file-object-exec-defect-found-narrow-repair-phase-next-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-REAL-HELPER-STORE-LAUNCHER-IV (COMPLETE \u2014 NOT VERIFIED / BLOCKED); same-file-object exec defect found; narrow repair phase next (not begun); N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260914-1700-n16-5-f-5-tb-real-helper-boundary-repair-same-file-object-exec-inheritance-canonical-store-entrypoint-wiring' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR): Same-File-Object Exec Inheritance + Canonical-Store Entrypoint Wiring) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260914-1750-idle-post-n16-5-f-5-tb-real-helper-boundary-repair-complete-both-predecessor-defects-repaired-and-independently-re-verified-finding-c-disclosed-not-repaired-fresh-repair-iv-successor-recommended-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR (COMPLETE); both predecessor defects repaired and independently re-verified; Finding C disclosed, not repaired; fresh repair-IV successor recommended, not begun; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260914-2017-n16-5-f-5-tb-cpipc-identity-reconcile-cpipc-canonical-lineage-reconciliation-for-the-helper-replay-boundary-branch' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE): CPIPC canonical lineage reconciliation for the helper/replay/boundary branch) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260914-2103-idle-post-n16-5-f-5-tb-cpipc-identity-reconcile-complete-disposition-a-no-lineage-defect-fresh-helper-boundary-repair-iv-recommended-not-begun-n-16-5-not-closed' (Idle post-N16-5-F-5-TB-CPIPC-IDENTITY-RECONCILE (COMPLETE); Disposition A -- no lineage defect; fresh helper-boundary repair IV recommended, not begun; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-0220-post-phase-cleanup-capture-final-canonical-report-and-push-state-for-n16-5-f-5-tb-real-helper-boundary-repair-iv' (Post-phase cleanup: capture final canonical report and push state for N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-0221-idle-post-n16-5-f-5-tb-real-helper-boundary-repair-iv-complete-finding-c-c-a-template-t-a-n-16-5-not-closed' (Idle: post-N16-5-F-5-TB-REAL-HELPER-BOUNDARY-REPAIR-IV (COMPLETE); Finding C=C-A, template=T-A; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-1230-n16-5-f-5-tb-helper-writer-authority-contract-arch-helper-scoped-writer-authority-architecture-and-contract-evolution' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH): Helper-Scoped Writer Authority Architecture and Contract Evolution) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-1356-idle-post-n16-5-f-5-tb-helper-writer-authority-contract-arch-complete-n16-5-f-5-tb-helper-writer-authority-contract-iv-recommended-next-not-begun-n-16-5-not-closed' (Idle: post-N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-ARCH (COMPLETE); N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV recommended next, not begun; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-1736-n16-5-f-5-tb-helper-writer-authority-contract-iv-fresh-independent-verification-of-hpac-pawa-helper-001-v2-0-model-d-writer-authority-contract' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV): fresh independent verification of HPAC-PAWA-HELPER-001 v2.0 Model D writer-authority contract) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-1827-idle-post-n16-5-f-5-tb-helper-writer-authority-contract-iv-complete-not-verified-blocked-n16-5-f-5-tb-helper-writer-authority-contract-repair-recommended-next-not-begun-n-16-5-not-closed' (Idle: post-N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-IV (COMPLETE -- NOT VERIFIED / BLOCKED); N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR recommended next, not begun; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-2025-n16-5-f-5-tb-helper-writer-authority-contract-repair-helper-writer-authority-contract-repair-and-re-architecture-after-model-d-independent-verification-failure' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR): Helper Writer-Authority Contract Repair and Re-Architecture After Model D Independent Verification Failure) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260915-2137-idle-post-n16-5-f-5-tb-helper-writer-authority-contract-repair-complete-n16-5-f-5-tb-helper-writer-authority-contract-repair-iv-recommended-next-not-begun-n-16-5-not-closed' (Idle: post-N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR (COMPLETE); N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV recommended next, not begun; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260916-1949-n16-5-f-5-tb-helper-writer-authority-contract-repair-iv-fresh-independent-adversarial-verification-of-hpac-pawa-helper-001-v3-0-model-e' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV): Fresh Independent Adversarial Verification of HPAC-PAWA-HELPER-001 v3.0 Model E) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260917-1723-idle-post-n16-5-f-5-tb-helper-writer-authority-contract-repair-iv-complete-independently-verified-n16-5-f-5-tb-helper-writer-authority-impl-recommended-next-not-begun-n-16-5-not-closed' (Idle: post-N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-CONTRACT-REPAIR-IV (COMPLETE -- INDEPENDENTLY VERIFIED); N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL recommended next, not begun; N-16-5 NOT CLOSED) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    },
+    {
+      "check": "done_file_missing_from_done_md",
+      "message": "Task '20260917-1911-n16-5-f-5-tb-helper-writer-authority-impl-model-e-helper-writer-authority-production-implementation' (Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 (N16-5-F-5-TB-HELPER-WRITER-AUTHORITY-IMPL): Model E Helper Writer-Authority Production Implementation) is in tasks/done/ but not listed in tasks/DONE.md.",
+      "severity": "warning"
+    }
+  ]
+}
