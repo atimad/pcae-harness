@@ -31,8 +31,13 @@ _HISTORICAL_ENTRY_COMMIT = '79ea7e1644535d011da6ca3869b5557b44c50737'
 _HISTORICAL_FINAL_COMMIT = 'c4f452c6a8e5d45b7076cd984d6f701a01cfa5e4'
 
 # This repair phase's own entry commit (origin/main == HEAD, clean, at
-# preflight time for this phase).
+# preflight time for this phase) and its own final (task-close) commit --
+# the phase's terminal boundary, reconstructed from PROJECT_STATUS.md and
+# git history. Historical phase-local claims below are bound to this fixed
+# range, never to whatever HEAD/origin main happens to be when the test
+# later runs.
 _THIS_PHASE_ENTRY_COMMIT = '4ddd5dd460355c39e842cf25e92532933b3343e9'
+_THIS_PHASE_FINAL_COMMIT = 'c4c9f554106965e10a057db96a106f85f72f8f65'
 
 _STALE_TEST_FILE = ROOT / 'tests/test_n16_5_f_5_tb_helper_installation_identity_contract_repair.py'
 _STALE_TEST_SOURCE = _STALE_TEST_FILE.read_text()
@@ -97,18 +102,31 @@ def test_historical_scope_reconstructed_as_zero_src_pcae_diff():
     assert all(not path.startswith('src/pcae/') for path in changed_all)
 
 
+def _read_bytes_at_commit(commit, path):
+    return subprocess.run(
+        ['git', 'show', f'{commit}:{path}'],
+        cwd=ROOT, capture_output=True, check=True,
+    ).stdout
+
+
 def test_stale_assumption_fails_against_modern_head_for_a_legitimate_reason():
-    """Proves *why* the old test was stale: at least one src/pcae/** file
-    now legitimately differs from the pinned baseline.json hashes, because
-    of the immediate predecessor's authorized source-conformance repair --
-    not because of any unauthorized drift."""
+    """Proves *why* the old test was stale: by the time of the immediate
+    predecessor's authorized source-conformance repair (pinned at this
+    phase's own entry commit, which is that repair's final commit), at
+    least one src/pcae/** file legitimately differed from the pinned
+    baseline.json hashes -- not because of any unauthorized drift.
+
+    This is evaluated at the fixed historical boundary
+    (``_THIS_PHASE_ENTRY_COMMIT``), never against whatever src/pcae/** looks
+    like on disk/HEAD when this test happens to run: a later, unrelated,
+    legitimate src/pcae/** edit must not perturb this historical fact."""
     baseline = json.loads((ROOT / 'docs/evidence/helper-installation-identity/baseline.json').read_text())
     source_hashes = {p: digest for p, digest in baseline['hashes'].items() if p.startswith('src/pcae/')}
     now_differs = [
         path for path, expected in source_hashes.items()
-        if hashlib.sha256((ROOT / path).read_bytes()).hexdigest() != expected
+        if hashlib.sha256(_read_bytes_at_commit(_THIS_PHASE_ENTRY_COMMIT, path)).hexdigest() != expected
     ]
-    assert now_differs, 'expected at least one legitimate later src/pcae/** edit to differ from the stale baseline'
+    assert now_differs, 'expected the source-conformance repair to have legitimately changed at least one src/pcae/** file by its own final commit'
     assert set(now_differs) <= set(_HELPER_CONFORMANCE_REPAIR_FILES)
 
 
@@ -194,10 +212,15 @@ def test_mutation_sensitivity_detects_synthetic_unauthorized_drift(tmp_path):
 
 
 def test_no_production_source_changed_in_this_phase():
-    """This test/evidence-only phase changes zero src/pcae/** paths from its
-    own entry commit."""
-    changed = _git('diff', '--name-only', _THIS_PHASE_ENTRY_COMMIT, 'HEAD',
-                    '--', 'src/pcae').strip()
+    """This test/evidence-only phase changed zero src/pcae/** paths between
+    its own entry commit and its own final (task-close) commit.
+
+    Bound to the phase's own terminal boundary, not to 'HEAD': any later,
+    unrelated, legitimate phase that edits some other src/pcae/** file must
+    not retroactively falsify this historical phase-local claim."""
+    assert _git('merge-base', '--is-ancestor', _THIS_PHASE_FINAL_COMMIT, 'HEAD') == ''
+    changed = _git('diff', '--name-only', _THIS_PHASE_ENTRY_COMMIT,
+                    _THIS_PHASE_FINAL_COMMIT, '--', 'src/pcae').strip()
     assert changed == ''
 
 
