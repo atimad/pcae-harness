@@ -6,11 +6,11 @@
 
 ## Title
 
-N16-5-F-5-TB-FAST-GREEN-STALE-ASSERTION-REPAIR: repair two current-HEAD-bound stale assertions in fast-green baseline-freeze evidence-repair tests
+Phase 150B (N16-5-F-5-TB-FAST-GREEN-STALE-ASSERTION-REPAIR): repair two current-HEAD-bound stale assertions in fast-green baseline-freeze evidence-repair tests
 
 ## Status
 
-active
+done
 
 ## Mode
 
