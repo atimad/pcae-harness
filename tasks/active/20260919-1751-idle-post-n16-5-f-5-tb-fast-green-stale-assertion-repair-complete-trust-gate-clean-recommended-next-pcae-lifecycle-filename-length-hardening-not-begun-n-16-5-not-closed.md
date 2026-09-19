@@ -28,6 +28,7 @@ Idle placeholder. Recommended next work: PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENIN
 - .pcae/session.json
 - .pcae/agent-locks/latest.json
 - .pcae/phase-completion-metadata.json
+- .pcae/fast-green-attribution/*
 
 ## Forbidden Files
 
