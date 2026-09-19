@@ -13,16 +13,16 @@
     "pcae_check": "PASS",
     "pcae_doctor_task_memory": "Pre-existing tasks/DONE.md bookkeeping warnings (predate this phase, unrelated to this phase's diff); no error-level task-memory defect; no new defect introduced by this phase.",
     "pcae_health": "healthy",
-    "pcae_push_check": "not_ready (pending this canonical report; will be re-checked post-push)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
-    "repository_transition_validator": "pending (staged pre-push; re-evaluated on the post-push finalization pass)",
+    "repository_transition_validator": "accept (complete_phase -> canonical phase report)",
     "telegram_runtime": "not_loaded"
   },
   "internal_evidence_coherence": "Evidence doc (docs/PHASE_N16_5_F_5_TB_FAST_GREEN_STALE_ASSERTION_REPAIR.md), PROJECT_STATUS.md's Current Phase section, and this metadata file all state the same disposition for this phase: COMPLETE -- STALE FAST GREEN HISTORICAL ASSERTIONS REPAIRED / TRUST GATE CLEAN, and the same zero attributable failures.",
   "internal_report_coherence": "No contradictory disposition strings present anywhere in this phase's own artifacts.",
   "metadata_consistency": "phase_id/phase_name/phase_title consistent throughout this file and the evidence doc.",
   "no_go_confirmation": "No src/pcae/** production source was changed by this phase.\nNo docs/contracts/** file was changed by this phase.\nNo held source-conformance IV commit (6c7f5cf4, 2b8ad2aa) was touched, cherry-picked, or published.\nNo blocked 150A filename-length-hardening commit (72cdba16, d0b2a75a) was touched, cherry-picked, or published.\nNo test was skipped, xfail'd, or deleted to achieve a clean Fast Green result.\nNo historical allowlist was broadened with today's file list to mask the defect.\nNo production writer authority, PB, POL-005, or runtime capability code was touched.\nNo packaging, deployment, or release metadata file was changed.\nNo force push, --no-verify, or manual hook bypass was used.\nNo fabricated canonical report or latest.json was produced; this report reflects real isolated-worktree Fast Green evidence.\nNo successor phase (filename-length hardening) was begun by this phase.\nNo runtime, PB, or POL-005 state was modified; runtime remains Observed / observe / unavailable.",
-  "origin_main_head_count": 1,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "c2b73f428e81d09a4152ca83c5e6f3ed56c0d708"
@@ -32,7 +32,7 @@
   "phase_name": "N16-5-F-5-TB-FAST-GREEN-STALE-ASSERTION-REPAIR",
   "phase_title": "Stale Fast Green Historical Assertions Repaired / Trust Gate Clean \u2014 N16-5-F-5-TB-FAST-GREEN-STALE-ASSERTION-REPAIR",
   "provisioning_model_selected": "Not applicable; this phase performs no provisioning-model work (test/evidence/governance repair only).",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING: re-attempt the blocked 150A filename-length hardening from updated origin/main, now unblocked against a clean Fast Green trust gate. Not begun.",
   "report_consistency": "docs/PHASE_N16_5_F_5_TB_FAST_GREEN_STALE_ASSERTION_REPAIR.md matches this metadata file's disposition and evidence.",
   "status": "completed",
