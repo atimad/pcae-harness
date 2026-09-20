@@ -2,6 +2,24 @@
 
 ## Current Phase
 
+Phase `150D` — N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV. **COMPLETE — INDEPENDENTLY VERIFIED** (provisioning source-conformance property only). Fresh, independent adversarial re-verification of the provisioning source-conformance repair against current `origin/main` after 150B/150C — not a reuse of the held IV's evidence or conclusions. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+
+Rooted at `origin/main` == `caa155b6` (150C's own final pushed commit) in an isolated worktree/branch (`n16-5-f-5-tb-helper-provisioning-source-conformance-repair-iv`). Verified absent from this branch's ancestry, before mutation and before push: the held source-conformance IV commits `6c7f5cf4`/`2b8ad2aa` (local-only, never on `origin/main`), not touched, cherry-picked, merged, rebased, or published.
+
+Independently reconstructed current source (not trusting predecessor prose): `CLOSED_ADMIN_MUTATIONS` = exactly `{enroll_principal, revoke_principal, enroll_credential, revoke_credential, initialize_credential_sidecar_state}`, both `configure_privileged_helper`/`configure_presentation_mechanism` absent and triple-fail-closed (`handle_admin_mutation`, `perform_recognized_admin_mutation`, `mint_and_perform_admin_mutation` independently gate both). Tree-wide occurrence inventory (128 hits) classified with zero unexpected helper-reachable occurrences. Standalone `configure_presentation_mechanism` path intact and distinct; `configure_privileged_helper`'s standalone dispatch legitimately does not exist yet (contractually expected per HPAC-PAWA-001 §98 REQ-352, not an accidental deletion). Model E authority separation (sealed `__slots__` classes, exact-type recognition, no shared sink) verified intact under an executed adversarial dispatch matrix. Foundation boundary (`hpac_foundation.py`) confirmed zero diff overlap with this repair — not touched, not claimed repaired.
+
+**Disclosed, not fixed:** a genuine pre-existing helper-admission gap — `hpac_pawa_helper_os.authenticate_peer`'s `configured_agent` parameter defaults to `None` rather than the live resolution its docstring claims, and the sole production caller (`hpac_pawa_helper_launcher.py`) never supplies it, so the peer-≠-configured-agent conjunct is silently skipped in production today. Unrelated to the source-conformance property verified here; helper admission is **not** claimed repaired. Full evidence: `docs/PHASE_N16_5_F_5_TB_HELPER_PROVISIONING_SOURCE_CONFORMANCE_REPAIR_IV.md`.
+
+Fresh 34-test dedicated IV suite (`tests/test_n16_5_f_5_tb_helper_provisioning_source_conformance_repair_iv.py`), all passing, independently authored against current source (old held-IV tests inspected read-only for reconciliation, not reused verbatim). Fast Green (`pcae phase fast-green-attribution`, method `parent_of_oldest_phase_attributed_commit`): baseline `caa155b6` (`origin/main`), candidate `8a5d0a14` (this phase's own finalization checkpoint). **`attributable_failures: []`.** Zero `src/pcae/**` and zero `docs/contracts/**` changes.
+
+Held commits `6c7f5cf4`/`2b8ad2aa`: **HISTORICAL / SUPERSEDED** — their verification intent was freshly reconstructed here; the commits themselves remain unpublished.
+
+Recommended next phase (not begun by this phase): a narrowly-scoped repair of the disclosed `hpac_pawa_helper_os.authenticate_peer` `configured_agent=None` admission gap. N-16-5 remains **NOT CLOSED**. N-16-6/N-16-7 untouched.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — one delegated fork performed bounded inspection, adversarial testing, and fresh-test-suite authorship only; the primary operator independently re-verified its central claims before relying on them and performed all lifecycle mutation, finalization, commit, and push directly.
+
+## Previous Completed Lifecycle Filename-Length Hardening
+
 Phase `150C` — PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING-R. **COMPLETE — LIFECYCLE FILENAME-LENGTH HARDENING VERIFIED**. Fresh, independent re-attempt from current `origin/main` (150B), with its own canonical identity (a fresh short top-level number, sibling to `150A`/`150B`), entry baseline, implementation commits, tests, Fast Green attribution, and completion lifecycle. Does not reinterpret the original blocked `150A` attempt as successful; `150A`'s production diff was read-only reference material only, independently re-derived here, never cherry-picked or merged. Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
 
 Rooted at `origin/main` == `2be6fe01` (150B's own final pushed commit) in an isolated worktree/branch. Verified absent from this branch's ancestry, before mutation and before push: held source-conformance IV (`6c7f5cf4`/`2b8ad2aa`) and the original blocked 150A commits (`72cdba16`/`d0b2a75a`).
