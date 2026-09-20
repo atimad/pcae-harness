@@ -2664,8 +2664,8 @@
       ],
       "schema_version": "fast_green_attribution.v1"
     },
-    "phase_150b_regression": "Both of 150B's originally-repaired assertions (test_no_production_source_changed_in_this_phase, test_stale_assumption_fails_against_modern_head_for_a_legitimate_reason) re-run and confirmed still green after this phase's legitimate src/pcae/** edits. Two additional stale assertions discovered and repaired in 150B's own fresh suite (see summary).",
-    "regression_sweep": "Full report|task|bootstrap|session_reporting|transition_valid keyword sweep: 20 failed / 2676 passed / 7 skipped, identical failure set (by name) to a git-stash-isolated pre-edit baseline (20 failed / 2667 passed / 7 skipped) -- zero new failures. Targeted suite (test_phase_reports*.py + test_task*.py + both 150B stale-assertion-repair test files): 384/384 passed.",
+    "predecessor_stale_assertion_regression": "Both of the predecessor phase's originally-repaired assertions (test_no_production_source_changed_in_this_phase, test_stale_assumption_fails_against_modern_head_for_a_legitimate_reason) re-run and confirmed still green after this phase's legitimate src/pcae/** edits. Two additional stale assertions discovered and repaired in the predecessor phase's own fresh suite (see summary).",
+    "regression_sweep": "Full report|task|bootstrap|session_reporting|transition_valid keyword sweep: 20 failed / 2676 passed / 7 skipped, identical failure set (by name) to a git-stash-isolated pre-edit baseline (20 failed / 2667 passed / 7 skipped) -- zero new failures. Targeted suite (test_phase_reports*.py + test_task*.py + both predecessor-phase stale-assertion-repair test files): 384/384 passed.",
     "report_notification_tests": "Not touched by this phase's diff; unaffected.",
     "runtime_posture": "Observed / observe / unavailable; unchanged by this phase.",
     "self_hosting_acceptance": "Synthetic phase identity (243 bytes, longer than the real blocked ID) and derived task title: task create/lookup/finish and phase-report promoted/quarantine writes all succeeded with zero ENAMETOOLONG; full canonical identity recovered from every written artifact's content.",
