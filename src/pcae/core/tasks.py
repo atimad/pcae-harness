@@ -8,6 +8,7 @@ import re
 import unicodedata
 
 from pcae.core import phase_id as canonical_phase_id
+from pcae.core.filename_safety import bounded_filename_component
 from pcae.core.paths import HarnessPath
 
 
@@ -190,7 +191,16 @@ def create_task_contract(
     timestamp = created_at or datetime.now().astimezone()
     slug = slugify_title(title)
     task_id = f"{timestamp:%Y%m%d-%H%M}-{slug}"
-    relative_path = Path("tasks") / "active" / f"{task_id}.md"
+    # PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING: `task_id` is the full
+    # canonical identity, recorded verbatim below in the "## Task ID"
+    # content section; the file basename is a separately bounded locator
+    # that may be shortened for an overlong title without touching the
+    # canonical identity itself. The primary lifecycle (close/finish) never
+    # reconstructs a path from `task_id` -- it renames whatever file it
+    # actually found -- so bounding only the write side here is sufficient
+    # for read/write symmetry.
+    file_stem = bounded_filename_component(task_id, extension=".md")
+    relative_path = Path("tasks") / "active" / f"{file_stem}.md"
     content = render_task_contract(
         task_id=task_id,
         title=title,

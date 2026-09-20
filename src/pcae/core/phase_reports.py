@@ -19,6 +19,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from pcae.core import phase_id as canonical_phase_id
+from pcae.core.filename_safety import bounded_filename_component
 from pcae.core.canonical_artifact_promotion import (
     ArtifactState as PromotionArtifactState,
     promote_artifact,
@@ -706,6 +707,19 @@ def _safe_filename(phase_id: str) -> str:
     return _SAFE_FILENAME_RE.sub("-", phase_id)
 
 
+def _bounded_report_base(raw_base: str, *, longest_extension: str) -> str:
+    """Bound a phase-report filename base (PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING).
+
+    ``longest_extension`` must be the longest of the extensions the caller
+    will suffix onto this same ``base`` (e.g. ``.json`` is longer than
+    ``.md``), so the byte bound holds for every sibling file sharing this
+    base. The canonical, untruncated ``phase_id`` remains recorded
+    verbatim in the report's own content -- this only bounds the
+    filename.
+    """
+    return bounded_filename_component(raw_base, extension=longest_extension)
+
+
 def _ensure_dir(reports_dir: Path) -> None:
     """Create the phase-reports directory if it doesn't exist."""
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -725,7 +739,8 @@ def write_phase_report(report: PhaseReport, reports_dir: Path) -> dict[str, str]
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     safe_id = _safe_filename(report.phase_id)
-    base = f"{ts}-{safe_id}"
+    raw_base = f"{ts}-{safe_id}"
+    base = _bounded_report_base(raw_base, longest_extension=".json")
 
     md_path = reports_dir / f"{base}.md"
     json_path = reports_dir / f"{base}.json"
@@ -862,7 +877,9 @@ def write_quarantined_report(
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f")
     safe_id = _safe_filename(report.phase_id)
     attempt_digest = compute_report_digest(report)[:12]
-    base = f"{ts}-{safe_id}-{attempt_digest}.blocked"
+    raw_base = f"{ts}-{safe_id}-{attempt_digest}"
+    bounded_base = _bounded_report_base(raw_base, longest_extension=".blocked.json")
+    base = f"{bounded_base}.blocked"
 
     md_path = quarantine_dir / f"{base}.md"
     json_path = quarantine_dir / f"{base}.json"

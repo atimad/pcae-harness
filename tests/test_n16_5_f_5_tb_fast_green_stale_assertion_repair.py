@@ -42,6 +42,14 @@ _TARGET_TEST_FILE = ROOT / 'tests/test_n16_5_f_5_tb_fast_green_baseline_freeze_e
 _TARGET_TEST_SOURCE = _TARGET_TEST_FILE.read_text()
 
 _THIS_REPAIR_PHASE_ENTRY_COMMIT = 'c4c9f554106965e10a057db96a106f85f72f8f65'
+# 150B's own final (last-pushed) commit -- this phase's own "did we touch
+# src/pcae" claim is evaluated at this pinned boundary, never at 'HEAD',
+# per the exact Model FG-E principle this file itself documents above.
+# (Phase 150C, PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING-R, found this same
+# HEAD-bound pattern still present in this file's own two "did this phase
+# touch src/pcae" assertions below -- the identical disease class 150B
+# repaired in the sibling file, present here in 150B's own fresh suite.)
+_THIS_REPAIR_PHASE_FINAL_COMMIT = '2be6fe01690d7ee81e854f6f8374a4086f318a9b'
 
 # The repaired phase's own pinned boundary (reconstructed independently from
 # PROJECT_STATUS.md and git history, not guessed).
@@ -84,10 +92,14 @@ def test_no_held_or_blocked_commits_in_this_branch_ancestry():
 
 
 def test_this_phase_changed_zero_production_or_contract_files():
-    """This stale-assertion-repair phase itself changes zero src/pcae/** or
-    docs/contracts/** paths from its own entry commit."""
+    """This stale-assertion-repair phase itself changed zero src/pcae/** or
+    docs/contracts/** paths between its own entry and its own final
+    (pushed) commit -- not against 'HEAD', which a later, unrelated,
+    legitimate phase (e.g. filename-length hardening) may legitimately
+    move past by editing some other src/pcae/** file."""
+    assert _git('merge-base', '--is-ancestor', _THIS_REPAIR_PHASE_FINAL_COMMIT, 'HEAD') == ''
     changed = _git('diff', '--name-only', _THIS_REPAIR_PHASE_ENTRY_COMMIT,
-                    'HEAD', '--', 'src/pcae', 'docs/contracts').strip()
+                    _THIS_REPAIR_PHASE_FINAL_COMMIT, '--', 'src/pcae', 'docs/contracts').strip()
     assert changed == ''
 
 
@@ -256,8 +268,10 @@ def test_legitimate_later_src_pcae_edit_does_not_break_either_repaired_assertion
 
 def test_no_production_source_or_contract_changes_repo_wide():
     """Zero src/pcae/** or docs/contracts/** changes anywhere in this
-    phase's diff from its own entry commit."""
-    changed = _git('diff', '--name-only', _THIS_REPAIR_PHASE_ENTRY_COMMIT, 'HEAD').strip()
+    phase's diff from its own entry commit to its own final (pushed)
+    commit -- pinned, not evaluated against a moving 'HEAD'."""
+    changed = _git('diff', '--name-only', _THIS_REPAIR_PHASE_ENTRY_COMMIT,
+                    _THIS_REPAIR_PHASE_FINAL_COMMIT).strip()
     changed_paths = changed.splitlines() if changed else []
     assert all(not p.startswith('src/pcae/') for p in changed_paths)
     assert all(not p.startswith('docs/contracts/') for p in changed_paths)
