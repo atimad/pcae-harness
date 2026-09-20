@@ -12,7 +12,7 @@
     "pcae_check": "PASS",
     "pcae_doctor_task_memory": "Pre-existing tasks/DONE.md bookkeeping warnings (predate this phase, unrelated to this phase's diff); no error-level task-memory defect; no new defect introduced by this phase.",
     "pcae_health": "healthy",
-    "pcae_push_check": "not yet pushed (staged pending-report pass; will be reconfirmed as clean (nothing_to_push) after push)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "repository_transition_validator": "accept (complete_phase -> canonical phase report)",
     "telegram_runtime": "not_loaded"
@@ -21,7 +21,7 @@
   "internal_report_coherence": "No contradictory disposition strings present anywhere in this phase's own artifacts.",
   "metadata_consistency": "phase_id/phase_name/phase_title consistent throughout this file, the canonical phase-completion-report.md, and the evidence doc.",
   "no_go_confirmation": "No src/pcae/** file was changed by this phase.\nNo docs/contracts/** file was changed by this phase.\nNo HPAC helper protocol/store-adapter/operations file was changed by this phase.\nNo Model E, foundation, PB, runtime, or POL-005 file was changed by this phase.\nNo held source-conformance IV commit (6c7f5cf4, 2b8ad2aa) was touched, cherry-picked, or published by this phase.\nNo production behavior was altered by this phase; it is verification-only.\nNo test was skipped, xfail'd, or deleted to obtain a clean Fast Green result.\nNo packaging, deployment, or release metadata file was changed by this phase.\nNo force push, --no-verify, or manual hook bypass was used by this phase.\nNo fabricated canonical report or latest.json was produced; this report reflects real isolated-worktree Fast Green evidence.\nNo helper admission repair was claimed or attempted by this phase.\nNo foundation boundary repair was claimed or attempted by this phase.\nNo real provisioning execution or host mutation was attempted by this phase.\nNo N-16-6 or N-16-7 work was begun by this phase.",
-  "origin_main_head_count": 3,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "fb1f0174c0482b4782a81d360f92f69c2aa6e3fc"
@@ -46,7 +46,7 @@
   "phase_name": "N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV",
   "phase_title": "Provisioning Source-Conformance Independently Verified \u2014 N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV",
   "provisioning_model_selected": "Not applicable; this phase performs no provisioning-model work (verification-only re-check of an already-completed source-conformance repair).",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "A narrowly-scoped repair of the disclosed hpac_pawa_helper_os.authenticate_peer configured_agent=None admission gap (docstring claims a live-resolution default the code does not perform; the sole production caller never supplies the parameter). Not begun. N-16-5 remains NOT CLOSED.",
   "report_consistency": "docs/PHASE_N16_5_F_5_TB_HELPER_PROVISIONING_SOURCE_CONFORMANCE_REPAIR_IV.md matches this metadata file's disposition and evidence.",
   "status": "completed",
