@@ -2287,6 +2287,11 @@
       ],
       "generated_at": "2026-09-20T18:05:00.750118+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
+      "provenance": {
+        "artifact_digest": "6d5ef7165ea01921dde5ba7dcd12282f2a60d0c87f90797f5bf1ff9b46910a03",
+        "artifact_path": ".pcae/fast-green-attribution/6d5ef7165ea01921dde5ba7dcd12282f2a60d0c87f90797f5bf1ff9b46910a03.json",
+        "generated_by_command": "pcae phase fast-green-attribution"
+      },
       "raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_baseline_digest_is_stable_and_reproducible",
