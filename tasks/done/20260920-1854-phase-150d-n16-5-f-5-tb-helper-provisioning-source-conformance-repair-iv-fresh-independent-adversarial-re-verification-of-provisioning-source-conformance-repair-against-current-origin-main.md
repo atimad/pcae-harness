@@ -10,7 +10,7 @@ Phase 150D (N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV): fres
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -76,10 +76,10 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
+- pcae status coherence
+- pcae health
+- pcae check
+- python3 -m pytest tests/test_n16_5_f_5_tb_helper_provisioning_source_conformance_repair_iv.py -q
 
 ## Documentation Requirements
 
