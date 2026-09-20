@@ -1,6 +1,7 @@
 {
   "execution_availability": "unavailable",
   "files_changed": [
+    ".pcae/fast-green-attribution/ebb3133e5deb8083dfa3725c56b7a12195d34819bf6a487f74fc9840914f6cb1.json",
     ".pcae/fast-green-attribution/fdc739c5801ff6a1899e8b723c1ac7a1e29b1a6f85432cb783c7aff970358546.json",
     "PROJECT_STATUS.md",
     "docs/PHASE_N16_5_F_5_TB_PCAE_LIFECYCLE_FILENAME_LENGTH_HARDENING_R.md",
@@ -14,16 +15,16 @@
     "pcae_check": "PASS",
     "pcae_doctor_task_memory": "Pre-existing tasks/DONE.md bookkeeping warnings (predate this phase, unrelated to this phase's diff); no error-level task-memory defect; no new defect introduced by this phase.",
     "pcae_health": "healthy",
-    "pcae_push_check": "not_ready (pending this canonical report; will be re-checked post-push)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
-    "repository_transition_validator": "pending (staged pre-push; re-evaluated on the post-push finalization pass)",
+    "repository_transition_validator": "accept (complete_phase -> canonical phase report)",
     "telegram_runtime": "not_loaded"
   },
   "internal_evidence_coherence": "Evidence doc (docs/PHASE_N16_5_F_5_TB_PCAE_LIFECYCLE_FILENAME_LENGTH_HARDENING_R.md), PROJECT_STATUS.md's Current Phase section, and this metadata file all state the same disposition for this phase: COMPLETE -- LIFECYCLE FILENAME-LENGTH HARDENING VERIFIED, and the same zero attributable failures.",
   "internal_report_coherence": "No contradictory disposition strings present anywhere in this phase's own artifacts.",
   "metadata_consistency": "phase_id/phase_name/phase_title consistent throughout this file and the evidence doc.",
   "no_go_confirmation": "No docs/contracts/** file was changed by this phase.\nNo HPAC helper protocol/store-adapter/operations file was changed by this phase.\nNo Model E, foundation, PB, runtime, or POL-005 file was changed by this phase.\nNo held source-conformance IV commit (6c7f5cf4, 2b8ad2aa) was touched, cherry-picked, or published.\nNo original blocked 150A commit (72cdba16, d0b2a75a) was touched, cherry-picked, merged, or published.\nNo test was skipped, xfail'd, or deleted to achieve a clean Fast Green result.\nNo packaging, deployment, or release metadata file was changed.\nNo force push, --no-verify, or manual hook bypass was used.\nNo fabricated canonical report or latest.json was produced; this report reflects real isolated-worktree Fast Green evidence.\nNo filename was shortened in a way that altered the canonical phase/task identity stored in artifact content.\nNo path-traversal or unsafe-character vulnerability was introduced by the bounded filename primitive.\nNo runtime, PB, or POL-005 state was modified; runtime remains Observed / observe / unavailable.\nNo held IV or successor conformance-repair work was begun by this phase.",
-  "origin_main_head_count": 1,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "4dcd4c0ec4f5f547ede89957816bd7ce0c1a73be"
@@ -33,7 +34,7 @@
   "phase_name": "PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING-R",
   "phase_title": "Lifecycle Filename-Length Hardening Verified \u2014 PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING-R",
   "provisioning_model_selected": "Not applicable; this phase performs no provisioning-model work (infrastructure-only filename-length repair).",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV: reconcile/resume the held IV (6c7f5cf4, 2b8ad2aa), now that the filename-length limitation that motivated holding it no longer applies. Not begun.",
   "report_consistency": "docs/PHASE_N16_5_F_5_TB_PCAE_LIFECYCLE_FILENAME_LENGTH_HARDENING_R.md matches this metadata file's disposition and evidence.",
   "status": "completed",
@@ -347,6 +348,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -424,7 +426,7 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
-      "candidate_commit": "4dcd4c0ec4f5f547ede89957816bd7ce0c1a73be",
+      "candidate_commit": "d241a4d3c1a4fe30b95270ddabd11bbf6b04d9da",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
       "excluded_environment_failures": [],
       "excluded_preexisting_failures": [
@@ -2274,18 +2276,12 @@
           "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
         }
       ],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "not_pushed"
-        }
-      ],
-      "generated_at": "2026-09-20T12:22:03.028822+00:00",
+      "expected_phase_artifacts": [],
+      "generated_at": "2026-09-20T12:44:27.453845+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "provenance": {
-        "artifact_digest": "fdc739c5801ff6a1899e8b723c1ac7a1e29b1a6f85432cb783c7aff970358546",
-        "artifact_path": ".pcae/fast-green-attribution/fdc739c5801ff6a1899e8b723c1ac7a1e29b1a6f85432cb783c7aff970358546.json",
+        "artifact_digest": "ebb3133e5deb8083dfa3725c56b7a12195d34819bf6a487f74fc9840914f6cb1",
+        "artifact_path": ".pcae/fast-green-attribution/ebb3133e5deb8083dfa3725c56b7a12195d34819bf6a487f74fc9840914f6cb1.json",
         "generated_by_command": "pcae phase fast-green-attribution"
       },
       "raw_errors": [
@@ -2584,7 +2580,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
