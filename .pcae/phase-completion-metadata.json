@@ -6,7 +6,9 @@
     "PROJECT_STATUS.md",
     "docs/PHASE_N16_5_F_5_TB_HELPER_PROVISIONING_SOURCE_CONFORMANCE_REPAIR_IV.md",
     "tests/test_n16_5_f_5_tb_helper_provisioning_source_conformance_repair_iv.py",
-    ".pcae/fast-green-attribution/885b41c3ab0997cf384559e3c1a98314d97fde4c760151cd4623818ed9b1a6b1.json"
+    ".pcae/fast-green-attribution/885b41c3ab0997cf384559e3c1a98314d97fde4c760151cd4623818ed9b1a6b1.json",
+    ".pcae/fast-green-attribution/9cd96e82c0cdc6dce87ad0645af59a996f474395827d50256fe801faf49e5104.json",
+    ".pcae/fast-green-attribution/560b7096a9b1c74e00b9143d09a0eaf97d234ff77a4df171d77e3c59b12a5089.json"
   ],
   "governance_results": {
     "pcae_check": "PASS",
@@ -40,6 +42,15 @@
     },
     {
       "hash": "9ae315749a69b30765de92e22118f1b07d2a3488"
+    },
+    {
+      "hash": "b4600234bb938fa7318053decb1a30823de9fb01"
+    },
+    {
+      "hash": "fa0639e2dde7538edc666c469c04469a3f4257d9"
+    },
+    {
+      "hash": "19f3cb381ab910f0dcfcc34de1f8830fe3ae3059"
     }
   ],
   "phase_id": "150D",
@@ -52,7 +63,7 @@
   "status": "completed",
   "summary": "Phase 150D: fresh, independent adversarial re-verification of the provisioning source-conformance repair (removal of configure_privileged_helper/configure_presentation_mechanism from the helper privileged mutation path) against current origin/main (rooted at 150C's caa155b6). Both forbidden ops confirmed absent from CLOSED_ADMIN_MUTATIONS and triple-fail-closed; zero unexpected occurrences tree-wide; standalone PAWA/PPA path intact; Model E authority separation intact; foundation boundary untouched; helper admission's configured_agent=None gap disclosed, not claimed repaired. Fresh 34-test suite green; Fast Green attributable_failures: []. Zero src/pcae/** and zero docs/contracts/** changes. N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.",
   "test_evidence_classification": "fresh_adversarial_suite_plus_governed_fast_green_attribution",
-  "test_evidence_classification_rationale": "34 fresh tests added for Phase 150D covering: central exclusion from CLOSED_ADMIN_MUTATIONS/CLOSED_OPERATIONS, the full tree-wide occurrence inventory as an executable assertion, dispatch fail-closed behavior through all three independent gates, alias/case/whitespace/null-byte/nested-parameter attack variants, Model E cross-family (off-diagonal) rejection and exact-type (non-isinstance) recognition, standalone-path existence and exclusivity for configure_presentation_mechanism, foundation-file non-overlap, the helper-admission configured_agent=None gap (disclosed, not fixed), and a correctly historically-pinned (not current-HEAD-bound) contract-byte-identity check. Governed pcae phase fast-green-attribution run against baseline caa155b6 (origin/main, 150C's own pushed final commit) vs candidate 8a5d0a14 (Phase 150D's own finalization checkpoint commit): attributable_failures: [].",
+  "test_evidence_classification_rationale": "34 fresh tests added for Phase 150D covering: central exclusion from CLOSED_ADMIN_MUTATIONS/CLOSED_OPERATIONS, the full tree-wide occurrence inventory as an executable assertion, dispatch fail-closed behavior through all three independent gates, alias/case/whitespace/null-byte/nested-parameter attack variants, Model E cross-family (off-diagonal) rejection and exact-type (non-isinstance) recognition, standalone-path existence and exclusivity for configure_presentation_mechanism, foundation-file non-overlap, the helper-admission configured_agent=None gap (disclosed, not fixed), and a correctly historically-pinned (not current-HEAD-bound) contract-byte-identity check. Governed pcae phase fast-green-attribution run against baseline caa155b6 (origin/main, 150C's own pushed final commit) vs candidate 8a5d0a14 (Phase 150D's own finalization checkpoint commit): attributable_failures: []. One candidate-only raw failure surfaced on the post-push run, tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record -- the same long-known-flaky node 150C's own evidence documents. Reclassified via --rerun-node (isolated single-node rerun), which passed. Final run: attributable_failures: [].",
   "tests_added_or_updated": "tests/test_n16_5_f_5_tb_helper_provisioning_source_conformance_repair_iv.py (new, 34 tests)",
   "tests_run": 34,
   "validation_results": {
@@ -360,6 +371,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -438,7 +450,7 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
         "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
       ],
-      "candidate_commit": "9ae315749a69b30765de92e22118f1b07d2a3488",
+      "candidate_commit": "19f3cb381ab910f0dcfcc34de1f8830fe3ae3059",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
       "excluded_environment_failures": [],
       "excluded_preexisting_failures": [
@@ -2289,12 +2301,12 @@
         }
       ],
       "expected_phase_artifacts": [],
-      "generated_at": "2026-09-20T18:39:36.083941+00:00",
+      "generated_at": "2026-09-20T19:22:45.179350+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "provenance": {
-        "artifact_digest": "885b41c3ab0997cf384559e3c1a98314d97fde4c760151cd4623818ed9b1a6b1",
-        "artifact_path": ".pcae/fast-green-attribution/885b41c3ab0997cf384559e3c1a98314d97fde4c760151cd4623818ed9b1a6b1.json",
-        "generated_by_command": "pcae phase fast-green-attribution --pushed-status not_pushed"
+        "artifact_digest": "560b7096a9b1c74e00b9143d09a0eaf97d234ff77a4df171d77e3c59b12a5089",
+        "artifact_path": ".pcae/fast-green-attribution/560b7096a9b1c74e00b9143d09a0eaf97d234ff77a4df171d77e3c59b12a5089.json",
+        "generated_by_command": "pcae phase fast-green-attribution --pushed-status pushed --rerun-node tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
       },
       "raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -2592,7 +2604,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
