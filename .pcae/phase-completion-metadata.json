@@ -2288,13 +2288,7 @@
           "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
         }
       ],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "not_pushed"
-        }
-      ],
+      "expected_phase_artifacts": [],
       "generated_at": "2026-09-20T18:39:36.083941+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "provenance": {
