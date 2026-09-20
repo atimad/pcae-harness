@@ -31,6 +31,7 @@ Fresh, independent adversarial re-verification of the provisioning source-confor
 - tasks/active/*
 - tasks/done/*
 - .pcae/*
+- .pcae/fast-green-attribution/*
 
 ## Forbidden Files
 

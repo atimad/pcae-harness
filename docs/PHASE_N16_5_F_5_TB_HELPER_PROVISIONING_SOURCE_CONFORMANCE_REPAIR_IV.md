@@ -84,11 +84,13 @@ Combined keyword sweep (`provisioning|prov_repair|helper_iv|helper_writer_author
 
 ## Post-commit regression re-check
 
-(completed after this phase's implementation commit; see below)
+Post-commit (`fb1f0174`), the two `test_real_host_class_b_conformance_is_non_compliant_and_host_unchanged` instances flagged above as a pre-commit-only artifact were re-run standalone and both pass (`tests/test_phase_149o_20l_5_class_b_real_host_provisioning_authorization_and_planning.py`: 12/12 passed). The fresh IV suite was also re-run standalone post-commit: 34/34 passed. `git status --short` is clean at this point (before the task-scope-widening and commit-message-amend bookkeeping below).
 
 ## Fast Green
 
-(recorded after fresh attribution run; see below)
+`pcae phase fast-green-attribution --phase-id 150D`, method `parent_of_oldest_phase_attributed_commit` (correctly derived from this phase's own commit subject, not caller-supplied): baseline `caa155b6` (== `origin/main`, Phase 150C's final pushed commit), candidate `fb1f0174` (this phase's own implementation commit, after amending its subject to the `Phase 150D: ...` format required for programmatic attribution — the amend was performed before push, on this phase's own single unpublished commit only). **`attributable_failures: []`.** 362 raw failures on the candidate vs. 361 on the baseline (the delta being this phase's own fresh 34-test file's collection, all passing, contributing zero failures); 370 failures excluded as preexisting. One `expected_phase_artifacts` prediction (`test_head_equals_origin_main`, predicted `local_only`) is expected and will resolve after this phase pushes. Artifact: `.pcae/fast-green-attribution/8a1428feef40ac0d9c47082ffe7c272789f227d2d859914d0fb105d1dd32bb29.json`.
+
+Note on process: an earlier invocation of this command produced a degenerate, vacuous result (baseline collapsed to candidate HEAD, trivially yielding zero attributable failures) because the phase's first commit message did not match the tool's required `"Phase <ID>: ..."` subject pattern (the alias parenthetical was placed before the colon). That result was discarded and never treated as evidence; the commit subject was corrected and this section reflects the re-run against the correctly-derived baseline only.
 
 ## Production / contract delta
 
