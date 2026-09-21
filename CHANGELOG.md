@@ -1,5 +1,9 @@
 # Changelog
 
+## Helper admission recognition shared-infrastructure architecture
+
+Phase `150F` — N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-SHARED-INFRASTRUCTURE-ARCHITECTURE. **COMPLETE — ARCHITECTURE VERIFIED** (contract-freeze only, no production implementation). Independently reconstructed `_run_recognition_sequence`'s eleven steps and REQ-031/032/033/042-045; confirmed steps 1-8 contain no mutation/writer-authority primitive and never touch `HPACStoreAuthority`. Evaluated Models A/B/C; selected Model B — extract steps 1-8 into a new neutral, non-agent-importable module (proposed `hpac_pawa_recognition_core.py`) safely importable by both the legacy factory and a future helper implementation. Foundation blocker (`_validate_production_boundary`) confirmed unchanged and untouched — recognition and capability-minting are already separable. Model E authority classes confirmed unchanged. 14 new tests, all passing; zero `src/pcae/**`/`docs/contracts/**` changes; zero attributable Fast Green regressions. N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched. Full evidence: `docs/PHASE_150F_N16_5_F_5_TB_HELPER_ADMISSION_RECOGNITION_SHARED_INFRASTRUCTURE_ARCHITECTURE.md`.
+
 ## Helper admission provenance investigation
 
 Recorded the blocked admission repair: helper/PAWA/PPA installation identities conflict, and presentation metadata reads reach the known foundation boundary. Added 13 evidence tests and disposable Linux reproduction. No production or contract change.
