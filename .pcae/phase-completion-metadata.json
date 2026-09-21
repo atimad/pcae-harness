@@ -7,13 +7,14 @@
     "tasks/active/20260921-1725-phase-150e-n16-5-f-5-tb-helper-admission-configured-agent-repair-reconstruct-configured-agent-admission-requirement-and-repair-authenticate-peer-configured-agent-none-gap.md",
     "tasks/done/20260920-2042-idle-post-phase-150d-n16-5-f-5-tb-helper-provisioning-source-conformance-repair-iv-complete-independently-verified-push-closure-pending-n-16-5-not-closed.md",
     ".pcae/fast-green-attribution/3bb0de3643369cd99f6079b059f09a8b8437ed91b1c7a30ba3cf83e5b0075129.json",
-    ".pcae/fast-green-attribution/2f9074f541433222bc0bd57ab66d8b24e307f289e9d83bdf861bb5b3acee4749.json"
+    ".pcae/fast-green-attribution/2f9074f541433222bc0bd57ab66d8b24e307f289e9d83bdf861bb5b3acee4749.json",
+    ".pcae/fast-green-attribution/3e61555ebf2332101bc542539a5ad1490b032a48add75211e33c3d997ff020ac.json"
   ],
   "governance_results": {
     "pcae_check": "PASS",
     "pcae_doctor_task_memory": "Pre-existing tasks/DONE.md bookkeeping warnings (predate this phase, unrelated to this phase's diff); no error-level task-memory defect; no new defect introduced by this phase.",
     "pcae_health": "healthy",
-    "pcae_push_check": "needs_push (1 unpushed)",
+    "pcae_push_check": "clean (nothing_to_push)",
     "pcae_status_coherence": "coherent",
     "repository_transition_validator": "accept (complete_phase -> canonical phase report)",
     "telegram_runtime": "loaded"
@@ -22,23 +23,32 @@
   "internal_report_coherence": "No contradictory disposition strings present anywhere in this phase's own artifacts.",
   "metadata_consistency": "phase_id/phase_name/phase_title consistent throughout this file, the canonical phase-completion-report.md, and the evidence doc.",
   "no_go_confirmation": "No src/pcae/** file was changed by this phase.\nNo docs/contracts/** file was changed by this phase.\nNo HPAC helper protocol/store-adapter/operations file was changed by this phase.\nNo Model E, foundation, PB, runtime, or POL-005 file was changed by this phase.\nNo held source-conformance IV commit (6c7f5cf4, 2b8ad2aa, 72cdba16, d0b2a75a) was touched, cherry-picked, or published by this phase.\nNo production behavior was altered by this phase; it is reconstruction-and-analysis-only.\nNo test was skipped, xfail'd, or deleted to obtain a clean Fast Green result.\nNo packaging, deployment, or release metadata file was changed by this phase.\nNo force push, --no-verify, or manual hook bypass was used by this phase.\nNo fabricated canonical report or latest.json was produced; this report reflects a real Fast Green attribution run.\nNo helper admission repair was implemented or claimed by this phase; it STOPPED with a Blocking Finding instead.\nNo foundation boundary repair was claimed or attempted by this phase.\nNo real provisioning execution or host mutation was attempted by this phase.\nNo N-16-6 or N-16-7 work was begun by this phase.",
-  "origin_main_head_count": 1,
+  "origin_main_head_count": 0,
   "phase_commits": [
     {
       "hash": "dee674d88e10f89e8f112eec99d7f7928f6a1416"
+    },
+    {
+      "hash": "6bdaf36bc43b8d65348249931e99cd10823487e6"
+    },
+    {
+      "hash": "818fe8b5"
+    },
+    {
+      "hash": "704240ac3860e75e6c1846d33e0b552173334c55"
     }
   ],
   "phase_id": "150E",
   "phase_name": "N16-5-F-5-TB-HELPER-ADMISSION-CONFIGURED-AGENT-REPAIR",
   "phase_title": "Helper Configured-Agent Admission Repair -- STOP / Blocking Finding -- N16-5-F-5-TB-HELPER-ADMISSION-CONFIGURED-AGENT-REPAIR",
   "provisioning_model_selected": "Not applicable; no repair model (A/B/C) was implemented. Both Model A and Model B were evaluated and found to require either importing the forbidden legacy PAWA factory, duplicating trust-critical protected-root reading logic as a second divergent resolver, or an out-of-scope shared-infrastructure/foundation extraction -- this phase STOPPED rather than select an unsafe or scope-exceeding model.",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "recommended_next_phase": "Either (a) a dedicated phase to implement HPAC-PAWA-HELPER-REQ-031's currently-missing in-helper section-33 step 1-8 recognition, or (b) a dedicated, explicitly-authorized module-boundary/shared-infrastructure phase extracting the read-only portion of hpac_protected_admin_writer._run_recognition_sequence into helper-reachable non-agent infrastructure. Neither begun. N-16-5 remains NOT CLOSED.",
   "report_consistency": "docs/PHASE_N16_5_F_5_TB_HELPER_ADMISSION_CONFIGURED_AGENT_REPAIR.md matches this metadata file's disposition and evidence.",
   "status": "completed",
   "summary": "Phase 150E: reconstructed the configured-agent admission requirement for hpac_pawa_helper_os.authenticate_peer from current primary source (HPAC-PAWA-HELPER-001 v5.0 section 7/section 10, and the actual hpac_pawa_agent_exclusion/hpac_protected_admin_writer source), not from Phase 150D's prose. Confirmed the disclosed defect (configured_agent defaults to None; sole production caller never supplies it) is real, but found that a contract-conformant narrow repair (Model A or B) is not achievable within this phase's authorized scope: genuine live resolution requires resolve_configured_agent_identity, whose required inputs are today assembled only inside the legacy PAWA factory module the helper is forbidden (REQ-033) from importing; duplicating that ~70-line trust-critical reading chain would create a forbidden parallel identity truth source, and extracting it into shared infrastructure is an out-of-scope foundation/module-boundary decision. Also confirmed the fuller REQ-031 in-helper section-33 recognition that would supply this identity natively does not exist anywhere in the codebase yet. STOPPED with a documented Blocking Finding; zero src/pcae/** and zero docs/contracts/** changes. Before opening this phase, found and repaired (per explicit operator authorization) a stale local main diverged onto two disowned held-IV commits; reset to canonical origin/main. N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.",
   "test_evidence_classification": "reconstruction_and_analysis_only_plus_governed_fast_green_attribution",
-  "test_evidence_classification_rationale": "No new test file was authored (no repair was implemented to test). Governed pcae phase fast-green-attribution run against baseline 963f3f45 (origin/main, Phase 150D's own final pushed commit) vs candidate dee674d8 (this phase's own reconstruction/evidence/STOP commit): attributable_failures: []. Zero src/pcae/** or docs/contracts/** diff exists for Fast Green to attribute against; the clean result confirms this phase introduced no regression while performing zero production changes.",
+  "test_evidence_classification_rationale": "No new test file was authored (no repair was implemented to test). Governed pcae phase fast-green-attribution run against baseline 963f3f45 (origin/main, Phase 150D's own final pushed commit) vs candidate dee674d8 (this phase's own reconstruction/evidence/STOP commit): attributable_failures: []. Zero src/pcae/** or docs/contracts/** diff exists for Fast Green to attribute against; the clean result confirms this phase introduced no regression while performing zero production changes. Post-push re-run with --pushed-status pushed surfaced one candidate-only raw failure, tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record -- the same long-known-flaky node Phase 150D also documented and reclassified. Reclassified via --rerun-node isolated single-node rerun, which passed. Final run: attributable_failures: [].",
   "tests_added_or_updated": "None -- no repair was implemented; this phase's deliverable is reconstruction, analysis, and a governed STOP.",
   "tests_run": 0,
   "validation_results": {
@@ -346,6 +356,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -424,7 +435,7 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
         "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
       ],
-      "candidate_commit": "dee674d88e10f89e8f112eec99d7f7928f6a1416",
+      "candidate_commit": "704240ac3860e75e6c1846d33e0b552173334c55",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
       "excluded_environment_failures": [],
       "excluded_preexisting_failures": [
@@ -2272,21 +2283,10 @@
           "baseline_commit": "963f3f45ea27a4a5f06356223db7fedd373ca449",
           "baseline_evidence": "failed_in_baseline",
           "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
-        },
-        {
-          "baseline_commit": "963f3f45ea27a4a5f06356223db7fedd373ca449",
-          "baseline_evidence": "failed_in_baseline",
-          "node_id": "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
         }
       ],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "not_pushed"
-        }
-      ],
-      "generated_at": "2026-09-21T16:07:32.061201+00:00",
+      "expected_phase_artifacts": [],
+      "generated_at": "2026-09-21T16:47:31.469654+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -2584,7 +2584,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -2660,14 +2659,13 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
-        "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
+        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
       "schema_version": "fast_green_attribution.v1",
       "provenance": {
-        "generated_by_command": "pcae phase fast-green-attribution --phase-id 150E --pushed-status not_pushed --timeout 900 --json",
-        "artifact_path": ".pcae/fast-green-attribution/2f9074f541433222bc0bd57ab66d8b24e307f289e9d83bdf861bb5b3acee4749.json",
-        "artifact_digest": "2f9074f541433222bc0bd57ab66d8b24e307f289e9d83bdf861bb5b3acee4749"
+        "generated_by_command": "pcae phase fast-green-attribution --phase-id 150E --pushed-status pushed --rerun-node tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record --json",
+        "artifact_path": ".pcae/fast-green-attribution/3e61555ebf2332101bc542539a5ad1490b032a48add75211e33c3d997ff020ac.json",
+        "artifact_digest": "3e61555ebf2332101bc542539a5ad1490b032a48add75211e33c3d997ff020ac"
       }
     },
     "report_notification_tests": "No report/notification code path (phase_reports.py, tasks.py notification hooks, bootstrap session reporting) was modified by Phase 150E; unaffected.",
