@@ -10,7 +10,7 @@ Phase 150F: N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-SHARED-INFRASTRUCTURE-ARCH
 
 ## Status
 
-done
+active
 
 ## Mode
 
@@ -30,6 +30,12 @@ Design and freeze the narrow architecture/module boundary for helper-side config
 - tasks/DONE.md
 - .pcae/fast-green-attribution/13e29519d0d831f9df9bc893957154f57bb7b5a4f40fcc1addb72b644949a89f.json
 - .pcae/fast-green-attribution/e1e1b68e676b9a5e3f0c0b9ba9f5ed6a5c611676db38e4de25eea833ff90482d.json
+- .pcae/fast-green-attribution/64272d5bff1782590047e2248fc79875af01e5acdabc80cf3cbfafd47b56e264.json
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
+- tasks/active/20260921-2226-phase-150f-n16-5-f-5-tb-helper-admission-recognition-shared-infrastructure-architecture.md
+- tasks/done/20260921-2226-phase-150f-n16-5-f-5-tb-helper-admission-recognition-shared-infrastructure-architecture.md
 
 ## Forbidden Files
 
@@ -42,7 +48,9 @@ Design and freeze the narrow architecture/module boundary for helper-side config
 
 ## Allowed Zones
 
-- TBD
+- tasks
+- docs
+- config
 
 ## Forbidden Zones
 
