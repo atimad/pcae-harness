@@ -32,6 +32,8 @@ Reconstruct HPAC-PAWA-HELPER-001 v5.0 §7/§10 configured-agent admission requir
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/fast-green-attribution/*
+- .pcae/phase-reports/*
+- .pcae/phase-reports/quarantine/*
 
 ## Forbidden Files
 
@@ -43,6 +45,7 @@ Reconstruct HPAC-PAWA-HELPER-001 v5.0 §7/§10 configured-agent admission requir
 - docs
 - tasks
 - package
+- config
 
 ## Forbidden Zones
 
