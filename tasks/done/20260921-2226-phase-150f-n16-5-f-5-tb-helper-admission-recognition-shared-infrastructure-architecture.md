@@ -10,7 +10,7 @@ Phase 150F: N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-SHARED-INFRASTRUCTURE-ARCH
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -28,6 +28,8 @@ Design and freeze the narrow architecture/module boundary for helper-side config
 - CHANGELOG.md
 - tasks/TODO.md
 - tasks/DONE.md
+- .pcae/fast-green-attribution/13e29519d0d831f9df9bc893957154f57bb7b5a4f40fcc1addb72b644949a89f.json
+- .pcae/fast-green-attribution/e1e1b68e676b9a5e3f0c0b9ba9f5ed6a5c611676db38e4de25eea833ff90482d.json
 
 ## Forbidden Files
 
