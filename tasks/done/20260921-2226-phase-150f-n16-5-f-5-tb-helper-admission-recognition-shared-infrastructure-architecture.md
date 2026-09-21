@@ -10,7 +10,7 @@ Phase 150F: N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-SHARED-INFRASTRUCTURE-ARCH
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -31,6 +31,8 @@ Design and freeze the narrow architecture/module boundary for helper-side config
 - .pcae/fast-green-attribution/13e29519d0d831f9df9bc893957154f57bb7b5a4f40fcc1addb72b644949a89f.json
 - .pcae/fast-green-attribution/e1e1b68e676b9a5e3f0c0b9ba9f5ed6a5c611676db38e4de25eea833ff90482d.json
 - .pcae/fast-green-attribution/64272d5bff1782590047e2248fc79875af01e5acdabc80cf3cbfafd47b56e264.json
+- .pcae/fast-green-attribution/24b106b2b6a6bb47d0a9cf0ac7a7bab96a1673a7165ad7abae154a3c5cf8c674.json
+- .pcae/fast-green-attribution/32edb3bb64083c9a5b03e6da39c9a20ada3822c9c47cdefd6ac5c70472acdfab.json
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - .pcae/phase-metadata-repairs.log
