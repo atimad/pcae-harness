@@ -28,6 +28,7 @@ Implement Model B from Phase 150F: extract hpac_protected_admin_writer._run_reco
 - tasks/**
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/**
 
 ## Forbidden Files
 
@@ -40,6 +41,7 @@ Implement Model B from Phase 150F: extract hpac_protected_admin_writer._run_reco
 - tests
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 

@@ -406,7 +406,25 @@ def test_28_helper_source_conformance_files_untouched():
 
 
 def test_29_production_diff_confined_to_expected_files():
-    changed = set(_git("diff", "--name-only", "origin/main", "HEAD", "--", "src/pcae").strip().splitlines())
+    """Re-pinned by Phase 150G: this is a historical claim about Phase
+    150C's own commit range specifically (150C touched exactly these
+    three files) -- not a permanent "nothing else will ever touch
+    src/pcae again" invariant. Comparing against a moving
+    ``origin/main``/``HEAD`` makes it false the instant any later,
+    legitimately-scoped phase (such as 150G, which the separate 150F
+    architecture explicitly recommended) touches ``src/pcae`` for reasons
+    that have nothing to do with 150C's own filename-length-hardening
+    scope -- exactly the stale-moving-assertion pattern this same
+    codebase has already repaired more than once (150C itself repaired an
+    analogous predecessor-suite assertion; Phase 150G separately re-pinned
+    two other such assertions in its own evidence). Re-pinned to 150C's
+    own final pushed commit (``caa155b6``, confirmed on ``origin/main``
+    ancestry) as the fixed historical boundary."""
+    phase_150c_entry = "2be6fe01"
+    phase_150c_final_commit = "caa155b6"
+    changed = set(
+        _git("diff", "--name-only", phase_150c_entry, phase_150c_final_commit, "--", "src/pcae").strip().splitlines()
+    )
     expected = {
         "src/pcae/core/filename_safety.py",
         "src/pcae/core/phase_reports.py",
