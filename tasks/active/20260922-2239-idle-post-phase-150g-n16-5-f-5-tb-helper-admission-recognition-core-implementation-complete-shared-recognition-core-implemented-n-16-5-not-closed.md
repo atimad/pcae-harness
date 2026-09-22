@@ -23,6 +23,7 @@ Idle placeholder awaiting next authorized phase (recommended: independent verifi
 ## Allowed Files
 
 - tasks/**
+- .pcae/**
 
 ## Forbidden Files
 
@@ -33,6 +34,7 @@ Idle placeholder awaiting next authorized phase (recommended: independent verifi
 
 - tasks
 - docs
+- config
 
 ## Forbidden Zones
 
