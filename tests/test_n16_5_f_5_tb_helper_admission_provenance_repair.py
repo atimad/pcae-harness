@@ -97,11 +97,31 @@ def test_baseline_dedicated_helper_registration_schema_not_implemented():
     assert matches == []
 
 
-@pytest.mark.parametrize('name', ['hpac_foundation', 'hpac_protected_admin_writer',
-                                   'hpac_pawa_helper_writer_authority'])
+@pytest.mark.parametrize('name', ['hpac_foundation', 'hpac_pawa_helper_writer_authority'])
 def test_deferred_authority_production_files_unchanged(name):
     relative = f'src/pcae/core/{name}.py'
     assert (ROOT / relative).read_text() == baseline(relative)
+
+
+def test_hpac_protected_admin_writer_deferred_authority_still_absent():
+    """``hpac_protected_admin_writer.py`` was byte-identical to this
+    test's baseline (``fabbfac0``) until Phase 150G
+    (N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION), which
+    legitimately, explicitly-authorizedly extracted its §33 steps 1-8 into
+    the new ``hpac_pawa_recognition_core`` module (a read-only,
+    non-authoritative refactor -- see that phase's own evidence). A literal
+    byte-identity assertion against this one file is now permanently
+    stale by design (the exact pattern Phase 150C already repaired in an
+    analogous predecessor suite); this narrower check preserves the
+    original assertion's actual intent -- that the deferred helper-side
+    authority/registration lineage this whole test file is about is still
+    NOT implemented here -- without pinning to an unchanging byte
+    snapshot. The other two files in the parametrized case above are
+    untouched by Phase 150G and remain checked by literal byte-identity."""
+    text = (ROOT / 'src/pcae/core/hpac_protected_admin_writer.py').read_text()
+    assert 'HPAC-PAWA-HELPER-INSTALLATION/1.0' not in text
+    assert 'authenticate_peer' not in text
+    assert 'require_verified_admission' not in text
 
 
 def test_current_store_rejects_contract_helper_identity(tmp_path):

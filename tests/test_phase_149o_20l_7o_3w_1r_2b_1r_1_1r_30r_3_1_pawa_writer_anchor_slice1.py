@@ -367,7 +367,12 @@ def test_16_agent_exclusion_record_has_no_persisted_group_snapshot(provisioned):
 
 
 def test_17_three_f1_predicates_are_distinct_in_code():
+    # N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION (Phase
+    # 150G): steps 3/7/8 (this predicate group) now live in the shared
+    # ``hpac_pawa_recognition_core`` module; check the union of both files
+    # so this assertion tracks the code wherever it lives, not one file.
     src_text = (SRC / "core" / "hpac_protected_admin_writer.py").read_text(encoding="utf-8")
+    src_text += (SRC / "core" / "hpac_pawa_recognition_core.py").read_text(encoding="utf-8")
     # A: configured-agent protected-root authority (resolved identity)
     assert "agent_has_protected_write_authority" in src_text
     # B: current_context_is_agent (live vs configured)
@@ -524,7 +529,10 @@ def test_28_installation_or_root_identity_mismatch(provisioned, tmp_path):
 
 
 def test_29_probe_uses_o_excl_o_nofollow():
+    # Phase 150G: the probe itself now lives in hpac_pawa_recognition_core;
+    # check the union of both files (see test_17's comment).
     src_text = (SRC / "core" / "hpac_protected_admin_writer.py").read_text(encoding="utf-8")
+    src_text += (SRC / "core" / "hpac_pawa_recognition_core.py").read_text(encoding="utf-8")
     assert "O_EXCL" in src_text and "O_NOFOLLOW" in src_text and "O_CREAT" in src_text
 
 

@@ -48,11 +48,23 @@ def _admin_writer_lines() -> list[str]:
     return _admin_writer_source().splitlines()
 
 
-def _region(start_marker: str, end_marker: str) -> str:
-    """Return the exact source slice between two ``# STEP N`` markers
-    (inclusive of start, exclusive of end) inside ``_run_recognition_sequence``.
-    """
-    lines = _admin_writer_lines()
+def _recognition_core_source() -> str:
+    # Phase 150G (N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION)
+    # realized this architecture's Model B: steps 1-8 now live here, not
+    # inline in ``hpac_protected_admin_writer.py``. Steps 9/10/11 (the
+    # admin-writer-specific tail this architecture explicitly leaves
+    # behind) still live in the legacy factory.
+    path = ROOT / "src" / "pcae" / "core" / "hpac_pawa_recognition_core.py"
+    return path.read_text(encoding="utf-8")
+
+
+def _recognition_core_lines() -> list[str]:
+    return _recognition_core_source().splitlines()
+
+
+def _region(lines: list[str], start_marker: str, end_marker: str) -> str:
+    """Return the exact source slice between two markers (inclusive of
+    start, exclusive of end)."""
     start = next(i for i, line in enumerate(lines) if start_marker in line)
     end = next(i for i, line in enumerate(lines) if end_marker in line)
     assert start < end
@@ -60,7 +72,7 @@ def _region(start_marker: str, end_marker: str) -> str:
 
 
 def _steps_1_through_8_region() -> str:
-    return _region("# STEP 1 —", "# STEP 9 —")
+    return _region(_recognition_core_lines(), "# STEP 1 —", "return RecognizedAnchorFacts(")
 
 
 def _step_9_region() -> str:
@@ -72,12 +84,16 @@ def _step_9_region() -> str:
 
 
 def test_recognition_sequence_has_the_eleven_documented_steps():
-    """Sanity: STEP 1/2/3/4/5/6/7/8/9 all exist inside the same function,
-    STEP 10/11 exist elsewhere (the factory's mint/audit tail, out of this
-    architecture's proposed extraction). Confirms the region-slicing helpers
-    above are anchored to markers that actually exist today."""
-    lines = _admin_writer_lines()
-    found = {n: any(f"# STEP {n} —" in line for line in lines) for n in range(1, 12)}
+    """Sanity: STEP 1-8 now exist in the shared recognition core (Phase
+    150G realized this architecture's Model B extraction); STEP 9/10/11
+    (the admin-writer-specific tail this architecture explicitly leaves
+    out of the shared module) still exist in the legacy factory. Confirms
+    the region-slicing helpers above are anchored to markers that actually
+    exist today, wherever the code now lives."""
+    core_lines = _recognition_core_lines()
+    admin_lines = _admin_writer_lines()
+    found = {n: any(f"# STEP {n} —" in line for line in core_lines) for n in range(1, 9)}
+    found.update({n: any(f"# STEP {n} —" in line for line in admin_lines) for n in (9, 10, 11)})
     assert all(found.values()), found
 
 
@@ -289,12 +305,22 @@ def test_contract_versions_unchanged_by_this_phase():
 
 
 def test_this_phase_changed_zero_production_or_contract_files():
-    """Model FG-E: compare this phase's own entry commit against the
-    current working tree (not a moving ``HEAD``-bound comparison), so this
-    assertion stays valid after any later legitimate ``src/pcae/**`` edit
-    outside this phase's own history."""
+    """Model FG-E, re-pinned by Phase 150G: this assertion is a historical
+    claim about Phase 150F's own commit range specifically (150F was
+    architecture/contract-freeze only) -- not a permanent "nothing will
+    ever touch src/pcae again" invariant. Comparing against a moving
+    ``HEAD``/working tree would make it false the instant any later,
+    legitimately-scoped phase (such as 150G itself, which the 150F
+    architecture explicitly recommended and which does implement
+    ``src/pcae/core/hpac_pawa_recognition_core.py`` +
+    ``hpac_protected_admin_writer.py``) touches those paths -- exactly the
+    stale-moving-assertion pattern a prior phase (150C) already repaired in
+    an analogous predecessor suite. Re-pinned to 150F's own final pushed
+    commit (``ce9b8beb``, confirmed on ``origin/main``) as the fixed
+    historical boundary."""
+    phase_150f_final_commit = "ce9b8bebc0094bc0b4de9d3b84d7c198edad7fe2"
     diff = subprocess.check_output(
-        ["git", "diff", "--name-only", ENTRY_COMMIT, "--", "src/pcae", "docs/contracts"],
+        ["git", "diff", "--name-only", ENTRY_COMMIT, phase_150f_final_commit, "--", "src/pcae", "docs/contracts"],
         cwd=ROOT,
         text=True,
     )

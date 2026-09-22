@@ -61,10 +61,15 @@ from pcae.core.hpac_foundation import (
     write_atomic_replace,
 )
 from pcae.core.hpac_pawa_agent_exclusion import (
-    AgentExclusionError,
     ConfiguredAgentAuthorityIdentity,
     build_agent_exclusion_document,
-    resolve_configured_agent_identity,
+)
+from pcae.core.hpac_pawa_recognition_core import (
+    RecognitionError,
+    RecognizedAnchorFacts,
+    TopologyProbe,
+    _real_topology,
+    recognize_protected_anchor,
 )
 from pcae.core.hpac_pawa_schemas import (
     AUTHORITY_NAMESPACE,
@@ -277,6 +282,10 @@ _TEST_FACTORY_CONSUMERS = frozenset(
         # Phase .1R.30R.4R.1 — the fresh dedicated implementation suite for the
         # v1.2 configure_presentation_mechanism family (HPAC-PAWA-REQ-166).
         "test_phase_149o_20l_7o_3w_1r_2b_1r_1_1r_30r_4r_1_protected_presentation_real_assurance",
+        # Phase 150G (N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION)
+        # — the fresh dedicated implementation suite proving steps 1-8
+        # extraction behavior parity end-to-end through production_writer.
+        "test_n16_5_f_5_tb_helper_admission_recognition_core_implementation",
     }
 )
 
@@ -305,29 +314,14 @@ def _now() -> str:
 
 # ─────────────────────────────────────────────────────────────────────────
 # Authority resolution (production / disclosed test fixture)
+#
+# N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION (Phase
+# 150G): ``TopologyProbe`` and ``_real_topology`` now live in
+# ``hpac_pawa_recognition_core`` (the module that actually consumes them,
+# in its own steps 3/7) and are imported above for backward-compatible
+# attribute access (``hpac_protected_admin_writer.TopologyProbe`` is
+# unchanged for existing callers/tests).
 # ─────────────────────────────────────────────────────────────────────────
-
-
-@dataclass(frozen=True)
-class TopologyProbe:
-    """Disclosed test-only seam (HPAC-PAWA-REQ-132/166). A deterministic
-    ``(effective_write_access, ancestor_chain_safe)`` pair standing in for
-    the platform ACL adapter, which is unavailable in sandboxed CI. Each
-    callable has the exact signature of its
-    ``hatp_class_b_topology_verifier`` counterpart. A guard test asserts no
-    non-test module constructs or passes one."""
-
-    effective_write_access: object
-    ancestor_chain_safe: object
-
-
-def _real_topology():
-    from pcae.core.hatp_class_b_topology_verifier import (
-        _ancestor_chain_safe,
-        _effective_write_access,
-    )
-
-    return _effective_write_access, _ancestor_chain_safe
 
 
 def _resolve_authority(
@@ -394,87 +388,13 @@ def _read_protected_json(path: Path, *, missing_code: str, malformed_code: str) 
         raise PawaError(malformed_code, f"non-canonical / malformed record {path}: {exc}")
 
 
-def _require_owner_and_mode(
-    path: Path,
-    *,
-    root_owner_uid: int,
-    wrong_owner_code: str,
-    wrong_mode_code: str,
-) -> None:
-    """§17 / §32 — the ``.authority/`` subtree and each record SHALL be
-    owned by the deployment owner (== the protected-root owner uid) and
-    SHALL NOT be group- or other-writable."""
-
-    try:
-        st = path.lstat()
-    except OSError as exc:
-        raise PawaError(wrong_mode_code, f"cannot lstat {path}: {exc!r}")
-    if st.st_uid != root_owner_uid:
-        raise PawaError(wrong_owner_code, f"{path} is not owned by the deployment owner (uid {root_owner_uid})")
-    if stat.S_IMODE(st.st_mode) & (stat.S_IWGRP | stat.S_IWOTH):
-        raise PawaError(wrong_mode_code, f"{path} is group- or other-writable")
-
-
-def _require_not_configured_agent_writable(
-    path: Path,
-    identity: ConfiguredAgentAuthorityIdentity,
-    effective_write_access,
-    *,
-    code: str,
-) -> None:
-    """§26 / §32 — the configured agent principal SHALL hold no write
-    access (mode, group, or ACL) to ``path``."""
-
-    writable, reason, _evidence = effective_write_access(path, identity.uid, identity.gids)
-    if writable is not False:
-        raise PawaError(code, f"configured agent can write {path}: {reason}")
-
-
-def _verify_provenance(
-    root: Path,
-    *,
-    record_relative_posix: str,
-    record_digest: str,
-    live_root_identity_digest: str,
-    provenance_ref: str,
-    malformed_code: str,
-    root_identity_code: str,
-) -> None:
-    """§19 / §38 — resolve and verify the ``HPAC-WRITER-PROVENANCE/1.0``
-    record for a protected anchor record. Provisioning writes it with the
-    same closed schema ``hpac_foundation.record_write`` uses (filesystem
-    primitives; no ``HPACWriterCapability`` — non-circular, §23(i))."""
-
-    key = hashlib.sha256(record_relative_posix.encode("utf-8")).hexdigest()
-    provenance_path = _authority_dir(root) / _PROVENANCE_DIR / f"{key}.json"
-    document = _read_protected_json(
-        provenance_path, missing_code=malformed_code, malformed_code=malformed_code
-    )
-    if not isinstance(document, dict) or set(document) != {
-        "schema_version",
-        "store_id",
-        "authority_class",
-        "root_identity_digest",
-        "record_relative_path",
-        "record_digest",
-        "writer_role",
-        "writer_subject",
-    }:
-        raise PawaError(malformed_code, f"provenance {provenance_path} has an invalid closed schema")
-    if document["schema_version"] != _PROVENANCE_SCHEMA:
-        raise PawaError(malformed_code, "provenance schema_version unsupported")
-    if document["authority_class"] != "production":
-        raise PawaError(malformed_code, "provenance authority_class is not 'production'")
-    if document["root_identity_digest"] != live_root_identity_digest:
-        raise PawaError(root_identity_code, "provenance root_identity_digest does not match the live root")
-    if document["record_relative_path"] != record_relative_posix:
-        raise PawaError(malformed_code, "provenance record_relative_path mismatch")
-    if document["record_digest"] != record_digest:
-        raise PawaError(malformed_code, "provenance record_digest mismatch")
-    if document["writer_role"] != _ANCHOR_WRITER_ROLE:
-        raise PawaError(malformed_code, "provenance writer_role is not the protected-admin role")
-    if provenance_ref != f"{_PROVENANCE_DIR}/{key}.json":
-        raise PawaError(malformed_code, "record provenance_ref does not name its provenance record")
+# N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION (Phase
+# 150G): ``_require_owner_and_mode``, ``_require_not_configured_agent_writable``,
+# and ``_verify_provenance`` moved to ``hpac_pawa_recognition_core`` — their
+# only callers were inside the extracted steps 1-8 (5/6 owner/mode checks,
+# 3 configured-agent-writability checks, 4/2 provenance verification).
+# No other operation in this module called them; removed here rather than
+# left as dead code (duplicate-implementation disposition).
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -732,235 +652,49 @@ def _run_recognition_sequence(
     # vs. the v1.3 §33A ``certification_writer`` factory, whose enumerated
     # set is the single §38A consumer). No wildcard / prefix / glob for
     # either set (PAWA-INV-9). HPAC-PAWA-REQ-235.
-    if topology_probe is not None:
-        effective_write_access = topology_probe.effective_write_access
-        ancestor_chain_safe = topology_probe.ancestor_chain_safe
-    else:
-        effective_write_access, ancestor_chain_safe = _real_topology()
+    #
+    # N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION (Phase
+    # 150G): steps 1 (root-content checks; canonical-root *resolution*
+    # stays here — only this factory is entitled to construct an
+    # ``HPACStoreAuthority``), 4, 5, 6, 2, 3, 7, 8 now run inside the
+    # shared, neutral ``hpac_pawa_recognition_core.recognize_protected_anchor``
+    # (Model B, frozen by Phase 150F). Step 9 (below) and step 10/11 (in
+    # ``production_writer``, unchanged) remain here — they are
+    # factory-specific / authority-minting and were never part of the
+    # extraction. This function's own behavior (success/failure outcomes,
+    # exact validation order, fail-closed semantics) is unchanged; only the
+    # steps-1-8 implementation's *location* moved.
+    authority = _resolve_authority(protected_root, topology_probe)
+    root = authority.root
     try:
-        # STEP 1 — resolve the canonical protected root (no input).
-        authority = _resolve_authority(protected_root, topology_probe)
-        root = authority.root
-        _reject_component_symlinks(root)
-        if not root.exists():
-            raise PawaError("protected_root_missing", f"{root} is absent")
-        if root.is_symlink() or not root.is_dir():
-            raise PawaError("protected_root_untrusted", f"{root} is a symlink or not a directory")
-        try:
-            root_owner_uid = root.stat().st_uid
-        except OSError as exc:
-            raise PawaError("protected_root_untrusted", f"cannot stat {root}: {exc!r}")
-        if stat.S_IMODE(root.stat().st_mode) & (stat.S_IWGRP | stat.S_IWOTH):
-            raise PawaError("protected_root_untrusted", "protected root is group- or other-writable")
-        authority_dir = _authority_dir(root)
-        _reject_component_symlinks(authority_dir)
-        if not authority_dir.is_dir():
-            raise PawaError("protected_root_missing", "the .authority/ namespace is absent")
-        live_root_identity = _root_identity(root)
-        live_root_identity_digest = canonical_digest(live_root_identity)
-
-        # STEP 4 — HPAC-STORE-AUTHORITY/1.0 manifest + {device,inode}.
-        manifest_path = authority_dir / _MANIFEST_NAME
-        manifest = _read_protected_json(
-            manifest_path,
-            missing_code="protected_root_missing",
-            malformed_code="protected_root_untrusted",
-        )
-        if (
-            not isinstance(manifest, dict)
-            or set(manifest) != {"schema_version", "store_id", "authority_class", "root_identity"}
-            or manifest["schema_version"] != "HPAC-STORE-AUTHORITY/1.0"
-            or manifest["authority_class"] != "production"
-        ):
-            raise PawaError("protected_root_untrusted", "store-authority manifest has an invalid closed schema")
-        manifest_root_identity = manifest["root_identity"]
-        if manifest_root_identity != live_root_identity:
-            raise PawaError("protected_root_untrusted", "HPAC root was copied or replaced; {device,inode} binding failed")
-        _require_owner_and_mode(
-            authority_dir,
-            root_owner_uid=root_owner_uid,
-            wrong_owner_code="protected_root_untrusted",
-            wrong_mode_code="protected_root_untrusted",
-        )
-
-        # STEP 5 — the authority descriptor.
-        descriptor_path = authority_dir / _DESCRIPTOR_NAME
-        descriptor_doc = _read_protected_json(
-            descriptor_path, missing_code="descriptor_missing", malformed_code="descriptor_malformed"
-        )
-        _require_owner_and_mode(
-            descriptor_path,
-            root_owner_uid=root_owner_uid,
-            wrong_owner_code="descriptor_wrong_owner",
-            wrong_mode_code="descriptor_wrong_mode",
-        )
-        try:
-            descriptor = validate_authority_descriptor(descriptor_doc)
-        except PawaSchemaError as exc:
-            raise PawaError("descriptor_malformed", str(exc))
-        if descriptor.protected_root_identity != live_root_identity or descriptor.protected_root_identity != manifest_root_identity:
-            raise PawaError("descriptor_root_identity_mismatch", "descriptor protected_root_identity != live root / manifest")
-        if descriptor.state == "REVOKED":
-            raise PawaError("descriptor_revoked", "descriptor state is REVOKED")
-        if descriptor.state != "ACTIVE":
-            raise PawaError("descriptor_malformed", f"descriptor state is {descriptor.state}, not ACTIVE")
-
-        # STEP 6 — the current-generation anchor (v1.1 closed 7-field set).
-        current_generation_path = authority_dir / _CURRENT_GENERATION_NAME
-        cg_doc = _read_protected_json(
-            current_generation_path,
-            missing_code="descriptor_installation_mismatch",
-            malformed_code="descriptor_installation_mismatch",
-        )
-        _require_owner_and_mode(
-            current_generation_path,
-            root_owner_uid=root_owner_uid,
-            wrong_owner_code="descriptor_wrong_owner",
-            wrong_mode_code="descriptor_wrong_mode",
-        )
-        try:
-            current_generation = validate_current_generation(cg_doc)
-        except PawaSchemaError as exc:
-            raise PawaError("descriptor_installation_mismatch", str(exc))
-        if current_generation.installation_id != descriptor.installation_id:
-            raise PawaError("descriptor_installation_mismatch", "descriptor installation_id != current-generation")
-        if descriptor.generation > current_generation.current_generation:
-            raise PawaError("descriptor_installation_mismatch", "descriptor generation is ahead of the anchor")
-        if descriptor.generation < current_generation.current_generation:
-            raise PawaError("descriptor_generation_stale", "a superseded descriptor cannot mint (rollback)")
-        if descriptor.descriptor_digest != current_generation.descriptor_digest:
-            raise PawaError("descriptor_installation_mismatch", "descriptor digest != anchored descriptor_digest")
-        _verify_provenance(
-            root,
-            record_relative_posix=f"{AUTHORITY_NAMESPACE}/{_DESCRIPTOR_NAME}",
-            record_digest=descriptor.descriptor_digest,
-            live_root_identity_digest=live_root_identity_digest,
-            provenance_ref=descriptor.provenance_ref,
-            malformed_code="descriptor_malformed",
-            root_identity_code="descriptor_root_identity_mismatch",
-        )
-
-        # STEP 2 — the configured-agent-principal resolution source
-        # (HPAC-PAWA-AGENT-EXCLUSION/1.0). v1.1 atomic substeps.
-        exclusion_path = authority_dir / _AGENT_EXCLUSION_NAME
-        try:
-            exclusion_doc = _read_protected_json(
-                exclusion_path, missing_code="agent_principal_unknown", malformed_code="agent_principal_unknown"
-            )
-            _require_owner_and_mode(
-                exclusion_path,
-                root_owner_uid=root_owner_uid,
-                wrong_owner_code="agent_principal_unknown",
-                wrong_mode_code="agent_principal_unknown",
-            )
-            configured_agent = resolve_configured_agent_identity(
-                exclusion_doc,
-                installation_id=descriptor.installation_id,
-                live_root_identity=live_root_identity,
-                manifest_root_identity=manifest_root_identity,
-                anchor_agent_exclusion_digest=current_generation.agent_exclusion_digest,
-                _configured_agent_identity_source=configured_agent_identity_source,
-            )
-        except AgentExclusionError as exc:
-            raise PawaError("agent_principal_unknown", str(exc))
-        _verify_provenance(
-            root,
-            record_relative_posix=f"{AUTHORITY_NAMESPACE}/{_AGENT_EXCLUSION_NAME}",
-            record_digest=configured_agent.record_digest,
-            live_root_identity_digest=live_root_identity_digest,
-            provenance_ref=_exclusion_provenance_ref(exclusion_doc),
-            malformed_code="agent_principal_unknown",
-            root_identity_code="agent_principal_unknown",
-        )
-
-        # STEP 3 — configured-agent exclusion + safe ancestors (F-1: the
-        # CONFIGURED agent identity, NOT os.geteuid()).
-        from pcae.core.hatp_class_b_topology_verifier import _current_agent_identity
-
-        writable, reason, _ev = effective_write_access(root, configured_agent.uid, configured_agent.gids)
-        ancestors_safe, diagnostics = ancestor_chain_safe(root, configured_agent.uid, configured_agent.gids)
-        if writable is True:
-            raise PawaError("agent_has_protected_write_authority", f"configured agent can write the root: {reason}")
-        if writable is None or ancestors_safe is None:
-            raise PawaError("protected_root_untrusted", f"indeterminate permissions: {reason} / {diagnostics}")
-        if ancestors_safe is not True:
-            raise PawaError("agent_has_protected_write_authority", f"configured-agent-writable ancestor: {diagnostics}")
-        _require_not_configured_agent_writable(
-            authority_dir, configured_agent, effective_write_access, code="agent_has_protected_write_authority"
-        )
-        _require_not_configured_agent_writable(
-            descriptor_path, configured_agent, effective_write_access, code="agent_has_protected_write_authority"
-        )
-        _require_not_configured_agent_writable(
-            exclusion_path, configured_agent, effective_write_access, code="agent_has_protected_write_authority"
-        )
-
-        # STEP 7 — the current administrative context is NOT the configured
-        # agent principal (compare live uid against the resolved
-        # configured-agent uid; never an agent_id label, never groups
-        # alone — HPAC-PAWA-REQ-201).
-        live_uid, _live_gids = _current_agent_identity()
-        if live_uid == configured_agent.uid:
-            raise PawaError("current_context_is_agent", "the current invocation is running as the configured agent account")
-
-        # STEP 8 — the positive O_EXCL|O_NOFOLLOW write probe (current
-        # invoking process; §28/§29).
-        _positive_write_probe(authority_dir)
-
-        # STEP 9 — the calling module is an authorized factory consumer.
-        if caller_module not in authorized_consumers and caller_module not in test_consumers:
-            raise PawaError("unauthorized_factory_consumer", f"{caller_module!r} is not an enumerated consumer (§38 / §38A)")
-
-        return _RecognizedAnchor(
-            authority=authority,
+        facts = recognize_protected_anchor(
             root=root,
-            live_root_identity=live_root_identity,
-            live_root_identity_digest=live_root_identity_digest,
-            anchor_id=descriptor.anchor_id,
-            installation_id=descriptor.installation_id,
-            generation=descriptor.generation,
-            configured_agent=configured_agent,
+            configured_agent_identity_source=configured_agent_identity_source,
+            topology_probe=topology_probe,
         )
-    except PawaError:
-        raise
-    except Exception as exc:  # noqa: BLE001 — deliberate fail-closed boundary (§0)
-        raise PawaError("internal_fail_closed", f"{type(exc).__name__}: {exc}") from exc
+    except RecognitionError as exc:
+        raise PawaError(exc.code, exc.detail)
+
+    # STEP 9 — the calling module is an authorized factory consumer.
+    if caller_module not in authorized_consumers and caller_module not in test_consumers:
+        raise PawaError("unauthorized_factory_consumer", f"{caller_module!r} is not an enumerated consumer (§38 / §38A)")
+
+    return _RecognizedAnchor(
+        authority=authority,
+        root=facts.root,
+        live_root_identity=facts.live_root_identity,
+        live_root_identity_digest=facts.live_root_identity_digest,
+        anchor_id=facts.anchor_id,
+        installation_id=facts.installation_id,
+        generation=facts.generation,
+        configured_agent=facts.configured_agent,
+    )
 
 
-def _exclusion_provenance_ref(document: object) -> str:
-    if isinstance(document, dict) and isinstance(document.get("provenance_ref"), str):
-        return document["provenance_ref"]
-    return ""
-
-
-def _positive_write_probe(authority_dir: Path) -> None:
-    """§28 / §29 / §30 — operation-based proof that the current
-    administrative invocation holds real OS-authorized write over
-    ``.authority/`` now. Dedicated random sentinel, O_CREAT|O_EXCL|
-    O_NOFOLLOW, write + fsync + close + unlink. Cleanup failure is
-    ``write_probe_failed`` — never left behind silently."""
-
-    sentinel = authority_dir / f".probe-{os.urandom(16).hex()}"
-    reject_symlink(sentinel)
-    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        fd = os.open(sentinel, flags, 0o600)
-    except OSError as exc:
-        raise PawaError("write_probe_failed", f"probe create failed: {exc!r}")
-    try:
-        os.write(fd, b"hpac-pawa-probe\n")
-        os.fsync(fd)
-    except OSError as exc:
-        raise PawaError("write_probe_failed", f"probe write failed: {exc!r}")
-    finally:
-        try:
-            os.close(fd)
-        except OSError:
-            pass
-    try:
-        os.unlink(sentinel)
-    except OSError as exc:
-        raise PawaError("write_probe_failed", f"probe sentinel could not be unlinked: {exc!r}")
+# N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION (Phase
+# 150G): ``_exclusion_provenance_ref`` (step 2) and ``_positive_write_probe``
+# (step 8) moved to ``hpac_pawa_recognition_core`` — no other call site in
+# this module used either; removed here rather than left as dead code.
 
 
 # ─────────────────────────────────────────────────────────────────────────
