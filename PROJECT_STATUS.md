@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase `150H` — PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION.
+**COMPLETE — NOT RECONCILED / BLOCKED.** CPIPC: `150H`, independently
+derived from canonical `150G`, valid, ordered after `150G`, same series,
+unequal, and collision-free at activation. This lifecycle/evidence-only phase
+reconstructed both promoted 150G generations and proved the terminal technical
+state is unambiguous, but the current reconciliation implementation cannot
+truthfully reproduce its certified identity from persisted JSON.
+
+Primary classification: **CLASS B — MULTI-GENERATION EXPECTED, RECONCILER
+DEFECT.** Generation A (`20260922-203915-150G`) is the explicitly
+non-authoritative `pending_push` generation. Generation B
+(`20260922-210046-150G`) is the terminal complete/pushed generation. Its stored
+Markdown SHA-256 is `5b954816...`, exactly matching both the completed
+checkpoint and ordinary-completion notification marker; its persisted semantic
+snapshot is `232104b6...`, also matching both. The reconciler instead
+rehydrates the JSON—which omits `canonical_report_content`—and re-renders a
+Markdown payload without the original Report Consistency section, producing
+`59dda6c6...` and a false payload conflict. The separate consistency command
+also mutates its in-memory rehydration with FGSC lifecycle fields before
+printing snapshot identity, producing `b78955e8...`; no persisted artifact is
+changed, but the inspection is not identity-pure.
+
+No supported governed mechanism exists to rotate/update the completed
+checkpoint or ordinary-completion marker, and `pcae phase-report reconcile` is
+explicitly read-only. Phase 150H therefore did not edit/delete/re-notify any
+150G artifact and did not forge a digest or latest pointer. Fresh phase suite:
+13 passed. Zero `src/pcae/**` changes; zero `docs/contracts/**` changes.
+Runtime remains Observed / observe / unavailable. N-16-5 remains OPEN;
+N-16-6/N-16-7 untouched. Full evidence:
+`docs/PHASE_150H_PCAE_LIFECYCLE_PHASE_150G_REPORT_IDENTITY_RECONCILIATION.md`.
+
+Recommended next phase (not begun): a dedicated lifecycle-infrastructure
+repair, suggested alias
+`PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR`, followed by fresh
+reconciliation/verification before the recognition-core implementation IV is
+authorized. The successor ID must be independently derived at its own
+preflight. Phase 150H / recognition-core IV was NOT begun by this phase.
+
+`HASH CONSISTENCY != PROVENANCE`.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+
+## Previous Completed Helper Admission Recognition Core Implementation
+
 Phase `150G` — N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION. **COMPLETE — SHARED RECOGNITION CORE IMPLEMENTED** (narrow implementation only; helper admission still NOT wired). CPIPC: `150G`, an independently derived, unused, valid short top-level sibling of `150A`-`150F` (`pcae.core.phase_id.is_valid` True; no collision against `git log --all` or repository docs/tasks). Runtime Observed / observe / unavailable; N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.
 
 Realized the Model B architecture Phase 150F selected: extracted `hpac_protected_admin_writer._run_recognition_sequence`'s §33 steps 1 (root-content checks only — canonical-root resolution stays with the entitled legacy factory), 4, 5, 6, 2, 3, 7, 8, in that exact original order, into a new, neutral, non-agent-importable module, `src/pcae/core/hpac_pawa_recognition_core.py` (`recognize_protected_anchor(...) -> RecognizedAnchorFacts`), and refactored the legacy factory to call it. Step 9 (authorized-factory-consumer check) and step 10/11 (configured-agent binding + capability minting) remain, unchanged, in the legacy factory — never part of the extraction. `RecognizedAnchorFacts` deliberately carries **no `authority` field** (unlike the legacy `_RecognizedAnchor`), resolving the one real design tension in Model B without ever letting the shared core import, construct, or reference `HPACStoreAuthority` (confirmed by AST-based identifier scan, not substring, so the module's own explanatory docstring prose cannot false-positive the check).

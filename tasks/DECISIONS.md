@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- **2026-09-24 — Phase 150H: classify the Phase 150G report identity conflict
+  as CLASS B — MULTI-GENERATION EXPECTED, RECONCILER DEFECT; do not mutate
+  completed 150G linkage.** The pending and complete report generations are
+  both legitimate. The terminal stored Markdown SHA-256 (`5b954816...`) and
+  semantic snapshot (`232104b6...`) already match the checkpoint and
+  notification marker. The reconciler re-renders from lossy persisted JSON,
+  which omits `canonical_report_content`, and therefore computes a different
+  Markdown digest (`59dda6c6...`). Because reconciliation is read-only and no
+  governed checkpoint/marker rotation is defined, manual edits or re-delivery
+  would falsify history. Decision: complete 150H as NOT RECONCILED / BLOCKED
+  and require a dedicated lifecycle-infrastructure repair before resuming the
+  recognition-core IV. Zero product/contract change; runtime and N-16 state
+  unchanged. `HASH CONSISTENCY != PROVENANCE`.
+
 - **2026-09-11 — N16-5-F-5-TB-TRIO-IV: resolved-trio cross-contract
   independent verification of HPAC-PAWA-001 v2.0 + HPAC-PAWA-HELPER-001 v1.0
   + HPAC-PPA-001 v2.0 → COMPLETE / INDEPENDENTLY VERIFIED (RESOLVED-TRIO

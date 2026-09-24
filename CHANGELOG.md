@@ -1,5 +1,19 @@
 # Changelog
 
+## Phase 150G report identity reconciliation
+
+Phase `150H` — PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION.
+**COMPLETE — NOT RECONCILED / BLOCKED.** Reconstructed both promoted 150G
+generations and proved pending-then-terminal generation is expected lifecycle
+behavior. The terminal stored Markdown, checkpoint, and notification marker
+already agree on digest `5b954816...` and semantic snapshot `232104b6...`.
+The read-only reconciler falsely reports conflict because persisted JSON omits
+`canonical_report_content`, so JSON rehydration cannot reproduce the certified
+Markdown's Report Consistency section and instead computes `59dda6c6...`.
+No supported governed linkage-repair operation exists; no 150G artifact was
+mutated. Added 13 focused evidence tests and the canonical phase analysis.
+Zero production/contract change. Runtime and N-16 disposition unchanged.
+
 ## Helper admission recognition core implementation
 
 Phase `150G` — N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION. **COMPLETE — SHARED RECOGNITION CORE IMPLEMENTED**. Realized Phase 150F's Model B architecture: extracted `_run_recognition_sequence`'s §33 steps 1 (root-content checks only), 4, 5, 6, 2, 3, 7, 8 into a new neutral, non-agent-importable module, `src/pcae/core/hpac_pawa_recognition_core.py` (`recognize_protected_anchor(...) -> RecognizedAnchorFacts`, no `authority` field), and refactored the legacy factory to call it. Step 9 (authorized-consumer check) and step 10/11 (capability minting) remain unchanged in the legacy factory. Removed five now-unused steps-1-8-only helper functions and moved `TopologyProbe`/`_real_topology` into the new module (re-imported for backward compatibility). 37 new tests prove behavior parity, non-authoritative/read-only/fail-closed/non-cached semantics, absence of duplicate implementation, Model E non-regression, and non-wiring of all helper admission modules. Zero attributable Fast Green regressions (one pre-existing stale byte-identity test narrowly repaired in-scope). Helper admission is still NOT implemented; N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched. Full evidence: `docs/PHASE_150G_N16_5_F_5_TB_HELPER_ADMISSION_RECOGNITION_CORE_IMPLEMENTATION.md`.
@@ -1762,6 +1776,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle post-Phase 150G (N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION): COMPLETE — shared recognition core implemented; N-16-5 NOT CLOSED to Phase 150H - PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-N16-5-F-5-TB-PCAE-LIFECYCLE-FILENAME-LENGTH-HARDENING-R (COMPLETE -- LIFECYCLE FILENAME-LENGTH HARDENING VERIFIED); recommended next: N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV, not begun; N-16-5 NOT CLOSED to Phase 150D (N16-5-F-5-TB-HELPER-PROVISIONING-SOURCE-CONFORMANCE-REPAIR-IV): fresh independent adversarial re-verification of provisioning source-conformance repair against current origin/main; session refreshed and governance continuity revalidated.
 - Transitioned active task from Housekeeping: push final task-closure bookkeeping commit to N16-5-F-5-TB-HELPER-INSTALLATION-PROVISIONING-CONTRACT-REPAIR-IV: fresh independent adversarial verification; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle after helper installation identity contract repair - fresh IV not begun to N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV; session refreshed and governance continuity revalidated.
