@@ -29,6 +29,7 @@ Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOC
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
+- .pcae/architecture-history.json
 - .pcae/phase-completion-metadata.json
 - .pcae/fast-green-attribution/a05d8fbbbae9fd1a51f24367a53fee0451c8c7f96f9d36ac682184456c855f56.json
 
