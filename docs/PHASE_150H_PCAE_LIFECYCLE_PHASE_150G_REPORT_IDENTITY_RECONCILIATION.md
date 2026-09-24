@@ -152,13 +152,17 @@ JSON re-render mismatch, proves the expected pending-to-complete lifecycle,
 proves the reconciler is read-only, captures the process-local consistency
 mutation, and verifies zero Phase 150H production/contract delta.
 
-Fresh governed Fast Green attribution used baseline
+Final governed Fast Green attribution used baseline
 `a6d475ef474514533e0144952d4f2f89374c3d2e` and candidate
-`4d4dafc314224e3f120ce25fff0157692435e89d`. It passed with
-`attributable_failures: []`; the 360 raw failures and 9 collection errors were
+`02d1d457f7efd26f39b82e913ab075bd73b3d152`. It passed with
+`attributable_failures: []`; the 359 raw failures and 9 collection errors were
 baseline-pre-existing, while the only expected phase artifact was the
 not-yet-pushed HEAD/origin assertion. The independently generated artifact is
-`.pcae/fast-green-attribution/8e674a1f9ba3ce75f97d6a70b40d7ac6e27831be2f431a866292b49ba766ab53.json`.
+`.pcae/fast-green-attribution/c4ec91e02efbbf3f34dfef635e90143ea8158e2090b3c178b6515732cd52a31a.json`.
+An intervening governed run's lone candidate-only
+`test_verify_detects_tampered_record` result passed 5/5 candidate and 3/3
+fixed-baseline focused reruns; the subsequent unmodified governed rerun passed.
+Both the failed and final passing artifacts are preserved.
 This evidence phase does not reuse Phase 150G's attribution artifact.
 
 ## 7. Preserved truth and disposition

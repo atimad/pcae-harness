@@ -36,10 +36,14 @@ linkage mutation and recommends a dedicated lifecycle-infrastructure repair.
 - Fresh Phase 150H suite: 13 passed; the combined Phase 150H and
   report/notification lifecycle regression selection passed 185 tests.
 - Fresh governed Fast Green: baseline `a6d475ef474514533e0144952d4f2f89374c3d2e`,
-  candidate `4d4dafc314224e3f120ce25fff0157692435e89d`,
+  candidate `02d1d457f7efd26f39b82e913ab075bd73b3d152`,
   `attributable_failures: []`.
 - Fast Green artifact:
-  `.pcae/fast-green-attribution/8e674a1f9ba3ce75f97d6a70b40d7ac6e27831be2f431a866292b49ba766ab53.json`.
+  `.pcae/fast-green-attribution/c4ec91e02efbbf3f34dfef635e90143ea8158e2090b3c178b6515732cd52a31a.json`.
+- An intervening run's lone `test_verify_detects_tampered_record` result was
+  classified as flaky only after 5/5 candidate and 3/3 fixed-baseline focused
+  reruns passed; both the failed artifact and final passing artifact are
+  preserved.
 - Full evidence:
   `docs/PHASE_150H_PCAE_LIFECYCLE_PHASE_150G_REPORT_IDENTITY_RECONCILIATION.md`.
 

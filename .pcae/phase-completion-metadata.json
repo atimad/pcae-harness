@@ -13,35 +13,39 @@
     "tasks/DONE.md",
     "tasks/active/20260924-1808-phase-150h-pcae-lifecycle-phase-150g-report-identity-reconciliation.md",
     "tasks/done/20260922-2239-idle-post-phase-150g-n16-5-f-5-tb-helper-admission-recognition-core-implementation-complete-shared-recognition-core-implemented-n-16-5-not-closed.md",
-    ".pcae/fast-green-attribution/8e674a1f9ba3ce75f97d6a70b40d7ac6e27831be2f431a866292b49ba766ab53.json"
+    ".pcae/fast-green-attribution/8e674a1f9ba3ce75f97d6a70b40d7ac6e27831be2f431a866292b49ba766ab53.json",
+    ".pcae/fast-green-attribution/e7f0b0680dad7153e27b6e63ae2d71ca0d7f1f5422d29153dbaf63aa3dc2ffaa.json",
+    ".pcae/fast-green-attribution/c4ec91e02efbbf3f34dfef635e90143ea8158e2090b3c178b6515732cd52a31a.json"
   ],
-  "files_changed_count": 9,
+  "files_changed_count": 11,
   "tests_added_or_updated": "13 tests added or updated",
   "tests_run": 185,
   "phase_commits": [
-    {"hash": "4d4dafc314224e3f120ce25fff0157692435e89d"}
+    {"hash": "4d4dafc314224e3f120ce25fff0157692435e89d"},
+    {"hash": "02d1d457f7efd26f39b82e913ab075bd73b3d152"}
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 1,
+  "origin_main_head_count": 2,
   "validation_results": {
     "report_notification_tests": "185 passed in the combined Phase 150H and report lifecycle regression selection",
     "bootstrap_session_reporting_tests": "covered by phase-report lifecycle regression suite",
     "fast_green": "0 attributable failures (passed)",
     "fresh_phase_150h_suite": "13 passed",
-    "fast_green_attribution_artifact": ".pcae/fast-green-attribution/8e674a1f9ba3ce75f97d6a70b40d7ac6e27831be2f431a866292b49ba766ab53.json; baseline a6d475ef474514533e0144952d4f2f89374c3d2e; candidate 4d4dafc314224e3f120ce25fff0157692435e89d; attributable_failures=[]",
+    "fast_green_attribution_artifact": ".pcae/fast-green-attribution/c4ec91e02efbbf3f34dfef635e90143ea8158e2090b3c178b6515732cd52a31a.json; baseline a6d475ef474514533e0144952d4f2f89374c3d2e; candidate 02d1d457f7efd26f39b82e913ab075bd73b3d152; attributable_failures=[]",
+    "fast_green_flake_classification": "An intervening governed run recorded test_verify_detects_tampered_record as candidate-only; it passed 5/5 candidate and 3/3 fixed-baseline focused reruns, and the subsequent unmodified governed attribution passed with attributable_failures=[]; failed artifact preserved",
     "phase_150g_reconcile": "CONFLICT retained; no safe governed mutation exists"
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "passed with pre-existing warnings and no errors",
-    "pcae_push_check": "clean except governed Phase 150H commits pending push",
+    "pcae_push_check": "passed; repository governance clean; governed Phase 150H commits pending push",
     "telegram_runtime": "notification lifecycle governed by pcae phase complete; notification marker is evidence, not authority",
     "pcae_status_coherence": "coherent",
     "repository_transition_validation": "passed at phase activation; final validation required before push"
   },
-  "no_go_confirmation": "No production source file under src/pcae/** was changed.\nNo normative contract file under docs/contracts/** was changed.\nNo Phase 150G technical content, promoted generation, checkpoint, receipt, notification marker, or latest pointer was edited, deleted, or fabricated.\nNo recognition-core IV, helper admission wiring, helper step 9-prime work, foundation repair, runtime/PB/POL change, N-16-6 work, or N-16-7 work was begun.\nNo force push, history rewrite, --no-verify, hook bypass, or delegated finalization/commit/push was used.",
+  "no_go_confirmation": "No production source file under src/pcae/** was changed.\nNo normative contract file under docs/contracts/** was changed.\nNo Phase 150G technical report content was rewritten.\nNo Phase 150G promoted generation was edited, deleted, or overwritten.\nNo Phase 150G checkpoint, receipt, or notification marker was edited or fabricated.\nNo latest/current pointer was manually changed or forged.\nNo recognition-core independent verification was begun.\nNo helper admission wiring or helper step 9-prime work was begun.\nNo foundation repair was attempted.\nNo runtime, PB, POL-005, host, or deployment mutation was performed.\nNo N-16-6 or N-16-7 work was begun.\nNo force push, history rewrite, --no-verify, hook bypass, or delegated finalization/commit/push was used.",
   "recommended_next_phase": "PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR -- a dedicated lifecycle-infrastructure repair whose phase ID must be independently re-derived at that future preflight",
   "test_evidence_classification": "current_phase_direct",
   "test_evidence_classification_rationale": "Fresh Phase 150H tests and machine-produced Fast Green attribution independently establish the lifecycle defect and zero candidate-attributable regressions.",
