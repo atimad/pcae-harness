@@ -25,8 +25,8 @@
     {"hash": "02d1d457f7efd26f39b82e913ab075bd73b3d152"}
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "validation_results": {
     "report_notification_tests": "185 passed in the combined Phase 150H and report lifecycle regression selection",
     "bootstrap_session_reporting_tests": "covered by phase-report lifecycle regression suite",
@@ -40,7 +40,7 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "passed with pre-existing warnings and no errors",
-    "pcae_push_check": "passed; repository governance clean; governed Phase 150H commits pending push",
+    "pcae_push_check": "clean (nothing_to_push)",
     "telegram_runtime": "notification lifecycle governed by pcae phase complete; notification marker is evidence, not authority",
     "pcae_status_coherence": "coherent",
     "repository_transition_validation": "passed at phase activation; final validation required before push"
