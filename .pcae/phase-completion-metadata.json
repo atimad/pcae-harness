@@ -22,7 +22,8 @@
   "tests_run": 185,
   "phase_commits": [
     {"hash": "4d4dafc314224e3f120ce25fff0157692435e89d"},
-    {"hash": "02d1d457f7efd26f39b82e913ab075bd73b3d152"}
+    {"hash": "02d1d457f7efd26f39b82e913ab075bd73b3d152"},
+    {"hash": "d1edf4ed0d542ab117708550fde5dd492255c2c8"}
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
@@ -32,7 +33,7 @@
     "bootstrap_session_reporting_tests": "covered by phase-report lifecycle regression suite",
     "fast_green": "0 attributable failures (passed)",
     "fresh_phase_150h_suite": "13 passed",
-    "fast_green_attribution_artifact": ".pcae/fast-green-attribution/c4ec91e02efbbf3f34dfef635e90143ea8158e2090b3c178b6515732cd52a31a.json; baseline a6d475ef474514533e0144952d4f2f89374c3d2e; candidate 02d1d457f7efd26f39b82e913ab075bd73b3d152; attributable_failures=[]",
+    "fast_green_attribution_artifact": ".pcae/fast-green-attribution/a05d8fbbbae9fd1a51f24367a53fee0451c8c7f96f9d36ac682184456c855f56.json; baseline a6d475ef474514533e0144952d4f2f89374c3d2e; candidate d1edf4ed0d542ab117708550fde5dd492255c2c8; attributable_failures=[]",
     "fast_green_flake_classification": "An intervening governed run recorded test_verify_detects_tampered_record as candidate-only; it passed 5/5 candidate and 3/3 fixed-baseline focused reruns, and the subsequent unmodified governed attribution passed with attributable_failures=[]; failed artifact preserved",
     "phase_150g_reconcile": "CONFLICT retained; no safe governed mutation exists"
   },

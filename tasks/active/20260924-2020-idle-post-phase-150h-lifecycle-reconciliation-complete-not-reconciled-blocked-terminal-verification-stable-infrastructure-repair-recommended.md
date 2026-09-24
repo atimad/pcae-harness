@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260924-1951-phase-150h-post-finalization-notification-marker-lifecycle-stability-correction
+20260924-2020-idle-post-phase-150h-lifecycle-reconciliation-complete-not-reconciled-blocked-terminal-verification-stable-infrastructure-repair-recommended
 
 ## Title
 
-Phase 150H post-finalization notification-marker lifecycle-stability correction
+Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended
 
 ## Status
 
@@ -18,9 +18,7 @@ verification
 
 ## Goal
 
-Make Phase 150H's own verification suite remain valid after the normal global
-notification marker advances from 150G to 150H, without changing any 150G
-artifact or production behavior.
+Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended
 
 ## Allowed Files
 
@@ -31,8 +29,8 @@ artifact or production behavior.
 - tasks/DECISIONS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- docs/PHASE_150H_PCAE_LIFECYCLE_PHASE_150G_REPORT_IDENTITY_RECONCILIATION.md
-- tests/test_phase_150h_pcae_lifecycle_phase_150g_report_identity_reconciliation.py
+- .pcae/phase-completion-metadata.json
+- .pcae/fast-green-attribution/a05d8fbbbae9fd1a51f24367a53fee0451c8c7f96f9d36ac682184456c855f56.json
 
 ## Forbidden Files
 
@@ -65,15 +63,13 @@ strict
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No delegated finalization, commit, or push
-- No force push, hook bypass, or history rewrite
+- No commit
+- No push
 - No rollback
 
 ## Acceptance Criteria
 
-- Fresh Phase 150H suite passes after terminal notification.
-- Global latest marker is not misrepresented as immutable per-phase evidence.
-- Zero src/pcae/** and docs/contracts/** changes.
+- TBD
 
 ## Acceptance Checks
 
@@ -88,4 +84,4 @@ strict
 
 ## Created Timestamp
 
-2026-09-24T19:51:47.517412+02:00
+2026-09-24T20:20:43.545468+02:00
