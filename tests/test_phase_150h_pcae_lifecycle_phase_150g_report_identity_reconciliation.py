@@ -16,6 +16,7 @@ from pathlib import Path
 
 from pcae.commands import phase as phase_command
 from pcae.commands import phase_reports as phase_report_commands
+from pcae.core import fast_green_attribution
 from pcae.core import phase_reports
 from pcae.core.phase_reports import (
     PhaseReport,
@@ -156,9 +157,16 @@ def test_finalization_transaction_certifies_trial_then_callback_regenerates_repo
     assert "report = make_phase_report(" in finalize_source
 
 
-def test_consistency_inspection_mutates_only_its_in_memory_rehydration() -> None:
+def test_consistency_inspection_mutates_only_its_in_memory_rehydration(
+    monkeypatch,
+) -> None:
     report = _report(GEN_B)
     before = copy.deepcopy(report.metadata)
+    # Recreate the exact post-150G inspection state.  Otherwise a later
+    # governed phase's legitimate files make the historical Fast Green check
+    # return early before reaching the mutation under test.
+    monkeypatch.setattr(fast_green_attribution, "current_head", lambda _root: ENTRY_COMMIT)
+    monkeypatch.setattr(phase_reports, "run_stage_b_focused_checks", lambda _root: [])
     assert phase_reports.validate_derived_correctness(report) == []
     assert before != report.metadata
     assert report.metadata["fgsc_lifecycle_state"] == "FINALIZATION_VERIFIED"

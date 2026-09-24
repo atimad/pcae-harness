@@ -152,9 +152,14 @@ JSON re-render mismatch, proves the expected pending-to-complete lifecycle,
 proves the reconciler is read-only, captures the process-local consistency
 mutation, and verifies zero Phase 150H production/contract delta.
 
-Fast Green and final governance results are recorded in the canonical Phase
-150H completion metadata/report. This evidence phase does not reuse Phase
-150G's attribution artifact.
+Fresh governed Fast Green attribution used baseline
+`a6d475ef474514533e0144952d4f2f89374c3d2e` and candidate
+`4d4dafc314224e3f120ce25fff0157692435e89d`. It passed with
+`attributable_failures: []`; the 360 raw failures and 9 collection errors were
+baseline-pre-existing, while the only expected phase artifact was the
+not-yet-pushed HEAD/origin assertion. The independently generated artifact is
+`.pcae/fast-green-attribution/8e674a1f9ba3ce75f97d6a70b40d7ac6e27831be2f431a866292b49ba766ab53.json`.
+This evidence phase does not reuse Phase 150G's attribution artifact.
 
 ## 7. Preserved truth and disposition
 
@@ -184,4 +189,3 @@ for existing reports without rewriting delivered content or historical
 generations. Only after that repair is independently verified and Phase 150G
 reconciliation is clean should the recognition-core implementation IV be
 re-authorized. No successor phase is begun here.
-

@@ -60,8 +60,8 @@ strict
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
+- No delegated finalization, commit, or push
+- No force push, hook bypass, or history rewrite
 - No rollback
 
 ## Acceptance Criteria

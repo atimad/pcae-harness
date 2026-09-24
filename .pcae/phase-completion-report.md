@@ -1,29 +1,63 @@
-# Phase 150G Complete — Helper Admission Recognition Core Implementation
+# Phase 150H Complete — Phase 150G Report Identity Reconciliation
 
-Canonical Phase ID: `150G`
+Canonical Phase ID: `150H`
 
-Alias: **N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-CORE-IMPLEMENTATION**
+Alias: **PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION**
 
-Status: **COMPLETE — SHARED RECOGNITION CORE IMPLEMENTED** (narrow implementation only; helper admission still NOT wired).
+Status: **COMPLETE — NOT RECONCILED / BLOCKED**.
 
-CPIPC: a fresh short top-level phase number (`pcae.core.phase_id` `is_valid` True, no collision against `git log --all`), sibling to `150A`-`150F`.
+## Outcome
 
-Predecessor: N16-5-F-5-TB-HELPER-ADMISSION-RECOGNITION-SHARED-INFRASTRUCTURE-ARCHITECTURE (150F) — **COMPLETE — ARCHITECTURE VERIFIED**, which selected Model B and recommended this exact narrow implementation as its successor.
+This governed phase reconstructed every Phase 150G promoted generation and
+classified the identity conflict as **Class B — MULTI-GENERATION EXPECTED,
+RECONCILER DEFECT**. Generation A is the legitimate pre-push
+`pending_push` artifact. Generation B is the legitimate terminal pushed
+artifact. The stored terminal Markdown digest
+`5b95481652526975ca6190b3a15a439b8aaefa8bfb4bd685abca7185536366b1`
+already matches both the finalization checkpoint and ordinary-completion
+notification marker.
 
-## What this phase did
+The read-only reconciler loads Generation B's persisted JSON into a
+`PhaseReport` and re-renders it. The persisted representation omits
+`canonical_report_content`, so the reconstructed Markdown loses the canonical
+report-consistency section and hashes to `59dda6c6…`. The apparent linkage
+conflict is therefore produced by lossy lifecycle rehydration. Consistency
+inspection also mutates the rehydrated object's Fast Green lifecycle metadata
+in memory, producing a different snapshot identity during inspection.
 
-Preflight: `git fetch origin` clean; local `HEAD == origin/main == ce9b8beb` (150F's own final pushed commit); `origin/main..HEAD == 0`; no active governed phase; no unexpected active task (two stale idle placeholders from 150E/150F closed); `PROJECT_STATUS.md` confirmed 150F complete/pushed with Model B selected and this narrow implementation as the recommended next phase.
+No established governed operation can rotate or update the completed 150G
+checkpoint/marker, and the existing `phase-report reconcile` operation is
+explicitly read-only. Manual digest substitution, deletion, re-notification,
+or pointer editing would falsify history. Accordingly, this phase made no 150G
+linkage mutation and recommends a dedicated lifecycle-infrastructure repair.
 
-Realized the Model B architecture: extracted `hpac_protected_admin_writer._run_recognition_sequence`'s §33 steps 1 (root-content checks only — canonical-root resolution itself stays with the legacy factory, the only entitled constructor of an `HPACStoreAuthority`), 4, 5, 6, 2, 3, 7, 8, in that exact original order, into a new module, `src/pcae/core/hpac_pawa_recognition_core.py`, exposing `recognize_protected_anchor(*, root: Path, configured_agent_identity_source, topology_probe=None) -> RecognizedAnchorFacts`. Step 9 (authorized-factory-consumer check) and step 10/11 (configured-agent binding + capability minting) remain unchanged in the legacy factory — never part of the extraction.
+## Evidence and validation
 
-`RecognizedAnchorFacts` deliberately carries no `authority` field (unlike the legacy `_RecognizedAnchor`), resolving the one real design tension in Model B: the legacy factory still resolves its own `HPACStoreAuthority` (via its existing `_resolve_authority()`), passes only the plain `root: Path` into the shared core, and keeps its own `authority` reference for step 10/11 binding/minting. The shared core never imports, constructs, or references `HPACStoreAuthority`, `_ensure_root`, or `_validate_production_boundary` (confirmed by AST-based identifier-usage scan, immune to docstring-prose false positives).
+- Fresh Phase 150H suite: 13 passed; the combined Phase 150H and
+  report/notification lifecycle regression selection passed 185 tests.
+- Fresh governed Fast Green: baseline `a6d475ef474514533e0144952d4f2f89374c3d2e`,
+  candidate `4d4dafc314224e3f120ce25fff0157692435e89d`,
+  `attributable_failures: []`.
+- Fast Green artifact:
+  `.pcae/fast-green-attribution/8e674a1f9ba3ce75f97d6a70b40d7ac6e27831be2f431a866292b49ba766ab53.json`.
+- Full evidence:
+  `docs/PHASE_150H_PCAE_LIFECYCLE_PHASE_150G_REPORT_IDENTITY_RECONCILIATION.md`.
 
-Removed (not left as dead code) five steps-1-8-only helper functions (`_require_owner_and_mode`, `_require_not_configured_agent_writable`, `_verify_provenance`, `_exclusion_provenance_ref`, `_positive_write_probe`) and the `TopologyProbe` class / `_real_topology` function from the legacy module, after confirming by full-file grep that they had no other call site; `TopologyProbe` is re-imported for backward-compatible attribute access across ~20 existing test call sites.
+## Preserved boundaries
 
-A fresh 37-test suite (`tests/test_n16_5_f_5_tb_helper_admission_recognition_core_implementation.py`) proves: behavior parity (old vs. new fail-closed outcomes identical across 9 scenarios, plus the full `production_writer` mint path); the shared core's read-only / non-authoritative / fail-closed / non-cached nature; absence of any duplicate steps-1-8 implementation remaining in the legacy module (AST-based); Model E non-regression; and non-wiring of all six helper admission modules (parametrized — none imports or calls the new core). Isolated keyword sweep (`git stash -u` baseline vs. candidate) showed an identical failure set before fixes (78 failed / 1842 passed both sides, 37 new tests added). Full governed Fast Green attribution surfaced exactly one attributable failure — a pre-existing stale moving-`origin/main`/`HEAD`-bound assertion in an unrelated predecessor phase's own suite (`tests/test_n16_5_f_5_tb_pcae_lifecycle_filename_length_hardening_r.py::test_29_production_diff_confined_to_expected_files`), which pinned `hpac_protected_admin_writer.py` (this phase's own explicitly-authorized production file) against a moving comparison rather than a fixed historical commit range. Repaired in-scope by re-pinning to Phase 150C's own entry/final commit range (`2be6fe01`..`caa155b6`), the same repair pattern already applied twice more in this phase's own commits (one 150F-suite assertion, one provenance-repair-suite byte-identity assertion). Re-running Fast Green attribution after the fix produced `attributable_failures: []`.
+Zero `src/pcae/**` changes and zero `docs/contracts/**` changes. Phase 150G's
+technical result remains unchanged: shared recognition core implemented,
+helper admission not wired, helper step 9-prime undefined, foundation blocker
+unchanged, and N-16-5 OPEN. N-16-6 and N-16-7 are untouched. Runtime remains
+Observed / observe / unavailable. Phase 150H / recognition-core IV was NOT
+begun by this phase.
 
-Foundation blocker (`hpac_foundation.py`) and Model E authority classes (`hpac_pawa_helper_writer_authority.py`) remain byte-unchanged (pre-existing byte-identity tests still pass). Zero `docs/contracts/**` changes. Helper admission is still NOT implemented by this phase; N-16-5 remains NOT CLOSED; N-16-6/N-16-7 untouched.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
 
-Full evidence: `docs/PHASE_150G_N16_5_F_5_TB_HELPER_ADMISSION_RECOGNITION_CORE_IMPLEMENTATION.md`.
+`HASH CONSISTENCY != PROVENANCE`
 
-`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED` — this phase's implementation, tests, and evidence were authored directly by the primary operator; no delegated fork was used. All lifecycle mutation, finalization, commit, and push were performed directly by the primary operator.
+## Recommended next phase
+
+After independently deriving its CPIPC identity, open a dedicated
+`PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR` phase. Do not begin
+the recognition-core IV until the 150G reconciliation command is clean.
