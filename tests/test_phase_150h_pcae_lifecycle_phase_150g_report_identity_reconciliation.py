@@ -90,24 +90,32 @@ def test_generation_b_is_the_unambiguous_terminal_pushed_generation() -> None:
     ]
 
 
-def test_terminal_markdown_digest_matches_checkpoint_and_notification_marker() -> None:
+def test_terminal_markdown_digest_matches_checkpoint_and_marker_is_global_latest() -> None:
     checkpoint = _json(CHECKPOINT)
     marker = _json(MARKER)
     assert _sha256(GEN_B_MD) == EXPECTED_TERMINAL_REPORT_DIGEST
     assert checkpoint["report_digest"] == EXPECTED_TERMINAL_REPORT_DIGEST
-    assert marker["report_digest"] == EXPECTED_TERMINAL_REPORT_DIGEST
-    assert marker["deliveries"]["ordinary_completion"]["report_digest"] == (
-        EXPECTED_TERMINAL_REPORT_DIGEST
-    )
+    # At Phase 150H preflight this global marker still named 150G and matched
+    # the digest above.  Normal 150H notification legitimately rotates the
+    # global latest marker; it is not immutable per-phase evidence.
+    if marker["phase_id"] == "150G":
+        assert marker["report_digest"] == EXPECTED_TERMINAL_REPORT_DIGEST
+    else:
+        assert marker["phase_id"] == "150H"
+        assert marker["report_digest"] != EXPECTED_TERMINAL_REPORT_DIGEST
 
 
-def test_terminal_semantic_snapshot_matches_checkpoint_and_marker() -> None:
+def test_terminal_semantic_snapshot_matches_checkpoint_and_global_marker_rotates() -> None:
     report = _report(GEN_B)
     checkpoint = _json(CHECKPOINT)
     marker = _json(MARKER)
     assert compute_finalization_snapshot_id(report) == EXPECTED_SNAPSHOT_ID
     assert checkpoint["finalization_snapshot_id"] == EXPECTED_SNAPSHOT_ID
-    assert marker["finalization_snapshot_id"] == EXPECTED_SNAPSHOT_ID
+    if marker["phase_id"] == "150G":
+        assert marker["finalization_snapshot_id"] == EXPECTED_SNAPSHOT_ID
+    else:
+        assert marker["phase_id"] == "150H"
+        assert marker["finalization_snapshot_id"] != EXPECTED_SNAPSHOT_ID
 
 
 def test_json_round_trip_cannot_reproduce_the_certified_markdown_digest() -> None:

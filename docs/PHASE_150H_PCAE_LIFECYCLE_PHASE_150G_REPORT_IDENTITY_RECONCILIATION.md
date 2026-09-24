@@ -163,6 +163,14 @@ An intervening governed run's lone candidate-only
 `test_verify_detects_tampered_record` result passed 5/5 candidate and 3/3
 fixed-baseline focused reruns; the subsequent unmodified governed rerun passed.
 Both the failed and final passing artifacts are preserved.
+
+Post-completion note: `.last-notified.json` is a global latest-notification
+pointer, not immutable per-phase storage. Phase 150H's own governed terminal
+notification legitimately advanced it from the preflight-observed 150G payload
+to 150H. The durable 150G checkpoint and promoted generations remain unchanged;
+post-150H `reconcile --phase-id 150G` therefore reports the marker as
+`not_dispatched` plus the same rehydration-created checkpoint conflict. No 150G
+artifact was manually mutated.
 This evidence phase does not reuse Phase 150G's attribution artifact.
 
 ## 7. Preserved truth and disposition
