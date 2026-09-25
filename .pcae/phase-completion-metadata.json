@@ -26,11 +26,12 @@
     {"hash": "371bc0d0244fdd8323a160cf9ce96543de93cc28"},
     {"hash": "884e8dd82efede1d92b0a8a60cf42cca9dea1093"},
     {"hash": "a1187f1c64f404f2f8248bd6cef3c42fe1dedef2"},
-    {"hash": "59f82f851e65754b187071a3ed924b2d99bde479"}
+    {"hash": "59f82f851e65754b187071a3ed924b2d99bde479"},
+    {"hash": "05f6fc23fde1036f3a163bd244cfd079a06951fd"}
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 4,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "validation_results": {
     "report_notification_tests": "177 passed in the focused Phase 150I, Phase 150H, and phase-report lifecycle selection",
     "bootstrap_session_reporting_tests": "covered by the 582-test broader lifecycle selection and baseline attribution",
@@ -42,13 +43,13 @@
     "phase_150g_reconcile": "reconciled; 2 trusted generations, 1 checkpoint-bound terminal generation, 1 legitimate historical pending-push generation, mutation=false"
   },
   "governance_results": {
-    "pcae_health": "healthy before finalization; final post-push verification required",
-    "pcae_check": "passed before finalization; final post-push verification required",
-    "pcae_doctor_task_memory": "passed with pre-existing warnings and no errors before finalization",
-    "pcae_push_check": "pending final commit",
+    "pcae_health": "healthy",
+    "pcae_check": "passed",
+    "pcae_doctor_task_memory": "passed with pre-existing warnings and no errors",
+    "pcae_push_check": "clean",
     "telegram_runtime": "notification lifecycle remains governed by pcae phase complete; notification marker is evidence, not authority",
-    "pcae_status_coherence": "coherent before finalization; final post-push verification required",
-    "repository_transition_validation": "passed at Phase 150I activation; final validation required before push"
+    "pcae_status_coherence": "coherent",
+    "repository_transition_validation": "passed"
   },
   "no_go_confirmation": "No Phase 150G report, checkpoint, receipt, notification marker, or latest pointer was edited, deleted, or fabricated.\nNo promoted historical generation was collapsed into the terminal generation.\nNo trust or consistency check was weakened.\nNo HPAC recognition-core or protected-admin-writer source was changed.\nNo helper admission or helper step 9-prime work was begun.\nNo foundation repair was attempted.\nNo runtime, PB, POL-005, host, deployment, release, or publication mutation was performed.\nNo normative contract file under docs/contracts/** was changed.\nNo N-16-5 product closure was claimed.\nNo N-16-6 or N-16-7 work was begun.\nNo force push, history rewrite, --no-verify, hook bypass, manual pointer forgery, manual digest substitution, or delegated finalization/commit/push was used.",
   "recommended_next_phase": "Independent verification of the Phase 150I phase-report rehydration identity repair; recognition-core IV remains on hold until that IV completes",
