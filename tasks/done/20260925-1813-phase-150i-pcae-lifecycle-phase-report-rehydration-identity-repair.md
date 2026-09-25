@@ -10,7 +10,7 @@ Phase 150I - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -109,15 +109,14 @@ strict
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- Fresh Phase 150I adversarial suite passes
-- Relevant phase-report lifecycle regression suites pass
-- pcae phase-report trust passes
-- pcae phase-report consistency passes
-- pcae phase-report reconcile --phase-id 150G passes
-- Fresh Fast Green attributable_failures is empty
+- pcae status coherence
+- pcae health
+- pcae check
+- pytest -q tests/test_phase_150i_phase_report_rehydration_identity_repair.py tests/test_phase_150h_pcae_lifecycle_phase_150g_report_identity_reconciliation.py tests/test_phase_reports.py
+- pcae phase-report trust
+- pcae phase-report consistency
+- pcae phase-report reconcile --phase-id 150G
+- python -c "import json; p='.pcae/fast-green-attribution/64329546c6dab9d7e0e0156169fda8cec88431ef97aadfaf3d87316a6bc374db.json'; d=json.load(open(p)); assert d['candidate_commit']=='371bc0d0244fdd8323a160cf9ce96543de93cc28' and d['attributable_failures']==[]"
 
 ## Documentation Requirements
 
