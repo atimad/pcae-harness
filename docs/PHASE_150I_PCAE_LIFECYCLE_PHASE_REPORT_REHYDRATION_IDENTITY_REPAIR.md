@@ -4,7 +4,7 @@ Canonical Phase ID: `150I`
 
 Alias: **PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR**
 
-Status: **IMPLEMENTATION COMPLETE; GOVERNED FINALIZATION IN PROGRESS**
+Status: **COMPLETE — PHASE-REPORT REHYDRATION IDENTITY REPAIR IMPLEMENTED**
 
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
 
@@ -141,8 +141,17 @@ The real post-repair result is:
 - snapshot: `232104b62f1c78b24732735cf1185f62790e0b0555a141d6d348d70fe5c078e8`;
 - mutation/redispatch: false.
 
-Fast Green and final governed commit/push evidence are recorded during
-terminal lifecycle completion.
+Canonical Fast Green passed with baseline
+`93424bea862aab27fcb2401a5e83e28481b1929a` and candidate
+`371bc0d0244fdd8323a160cf9ce96543de93cc28`: 360 raw failures and 9
+collection errors were baseline-pre-existing; the one expected
+`HEAD == origin/main` phase artifact was predicted by `not_pushed`; and
+`attributable_failures: []`. Artifact:
+`.pcae/fast-green-attribution/64329546c6dab9d7e0e0156169fda8cec88431ef97aadfaf3d87316a6bc374db.json`.
+
+The first governed implementation commit is `371bc0d0`. Final completion and
+push commits are appended by the governed lifecycle; canonical completion
+metadata carries the complete commit set.
 
 ## 7. Scope and preserved state
 

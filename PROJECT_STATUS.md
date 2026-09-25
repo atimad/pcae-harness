@@ -3,7 +3,7 @@
 ## Current Phase
 
 Phase `150I` — PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR.
-**IMPLEMENTATION COMPLETE; GOVERNED FINALIZATION IN PROGRESS.** CPIPC: `150I`,
+**COMPLETE — PHASE-REPORT REHYDRATION IDENTITY REPAIR IMPLEMENTED.** CPIPC: `150I`,
 independently derived from canonical `150H`, valid, ordered after `150H`, same
 series, unequal, and collision-free at activation.
 
@@ -26,8 +26,10 @@ identity-pure against rehydrated report objects.
 
 Fresh focused result: 177 passed. A broader selected lifecycle run produced
 582 passed / 3 failed; all three failures reproduce at entry commit
-`93424bea` and are baseline-pre-existing. Fast Green and final governed
-commit/push evidence remain part of this phase's terminal lifecycle. No Phase
+`93424bea` and are baseline-pre-existing. Canonical Fast Green passed from
+baseline `93424bea` to candidate `371bc0d0` with 360 raw failures / 9 errors
+baseline-pre-existing, one expected not-yet-pushed HEAD assertion, and
+`attributable_failures: []`. No Phase
 150G artifact, HPAC/helper/foundation/runtime/PB/POL file, or normative
 contract changed. Runtime remains Observed / observe / unavailable. N-16-5
 remains OPEN; N-16-6/N-16-7 untouched. Full evidence:
