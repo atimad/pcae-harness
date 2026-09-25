@@ -34,6 +34,7 @@ from pcae.core.phase_reports import (
     write_phase_report,
     write_quarantined_report,
     read_latest_report,
+    resolve_terminal_promoted_generation,
     write_notification_dispatch_marker,
     PhaseReport,
 )
@@ -368,43 +369,15 @@ def run_phase_report_reconcile(args: argparse.Namespace) -> int:
         getattr(args, "transaction_root", None) or ".pcae/finalization-transactions"
     )
 
-    report: PhaseReport | None = None
-    report_path: Path | None = None
-    candidates = [reports_dir / "latest.json"] + sorted(
-        (
-            path for path in reports_dir.glob("*.json")
-            if path.name != "latest.json" and path.name[:1].isdigit()
-        ),
-        reverse=True,
-    )
-    seen: set[Path] = set()
-    promoted_generation_count = 0
-    for path in candidates:
-        if path in seen or not path.is_file():
-            continue
-        seen.add(path)
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        if data.get("phase_id") != phase_id:
-            continue
-        if path.name != "latest.json":
-            promoted_generation_count += 1
-        if report is None:
-            try:
-                report = PhaseReport(**data)
-                report_path = path
-            except TypeError:
-                continue
-
     marker_path = Path(
         getattr(args, "marker_path", None)
         or ".pcae/phase-reports/.last-notified.json"
     )
     checkpoint_path = transaction_root / f"{phase_id}.json"
     checkpoint: dict[str, Any] = {}
-    if checkpoint_path.is_file():
+    if checkpoint_path.is_symlink():
+        checkpoint = {"status": "corrupt"}
+    elif checkpoint_path.is_file():
         try:
             raw = json.loads(checkpoint_path.read_text(encoding="utf-8"))
             if isinstance(raw, dict):
@@ -412,8 +385,13 @@ def run_phase_report_reconcile(args: argparse.Namespace) -> int:
         except (OSError, json.JSONDecodeError):
             checkpoint = {"status": "corrupt"}
 
-    report_digest = compute_report_digest(report) if report is not None else ""
-    snapshot_id = compute_finalization_snapshot_id(report) if report is not None else ""
+    resolution = resolve_terminal_promoted_generation(reports_dir, phase_id, checkpoint)
+    generation = resolution.terminal
+    report = generation.report if generation is not None else None
+    report_path = generation.json_path if generation is not None else None
+    report_digest = generation.report_digest if generation is not None else ""
+    snapshot_id = generation.finalization_snapshot_id if generation is not None else ""
+    promoted_generation_count = len(resolution.generations) + len(resolution.rejected_paths)
     from pcae.core.phase_reports import notification_dispatch_state
     marker_state = notification_dispatch_state(
         phase_id,
@@ -434,21 +412,34 @@ def run_phase_report_reconcile(args: argparse.Namespace) -> int:
     receipt_state = "absent"
     if receipt_path is not None and receipt_path.is_file():
         try:
-            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            if receipt_path.is_symlink():
+                raise ValueError("receipt path is a symlink")
+            expected_receipts_root = (
+                transaction_root.parent / "delivery-receipts" / "receipts"
+            ).resolve()
+            if receipt_path.resolve().parent.parent != expected_receipts_root:
+                raise ValueError("receipt path escapes canonical receipt storage")
+            receipt_data = json.loads(receipt_path.read_text(encoding="utf-8"))
+            from pcae.core.delivery_receipt import _receipt_from_dict
+            receipt = _receipt_from_dict(receipt_data, verify_digest=True)
+            checkpoint_logical_id = str(checkpoint.get("receipt_logical_delivery_id", ""))
             if (
-                isinstance(receipt, dict)
-                and receipt.get("phase_id") == phase_id
-                and receipt.get("finalized") is True
+                receipt.phase_id == phase_id
+                and receipt.finalized is True
+                and receipt.logical_delivery_id == checkpoint_logical_id
+                and receipt_path.name == "receipt.json"
+                and receipt_path.parent.name == checkpoint_logical_id
             ):
                 receipt_state = "finalized"
             else:
                 receipt_state = "conflict"
-        except (OSError, json.JSONDecodeError):
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
             receipt_state = "corrupt"
 
-    blockers: list[str] = []
+    blockers: list[str] = list(resolution.blockers)
     if report is None:
-        blockers.append("no promoted report generation found for phase")
+        if not resolution.blockers:
+            blockers.append("no terminal promoted report generation found for phase")
     elif report.report_completeness != "complete":
         blockers.append("promoted report is not trust-complete")
     if marker_state == "payload_conflict":
@@ -461,10 +452,10 @@ def run_phase_report_reconcile(args: argparse.Namespace) -> int:
     if blockers:
         reconciliation_status = "conflict"
     elif (
-        marker_state == "already_dispatched"
-        and checkpoint_state == "completed"
+        checkpoint_state in ("completed", "completed_receipt_best_effort_incomplete")
         and checkpoint_matches
         and receipt_state == "finalized"
+        and bool((report.notification_result if report else {}).get("success"))
     ):
         reconciliation_status = "reconciled"
     elif marker_state == "already_dispatched":
@@ -485,6 +476,13 @@ def run_phase_report_reconcile(args: argparse.Namespace) -> int:
         "finalization_snapshot_id": snapshot_id or None,
         "report_completeness": report.report_completeness if report else None,
         "promoted_generation_count": promoted_generation_count,
+        "historical_generation_count": len(resolution.historical),
+        "historical_generation_paths": [str(item.json_path) for item in resolution.historical],
+        "rejected_generation_paths": list(resolution.rejected_paths),
+        "terminal_selection_provenance": (
+            "completed_checkpoint_report_digest_and_finalization_snapshot_id"
+            if generation is not None else None
+        ),
         "marker_state": marker_state,
         "marker_path": str(marker_path),
         "checkpoint_state": checkpoint_state,
@@ -911,8 +909,15 @@ def run_phase_report_consistency(args: argparse.Namespace) -> int:
             print("No phase report found. Create one with: pcae phase-report create ...")
         return 2
 
-    coherence_issues = validate_internal_report_coherence(report)
-    derived_issues = validate_derived_correctness(report)
+    # Derived correctness records verified FGSC identities on the object it
+    # validates during report construction.  Inspection must not let that
+    # useful construction-time behavior change the identity of a rehydrated
+    # persisted report.  Validate an isolated copy and compute displayed
+    # identities from the original persisted representation.
+    import copy
+    inspection_report = copy.deepcopy(report)
+    coherence_issues = validate_internal_report_coherence(inspection_report)
+    derived_issues = validate_derived_correctness(inspection_report)
     arch = report.architecture_status or {}
 
     payload = {

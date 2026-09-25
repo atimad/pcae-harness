@@ -5581,3 +5581,26 @@ DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 Contract-text repair of F1-A/F1-B independently re-verified sound (HELPER v5.0 §30E, PAWA v4.0 §98, PPA v2.1 reuse validated as structurally identical, not analogy). Activating prompt's claimed predecessor self-contradiction adjudicated as not present in repository truth — a distinct earlier phase's disposition was being conflated with this predecessor's own, single, consistent disposition. BLOCKED instead on a new finding: already-existing production source (`hpac_pawa_helper_protocol.py` `CLOSED_ADMIN_MUTATIONS`, `hpac_pawa_helper_store_adapter.py` dispatch branch, `hpac_pawa_helper_operations.py::handle_admin_mutation`), written before the contract-repair phase and never touched by it, still implements the pre-repair circular/self-lineage-violating `configure_privileged_helper` dispatch route through H's own admin_mutation handler — contradicting the frozen HELPER-REQ-184. Predecessor's source-impact map claimed "no change" for the store adapter without checking whether "no change" left it inconsistent with the contract it just froze, and never mentioned `hpac_pawa_helper_protocol.py` at all. Fresh tests (`tests/test_n16_5_f5_tb_prov_repair_iv.py`, 14/14 pass) document the live defect; no `src/pcae/**` byte changed by this IV. Recommended narrow successor: source-only conformance repair (not the standalone-script implementation phase, which remains separately authorized later). N-16-5 remains OPEN; N-16-6/N-16-7 untouched.
 
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+## Phase 150I — phase-report rehydration identity repair
+
+- **Terminal provenance:** the current architecture's completed finalization
+  checkpoint selects the terminal generation by the conjunction of certified
+  stored-Markdown digest and semantic finalization snapshot. Filename, mtime,
+  directory order, ordinal, and marker preference are non-authoritative.
+- **Checkpoint semantics:** a completed checkpoint is the terminal transaction
+  identity in the current implementation. Earlier pending-push generations
+  are historical evidence; an earlier/unbound complete generation cannot be
+  promoted to terminal by changing a checkpoint digest alone.
+- **Notification semantics:** `.last-notified.json` is a rotating global
+  idempotency pointer, not immutable per-phase history. For an older phase,
+  successful persisted notification plus the checkpoint-bound finalized,
+  digest-valid receipt establishes delivery without rewriting the marker.
+- **Fail-closed scope:** malformed/extra/ambiguous generations and invalid
+  pointer/checkpoint/receipt linkage are conflicts. No historical artifact is
+  rewritten or deleted.
+- **Boundary:** no HPAC, helper, foundation, runtime, PB, POL-005, or contract
+  behavior changes. Recognition-core IV remains on hold pending Phase 150I IV.
+
+`HASH CONSISTENCY != PROVENANCE`.
+
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`

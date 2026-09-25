@@ -13,7 +13,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from collections.abc import Mapping
 from typing import Any
@@ -939,6 +939,237 @@ def read_latest_report(reports_dir: Path) -> PhaseReport | None:
         return None
 
 
+# ── Promoted-generation rehydration (Phase 150I) ────────────────────────────
+
+
+@dataclass(frozen=True)
+class PromotedReportGeneration:
+    """One paired, persisted JSON/Markdown report generation.
+
+    ``report_digest`` is the digest of the certified Markdown bytes actually
+    stored at promotion time.  It is deliberately not re-derived by rendering
+    the lossy JSON representation again.
+    """
+
+    report: PhaseReport
+    json_path: Path
+    markdown_path: Path
+    report_digest: str
+    finalization_snapshot_id: str
+
+
+@dataclass(frozen=True)
+class TerminalGenerationResolution:
+    """Fail-closed resolution of a phase's terminal promoted generation."""
+
+    terminal: PromotedReportGeneration | None
+    generations: tuple[PromotedReportGeneration, ...]
+    historical: tuple[PromotedReportGeneration, ...]
+    rejected_paths: tuple[str, ...]
+    blockers: tuple[str, ...]
+
+
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _parse_utc_timestamp(value: object) -> datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(timezone.utc)
+
+
+def _load_promoted_generation(json_path: Path, reports_dir: Path) -> PromotedReportGeneration:
+    """Load one versioned generation without following path substitutions."""
+
+    resolved_root = reports_dir.resolve()
+    if json_path.is_symlink() or json_path.resolve().parent != resolved_root:
+        raise ValueError("generation JSON path is a symlink or escapes report storage")
+    markdown_path = json_path.with_suffix(".md")
+    if markdown_path.is_symlink() or not markdown_path.is_file():
+        raise ValueError("generation Markdown sibling is absent or a symlink")
+    if markdown_path.resolve().parent != resolved_root:
+        raise ValueError("generation Markdown path escapes report storage")
+
+    try:
+        data = json.loads(json_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("generation JSON is unreadable or malformed") from exc
+    if not isinstance(data, dict):
+        raise ValueError("generation JSON root is not an object")
+    try:
+        report = PhaseReport(**data)
+    except TypeError as exc:
+        raise ValueError("generation JSON does not match the PhaseReport schema") from exc
+    issues = report.validate()
+    if issues:
+        raise ValueError("generation report is invalid: " + "; ".join(issues))
+
+    markdown = markdown_path.read_text(encoding="utf-8")
+    if f"# Phase Report: {report.phase_name}\n" not in markdown:
+        raise ValueError("generation Markdown title disagrees with JSON")
+    if f"- **Phase ID:** `{report.phase_id}`\n" not in markdown:
+        raise ValueError("generation Markdown phase identity disagrees with JSON")
+    report_digest = hashlib.sha256(markdown_path.read_bytes()).hexdigest()
+    return PromotedReportGeneration(
+        report=report,
+        json_path=json_path,
+        markdown_path=markdown_path,
+        report_digest=report_digest,
+        finalization_snapshot_id=compute_finalization_snapshot_id(report),
+    )
+
+
+def resolve_terminal_promoted_generation(
+    reports_dir: Path,
+    phase_id: str,
+    checkpoint: Mapping[str, Any] | None,
+) -> TerminalGenerationResolution:
+    """Resolve the terminal report using completed-transaction provenance.
+
+    The finalization checkpoint is the lifecycle authority for terminal
+    selection in the current architecture.  A candidate must match both its
+    certified stored-Markdown digest and its semantic snapshot.  Filename
+    order, mtimes, directory order, caller-selected paths, and the global
+    latest-notification marker have no selection role.
+
+    Earlier ``pending_push`` generations are retained as historical evidence
+    only when their commit set is a subset of the terminal generation and
+    their embedded creation time precedes it.  Any other extra generation is
+    rejected and makes resolution fail closed.
+    """
+
+    blockers: list[str] = []
+    rejected: list[str] = []
+    generations: list[PromotedReportGeneration] = []
+    safe_id = _safe_filename(phase_id)
+    candidate_paths = tuple(reports_dir.glob(f"*-{safe_id}.json"))
+    for path in candidate_paths:
+        try:
+            generation = _load_promoted_generation(path, reports_dir)
+        except ValueError as exc:
+            rejected.append(str(path))
+            blockers.append(f"rejected promoted generation {path.name}: {exc}")
+            continue
+        if generation.report.phase_id != phase_id:
+            rejected.append(str(path))
+            blockers.append(f"rejected promoted generation {path.name}: phase identity mismatch")
+            continue
+        generations.append(generation)
+
+    cp = dict(checkpoint or {})
+    if not cp:
+        blockers.append("completed finalization checkpoint is absent")
+    elif cp.get("phase_id") != phase_id:
+        blockers.append("finalization checkpoint phase identity mismatch")
+    elif cp.get("status") not in ("completed", "completed_receipt_best_effort_incomplete"):
+        blockers.append("finalization checkpoint is not terminal")
+    else:
+        required_steps = cp.get("steps")
+        if not isinstance(required_steps, dict) or any(
+            required_steps.get(step) != "completed"
+            for step in ("pre_promotion_certification", "promotion_and_dispatch")
+        ):
+            blockers.append("finalization checkpoint lacks completed promotion provenance")
+        if not _SHA256_RE.fullmatch(str(cp.get("report_digest", ""))):
+            blockers.append("finalization checkpoint report digest is malformed")
+        if not _SHA256_RE.fullmatch(str(cp.get("finalization_snapshot_id", ""))):
+            blockers.append("finalization checkpoint snapshot identity is malformed")
+
+    matches = [
+        generation
+        for generation in generations
+        if generation.report_digest == cp.get("report_digest")
+        and generation.finalization_snapshot_id == cp.get("finalization_snapshot_id")
+    ] if cp else []
+    terminal: PromotedReportGeneration | None = None
+    if len(matches) != 1:
+        if len(matches) > 1:
+            rejected.extend(str(item.json_path) for item in matches)
+        blockers.append(
+            "terminal promoted generation is missing or ambiguous for the checkpoint identity"
+        )
+    else:
+        terminal = matches[0]
+        report = terminal.report
+        if report.report_completeness != COMPLETENESS_COMPLETE:
+            blockers.append("checkpoint-selected generation is not trust-complete")
+        if report.pushed_status not in ("pushed", "clean", "nothing_to_push"):
+            blockers.append("checkpoint-selected generation is not in a pushed terminal state")
+        if report.origin_main_head_count != 0:
+            blockers.append("checkpoint-selected generation has outgoing commits")
+        created = _parse_utc_timestamp(report.created_at)
+        started = _parse_utc_timestamp(cp.get("started_at"))
+        completed = _parse_utc_timestamp(cp.get("completed_at"))
+        # Checkpoint timestamps intentionally have second precision while the
+        # report carries microseconds.  The terminal write may therefore look
+        # up to one second later than ``completed_at`` after serialization.
+        if (
+            created is None or started is None or completed is None
+            or not (started <= created < completed + timedelta(seconds=1))
+        ):
+            blockers.append("checkpoint chronology does not enclose terminal generation creation")
+        source_revision = str((report.metadata or {}).get("source_revision", ""))
+        if source_revision and not any(source_revision.startswith(str(item)) for item in report.commits):
+            blockers.append("terminal source revision is not bound to its phase commit inventory")
+
+    historical: list[PromotedReportGeneration] = []
+    if terminal is not None:
+        terminal_created = _parse_utc_timestamp(terminal.report.created_at)
+        terminal_commits = set(terminal.report.commits)
+        for generation in generations:
+            if generation is terminal:
+                continue
+            created = _parse_utc_timestamp(generation.report.created_at)
+            is_governed_pending_history = (
+                generation.report.report_completeness == COMPLETENESS_PENDING_PUSH
+                and generation.report.pushed_status not in ("pushed", "clean", "nothing_to_push")
+                and created is not None
+                and terminal_created is not None
+                and created <= terminal_created
+                and set(generation.report.commits).issubset(terminal_commits)
+            )
+            if is_governed_pending_history:
+                historical.append(generation)
+            else:
+                rejected.append(str(generation.json_path))
+                blockers.append(
+                    f"unbound promoted generation {generation.json_path.name} is not governed pending history"
+                )
+
+        latest_json = reports_dir / "latest.json"
+        latest_md = reports_dir / "latest.md"
+        if latest_json.is_file():
+            try:
+                latest_data = json.loads(latest_json.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                blockers.append("latest report pointer is malformed")
+            else:
+                if isinstance(latest_data, dict) and latest_data.get("phase_id") == phase_id:
+                    if latest_json.is_symlink() or latest_md.is_symlink() or not latest_md.is_file():
+                        blockers.append("latest report pointer uses a path substitution or lacks its pair")
+                    elif (
+                        latest_json.read_bytes() != terminal.json_path.read_bytes()
+                        or latest_md.read_bytes() != terminal.markdown_path.read_bytes()
+                    ):
+                        blockers.append("latest report pointer disagrees with checkpoint-selected terminal generation")
+
+    if blockers:
+        terminal = None
+    return TerminalGenerationResolution(
+        terminal=terminal,
+        generations=tuple(generations),
+        historical=tuple(historical),
+        rejected_paths=tuple(dict.fromkeys(rejected)),
+        blockers=tuple(dict.fromkeys(blockers)),
+    )
+
+
 # ── Notification dispatch idempotency (Phase 113V.N) ─────────────────────────
 #
 # `finalize_phase_report()` writes the report artifact *before* attempting
@@ -1092,7 +1323,12 @@ def compute_report_digest(report: "PhaseReport") -> str:
 
 def compute_finalization_snapshot_id(report: "PhaseReport") -> str:
     """Return a stable identity for the sealed semantic finalization facts."""
-    data = report.to_dict()
+    # ``to_dict`` intentionally exposes nested structures used by normal
+    # report construction.  Snapshot computation is an inspection boundary,
+    # so isolate those structures before removing non-identity diagnostics.
+    # Otherwise ``metadata.pop`` below mutates the caller's live report.
+    import copy
+    data = copy.deepcopy(report.to_dict())
     for key in (
         "created_at", "notification_result", "report_completeness",
         "missing_trust_fields", "trust_warnings", "canonical_report_used",

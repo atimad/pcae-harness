@@ -1,5 +1,14 @@
 # Changelog
 
+## Phase 150I — Phase-report rehydration identity repair
+
+- Select terminal promoted reports by completed checkpoint digest plus
+  semantic snapshot, preserving governed pending-push generations as history.
+- Reconcile historical phases from stored certified Markdown and verified
+  receipts without requiring the rotating global notification marker.
+- Fail closed on forged, malformed, path-substituted, missing, or ambiguous
+  generation/linkage state; keep consistency and snapshot inspection read-only.
+
 ## Phase 150G report identity reconciliation
 
 Phase `150H` — PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION.
@@ -1776,6 +1785,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended to Phase 150I - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150H post-finalization notification-marker lifecycle-stability correction to Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150H PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION COMPLETE — NOT RECONCILED / BLOCKED; lifecycle-infrastructure repair recommended; recognition-core IV not begun to Phase 150H post-finalization notification-marker lifecycle-stability correction; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150H - PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION to Idle post-Phase 150H PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION COMPLETE — NOT RECONCILED / BLOCKED; lifecycle-infrastructure repair recommended; recognition-core IV not begun; session refreshed and governance continuity revalidated.

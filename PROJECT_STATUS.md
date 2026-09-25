@@ -2,43 +2,40 @@
 
 ## Current Phase
 
-Phase `150H` — PCAE-LIFECYCLE-PHASE-150G-REPORT-IDENTITY-RECONCILIATION.
-**COMPLETE — NOT RECONCILED / BLOCKED.** CPIPC: `150H`, independently
-derived from canonical `150G`, valid, ordered after `150G`, same series,
-unequal, and collision-free at activation. This lifecycle/evidence-only phase
-reconstructed both promoted 150G generations and proved the terminal technical
-state is unambiguous, but the current reconciliation implementation cannot
-truthfully reproduce its certified identity from persisted JSON.
+Phase `150I` — PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR.
+**IMPLEMENTATION COMPLETE; GOVERNED FINALIZATION IN PROGRESS.** CPIPC: `150I`,
+independently derived from canonical `150H`, valid, ordered after `150H`, same
+series, unequal, and collision-free at activation.
 
-Primary classification: **CLASS B — MULTI-GENERATION EXPECTED, RECONCILER
-DEFECT.** Generation A (`20260922-203915-150G`) is the explicitly
-non-authoritative `pending_push` generation. Generation B
-(`20260922-210046-150G`) is the terminal complete/pushed generation. Its stored
-Markdown SHA-256 is `5b954816...`, exactly matching both the completed
-checkpoint and ordinary-completion notification marker; its persisted semantic
-snapshot is `232104b6...`, also matching both. The reconciler instead
-rehydrates the JSON—which omits `canonical_report_content`—and re-renders a
-Markdown payload without the original Report Consistency section, producing
-`59dda6c6...` and a false payload conflict. The separate consistency command
-also mutates its in-memory rehydration with FGSC lifecycle fields before
-printing snapshot identity, producing `b78955e8...`; no persisted artifact is
-changed, but the inspection is not identity-pure.
+The Phase 150H Class B defect is repaired without rewriting history. Terminal
+selection now requires exactly one promoted generation matching the completed
+finalization checkpoint's stored-Markdown digest and semantic snapshot. The
+selector rejects filename/mtime/ordinal ordering, path substitutions, forged
+latest pointers, unbound complete generations, malformed identities, missing
+terminal content, and ambiguity. Earlier governed `pending_push` generations
+remain inspectable historical evidence when their chronology and commit subset
+lead to the checkpoint-bound terminal generation.
 
-No supported governed mechanism exists to rotate/update the completed
-checkpoint or ordinary-completion marker, and `pcae phase-report reconcile` is
-explicitly read-only. Phase 150H therefore did not edit/delete/re-notify any
-150G artifact and did not forge a digest or latest pointer. Fresh phase suite:
-13 passed. Zero `src/pcae/**` changes; zero `docs/contracts/**` changes.
-Runtime remains Observed / observe / unavailable. N-16-5 remains OPEN;
-N-16-6/N-16-7 untouched. Full evidence:
-`docs/PHASE_150H_PCAE_LIFECYCLE_PHASE_150G_REPORT_IDENTITY_RECONCILIATION.md`.
+Phase 150G now reconciles cleanly against its unchanged two-generation record:
+Generation A remains historical; Generation B is selected by digest
+`5b954816...` plus snapshot `232104b6...`; its finalized receipt is verified;
+the global latest-notification marker's legitimate rotation to 150H does not
+falsify the earlier delivery. Reconciliation is read-only and performed no
+redispatch. Consistency validation and snapshot computation are now
+identity-pure against rehydrated report objects.
 
-Recommended next phase (not begun): a dedicated lifecycle-infrastructure
-repair, suggested alias
-`PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR`, followed by fresh
-reconciliation/verification before the recognition-core implementation IV is
-authorized. The successor ID must be independently derived at its own
-preflight. Phase 150H / recognition-core IV was NOT begun by this phase.
+Fresh focused result: 177 passed. A broader selected lifecycle run produced
+582 passed / 3 failed; all three failures reproduce at entry commit
+`93424bea` and are baseline-pre-existing. Fast Green and final governed
+commit/push evidence remain part of this phase's terminal lifecycle. No Phase
+150G artifact, HPAC/helper/foundation/runtime/PB/POL file, or normative
+contract changed. Runtime remains Observed / observe / unavailable. N-16-5
+remains OPEN; N-16-6/N-16-7 untouched. Full evidence:
+`docs/PHASE_150I_PCAE_LIFECYCLE_PHASE_REPORT_REHYDRATION_IDENTITY_REPAIR.md`.
+
+Recommended next phase (not begun): independent verification of the Phase
+150I lifecycle repair. Recognition-core IV remains on hold until that IV
+completes successfully.
 
 `HASH CONSISTENCY != PROVENANCE`.
 
