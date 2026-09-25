@@ -25,6 +25,7 @@ from pcae.core.phase_reports import (
 
 ROOT = Path(__file__).resolve().parents[1]
 ENTRY_COMMIT = "a6d475ef474514533e0144952d4f2f89374c3d2e"
+PHASE_150H_FINAL_COMMIT = "93424bea862aab27fcb2401a5e83e28481b1929a"
 GEN_A = ROOT / ".pcae/phase-reports/20260922-203915-150G.json"
 GEN_B = ROOT / ".pcae/phase-reports/20260922-210046-150G.json"
 GEN_B_MD = ROOT / ".pcae/phase-reports/20260922-210046-150G.md"
@@ -193,7 +194,7 @@ def test_phase_150h_has_no_production_or_contract_delta() -> None:
             "git",
             "diff",
             "--name-only",
-            f"{ENTRY_COMMIT}..HEAD",
+            f"{ENTRY_COMMIT}..{PHASE_150H_FINAL_COMMIT}",
             "--",
             "src/pcae",
             "docs/contracts",
