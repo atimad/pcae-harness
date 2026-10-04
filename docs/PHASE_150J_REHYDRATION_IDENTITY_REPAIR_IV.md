@@ -200,7 +200,34 @@ shell-audit candidate-only failure did not recur; no test was changed or suppres
 Trust command still reports complete and consistency still
 reports consistent for real 150I; these do not refute the adversarial findings.
 
-## Disposition and successor
+## Governed lifecycle closure
+
+Task finish closed the IV task in commit 5f193983. Its early report attempt was
+quarantined; no incomplete report was notified. Same-phase finalization bookkeeping
+then transitioned to idle through the governed task lifecycle. Completion metadata
+explicitly names the fresh Phase 150J evidence and preserves the blocked result.
+The normal pending-push ceremony accepted only push-state blockers; the governed
+push of e9fad74a, 5f193983, 7e9e6b88 and 2023fc3b succeeded. Fetch verified zero
+outgoing commits; health/check/coherence and push readiness passed, with only
+pre-existing task-memory warnings. Final pushed-state metadata/report closure is
+bookkeeping only. No production or contract path changed. The remote reported
+its configured main/PR-rule bypass; no operator hook bypass or force option was
+used. Historical 150G artifacts remain byte-identical.
+Normal post-push completion promoted `20261004-172223-150J` with complete trust,
+accepted transition, completed finalization transaction and certified Telegram
+summary/document delivery. The transaction reported the existing independent
+rendering-stage byte-divergence limitation, not a certification failure.
+Trust: Phase 150J complete, repair_required=false. Consistency: consistent,
+source revision 2023fc3be44b2301d40ce8b32524622ba1b7056b, report digest
+e9ae3888942f14c36b92d3d39051d143154dc41209f26fd02e4635260dde6321,
+snapshot 37e5f4a5dbd8be229b1725aeac7dbd88b2d6de3550ca82e7d483c57baf3e8ad0.
+150J reconcile: reconciled, 2 generations, already_dispatched marker, completed
+checkpoint, finalized receipt, mutation=false. 150G reconcile: reconciled,
+2 generations, rotated marker/not_dispatched, completed checkpoint, finalized
+receipt, mutation=false. Report completeness does not mean the repaired security
+properties passed this independent verification.
+
+## Final disposition
 
 COMPLETE — NOT VERIFIED / BLOCKED. Recommend a narrow lifecycle provenance repair
 that authenticates pending promotion and terminal certification links, validates

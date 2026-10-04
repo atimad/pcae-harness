@@ -5,21 +5,23 @@
   "status": "completed",
   "summary": "Independent Phase 150J IV reproduced forged pending-history acceptance, coordinated forged terminal/checkpoint acceptance with unchanged receipt, incomplete trust claims accepted as complete, and malformed latest-pointer acceptance. Phase 150I's real 150G fix works for honest artifacts but does not prove lifecycle provenance under the required forgery threat model. COMPLETE — NOT VERIFIED / BLOCKED; no production repair performed; recognition-core IV remains on hold.",
   "files_changed": [
-    "tests/test_phase_150j_rehydration_identity_repair_iv.py",
-    "docs/PHASE_150J_REHYDRATION_IDENTITY_REPAIR_IV.md",
-    "PROJECT_STATUS.md",
-    "CHANGELOG.md",
-    "tasks/DECISIONS.md",
-    "tasks/DONE.md",
+    ".pcae/fast-green-attribution/c734e000752eb7ce37e6c64efb994a2b1432d1c732185f375de5e37a980df020.json",
+    ".pcae/fast-green-attribution/f762d4be09892077acb1d8a2c1634bf61bd668fc75941116017fdab824fc52d2.json",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
+    "CHANGELOG.md",
+    "PROJECT_STATUS.md",
+    "docs/PHASE_150J_REHYDRATION_IDENTITY_REPAIR_IV.md",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/active/20260925-1849-idle-post-phase-150i-phase-report-rehydration-identity-repair-complete-independent-verification-recommended-next-recognition-core-iv-remains-on-hold-n-16-5-remains-open.md",
+    "tasks/active/20261004-1919-idle-post-phase-150j-iv-complete-not-verified-blocked-lifecycle-provenance-repair-recommended-recognition-core-iv-on-hold-no-successor-begun.md",
+    "tasks/done/20260925-1849-idle-post-phase-150i-phase-report-rehydration-identity-repair-complete-independent-verification-recommended-next-recognition-core-iv-remains-on-hold-n-16-5-remains-open.md",
     "tasks/done/20261004-1827-phase-150j-pcae-lifecycle-phase-report-rehydration-identity-repair-iv.md",
     "tasks/done/20261004-1840-phase-150j-finalization-bookkeeping.md",
-    "tasks/active/20261004-1919-idle-post-phase-150j-iv-complete-not-verified-blocked-lifecycle-provenance-repair-recommended-recognition-core-iv-on-hold-no-successor-begun.md",
-    ".pcae/fast-green-attribution/c734e000752eb7ce37e6c64efb994a2b1432d1c732185f375de5e37a980df020.json",
-    ".pcae/fast-green-attribution/f762d4be09892077acb1d8a2c1634bf61bd668fc75941116017fdab824fc52d2.json"
+    "tests/test_phase_150j_rehydration_identity_repair_iv.py"
   ],
-  "files_changed_count": 13,
+  "files_changed_count": 15,
   "tests_added_or_updated": "35 fresh independent IV tests",
   "tests_run": 572,
   "phase_commits": [
@@ -31,11 +33,14 @@
     },
     {
       "hash": "7e9e6b88d33b25ddecf0f87ab8faa30f7ef4fc44"
+    },
+    {
+      "hash": "2023fc3be44b2301d40ce8b32524622ba1b7056b"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 3,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "validation_results": {
     "report_notification_tests": "Phase 150J direct IV suite: tests/test_phase_150j_rehydration_identity_repair_iv.py 35 passed; combined Phase 150J lifecycle regression selection 416 passed / 2 fixed-baseline pre-existing Phase 150H failures; additional 154 passed",
     "bootstrap_session_reporting_tests": "Phase 150J regression evidence: task-memory, task-finish ordering, report CLI and transition tests included in the 570-passed selection",
@@ -50,10 +55,10 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "pre-existing warnings; no errors",
-    "pcae_push_check": "pending final commit",
+    "pcae_push_check": "clean",
     "telegram_runtime": "governed phase-completion notification only",
     "pcae_status_coherence": "coherent",
-    "repository_transition_validation": "task transition passed; final report validation follows normal phase completion"
+    "repository_transition_validation": "passed"
   },
   "no_go_confirmation": "No production source under src/pcae/** was changed.\nNo normative contract under docs/contracts/** was changed.\nNo Phase 150G historical report generation was edited or deleted.\nNo Phase 150G checkpoint or receipt was edited.\nNo canonical notification marker was manually edited.\nNo latest/current pointer was manually edited.\nNo production repair was attempted inside this IV.\nNo recognition-core IV or helper admission was begun.\nNo helper step 9-prime or foundation repair was begun.\nNo runtime, PB, POL-005, host, deployment, release, or publication mutation was performed.\nNo N-16-5 closure or N-16-6/N-16-7 work was performed.\nNo --no-verify, force push, history rewrite, hook bypass, or delegated finalization/commit/push was used.",
   "recommended_next_phase": "Narrow governed lifecycle provenance/certification-link repair for Phase 150J findings, with independently derived identity; recognition-core IV remains on hold",

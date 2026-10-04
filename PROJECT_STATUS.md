@@ -3,7 +3,8 @@
 ## Current Phase
 
 Phase `150J` — PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR-IV.
-**COMPLETE — NOT VERIFIED / BLOCKED** (governed closure in progress).
+**COMPLETE — NOT VERIFIED / BLOCKED**. Governed IV task closed and pushed;
+canonical report finalization records the blocked technical outcome.
 Independent IV reproduces acceptance of forged pending history and coordinated
 forged terminal/checkpoint identities with an unchanged receipt. Stored complete
 claims are not fully revalidated; malformed latest-pointer roots can pass.
