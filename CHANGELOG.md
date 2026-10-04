@@ -1785,6 +1785,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Phase 150J finalization bookkeeping to Idle post-Phase 150J IV COMPLETE NOT VERIFIED BLOCKED; lifecycle provenance repair recommended; recognition-core IV on hold; no successor begun; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independent verification recommended next; recognition-core IV remains on hold; N-16-5 remains OPEN to Phase 150J - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR-IV; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150I finalization bookkeeping to Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independent verification recommended next; recognition-core IV remains on hold; N-16-5 remains OPEN; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended to Phase 150I - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR; session refreshed and governance continuity revalidated.

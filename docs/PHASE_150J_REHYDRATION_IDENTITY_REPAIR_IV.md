@@ -171,9 +171,33 @@ assertions hardcode global marker rotation to 150H and fail after legitimate 150
 notification; they are baseline-preexisting and are preserved without repair.
 
 Fresh suite: 35 passed. Combined required lifecycle selection: 416 passed / 2 failed;
-both failures are the historical Phase 150H moving-marker assertions. Fixed-entry
-baseline reproduction and fresh Fast Green attribution are recorded below during
-governed finalization. Trust command still reports complete and consistency still
+both failures are the historical Phase 150H moving-marker assertions. Both exact
+nodes also fail at fixed entry commit 841c61e13b20132896b4b9674e4add58544364ac
+in detached worktree /private/tmp/pcae-150j-baseline.rDzKHh with copied canonical
+artifact fixtures (2 failed). An additional finalization, notification, push,
+post-push and repository-transition selection passed all 154 tests. Thus the
+selected lifecycle regressions total 570 passed / 2 baseline-preexisting failures.
+The first Fast Green attempt against e9fad74a was correctly rejected with
+"HEAD moved during baseline capture" after governed task closure created
+5f193983. No rejected result is used as attribution evidence. A fresh run holds
+the new candidate HEAD fixed until both isolated collections finish.
+The next canonical attribution produced artifact
+`.pcae/fast-green-attribution/f762d4be09892077acb1d8a2c1634bf61bd668fc75941116017fdab824fc52d2.json`
+with one additional shell-audit test failure. It is retained, not suppressed.
+`TestAuditPersistence::test_verify_detects_tampered_record` passed in isolated
+reruns at both entry and candidate. Its first sorted audit record is not
+necessarily a deny record, so assigning allow can leave content unchanged.
+Neither its source nor shell-gate source changed in this IV. Canonical attribution
+is rerun with the supported bounded `--rerun-node` option for this exact node;
+only the command's resulting classification is accepted.
+Final canonical attribution PASS: baseline 841c61e13b20132896b4b9674e4add58544364ac,
+candidate 5f1939836c4ee964c246dee615178ba4038c1f8a, artifact
+`.pcae/fast-green-attribution/c734e000752eb7ce37e6c64efb994a2b1432d1c732185f375de5e37a980df020.json`.
+Both runs have 359 raw failures and 9 errors; candidate failures are baseline
+pre-existing except the closed, predicted not-yet-pushed HEAD assertion.
+`attributable_failures: []`; `excluded_environment_failures: []`. The prior
+shell-audit candidate-only failure did not recur; no test was changed or suppressed.
+Trust command still reports complete and consistency still
 reports consistent for real 150I; these do not refute the adversarial findings.
 
 ## Disposition and successor
