@@ -1785,6 +1785,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independent verification recommended next; recognition-core IV remains on hold; N-16-5 remains OPEN to Phase 150J - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR-IV; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150I finalization bookkeeping to Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independent verification recommended next; recognition-core IV remains on hold; N-16-5 remains OPEN; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended to Phase 150I - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150H post-finalization notification-marker lifecycle-stability correction to Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended; session refreshed and governance continuity revalidated.
@@ -4088,3 +4089,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 ### N16-5-F-5-TB-HELPER-INSTALLATION-IDENTITY-CONTRACT-REPAIR-IV — independent contract IV
 
 Added161 fresh IV cases,113 matrix rows and full normative inventory. Found F1 helper registration/provisioning trust-bootstrap and rotation contradiction; contract set NOT VERIFIED / BLOCKED. No source or contract changes. Recommended contract-only successor 149O.20L.7O.3W.1R.2B.1R.1.1R.30R.5R.2.1R.1R.2R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1R.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1 NOT begun.
+# Phase 150J — lifecycle repair independent verification
+
+Added fresh independent artifact-copy adversarial tests and evidence. Reproduced
+blocking provenance gaps; no production/contract repair. Recognition-core IV held.

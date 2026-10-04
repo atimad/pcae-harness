@@ -83,6 +83,7 @@
 
 ## Completed
 
+- Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independent verification recommended next; recognition-core IV remains on hold; N-16-5 remains OPEN (20260925-1849-idle-post-phase-150i-phase-report-rehydration-identity-repair-complete-independent-verification-recommended-next-recognition-core-iv-remains-on-hold-n-16-5-remains-open)
 - Phase 150I finalization bookkeeping (20260925-1844-phase-150i-finalization-bookkeeping)
 - Phase 150I - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR (20260925-1813-phase-150i-pcae-lifecycle-phase-report-rehydration-identity-repair)
 - Idle post-Phase 150H lifecycle reconciliation COMPLETE — NOT RECONCILED / BLOCKED; terminal verification stable; infrastructure repair recommended (20260924-2020-idle-post-phase-150h-lifecycle-reconciliation-complete-not-reconciled-blocked-terminal-verification-stable-infrastructure-repair-recommended)

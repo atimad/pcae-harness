@@ -2,6 +2,22 @@
 
 ## Current Phase
 
+Phase `150J` — PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR-IV.
+**COMPLETE — NOT VERIFIED / BLOCKED** (governed closure in progress).
+Independent IV reproduces acceptance of forged pending history and coordinated
+forged terminal/checkpoint identities with an unchanged receipt. Stored complete
+claims are not fully revalidated; malformed latest-pointer roots can pass.
+Real Phase 150G still reconciles cleanly and its artifacts remain unchanged, but
+the requested provenance guarantees do not hold. Fresh IV: 35 passed, including
+explicit blocking exploit witnesses. Recognition-core IV remains on hold.
+Recommend narrow lifecycle provenance/certification-link repair; no successor begun.
+Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+Evidence: `docs/PHASE_150J_REHYDRATION_IDENTITY_REPAIR_IV.md`.
+`HASH CONSISTENCY != PROVENANCE`.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+
+## Previous Completed Lifecycle Repair
+
 Phase `150I` — PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR.
 **COMPLETE — PHASE-REPORT REHYDRATION IDENTITY REPAIR IMPLEMENTED.** CPIPC: `150I`,
 independently derived from canonical `150H`, valid, ordered after `150H`, same

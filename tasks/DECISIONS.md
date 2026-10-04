@@ -5604,3 +5604,9 @@ DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 `HASH CONSISTENCY != PROVENANCE`.
 
 `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+# Phase 150J — independent lifecycle provenance IV
+
+Blocked on executable forged-history and coordinated report/checkpoint attacks.
+Matching hashes and structurally valid canonical-path records do not authenticate
+promotion. Preserve production and historical evidence; recommend a narrowly
+governed provenance repair. Recognition-core IV remains on hold.

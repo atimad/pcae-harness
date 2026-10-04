@@ -10,7 +10,7 @@ Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independ
 
 ## Status
 
-active
+done
 
 ## Mode
 
