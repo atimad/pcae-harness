@@ -30,8 +30,21 @@ report/trust/consistency/reconcile/rehydration/promotion/checkpoint/receipt/noti
 finalization/task/filename/transition/extraction selection: 870 passed / 4 failed;
 all four reproduce at fixed entry c90254a2, including two stale marker assertions
 and two old receipt integration assertions. No test was skipped or suppressed.
-Fresh canonical Fast Green and final commit/push state are recorded in metadata
-and evidence through normal governed closure; no predecessor artifact is reused.
+Fresh canonical Fast Green PASS: baseline c90254a2648e4afb263373fd4aff2afb48946e2e,
+candidate 5feb69eb686b7378291d914498fad0270fe9fb9c;
+attributable_failures: []. Baseline: 358 failed / 9 errors; candidate: 360 failed /
+9 errors. Classification: 367 baseline-pre-existing; 1 environment-only shell
+audit ordering failure (tool isolated candidate rerun pass, 3 additional candidate
+and 3 fixed-baseline passes); 1 expected not-yet-pushed HEAD assertion. Source
+test tampers the first sorted historical audit record, which can already contain
+the target value; no production/test repair or suppression was performed.
+Original raw failed-node evidence preserved in
+.pcae/fast-green-attribution/b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62.json.
+No production repair commit exists: canonical attribution uses the parent of the
+oldest diagnostic phase commit as entry baseline. The user-requested location
+pause interrupted the first capture before a verdict; this fresh completed run
+supersedes it without reusing predecessor evidence. Only permitted finalization
+bookkeeping changes follow this verification checkpoint.
 
 Real 150G remains reconciled: 2 original generations; terminal Markdown digest
 5b95481652526975ca6190b3a15a439b8aaefa8bfb4bd685abca7185536366b1;
