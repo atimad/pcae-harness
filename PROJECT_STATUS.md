@@ -3,7 +3,13 @@
 ## Current Phase
 
 Phase `150L` — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE.
-ACTIVE — architecture adjudication / contract freeze only. Phase 150K's missing
+COMPLETE — LIFECYCLE GENERATION PROVENANCE ARCHITECTURE ADJUDICATED.
+Architecture task closed; canonical terminal report complete, finalization
+transaction completed, Telegram summary/document API accepted. Trust complete;
+consistency consistent; 150L and unchanged 150G reconciled. Final bookkeeping
+commit/push closes the phase without regenerating its report. These are legacy
+mechanical lifecycle results, not deployed GCP generation certification.
+Architecture adjudication / contract freeze only. Phase 150K's missing
 generic issuance/predecessor/terminal root independently reconfirmed; unchanged
 150J/K defect witnesses pass. Selected R6 target: independently protected accepted
 repository-event root, isolated issuer, independent exact-manifest authorization
@@ -17,6 +23,10 @@ classification does not retrofit certificates. Mandatory new-write / dual-read
 cutover follows separately authorized implementation and independent verification.
 No migration required. Current 150H source/inventory conflict disclosed, not repaired.
 Fresh architecture coverage: 127 passed; combined L/J/K: 199 passed.
+Broader lifecycle selection: 988 passed / 4 fixed-entry pre-existing failures.
+Fresh post-push Fast Green: baseline 8c998d2b, candidate 4bb98006;
+359 failed / 9 errors, all 368 baseline-pre-existing; no environment/expected
+exclusions; attributable_failures: []. Only finalization bookkeeping follows.
 ZERO src/pcae/** delta. No HPAC/helper/foundation/runtime/PB/POL/deployment work.
 Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
 Recognition-core IV remains on hold. No implementation slice or successor begun.

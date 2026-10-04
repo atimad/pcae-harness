@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20261004-2143-phase-150l-pcae-lifecycle-phase-report-provenance-root-generation-certificate-historical-compatibility-architecture
+20261004-2221-idle-post-phase-150l-complete-architecture-adjudicated-slice-1-pure-models-recommended-not-begun-recognition-core-iv-remains-on-hold
 
 ## Title
 
-Phase 150L - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE
+Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold
 
 ## Status
 
@@ -14,17 +14,14 @@ active
 
 ## Mode
 
-architecture
+finalization
 
 ## Goal
 
-Adjudicate and freeze future lifecycle generation provenance and honest legacy compatibility; architecture/contract only, no implementation or deployment
+Complete Phase 150L architecture report, notification and governed final bookkeeping only; no successor work
 
 ## Allowed Files
 
-- docs/PHASE_150L_GENERATION_PROVENANCE_ARCHITECTURE.md
-- docs/contracts/LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md
-- tests/test_phase_150l_generation_provenance_architecture.py
 - .pcae/**
 - PROJECT_STATUS.md
 - CHANGELOG.md
@@ -33,7 +30,9 @@ Adjudicate and freeze future lifecycle generation provenance and honest legacy c
 ## Forbidden Files
 
 - src/pcae/**
-- docs/contracts/HPAC*
+- docs/contracts/**
+- docs/PHASE_150L_GENERATION_PROVENANCE_ARCHITECTURE.md
+- tests/**
 
 ## Allowed Zones
 
@@ -81,4 +80,4 @@ strict
 
 ## Created Timestamp
 
-2026-10-04T21:43:00.095128+02:00
+2026-10-04T22:21:22.136644+02:00
