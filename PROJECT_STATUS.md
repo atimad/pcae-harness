@@ -2,6 +2,32 @@
 
 ## Current Phase
 
+Phase `150L` — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE.
+ACTIVE — architecture adjudication / contract freeze only. Phase 150K's missing
+generic issuance/predecessor/terminal root independently reconfirmed; unchanged
+150J/K defect witnesses pass. Selected R6 target: independently protected accepted
+repository-event root, isolated issuer, independent exact-manifest authorization
+and create-only linear certificate ledger. Ordinary agent/main/local JSON is NOT
+that root. GCP-001 v1.0 is frozen TARGET / NOT IMPLEMENTED / CUTOVER INACTIVE.
+Pending issuance requires a pre-existing input commit and independent accepted
+root append before promotion; terminal certification is separate and unique.
+Checkpoint/receipt are evidence outputs, notification records what was sent,
+latest is a derived cache. No post-terminal regeneration in v1. Legacy A–D
+classification does not retrofit certificates. Mandatory new-write / dual-read
+cutover follows separately authorized implementation and independent verification.
+No migration required. Current 150H source/inventory conflict disclosed, not repaired.
+Fresh architecture coverage: 127 passed; combined L/J/K: 199 passed.
+ZERO src/pcae/** delta. No HPAC/helper/foundation/runtime/PB/POL/deployment work.
+Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+Recognition-core IV remains on hold. No implementation slice or successor begun.
+Evidence: `docs/PHASE_150L_GENERATION_PROVENANCE_ARCHITECTURE.md`.
+Contract: `docs/contracts/LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md`.
+`HASH CONSISTENCY != PROVENANCE`.
+`legacy compatibility != retroactive provenance certification`.
+`DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`
+
+## Previous Completed Provenance Investigation
+
 Phase `150K` — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR.
 **COMPLETE — NOT VERIFIED / BLOCKED**. Governed task closed, canonical terminal
 report complete, finalization transaction completed, Telegram summary/document

@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- **2026-10-04 — Phase 150L: freeze GCP-001 v1.0, R6 independent repository-event
+  root + create-only generation certificate chain, TARGET ONLY.** Neither ordinary
+  main nor same-process certificates provide issuance provenance. Require an
+  isolated approved-policy publisher and independent exact-manifest review,
+  externally pinned root configuration and authenticated provider acceptance.
+  Pending birth follows a pre-existing input commit, precedes promotion and binds
+  exact bytes without self-reference. One linear phase/task/epoch chain and one
+  separately certified terminal; no post-terminal regeneration. Checkpoint,
+  receipt, notification and latest retain evidentiary/index roles. Dual-read
+  explicit legacy classes; mandatory new-write cutover only after implemented/IV
+  separation. No historical migration or retroactive provenance certification.
+  Architecture/32-row attack matrix and seven bounded slices frozen in the phase
+  evidence. Root is not installed and no production mechanism is implemented.
+  Recommend pure-model/validation Slice 1, not recognition-core IV. Current 150H
+  source/inventory conflict remains disclosed historical debt. No product/runtime
+  advancement. `DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED`.
+
 - **2026-09-24 — Phase 150H: classify the Phase 150G report identity conflict
   as CLASS B — MULTI-GENERATION EXPECTED, RECONCILER DEFECT; do not mutate
   completed 150G linkage.** The pending and complete report generations are

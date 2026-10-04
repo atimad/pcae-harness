@@ -1,5 +1,15 @@
 # Changelog
 
+## Phase 150L — Lifecycle generation provenance architecture
+
+- Freeze GCP-001 v1.0 TARGET architecture: independently protected accepted-event
+  root, issuance/linear successor certificates, separate terminal certification.
+- Specify pending birth, replay/crash defenses, checkpoint/receipt/notification
+  evidence and derived latest indexes; freeze a 32-row architecture attack matrix.
+- Define honest legacy compatibility and mandatory new-write/dual-read cutover,
+  with no migration, retroactive certificates, production implementation or
+  runtime change. Recognition-core IV remains on hold pending implementation/IV.
+
 ## Phase 150I — Phase-report rehydration identity repair
 
 - Select terminal promoted reports by completed checkpoint digest plus
@@ -1785,6 +1795,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle post-Phase 150K COMPLETE NOT VERIFIED BLOCKED; provenance architecture adjudication recommended; recognition-core IV remains on hold; no successor begun to Phase 150L - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150K - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR to Idle post-Phase 150K COMPLETE NOT VERIFIED BLOCKED; provenance architecture adjudication recommended; recognition-core IV remains on hold; no successor begun; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150J IV COMPLETE NOT VERIFIED BLOCKED; lifecycle provenance repair recommended; recognition-core IV on hold; no successor begun to Phase 150K - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150J finalization bookkeeping to Idle post-Phase 150J IV COMPLETE NOT VERIFIED BLOCKED; lifecycle provenance repair recommended; recognition-core IV on hold; no successor begun; session refreshed and governance continuity revalidated.

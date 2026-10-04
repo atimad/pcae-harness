@@ -1,5 +1,12 @@
 # TODO
 
+## Current governed generation-provenance architecture
+
+- Phase 150L — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE:
+  architecture and future contract freeze only; independently reconfirm 150K,
+  adjudicate independent root, issuance/terminal chain and honest legacy semantics;
+  zero production implementation or deployment. Recognition-core IV stays on hold.
+
 ## Current governed lifecycle provenance repair
 
 - Phase 150K — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR:

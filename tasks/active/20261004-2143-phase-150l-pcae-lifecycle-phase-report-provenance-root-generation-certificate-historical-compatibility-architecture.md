@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20261004-1948-idle-post-phase-150k-complete-not-verified-blocked-provenance-architecture-adjudication-recommended-recognition-core-iv-remains-on-hold-no-successor-begun
+20261004-2143-phase-150l-pcae-lifecycle-phase-report-provenance-root-generation-certificate-historical-compatibility-architecture
 
 ## Title
 
-Idle post-Phase 150K COMPLETE NOT VERIFIED BLOCKED; provenance architecture adjudication recommended; recognition-core IV remains on hold; no successor begun
+Phase 150L - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE
 
 ## Status
 
@@ -14,25 +14,26 @@ active
 
 ## Mode
 
-implementation
+architecture
 
 ## Goal
 
-Finish only Phase 150K blocked disposition, evidence, canonical reporting, governed commit and push; no successor work
+Adjudicate and freeze future lifecycle generation provenance and honest legacy compatibility; architecture/contract only, no implementation or deployment
 
 ## Allowed Files
 
+- docs/PHASE_150L_GENERATION_PROVENANCE_ARCHITECTURE.md
+- docs/contracts/LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md
+- tests/test_phase_150l_generation_provenance_architecture.py
 - .pcae/**
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/**
-- docs/PHASE_150K_PROVENANCE_CERTIFICATION_LINK_REPAIR.md
-- tests/test_phase_150k_provenance_certification_link_repair.py
 
 ## Forbidden Files
 
 - src/pcae/**
-- docs/contracts/**
+- docs/contracts/HPAC*
 
 ## Allowed Zones
 
@@ -80,4 +81,4 @@ strict
 
 ## Created Timestamp
 
-2026-10-04T19:48:47.650497+02:00
+2026-10-04T21:43:00.095128+02:00
