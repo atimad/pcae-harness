@@ -23,6 +23,10 @@ from pcae.core.phase_reports import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# Immutable entry/closure recorded by Phase 150J's independent diff inventory.
+# This is a Phase 150I scope assertion, not a prohibition on future governed work.
+ENTRY = "93424bea862aab27fcb2401a5e83e28481b1929a"
+PHASE_END = "841c61e13b20132896b4b9674e4add58544364ac"
 REAL_150G_GENERATIONS = (
     ROOT / ".pcae/phase-reports/20260922-203915-150G.json",
     ROOT / ".pcae/phase-reports/20260922-210046-150G.json",
@@ -260,8 +264,8 @@ def test_notification_marker_for_arbitrary_historical_digest_conflicts(
 def test_runtime_and_product_boundaries_are_untouched() -> None:
     changed = subprocess.check_output(
         [
-            "git", "diff", "--name-only",
-            "93424bea862aab27fcb2401a5e83e28481b1929a", "--",
+            "git", "diff", "--name-only", "--no-renames",
+            ENTRY, PHASE_END, "--",
         ],
         cwd=ROOT,
         text=True,

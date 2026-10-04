@@ -2,6 +2,25 @@
 
 ## Current Phase
 
+Phase `150M` — PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION.
+ACTIVE — historical assertion correction and target architecture revalidation.
+Authoritative entry 944228ac preserves 150L COMPLETE — ARCHITECTURE NOT ADJUDICATED /
+BLOCKED. Three original I/J/K tests independently reproduce fail on entry, pass at
+fixed pre-L 8c998d2b. Proven phase-scoped moving-head comparisons are pinned to
+actual I/J/K closure commits, original scope retained and rename deletion visible.
+Objective A completed before B: fresh 48 mutation/boundary tests plus I/J/K = 136 pass.
+Fresh B63 + L127 + J35 + K37 = 262 pass. R6/GCP target coherent, unchanged contract;
+11 architectural domains distinguished from 13 RootEvent wire kinds. Root not
+deployed; no implementation, certificate issuance, cutover or historical upgrade.
+Full committed-candidate regression, THIS-phase attribution and final lifecycle
+are required before completion. Original L promoted pair/cp/receipt and blocked
+source remain historical; do not retry or bypass payload_conflict.
+Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+Recognition-core IV remains ON HOLD. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+Evidence: `docs/PHASE_150M_HISTORICAL_FREEZE_ARCHITECTURE_REVALIDATION.md`.
+
+## Previous Phase 150L — Preserved Authoritative Blocked State
+
 Phase `150L` — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE.
 COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED.
 The earlier clean-regression success claim is WITHDRAWN. Post-push L/J/K rerun:

@@ -1,5 +1,16 @@
 # Changelog
 
+## Phase 150M — Historical freeze correction and architecture revalidation
+
+- Pin three I/J/K phase-scope tests to their actual immutable closure commits;
+  preserve original scopes and reject rename-hidden deletion. Fresh original-
+  assertion mutation tests detect body/delete/symlink/version/scope drift.
+- Independently revalidate unchanged R6/GCP-001 target after correction, including
+  exact inventory and 32 attack defenses. Preserve prior 150L blocked source,
+  original dispatched artifacts and payload_conflict; successor records correction
+  under its own identity. No production implementation, contract change, root,
+  issuance, cutover or recognition-core IV.
+
 ## Phase 150L — Post-push blocked disposition correction
 
 The initial architecture success claim is withdrawn: I/J/K historical current-HEAD
@@ -1807,6 +1818,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold to Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150L: BLOCKED by two candidate-attributable historical freeze regressions; narrow test repair recommended; no implementation or recognition-core IV begun to Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold to Idle post-Phase 150L: BLOCKED by two candidate-attributable historical freeze regressions; narrow test repair recommended; no implementation or recognition-core IV begun; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150L - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE to Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold; session refreshed and governance continuity revalidated.

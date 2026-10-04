@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- **2026-10-05 — Phase 150M Objective B:** R6/GCP-001 v1.0 target revalidated only
+  after Objective A passes. Eleven architecture domains differ intentionally
+  from thirteen RootEvent wire kinds; freeze both existing abstractions unchanged.
+  Require independent exact-manifest/provider acceptance and pinned root isolation;
+  no ordinary main/local certificate root. All 32 attacks remain architectural
+  defenses, J/K witnesses still live. Preserve old L blocked/payload_conflict truth;
+  current successor may supersede readiness, never rewrite dispatched identity.
+  No GCP implementation or root deployment; recognition-core IV remains on hold.
+
+- **2026-10-05 — Phase 150M Objective A:** three I/J/K phase-scoped assertions
+  accidentally compare historical entry to live tree. Pin to independently
+  evidenced actual closure commits, not candidate bytes; keep original scopes.
+  Disable rename elision so protected deletion/substitution remains visible.
+  Original functions reject 42 synthetic protected mutations; 48 fresh A tests
+  and original I/J/K suites total 136 pass. Only after this evidence proceed to
+  architecture revalidation. Preserve prior L blocked truth/payload_conflict;
+  no production/contract edits or Slice 1. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
 - **Phase 150L correction guard: STOP on payload_conflict.** Normal complete_phase
   validated the attempted blocked correction, then refused promotion because
   ordinary notification already binds the original payload. Do not edit marker,

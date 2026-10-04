@@ -10,7 +10,7 @@ Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow tes
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -19,6 +19,8 @@ from pcae.core.phase_reports import PhaseReport, compute_finalization_snapshot_i
 
 ROOT = Path(__file__).resolve().parents[1]
 ENTRY = "841c61e13b20132896b4b9674e4add58544364ac"
+# Actual governed closure, also Phase 150K's independently recorded entry.
+PHASE_END = "c90254a2648e4afb263373fd4aff2afb48946e2e"
 STEMS = ("20260922-203915-150G", "20260922-210046-150G")
 
 
@@ -280,4 +282,4 @@ def test_phase_150i_production_diff_has_exactly_two_lifecycle_files():
 
 
 def test_this_iv_has_zero_production_and_contract_delta():
-    assert subprocess.check_output(["git", "diff", "--name-only", ENTRY, "--", "src/pcae", "docs/contracts"], cwd=ROOT, text=True) == ""
+    assert subprocess.check_output(["git", "diff", "--name-only", "--no-renames", ENTRY, PHASE_END, "--", "src/pcae", "docs/contracts"], cwd=ROOT, text=True) == ""

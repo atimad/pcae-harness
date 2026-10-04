@@ -17,6 +17,8 @@ from pcae.core.finalization_transaction import _build_pre_promotion_artifacts
 
 ROOT = Path(__file__).resolve().parents[1]
 ENTRY = "c90254a2648e4afb263373fd4aff2afb48946e2e"
+# Actual governed closure, independently recorded as Phase 150L's entry.
+PHASE_END = "8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f"
 
 
 def write_pair(path, data):
@@ -181,4 +183,4 @@ def test_runtime_artifact_sets_are_not_repository_committed_root():
 
 
 def test_architectural_stop_changes_no_production_or_contracts():
-    assert not subprocess.check_output(["git", "diff", "--name-only", ENTRY, "--", "src/pcae", "docs/contracts"], cwd=ROOT, text=True)
+    assert not subprocess.check_output(["git", "diff", "--name-only", "--no-renames", ENTRY, PHASE_END, "--", "src/pcae", "docs/contracts"], cwd=ROOT, text=True)
