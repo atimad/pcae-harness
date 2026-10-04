@@ -1,548 +1,375 @@
-# Phase 150L Complete — Lifecycle Generation Provenance Architecture
+# Phase 150M Complete — Historical Freeze Correction and Architecture Revalidation
 
-Canonical Phase ID: 150L
-Exact title: PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE
-Status: COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED.
-Earlier clean-regression success WITHDRAWN; section 15 is authoritative.
-Fresh Fast Green passed; governed task closed; corrected canonical finalization BLOCKED.
-Normal complete_phase refused payload_conflict against already-dispatched identity.
-This completion source records truth; original promoted report is retained
-historically, NOT silently corrected or represented as the corrected conclusion.
+Canonical Phase ID: 150M
+Exact title: PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION
+Status: COMPLETE — HISTORICAL FREEZE CORRECTION AND ARCHITECTURE REVALIDATION VERIFIED.
+Report completeness: complete. Governed task and normal THIS-phase canonical lifecycle completed.
+Fresh candidate and attribution verified; final bookkeeping commit/push follows; no successor begun.
 
-Initial (withdrawn-success) legacy lifecycle result: complete. Normal retry accepted the complete_phase
-transition, promoted 20261004-202343-150L.md/.json, completed the finalization
-transaction and finalized receipt. Telegram summary/document API accepted; no claim
-of user reading/approval. Trust complete; consistency consistent/fresh_with_limitations;
-150L reconciled (one generation, already_dispatched); unchanged 150G reconciled
-(two generations, completed checkpoint/finalized receipt). Current mechanical
-trust is NOT future GCP certification. Known independent presentation-rendering
-divergence is explicitly retained, not forced to byte identity. Promoted report
-retains its truthful pre-dispatch metadata snapshot; subsequent delivery outcome
-is recorded here and in current completion metadata, not retroactively substituted.
-Only final bookkeeping commit/push follows; no new generation is requested.
+## Completion snapshot
 
-# Phase 150L — Lifecycle Generation Provenance Architecture
+- Files changed: 17, listed below; ZERO src/pcae and docs/contracts delta.
+- Commit: c53209f262c0d0826c848e57d060c950e065c6d5 (corrective tests/evidence).
+- Pushed: pushed; origin/main..HEAD: 0 at terminal-generation input.
+- Fresh suites: A48 + original I/J/K88 = 136 pass before B; B63 + L127 + J35/K37 = 262 pass.
+- Committed broad selection: 1099 passed / 4 failed (48.12s); fixed944228ac:985 passed/7 failed (51.77s).
+- Post-push M/L/I/J/K:326 passed (7.22s). Four residual failures independently fixed-entry pre-existing.
+- Fresh canonical Fast Green PASS: baseline 944228ac9cdbe91711c5e4c32190640cec467068; candidate c53209f262c0d0826c848e57d060c950e065c6d5.
+- Baseline raw 359 failures/9 errors; candidate 358 failures/9 errors.
+- 367 baseline-pre-existing; environment=[]; expected_phase_artifacts=[]; attributable_failures: [].
+- Artifact: .pcae/fast-green-attribution/9c8558da1895af9092d209e6db2f3f6660a996e5345c3ad497420de06700f5ae.json.
+- No suppression, exclusions of repaired nodes, skip/xfail, source/contract edits, hook bypass or history rewrite.
+- Check passed; health healthy; task-memory exit0/282 old warnings/0errors; status coherent; push check nothing_to_push.
+- Task transition validator accepted. THIS-phase complete_phase transition/promotion/receipt/notification checked normally below.
+- Original L mechanically complete legacy report is NOT the corrected technical conclusion. Prior BLOCKED truth remains at944228ac.
+- Transitional old-latest consistency detected legitimate M Class A changes against old L checkpoint; no L regeneration.
+- Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched; recognition-core IV ON HOLD.
 
-Alias: PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE
-Target disposition: COMPLETE — LIFECYCLE GENERATION PROVENANCE ARCHITECTURE ADJUDICATED.
-Architecture/contract freeze ONLY. No operational certification verdict.
+## Exact file inventory
+
+## Actual terminal lifecycle outcome (after the preserved pre-dispatch snapshot)
+
+Normal complete_phase accepted; promoted .pcae/phase-reports/20261004-232042-150M.md/.json.
+Checkpoint completed; receipt finalized; summary/document Telegram API accepted;
+agent lock released. No claim of user reading or approval. Trust complete;
+consistency consistent/fresh_with_limitations; reconcile150M reconciled,
+one generation/already_dispatched/completed checkpoint/finalized receipt, no mutation.
+G and L historical reconciliation remains clean; old pair/cp/receipt bytes unchanged.
+Known independent rendering divergence remains disclosed, not forced into equality.
+First attempt metadata tests-added field had list rather than supported string;
+next guard refused grouped no-go count/direct-evidence identity wording. Corrected
+ONLY bookkeeping shape and truthful explicit150M evidence. Quarantine retained,
+no partial-report override, no promotion/notification until guard accepted.
+Finalization-only bookkeeping does not regenerate the dispatched report or alter
+the fixed Fast Green candidate. Final human handoff identifies the actual final
+commit; no prospective own-commit hash is fabricated.
+
+Exact terminal Markdown digest: 96e3a065b7e6f9e19ce60d1985058b060bda820a8d6feba7de2525969dad4eb8.
+Snapshot: ca403fbe303f7596d45ab1b34cd5036787f0043337dc6f0a26f21179f2848735.
+Receipt: .pcae/delivery-receipts/receipts/6637698b036d7eae92e451eea977e841e9247287135824601f798b56c5d260d9/receipt.json.
+
+## Files changed by current successor
+
+- .pcae/fast-green-attribution/9c8558da1895af9092d209e6db2f3f6660a996e5345c3ad497420de06700f5ae.json
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- CHANGELOG.md
+- PROJECT_STATUS.md
+- docs/PHASE_150M_HISTORICAL_FREEZE_ARCHITECTURE_REVALIDATION.md
+- tasks/DECISIONS.md
+- tasks/DONE.md
+- tasks/TODO.md
+- tasks/active/20261005-0117-idle-post-phase-150m-historical-freeze-correction-and-architecture-revalidation-verified-future-pure-model-slice-1-recommended-not-begun-recognition-core-iv-on-hold.md
+- tasks/done/20261004-2231-idle-post-phase-150l-blocked-by-three-historical-freeze-regressions-narrow-test-scope-repair-recommended-architecture-implementation-and-recognition-core-iv-remain-on-hold.md
+- tasks/done/20261005-0048-phase-150m-pcae-lifecycle-generation-provenance-historical-freeze-correction-and-architecture-revalidation.md
+- tests/test_phase_150i_phase_report_rehydration_identity_repair.py
+- tests/test_phase_150j_rehydration_identity_repair_iv.py
+- tests/test_phase_150k_provenance_certification_link_repair.py
+- tests/test_phase_150m_architecture_revalidation.py
+- tests/test_phase_150m_historical_freeze_correction.py
+
+## Complete bounded technical/evidence report
+
+# Phase 150M — Historical Freeze Correction and Architecture Revalidation
+
+Exact alias: PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 
-## 1. Authority, entry and independently reconstructed problem
+## 1. Authority and ordered objectives
 
-Entry main = origin/main = 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f;
-clean worktree, zero outgoing commits, expected idle post-150K, no active lock,
-no held/recovery checkout or unrelated local-only commit. No historical worktree
-was merged/cherry-picked. CPIPC parsed canonical 150K and derived branch successor
-150L: valid, less(150K,150L), unequal, same series, no Git/docs/tasks collision.
-Governed task transition/update and codex-local phase start activated only 150L.
+Entry main = origin/main = 944228ac9cdbe91711c5e4c32190640cec467068;
+clean, zero outgoing, available lock, expected idle post-150L. Canonical tracked
+150L completion source explicitly withdraws success: COMPLETE — ARCHITECTURE NOT
+ADJUDICATED / BLOCKED. That state is authoritative, despite the retained original
+promoted report's mechanically complete legacy status. No Slice 1 is authorized.
+CPIPC parses 150L and its branch successor 150M: valid, same series, ordered less;
+all Git subjects, repository phase references and promoted filenames have no
+150M collision. Governed TODO/task transition/update and phase start activate
+only this corrective phase. No historical held branch is merged or cherry-picked.
 
-Canonical 150K report 20261004-185917-150K is complete/pushed; source 5683b8fe;
-tracked closure 8c998d2b. Trust complete, consistency consistent, reconcile 150K
-reconciled with two generations/checkpoint/receipt. These are existing mechanical
-results, not new-generation provenance. K/J diagnostics rerun fresh: 72 passed
-(37 K + 35 J), reproducing accepted forged history, coordinated terminal/checkpoint
-with unchanged receipt, incomplete stored complete claim and nonobject latest.
+Objective A was completed before architecture revalidation: current-main three
+nodes fail (3 failed, 0.13s), fixed pre-150L 8c998d2b detached baseline passes
+(3 passed, 1.18s). Each failure names ONLY the later newly added GCP contract.
+After bounded correction, original I/J/K suites plus mutation suite: 136 passed
+(7.06s). No production or contract edit was needed.
 
-Current source independently re-read: core/phase_reports.py write_phase_report,
-_load_promoted_generation, resolve_terminal_promoted_generation, marker functions,
-compute_finalization_snapshot_id, trust/finalization; commands/phase_reports.py
-trust/consistency/reconcile; finalization_transaction.py checkpoint save/load,
-_capture_evidence, _build_pre_promotion_artifacts, transaction; canonical_artifact_
-promotion.py; repository_transition_validator/integration.py; delivery_receipt.py;
-notification_certification.py; CLTR authority models and migration configuration.
-Source root for these paths: src/pcae/. Evidence predecessors: 150H/I/J/K docs.
+## 2. Exact historical assertions and boundary provenance
 
-A–F reconfirmed: no generic durable issuance or predecessor chain; pending writer
-passes enum CERTIFIED into ordinary promotion without checkpoint; terminal capture
-is explicitly pure report-to-evidence derivation; metadata preserves committed
-facts, not all-generation event issuance; all J attack classes remain valid.
-No current mechanism invalidates K. No production source is changed here.
+Test directory prefix below is `tests/`; no node is excluded, skipped or xfailed.
 
-PFR-001 content contract §§3–6/12–14/17 preserves thirteen sections, phase-class
-applicability, compatibility and PFN delivery. GLP-001 v1.0 §§6/8–10 separates
-architecture/freeze from implementation/IV and Scope A from Scope B. The user's
-explicit combined architecture/freeze authorization is used; no automatic GLP
-designation or certification claim. New GCP-001 is an orthogonal provenance
-overlay: no PFR structure, PFN delivery, GLP sequence or FGSC attribution change.
-
-## 2. Current graph and precedents
-
-| Current node | Producer / timing | Actual edge and limitation |
-|---|---|---|
-| tracked task/metadata/evidence | operator, governed commits | verifies committed bytes/history, not an unrecorded issuance event |
-| pending report pair | write_phase_report before canonical push | structured bytes + caller CERTIFIED enum; no independent issuance |
-| terminal report pair | finalization callback after push | content and public snapshot digests; no root generation certificate |
-| extraction/view/rendering | _capture_evidence/report derivation | repeatable from invented caller content; identity, not origin |
-| checkpoint | atomic plain ignored JSON | recovery snapshot; publicly recomputable report binding |
-| receipt | immutable-through-store finalized JSON | self-digest/logical ID and synthetic rendering delivery, not selected issuance |
-| notification marker | notification callback | rotating delivery/idempotency evidence; unbound legacy accepted |
-| latest/current | ordinary promotion | rotating copies, no authority |
-| transition validator | pure caller snapshot evaluation | structural acceptance; no agent identity or durable independent attestation |
-| CLTR typed records | schema constructors / shadow derivation | explicitly shape-only; LEGACY remains production authority |
-
-```text
-accepted repository history --> committed facts
-                           -X-> generic generation issuance (missing today)
-caller report --> extraction --> view/rendering --> receipt consistency
-      ^                                         |
-      +--------- checkpoint hashes -------------+
-pending declaration + timestamp + commit subset --> legacy selection
-latest/marker --> indexes/evidence, NOT independent roots
-```
-
-Precedents reused as constraints, not silently elevated: transition validator
-has no producer identity; CLTR authority_core/bindings say constructed objects
-assert shape, never operational truth; migration.configuration resolves LEGACY.
-Create-only records, explicit absence/limitations, exact subject binding and
-linear CAS are useful patterns. None supplies today's missing root.
-
-## 3. Root model decision matrix
-
-| Model | Issuance proof | Independent root | Pending | Terminal | Chain | Replay | Crash | Legacy | Same-process | Complexity | Migration | Contract impact | Gap | Verdict |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| R1 ordinary committed events/hooks | byte inclusion | ordinary main is agent-writable | delayed commit | claimed closure | can encode | copied records possible | retained commits | facts only | agent can fabricate/commit | low | no | event format | no independent acceptance | REJECT alone |
-| R2 local append-only ledger | entries/self-chain | local files none | immediate claims | claims | hash chain | reconstructable by attacker | journal useful | facts only | mutation before commit | medium | no | ledger schema | ledger protection absent | REJECT alone |
-| R3 checkpoint/completion extension | checkpoint match | mutable local checkpoint | checkpoint moved earlier | circular report match | new links possible | coordinated forgery | useful snapshot | old cp incomplete | ordinary JSON minting | medium | old formats split | cp responsibilities | overload/circularity | REJECT root role |
-| R4 isolated signer | authenticated signed issuance | independently provisioned signer | possible | possible | possible | domain-bound signatures | signed journal needed | explicit classes | safe only outside agent | high key lifecycle | no retro-cert | new signing domain | local signer possession unsafe | viable external alternative; NOT selected |
-| R5 local transition verdict | structural validity | caller-selected snapshot | claimed state | claimed state | can add refs | same verdict reproducible | no durable root | facts only | direct call reproduces verdict | low | no | validator expansion | non-authenticated event | REJECT alone |
-| R6 protected accepted-event root + ledger | independent exact-manifest approval + publication | isolated issuer/reviewer, pinned repository root | commit then root birth before promotion | separate root terminal event | linear CAS | exact domain/subject refs | durable idempotent events | explicit A–D, no retrofit | local cert descriptive until independent acceptance | bounded but higher | NO historical migration | new GCP overlay | isolation is mandatory deployment prerequisite | SELECT exactly one |
-
-Rejected certificate alternatives: digest-only proves identity; adjacent self-
-hashed JSON only moves the forgery; local secret seals/private constructors/module
-allowlists/object possession are same-process pseudo-authority. Independent signed
-certificate plus a ledger could work but introduces disproportionate signer/key
-rotation responsibilities. R6 uses existing repository/provider authentication as
-a primitive while adding the REQUIRED independent approval/publication boundary;
-it does not pretend today's agent-writable main already has that boundary.
-
-## 4. Selected independent root and proof graph
-
-The selected target root is a separately administered, protected repository
-accepted-event reference with an isolated lifecycle issuer and independently
-authenticated exact-manifest reviewer. Ordinary CLI/client credentials cannot
-write/configure/bypass this root; issuer executes approved policy, not candidate
-code. Provider publication and authorization evidence must authenticate each
-accepted event. Trusted bootstrap pins provider/repository identity, genesis,
-epoch and policy out of the report/caller-controlled domain. Existing main's
-reported PR-rule exemption is NOT acceptable root protection. No such root is
-installed/claimed in this phase; inability to provision this separation later
-blocks cutover rather than weakens the contract. No local signing subsystem,
-HPAC/HATP/FIDO/PB coupling or hidden seal is selected.
-
-```text
-independent reviewer approves exact manifest + approved issuer policy
-                         |
-pinned protected accepted-event root (authenticated provider, CAS history)
-       |                 |                         |
-       +--> issuance G0 -+--> issuance G1 ----------+--> terminal T(G1)
-              |                  |                         |
-         exact JSON/MD      predecessor=G0            completed task + pushed input
-              |                  |                         |
-              +-------- retained certified history --------+
-                                                            |
-                                             checkpoint / receipt / sent evidence
-                                                            |
-                                                  derived latest/current cache
-```
-
-Each edge validates epoch/repository/phase instance/task, exact full identities,
-accepted-root membership and independent authorization/publication, not path or
-hash alone. Replay of an existing identical subject is retrieval/idempotent
-resume, not new generation authorization. Cross-phase/task/epoch substitution
-fails exact domain checks. Hashes prove bytes; root acceptance proves governed
-issuance. Neither proves report conclusions true, grants runtime authority or
-authenticates a Python caller frame. Root admin/provider compromise is explicitly
-outside the cert-reader threat boundary; caller root-config substitution is inside.
-Offline membership can prove certified history, never live current selection.
-
-## 5. E1–E11 lifecycle events and ordering
-
-All outputs below are create-only accepted-root records or immutable evidence
-bindings. Local progress/cache changes do not mutate them. Every event binds the
-same repository/epoch/phase-instance/task grant and exact approved subject; root
-sequence/predecessor links are validated independently.
-
-| Event | Producer / inputs | Output / predecessor | Commit relation / role | Independent certification / mutation |
-|---|---|---|---|---|
-| E1 issuance | isolated issuer; reviewed report/input manifest | GenerationCertificate; prior issuance or null at zero | pre-existing candidate/tree objects; issued role | exact independent approval + atomic root append; create-only |
-| E2 promotion | CLI adapter; accepted issuance and exact bytes | promotion observation linked to issuance | cache write after root birth | root-bound observed manifest; no authority from placement |
-| E3 pending/pre-push | issuer; accepted pending-role request | pending issuance G0/Gn | candidate commit exists, canonical code push absent | same E1 proof, NOT pre-any-commit |
-| E4 governed commit linkage | primary/operator; candidate payload/input tree | immutable Git input object references | containing hash outside its own content | independent review of exact commit/tree, not author text |
-| E5 push linkage | root issuer/provider observation | accept_push event | input candidate accepted at pinned canonical code ref | authenticated provider observation and ancestry checks |
-| E6 checkpoint creation | local finalizer; T and immutable recovery snapshot | checkpoint + accepted binding to T | output after T; prepared cp before T is nonterminal | exact root-bound manifest, progress separate |
-| E7 terminal certification | issuer; chain tail, completed task, E5, full trust | TerminalCertificate T(Gn) | source/push candidate prior to T storage commit | independent exact approval; unique phase terminal; create-only |
-| E8 completion receipt | finalizer; T and actual completion/delivery evidence | receipt and root binding | output after T, immutable evidence | exact T/Gn/purpose/subject, no issuance proof |
-| E9 notification publication | governed notifier; T, exact payload, intent ID | API observations/failure + root evidence binding | after T; external governance delivery only | actual provider evidence, marker derived/idempotent |
-| E10 later regeneration | issuer; explicit pre-terminal successor intent | new issued generation; prior tail | before T only, including pushed-status sync | independent approval and CAS; post-T generation forbidden v1 |
-| E11 historical retention | storage/reader; validated chain or legacy class | retained original bytes and proof references | no rewritten history | membership/class proof; never mtime/filename preference |
-
-Actual legacy order inspected: report creation/promotion and pending_push precede
-push; terminal callback creates checkpoint/extraction, promotes and dispatches,
-then completes receipt/checkpoint. Future ordering deliberately separates root
-birth/certification from those local outputs to eliminate circular provenance.
-
-## 6. Certificate and proof semantics
-
-GCP-001 §3 freezes exact semantic gcp/1.0 wire fields and types, classified by
-identity/provenance/ordering/descriptive purpose. No production schema registration
-or model is implemented. Generation identity is the root-scoped phase-instance
-and assigned sequence tuple; report JSON/MD digests identify content, not issuance.
-Certificate ID hashes canonical domain-separated body. Root-issued event IDs are
-opaque collision-checked IDs, assigned before atomic publication, NOT hashes of
-the certificate that references them. This avoids certificate/event self-cycles.
-Containing root commit/blob identities are detached inclusion-proof locators.
-
-Independent approval binds exact report bytes, input metadata/commit/task, role,
-expected predecessor/tail and policy. The issuer cannot certify directory scans
-or changed proposal content merely because structure is valid. Root generation
-has sequence zero; successors increment once and bind prior certificate. One
-phase instance has one linear chain and one terminal. Branches/gaps/cycles conflict.
-Source metadata is committed before the certificate storage commit, never contains
-its own containing-commit ID. Push status and notification data do not mutate a
-certified generation: transport outcomes are companion evidence. Certificate
-possession/copying/manual construction never conveys issuance or terminal proof.
-
-Terminal certification is independent of issuance: terminal_candidate is not
-terminal until T validates root chain tail, completed task, canonical pushed input
-and full content/trust evidence. It does not require the later T storage commit
-to appear inside the report it certifies. Checkpoint is recovery/output; receipt
-is completion/delivery evidence; marker is what was notified; latest is a cache.
-Each has an exact subject/root event binding and cannot substitute for T.
-
-## 7. Legacy inventory and honest compatibility
-
-| Phase / set inspected | Current observations | Primary future legacy disposition | Strong future provenance |
+| Node | Original historical invariant / actual assertion | Immutable entry → closure | Classification / repair |
 |---|---|---|---|
-| 150G, 2 generations | H/J committed inventories bind the exact known pair; cp/receipt unchanged; reconcile clean | LEGACY-B for archived observed byte/selection facts, also A contemporary completion | NO; no issuance certificate |
-| 150H, 2 generations | terminal source 1d1861b3 absent from listed 4d4dafc3/02d1d457; current reconcile conflicts | LEGACY-D for current selection; retain A-era closure evidence, technical result unchanged | NO |
-| 150I, 2 generations | pending 59f82f85, terminal 05f6fc23; current reconcile clean | LEGACY-A; generation issuance remains provenance-incomplete | NO |
-| 150J, 2 generations | pending/terminal source 2023fc3b; defects recorded, reconcile clean | LEGACY-A; provenance-incomplete under new rules | NO |
-| 150K, 2 generations | pending 5feb69eb, terminal 5683b8fe; closure 8c998d2b; reconcile clean | LEGACY-A; provenance-incomplete under new rules | NO |
-| 133B, single generation | complete/pushed, no source revision; PFR content freeze | LEGACY-A closure facts; origin not newly certified | NO |
-| 134E.10.1, single | source 441a2142; five-commit inventory contains documented prior-phase attribution debt | LEGACY-C for unproved issuance; conflict facts disclosed, no current certification | NO |
-| 134E.10.1V.1, single | source d88b1294 absent from three listed phase commits | LEGACY-C; incompatible source binding disclosed | NO |
-| 137I.1, single | source dfa74fd2 absent from listed 8bb81dbd | LEGACY-C; no strong current selection | NO |
-| 113B, earlier multi-set | 17 report generations present, pre-terminal-proof conventions | LEGACY-C unless independently bound per artifact; no filename/mtime selection | NO |
-| 150L, this phase | runs current legacy machinery; future root not active | LEGACY-A after normal completion, never gcp-certified | NO |
+| test_phase_150i_phase_report_rehydration_identity_repair.py::test_runtime_and_product_boundaries_are_untouched | Phase I may change lifecycle infrastructure, not exact recognition/writer/foundation files, helper prefix, runtime/PB prefixes or contracts; git diff entry→working tree accidentally included all future phases | 93424bea862aab27fcb2401a5e83e28481b1929a → 841c61e13b20132896b4b9674e4add58544364ac | F2 primary, F3 effect; pin endpoint, preserve exact predicate, disable rename elision |
+| test_phase_150j_rehydration_identity_repair_iv.py::test_this_iv_has_zero_production_and_contract_delta | Phase J verification changes zero src/pcae or contracts; entry→working tree freezes all future additions | 841c61e13b20132896b4b9674e4add58544364ac → c90254a2648e4afb263373fd4aff2afb48946e2e | F2 primary, F3 effect; pin endpoint, retain zero-diff scope |
+| test_phase_150k_provenance_certification_link_repair.py::test_architectural_stop_changes_no_production_or_contracts | Phase K architectural stop changes zero src/pcae or contracts; entry→working tree freezes all future additions | c90254a2648e4afb263373fd4aff2afb48946e2e → 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f | F2 primary, F3 effect; pin endpoint, retain zero-diff scope |
 
-These are architecture evidence classifications, not production reclassification
-or migration. A/B are scope-limited facts; they never fabricate issuance. The
-then-current closure of 150H is not erased by today's newly observed mismatch.
-No current artifact directly satisfies future certificates. New observations
-prove only observation time. Legacy audit/display/reconstruction is allowed with
-clear limitations; strong current/certification consumers cannot consume A/B/C.
-Actual contradictory/malformed/tampered evidence is D and quarantined for audit.
+These are actual full repository commit objects, not candidate hashes invented as
+historical snapshots. J's independently committed evidence §Exact Phase 150I
+production diff names I's complete range and only the two phase-report production
+files. K's preflight names J's closure as entry; L's preflight names K's closure.
+Git ancestry/subjects agree, and fixed-range diffs independently reproduce the
+original protected-scope zero deltas. Terminal promoted report source commits
+05f6fc23/2023fc3b/5683b8fe precede the respective closure bookkeeping; those tails
+also have zero protected deltas. No contract identity/version drift or legitimate
+permanent-byte freeze was implicated. GCP was a separately authorized new target
+contract, not a changed historical normative contract. None is F1/F6.
 
-150G preservation: JSON A 5509cb71..., Markdown A da5a678c...; JSON B deafa34c...,
-Markdown B 5b954816...; checkpoint d0bbbb3e...; receipt 057a4539.... Exact full
-hashes are retained in predecessor K/J/H evidence and fresh tests. Both original
-generations, checkpoint and receipt are read-only here. Global latest/marker may
-advance ONLY through this phase's normal legacy finalization, not manual repair.
+Mutation tests execute the ORIGINAL repaired functions, changing only synthetic
+Git repositories and explicit fixture endpoints: protected body mutation, deletion,
+symlink replacement, same-version drift, contraction, substitution and unauthorized
+protected addition all fail for both contract and foundation scope in all three
+assertions (42 adversarial cases). Three future-legal-addition/version-evolution
+cases remain outside the immutable phase range. Three actual-boundary cases verify
+real commit existence/ancestry and execute original assertions. Total new A suite:
+48 tests. Initial construction run exposed 150I rename deletion elision and one
+fixture addition outside I's deliberately limited scope: 134 pass/2 fail. Fix uses
+--no-renames (all three) and a genuinely protected helper-prefix addition; no
+scope contraction or arbitrary-source ban is introduced. Final 136 pass includes
+88 original I/J/K cases. Mutations do not rewrite real history or live contracts.
 
-## 8. Cutover, versioning and migration adjudication
+## 3. Prior payload_conflict and preserved truth
 
-C1 mandatory for newly opened phase instances + C4 dual-read/new-write selected.
-C2 indefinite opt-in is rejected (downgrade/split semantics); C3 multi-only is
-rejected (one forged generation has the same provenance problem). Cutover is an
-independently accepted activation event AFTER implementation/IV and authorized
-root provisioning prove isolation. Activation binds schema/policy versions,
-implementation/IV evidence and the canonical pre-cutover instance set. Missing
-certificate/timestamp/flag cannot designate legacy. Unknown phase instances fail.
-Every current phase, including 150L, is legacy; this contract is target-only.
+150L first promoted 20261004-202343-150L paired report at source 4bb98006 before
+the post-tracking broad regression disproved the clean-success claim. It bound
+checkpoint/notification and dispatched summary/document API message 2700/2701.
+Tracked completion correction in 944228ac records BLOCKED and the three failures.
+Normal correction passed transition validation but refused already-dispatched
+payload_conflict. Source dispatch-state code compares Markdown report_digest
+and finalization_snapshot_id with the bound marker; either mismatch is conflict.
+Changed status/summary, validation results/failed nodes, commit inventory and
+expanded correction report body change those identities. Pushed status remained
+pushed and outgoing remained zero; transport state was NOT evidence of correction.
+The exact refused attempt's new digest is not persisted as a promoted generation:
+do not invent it. Its changed fields are evidenced by tracked corrected source
+versus retained JSON/Markdown; causal guard is independently read from code.
 
-Migration decision A: NO MIGRATION. Optional B reconstructive observation index
-may describe only provable facts and never certify issuance. C historical strong
-trust migration is not required/authorized; a later genuine need needs separate
-architecture. No existing report/receipt/checkpoint is rewritten or certified.
+| Preserved object | SHA-256 at entry |
+|---|---|
+| original 150L JSON | 8070a4016915dad3f7d45f5ea88b8c9df2cb078fd8d9e253d7d897cbe4d4874a |
+| original 150L Markdown | 18d66beecdb1d219495d13a8be322436c90c4ca8fdde6117d61050634a211c3e |
+| 150L checkpoint | 26a33dbfa1ead42b8b3d5985a50b4f5207583c92b56b0cbcff211d1a44f90e02 |
+| original 150L receipt dfad1a7c… | 38679c3e4d70d3ef2dc12e9698c609579be0c6d28f0d20f8096daffabbf691f4 |
+| tracked BLOCKED completion Markdown at 944228ac | 63cb68a882a85fb446615907e2e928932159fa71d77f3a339f41f7b12164a935 |
+| tracked BLOCKED completion metadata at 944228ac | a2de65ff042e646e0cf34c56b5059a0def591552c1c74cb26f1b02d2473fdb37 |
+| unchanged GCP target contract | d72d93451a28befd39febd51473e05f020649afe26886742838a1adae119c51f |
 
-New normative artifact: docs/contracts/LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md,
-GCP-001 v1.0, schemas gcp-generation/terminal/event/anchor/checkpoint-binding/
-receipt-binding/result 1.0. Existing PFR thirteen-section structure, GLP-001,
-PFN-001 and FGSC-001 are unchanged. Future checkpoint/receipt bindings are sidecars
-to preserve old wire formats. No implementation or consumer schema is registered.
-Backward-compatible CLI extension separates old mechanical status from provenance
-and complete_trust; old reconciled/exit-zero NEVER means new certification.
+Original checkpoint snapshot 8ad74f057f6845e9623cb35abb98911bca36d4b81ab84b346eeaf5df28209f60
+and old immutable delivery receipt remain untouched. No retry/resend of 150L,
+no promoted-generation deletion, no pointer/checkpoint/marker substitution. This
+successor's own normal finalization may rotate the global index/marker; it does
+not claim old 150L successfully corrected its dispatched report. The BLOCKED
+completion files remain immutable in Git at 944228ac even when current-phase
+completion files are normally replaced by this successor's own records.
 
-## 9. Crash/retry matrix (binding under GCP-REQ-024)
-
-| State | Recoverable? | Required recovery / disposition |
-|---|---|---|
-| CR1 report written, certificate absent | proposal only | quarantine/staging; approve exact original manifest independently or abandon; never infer issuance |
-| CR2 certificate accepted, promotion incomplete | yes | validate root proof, fetch exact approved bytes, resume cache promotion; no new generation |
-| CR3 promotion present, input commit absent | no certified possibility | invariant violation/quarantine: valid issuance required pre-existing input commit; directory is not proof |
-| CR4 input commit complete, push absent | pending only | independently certify pending if approved; resume governed push; no terminal claim |
-| CR5 push complete, terminal absent | yes | inspect durable accepted push/task/chain, independently authorize exact terminal; never use latest to guess |
-| CR6 terminal accepted, checkpoint absent | yes / finalization incomplete | reconstruct snapshot only from exact rooted facts, persist binding; T stays genuine, completion limb pending |
-| CR7 checkpoint bound, receipt absent | yes / evidence incomplete | recover actual completion evidence, bind new observed receipt; never fabricate transport success |
-| CR8 receipt bound, notification absent | yes | verify T, issue durable intent and one supported idempotent send; failure/unknown explicit |
-| CR9 send possibly occurred, acknowledgement absent | conditionally | provider query/idempotency required; otherwise UNKNOWN/durable failure, no automatic resend |
-| CR10 process crash/retry | yes with durable facts | resolve manifest-bound root request ID; reuse accepted event, otherwise remain incomplete |
-| CR11 duplicate identical retry | yes | return identical certificate/terminal/delivery identity; no new sequence/report |
-| CR12 same ID changed manifest or forked tail | no automatic resume | conflict/quarantine; do not allocate around failed CAS or erase accepted history |
-
-Root event creation and publication are one atomic create-only CAS commit/ref
-acceptance. Crash before acknowledgement is resolved by querying request identity;
-local staging record cannot prove remote acceptance. No rollback deletes accepted
-history. Report/certificate bytes lost cannot be recreated from a digest alone.
-Post-terminal regeneration is forbidden; unchanged retries reuse the existing T.
-
-## 10. Architecture attack matrix
-
-Required result means future normative defense, NOT implemented test success.
-
-| # | Attacker action | Invariant | Required result | Selected-model defense |
-|---|---|---|---|---|
-| 1 | forged pending report | GCP-INV-002 | untrusted/quarantine | independent exact-manifest issuance before promotion |
-| 2 | copied other-phase report | GCP-INV-003 | reject | root epoch/repository/phase/task domain equality |
-| 3 | same-phase forged report | GCP-INV-002 | reject | exact approved pair/metadata/input commit, not local structure |
-| 4 | forged terminal report | GCP-INV-005 | reject | separate root terminal event references genuine issuance |
-| 5 | forged checkpoint | GCP-INV-006 | reject | cp evidence cannot select T; exact root binding |
-| 6 | forged report + checkpoint | GCP-INV-001 | reject | neither can append protected accepted-event root |
-| 7 | legitimate receipt replay | GCP-INV-007 | reject changed subject | exact T/generation/domain/purpose equality |
-| 8 | copied receipt | GCP-INV-007 | reject changed subject | immutable root-bound observed evidence |
-| 9 | forged receipt | GCP-INV-007 | reject | actual evidence approval/publication, not self-digest |
-| 10 | notification replay | GCP-INV-008 | no authority; conflict if changed | exact sent payload/logical purpose; actual provider evidence |
-| 11 | malformed latest | GCP-INV-009 | explicit invalid index | object schema checked; never silently ignored |
-| 12 | forged latest | GCP-INV-009 | conflict/quarantine | derive current from root, not pointer |
-| 13 | forged higher sequence | GCP-INV-003 | reject | isolated root CAS allocates ordinal |
-| 14 | predecessor substitution | GCP-INV-003 | reject | exact accepted predecessor cert and approved tail |
-| 15 | branch insertion | GCP-INV-011 | conflict | one root chain, atomic tail CAS |
-| 16 | chain cycle | GCP-INV-011 | reject | consecutive root-assigned sequence, visited identity checks |
-| 17 | skipped predecessor | GCP-INV-003 | reject | require all consecutive accepted links |
-| 18 | terminal certificate replay | GCP-INV-005 | reject changed subject | phase-instance/task/epoch/generation binding |
-| 19 | issuance certificate replay | GCP-INV-002 | no new issuance | existing exact identity is idempotent retrieval only |
-| 20 | cross-phase certificate | GCP-INV-002 | reject | canonical CPIPC plus root phase-instance grant |
-| 21 | cross-task substitution | GCP-INV-003 | reject | task ID and immutable granted input task tree |
-| 22 | report mutation after cert | GCP-INV-001 | reject | exact JSON/Markdown digests; no lossy re-render identity |
-| 23 | certificate mutation | GCP-INV-002 | reject | canonical body ID and root blob inclusion/publication |
-| 24 | crash before certificate | GCP-INV-010 | incomplete proposal | no auto-certification from found files |
-| 25 | crash after cert before input commit | GCP-INV-010 | invalid/quarantine | causal rule: input commit predates certificate birth |
-| 26 | crash after push before terminal | GCP-INV-005 | no terminal yet | resume independently approved terminal event |
-| 27 | duplicate finalization | GCP-INV-011 | same existing T | manifest-idempotent root query; post-T generation forbidden |
-| 28 | mtime manipulation | GCP-INV-009 | no selection influence | root chain/event role only |
-| 29 | filename-order manipulation | GCP-INV-009 | no selection influence | full proof IDs, not filenames |
-| 30 | symlink/path/TOCTOU substitution | GCP-INV-002 | reject | safe containment/open and verify same opened bytes |
-| 31 | incomplete trust reported complete | GCP-INV-010 | incomplete/untrusted | re-run full content and every mandatory proof limb |
-| 32 | legacy provenance fabrication | GCP-INV-012 | reject claimed new cert | explicit legacy class, no inferred past events; also GCP-INV-004 requires membership or disclosed legacy class |
-
-Root-policy/reviewer credential compromise is a root compromise, not something
-a certificate reader can solve. Malicious ordinary same-process code is in scope:
-it may write equivalent JSON or invoke APIs but cannot obtain independent exact-
-manifest acceptance or modify protected root/configuration. If deployment cannot
-enforce that separation, cutover MUST remain blocked. No secret globals, private
-constructors, trusted module names, code pins or writer-object possession are used.
-
-## 11. Trust vocabulary and reader algorithms
-
-certified/current = rooted issuance and unique T against fresh root; certified/
-historical = rooted nonterminal chain membership; legacy-reconstructably-bound =
-only enumerated independent historic facts; legacy-provenance-incomplete = lacks
-new issuance proof; untrusted = no required proof; conflicting = contradictory
-proof/data; ambiguous = multiple possible chain/terminal states. Delivery
-completeness is independent; a genuine T with missing receipt is not complete trust.
-
-Rehydration order: safe discovery -> exact structure/full report trust -> fresh
-independent root/policy/cutover -> issuance proofs -> linear chain -> explicit
-legacy classes -> fork/cycle/gap detection -> unique T + task/push -> checkpoint/
-receipt -> actual notification evidence -> derived current/index checks. Fail
-closed on ambiguity, missing mandatory limb or proof substitution. No cache pin.
-
-Reconcile reports clean_certified, clean_with_certified_history,
-legacy_compatible_provenance_incomplete, conflict, ambiguous or untrusted, separate
-from old mechanical status. Valid old delivery absence is disclosed; arbitrary
-historical digest references are not acceptable. Neither command mutates linkage
-or chooses whatever candidate yields green. Derived pointer repair is governed.
-
-## 12. Bounded implementation plan and traceability
-
-| Slice | Bounded work | Non-goal / exit and IV |
-|---|---|---|
-| 1 | schema-backed pure models/canonicalization and local structural/semantic validation | no root lookup/write, no lifecycle integration, no trusted result; independent slice IV |
-| 2 | read-only root configuration/proof/provider acceptance verifier | reject root substitution, rollback and forged provenance; independently verified before writes |
-| 3 | isolated issuer/independent-review protocol, CAS ledger and authorized bootstrap adapter | no production deployment/activation without separate approval; verify real separation, crash/replay IV |
-| 4 | pending issuance/promotion integration | staging remains untrusted until external acceptance; focused issuance IV |
-| 5 | successor/terminal plus task/push/checkpoint/receipt/notification binding | no post-terminal regeneration; full causal/replay/crash IV |
-| 6 | rehydration/reconcile/legacy/cache consumers and versioned result disclosure | no legacy upgrade or certificate retrofit; consumer IV |
-| 7 | final end-to-end lifecycle provenance IV and explicit cutover readiness | activation separately authorized; only after full success may recognition-core IV resume |
-
-No slice was implemented. Exact successor identity is re-derived at its own
-preflight. Recommended alias: PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1.
-No successor is activated or implementation pre-authorized by this recommendation.
-
-Traceability: GCP-REQ-001–004 -> §§1–4; 005–007 -> §6; 008–009 -> §§5–6;
-010–012 -> §§5–6/9; 013–016 -> §§5–6/11; 017–019 -> §§7–8; 020–024 -> §§9–11;
-025–026 -> §§10/12. GCP-INV-001–012 are covered by the 32-row attack matrix.
-Contract tests check freeze consistency/coverage, NOT deployed enforcement.
-150L independently challenges the architecture; implementation security claims
-await separately governed IV. Root deployment isolation is a hard readiness gate,
-not an unresolved weakening exception or a claim that today's root exists.
-
-## 13. Evidence, boundaries and closure
-
-Fresh architecture/contract coverage and relevant regressions are recorded in
-completion metadata/report. Fresh canonical Fast Green uses this phase's own
-oldest attributed commit parent and fixed candidate, never K's artifact.
-Failure sets are compared to fixed entry; no existing tests skipped or suppressed.
-All verification-affecting architecture/contract/tests are frozen before capture;
-only permitted finalization bookkeeping follows. Normal governed checks, report
-promotion, notification, push and fetch close the SAME phase.
-
-Inherited debt: J/K root gap is architecturally resolved by an independent target
-boundary, operationally OPEN until implementation/IV; H inventory conflict is
-CONFIRMED historical debt, no repair here; independent rendering mismatch remains
-NON-BLOCKING disclosure; old task-memory warning debt remains unchanged.
-Durable knowledge: a certificate becomes provenance only through independent
-accepted transition, and an observation index cannot make an earlier event real.
-
-Zero src/pcae/** delta; zero runtime behavior delta; no historical report/cp/receipt
-rewriting or deletion; no actual generation certificate or root artifact created.
-No HPAC/helper/step 9-prime/foundation/HATP/PB/POL/host/deployment/release work.
-Runtime Observed / observe / unavailable. N-16-5 OPEN; N-16-6/N-16-7 untouched.
-recognition-core IV remains on hold until the lifecycle generation-provenance architecture is implemented and independently verified.
+prior Phase 150L blocked state remains preserved as historical truth
 HASH CONSISTENCY != PROVENANCE
-legacy compatibility != retroactive provenance certification
 
-## 14. Fresh verification and governed closure
+## 4. Independent architecture adjudication (after Objective A)
 
-The first completion attempt was quarantined for an omitted telegram_runtime
-metadata field. No promotion/notification occurred. Truthful configured/not-yet-
-dispatched state was added before normal retry; no override or guard bypass.
+Re-read frozen GCP and full 150L architecture, not its withdrawn success report.
+Re-read I's actual scope evidence, J/K primary investigations and executable
+witnesses, current dispatch-state/notification certification implementation and
+G/H reconciliation. No implementation now invalidates K's missing-root premise:
+source has no gcp-generation/terminal schema, accepted-event resolver or issuance
+writer. Existing HATP cutover names are unrelated and NOT reused as GCP authority.
 
-Fresh architecture suite: 127 passed. L/J/K combined: 199 passed (72 unchanged
-production defect witnesses). Broader lifecycle selection: 988 passed / 4 failed
-in 41.38s. All four reproduce at fixed entry 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f
-in detached /private/tmp/pcae-150l-baseline.ZHX3XL with copied canonical G artifacts
-and the unchanged K global marker. Two stale H marker assertions; two old receipt
-no-integration assertions. No skip/xfail/deletion or suppression. Initial fresh
-lint regex/hash transcription and INV-004 trace coverage were corrected before
-freeze. One baseline copy invocation used a wrong relative source path; corrected
-absolute-source copies and the completed four-node rerun supply the actual evidence.
+R6 is a coherent TARGET: out-of-band pinned provider/repository/ref/genesis/epoch/
+policy, independently administered accepted-event root, isolated approved-policy
+issuer, provider-authenticated exact-manifest reviewer outside agent/same-process
+read/write domain. Protected ancestry AND authenticated acceptance are required;
+ordinary main/local commit/author text/digest/caller certificate is not the root.
+Fresh authenticated head plus non-rollback checks are required for currentness.
+Exact approved phase instance/task/input tree/metadata/report pair/predecessor/
+intent prevent substitution. Same-process code may construct identical data but
+cannot mint accepted root events. Deployment isolation is a future hard gate,
+not an exception permitting today's writable main. No root is deployed here.
 
-Fresh canonical Fast Green PASS: baseline 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f;
-candidate 4bb980064b28c0a594344aa72a92ec4842ac9957. Baseline raw 361 failed / 9 errors;
-candidate 359 failed / 9 errors. All 368 candidate failure/error nodes are
-baseline-pre-existing. Environment exclusions: []; expected artifacts: [];
-attributable_failures: []. Artifact .pcae/fast-green-attribution/33a5dedf9a8f0b4ca3aadbc696a3f00f29fd25f5163e8ac2b687e7875fb539c1.json.
-The artifact was produced by this phase's normal PCAE command and embedded
-verbatim; not reused from K, manually substituted or edited. Candidate was pushed
-before capture while L task remained active, using normal active-task push mode.
-No verification-affecting files changed after capture. Only Class B finalization
-bookkeeping follows. Governed architecture commit: 4bb980064b28c0a594344aa72a92ec4842ac9957.
-Any later closure commit is identified in the final human handoff, not prospectively
-invented inside its own report. Report-generation inventory contains existing commits.
+The acyclic graph is pinned root → accepted exact authorization → issuance
+certificate + immutable pre-existing input objects → linear accepted successor
+chain → separately accepted terminal certificate after push/task completion →
+checkpoint/receipt/delivery evidence. Event IDs are root-assigned opaque IDs before
+publication; body hashes exclude self-ID; containing commit lives in detached
+proof, not its own body. Checkpoint/receipt cannot certify their own source report.
+Pending birth follows independent acceptance, before promotion, NOT before any
+commit. One zero-based linear chain/CAS tail, no forks/gaps/cycles, one terminal;
+post-terminal regeneration forbidden. Changed post-terminal findings belong to a
+separate successor, as this phase demonstrates under existing legacy machinery.
 
-Task 20261004-2143-phase-150l-pcae-lifecycle-phase-report-provenance-root-generation-certificate-historical-compatibility-architecture
-closed through normal task transition, DONE recorded, idle post-L created (not a
-successor phase). Current checks: pcae check passed; health healthy; status coherence
-coherent; doctor task-memory exit 0, 282 inherited warnings / zero errors; normal
-push succeeded without operator force/history/hook bypass. GitHub reports its
-existing main pull-request-rule exemption; this is explicitly rejected as a future
-GCP independent root. Normal complete_phase transition validation, promotion and
-notification outcomes are recorded after execution below. Pushed candidate equals
-origin/main; origin/main..HEAD == 0. Current legacy trust/consistency results are
-mechanical, never new GCP issuance certification.
+R1 ordinary Git, R2 local ledger, R3 checkpoint root and R5 local verdict are
+rejected pseudo-roots; R4 external signer is viable but disproportionate/unselected.
+R6 combines durable membership with independent acceptance, not two self-checks.
+Receipts record observed delivery; marker exactly what was sent; latest is derived
+cache. Strong trust separates content/provenance/terminal/delivery axes. Cutover
+C1+C4 only after bounded implementation, IV, authorized isolated provisioning and
+accepted activation; absence/timestamp/user flag cannot opt into legacy. No migration.
 
-Selected-model conclusions: independently protected R6 root; gcp/1.0 semantic
-schemas frozen; pending birth after input commit/root acceptance before promotion;
-linear root-assigned successor identities; unique independent terminal certification;
-checkpoint/receipt outputs, notification actual sent evidence, latest cache; explicit
-legacy A–D with H current-selection conflict preserved; C1+C4 cutover inactive;
-NO historical migration; 12 recovery states and 32 attacks covered architecturally.
-Recommended first bounded phase: PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1,
-pure data models/validation only. No future identity reserved or successor activated.
-Implementation/IV and independently verified authorized root provisioning precede
-cutover; recognition-core IV remains on hold until lifecycle provenance is implemented
-and independently verified. No product closure advancement.
+## 5. Mechanical contract inventory and abstraction distinction
 
-## 15. AUTHORITATIVE POST-PUSH DISPOSITION CORRECTION
+GCP-001 v1.0 remains byte-identical, FROZEN TARGET / NOT IMPLEMENTED / CUTOVER
+INACTIVE. Fresh independent tests check exact inventories, unique/gap-free IDs,
+all references defined, closed generation table and attack-to-invariant/requirement
+crosswalk. All 26 requirements and 12 invariants are present exactly once. Existing
+150L suite covers every numbered requirement/invariant individually; new audit
+checks the total inventory rather than only expected rows. Exact field inventory:
 
-COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED.
-This overrides the earlier target/success wording; the target is not cleared for
-implementation. Pre-commit git diff omitted the untracked new contract; initial
-report/notification made a premature clean-regression claim. Original bytes and
-delivery evidence remain preserved, not silently rewritten.
+schema; root_epoch; repository_id; phase_instance_id; phase_id; task_id; sequence;
+generation_id; role; report_json_sha256; report_markdown_sha256;
+predecessor_certificate_id; input_commit; completion_metadata_sha256;
+authorization_event_id; issuance_event_id; certificate_id.
 
-Normal blocked correction: transition validator ACCEPT, then notification identity
-preflight REFUSED payload_conflict: already-dispatched phase, differing report digest/
-snapshot. No corrected promotion or notification. Initial checkpoint remains
-26a33dbf... and report remains 18d66bee.... Mechanical trust/consistency/reconcile
-are clean for original identity ONLY. Corrected canonical lifecycle cannot safely
-complete through existing ordinary completion machinery. No manual identity edit,
-deletion, override or fabricated generation. Final bookkeeping records this limit.
-An authorized successor may record correction under its own identity, fix historical
-test scope narrowly and revalidate architecture before implementation. None begun.
+There are exactly 11 ARCHITECTURAL lifecycle domains E1–E11, not a claimed
+11-member wire enum. GCP-REQ-007 explicitly defines 13 RootEvent kinds. No contract
+change or silent vocabulary contraction is made. Their consistent crosswalk:
 
-Full post-commit selection: 985 passed / 7 failed, 41.25s. Four separately reproduced
-fixed-entry pre-existing marker/receipt failures; three candidate-attributable:
+| Architecture domain | Accepted-event/proof relationship |
+|---|---|
+| E1 issuance | issue_generation after authorize_manifest |
+| E2 promotion | observe_promotion |
+| E3 pending/pre-push | pending role of issue_generation, not a separate kind |
+| E4 governed commit | approved immutable object input via authorize_manifest |
+| E5 push | accept_push |
+| E6 checkpoint | bind_checkpoint |
+| E7 terminal | certify_terminal, depends on complete_task/accept_push |
+| E8 receipt | bind_receipt |
+| E9 notification | record_notification, followed by close_delivery |
+| E10 pre-terminal regeneration | successor issue_generation |
+| E11 retention | proof membership/explicit legacy audit, not another write event |
 
-- tests/test_phase_150i_phase_report_rehydration_identity_repair.py::test_runtime_and_product_boundaries_are_untouched
-- tests/test_phase_150j_rehydration_identity_repair_iv.py::test_this_iv_has_zero_production_and_contract_delta
-- tests/test_phase_150k_provenance_certification_link_repair.py::test_architectural_stop_changes_no_production_or_contracts
+Additional root control kinds bootstrap/open_phase/activate_cutover bind root,
+phase grant and cutover; they are not missing report-generation domains. This
+distinction must carry into future pure-model implementation: do not substitute
+the illustrative 11-domain table for the 13-kind exact wire vocabulary.
 
-All three pass at fixed entry 8c998d2b in the detached baseline and fail when GCP
-becomes tracked, because their git diff compares current HEAD without a historical
-upper bound. No production or existing-contract delta. Fresh L coverage: 127 pass.
-L/J/K post-push: 197 pass / 2 fail. Valid Fast Green PASS/attributable_failures []
-does not select these nodes; it is not substituted for broad regression evidence.
-No tests skipped, suppressed or repaired. BLOCKED.
+All 12 recovery states CR1–CR12 remain defined and coherent: proposal-only before
+certificate; resume exact accepted bytes after partial promotion; impossible
+certified-before-input-commit quarantined; pending before push; independently
+complete terminal after push; required cp/receipt limbs may remain incomplete;
+notify actual outcome; ambiguous send requires provider idempotency/query or
+UNKNOWN/no automatic resend; identical retry reuses identity; changed manifest
+conflicts. No recovery fabricates acceptance or transport success.
 
-Smallest successor: narrow governed historical phase-freeze assertion scope
-repair for I/J/K, using their immutable actual completed-phase boundaries, then
-architecture revalidation before any implementation. No successor begun or ID
-reserved. R6/GCP remain documented TARGET ONLY. Root not installed; no migration,
-retrospective certification, production implementation or cutover.
+Requirement traceability: 001 content scope; 002 root; 003 independent exact
+authorization; 004 authenticated publication/currentness; 005 closed canonical
+schemas; 006 terminal shape; 007 events/anchor; 008 issuance; 009 pending birth;
+010 linear chain; 011 independent terminal; 012 no post-T regeneration;
+013 checkpoint; 014 receipt; 015 notification; 016 index; 017 legacy classes;
+018 cutover; 019 no migration; 020 vocabulary; 021 result evolution;
+022 rehydration; 023 reconcile; 024 recovery; 025 slices/isolation; 026 walls.
+Tests mechanize exact counts/reference/field checks and critical normative clauses;
+source/contract reasoning adjudicates semantics, not textual lint alone.
 
-Initial promoted report 20261004-202343-150L.md/.json, source 4bb98006, preserved.
-MD SHA-256: 18d66beecdb1d219495d13a8be322436c90c4ca8fdde6117d61050634a211c3e.
-Initial API summary/document message IDs: 2700/2701. Immutable receipt retained:
-.pcae/delivery-receipts/receipts/dfad1a7ceb5b29384d435bedcedb364057d1db8d99369822b90722ba4a74bff0/receipt.json.
-Initial checkpoint observed BEFORE correction, SHA-256
-26a33dbfa1ead42b8b3d5985a50b4f5207583c92b56b0cbcff211d1a44f90e02:
+## 6. All 32 attacks and invariant coverage
 
-```json
-{
-  "completed_at": "2026-10-04T20:23:44Z",
-  "evidence_id": "150L#1",
-  "extraction_digests": {
-    "operator_report": "51a0ebf58646d0bb667bdcc398e4c6d6424efaa2e806fa99375ac32054a755b3",
-    "phase_report": "c744ed51349ef72fff5bfc94ab57def4c9a05f36fae2c682129103493d8015dd"
-  },
-  "finalization_snapshot_id": "8ad74f057f6845e9623cb35abb98911bca36d4b81ab84b346eeaf5df28209f60",
-  "limitations": [
-    "known limitation: phase_report_markdown_v1 rendering output diverges from PhaseReport.render_markdown() output for this report; both derive from the same certified report/evidence but are independent presentation stages and are not forced to be byte-identical"
-  ],
-  "phase_id": "150L",
-  "phase_name": "PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE",
-  "receipt_logical_delivery_id": "dfad1a7ceb5b29384d435bedcedb364057d1db8d99369822b90722ba4a74bff0",
-  "receipt_path": ".pcae/delivery-receipts/receipts/dfad1a7ceb5b29384d435bedcedb364057d1db8d99369822b90722ba4a74bff0/receipt.json",
-  "rendering_content_matches_existing": {
-    "phase_report_markdown": false
-  },
-  "rendering_digests": {
-    "operator_report": "ff49c08b9430470a384df20d7ba04d5d588c8d8ce9eebf0712df59ed46cc6ba2",
-    "phase_report": "081b1f613a9f4f0551f11b6795c217eebaacea75cdcd275029b6864e5dc245fb"
-  },
-  "report_digest": "18d66beecdb1d219495d13a8be322436c90c4ca8fdde6117d61050634a211c3e",
-  "started_at": "2026-10-04T20:23:43Z",
-  "status": "completed",
-  "steps": {
-    "delivery_model": "completed",
-    "pre_promotion_certification": "completed",
-    "promotion_and_dispatch": "completed",
-    "receipt": "completed"
-  },
-  "view_digests": {
-    "operator_report": "9b712ef57773b4c9ba355007d3d9ae36d7250c995c869bb5094429f18cb20884",
-    "phase_report": "87b6e5d33dca25ba921a4eb6dc33c430300cb4aeee8aabc1a58597e7098a2f8f"
-  }
-}```
+Frozen attack rows remain in the unchanged 150L architecture §10. Each is freshly
+checked for defined invariant, nonempty required result/defense and an applicable
+normative requirement. All rows are ARCHITECTURAL, runtime enforcement deferred.
+No pure model or production security closure is claimed. Requirement crosswalk:
 
-Observation copy only, NOT a canonical checkpoint or provenance root. Only normal
-governed complete_phase may persist correction; no manual pointer/digest/marker/
-checkpoint substitution or generation deletion. New finding correction, not a
-resend merely to align hashes. Current legacy machinery permits changed-report
-re-entry; post-cutover GCP v1 forbids post-terminal regeneration but is inactive.
+| Row | Attack | GCP-REQ | Architectural defense / required outcome |
+|---|---|---|---|
+| 1 | forged pending | 009 | no accepted exact issuance → untrusted |
+| 2 | cross-phase report | 010 | exact root/phase/task domain rejects |
+| 3 | same-phase forgery | 003 | independent exact manifest rejects |
+| 4 | forged terminal | 006 | separate genuine terminal certificate required |
+| 5 | forged checkpoint | 013 | evidence cannot select terminal |
+| 6 | report + checkpoint | 004 | no independently authenticated acceptance |
+| 7 | legitimate receipt replay | 014 | exact terminal/generation/purpose required |
+| 8 | copied receipt | 014 | exact immutable observed subject required |
+| 9 | forged receipt | 014 | actual approved durable evidence required |
+| 10 | notification replay | 015 | no authority, exact sent identity required |
+| 11 | malformed latest | 016 | explicit invalid cache |
+| 12 | forged latest | 016 | current derives only from root |
+| 13 | higher sequence | 010 | root CAS assigns, caller cannot select tail |
+| 14 | predecessor substitution | 010 | exact accepted predecessor required |
+| 15 | branch | 010 | one atomic linear tail |
+| 16 | cycle | 010 | consecutive accepted links/visited IDs |
+| 17 | gap | 010 | every predecessor required |
+| 18 | terminal replay | 006 | exact phase/task/epoch/generation domain |
+| 19 | issuance replay | 010 | identical retrieval only, no new issuance |
+| 20 | cross-phase cert | 010 | CPIPC and phase-instance grant |
+| 21 | cross-task cert | 010 | immutable granted task/input |
+| 22 | report mutation | 005 | exact paired stored-byte digests |
+| 23 | certificate mutation | 005 | canonical ID + independent blob inclusion |
+| 24 | crash before certificate | 009 | remains incomplete proposal |
+| 25 | cert before input commit | 008 | impossible causal shape/quarantine |
+| 26 | push before terminal | 011 | no terminal claim until accepted T |
+| 27 | duplicate finalization | 012 | reuse T, no post-T generation |
+| 28 | mtime | 016 | no selection influence |
+| 29 | filename order | 016 | no selection influence |
+| 30 | symlink/traversal/substitution | 022 | safe exact opened bytes and containment |
+| 31 | incomplete complete claim | 020 | every mandatory proof/evidence limb |
+| 32 | retroactive legacy cert | 017 | explicit limited facts, no fabricated issuance |
+
+INV-001 rows6/22; 002 rows1/3/19/20/23/30; 003 rows2/13/14/17/21;
+004 row32 membership-or-explicit-legacy; 005 rows4/18/26; 006 row5;
+007 rows7–9; 008 row10; 009 rows11/12/28/29; 010 rows24/25/31;
+011 rows15/16/27; 012 row32. No duplicate or undefined references.
+
+## 7. Legacy, unchanged defects, testing and disposition
+
+150G read-only reconcile: reconciled, 2 generations, completed cp/finalized receipt,
+marker not_dispatched because it rotated normally, mutation none. Both original
+generation pairs/cp/receipt hash-match 150L's full frozen hashes. Future LEGACY-B
+means only archived listed observations (also A contemporary closure), never GCP
+issuance. 150H still conflicts: terminal source not in phase inventory and checkpoint
+identity conflict; preserve LEGACY-D current-selection debt and A-era technical
+closure. Older 133B remains A closure evidence, 113B multi-set remains C unless
+independently bound. All lack new generation certificates. No historical status
+or artifact is mutated. Current L's blocked source is preserved at entry commit.
+
+Fresh B audit 63 tests + unchanged L127 + J35 + K37 = 262 passed, 0.81s.
+Initial new lint construction 260 pass/2 fail (field regex excluded digest-name
+digits; clause transcribed "accepted" instead of frozen "accepts"); corrected
+ONLY fresh test construction/whitespace normalization. No contract reinterpretation.
+J/K executable witnesses remain LIVE production defect witnesses: 72 pass, no fix.
+Future mechanism modeled != current defect closed. No Slice 1, resolver, writer,
+deployment, accepted event, certificate issuance, migration, activation or lifecycle
+consumer integration. Zero src/pcae delta and zero docs/contracts delta verified.
+
+Four broader-suite failures reproduced at fixed THIS-phase entry 944228ac in an
+isolated worktree with read-only copies of existing canonical artifact fixtures:
+two H global-marker assertions expect H but marker already L; two old receipt
+tests expect no commands/phase_reports consumer, added by I. Also reproduce at
+pre-L 8c998d2b (marker K). These are baseline-pre-existing, not excluded or repaired
+here. The original three I/J/K regressions are repaired, not classified away.
+Final committed-candidate full regression/attribution outcomes are recorded in
+this phase's canonical completion metadata/report, after tests become tracked.
+
+R6/GCP-001 target architecture revalidation succeeds without normative repair.
+Architecture adjudicated is NOT implementation complete, root installed, cutover
+or runtime trust. No old 150L report is replaced; this successor independently
+supersedes the implementation-readiness block only upon successful full lifecycle.
+Recommended next separately governed phase: PCAE-LIFECYCLE-GENERATION-PROVENANCE-
+PURE-MODELS-VALIDATION-SLICE-1, future ID re-derived; no activation here.
+
+Runtime Observed / observe / unavailable. No external runtime effect; governed
+repository push/notification is not runtime capability advancement. N-16-5 OPEN;
+N-16-6/N-16-7 untouched. No HPAC/helper/9-prime/foundation/HATP/PB/POL/host/release work.
+Recognition-core IV remains ON HOLD until full lifecycle provenance implementation
+and independent verification. prior Phase 150L blocked state remains preserved as
+historical truth. legacy compatibility != retroactive provenance certification.
+GCP-001 v1.0 architecture is now revalidated for future bounded implementation,
+but no GCP implementation has begun.
+
+
+## Canonical current-phase disposition
+
+The authorized successor independently supersedes the architecture readiness block;
+it does not erase prior Phase150L failure or bypass its payload_conflict.
+Historical I/J/K invariants are pinned to actual phase closures, not candidate bytes.
+Fresh mutation tests execute original assertions and remain fail-closed.
+GCP-001 v1.0 architecture is now revalidated for future bounded implementation, but no GCP implementation has begun.
+No independent R6 root exists here; no certificates/accepted events issued; no cutover or migration.
+No recognition-core IV, helper admission, step9-prime, foundation, HPAC/HATP/PB/POL/runtime/deployment/release work.
+No historical report/checkpoint/receipt deletion or rewrite. Global marker/latest may rotate ONLY under normal THIS-phase finalization.
+No retrospective provenance certification, no fabricated root/certificate or old correction digest.
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
+Recommended next governed phase: PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1.
+Future ID re-derived, not reserved/activated; no automatic implementation authority.
+Independent IV follows security-significant slices; final lifecycle provenance IV precedes recognition-core IV.
+
+Report/evidence/metadata internally coherent; final legacy mechanical trust is not GCP certification.
 HASH CONSISTENCY != PROVENANCE
+prior Phase 150L blocked state remains preserved as historical truth
 legacy compatibility != retroactive provenance certification
-recognition-core IV remains on hold until the lifecycle generation-provenance architecture is implemented and independently verified.

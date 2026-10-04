@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20261005-0048-phase-150m-pcae-lifecycle-generation-provenance-historical-freeze-correction-and-architecture-revalidation
+20261005-0117-idle-post-phase-150m-historical-freeze-correction-and-architecture-revalidation-verified-future-pure-model-slice-1-recommended-not-begun-recognition-core-iv-on-hold
 
 ## Title
 
-Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION
+Idle post-Phase 150M: historical freeze correction and architecture revalidation verified; future pure-model Slice 1 recommended, not begun; recognition-core IV on hold
 
 ## Status
 
@@ -14,25 +14,24 @@ active
 
 ## Mode
 
-corrective
+finalization
 
 ## Goal
 
-Prove and repair three historical moving-head freeze assertions; then independently revalidate R6/GCP target without implementation or historical identity mutation.
+Finalize only Phase 150M canonical completion/report/push bookkeeping; preserve old L blocked artifacts; no successor implementation.
 
 ## Allowed Files
 
-- tests/**
-- docs/PHASE_150M_HISTORICAL_FREEZE_ARCHITECTURE_REVALIDATION.md
+- .pcae/**
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/**
-- .pcae/**
 
 ## Forbidden Files
 
 - src/pcae/**
-- docs/contracts/**
+- docs/**
+- tests/**
 
 ## Allowed Zones
 
@@ -66,7 +65,7 @@ strict
 
 ## Acceptance Criteria
 
-- Historical assertions remain mutation-sensitive; architecture coherent; zero attributable regressions; prior blocked truth preserved; no Slice 1.
+- TBD
 
 ## Acceptance Checks
 
@@ -80,4 +79,4 @@ strict
 
 ## Created Timestamp
 
-2026-10-05T00:48:38.392875+02:00
+2026-10-05T01:17:52.904808+02:00

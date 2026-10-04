@@ -3,9 +3,12 @@
 ## Current governed historical-freeze correction and architecture revalidation
 
 - Phase 150M — PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION:
-  correct only the independently proven I/J/K moving-head freeze assertions;
-  preserve mutation sensitivity and immutable historical boundaries; only then
-  revalidate R6/GCP-001. Preserve prior 150L BLOCKED truth and payload_conflict.
+  task COMPLETE — HISTORICAL FREEZE CORRECTION AND ARCHITECTURE REVALIDATION VERIFIED.
+  I/J/K assertions pinned to actual phase boundaries, mutation sensitivity proven;
+  then R6/GCP-001 target independently revalidated. Prior150L BLOCKED truth and
+  payload_conflict preserved. Canonical150M report/receipt/notification complete.
+  Recommend future pure-model Slice1 (ID re-derived), NOT begun; final bookkeeping
+  push closes this phase. No successor activated; recognition-core IV ON HOLD.
   No production/contract mutation, GCP implementation, root deployment or cutover.
   DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 

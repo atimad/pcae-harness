@@ -2,6 +2,12 @@
 
 ## Phase 150M — Historical freeze correction and architecture revalidation
 
+- Committed broad regression 1099 passed / 4 fixed-entry failures; fresh Fast
+  Green attributable_failures []; no environment/expected exclusions. Canonical
+  150M promotion/checkpoint/receipt and API-accepted summary/document completed
+  normally. Initial metadata-shape/no-go/direct-evidence guard refusals repaired
+  truthfully before promotion; quarantine retained, no overrides.
+
 - Pin three I/J/K phase-scope tests to their actual immutable closure commits;
   preserve original scopes and reject rename-hidden deletion. Fresh original-
   assertion mutation tests detect body/delete/symlink/version/scope drift.
@@ -1818,6 +1824,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION to Idle post-Phase 150M: historical freeze correction and architecture revalidation verified; future pure-model Slice 1 recommended, not begun; recognition-core IV on hold; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold to Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150L: BLOCKED by two candidate-attributable historical freeze regressions; narrow test repair recommended; no implementation or recognition-core IV begun to Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold to Idle post-Phase 150L: BLOCKED by two candidate-attributable historical freeze regressions; narrow test repair recommended; no implementation or recognition-core IV begun; session refreshed and governance continuity revalidated.

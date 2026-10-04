@@ -2,6 +2,14 @@
 
 ## Accepted
 
+- **Phase150M closure:** fresh fixed-baseline attribution PASS; 367 candidate raw
+  failures/errors baseline-pre-existing, attributable/environment/expected empty.
+  Normal finalization accepts new150M identity, one promoted generation and actual
+  summary/document API acceptance. Preserve initial metadata guard quarantine and
+  old150L blocked/dispatched evidence. Only finalization bookkeeping follows;
+  no second150M generation or old150L correction/resend. Future Slice1 recommended,
+  not activated. Root remains undeployed; recognition-core IV held.
+
 - **2026-10-05 — Phase 150M Objective B:** R6/GCP-001 v1.0 target revalidated only
   after Objective A passes. Eleven architecture domains differ intentionally
   from thirteen RootEvent wire kinds; freeze both existing abstractions unchanged.

@@ -3,7 +3,7 @@
 ## Current Phase
 
 Phase `150M` — PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION.
-ACTIVE — historical assertion correction and target architecture revalidation.
+COMPLETE — HISTORICAL FREEZE CORRECTION AND ARCHITECTURE REVALIDATION VERIFIED.
 Authoritative entry 944228ac preserves 150L COMPLETE — ARCHITECTURE NOT ADJUDICATED /
 BLOCKED. Three original I/J/K tests independently reproduce fail on entry, pass at
 fixed pre-L 8c998d2b. Proven phase-scoped moving-head comparisons are pinned to
@@ -12,9 +12,26 @@ Objective A completed before B: fresh 48 mutation/boundary tests plus I/J/K = 13
 Fresh B63 + L127 + J35 + K37 = 262 pass. R6/GCP target coherent, unchanged contract;
 11 architectural domains distinguished from 13 RootEvent wire kinds. Root not
 deployed; no implementation, certificate issuance, cutover or historical upgrade.
-Full committed-candidate regression, THIS-phase attribution and final lifecycle
-are required before completion. Original L promoted pair/cp/receipt and blocked
-source remain historical; do not retry or bypass payload_conflict.
+Committed broad regression: 1099 passed / 4 fixed-entry pre-existing failures;
+fixed entry944228ac:985 passed/7 failures; exactly three authorized repairs plus
+111 new tests pass. Post-push focused M/L/I/J/K:326 pass.
+Fresh THIS-phase canonical Fast Green PASS: baseline944228ac, candidatec53209f2;
+candidate358 failed/9 errors, all367 baseline-pre-existing; environment/expected
+exclusions empty; attributable_failures: []. Verification candidate pushed/zero outgoing.
+Normal complete_phase accepted: promoted20261004-232042-150M, checkpoint complete,
+receipt finalized, summary/document Telegram API accepted; agent lock released.
+Trust complete, consistency consistent/fresh_with_limitations, reconcile150M clean
+(one generation/already_dispatched). Known independent presentation-rendering
+divergence disclosed, not forced to byte equality. Task closed, idle successor
+placeholder only. Finalization-only bookkeeping commit/push completes closure;
+final human handoff identifies its actual hash, never fabricated prospectively.
+Original L promoted pair/cp/receipt and blocked source remain historical; no retry
+or payload_conflict bypass. This successor independently supersedes readiness block.
+Prior Phase150L blocked state remains preserved as historical truth. GCP-001 v1.0
+architecture is now revalidated for future bounded implementation, but no GCP
+implementation has begun. Recommend separately governed pure-model Slice1 with
+future ID re-derived, NOT activated. Recognition-core IV remains on hold through
+the entire lifecycle-provenance implementation and independent verification.
 Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
 Recognition-core IV remains ON HOLD. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 Evidence: `docs/PHASE_150M_HISTORICAL_FREEZE_ARCHITECTURE_REVALIDATION.md`.
