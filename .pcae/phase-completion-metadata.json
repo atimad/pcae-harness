@@ -17,17 +17,23 @@
     "tasks/done/20261004-1940-phase-150k-pcae-lifecycle-phase-report-provenance-certification-link-repair.md",
     "tests/test_phase_150k_provenance_certification_link_repair.py",
     ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md"
+    ".pcae/phase-completion-report.md",
+    ".pcae/fast-green-attribution/b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62.json"
   ],
-  "files_changed_count": 13,
+  "files_changed_count": 14,
   "tests_added_or_updated": "37 fresh architectural-stop and synthetic provenance diagnostics",
   "tests_run": 874,
   "phase_commits": [
-    { "hash": "5feb69eb686b7378291d914498fad0270fe9fb9c" }
+    {
+      "hash": "5feb69eb686b7378291d914498fad0270fe9fb9c"
+    },
+    {
+      "hash": "f12ced2ca31d252a66bc2d654bca6c66fa14a2ff"
+    }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "validation_results": {
     "report_notification_tests": "Phase 150K fresh diagnostic suite 37 passed; Phase 150K plus unchanged 150J exploit suite 72 passed; broader lifecycle selection 870 passed / 4 fixed-baseline pre-existing failures",
     "bootstrap_session_reporting_tests": "Phase 150K task-memory/report, task-finish ordering, CLI and repository-transition regressions included in broader 870-passed selection",
@@ -5274,10 +5280,11 @@
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "exit 0; 282 pre-existing warnings; zero errors",
-    "pcae_push_check": "pending final commit",
+    "pcae_push_check": "passed",
     "telegram_runtime": "normal governed phase completion notification only",
     "pcae_status_coherence": "coherent",
-    "repository_transition_validation": "task transitions passed; report transition follows normal phase completion"
+    "repository_transition_validation": "accept: complete_phase -> canonical phase report; normal pending-push staging; terminal transition follows",
+    "remote_branch_rule_notice": "Normal pcae push succeeded; GitHub printed existing main pull-request-rule exemption ('Bypassed rule violations'); no explicit force push, history rewrite, --no-verify or hook bypass command used"
   },
   "no_go_confirmation": "No production source was changed.\nNo normative contract or schema was changed.\nNo missing historical provenance was retroactively fabricated.\nNo Phase 150G report generation was edited or deleted.\nNo Phase 150G checkpoint or receipt was edited.\nNo canonical marker or latest pointer was manually edited.\nNo signing/seal/registry pseudo-root or unrelated CLTR authority was introduced.\nNo migration or special-case 150G production logic was implemented.\nNo recognition-core IV, helper admission, step 9-prime or foundation repair was begun.\nNo runtime, PB or POL-005 capability or external runtime effect was advanced.\nNo host/deployment, release or publication mutation was performed.\nNo N-16-5 closure or N-16-6/N-16-7 work was performed.\nNo force push, history rewrite, --no-verify or operator hook bypass was used.\nNo delegated finalization, commit or push was authorized or performed.\nNo successor phase was begun.",
   "recommended_next_phase": "Governed lifecycle provenance-root/generation-certificate/historical compatibility architecture adjudication; derive future phase identity at preflight; then implementation and IV; recognition-core IV remains on hold",

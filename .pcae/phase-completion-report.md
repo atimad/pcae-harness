@@ -46,6 +46,14 @@ pause interrupted the first capture before a verdict; this fresh completed run
 supersedes it without reusing predecessor evidence. Only permitted finalization
 bookkeeping changes follow this verification checkpoint.
 
+The initial terminal-completion attempt was refused after push because the
+pre-push structured attribution contains an expected HEAD==origin/main exclusion
+that is not valid for a pushed terminal report. Its quarantine artifact is retained;
+no override, scalar downgrade, exclusion deletion or trust bypass was used.
+Fresh post-push attribution is required and will be recorded in completion metadata.
+Normal governed pushes used the existing remote main-branch pull-request-rule
+exemption reported by GitHub; no explicit force push or operator hook bypass.
+
 Real 150G remains reconciled: 2 original generations; terminal Markdown digest
 5b95481652526975ca6190b3a15a439b8aaefa8bfb4bd685abca7185536366b1;
 historical Markdown digest da5a678cbf6e88eb6d37a8bad3fead8217aa92dd30709fab52edabbe5c308551;
