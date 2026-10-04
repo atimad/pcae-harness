@@ -3,12 +3,30 @@
 ## Current Phase
 
 Phase `150L` — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE.
-COMPLETE — LIFECYCLE GENERATION PROVENANCE ARCHITECTURE ADJUDICATED.
-Architecture task closed; canonical terminal report complete, finalization
-transaction completed, Telegram summary/document API accepted. Trust complete;
-consistency consistent; 150L and unchanged 150G reconciled. Final bookkeeping
-commit/push closes the phase without regenerating its report. These are legacy
-mechanical lifecycle results, not deployed GCP generation certification.
+COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED.
+The earlier clean-regression success claim is WITHDRAWN. Post-push L/J/K rerun:
+197 passed / 2 failed, then full post-commit selection 985 passed / 7 failed.
+Three I/J/K historical current-HEAD contract-freeze assertions
+pass at fixed entry 8c998d2b but fail once GCP-001 is tracked: candidate-attributable
+regressions (plus four fixed-entry failures), not pre-existing or suppressed.
+Initial pre-commit tests missed the
+untracked contract because git diff does not enumerate untracked files. Fast Green
+does not select these three nodes; its own PASS is valid but not sufficient.
+R6/GCP-001 remain a documented frozen TARGET proposal, not cleared implementation
+authority. STOP before implementation or out-of-scope historical test repair.
+Recommend narrowly governed historical phase-freeze assertion scope repair,
+then revalidate this architecture before any implementation slice. No successor begun.
+Architecture task closed. Initial canonical report 20261004-202343-150L and its
+notification remain historical evidence of the premature success claim. Current
+completion metadata/report correct it truthfully. Normal corrected promotion was
+REFUSED: notification payload_conflict (already-dispatched identity differs).
+No corrected report/notification was promoted/sent; original generation/checkpoint
+remain unchanged. This unresolved canonical-correction blocker is disclosed,
+not bypassed. Initial promoted report is structurally complete but its clean-
+regression success is withdrawn by this durable completion record. No original
+generation is manually edited or deleted. Current legacy trust/consistency/
+reconcile remain mechanically clean for the original identity, NOT for correction.
+These are legacy mechanical lifecycle results, not deployed GCP certification.
 Architecture adjudication / contract freeze only. Phase 150K's missing
 generic issuance/predecessor/terminal root independently reconfirmed; unchanged
 150J/K defect witnesses pass. Selected R6 target: independently protected accepted
@@ -22,8 +40,9 @@ latest is a derived cache. No post-terminal regeneration in v1. Legacy A–D
 classification does not retrofit certificates. Mandatory new-write / dual-read
 cutover follows separately authorized implementation and independent verification.
 No migration required. Current 150H source/inventory conflict disclosed, not repaired.
-Fresh architecture coverage: 127 passed; combined L/J/K: 199 passed.
-Broader lifecycle selection: 988 passed / 4 fixed-entry pre-existing failures.
+Fresh architecture coverage: 127 passed. Pre-tracking L/J/K: 199 passed;
+post-tracking: 197 passed / 2 failed. Pre-tracking broader lifecycle selection:
+988 passed / 4 fixed-entry failures; post-tracking 985 passed / 7 failed.
 Fresh post-push Fast Green: baseline 8c998d2b, candidate 4bb98006;
 359 failed / 9 errors, all 368 baseline-pre-existing; no environment/expected
 exclusions; attributable_failures: []. Only finalization bookkeeping follows.

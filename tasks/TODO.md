@@ -3,12 +3,15 @@
 ## Current governed generation-provenance architecture
 
 - Phase 150L — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE:
-  task COMPLETE — architecture adjudicated; GCP-001 v1.0 frozen TARGET ONLY,
+  task COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED; GCP-001 v1.0 TARGET ONLY,
   independently protected R6 root/linear certificate chain and honest legacy
-  semantics. Fresh Fast Green attributable_failures: []; canonical report complete,
-  trust/consistency/reconcile clean, checkpoint/receipt finalized, Telegram sent.
+  semantics. Fast Green attributable_failures: [] is narrower than full regressions.
+  Original report/receipt/notification remain historical; corrected BLOCKED
+  promotion was refused by payload_conflict, with no identity edits or bypass.
   Zero production implementation/deployment. Recognition-core IV on hold.
-  Recommend separately governed pure models/validation Slice 1, not begun.
+  Earlier Slice 1 recommendation suspended: three post-push I/J/K moving-HEAD freeze
+  regressions are candidate-attributable. Recommend narrowly governed historical
+  phase-freeze assertion scope repair and architecture revalidation, not begun.
 
 ## Current governed lifecycle provenance repair
 

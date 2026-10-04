@@ -1,5 +1,17 @@
 # Changelog
 
+## Phase 150L — Post-push blocked disposition correction
+
+The initial architecture success claim is withdrawn: I/J/K historical current-HEAD
+contract-freeze assertions pass at fixed entry but reject the newly tracked GCP
+target contract. These three candidate-attributable regressions were invisible to
+pre-commit git diff while the contract was untracked and are not Fast Green-selected.
+No tests are suppressed or repaired here. Preserve the original report generation;
+Durable completion source records BLOCKED; normal corrected promotion/notification
+was REFUSED payload_conflict against the already-dispatched original identity.
+No guard bypass or artifact rewrite. Narrow historical test-scope repair
+and architecture revalidation must precede implementation.
+
 ## Phase 150L — Lifecycle generation provenance architecture
 
 - Freeze GCP-001 v1.0 TARGET architecture: independently protected accepted-event
@@ -1795,6 +1807,8 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle post-Phase 150L: BLOCKED by two candidate-attributable historical freeze regressions; narrow test repair recommended; no implementation or recognition-core IV begun to Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold; session refreshed and governance continuity revalidated.
+- Transitioned active task from Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold to Idle post-Phase 150L: BLOCKED by two candidate-attributable historical freeze regressions; narrow test repair recommended; no implementation or recognition-core IV begun; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150L - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE to Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150K COMPLETE NOT VERIFIED BLOCKED; provenance architecture adjudication recommended; recognition-core IV remains on hold; no successor begun to Phase 150L - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150K - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR to Idle post-Phase 150K COMPLETE NOT VERIFIED BLOCKED; provenance architecture adjudication recommended; recognition-core IV remains on hold; no successor begun; session refreshed and governance continuity revalidated.

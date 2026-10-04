@@ -3,7 +3,7 @@
   "phase_name": "PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE",
   "phase_title": "PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE",
   "status": "completed",
-  "summary": "COMPLETE — LIFECYCLE GENERATION PROVENANCE ARCHITECTURE ADJUDICATED. Phase 150L independently reconfirmed Phase 150K's missing durable issuance/predecessor/terminal provenance root and selected R6: an independently protected accepted repository-event root, isolated approved-policy issuer, independent exact-manifest authorization and create-only linear generation certificate chain. GCP-001 v1.0 freezes future issuance, pending birth, successor/terminal certification, evidence/index roles, explicit legacy compatibility, cutover and recovery. Architecture only: root NOT installed, production mechanism NOT implemented, cutover INACTIVE. Recognition-core IV remains on hold.",
+  "summary": "COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED. R6 and GCP-001 v1.0 target architecture are documented, with no implementation, root deployment or cutover. The initial clean-regression claim is withdrawn: three I/J/K historical current-HEAD contract-freeze tests pass at fixed entry but fail after GCP-001 becomes tracked. Pre-commit git diff missed the untracked file. Fresh Fast Green PASS has attributable_failures [] but does not select these three nodes; broader post-commit suite has 985 passed / 7 failed, including four fixed-entry pre-existing failures and three candidate-attributable regressions. STOP before out-of-scope historical test repair or architecture implementation. Recognition-core IV remains on hold.",
   "files_changed": [
     ".pcae/fast-green-attribution/33a5dedf9a8f0b4ca3aadbc696a3f00f29fd25f5163e8ac2b687e7875fb539c1.json",
     ".pcae/phase-completion-metadata.json",
@@ -15,25 +15,30 @@
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20261004-2221-idle-post-phase-150l-complete-architecture-adjudicated-slice-1-pure-models-recommended-not-begun-recognition-core-iv-remains-on-hold.md",
+    "tasks/active/20261004-2231-idle-post-phase-150l-blocked-by-three-historical-freeze-regressions-narrow-test-scope-repair-recommended-architecture-implementation-and-recognition-core-iv-remain-on-hold.md",
     "tasks/done/20261004-1948-idle-post-phase-150k-complete-not-verified-blocked-provenance-architecture-adjudication-recommended-recognition-core-iv-remains-on-hold-no-successor-begun.md",
     "tasks/done/20261004-2143-phase-150l-pcae-lifecycle-phase-report-provenance-root-generation-certificate-historical-compatibility-architecture.md",
+    "tasks/done/20261004-2221-idle-post-phase-150l-complete-architecture-adjudicated-slice-1-pure-models-recommended-not-begun-recognition-core-iv-remains-on-hold.md",
+    "tasks/done/20261004-2228-idle-post-phase-150l-blocked-by-two-candidate-attributable-historical-freeze-regressions-narrow-test-repair-recommended-no-implementation-or-recognition-core-iv-begun.md",
     "tests/test_phase_150l_generation_provenance_architecture.py"
   ],
-  "files_changed_count": 14,
+  "files_changed_count": 16,
   "tests_added_or_updated": "127 fresh architecture/contract coverage and independent historical-byte preservation checks; not implemented-security acceptance tests",
   "tests_run": 992,
   "phase_commits": [
     {
       "hash": "4bb980064b28c0a594344aa72a92ec4842ac9957"
+    },
+    {
+      "hash": "9557abd8047a05f5841fcec636fe4d1a416433be"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "validation_results": {
-    "report_notification_tests": "Fresh architecture suite 127 passed; L/J/K combined 199 passed; broader report/trust/reconcile/promotion/checkpoint/receipt/notification/finalization/task/filename/transition selection 988 passed / 4 fixed-entry pre-existing failures",
-    "bootstrap_session_reporting_tests": "Task-memory/report/task-finish/CLI/transition tests included in broader 992-node selection",
+    "report_notification_tests": "Fresh architecture suite 127 passed. Post-push L/J/K 197 passed / 2 failed. Full post-commit lifecycle selection 985 passed / 7 failed (41.25s): four baseline-pre-existing failures, three candidate-attributable historical contract-freeze assertions.",
+    "bootstrap_session_reporting_tests": "Report/task/CLI/transition governance tests pass within broader post-commit selection; historical contract-freeze regressions prevent success disposition.",
     "fast_green": {
       "schema_version": "fast_green_attribution.v1",
       "method": "baseline_vs_candidate_isolated_worktree",
@@ -2642,31 +2647,36 @@
     "baseline_reproduction": "Four broader-suite failed nodes reproduced at fixed entry 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f in detached /private/tmp/pcae-150l-baseline.ZHX3XL with read-only copies of current canonical 150G report/checkpoint and global marker. Two stale 150H marker assertions, two historical receipt no-integration assertions. No skip/xfail/repair.",
     "architecture_root": "R6 independently administered accepted-event repository reference, pinned epoch/genesis/policy, isolated issuer and independent exact-manifest provider-authenticated review; ordinary agent/main/local certificates not root; target not deployed",
     "contract_identity_traceability": "New GCP-001 v1.0, 26 requirements, 12 invariants, 17 generation fields, 11 lifecycle events, 12 recovery states and 32 architecture attack rows covered; existing contracts byte-unchanged",
-    "phase_150j_k_exploits": "72 unchanged executable defect witnesses pass; future mechanism not implemented",
+    "phase_150j_k_exploits": "Executable production defect witnesses still reproduce; two separate moving-HEAD no-contract-change assertions fail after authorized new target contract is tracked.",
     "phase_150g_preservation": "Both original JSON/Markdown generations, checkpoint and receipt independently hash-match preserved full baselines",
     "phase_150h_historical_debt": "Read-only reconcile conflict: terminal source 1d1861b3 absent from phase commit inventory; LEGACY-D current selection, historical closure and technical content preserved",
     "test_construction_corrections": "Initial fresh lint had overbroad row regex, receipt hash transcription typo, and uncovered INV-004 trace; new test selector/hash corrected and legacy attack defense expanded before freeze. Final suite 127 passed.",
-    "fast_green_summary": "Fresh canonical post-push PASS: baseline 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f; candidate 4bb980064b28c0a594344aa72a92ec4842ac9957; candidate 359 failed / 9 errors; 368 baseline-pre-existing; environment=[]; expected_phase_artifacts=[]; attributable_failures=[]; baseline raw 361 failed / 9 errors."
+    "fast_green_summary": "Fresh canonical post-push PASS: baseline 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f; candidate 4bb980064b28c0a594344aa72a92ec4842ac9957; candidate 359 failed / 9 errors; 368 baseline-pre-existing; environment=[]; expected_phase_artifacts=[]; attributable_failures=[]; baseline raw 361 failed / 9 errors.",
+    "candidate_attributable_regressions": [
+      "tests/test_phase_150i_phase_report_rehydration_identity_repair.py::test_runtime_and_product_boundaries_are_untouched",
+      "tests/test_phase_150j_rehydration_identity_repair_iv.py::test_this_iv_has_zero_production_and_contract_delta",
+      "tests/test_phase_150k_provenance_certification_link_repair.py::test_architectural_stop_changes_no_production_or_contracts"
+    ],
+    "candidate_regression_baseline": "All three nodes pass at fixed entry 8c998d2b; unmodified source and existing contracts, new tracked GCP-001 triggers their unbounded current-HEAD comparisons. Fresh contract was untracked during original 988/4 pre-commit suite and therefore absent from git diff. No suppression, exclusion or repair."
   },
   "governance_results": {
-    "telegram_runtime": "sent; governed phase complete received Telegram summary/document API acceptance; no redispatch; does not prove user reading or approval",
     "pcae_check": "passed",
     "pcae_health": "healthy",
     "pcae_status_coherence": "coherent",
     "pcae_doctor_task_memory": "exit 0; 282 pre-existing warnings; zero errors",
     "pcae_push_check": "nothing_to_push",
-    "repository_transition_validation": "accept: complete_phase -> canonical phase report; finalization transaction completed without override",
-    "phase_report_trust": "complete; repair_required=false",
-    "phase_report_consistency": "consistent; fresh_with_limitations",
-    "phase_150l_reconcile": "reconciled; one promoted generation; checkpoint completed; receipt finalized; already_dispatched; mutation=false",
-    "phase_150g_reconcile": "reconciled; two preserved generations; checkpoint completed; receipt finalized; mutation=false",
-    "remote_branch_rule_notice": "Normal pcae push used existing main PR-rule exemption reported by GitHub; no operator force/history/hook bypass. That exemption is explicitly NOT sufficient for the future GCP root."
+    "repository_transition_validation": "Blocked correction transition accepted, then notification identity preflight REFUSED payload_conflict; no corrected promotion, no override",
+    "telegram_runtime": "Original summary/document API accepted (2700/2701); corrected blocked notification NOT sent: normal complete refused payload_conflict; no resend/override",
+    "phase_report_trust": "original promoted report complete; does NOT certify withdrawn technical success or corrected promotion",
+    "phase_report_consistency": "original promoted report consistent/fresh_with_limitations; blocked correction not promoted",
+    "phase_150l_reconcile": "original one-generation state reconciled, completed checkpoint/finalized receipt/already_dispatched; original bytes unchanged; correction not promoted",
+    "phase_150g_reconcile": "reconciled; original two generations/checkpoint/receipt unchanged"
   },
   "no_go_confirmation": "No production implementation or src/pcae changes.\nNo existing contract, HPAC/HATP/PB/POL/runtime mechanism changed; only new target GCP-001 freeze.\nNo lifecycle root installed, certificate issued, cutover activated or deployment mutated.\nNo historical report generation/checkpoint/receipt rewritten or deleted.\nNo historical provenance fabricated; legacy compatibility is not certification.\nNo latest/marker pointer manually edited.\nNo recognition-core IV, helper admission, step 9-prime or foundation work begun.\nNo runtime capability/external runtime effect or N-16 closure advancement.\nNo release/publication/deployment work.\nNo force push/history rewrite/--no-verify/operator hook bypass.\nNo delegated finalization/commit/push.\nNo successor phase activated.",
-  "recommended_next_phase": "PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1; derive identity at future preflight; pure schema/data validation only, no writes/root resolution; independent verification after security-significant slices and final lifecycle provenance IV before recognition-core IV",
+  "recommended_next_phase": "Narrow governed successor recording this blocked correction under its own identity and repairing three I/J/K historical phase-freeze test scopes against immutable completed-phase boundaries; then architecture revalidation before implementation. Any reusable amendment infrastructure is separate scope. No successor begun; recognition-core IV on hold.",
   "test_evidence_classification": "current_phase_direct",
   "test_evidence_classification_rationale": "Fresh freeze coverage directly validates this architecture/contract; unchanged J/K executable diagnostics reconfirm the current operational gap. Coverage is not deployed-security enforcement.",
-  "report_consistency": "Canonical terminal report 20261004-202343-150L is complete; trust complete, consistency consistent, reconcile clean. GCP-001 target and evidence agree: NOT IMPLEMENTED/CUTOVER INACTIVE. Promoted report preserves truthful pre-dispatch snapshot; this bookkeeping records actual subsequent API acceptance, without retroactively rewriting it. Independent presentation limitation retained; final bookkeeping commit is reported in human handoff, not self-hash invented.",
+  "report_consistency": "Durable completion source/status withdraw premature clean-regression success. Corrected promotion/notification refused payload_conflict guard; original mechanically clean historical identity is not corrected technical truth. Three candidate regressions distinguished from narrower valid Fast Green PASS. Corrected canonical lifecycle BLOCKED, not falsely claimed complete; no provenance invented.",
   "internal_report_coherence": "complete",
   "internal_evidence_coherence": "complete",
   "metadata_consistency": "complete",

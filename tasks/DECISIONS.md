@@ -2,6 +2,25 @@
 
 ## Accepted
 
+- **Phase 150L correction guard: STOP on payload_conflict.** Normal complete_phase
+  validated the attempted blocked correction, then refused promotion because
+  ordinary notification already binds the original payload. Do not edit marker,
+  checkpoint/latest or delete/overwrite the original generation. Preserve blocked
+  completion source and disclose that corrected promotion/notification could not
+  complete. An authorized successor may record correction under its own identity;
+  no amendment mechanism or implementation is improvised here.
+
+- **2026-10-04 — Phase 150L post-push correction: withdraw clean-regression
+  completion; COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED.** Three I/J/K tests
+  freeze current HEAD against historical phase entry, failing after the new GCP
+  contract becomes tracked. All three pass at fixed 150L entry; these are candidate-
+  attributable regressions outside Fast Green selection. Pre-commit runs missed
+  the untracked file. Do not suppress/repair them in architecture scope. Preserve
+  the initial promoted success report as historical evidence; use normal governed
+  finalization for truthful correction, with no manual checkpoint/pointer/marker
+  rewrite. R6/GCP target remains documented but implementation recommendation is
+  on hold pending narrow historical test-scope repair and architecture revalidation.
+
 - **2026-10-04 — Phase 150L: freeze GCP-001 v1.0, R6 independent repository-event
   root + create-only generation certificate chain, TARGET ONLY.** Neither ordinary
   main nor same-process certificates provide issuance provenance. Require an

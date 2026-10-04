@@ -83,6 +83,8 @@
 
 ## Completed
 
+- Idle post-Phase 150L: BLOCKED by two candidate-attributable historical freeze regressions; narrow test repair recommended; no implementation or recognition-core IV begun (20261004-2228-idle-post-phase-150l-blocked-by-two-candidate-attributable-historical-freeze-regressions-narrow-test-repair-recommended-no-implementation-or-recognition-core-iv-begun)
+- Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold (20261004-2221-idle-post-phase-150l-complete-architecture-adjudicated-slice-1-pure-models-recommended-not-begun-recognition-core-iv-remains-on-hold)
 - Phase 150L - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE (20261004-2143-phase-150l-pcae-lifecycle-phase-report-provenance-root-generation-certificate-historical-compatibility-architecture)
 - Idle post-Phase 150K COMPLETE NOT VERIFIED BLOCKED; provenance architecture adjudication recommended; recognition-core IV remains on hold; no successor begun (20261004-1948-idle-post-phase-150k-complete-not-verified-blocked-provenance-architecture-adjudication-recommended-recognition-core-iv-remains-on-hold-no-successor-begun)
 - Phase 150K - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR (20261004-1940-phase-150k-pcae-lifecycle-phase-report-provenance-certification-link-repair)

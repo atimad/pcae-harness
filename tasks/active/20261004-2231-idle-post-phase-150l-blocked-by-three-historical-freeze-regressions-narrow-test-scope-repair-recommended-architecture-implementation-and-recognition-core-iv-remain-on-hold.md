@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20261004-2221-idle-post-phase-150l-complete-architecture-adjudicated-slice-1-pure-models-recommended-not-begun-recognition-core-iv-remains-on-hold
+20261004-2231-idle-post-phase-150l-blocked-by-three-historical-freeze-regressions-narrow-test-scope-repair-recommended-architecture-implementation-and-recognition-core-iv-remain-on-hold
 
 ## Title
 
-Idle post-Phase 150L: COMPLETE architecture adjudicated; Slice 1 pure models recommended, not begun; recognition-core IV remains on hold
+Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold
 
 ## Status
 
@@ -18,7 +18,7 @@ finalization
 
 ## Goal
 
-Complete Phase 150L architecture report, notification and governed final bookkeeping only; no successor work
+Finish truthful Phase 150L blocked report correction and governed bookkeeping only; no successor or out-of-scope repairs
 
 ## Allowed Files
 
@@ -30,8 +30,7 @@ Complete Phase 150L architecture report, notification and governed final bookkee
 ## Forbidden Files
 
 - src/pcae/**
-- docs/contracts/**
-- docs/PHASE_150L_GENERATION_PROVENANCE_ARCHITECTURE.md
+- docs/**
 - tests/**
 
 ## Allowed Zones
@@ -80,4 +79,4 @@ strict
 
 ## Created Timestamp
 
-2026-10-04T22:21:22.136644+02:00
+2026-10-04T22:31:17.102216+02:00

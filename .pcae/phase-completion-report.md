@@ -2,10 +2,14 @@
 
 Canonical Phase ID: 150L
 Exact title: PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE
-Status target: COMPLETE — LIFECYCLE GENERATION PROVENANCE ARCHITECTURE ADJUDICATED.
-Fresh Fast Green passed; governed task closed; normal canonical finalization follows.
+Status: COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED.
+Earlier clean-regression success WITHDRAWN; section 15 is authoritative.
+Fresh Fast Green passed; governed task closed; corrected canonical finalization BLOCKED.
+Normal complete_phase refused payload_conflict against already-dispatched identity.
+This completion source records truth; original promoted report is retained
+historically, NOT silently corrected or represented as the corrected conclusion.
 
-Final canonical lifecycle result: complete. Normal retry accepted the complete_phase
+Initial (withdrawn-success) legacy lifecycle result: complete. Normal retry accepted the complete_phase
 transition, promoted 20261004-202343-150L.md/.json, completed the finalization
 transaction and finalized receipt. Telegram summary/document API accepted; no claim
 of user reading/approval. Trust complete; consistency consistent/fresh_with_limitations;
@@ -450,3 +454,95 @@ pure data models/validation only. No future identity reserved or successor activ
 Implementation/IV and independently verified authorized root provisioning precede
 cutover; recognition-core IV remains on hold until lifecycle provenance is implemented
 and independently verified. No product closure advancement.
+
+## 15. AUTHORITATIVE POST-PUSH DISPOSITION CORRECTION
+
+COMPLETE — ARCHITECTURE NOT ADJUDICATED / BLOCKED.
+This overrides the earlier target/success wording; the target is not cleared for
+implementation. Pre-commit git diff omitted the untracked new contract; initial
+report/notification made a premature clean-regression claim. Original bytes and
+delivery evidence remain preserved, not silently rewritten.
+
+Normal blocked correction: transition validator ACCEPT, then notification identity
+preflight REFUSED payload_conflict: already-dispatched phase, differing report digest/
+snapshot. No corrected promotion or notification. Initial checkpoint remains
+26a33dbf... and report remains 18d66bee.... Mechanical trust/consistency/reconcile
+are clean for original identity ONLY. Corrected canonical lifecycle cannot safely
+complete through existing ordinary completion machinery. No manual identity edit,
+deletion, override or fabricated generation. Final bookkeeping records this limit.
+An authorized successor may record correction under its own identity, fix historical
+test scope narrowly and revalidate architecture before implementation. None begun.
+
+Full post-commit selection: 985 passed / 7 failed, 41.25s. Four separately reproduced
+fixed-entry pre-existing marker/receipt failures; three candidate-attributable:
+
+- tests/test_phase_150i_phase_report_rehydration_identity_repair.py::test_runtime_and_product_boundaries_are_untouched
+- tests/test_phase_150j_rehydration_identity_repair_iv.py::test_this_iv_has_zero_production_and_contract_delta
+- tests/test_phase_150k_provenance_certification_link_repair.py::test_architectural_stop_changes_no_production_or_contracts
+
+All three pass at fixed entry 8c998d2b in the detached baseline and fail when GCP
+becomes tracked, because their git diff compares current HEAD without a historical
+upper bound. No production or existing-contract delta. Fresh L coverage: 127 pass.
+L/J/K post-push: 197 pass / 2 fail. Valid Fast Green PASS/attributable_failures []
+does not select these nodes; it is not substituted for broad regression evidence.
+No tests skipped, suppressed or repaired. BLOCKED.
+
+Smallest successor: narrow governed historical phase-freeze assertion scope
+repair for I/J/K, using their immutable actual completed-phase boundaries, then
+architecture revalidation before any implementation. No successor begun or ID
+reserved. R6/GCP remain documented TARGET ONLY. Root not installed; no migration,
+retrospective certification, production implementation or cutover.
+
+Initial promoted report 20261004-202343-150L.md/.json, source 4bb98006, preserved.
+MD SHA-256: 18d66beecdb1d219495d13a8be322436c90c4ca8fdde6117d61050634a211c3e.
+Initial API summary/document message IDs: 2700/2701. Immutable receipt retained:
+.pcae/delivery-receipts/receipts/dfad1a7ceb5b29384d435bedcedb364057d1db8d99369822b90722ba4a74bff0/receipt.json.
+Initial checkpoint observed BEFORE correction, SHA-256
+26a33dbfa1ead42b8b3d5985a50b4f5207583c92b56b0cbcff211d1a44f90e02:
+
+```json
+{
+  "completed_at": "2026-10-04T20:23:44Z",
+  "evidence_id": "150L#1",
+  "extraction_digests": {
+    "operator_report": "51a0ebf58646d0bb667bdcc398e4c6d6424efaa2e806fa99375ac32054a755b3",
+    "phase_report": "c744ed51349ef72fff5bfc94ab57def4c9a05f36fae2c682129103493d8015dd"
+  },
+  "finalization_snapshot_id": "8ad74f057f6845e9623cb35abb98911bca36d4b81ab84b346eeaf5df28209f60",
+  "limitations": [
+    "known limitation: phase_report_markdown_v1 rendering output diverges from PhaseReport.render_markdown() output for this report; both derive from the same certified report/evidence but are independent presentation stages and are not forced to be byte-identical"
+  ],
+  "phase_id": "150L",
+  "phase_name": "PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-ROOT-GENERATION-CERTIFICATE-HISTORICAL-COMPATIBILITY-ARCHITECTURE",
+  "receipt_logical_delivery_id": "dfad1a7ceb5b29384d435bedcedb364057d1db8d99369822b90722ba4a74bff0",
+  "receipt_path": ".pcae/delivery-receipts/receipts/dfad1a7ceb5b29384d435bedcedb364057d1db8d99369822b90722ba4a74bff0/receipt.json",
+  "rendering_content_matches_existing": {
+    "phase_report_markdown": false
+  },
+  "rendering_digests": {
+    "operator_report": "ff49c08b9430470a384df20d7ba04d5d588c8d8ce9eebf0712df59ed46cc6ba2",
+    "phase_report": "081b1f613a9f4f0551f11b6795c217eebaacea75cdcd275029b6864e5dc245fb"
+  },
+  "report_digest": "18d66beecdb1d219495d13a8be322436c90c4ca8fdde6117d61050634a211c3e",
+  "started_at": "2026-10-04T20:23:43Z",
+  "status": "completed",
+  "steps": {
+    "delivery_model": "completed",
+    "pre_promotion_certification": "completed",
+    "promotion_and_dispatch": "completed",
+    "receipt": "completed"
+  },
+  "view_digests": {
+    "operator_report": "9b712ef57773b4c9ba355007d3d9ae36d7250c995c869bb5094429f18cb20884",
+    "phase_report": "87b6e5d33dca25ba921a4eb6dc33c430300cb4aeee8aabc1a58597e7098a2f8f"
+  }
+}```
+
+Observation copy only, NOT a canonical checkpoint or provenance root. Only normal
+governed complete_phase may persist correction; no manual pointer/digest/marker/
+checkpoint substitution or generation deletion. New finding correction, not a
+resend merely to align hashes. Current legacy machinery permits changed-report
+re-entry; post-cutover GCP v1 forbids post-terminal regeneration but is inactive.
+HASH CONSISTENCY != PROVENANCE
+legacy compatibility != retroactive provenance certification
+recognition-core IV remains on hold until the lifecycle generation-provenance architecture is implemented and independently verified.
