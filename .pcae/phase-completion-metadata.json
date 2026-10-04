@@ -28,16 +28,19 @@
     },
     {
       "hash": "5f1939836c4ee964c246dee615178ba4038c1f8a"
+    },
+    {
+      "hash": "7e9e6b88d33b25ddecf0f87ab8faa30f7ef4fc44"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "origin_main_head_count": 3,
   "validation_results": {
-    "report_notification_tests": "416 passed / 2 baseline-preexisting failures in combined lifecycle regression selection",
-    "bootstrap_session_reporting_tests": "covered by task-memory, task-finish ordering and report CLI tests in the combined selection",
+    "report_notification_tests": "Phase 150J direct IV suite: tests/test_phase_150j_rehydration_identity_repair_iv.py 35 passed; combined Phase 150J lifecycle regression selection 416 passed / 2 fixed-baseline pre-existing Phase 150H failures; additional 154 passed",
+    "bootstrap_session_reporting_tests": "Phase 150J regression evidence: task-memory, task-finish ordering, report CLI and transition tests included in the 570-passed selection",
     "fast_green": "0 attributable failures (passed)",
-    "fresh_iv_suite": "35 passed; finding tests are defect witnesses, not security acceptance",
+    "fresh_iv_suite": "Phase 150J: 35 passed in tests/test_phase_150j_rehydration_identity_repair_iv.py; exploit witnesses establish blocked disposition, not security acceptance",
     "additional_lifecycle_regression": "154 passed; selected regression total 570 passed / 2 baseline-preexisting failures",
     "baseline_reproduction": "Both Phase 150H marker failures reproduced against fixed 841c61e13b20132896b4b9674e4add58544364ac in detached worktree with copied canonical read-only artifact fixtures",
     "phase_150g_reconcile": "reconciled; two actual generations and finalized receipt; mutation=false; adversarial copied state nevertheless demonstrates provenance defects",
@@ -63,10 +66,10 @@
   "provisioning_model_selected": "unchanged",
   "execution_availability": "unavailable",
   "test_results": {
-    "report_notification_tests": "416 passed / 2 baseline-preexisting failures in combined lifecycle regression selection",
-    "bootstrap_session_reporting_tests": "covered by task-memory, task-finish ordering and report CLI tests in the combined selection",
+    "report_notification_tests": "Phase 150J direct IV suite: tests/test_phase_150j_rehydration_identity_repair_iv.py 35 passed; combined Phase 150J lifecycle regression selection 416 passed / 2 fixed-baseline pre-existing Phase 150H failures; additional 154 passed",
+    "bootstrap_session_reporting_tests": "Phase 150J regression evidence: task-memory, task-finish ordering, report CLI and transition tests included in the 570-passed selection",
     "fast_green": "0 attributable failures (passed)",
-    "fresh_iv_suite": "35 passed; finding tests are defect witnesses, not security acceptance",
+    "fresh_iv_suite": "Phase 150J: 35 passed in tests/test_phase_150j_rehydration_identity_repair_iv.py; exploit witnesses establish blocked disposition, not security acceptance",
     "additional_lifecycle_regression": "154 passed; selected regression total 570 passed / 2 baseline-preexisting failures",
     "baseline_reproduction": "Both Phase 150H marker failures reproduced against fixed 841c61e13b20132896b4b9674e4add58544364ac in detached worktree with copied canonical read-only artifact fixtures",
     "phase_150g_reconcile": "reconciled; two actual generations and finalized receipt; mutation=false; adversarial copied state nevertheless demonstrates provenance defects",
