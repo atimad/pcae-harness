@@ -1785,6 +1785,8 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Phase 150K - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR to Idle post-Phase 150K COMPLETE NOT VERIFIED BLOCKED; provenance architecture adjudication recommended; recognition-core IV remains on hold; no successor begun; session refreshed and governance continuity revalidated.
+- Transitioned active task from Idle post-Phase 150J IV COMPLETE NOT VERIFIED BLOCKED; lifecycle provenance repair recommended; recognition-core IV on hold; no successor begun to Phase 150K - PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150J finalization bookkeeping to Idle post-Phase 150J IV COMPLETE NOT VERIFIED BLOCKED; lifecycle provenance repair recommended; recognition-core IV on hold; no successor begun; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independent verification recommended next; recognition-core IV remains on hold; N-16-5 remains OPEN to Phase 150J - PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR-IV; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150I finalization bookkeeping to Idle post-Phase 150I phase-report rehydration identity repair COMPLETE; independent verification recommended next; recognition-core IV remains on hold; N-16-5 remains OPEN; session refreshed and governance continuity revalidated.
@@ -4094,3 +4096,9 @@ Added161 fresh IV cases,113 matrix rows and full normative inventory. Found F1 h
 
 Added fresh independent artifact-copy adversarial tests and evidence. Reproduced
 blocking provenance gaps; no production/contract repair. Recognition-core IV held.
+# Phase 150K — lifecycle provenance repair blocked at architectural prerequisite
+
+Reproduced Phase 150J exploits and added 37 fresh synthetic/root diagnostics.
+Recorded explicit trust graph, 30-row attack matrix and missing independent
+generation issuance/root relationship. No production or contract repair was made;
+historical artifacts preserved. Recognition-core IV remains on hold.

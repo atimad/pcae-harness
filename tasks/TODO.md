@@ -1,5 +1,13 @@
 # TODO
 
+## Current governed lifecycle provenance repair
+
+- Phase 150K — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR:
+  task complete, NOT VERIFIED / BLOCKED; trust graph and fresh witnesses establish
+  missing generic generation-issuance/root linkage. No production patch or schema
+  evolution. Recommend separately governed provenance architecture adjudication;
+  recognition-core IV remains on hold; no successor is authorized or begun.
+
 **Source of truth:** `PROJECT_STATUS.md`'s `## Current Phase` section is
 authoritative for "what phase are we on" and "what phase is recommended
 next" — never this file. `docs/ROADMAP.md` is the canonical long-term

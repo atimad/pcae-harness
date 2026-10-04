@@ -1,83 +1,66 @@
 {
-  "phase_id": "150J",
-  "phase_name": "PCAE-LIFECYCLE-PHASE-REPORT-REHYDRATION-IDENTITY-REPAIR-IV",
-  "phase_title": "Phase-Report Rehydration Identity Repair IV — COMPLETE / NOT VERIFIED / BLOCKED",
+  "phase_id": "150K",
+  "phase_name": "PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR",
+  "phase_title": "Lifecycle Provenance/Certification-Link Repair — COMPLETE / NOT VERIFIED / BLOCKED",
   "status": "completed",
-  "summary": "Independent Phase 150J IV reproduced forged pending-history acceptance, coordinated forged terminal/checkpoint acceptance with unchanged receipt, incomplete trust claims accepted as complete, and malformed latest-pointer acceptance. Phase 150I's real 150G fix works for honest artifacts but does not prove lifecycle provenance under the required forgery threat model. COMPLETE — NOT VERIFIED / BLOCKED; no production repair performed; recognition-core IV remains on hold.",
+  "summary": "Phase 150K independently reproduced Phase 150J exploits and reconstructed the lifecycle trust graph. Existing legacy artifacts lack a generic durably anchored generation-issuance/predecessor relationship to an independent governed root. Pending reports have no certification checkpoint; terminal extraction hashes derive from caller-supplied report content. Repository metadata and retrospective inventories preserve specific facts but do not provide the required all-generation provenance contract. COMPLETE — NOT VERIFIED / BLOCKED; stopped before production repair, schema evolution, migration or retroactive fabrication. Recognition-core IV remains on hold.",
   "files_changed": [
-    ".pcae/fast-green-attribution/c734e000752eb7ce37e6c64efb994a2b1432d1c732185f375de5e37a980df020.json",
-    ".pcae/fast-green-attribution/f762d4be09892077acb1d8a2c1634bf61bd668fc75941116017fdab824fc52d2.json",
-    ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_150J_REHYDRATION_IDENTITY_REPAIR_IV.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/active/20260925-1849-idle-post-phase-150i-phase-report-rehydration-identity-repair-complete-independent-verification-recommended-next-recognition-core-iv-remains-on-hold-n-16-5-remains-open.md",
+    "tasks/TODO.md",
     "tasks/active/20261004-1919-idle-post-phase-150j-iv-complete-not-verified-blocked-lifecycle-provenance-repair-recommended-recognition-core-iv-on-hold-no-successor-begun.md",
-    "tasks/done/20260925-1849-idle-post-phase-150i-phase-report-rehydration-identity-repair-complete-independent-verification-recommended-next-recognition-core-iv-remains-on-hold-n-16-5-remains-open.md",
-    "tasks/done/20261004-1827-phase-150j-pcae-lifecycle-phase-report-rehydration-identity-repair-iv.md",
-    "tasks/done/20261004-1840-phase-150j-finalization-bookkeeping.md",
-    "tests/test_phase_150j_rehydration_identity_repair_iv.py"
+    "docs/PHASE_150K_PROVENANCE_CERTIFICATION_LINK_REPAIR.md",
+    "tasks/active/20261004-1948-idle-post-phase-150k-complete-not-verified-blocked-provenance-architecture-adjudication-recommended-recognition-core-iv-remains-on-hold-no-successor-begun.md",
+    "tasks/done/20261004-1919-idle-post-phase-150j-iv-complete-not-verified-blocked-lifecycle-provenance-repair-recommended-recognition-core-iv-on-hold-no-successor-begun.md",
+    "tasks/done/20261004-1940-phase-150k-pcae-lifecycle-phase-report-provenance-certification-link-repair.md",
+    "tests/test_phase_150k_provenance_certification_link_repair.py",
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md"
   ],
-  "files_changed_count": 15,
-  "tests_added_or_updated": "35 fresh independent IV tests",
-  "tests_run": 572,
-  "phase_commits": [
-    {
-      "hash": "e9fad74a55924290e8a565a12ef17fce281bf697"
-    },
-    {
-      "hash": "5f1939836c4ee964c246dee615178ba4038c1f8a"
-    },
-    {
-      "hash": "7e9e6b88d33b25ddecf0f87ab8faa30f7ef4fc44"
-    },
-    {
-      "hash": "2023fc3be44b2301d40ce8b32524622ba1b7056b"
-    }
-  ],
+  "files_changed_count": 13,
+  "tests_added_or_updated": "37 fresh architectural-stop and synthetic provenance diagnostics",
+  "tests_run": 874,
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pushed",
+  "pushed_status": "not_pushed",
   "origin_main_head_count": 0,
   "validation_results": {
-    "report_notification_tests": "Phase 150J direct IV suite: tests/test_phase_150j_rehydration_identity_repair_iv.py 35 passed; combined Phase 150J lifecycle regression selection 416 passed / 2 fixed-baseline pre-existing Phase 150H failures; additional 154 passed",
-    "bootstrap_session_reporting_tests": "Phase 150J regression evidence: task-memory, task-finish ordering, report CLI and transition tests included in the 570-passed selection",
-    "fast_green": "0 attributable failures (passed)",
-    "fresh_iv_suite": "Phase 150J: 35 passed in tests/test_phase_150j_rehydration_identity_repair_iv.py; exploit witnesses establish blocked disposition, not security acceptance",
-    "additional_lifecycle_regression": "154 passed; selected regression total 570 passed / 2 baseline-preexisting failures",
-    "baseline_reproduction": "Both Phase 150H marker failures reproduced against fixed 841c61e13b20132896b4b9674e4add58544364ac in detached worktree with copied canonical read-only artifact fixtures",
-    "phase_150g_reconcile": "reconciled; two actual generations and finalized receipt; mutation=false; adversarial copied state nevertheless demonstrates provenance defects",
-    "fast_green_attribution_artifact": ".pcae/fast-green-attribution/c734e000752eb7ce37e6c64efb994a2b1432d1c732185f375de5e37a980df020.json; baseline 841c61e13b20132896b4b9674e4add58544364ac; candidate 5f1939836c4ee964c246dee615178ba4038c1f8a; attributable_failures=[]; raw 359 failures / 9 errors; earlier failed artifact retained"
+    "report_notification_tests": "Phase 150K fresh diagnostic suite 37 passed; Phase 150K plus unchanged 150J exploit suite 72 passed; broader lifecycle selection 870 passed / 4 fixed-baseline pre-existing failures",
+    "bootstrap_session_reporting_tests": "Phase 150K task-memory/report, task-finish ordering, CLI and repository-transition regressions included in broader 870-passed selection",
+    "fast_green": "pending fresh canonical Phase 150K attribution",
+    "phase_150j_exploits": "35 passed before code changes and alongside fresh K tests; exploits remain reproduced because production repair stopped",
+    "baseline_reproduction": "All 4 failed nodes reproduced at fixed entry c90254a2648e4afb263373fd4aff2afb48946e2e in /private/tmp/pcae-150k-baseline.UKlk3Y",
+    "architectural_root": "No generic durable generation issuance/predecessor root link found; pure certification derivation test reproduces hashes from invented report",
+    "phase_150g_reconcile": "reconciled; 2 unchanged generations, completed checkpoint, finalized receipt, mutation=false"
+  },
+  "test_results": {
+    "report_notification_tests": "Phase 150K fresh diagnostic suite 37 passed; Phase 150K plus unchanged 150J exploit suite 72 passed; broader lifecycle selection 870 passed / 4 fixed-baseline pre-existing failures",
+    "bootstrap_session_reporting_tests": "Phase 150K task-memory/report, task-finish ordering, CLI and repository-transition regressions included in broader 870-passed selection",
+    "fast_green": "pending fresh canonical Phase 150K attribution",
+    "phase_150j_exploits": "35 passed before code changes and alongside fresh K tests; exploits remain reproduced because production repair stopped",
+    "baseline_reproduction": "All 4 failed nodes reproduced at fixed entry c90254a2648e4afb263373fd4aff2afb48946e2e in /private/tmp/pcae-150k-baseline.UKlk3Y",
+    "architectural_root": "No generic durable generation issuance/predecessor root link found; pure certification derivation test reproduces hashes from invented report",
+    "phase_150g_reconcile": "reconciled; 2 unchanged generations, completed checkpoint, finalized receipt, mutation=false"
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
-    "pcae_doctor_task_memory": "pre-existing warnings; no errors",
-    "pcae_push_check": "clean",
-    "telegram_runtime": "governed phase-completion notification only",
+    "pcae_doctor_task_memory": "pre-existing warnings; final diagnostic follows normal closure",
+    "pcae_push_check": "pending final commit",
+    "telegram_runtime": "normal governed phase completion notification only",
     "pcae_status_coherence": "coherent",
-    "repository_transition_validation": "passed"
+    "repository_transition_validation": "task transitions passed; report transition follows normal phase completion"
   },
-  "no_go_confirmation": "No production source under src/pcae/** was changed.\nNo normative contract under docs/contracts/** was changed.\nNo Phase 150G historical report generation was edited or deleted.\nNo Phase 150G checkpoint or receipt was edited.\nNo canonical notification marker was manually edited.\nNo latest/current pointer was manually edited.\nNo production repair was attempted inside this IV.\nNo recognition-core IV or helper admission was begun.\nNo helper step 9-prime or foundation repair was begun.\nNo runtime, PB, POL-005, host, deployment, release, or publication mutation was performed.\nNo N-16-5 closure or N-16-6/N-16-7 work was performed.\nNo --no-verify, force push, history rewrite, hook bypass, or delegated finalization/commit/push was used.",
-  "recommended_next_phase": "Narrow governed lifecycle provenance/certification-link repair for Phase 150J findings, with independently derived identity; recognition-core IV remains on hold",
+  "no_go_confirmation": "No production source was changed.\nNo normative contract or schema was changed.\nNo missing historical provenance was retroactively fabricated.\nNo Phase 150G report generation was edited or deleted.\nNo Phase 150G checkpoint or receipt was edited.\nNo canonical marker or latest pointer was manually edited.\nNo signing/seal/registry pseudo-root or unrelated CLTR authority was introduced.\nNo migration or special-case 150G production logic was implemented.\nNo recognition-core IV, helper admission, step 9-prime or foundation repair was begun.\nNo runtime, PB or POL-005 capability or external runtime effect was advanced.\nNo host/deployment, release or publication mutation was performed.\nNo N-16-5 closure or N-16-6/N-16-7 work was performed.\nNo force push, history rewrite, --no-verify or operator hook bypass was used.\nNo delegated finalization, commit or push was authorized or performed.\nNo successor phase was begun.",
+  "recommended_next_phase": "Governed lifecycle provenance-root/generation-certificate/historical compatibility architecture adjudication; derive future phase identity at preflight; then implementation and IV; recognition-core IV remains on hold",
   "test_evidence_classification": "current_phase_direct",
-  "test_evidence_classification_rationale": "Independent real-artifact copies and fresh executable adversarial witnesses directly establish blocking findings; fixed-entry baseline reproduces historical regression failures.",
-  "report_consistency": "Phase 150J blocked disposition is consistent across IV evidence, project status, task, and metadata.",
+  "test_evidence_classification_rationale": "Phase 150K fresh synthetic exploit/root diagnostics directly establish the architectural stop; unchanged 150J executable witnesses and fixed-entry baseline attribution are preserved.",
+  "report_consistency": "Phase 150K evidence, project status, tasks, changelog and metadata consistently record blocked disposition and zero production/contract delta.",
   "internal_report_coherence": "complete",
   "internal_evidence_coherence": "complete",
   "metadata_consistency": "complete",
   "provisioning_model_selected": "unchanged",
-  "execution_availability": "unavailable",
-  "test_results": {
-    "report_notification_tests": "Phase 150J direct IV suite: tests/test_phase_150j_rehydration_identity_repair_iv.py 35 passed; combined Phase 150J lifecycle regression selection 416 passed / 2 fixed-baseline pre-existing Phase 150H failures; additional 154 passed",
-    "bootstrap_session_reporting_tests": "Phase 150J regression evidence: task-memory, task-finish ordering, report CLI and transition tests included in the 570-passed selection",
-    "fast_green": "0 attributable failures (passed)",
-    "fresh_iv_suite": "Phase 150J: 35 passed in tests/test_phase_150j_rehydration_identity_repair_iv.py; exploit witnesses establish blocked disposition, not security acceptance",
-    "additional_lifecycle_regression": "154 passed; selected regression total 570 passed / 2 baseline-preexisting failures",
-    "baseline_reproduction": "Both Phase 150H marker failures reproduced against fixed 841c61e13b20132896b4b9674e4add58544364ac in detached worktree with copied canonical read-only artifact fixtures",
-    "phase_150g_reconcile": "reconciled; two actual generations and finalized receipt; mutation=false; adversarial copied state nevertheless demonstrates provenance defects",
-    "fast_green_attribution_artifact": ".pcae/fast-green-attribution/c734e000752eb7ce37e6c64efb994a2b1432d1c732185f375de5e37a980df020.json; baseline 841c61e13b20132896b4b9674e4add58544364ac; candidate 5f1939836c4ee964c246dee615178ba4038c1f8a; attributable_failures=[]; raw 359 failures / 9 errors; earlier failed artifact retained"
-  }
+  "execution_availability": "unavailable"
 }

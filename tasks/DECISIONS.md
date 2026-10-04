@@ -5610,3 +5610,13 @@ Blocked on executable forged-history and coordinated report/checkpoint attacks.
 Matching hashes and structurally valid canonical-path records do not authenticate
 promotion. Preserve production and historical evidence; recommend a narrowly
 governed provenance repair. Recognition-core IV remains on hold.
+# Phase 150K lifecycle provenance architectural stop
+
+The requested repair cannot use checkpoint/report hash agreement as its root.
+Current pending generations lack a durable issuance/predecessor record; terminal
+evidence is deterministically report-derived and locally self-hashed. Committed
+metadata and retrospective inventories support known historical facts, not a
+generic all-generation normative certificate. STOP before production repair,
+schema evolution, unrelated CLTR authority adoption or retroactive fabrication.
+Recommend separately governed provenance-root/certificate/legacy acceptance
+architecture adjudication. Recognition-core IV remains on hold.
