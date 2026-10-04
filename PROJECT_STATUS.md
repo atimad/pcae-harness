@@ -3,7 +3,9 @@
 ## Current Phase
 
 Phase `150K` — PCAE-LIFECYCLE-PHASE-REPORT-PROVENANCE-CERTIFICATION-LINK-REPAIR.
-**COMPLETE — NOT VERIFIED / BLOCKED** (governed closure in progress).
+**COMPLETE — NOT VERIFIED / BLOCKED**. Governed task closed, canonical terminal
+report complete, finalization transaction completed, Telegram summary/document
+sent. Trust complete; consistency consistent; 150K and unchanged 150G reconciled.
 Phase 150J exploits independently reproduced. The current legacy lifecycle has
 no generic durably anchored generation-issuance/predecessor certificate binding
 each report to its governed phase/task/transition. Pending promotion has no
@@ -13,6 +15,9 @@ specific committed facts but no all-generation provenance contract.
 STOP before production patching or retroactive fabrication; zero production and
 contract delta. Fresh K+J: 72 passed, including explicit defect witnesses;
 broader lifecycle: 870 passed / 4 fixed-baseline pre-existing failures.
+Fresh post-push Fast Green: baseline c90254a2, candidate 5683b8fe;
+367 baseline-pre-existing, no environment/expected exclusions,
+attributable_failures: []. Only finalization bookkeeping follows that checkpoint.
 Recommend provenance-root/generation-certificate/historical compatibility
 architecture adjudication, not an opportunistic schema/migration change.
 Recognition-core IV remains on hold. Runtime Observed / observe / unavailable;

@@ -18,9 +18,10 @@
     "tests/test_phase_150k_provenance_certification_link_repair.py",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
-    ".pcae/fast-green-attribution/b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62.json"
+    ".pcae/fast-green-attribution/b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62.json",
+    ".pcae/fast-green-attribution/2c22e1cbed73f1d3b877d9f8646dbfe234e8682a27cceba099977f1d1cf975fb.json"
   ],
-  "files_changed_count": 14,
+  "files_changed_count": 15,
   "tests_added_or_updated": "37 fresh architectural-stop and synthetic provenance diagnostics",
   "tests_run": 874,
   "phase_commits": [
@@ -29,6 +30,9 @@
     },
     {
       "hash": "f12ced2ca31d252a66bc2d654bca6c66fa14a2ff"
+    },
+    {
+      "hash": "5683b8fe493752fda09771905f00d353d9bf178f"
     }
   ],
   "commit_attribution": "phase_owned",
@@ -337,6 +341,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -412,16 +417,9 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
-      "candidate_commit": "5feb69eb686b7378291d914498fad0270fe9fb9c",
+      "candidate_commit": "5683b8fe493752fda09771905f00d353d9bf178f",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
-      "excluded_environment_failures": [
-        {
-          "node_id": "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record",
-          "rerun_at": "2026-10-04T18:34:29.098158+00:00",
-          "rerun_commit": "5feb69eb686b7378291d914498fad0270fe9fb9c",
-          "rerun_result": "pass"
-        }
-      ],
+      "excluded_environment_failures": [],
       "excluded_preexisting_failures": [
         {
           "baseline_commit": "c90254a2648e4afb263373fd4aff2afb48946e2e",
@@ -2259,14 +2257,8 @@
           "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
         }
       ],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "not_pushed"
-        }
-      ],
-      "generated_at": "2026-10-04T18:34:29.364651+00:00",
+      "expected_phase_artifacts": [],
+      "generated_at": "2026-10-04T18:58:16.332996+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -2564,7 +2556,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -2638,22 +2629,22 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
-        "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
+        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
       "schema_version": "fast_green_attribution.v1",
       "provenance": {
         "generated_by_command": "pcae phase fast-green-attribution",
-        "artifact_path": ".pcae/fast-green-attribution/b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62.json",
-        "artifact_digest": "b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62"
+        "artifact_path": ".pcae/fast-green-attribution/2c22e1cbed73f1d3b877d9f8646dbfe234e8682a27cceba099977f1d1cf975fb.json",
+        "artifact_digest": "2c22e1cbed73f1d3b877d9f8646dbfe234e8682a27cceba099977f1d1cf975fb"
       }
     },
     "phase_150j_exploits": "35 passed before code changes and alongside fresh K tests; exploits remain reproduced because production repair stopped",
     "baseline_reproduction": "All 4 failed nodes reproduced at fixed entry c90254a2648e4afb263373fd4aff2afb48946e2e in /private/tmp/pcae-150k-baseline.UKlk3Y",
     "architectural_root": "No generic durable generation issuance/predecessor root link found; pure certification derivation test reproduces hashes from invented report",
     "phase_150g_reconcile": "reconciled; 2 unchanged generations, completed checkpoint, finalized receipt, mutation=false",
-    "fast_green_summary": "PASS: baseline c90254a2, candidate 5feb69eb, 367 baseline-preexisting, 1 environment-only isolated rerun pass, 1 expected pre-push artifact, attributable_failures=[]; original failed-node evidence retained",
-    "shell_flake_reruns": "Fixed candidate 5feb69eb: 3/3 passed (29.57s,23.26s,7.72s); fixed baseline c90254a2: 3/3 passed (0.09s,0.04s,0.04s); tool isolated candidate rerun passed; raw failed artifact retained"
+    "fast_green_summary": "Post-push PASS: baseline c90254a2648e4afb263373fd4aff2afb48946e2e; candidate 5683b8fe493752fda09771905f00d353d9bf178f; raw 358 failed / 9 errors; 367 baseline-pre-existing; environment=[]; expected_phase_artifacts=[]; attributable_failures=[]",
+    "shell_flake_reruns": "Fixed candidate 5feb69eb: 3/3 passed (29.57s,23.26s,7.72s); fixed baseline c90254a2: 3/3 passed (0.09s,0.04s,0.04s); tool isolated candidate rerun passed; raw failed artifact retained",
+    "pre_push_attribution": "Earlier b1b84a04 artifact retained unchanged: PASS with 1 environment-only rerun and 1 expected pre-push exclusion; rejected for terminal pushed-state reuse; fresh post-push attribution supersedes it"
   },
   "test_results": {
     "report_notification_tests": "Phase 150K fresh diagnostic suite 37 passed; Phase 150K plus unchanged 150J exploit suite 72 passed; broader lifecycle selection 870 passed / 4 fixed-baseline pre-existing failures",
@@ -2958,6 +2949,7 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
+        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -3033,16 +3025,9 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
-      "candidate_commit": "5feb69eb686b7378291d914498fad0270fe9fb9c",
+      "candidate_commit": "5683b8fe493752fda09771905f00d353d9bf178f",
       "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m pytest -m fast_green -q --no-header",
-      "excluded_environment_failures": [
-        {
-          "node_id": "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record",
-          "rerun_at": "2026-10-04T18:34:29.098158+00:00",
-          "rerun_commit": "5feb69eb686b7378291d914498fad0270fe9fb9c",
-          "rerun_result": "pass"
-        }
-      ],
+      "excluded_environment_failures": [],
       "excluded_preexisting_failures": [
         {
           "baseline_commit": "c90254a2648e4afb263373fd4aff2afb48946e2e",
@@ -4880,14 +4865,8 @@
           "node_id": "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
         }
       ],
-      "expected_phase_artifacts": [
-        {
-          "node_id": "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
-          "predicted_by": "pushed_status",
-          "predicted_value": "not_pushed"
-        }
-      ],
-      "generated_at": "2026-10-04T18:34:29.364651+00:00",
+      "expected_phase_artifacts": [],
+      "generated_at": "2026-10-04T18:58:16.332996+00:00",
       "method": "baseline_vs_candidate_isolated_worktree",
       "raw_errors": [
         "tests/test_phase_149o_20e_hmic_v1_2_hbdc_bound_contract_identity_independent_verification.py::test_all_25_files_individually_digest_sensitive",
@@ -5185,7 +5164,6 @@
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestCandidateAuthorityRelevantContents::test_implementation_scope_digest_matches_expected",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_only_four_historical_chgr_records_exist",
         "tests/test_phase_149o_20l_7m_dell_redeployment_deploymentbinding_first_use_sequencing_architecture.py::TestNoExecutionProof::test_this_phase_touches_no_src_pcae_scripts_or_contracts",
-        "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_head_equals_origin_main",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_intervening_commits_are_governance_bookkeeping_only",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestCandidateCurrentness::test_no_authority_bearing_drift_candidate_to_head",
         "tests/test_phase_149o_20l_7n_1_dell_redeployment_proposition_independent_verification.py::TestNoAuthorityStateAdvanced::test_exactly_four_historical_chgr_records_exist",
@@ -5259,41 +5237,46 @@
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestConcreteBypassCounterexample::test_real_unmocked_class_b_conformance_is_not_compliant_on_the_same_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestLiveReadinessVectorReconstruction::test_readiness_vector_has_exactly_seven_terms_on_the_real_host",
         "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_no_module_outside_the_island_imports_the_verifiers",
-        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference",
-        "tests/test_shell_gate.py::TestAuditPersistence::test_verify_detects_tampered_record"
+        "tests/test_phase_149o_20l_class_b_full_hbdc_readiness_contract_integration_analysis.py::TestZeroConsumerReconfirmation::test_readiness_root_source_has_no_class_b_verifier_reference"
       ],
       "schema_version": "fast_green_attribution.v1",
       "provenance": {
         "generated_by_command": "pcae phase fast-green-attribution",
-        "artifact_path": ".pcae/fast-green-attribution/b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62.json",
-        "artifact_digest": "b1b84a0483d0c5a9568415be1c162958e945e0b1c90ae5b4b44b85f03b4c9f62"
+        "artifact_path": ".pcae/fast-green-attribution/2c22e1cbed73f1d3b877d9f8646dbfe234e8682a27cceba099977f1d1cf975fb.json",
+        "artifact_digest": "2c22e1cbed73f1d3b877d9f8646dbfe234e8682a27cceba099977f1d1cf975fb"
       }
     },
     "phase_150j_exploits": "35 passed before code changes and alongside fresh K tests; exploits remain reproduced because production repair stopped",
     "baseline_reproduction": "All 4 failed nodes reproduced at fixed entry c90254a2648e4afb263373fd4aff2afb48946e2e in /private/tmp/pcae-150k-baseline.UKlk3Y",
     "architectural_root": "No generic durable generation issuance/predecessor root link found; pure certification derivation test reproduces hashes from invented report",
     "phase_150g_reconcile": "reconciled; 2 unchanged generations, completed checkpoint, finalized receipt, mutation=false",
-    "fast_green_summary": "PASS: baseline c90254a2, candidate 5feb69eb, 367 baseline-preexisting, 1 environment-only isolated rerun pass, 1 expected pre-push artifact, attributable_failures=[]; original failed-node evidence retained",
-    "shell_flake_reruns": "Fixed candidate 5feb69eb: 3/3 passed (29.57s,23.26s,7.72s); fixed baseline c90254a2: 3/3 passed (0.09s,0.04s,0.04s); tool isolated candidate rerun passed; raw failed artifact retained"
+    "fast_green_summary": "Post-push PASS: baseline c90254a2648e4afb263373fd4aff2afb48946e2e; candidate 5683b8fe493752fda09771905f00d353d9bf178f; raw 358 failed / 9 errors; 367 baseline-pre-existing; environment=[]; expected_phase_artifacts=[]; attributable_failures=[]",
+    "shell_flake_reruns": "Fixed candidate 5feb69eb: 3/3 passed (29.57s,23.26s,7.72s); fixed baseline c90254a2: 3/3 passed (0.09s,0.04s,0.04s); tool isolated candidate rerun passed; raw failed artifact retained",
+    "pre_push_attribution": "Earlier b1b84a04 artifact retained unchanged: PASS with 1 environment-only rerun and 1 expected pre-push exclusion; rejected for terminal pushed-state reuse; fresh post-push attribution supersedes it"
   },
   "governance_results": {
     "pcae_health": "healthy",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "exit 0; 282 pre-existing warnings; zero errors",
-    "pcae_push_check": "passed",
-    "telegram_runtime": "normal governed phase completion notification only",
+    "pcae_push_check": "nothing_to_push",
+    "telegram_runtime": "sent; Telegram summary/document API accepted through governed phase complete; no redispatch",
     "pcae_status_coherence": "coherent",
-    "repository_transition_validation": "accept: complete_phase -> canonical phase report; normal pending-push staging; terminal transition follows",
-    "remote_branch_rule_notice": "Normal pcae push succeeded; GitHub printed existing main pull-request-rule exemption ('Bypassed rule violations'); no explicit force push, history rewrite, --no-verify or hook bypass command used"
+    "repository_transition_validation": "accept: complete_phase -> canonical phase report; finalization transaction completed; strict guards preserved without override",
+    "remote_branch_rule_notice": "Normal pcae push succeeded; GitHub printed existing main pull-request-rule exemption ('Bypassed rule violations'); no explicit force push, history rewrite, --no-verify or hook bypass command used",
+    "phase_report_trust": "complete; repair_required=false",
+    "phase_report_consistency": "consistent; fresh_with_limitations",
+    "phase_150k_reconcile": "reconciled; 2 generations; completed checkpoint; finalized receipt; already_dispatched; mutation=false",
+    "phase_150g_reconcile": "reconciled; 2 unchanged generations; completed checkpoint; finalized receipt; mutation=false"
   },
   "no_go_confirmation": "No production source was changed.\nNo normative contract or schema was changed.\nNo missing historical provenance was retroactively fabricated.\nNo Phase 150G report generation was edited or deleted.\nNo Phase 150G checkpoint or receipt was edited.\nNo canonical marker or latest pointer was manually edited.\nNo signing/seal/registry pseudo-root or unrelated CLTR authority was introduced.\nNo migration or special-case 150G production logic was implemented.\nNo recognition-core IV, helper admission, step 9-prime or foundation repair was begun.\nNo runtime, PB or POL-005 capability or external runtime effect was advanced.\nNo host/deployment, release or publication mutation was performed.\nNo N-16-5 closure or N-16-6/N-16-7 work was performed.\nNo force push, history rewrite, --no-verify or operator hook bypass was used.\nNo delegated finalization, commit or push was authorized or performed.\nNo successor phase was begun.",
   "recommended_next_phase": "Governed lifecycle provenance-root/generation-certificate/historical compatibility architecture adjudication; derive future phase identity at preflight; then implementation and IV; recognition-core IV remains on hold",
   "test_evidence_classification": "current_phase_direct",
   "test_evidence_classification_rationale": "Phase 150K fresh synthetic exploit/root diagnostics directly establish the architectural stop; unchanged 150J executable witnesses and fixed-entry baseline attribution are preserved.",
-  "report_consistency": "Phase 150K evidence, project status, tasks, changelog and metadata consistently record blocked disposition and zero production/contract delta.",
+  "report_consistency": "Complete canonical terminal report 20261004-185917-150K, metadata, project status and evidence agree on blocked technical outcome; report trust complete, consistency consistent, both 150K/150G reconciled. Known independent-presentation limitation retained. Final bookkeeping commit follows terminal generation without retroactive self-hash invention.",
   "internal_report_coherence": "complete",
   "internal_evidence_coherence": "complete",
   "metadata_consistency": "complete",
   "provisioning_model_selected": "unchanged",
-  "execution_availability": "unavailable"
+  "execution_availability": "unavailable",
+  "phase_commit_inventory_boundary": "Inventory includes all three commits present at terminal report generation; any subsequent commit is finalization-only bookkeeping and is identified in the final human handoff, not invented prospectively."
 }

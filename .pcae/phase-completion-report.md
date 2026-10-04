@@ -50,7 +50,16 @@ The initial terminal-completion attempt was refused after push because the
 pre-push structured attribution contains an expected HEAD==origin/main exclusion
 that is not valid for a pushed terminal report. Its quarantine artifact is retained;
 no override, scalar downgrade, exclusion deletion or trust bypass was used.
-Fresh post-push attribution is required and will be recorded in completion metadata.
+Fresh post-push attribution completed PASS and is recorded verbatim in metadata:
+baseline c90254a2648e4afb263373fd4aff2afb48946e2e;
+candidate 5683b8fe493752fda09771905f00d353d9bf178f;
+raw candidate 358 failed / 9 errors; 367 baseline-pre-existing;
+environment exclusions: []; expected phase artifacts: []; attributable_failures: [].
+Artifact: .pcae/fast-green-attribution/2c22e1cbed73f1d3b877d9f8646dbfe234e8682a27cceba099977f1d1cf975fb.json.
+Both attribution artifacts and the refused terminal attempt remain preserved.
+All three pre-report commits are pushed; origin/main..HEAD is 0. Any subsequent
+closure commit contains permitted finalization bookkeeping only and is identified
+in the final human handoff, without prospective self-referential commit fabrication.
 Normal governed pushes used the existing remote main-branch pull-request-rule
 exemption reported by GitHub; no explicit force push or operator hook bypass.
 
@@ -75,3 +84,19 @@ architecture adjudication, not IV of an unimplemented repair. No successor begun
 
 HASH CONSISTENCY != PROVENANCE
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
+Final governed lifecycle: canonical terminal report
+.pcae/phase-reports/20261004-185917-150K.md (JSON counterpart retained);
+report completeness complete; source revision 5683b8fe493752fda09771905f00d353d9bf178f;
+trust complete, repair_required=false; consistency consistent/fresh_with_limitations;
+reconcile 150K reconciled, two generations, checkpoint completed, receipt finalized,
+marker already_dispatched; reconcile 150G reconciled, two unchanged generations,
+checkpoint completed, receipt finalized, no mutation. The rotating global marker
+now identifies THIS phase, without rewriting the older 150G receipt or payload.
+Telegram summary and document API accepted via normal phase-completion machinery.
+Known presentation limitation: independently derived operator-rendering and legacy
+Markdown are not byte-identical; no forced digest equality was introduced.
+Pre-push exclusion and governance-result input-normalization refusals remain in
+quarantine; no allow-partial override or scalar evidence downgrade was used.
+Final bookkeeping is committed/pushed separately without regenerating the already
+notified terminal report. Final commit identity is returned in the human handoff.
