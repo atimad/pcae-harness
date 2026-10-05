@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "docs/contracts/LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md"
 ARCH = ROOT / "docs/PHASE_150L_GENERATION_PROVENANCE_ARCHITECTURE.md"
 ENTRY = "8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f"
+# Includes architecture, closure, and the truthful blocked-disposition correction.
+PHASE_END = "944228ac9cdbe91711c5e4c32190640cec467068"
 
 
 @pytest.mark.parametrize("number", range(1, 27))
@@ -105,10 +107,10 @@ def test_slice_one_is_not_lifecycle_implementation():
 
 
 def test_zero_production_delta_from_fixed_entry():
-    changes = subprocess.check_output(["git", "diff", "--name-only", ENTRY, "--", "src/pcae"], cwd=ROOT, text=True)
+    changes = subprocess.check_output(["git", "diff", "--name-only", "--no-renames", ENTRY, PHASE_END, "--", "src/pcae"], cwd=ROOT, text=True)
     assert not changes.strip()
 
 
 def test_existing_contracts_unchanged():
-    changes = subprocess.check_output(["git", "diff", "--name-only", ENTRY, "--", "docs/contracts"], cwd=ROOT, text=True)
+    changes = subprocess.check_output(["git", "diff", "--name-only", "--no-renames", ENTRY, PHASE_END, "--", "docs/contracts"], cwd=ROOT, text=True)
     assert set(changes.splitlines()) <= {"docs/contracts/LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md"}

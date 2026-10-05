@@ -1,5 +1,22 @@
 # Decisions
 
+## Phase 150N — historical L/M boundaries
+
+User authorized exactly one bounded corrective phase. Actual Git subjects,
+ancestry, prior entry evidence and closure records establish L8c998d2b→944228ac
+(three commits, including truthful blocked correction) and M944228ac→5a79d079
+(two commits, including lifecycle bookkeeping). Promoted source revisions are
+earlier snapshots; they do not replace the full phase closure boundary.
+Original L/M assertions pass at entry and fail on in-memory later-source probes.
+Pin their ranges with --no-renames and read M Python blobs via fixed git objects.
+L's adjacent contract allowlist is the same moving-history defect and is pinned
+without changing its allowed set. Fresh tests run ORIGINAL functions against
+isolated synthetic Git history, detecting historical violations while permitting
+later committed/uncommitted source evolution. No actual history is rewritten.
+historical no-production-change assertion != permanent prohibition on future authorized production evolution
+HASH CONSISTENCY != PROVENANCE
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
 ## Accepted
 
 - **Phase150M closure:** fresh fixed-baseline attribution PASS; 367 candidate raw

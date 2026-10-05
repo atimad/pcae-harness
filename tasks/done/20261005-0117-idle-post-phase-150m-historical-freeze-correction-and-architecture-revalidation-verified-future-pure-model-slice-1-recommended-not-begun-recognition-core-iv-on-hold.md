@@ -10,7 +10,7 @@ Idle post-Phase 150M: historical freeze correction and architecture revalidation
 
 ## Status
 
-active
+done
 
 ## Mode
 

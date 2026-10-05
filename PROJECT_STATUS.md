@@ -2,6 +2,24 @@
 
 ## Current Phase
 
+Phase `150N` — PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M.
+ACTIVE — bounded historical-test maintenance. Governed entry main/origin/main
+5a79d079ffcfb53bb0d46477958c99c877750579, clean/zero outgoing at activation.
+Original L/M tests pass today but independently reject synthetic future source.
+L historical range8c998d2b→944228ac; M944228ac→5a79d079. Fixes pin both range
+comparisons, including L's directly related contract allowlist, and inspect M's
+production Python bytes at its historical endpoint. Historical guarantees remain
+mutation-sensitive; future authorized evolution stays outside those ranges.
+Fresh focused N/L/M/J/K selection327 passed. Broader checks/attribution pending.
+No production/contract changes; GCP-001 v1.0 byte-unchanged. No Slice1, R6,
+certificate issuance, cutover, or historical report/checkpoint/receipt mutation.
+Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.
+Recognition-core IV ON HOLD. Recommended future Slice1 requires fresh preflight,
+not activated. DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+Evidence: `docs/PHASE_150N_HISTORICAL_TEST_BOUNDARY_CORRECTION.md`.
+
+## Previous Phase 150M
+
 Phase `150M` — PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION.
 COMPLETE — HISTORICAL FREEZE CORRECTION AND ARCHITECTURE REVALIDATION VERIFIED.
 Authoritative entry 944228ac preserves 150L COMPLETE — ARCHITECTURE NOT ADJUDICATED /

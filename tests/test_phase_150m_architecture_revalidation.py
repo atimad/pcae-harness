@@ -9,6 +9,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 ENTRY = "944228ac9cdbe91711c5e4c32190640cec467068"
+PHASE_END = "5a79d079ffcfb53bb0d46477958c99c877750579"
 CONTRACT = ROOT / "docs/contracts/LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md"
 ARCH = ROOT / "docs/PHASE_150L_GENERATION_PROVENANCE_ARCHITECTURE.md"
 FIELDS = ("schema root_epoch repository_id phase_instance_id phase_id task_id sequence generation_id role "
@@ -121,11 +122,15 @@ def test_blocked_150l_truth_is_permanently_retained_in_repository_history():
 
 
 def test_no_production_contract_or_lifecycle_consumer_delta():
-    delta = subprocess.check_output(["git", "diff", "--name-only", "--no-renames", ENTRY,
+    delta = subprocess.check_output(["git", "diff", "--name-only", "--no-renames", ENTRY, PHASE_END,
                                      "--", "src/pcae", "docs/contracts"], cwd=ROOT, text=True)
     assert delta == ""
-    for path in (ROOT / "src/pcae").rglob("*.py"):
-        text = path.read_text()
+    paths = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", "-z",
+                                     PHASE_END, "--", "src/pcae"], cwd=ROOT, text=True)
+    for path in paths.split("\0"):
+        if not path.endswith(".py"):
+            continue
+        text = subprocess.check_output(["git", "show", PHASE_END + ":" + path], cwd=ROOT, text=True)
         assert "gcp-generation/1.0" not in text and "gcp-terminal/1.0" not in text
 
 
