@@ -7,6 +7,8 @@
   L's adjacent historical contract allowlist uses the same fixed endpoint.
 - Fresh controls preserve rejection of historical violations and permit later
   authorized production evolution. No production or contract behavior changes.
+- Canonical150N completion/report/checkpoint/receipt and notification completed;
+  Fast Green attributable_failures: []; old L/M historical records preserved.
 
 ## Phase 150M — Historical freeze correction and architecture revalidation
 

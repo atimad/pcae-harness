@@ -1,5 +1,12 @@
 # Done
 
+- Phase150N — COMPLETE — HISTORICAL TEST BOUNDARIES CORRECTED. Original L/M
+  assertions retain mutation sensitivity at exact complete historical endpoints;
+  future source/schema evolution permitted outside them. Fresh N17 and selected
+  regressions1023 passes/1 existing skip, Fast Green attributable_failures: [].
+  Corrective task closed, candidatefa8c7dfc pushed; canonical closure follows.
+  No source/contract/Slice1/R6/issuance/cutover changes; recognition-core IV held.
+
 - 2026-08-28 — Phase 149O.20L.7O.3W.1R.2B.1R.1.1R.7 implemented the
   frozen Option-A production authority repair: B1 projection provenance is
   exact-object/content/current-state bound; B7 rereads durable dispatch
@@ -83,6 +90,7 @@
 
 ## Completed
 
+- Phase 150N: PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M (20261005-1006-phase-150n-pcae-lifecycle-historical-test-boundary-correction-for-150l-150m)
 - Idle post-Phase 150M: historical freeze correction and architecture revalidation verified; future pure-model Slice 1 recommended, not begun; recognition-core IV on hold (20261005-0117-idle-post-phase-150m-historical-freeze-correction-and-architecture-revalidation-verified-future-pure-model-slice-1-recommended-not-begun-recognition-core-iv-on-hold)
 - Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION (20261005-0048-phase-150m-pcae-lifecycle-generation-provenance-historical-freeze-correction-and-architecture-revalidation)
 - Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold (20261004-2231-idle-post-phase-150l-blocked-by-three-historical-freeze-regressions-narrow-test-scope-repair-recommended-architecture-implementation-and-recognition-core-iv-remain-on-hold)

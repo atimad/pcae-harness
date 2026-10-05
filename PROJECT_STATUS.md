@@ -3,14 +3,27 @@
 ## Current Phase
 
 Phase `150N` — PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M.
-ACTIVE — bounded historical-test maintenance. Governed entry main/origin/main
+COMPLETE — HISTORICAL TEST BOUNDARIES CORRECTED. Governed entry main/origin/main
 5a79d079ffcfb53bb0d46477958c99c877750579, clean/zero outgoing at activation.
 Original L/M tests pass today but independently reject synthetic future source.
 L historical range8c998d2b→944228ac; M944228ac→5a79d079. Fixes pin both range
 comparisons, including L's directly related contract allowlist, and inspect M's
 production Python bytes at its historical endpoint. Historical guarantees remain
 mutation-sensitive; future authorized evolution stays outside those ranges.
-Fresh focused N/L/M/J/K selection327 passed. Broader checks/attribution pending.
+Fresh focused selection327 passed; required lifecycle570 passed; bootstrap126
+passed/1 existing skip. Post-commit N/L/M207 passed. Fresh canonical Fast Green
+PASS: baseline5a79d079, candidatefa8c7dfc; baseline360 failures/9 errors,
+candidate358 failures/9 errors, all367 baseline-preexisting; environment/expected
+exclusions empty; attributable_failures: []. First180s attempt timed out during
+baseline collection; exact error preserved in completion source; same-candidate
+900s rerun completed. Corrective task closed, candidate pushed/zero outgoing.
+Normal canonical completion ACCEPT: promoted20261005-091249-150N, checkpoint
+completed, receipt finalized, Telegram summary/document API accepted, lock
+released. Trust complete, consistency consistent/fresh_with_limitations,
+reconcile150N clean (one generation/already_dispatched, mutation none).
+Known rendering divergence disclosed; no forced byte equality. Two normal
+quarantines for push-check vocabulary retained; exact nothing_to_push state
+accepted without bypass. Finalization-only bookkeeping push closes this phase.
 No production/contract changes; GCP-001 v1.0 byte-unchanged. No Slice1, R6,
 certificate issuance, cutover, or historical report/checkpoint/receipt mutation.
 Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched.

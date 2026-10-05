@@ -2,6 +2,12 @@
 
 ## Phase 150N — historical L/M boundaries
 
+Canonical completion accepted after closed push-check vocabulary was represented
+as actual CLI state nothing_to_push; two normal quarantines retained. New N
+report pair091249, checkpoint/receipt/notification completed and lock released.
+Trust complete/consistency consistent/reconcile clean; no dispatched report
+regeneration. Only Class-B finalization bookkeeping follows checkpointfa8c7dfc.
+
 User authorized exactly one bounded corrective phase. Actual Git subjects,
 ancestry, prior entry evidence and closure records establish L8c998d2b→944228ac
 (three commits, including truthful blocked correction) and M944228ac→5a79d079

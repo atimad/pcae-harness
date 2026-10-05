@@ -1,375 +1,235 @@
-# Phase 150M Complete — Historical Freeze Correction and Architecture Revalidation
+# Phase 150N Complete — Historical Test Boundaries Corrected
 
-Canonical Phase ID: 150M
-Exact title: PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION
-Status: COMPLETE — HISTORICAL FREEZE CORRECTION AND ARCHITECTURE REVALIDATION VERIFIED.
-Report completeness: complete. Governed task and normal THIS-phase canonical lifecycle completed.
-Fresh candidate and attribution verified; final bookkeeping commit/push follows; no successor begun.
+Canonical Phase ID: 150N
+Exact title: PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M
+Status: COMPLETE — HISTORICAL TEST BOUNDARIES CORRECTED
+Report completeness: complete technical evidence; normal terminal lifecycle recorded below.
+Commit at report generation: fa8c7dfc6c1f8b1deaa23cfe97b08823a2ea8cfc.
+Pushed: pushed. origin/main..HEAD: 0 at the promoted report input.
+Finalization-only bookkeeping follows; its actual hash is returned at final handoff.
+No successor phase is activated.
 
-## Completion snapshot
+## Actual canonical lifecycle outcome
 
-- Files changed: 17, listed below; ZERO src/pcae and docs/contracts delta.
-- Commit: c53209f262c0d0826c848e57d060c950e065c6d5 (corrective tests/evidence).
-- Pushed: pushed; origin/main..HEAD: 0 at terminal-generation input.
-- Fresh suites: A48 + original I/J/K88 = 136 pass before B; B63 + L127 + J35/K37 = 262 pass.
-- Committed broad selection: 1099 passed / 4 failed (48.12s); fixed944228ac:985 passed/7 failed (51.77s).
-- Post-push M/L/I/J/K:326 passed (7.22s). Four residual failures independently fixed-entry pre-existing.
-- Fresh canonical Fast Green PASS: baseline 944228ac9cdbe91711c5e4c32190640cec467068; candidate c53209f262c0d0826c848e57d060c950e065c6d5.
-- Baseline raw 359 failures/9 errors; candidate 358 failures/9 errors.
-- 367 baseline-pre-existing; environment=[]; expected_phase_artifacts=[]; attributable_failures: [].
-- Artifact: .pcae/fast-green-attribution/9c8558da1895af9092d209e6db2f3f6660a996e5345c3ad497420de06700f5ae.json.
-- No suppression, exclusions of repaired nodes, skip/xfail, source/contract edits, hook bypass or history rewrite.
-- Check passed; health healthy; task-memory exit0/282 old warnings/0errors; status coherent; push check nothing_to_push.
-- Task transition validator accepted. THIS-phase complete_phase transition/promotion/receipt/notification checked normally below.
-- Original L mechanically complete legacy report is NOT the corrected technical conclusion. Prior BLOCKED truth remains at944228ac.
-- Transitional old-latest consistency detected legitimate M Class A changes against old L checkpoint; no L regeneration.
-- Runtime Observed / observe / unavailable; N-16-5 OPEN; N-16-6/N-16-7 untouched; recognition-core IV ON HOLD.
+Normal repository transition validator ACCEPT; complete_phase finalization
+transaction completed. Promoted report pair20261005-091249-150N.md/.json;
+checkpoint completed; receipt finalized; Telegram summary/document API accepted;
+agent lock released. Trust complete/no repair, consistency consistent with
+fresh_with_limitations architecture status, reconciliation150N clean with one
+generation/already_dispatched/completed checkpoint/finalized receipt, mutation none.
+Snapshot26312fd4600614cdaa33c23384e5789401191fca23b6f0482bf859fdc1ca220e.
+Known independent rendering divergence remains disclosed; no forced byte equality.
+Two initial completions were normally quarantined because push-check descriptive
+prose, then generic 'passed', are not the contract's closed clean-state vocabulary.
+Current CLI push check returned nothing_to_push (zero outgoing); metadata uses
+that exact supported state. Quarantines preserved, no partial override or bypass,
+and no notification/promotion until normal guard accepted the truthful field.
+Finalization-only commit/push follows, with its actual hash returned at handoff.
+No dispatched report regeneration is performed.
 
-## Exact file inventory
+## Exact changed-file inventory (16 paths; rename source and destination explicit)
 
-## Actual terminal lifecycle outcome (after the preserved pre-dispatch snapshot)
-
-Normal complete_phase accepted; promoted .pcae/phase-reports/20261004-232042-150M.md/.json.
-Checkpoint completed; receipt finalized; summary/document Telegram API accepted;
-agent lock released. No claim of user reading or approval. Trust complete;
-consistency consistent/fresh_with_limitations; reconcile150M reconciled,
-one generation/already_dispatched/completed checkpoint/finalized receipt, no mutation.
-G and L historical reconciliation remains clean; old pair/cp/receipt bytes unchanged.
-Known independent rendering divergence remains disclosed, not forced into equality.
-First attempt metadata tests-added field had list rather than supported string;
-next guard refused grouped no-go count/direct-evidence identity wording. Corrected
-ONLY bookkeeping shape and truthful explicit150M evidence. Quarantine retained,
-no partial-report override, no promotion/notification until guard accepted.
-Finalization-only bookkeeping does not regenerate the dispatched report or alter
-the fixed Fast Green candidate. Final human handoff identifies the actual final
-commit; no prospective own-commit hash is fabricated.
-
-Exact terminal Markdown digest: 96e3a065b7e6f9e19ce60d1985058b060bda820a8d6feba7de2525969dad4eb8.
-Snapshot: ca403fbe303f7596d45ab1b34cd5036787f0043337dc6f0a26f21179f2848735.
-Receipt: .pcae/delivery-receipts/receipts/6637698b036d7eae92e451eea977e841e9247287135824601f798b56c5d260d9/receipt.json.
-
-## Files changed by current successor
-
-- .pcae/fast-green-attribution/9c8558da1895af9092d209e6db2f3f6660a996e5345c3ad497420de06700f5ae.json
+- .pcae/fast-green-attribution/c140c181519efba24967f7cc401b6a912e48a1ad2d105bda9ebba3e1e46d77b6.json
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
 - CHANGELOG.md
 - PROJECT_STATUS.md
-- docs/PHASE_150M_HISTORICAL_FREEZE_ARCHITECTURE_REVALIDATION.md
+- docs/PHASE_150N_HISTORICAL_TEST_BOUNDARY_CORRECTION.md
 - tasks/DECISIONS.md
 - tasks/DONE.md
 - tasks/TODO.md
 - tasks/active/20261005-0117-idle-post-phase-150m-historical-freeze-correction-and-architecture-revalidation-verified-future-pure-model-slice-1-recommended-not-begun-recognition-core-iv-on-hold.md
-- tasks/done/20261004-2231-idle-post-phase-150l-blocked-by-three-historical-freeze-regressions-narrow-test-scope-repair-recommended-architecture-implementation-and-recognition-core-iv-remain-on-hold.md
-- tasks/done/20261005-0048-phase-150m-pcae-lifecycle-generation-provenance-historical-freeze-correction-and-architecture-revalidation.md
-- tests/test_phase_150i_phase_report_rehydration_identity_repair.py
-- tests/test_phase_150j_rehydration_identity_repair_iv.py
-- tests/test_phase_150k_provenance_certification_link_repair.py
+- tasks/active/20261005-1048-idle-post-phase-150n-historical-l-m-boundaries-corrected-canonical-finalization-only-future-slice-1-not-begun-recognition-core-iv-on-hold.md
+- tasks/done/20261005-0117-idle-post-phase-150m-historical-freeze-correction-and-architecture-revalidation-verified-future-pure-model-slice-1-recommended-not-begun-recognition-core-iv-on-hold.md
+- tasks/done/20261005-1006-phase-150n-pcae-lifecycle-historical-test-boundary-correction-for-150l-150m.md
+- tests/test_phase_150l_generation_provenance_architecture.py
 - tests/test_phase_150m_architecture_revalidation.py
-- tests/test_phase_150m_historical_freeze_correction.py
+- tests/test_phase_150n_historical_test_boundary_correction.py
 
-## Complete bounded technical/evidence report
+## Verification results and attribution
 
-# Phase 150M — Historical Freeze Correction and Architecture Revalidation
+- Focused N17/L127/M63/earlier M48/J35/K37: 327 passed.
+- Required report/trust/transition/finalization/notification/filename/I subset: 570 passed.
+- Bootstrap/reporting subset: 126 passed, 1 existing skip; no new skips/xfails.
+- Total selected: 1023 passed, 1 existing skip; zero candidate-attributable regressions.
+- Post-commit N/L/M repeat: 207 passed.
+- Fresh Fast Green PASS, canonical baseline parent of oldest THIS-phase commit:
+  5a79d079ffcfb53bb0d46477958c99c877750579.
+- Candidate: fa8c7dfc6c1f8b1deaa23cfe97b08823a2ea8cfc.
+- Baseline raw: 360 failures / 9 errors.
+- Candidate raw: 358 failures / 9 errors.
+- All 367 candidate failures/errors are baseline-preexisting.
+- excluded_environment_failures: []; expected_phase_artifacts: []; attributable_failures: [].
+- Artifact: .pcae/fast-green-attribution/c140c181519efba24967f7cc401b6a912e48a1ad2d105bda9ebba3e1e46d77b6.json.
+- Existing canonical structured-evidence validator independently returned [].
+- First180s attempt returned exactly:
+  fast_green collection timed out after 180s in /var/folders/16/jzd0f9nx4x70zln2s7776px00000gn/T/pcae-fga-wt-1q1qbit_
+  This incomplete baseline attempt is preserved, not claimed successful or treated as completed attribution.
+  The completed900s rerun used the SAME baseline/candidate; no suppression or source changes.
+- Check passed; health healthy; coherence coherent; task-memory282 pre-existing warnings/zero errors.
+- Corrective task finished normally with all acceptance checks passing. Idle finalization placeholder only.
+- Implementation commit/push used governed commands and normal hooks.
+  Remote reports existing main PR-rule exemption; no operator bypass/force/history rewrite.
+- complete_phase performs ordinary repository-transition validation and this phase's notification.
+  Exact terminal promotion/checkpoint/receipt/notification outcomes are captured after the command.
+- No original L/M report or checkpoint is regenerated.
 
-Exact alias: PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION
+## Historical artifact preservation snapshot
+
+| Object | SHA256 |
+|---|---|
+| L original Markdown | 18d66beecdb1d219495d13a8be322436c90c4ca8fdde6117d61050634a211c3e |
+| L original JSON | 8070a4016915dad3f7d45f5ea88b8c9df2cb078fd8d9e253d7d897cbe4d4874a |
+| L checkpoint | 26a33dbfa1ead42b8b3d5985a50b4f5207583c92b56b0cbcff211d1a44f90e02 |
+| M Markdown | 96e3a065b7e6f9e19ce60d1985058b060bda820a8d6feba7de2525969dad4eb8 |
+| M JSON | 655c5692f12ebfc74c7509d9dbb829ad2074dabc35c85259185e3dbab3631b65 |
+| M checkpoint | 4609199414e48847523a2eb071b4cd1feb03a36b50273438e64878dcdbf31e7f |
+
+Old completion metadata/reports remain at their immutable Git endpoints.
+Shared current completion files are this phase's own records, normally replaced.
+No historical receipt/marker payload is edited; normal latest indexes may rotate.
+
+## No-go confirmations
+
+- No production source changes.
+- No contract/schema changes; GCP-001 v1.0 byte-unchanged.
+- No GCP Slice1 models/parsers/canonicalizers/digests/validators/classifiers implemented.
+- No R6 root/repository/epoch/genesis/policy deployment or accepted-event access.
+- No issuer provisioning or provider authentication configured.
+- No generation certificate issuance or persistence.
+- No lifecycle consumer/writer integration, cutover or migration.
+- No historical L/M report/metadata/checkpoint/receipt/marker payload edits.
+- No latest-pointer forgery or manual digest substitution.
+- No HPAC/helper/step9-prime/foundation work.
+- No runtime/PB/POL/host/deployment/release advancement.
+- No recognition-core IV activation; it remains on hold.
+- N-16-5 OPEN; N-16-6/N-16-7 untouched.
+- No operator hook bypass, force push or history rewrite.
+- DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
+## Full scoped technical evidence
+
+# Phase 150N — Historical Test Boundary Correction for 150L/150M
+
+Exact title: PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M
 DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 
-## 1. Authority and ordered objectives
+## Authority and preflight
 
-Entry main = origin/main = 944228ac9cdbe91711c5e4c32190640cec467068;
-clean, zero outgoing, available lock, expected idle post-150L. Canonical tracked
-150L completion source explicitly withdraws success: COMPLETE — ARCHITECTURE NOT
-ADJUDICATED / BLOCKED. That state is authoritative, despite the retained original
-promoted report's mechanically complete legacy status. No Slice 1 is authorized.
-CPIPC parses 150L and its branch successor 150M: valid, same series, ordered less;
-all Git subjects, repository phase references and promoted filenames have no
-150M collision. Governed TODO/task transition/update and phase start activate
-only this corrective phase. No historical held branch is merged or cherry-picked.
+User authorizes one governed TEST-BOUNDARY CORRECTION ONLY phase. Entry main =
+origin/main = 5a79d079ffcfb53bb0d46477958c99c877750579; fetch successful,
+clean worktree, zero outgoing, expected idle post-M task and available lock.
+No unrelated commits, held branch, active governed phase, or Slice1 module.
+GCP-001 v1.0 SHA256 d72d93451a28befd39febd51473e05f020649afe26886742838a1adae119c51f.
+Health healthy/status coherent; latest M trust complete/consistency consistent.
+L and M read-only reconciliation both reconciled, completed checkpoints/finalized
+receipts. L's original promoted success does NOT supersede its tracked withdrawn
+success and blocked conclusion at944228ac. M later independently revalidates the
+architecture. This phase preserves that distinction and all original artifacts.
 
-Objective A was completed before architecture revalidation: current-main three
-nodes fail (3 failed, 0.13s), fixed pre-150L 8c998d2b detached baseline passes
-(3 passed, 1.18s). Each failure names ONLY the later newly added GCP contract.
-After bounded correction, original I/J/K suites plus mutation suite: 136 passed
-(7.06s). No production or contract edit was needed.
+Canonical parser derives150N from current150M; same series, valid, ordered less,
+no commit-subject/promoted-artifact collision. Governed task transition/update
+then phase start activates only150N under codex-local. No delegation occurred.
 
-## 2. Exact historical assertions and boundary provenance
+## Pre-fix reproduction
 
-Test directory prefix below is `tests/`; no node is excluded, skipped or xfailed.
+Executed both ORIGINAL functions at entry with no file mutation: PASS/PASS.
+In-memory replacement of git diff output with a synthetic later production path
+causes AssertionError/AssertionError. Earlier independent schema-string probe
+also demonstrates M rejects a current source containing gcp-generation/1.0 even
+when its diff is empty. These are prospective gate defects, not historical
+production violations or an implemented Slice1 candidate failure.
 
-| Node | Original historical invariant / actual assertion | Immutable entry → closure | Classification / repair |
+## Independently derived complete phase boundaries
+
+| Phase | Entry / baseline | Final historical endpoint | Attributed commits |
 |---|---|---|---|
-| test_phase_150i_phase_report_rehydration_identity_repair.py::test_runtime_and_product_boundaries_are_untouched | Phase I may change lifecycle infrastructure, not exact recognition/writer/foundation files, helper prefix, runtime/PB prefixes or contracts; git diff entry→working tree accidentally included all future phases | 93424bea862aab27fcb2401a5e83e28481b1929a → 841c61e13b20132896b4b9674e4add58544364ac | F2 primary, F3 effect; pin endpoint, preserve exact predicate, disable rename elision |
-| test_phase_150j_rehydration_identity_repair_iv.py::test_this_iv_has_zero_production_and_contract_delta | Phase J verification changes zero src/pcae or contracts; entry→working tree freezes all future additions | 841c61e13b20132896b4b9674e4add58544364ac → c90254a2648e4afb263373fd4aff2afb48946e2e | F2 primary, F3 effect; pin endpoint, retain zero-diff scope |
-| test_phase_150k_provenance_certification_link_repair.py::test_architectural_stop_changes_no_production_or_contracts | Phase K architectural stop changes zero src/pcae or contracts; entry→working tree freezes all future additions | c90254a2648e4afb263373fd4aff2afb48946e2e → 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f | F2 primary, F3 effect; pin endpoint, retain zero-diff scope |
+| 150L | 8c998d2b2654e45e189bc3bfda57c7b6ecd71d7f | 944228ac9cdbe91711c5e4c32190640cec467068 | 4bb980064b28c0a594344aa72a92ec4842ac9957; 9557abd8047a05f5841fcec636fe4d1a416433be; 944228ac9cdbe91711c5e4c32190640cec467068 |
+| 150M | 944228ac9cdbe91711c5e4c32190640cec467068 | 5a79d079ffcfb53bb0d46477958c99c877750579 | c53209f262c0d0826c848e57d060c950e065c6d5; 5a79d079ffcfb53bb0d46477958c99c877750579 |
 
-These are actual full repository commit objects, not candidate hashes invented as
-historical snapshots. J's independently committed evidence §Exact Phase 150I
-production diff names I's complete range and only the two phase-report production
-files. K's preflight names J's closure as entry; L's preflight names K's closure.
-Git ancestry/subjects agree, and fixed-range diffs independently reproduce the
-original protected-scope zero deltas. Terminal promoted report source commits
-05f6fc23/2023fc3b/5683b8fe precede the respective closure bookkeeping; those tails
-also have zero protected deltas. No contract identity/version drift or legitimate
-permanent-byte freeze was implicated. GCP was a separately authorized new target
-contract, not a changed historical normative contract. None is F1/F6.
+Actual ancestry, all five phase-specific subjects, prior phase-entry evidence and
+tracked completion records agree. L includes its blocked-disposition correction,
+not just its original report source. M includes normal closure bookkeeping.
+Exact historical changed-file sets are reproducible with git diff --name-only
+--no-renames ENTRY END. L changes one new contract, architecture evidence/tests,
+Fast Green and task/status/completion artifacts; M changes I/J/K tests, M tests,
+M evidence and Fast Green/task/status/completion artifacts. Both production
+changed-file sets are empty. M contract changed-file set is empty. L's exact
+allowed contract delta is only LIFECYCLE_GENERATION_PROVENANCE_CONTRACT.md.
 
-Mutation tests execute the ORIGINAL repaired functions, changing only synthetic
-Git repositories and explicit fixture endpoints: protected body mutation, deletion,
-symlink replacement, same-version drift, contraction, substitution and unauthorized
-protected addition all fail for both contract and foundation scope in all three
-assertions (42 adversarial cases). Three future-legal-addition/version-evolution
-cases remain outside the immutable phase range. Three actual-boundary cases verify
-real commit existence/ancestry and execute original assertions. Total new A suite:
-48 tests. Initial construction run exposed 150I rename deletion elision and one
-fixture addition outside I's deliberately limited scope: 134 pass/2 fail. Fix uses
---no-renames (all three) and a genuinely protected helper-prefix addition; no
-scope contraction or arbitrary-source ban is introduced. Final 136 pass includes
-88 original I/J/K cases. Mutations do not rewrite real history or live contracts.
+## Corrected semantics and controls
 
-## 3. Prior payload_conflict and preserved truth
+L test_zero_production_delta_from_fixed_entry checks only ENTRY→PHASE_END under
+src/pcae. L test_existing_contracts_unchanged uses the same endpoint and retains
+its exact allowlist. This adjacent assertion is the directly related stale
+moving-history comparison; no other architecture claims are rewritten.
+M test_no_production_contract_or_lifecycle_consumer_delta checks its fixed range
+under src/pcae and docs/contracts, then enumerates Python paths with git ls-tree
+at PHASE_END and reads each blob with git show PHASE_END:path. No network,
+checkout/worktree mutation, filename sorting trust or current-source inspection.
+Read failures propagate and do not pass silently; --no-renames preserves deletion
+visibility. Existing test names and substantive predicates remain unchanged.
 
-150L first promoted 20261004-202343-150L paired report at source 4bb98006 before
-the post-tracking broad regression disproved the clean-success claim. It bound
-checkpoint/notification and dispatched summary/document API message 2700/2701.
-Tracked completion correction in 944228ac records BLOCKED and the three failures.
-Normal correction passed transition validation but refused already-dispatched
-payload_conflict. Source dispatch-state code compares Markdown report_digest
-and finalization_snapshot_id with the bound marker; either mismatch is conflict.
-Changed status/summary, validation results/failed nodes, commit inventory and
-expanded correction report body change those identities. Pushed status remained
-pushed and outgoing remained zero; transport state was NOT evidence of correction.
-The exact refused attempt's new digest is not persisted as a promoted generation:
-do not invent it. Its changed fields are evidenced by tracked corrected source
-versus retained JSON/Markdown; causal guard is independently read from code.
+Fresh N suite executes original corrected assertions in isolated synthetic Git
+repositories, not copies of their predicates. Future module includes BOTH exact
+GCP schema strings, then committed and uncommitted revisions occur after the
+historical endpoint; both functions still pass. L future contract addition also
+passes its unchanged historical allowlist. Historical body mutation, addition,
+deletion, rename and symlink each fail in BOTH original functions. M's archived
+schema scanner separately fails for both prohibited strings even with entry=end
+and empty diff, proving the source check has independent sensitivity.
+Real-boundary tests validate exact full OIDs, ancestry, all3 L/all2 M subjects,
+and original assertions. Preservation test freezes this maintenance phase's own
+attributed endpoint once committed, avoiding creation of another moving gate.
 
-| Preserved object | SHA-256 at entry |
-|---|---|
-| original 150L JSON | 8070a4016915dad3f7d45f5ea88b8c9df2cb078fd8d9e253d7d897cbe4d4874a |
-| original 150L Markdown | 18d66beecdb1d219495d13a8be322436c90c4ca8fdde6117d61050634a211c3e |
-| 150L checkpoint | 26a33dbfa1ead42b8b3d5985a50b4f5207583c92b56b0cbcff211d1a44f90e02 |
-| original 150L receipt dfad1a7c… | 38679c3e4d70d3ef2dc12e9698c609579be0c6d28f0d20f8096daffabbf691f4 |
-| tracked BLOCKED completion Markdown at 944228ac | 63cb68a882a85fb446615907e2e928932159fa71d77f3a339f41f7b12164a935 |
-| tracked BLOCKED completion metadata at 944228ac | a2de65ff042e646e0cf34c56b5059a0def591552c1c74cb26f1b02d2473fdb37 |
-| unchanged GCP target contract | d72d93451a28befd39febd51473e05f020649afe26886742838a1adae119c51f |
+## Scope and product disposition
 
-Original checkpoint snapshot 8ad74f057f6845e9623cb35abb98911bca36d4b81ab84b346eeaf5df28209f60
-and old immutable delivery receipt remain untouched. No retry/resend of 150L,
-no promoted-generation deletion, no pointer/checkpoint/marker substitution. This
-successor's own normal finalization may rotate the global index/marker; it does
-not claim old 150L successfully corrected its dispatched report. The BLOCKED
-completion files remain immutable in Git at 944228ac even when current-phase
-completion files are normally replaced by this successor's own records.
+ZERO src/pcae/** changes. ZERO docs/contracts/** changes. ZERO schema changes.
+GCP-001 v1.0 remains byte-identical. No Phase L/M promoted reports, archived
+completion records, checkpoints, receipts or historical marker payloads edited.
+Normal current-phase completion may rotate global latest indexes; no manual
+pointer edits or historical regeneration. No GCP model/parser/canonicalizer/
+digest/validator/classifier/resolver/writer implemented. No R6 repository, epoch,
+genesis/policy installation, accepted event, issuer/provider configuration,
+certificate issuance, lifecycle consumption, cutover or migration.
+J35/K37 exploit witnesses stay live and unchanged; no provenance repair claimed.
+Runtime State: Observed; Maximum Capability: observe; Execution Availability:
+unavailable. N-16-5 OPEN; N-16-6/N-16-7 untouched. Recognition-core IV ON HOLD.
+No HPAC/helper/step9-prime/foundation/PB/POL/runtime/host/deployment/release work.
 
-prior Phase 150L blocked state remains preserved as historical truth
+historical no-production-change assertion != permanent prohibition on future authorized production evolution
+historical endpoint != current HEAD
 HASH CONSISTENCY != PROVENANCE
-
-## 4. Independent architecture adjudication (after Objective A)
-
-Re-read frozen GCP and full 150L architecture, not its withdrawn success report.
-Re-read I's actual scope evidence, J/K primary investigations and executable
-witnesses, current dispatch-state/notification certification implementation and
-G/H reconciliation. No implementation now invalidates K's missing-root premise:
-source has no gcp-generation/terminal schema, accepted-event resolver or issuance
-writer. Existing HATP cutover names are unrelated and NOT reused as GCP authority.
-
-R6 is a coherent TARGET: out-of-band pinned provider/repository/ref/genesis/epoch/
-policy, independently administered accepted-event root, isolated approved-policy
-issuer, provider-authenticated exact-manifest reviewer outside agent/same-process
-read/write domain. Protected ancestry AND authenticated acceptance are required;
-ordinary main/local commit/author text/digest/caller certificate is not the root.
-Fresh authenticated head plus non-rollback checks are required for currentness.
-Exact approved phase instance/task/input tree/metadata/report pair/predecessor/
-intent prevent substitution. Same-process code may construct identical data but
-cannot mint accepted root events. Deployment isolation is a future hard gate,
-not an exception permitting today's writable main. No root is deployed here.
-
-The acyclic graph is pinned root → accepted exact authorization → issuance
-certificate + immutable pre-existing input objects → linear accepted successor
-chain → separately accepted terminal certificate after push/task completion →
-checkpoint/receipt/delivery evidence. Event IDs are root-assigned opaque IDs before
-publication; body hashes exclude self-ID; containing commit lives in detached
-proof, not its own body. Checkpoint/receipt cannot certify their own source report.
-Pending birth follows independent acceptance, before promotion, NOT before any
-commit. One zero-based linear chain/CAS tail, no forks/gaps/cycles, one terminal;
-post-terminal regeneration forbidden. Changed post-terminal findings belong to a
-separate successor, as this phase demonstrates under existing legacy machinery.
-
-R1 ordinary Git, R2 local ledger, R3 checkpoint root and R5 local verdict are
-rejected pseudo-roots; R4 external signer is viable but disproportionate/unselected.
-R6 combines durable membership with independent acceptance, not two self-checks.
-Receipts record observed delivery; marker exactly what was sent; latest is derived
-cache. Strong trust separates content/provenance/terminal/delivery axes. Cutover
-C1+C4 only after bounded implementation, IV, authorized isolated provisioning and
-accepted activation; absence/timestamp/user flag cannot opt into legacy. No migration.
-
-## 5. Mechanical contract inventory and abstraction distinction
-
-GCP-001 v1.0 remains byte-identical, FROZEN TARGET / NOT IMPLEMENTED / CUTOVER
-INACTIVE. Fresh independent tests check exact inventories, unique/gap-free IDs,
-all references defined, closed generation table and attack-to-invariant/requirement
-crosswalk. All 26 requirements and 12 invariants are present exactly once. Existing
-150L suite covers every numbered requirement/invariant individually; new audit
-checks the total inventory rather than only expected rows. Exact field inventory:
-
-schema; root_epoch; repository_id; phase_instance_id; phase_id; task_id; sequence;
-generation_id; role; report_json_sha256; report_markdown_sha256;
-predecessor_certificate_id; input_commit; completion_metadata_sha256;
-authorization_event_id; issuance_event_id; certificate_id.
-
-There are exactly 11 ARCHITECTURAL lifecycle domains E1–E11, not a claimed
-11-member wire enum. GCP-REQ-007 explicitly defines 13 RootEvent kinds. No contract
-change or silent vocabulary contraction is made. Their consistent crosswalk:
-
-| Architecture domain | Accepted-event/proof relationship |
-|---|---|
-| E1 issuance | issue_generation after authorize_manifest |
-| E2 promotion | observe_promotion |
-| E3 pending/pre-push | pending role of issue_generation, not a separate kind |
-| E4 governed commit | approved immutable object input via authorize_manifest |
-| E5 push | accept_push |
-| E6 checkpoint | bind_checkpoint |
-| E7 terminal | certify_terminal, depends on complete_task/accept_push |
-| E8 receipt | bind_receipt |
-| E9 notification | record_notification, followed by close_delivery |
-| E10 pre-terminal regeneration | successor issue_generation |
-| E11 retention | proof membership/explicit legacy audit, not another write event |
-
-Additional root control kinds bootstrap/open_phase/activate_cutover bind root,
-phase grant and cutover; they are not missing report-generation domains. This
-distinction must carry into future pure-model implementation: do not substitute
-the illustrative 11-domain table for the 13-kind exact wire vocabulary.
-
-All 12 recovery states CR1–CR12 remain defined and coherent: proposal-only before
-certificate; resume exact accepted bytes after partial promotion; impossible
-certified-before-input-commit quarantined; pending before push; independently
-complete terminal after push; required cp/receipt limbs may remain incomplete;
-notify actual outcome; ambiguous send requires provider idempotency/query or
-UNKNOWN/no automatic resend; identical retry reuses identity; changed manifest
-conflicts. No recovery fabricates acceptance or transport success.
-
-Requirement traceability: 001 content scope; 002 root; 003 independent exact
-authorization; 004 authenticated publication/currentness; 005 closed canonical
-schemas; 006 terminal shape; 007 events/anchor; 008 issuance; 009 pending birth;
-010 linear chain; 011 independent terminal; 012 no post-T regeneration;
-013 checkpoint; 014 receipt; 015 notification; 016 index; 017 legacy classes;
-018 cutover; 019 no migration; 020 vocabulary; 021 result evolution;
-022 rehydration; 023 reconcile; 024 recovery; 025 slices/isolation; 026 walls.
-Tests mechanize exact counts/reference/field checks and critical normative clauses;
-source/contract reasoning adjudicates semantics, not textual lint alone.
-
-## 6. All 32 attacks and invariant coverage
-
-Frozen attack rows remain in the unchanged 150L architecture §10. Each is freshly
-checked for defined invariant, nonempty required result/defense and an applicable
-normative requirement. All rows are ARCHITECTURAL, runtime enforcement deferred.
-No pure model or production security closure is claimed. Requirement crosswalk:
-
-| Row | Attack | GCP-REQ | Architectural defense / required outcome |
-|---|---|---|---|
-| 1 | forged pending | 009 | no accepted exact issuance → untrusted |
-| 2 | cross-phase report | 010 | exact root/phase/task domain rejects |
-| 3 | same-phase forgery | 003 | independent exact manifest rejects |
-| 4 | forged terminal | 006 | separate genuine terminal certificate required |
-| 5 | forged checkpoint | 013 | evidence cannot select terminal |
-| 6 | report + checkpoint | 004 | no independently authenticated acceptance |
-| 7 | legitimate receipt replay | 014 | exact terminal/generation/purpose required |
-| 8 | copied receipt | 014 | exact immutable observed subject required |
-| 9 | forged receipt | 014 | actual approved durable evidence required |
-| 10 | notification replay | 015 | no authority, exact sent identity required |
-| 11 | malformed latest | 016 | explicit invalid cache |
-| 12 | forged latest | 016 | current derives only from root |
-| 13 | higher sequence | 010 | root CAS assigns, caller cannot select tail |
-| 14 | predecessor substitution | 010 | exact accepted predecessor required |
-| 15 | branch | 010 | one atomic linear tail |
-| 16 | cycle | 010 | consecutive accepted links/visited IDs |
-| 17 | gap | 010 | every predecessor required |
-| 18 | terminal replay | 006 | exact phase/task/epoch/generation domain |
-| 19 | issuance replay | 010 | identical retrieval only, no new issuance |
-| 20 | cross-phase cert | 010 | CPIPC and phase-instance grant |
-| 21 | cross-task cert | 010 | immutable granted task/input |
-| 22 | report mutation | 005 | exact paired stored-byte digests |
-| 23 | certificate mutation | 005 | canonical ID + independent blob inclusion |
-| 24 | crash before certificate | 009 | remains incomplete proposal |
-| 25 | cert before input commit | 008 | impossible causal shape/quarantine |
-| 26 | push before terminal | 011 | no terminal claim until accepted T |
-| 27 | duplicate finalization | 012 | reuse T, no post-T generation |
-| 28 | mtime | 016 | no selection influence |
-| 29 | filename order | 016 | no selection influence |
-| 30 | symlink/traversal/substitution | 022 | safe exact opened bytes and containment |
-| 31 | incomplete complete claim | 020 | every mandatory proof/evidence limb |
-| 32 | retroactive legacy cert | 017 | explicit limited facts, no fabricated issuance |
-
-INV-001 rows6/22; 002 rows1/3/19/20/23/30; 003 rows2/13/14/17/21;
-004 row32 membership-or-explicit-legacy; 005 rows4/18/26; 006 row5;
-007 rows7–9; 008 row10; 009 rows11/12/28/29; 010 rows24/25/31;
-011 rows15/16/27; 012 row32. No duplicate or undefined references.
-
-## 7. Legacy, unchanged defects, testing and disposition
-
-150G read-only reconcile: reconciled, 2 generations, completed cp/finalized receipt,
-marker not_dispatched because it rotated normally, mutation none. Both original
-generation pairs/cp/receipt hash-match 150L's full frozen hashes. Future LEGACY-B
-means only archived listed observations (also A contemporary closure), never GCP
-issuance. 150H still conflicts: terminal source not in phase inventory and checkpoint
-identity conflict; preserve LEGACY-D current-selection debt and A-era technical
-closure. Older 133B remains A closure evidence, 113B multi-set remains C unless
-independently bound. All lack new generation certificates. No historical status
-or artifact is mutated. Current L's blocked source is preserved at entry commit.
-
-Fresh B audit 63 tests + unchanged L127 + J35 + K37 = 262 passed, 0.81s.
-Initial new lint construction 260 pass/2 fail (field regex excluded digest-name
-digits; clause transcribed "accepted" instead of frozen "accepts"); corrected
-ONLY fresh test construction/whitespace normalization. No contract reinterpretation.
-J/K executable witnesses remain LIVE production defect witnesses: 72 pass, no fix.
-Future mechanism modeled != current defect closed. No Slice 1, resolver, writer,
-deployment, accepted event, certificate issuance, migration, activation or lifecycle
-consumer integration. Zero src/pcae delta and zero docs/contracts delta verified.
-
-Four broader-suite failures reproduced at fixed THIS-phase entry 944228ac in an
-isolated worktree with read-only copies of existing canonical artifact fixtures:
-two H global-marker assertions expect H but marker already L; two old receipt
-tests expect no commands/phase_reports consumer, added by I. Also reproduce at
-pre-L 8c998d2b (marker K). These are baseline-pre-existing, not excluded or repaired
-here. The original three I/J/K regressions are repaired, not classified away.
-Final committed-candidate full regression/attribution outcomes are recorded in
-this phase's canonical completion metadata/report, after tests become tracked.
-
-R6/GCP-001 target architecture revalidation succeeds without normative repair.
-Architecture adjudicated is NOT implementation complete, root installed, cutover
-or runtime trust. No old 150L report is replaced; this successor independently
-supersedes the implementation-readiness block only upon successful full lifecycle.
-Recommended next separately governed phase: PCAE-LIFECYCLE-GENERATION-PROVENANCE-
-PURE-MODELS-VALIDATION-SLICE-1, future ID re-derived; no activation here.
-
-Runtime Observed / observe / unavailable. No external runtime effect; governed
-repository push/notification is not runtime capability advancement. N-16-5 OPEN;
-N-16-6/N-16-7 untouched. No HPAC/helper/9-prime/foundation/HATP/PB/POL/host/release work.
-Recognition-core IV remains ON HOLD until full lifecycle provenance implementation
-and independent verification. prior Phase 150L blocked state remains preserved as
-historical truth. legacy compatibility != retroactive provenance certification.
-GCP-001 v1.0 architecture is now revalidated for future bounded implementation,
-but no GCP implementation has begun.
-
-
-## Canonical current-phase disposition
-
-The authorized successor independently supersedes the architecture readiness block;
-it does not erase prior Phase150L failure or bypass its payload_conflict.
-Historical I/J/K invariants are pinned to actual phase closures, not candidate bytes.
-Fresh mutation tests execute original assertions and remain fail-closed.
-GCP-001 v1.0 architecture is now revalidated for future bounded implementation, but no GCP implementation has begun.
-No independent R6 root exists here; no certificates/accepted events issued; no cutover or migration.
-No recognition-core IV, helper admission, step9-prime, foundation, HPAC/HATP/PB/POL/runtime/deployment/release work.
-No historical report/checkpoint/receipt deletion or rewrite. Global marker/latest may rotate ONLY under normal THIS-phase finalization.
-No retrospective provenance certification, no fabricated root/certificate or old correction digest.
-DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
-
-Recommended next governed phase: PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1.
-Future ID re-derived, not reserved/activated; no automatic implementation authority.
-Independent IV follows security-significant slices; final lifecycle provenance IV precedes recognition-core IV.
-
-Report/evidence/metadata internally coherent; final legacy mechanical trust is not GCP certification.
-HASH CONSISTENCY != PROVENANCE
-prior Phase 150L blocked state remains preserved as historical truth
 legacy compatibility != retroactive provenance certification
+structurally valid generation certificate != R6-verified generation provenance
+
+## Validation and lifecycle results
+
+Focused fresh N17 + L127 + M63 + earlier M48 + J35 + K37 =327 passed in17.03s.
+Broader required lifecycle selection570 passed in31.94s: phase reports/CLI,
+trust gates/hard failures, repository transitions and contract-freeze/task-finish/
+phase-complete integration, task notification, finalization gate/transaction,
+notification idempotency, filename safety and Phase I lifecycle repair.
+Combined selected result897 passed, zero failures. J/K72 witnesses stay live.
+Check passed; health healthy; coherence coherent. Task-memory zero errors with
+282 pre-existing warnings (unchanged historical DONE-index debt).
+Broader lifecycle regression and fresh fixed-baseline Fast Green results are
+recorded at completion after the corrective candidate is committed.
+Recommended next (not activated):
+PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1 with fresh
+preflight and phase ID derivation; then its independent verification. This phase
+does not begin it. Recognition-core IV remains on hold through full provenance
+implementation and independent verification.
+
+
+## Recommended next governed phase and consistency
+
+PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1 with fresh preflight and phase ID derivation; NOT begun; independent verification follows.
+Recognition-core IV remains ON HOLD through full lifecycle provenance implementation and independent verification.
+Runtime State: Observed; Maximum Capability: observe; Execution Availability: unavailable.
+N-16-5 remains OPEN. N-16-6/N-16-7 untouched.
+Historical L blocked truth and M revalidation remain preserved.
+historical no-production-change assertion != permanent prohibition on future authorized production evolution
+HASH CONSISTENCY != PROVENANCE
+legacy compatibility != retroactive provenance certification
+structurally valid generation certificate != R6-verified generation provenance

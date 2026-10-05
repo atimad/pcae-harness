@@ -3,10 +3,14 @@
 ## Current governed L/M historical-test boundary correction
 
 - Phase150N — PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M:
-  ACTIVE, test maintenance only. Pin actual L/M historical endpoints; preserve
+  COMPLETE — HISTORICAL TEST BOUNDARIES CORRECTED, test maintenance only.
+  Actual L/M historical endpoints pinned; preserve
   original assertions with executable historical-violation controls and future
   evolution controls. No production/contracts/Slice1/root/issuance/cutover work.
-  Canonical completion and push required before future Slice1 fresh preflight.
+  1023 selected passes/1 existing skip; fresh Fast Green attributable_failures: [].
+  Candidate pushed; canonical report/checkpoint/receipt/notification completed,
+  trust/consistency/reconcile clean; final bookkeeping push closes the phase
+  before future Slice1 fresh preflight. No successor activated.
   DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
 
 ## Current governed historical-freeze correction and architecture revalidation
