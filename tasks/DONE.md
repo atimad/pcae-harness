@@ -90,6 +90,7 @@
 
 ## Completed
 
+- Idle post-Phase 150N: historical L/M boundaries corrected; canonical finalization only; future Slice 1 not begun; recognition-core IV on hold (20261005-1048-idle-post-phase-150n-historical-l-m-boundaries-corrected-canonical-finalization-only-future-slice-1-not-begun-recognition-core-iv-on-hold)
 - Phase 150N: PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M (20261005-1006-phase-150n-pcae-lifecycle-historical-test-boundary-correction-for-150l-150m)
 - Idle post-Phase 150M: historical freeze correction and architecture revalidation verified; future pure-model Slice 1 recommended, not begun; recognition-core IV on hold (20261005-0117-idle-post-phase-150m-historical-freeze-correction-and-architecture-revalidation-verified-future-pure-model-slice-1-recommended-not-begun-recognition-core-iv-on-hold)
 - Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION (20261005-0048-phase-150m-pcae-lifecycle-generation-provenance-historical-freeze-correction-and-architecture-revalidation)

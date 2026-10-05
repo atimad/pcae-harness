@@ -1,5 +1,20 @@
 # Decisions
 
+## Phase150O — do not invent certificate identity
+
+N's historical-boundary repair is independently revalidated (20 pass). A separate
+GCP-REQ-005 interoperability gap blocks exact Slice1 implementation: domain
+separation is required but its bytes/framing/vector are not frozen. ASCII/JCS
+diagnostic data with identical canonical body produces unequal SHA-256 IDs under
+two domain-separated frames. Neither is a certificate or selected architecture.
+Do not skip ID checks, add encoding fields, silently pick a prefix, or amend GCP
+in this implementation phase. Record COMPLETE — NOT VERIFIED / BLOCKED after
+normal lifecycle. Recommend narrow contract byte-identity clarification + IV,
+then fresh Slice1.13 wire kinds vs11 architecture domains is already adjudicated.
+No production/contract/history/root/issuance/consumer/cutover mutation authorized.
+HASH CONSISTENCY != PROVENANCE
+DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
 ## Phase 150N — historical L/M boundaries
 
 Canonical completion accepted after closed push-check vocabulary was represented

@@ -10,7 +10,7 @@ Idle post-Phase 150N: historical L/M boundaries corrected; canonical finalizatio
 
 ## Status
 
-active
+done
 
 ## Mode
 

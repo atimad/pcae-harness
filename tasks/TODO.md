@@ -1,5 +1,13 @@
 # TODO
 
+## Current governed Slice1 contract-readiness stop
+
+- Phase150O — PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1:
+  bounded implementation requested, stopped before production due missing exact
+  certificate digest framing. Complete blocked lifecycle, fresh regression and
+  Fast Green, no contract or production repair. Recognition-core IV ON HOLD.
+  DELEGATED .3 FINALIZATION / COMMIT / PUSH: UNAUTHORIZED
+
 ## Current governed L/M historical-test boundary correction
 
 - Phase150N — PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M:

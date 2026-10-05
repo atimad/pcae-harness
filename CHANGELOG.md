@@ -1,5 +1,13 @@
 # Changelog
 
+## Phase150O — Slice1 contract-readiness blocker
+
+- Revalidate150N controls and mechanically inventory frozen GCP-001.
+- Preserve two differing domain-separated digest encodings as diagnostic
+  witnesses of missing normative framing; neither algorithm is adopted.
+- Stop pure-model implementation instead of silently defining wire identity.
+  No production, contract, root, issuance, consumer or cutover change.
+
 ## Phase 150N — historical L/M test boundary correction
 
 - L/M no-production assertions now use their complete historical phase ranges.
@@ -1834,6 +1842,7 @@ Recorded the blocked admission repair: helper/PAWA/PPA installation identities c
 
 ## Unreleased
 
+- Transitioned active task from Idle post-Phase 150N: historical L/M boundaries corrected; canonical finalization only; future Slice 1 not begun; recognition-core IV on hold to Phase 150O: PCAE-LIFECYCLE-GENERATION-PROVENANCE-PURE-MODELS-VALIDATION-SLICE-1; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150M: historical freeze correction and architecture revalidation verified; future pure-model Slice 1 recommended, not begun; recognition-core IV on hold to Phase 150N: PCAE-LIFECYCLE-HISTORICAL-TEST-BOUNDARY-CORRECTION-FOR-150L-150M; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION to Idle post-Phase 150M: historical freeze correction and architecture revalidation verified; future pure-model Slice 1 recommended, not begun; recognition-core IV on hold; session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle post-Phase 150L: BLOCKED by three historical freeze regressions; narrow test-scope repair recommended; architecture implementation and recognition-core IV remain on hold to Phase 150M - PCAE-LIFECYCLE-GENERATION-PROVENANCE-HISTORICAL-FREEZE-CORRECTION-AND-ARCHITECTURE-REVALIDATION; session refreshed and governance continuity revalidated.
