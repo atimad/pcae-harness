@@ -2,6 +2,15 @@
 
 ## Phase150O — do not invent certificate identity
 
+Normal canonical completion accepted new150O report095212 after accurate
+boundary-delimited direct evidence wording. First quarantine preserved; no
+partial-report override or inherited-regression classification used. Checkpoint
+completed, receipt finalized, summary/document API accepted, lock released.
+Trust/consistency/reconcile clean, one promoted generation. Fresh Fast Green
+baseline d5a717fd/candidate99470c64:367 baseline-preexisting failures/errors,
+attributable/environment/expected empty.24 historical artifact bytes preserved.
+Only Class-B finalization bookkeeping after checkpoint; no report regeneration.
+
 N's historical-boundary repair is independently revalidated (20 pass). A separate
 GCP-REQ-005 interoperability gap blocks exact Slice1 implementation: domain
 separation is required but its bytes/framing/vector are not frozen. ASCII/JCS

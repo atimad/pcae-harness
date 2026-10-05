@@ -2,6 +2,11 @@
 
 ## Phase150O — Slice1 contract-readiness blocker
 
+- Canonical blocked completion/report/checkpoint/receipt and notification accepted
+  normally; first evidence-token quarantine retained, no override. Fresh Fast
+  Green attributable_failures: []; all367 raw failures/errors baseline-preexisting.
+- Preserve24 historical artifacts; final Class-B bookkeeping closure only.
+
 - Revalidate150N controls and mechanically inventory frozen GCP-001.
 - Preserve two differing domain-separated digest encodings as diagnostic
   witnesses of missing normative framing; neither algorithm is adopted.
